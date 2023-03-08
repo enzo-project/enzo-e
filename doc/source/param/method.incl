@@ -197,93 +197,82 @@ flux_correct
 grackle
 -------
 
-"Grackle is a chemistry and radiative cooling library for astrophysical
-simulations. It is a generalized and trimmed down version of the
-chemistry network of the Enzo simulation code."
+"`Grackle <https://grackle.readthedocs.io/en/latest/>`_ is a chemistry and radiative cooling library for astrophysical
+simulations. 
+It is a generalized and trimmed down version of the chemistry network of the Enzo simulation code."
 
-Most of the descriptions of the parameters come from the `Grackle documentation <http://grackle.readthedocs.org/en/grackle-1.0/index.html>`_; for the
-most up-to-date description of Grackle parameters, see the `Grackle parameters <http://grackle.readthedocs.org/en/grackle-1.0/Parameters.html#id1>`_ section of the website.
-
-----
-
-.. par:parameter:: Method:grackle:density_units
-
-
-   :Summary: :s:`Units for the density field`
-   :Type:    :par:typefmt:`float`
-   :Default: :d:`1.67e-24  (1 m_H/cc)`
-   :Scope:     :z:`Enzo`
-
-   :e:`Units of density for the Grackle chemistry and cooling solver library.`
-
+While most of the parameters come directly from Grackle, there are a few notable exceptions.
+These generally affect how Enzo-E uses Grackle and don't have direct counterparts listed on the `Grackle parameters section <https://grackle.readthedocs.io/en/latest/Parameters.html>`_ of the Grackle website.
+These parameters include:
 
 ----
 
-.. par:parameter:: Method:grackle:length_units
+.. par:parameter:: Method:grackle:courant
 
-
-   :Summary: :s:`Units for distance`
-   :Type:    :par:typefmt:`float`
-   :Default: :d:`3.086e21 (1 kpc)`
-   :Scope:     :z:`Enzo`
-
-   :e:`Units of length for the Grackle chemistry and cooling solver library.`
-
-----
-
-.. par:parameter:: Method:grackle:time_units
-
-
-   :Summary: :s:`Units for time`
-   :Type:    :par:typefmt:`float`
-   :Default: :d:`3.15569e13 (1 Myr)`
-   :Scope:     :z:`Enzo`
-
-   :e:`Units of time for the Grackle chemistry and cooling solver library.`
-
-----
-
-.. par:parameter:: Method:grackle:a_units
-
-   :Summary: :s:`Units for the cosmological expansion factor`
+   :Summary: :s:`Courant safety factor`
    :Type:    :par:typefmt:`float`
    :Default: :d:`1.0`
    :Scope:     :z:`Enzo`
 
-   :e:`Units of the cosmological expansion factor for the Grackle chemistry and cooling solver library.`
+   :e:`The method-specific courant safety factor. This is meaningless unless` :par:param:`~Method:grackle:use_cooling_timestep` :e:`has been set to` ``true``.
+   :e:`In that case, the timestep associated with the Grackle method is this value mutliplied by the minimum timestep.`
 
 ----
 
-.. par:parameter:: Method:grackle:gamma
+.. par:parameter:: Method:grackle:use_cooling_timestep
 
-   :Summary: :s:`The ratio of specific heats for an ideal gas`
+   :Summary: :s:`Whether to limit the timestep by the minimum cooling time`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:   :z:`Enzo`
+
+   :e:`Units of the cosmological expansion factor for the Grackle chemistry and cooling solver library. By default, usage of Grackle does not limit the timestep. When this parameter is set to` ``true``, :e:`the timestep is limited by the product of the minimum cooling time and` :par:param:`Method:grackle:courant`.
+
+----
+
+.. par:parameter:: Method:grackle:radiation_redshift
+
+   :Summary: :s:`redshift of the UV background in non-cosmological simulations`
    :Type:    :par:typefmt:`float`
-   :Default: :d:`5/3`
+   :Default: :d:`-1.0`
    :Scope:     :z:`Enzo`
 
-   :e:`The ratio of specific heats for an ideal gas. A direct calculation for the molecular component is used if` :p:`primordial_chemistry` :e:`> 1.`
+   :e:`In non-cosmological simulations, this parameter is used to specify the redshift of the UV background.`
 
 ----
 
-.. par:parameter:: Method:grackle:with_radiative_cooling
+All of the other allowed parameters are used to directly configure the grackle-parameters stored in Grackle's configuration object, which are each listed on the `Grackle parameters section <https://grackle.readthedocs.io/en/latest/Parameters.html>`_ of the Grackle website.
+In general, to configure a given parameter on that page, ``<grackle-param>``, just assign your desired value to :par:param:`!Method:grackle:<grackle-param>`.
+The primary exceptions to this guideline are for the following grackle-parameters:
 
-   :Summary:    :s:`Include radiative cooling`
-   :Type:       :par:typefmt:`logical`
-   :Default:    :d:`true`
+  * ``use_grackle``: when the grackle method is in use, this is always set to ``1``.
+  * ``Gamma``: this grackle-parameter is instead initialized by :par:param:`Physics:fluid_props:eos:gamma`
+  * ``grackle_data_field``: this grackle-parameter is initialized with the value of :par:param:`Method:grackle:data_file`
+
+If you choose not to specify a value for a given grackle-parameter, the default value is selected by the Grackle library.
+
+For brevity (and to avoid having out-of-date documentation), we omit descriptions for the vast majority of recognized parameters that are directly used to initialize a corresponding grackle-parameter.
+With that said, we make exceptions for a small handful of these parameters (primarily in cases where a parameter's value may necessitate the existence of a field) and provide descriptions for them down below:
+
+.. par:parameter:: Method:grackle:data_file
+
+   :Summary:     :s:`Path to the data file containing the metal cooling and UV background tables.`
+   :Type:        :par:typefmt:`string`
+   :Default:     :d:`""`
    :Scope:     :z:`Enzo`
 
-   :e:`Flag to include radiative cooling and actually update the thermal energy during the chemistry solver. If off, the chemistry species will still be updated. The most common reason to set this to off is to iterate the chemistry network to an equilibrium state.`
+   :e:`Path to the data file containing the metal cooling and UV background tables. This parameter is directly used to initialize Grackle's` ``grackle_data_file`` :e:`parameter. The only reason this isn't called` :par:param:`!Method:grackle:grackle_data_file` :e:`is for the sake of maintaining backwards compatability`.
 
 ----
 
 .. par:parameter:: Method:grackle:primordial_chemistry
 
    :Summary: :s:`Flag to control which primordial chemistry network is used`
-   :Type:    :par:typefmt:`logical`
-   :Default:  :d:`false`
-   :Scope:     :z:`Enzo`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`0`
+   :Scope:   :z:`Enzo`
 
-   :e:`Flag to control which primordial chemistry network is used.`
+   :e:`Flag to control which primordial chemistry network is used (this directly corresponds to Grackle's` ``primordial_chemistry`` :e:`parameter).`
 
      **0:** :e:`no chemistry network. Radiative cooling for primordial species is solved by interpolating from lookup tables calculated with Cloudy. A simplified set of functions are available (though not required) for use in this mode. For more information, see` `Pure Tabulated Mode <http://grackle.readthedocs.org/en/grackle-1.0/Integration.html#tabulated-mode>`_.
 
@@ -295,7 +284,6 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 
      **Note:** :e:`In order to make use of the non-equilibrium chemistry network (primordial_chemistry options 1-3), you must add and advect baryon fields for each of the species used by that particular option.`
 
-
 ----
 
 .. par:parameter:: Method:grackle:metal_cooling
@@ -305,371 +293,9 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
    :Default:  :d:`false`
    :Scope:     :z:`Enzo`
 
-   :e:`Flag to enable metal cooling using the Cloudy tables. If enabled, the cooling table to be used must be specified with the Grackle` :p:`data_file` :e:`parameter.`
+   :e:`Flag to enable metal cooling using the Cloudy tables. If enabled, the cooling table to be used must be specified within the table specified by the` ``Method:grackle:data_file`` :e:`parameter.`
 
    **Note:** :e:`In order to use the metal cooling, you must add and advect a metal density field.`
-
-----
-
-.. par:parameter:: Method:grackle:h2_on_dust
-
-   :Summary:     :s:`Flag to enable H2 formation`
-   :Type:        :par:typefmt:`logical`
-   :Default:     :d:`false`
-   :Scope:     :z:`Enzo`
-
-   :e:`Flag to enable H2 formation on dust grains, dust cooling, and dust-gas heat transfer follow Omukai (2000). This assumes that the dust to gas ratio scales with the metallicity.`
-
-----
-
-.. par:parameter:: Method:grackle:cmb_temperature_floor
-
-   :Summary:    :s:`Flag to enable an effective CMB temperature floor.`
-   :Type:       :par:typefmt:`logical`
-   :Default:    :d:`true`
-   :Scope:     :z:`Enzo`
-
-   :e:`Flag to enable an effective CMB temperature floor. This is implemented by subtracting the value of the cooling rate at TCMB from the total cooling rate.`
-
-----
-
-.. par:parameter:: Method:grackle:data_file
-
-   :Summary:     :s:`Path to the data file containing the metal cooling and UV background tables.`
-   :Type:        :par:typefmt:`string`
-   :Default:     :d:`""`
-   :Scope:     :z:`Enzo`
-
-   :e:`Path to the data file containing the metal cooling and UV background tables.`
-
-----
-
-.. par:parameter:: Method:grackle:three_body_rate
-
-   :Summary:      :s:`Flag to control which three-body H2 formation rate is used.`
-   :Type:        :par:typefmt:`integer`
-   :Default:     :d:`0`
-   :Scope:     :z:`Enzo`
-   :Status:  **Not accessed**
-
-
-   :e:`Flag to control which three-body H2 formation rate is used.`
-
-      **0:** `Abel, Bryan & Norman (2002) <http://adsabs.harvard.edu/abs/2002Sci...295...93A>`_
-
-      **1:** `Palla, Salpeter & Stahler (1983) <http://adsabs.harvard.edu/abs/1983ApJ...271..632P>`_
-
-      **2:** `Cohen & Westberg (1983) <http://adsabs.harvard.edu/abs/1983JPCRD..12..531C>`_
-
-      **3:** `Flower & Harris (2007) <http://adsabs.harvard.edu/abs/2007MNRAS.377..705F>`_
-
-      **4:** `Glover (2008) <http://adsabs.harvard.edu/abs/2008AIPC..990...25G.>`_
-
-      :e:`These are discussed in` `Turk et. al. (2011) <http://adsabs.harvard.edu/abs/2011ApJ...726...55T>`_
-
-----
-
-.. par:parameter:: Method:grackle:cie_cooling
-
-   :Summary:    :s:`Flag to enable |H2| collision-induced emission cooling`
-   :Type:        :par:typefmt:`logical`
-   :Default:     :d:`false`
-   :Scope:     :z:`Enzo`
-
-   :e:`Flag to enable` |H2| :e:`collision-induced emission cooling from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
-
-----
-
-.. par:parameter:: Method:grackle:h2_optical_depth_approximation
-
-   :Summary: :s:`Flag to enable |H2| cooling attenuation`
-   :Type:    :par:typefmt:`logical`
-   :Default: :d:`false`
-   :Scope:     :z:`Enzo`
-
-   :e:`Flag to enable H2 cooling attenuation from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
-
-----
-
-.. par:parameter:: Method:grackle:photoelectric_heating
-
-   :Summary: 
-   :Type:
-   :Default:
-   :Scope:     :z:`Enzo`
-
-   :e:`Flag to enable a spatially uniform heating term approximating photo-electric heating from dust from Tasker & Bryan (2008)http://adsabs.harvard.edu/abs/2008ApJ...673..810T.`
-
-----
-
-.. par:parameter:: Method:grackle:photoelectric_heating_rate
-
-   :Summary: 
-   :Type:
-   :Default:  :d:`8.5e-26`
-   :Scope:     :z:`Enzo`
-
-   :e:`If` :p:`photoelectric_heating` :e:`is enabled, the heating rate in units of erg cm-3 s-1.`
-
-----
-
-.. par:parameter:: Method:grackle:UVbackground
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo:  :o:`write`
-
-----
-
-.. par:parameter:: Method:grackle:UVbackground_redshift_on
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo:       :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:UVbackground_redshift_off
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo:       :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:UVbackground_redshift_fullon
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-
-
-----
-
-.. par:parameter:: Method:grackle:UVbackground_redshift_drop
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-
-
-
-----
-
-.. par:parameter:: Method:grackle:Compton_xray_heating
-
-   :Summary: 
-   :Type:
-   :Default:   :d:`0`
-   :Scope:     :z:`Enzo`
-
-
-   :e:`Flag to enable Compton heating from an X-ray background following Madau & Efstathiou (1999)http://adsabs.harvard.edu/abs/1999ApJ...517L...9M.`
-
-----
-
-.. par:parameter:: Method:grackle:LWbackground_intensity
-
-   :Summary: 
-   :Type:
-   :Default: :d:`0`
-   :Scope:     :z:`Enzo`
-
-   :e:`Intensity of a constant Lyman-Werner H2 photo-dissociating radiation field in units of 10-21 erg s-1 cm-2 Hz-1 sr-1.`
-
-----
-
-.. par:parameter:: Method:grackle:LWbackground_sawtooth_suppression
-
-   :Summary: 
-   :Type:
-   :Default: :d:`0`
-   :Scope:     :z:`Enzo`
-
-
-   :e:`Flag to enable suppression of Lyman-Werner flux due to Lyman-series absorption (giving a sawtooth pattern), taken from Haiman & Abel, & Rees (2000)http://adsabs.harvard.edu/abs/2000ApJ...534...11H.`
-
-
-----
-
-.. par:parameter:: Method:grackle:HydrogenFractionByMass
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:DeuteriumToHydrogenRatio
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:SolarMetalFractionByMass
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:NumberOfTemperatureBins
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:ih2co
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:ipiht
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:TemperatureStart
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:TemperatureEnd
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:comp_xray
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:temp_xray
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:CaseBRecombination
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:NumberOfDustTemperatureBins
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:DustTemperatureStart
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:DustTemperatureEnd
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
-
-----
-
-.. par:parameter:: Method:grackle:cloudy_electron_fraction_factor
-
-   :Summary: 
-   :Type:
-   :Default: 
-   :Scope:     :z:`Enzo`
-   :Todo: :o:`write`
-   :Status:  **Not accessed**
 
 gravity
 -------
