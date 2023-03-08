@@ -1519,8 +1519,8 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     //   1. specify all of the Grackle parameters that we will manually setup
     //      based on the values passed for other Enzo-E parameters. Errors will
     //      be reported if any of these are encountered
-    const std::unordered_set<std::string> forbid_leaf_names =
-      {"use_grackle", "Gamma", "use_radiative_transfer"};
+    const std::unordered_set<std::string> forbid_leaf_names = {"use_grackle",
+                                                               "Gamma"};
 
     //   2. specify all parameters that MAY occur within the "Method:grackle:*"
     //      group that should be ignored by the factory method. (This needs to
@@ -1569,8 +1569,8 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     // 3. Copy over parameters from Enzo-E to Grackle
     method_grackle_chemistry.set<double>("Gamma", physics_fluid_props_gamma);
 
-    // When radiative transfer is eventually included, make sure to set the
-    // below parameter to match the Enzo-E parameter for turning RT on / off:
+    // In the future, we may want to manually set use_radiative_transfer based
+    // on an Enzo-E parameter for turning RT on / off:
     //method_grackle_chemistry.set<int>("use_radiative_transfer", ENZO_E_PARAMETER_NAME);
   }
 }
