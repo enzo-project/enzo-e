@@ -31,8 +31,10 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
          "This function requires the domain's rank to be 3",
          GridRank == 3);
 
-  const int in = cello::index_static();
-  if (NumberOfBaryonFields[in] > 0) {
+  Field field = data()->field();
+  if (field.num_permanent() > 0) { // TODO: revisit if-clause. This could be
+                                   // improved. (plus we probably want to
+                                   // report an error when false)
 
     // load the position of the lower left edge of the grid.
     //
@@ -58,9 +60,6 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
       size *= GridDimension[dim];
 
     /* Get easy to handle pointers for each variable. */
-
-
-    Field field = data()->field();
 
     enzo_float *density    = (enzo_float *) field.values ("density");
     enzo_float *velox      = (enzo_float *) field.values ("velox");
@@ -367,7 +366,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 
     delete [] leftface;
 
-  }  // end: if (NumberOfBaryonFields > 0)
+  }  // end: if (field.num_permanent() > 0)
 
   return ENZO_SUCCESS;
  

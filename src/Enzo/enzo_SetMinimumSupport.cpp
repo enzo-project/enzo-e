@@ -15,7 +15,11 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 				 bool comoving_coordinates)
 {
   const int in = cello::index_static();
-  if (NumberOfBaryonFields[in] > 0) {
+   
+  Field field = data()->field();
+  if (field.num_permanent() > 0) {  // TODO: revisit if-clause. This could be
+                                    // improved. (plus we probably want to
+                                    // report an error when false)
  
     /* Compute cosmology factors. */
  
@@ -40,8 +44,6 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     int dim, size = 1, i;
     for (dim = 0; dim < GridRank; dim++)
       size *= GridDimension[dim];
- 
-    Field field = data()->field();
 
     enzo_float * density         = (enzo_float*) field.values("density");
     enzo_float * total_energy    = (enzo_float *)field.values("total_energy");
@@ -95,7 +97,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
       return ENZO_FAIL;
     }
  
-  } // end: if (NumberOfBaryonFields > 0)
+  } // end: if (field.num_permanent() > 0)
  
   return ENZO_SUCCESS;
 }

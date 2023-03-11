@@ -30,10 +30,6 @@ int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
-// Fields
-
-int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
-
 //----------------------------------------------------------------------
 
 // STATIC
@@ -49,8 +45,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
   for (int in=0; in<CONFIG_NODE_SIZE; in++) {
 
-    NumberOfBaryonFields[in] = 0;
-
     // Gravity parameters
 
     GravitationalConstant[in]           = 1.0;  // used only in SetMinimumSupport()
@@ -65,17 +59,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
     PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
     PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
     PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
-
-    NumberOfBaryonFields[in] = enzo_config->field_list.size();
-
-    // Check NumberOfBaryonFields
-
-    if (NumberOfBaryonFields[in] > MAX_NUMBER_OF_BARYON_FIELDS) {
-      ERROR2 ("EnzoBlock::initialize",
-	      "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
-	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields[in] );
-    }
-
   }
 
 } // void initialize()
@@ -275,10 +258,6 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n",
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
 
-
-  fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
-	   NumberOfBaryonFields[in]);
-
   // problem
 
   fprintf (fp,"EnzoBlock: dt %g\n", dt);
@@ -325,6 +304,19 @@ void EnzoBlock::initialize () throw()
   // Grid dimensions
 
   Field field = data()->field();
+
+  // the following check was originally located elsewhere, but we moved it here
+  // for lack of a better place to put it. We might be able to remove this in
+  // the future.
+  //
+  // It's unclear whether we should be using field.num_permanent() or a
+  // different count of fields. In any case, this is improvement over the count
+  // that was used previously in this check
+  if (field.num_permanent() > MAX_NUMBER_OF_BARYON_FIELDS) {
+    ERROR2 ("EnzoBlock::initialize",
+            "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
+            MAX_NUMBER_OF_BARYON_FIELDS, field.num_permanent() );
+  }
 
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);

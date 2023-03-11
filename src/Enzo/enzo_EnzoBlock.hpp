@@ -57,10 +57,6 @@ public:
   static int PPMDiffusionParameter[CONFIG_NODE_SIZE];
   static int PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
-  // Fields
-
-  static int NumberOfBaryonFields[CONFIG_NODE_SIZE];  // active baryon fields
-
 public: // interface
 
 #ifdef BYPASS_CHARM_MEM_LEAK
