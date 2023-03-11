@@ -30,10 +30,6 @@ int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
-// PPM
-
-int EnzoBlock::ghost_depth[3*CONFIG_NODE_SIZE];
-
 // Fields
 
 int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
@@ -47,27 +43,13 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
   CkPrintf ("%d DEBUG_ENZO_BLOCK [static] EnzoBlock::initialize()\n",
             CkMyPe());
 #endif
-  int gx = enzo_config->field_ghost_depth[0];
-  int gy = enzo_config->field_ghost_depth[1];
-  int gz = enzo_config->field_ghost_depth[2];
-
-  const int rank = enzo_config->mesh_root_rank;
-
-  if (rank < 1) gx = 0;
-  if (rank < 2) gy = 0;
-  if (rank < 3) gz = 0;
+  
 
   double time  = enzo_config->initial_time;
 
   for (int in=0; in<CONFIG_NODE_SIZE; in++) {
 
     NumberOfBaryonFields[in] = 0;
-
-    int i;
-
-    for (i=0; i<MAX_DIMENSION; i++) {
-      ghost_depth[in*3+i] = 0;
-    }
 
     // Gravity parameters
 
@@ -83,10 +65,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
     PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
     PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
     PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
-
-    ghost_depth[in*3+0] = gx;
-    ghost_depth[in*3+1] = gy;
-    ghost_depth[in*3+2] = gz;
 
     NumberOfBaryonFields[in] = enzo_config->field_list.size();
 
@@ -297,11 +275,6 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n",
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
 
-  fprintf (fp,"EnzoBlock: ghost %d %d %d\n",
-	   ghost_depth[in*3+0],
-	   ghost_depth[in*3+1],
-	   ghost_depth[in*3+2]);
-
 
   fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
 	   NumberOfBaryonFields[in]);
@@ -356,13 +329,26 @@ void EnzoBlock::initialize () throw()
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);
 
-  int gx,gy,gz;
+  // query the ghost depth.
+  //
+  // Note: this is an improper way to do things... We only do it this way
+  // because this is how it used to be done when EnzoBlock::ghost_depth was a
+  // global variable
+  //
+  // In the future, we should be computing GridDimension, GridStartIndex and
+  // GridEndIndex within the Method objects where that information is needed
+  // and using the ghost_depth information relevant to the fields that are
+  // being used. Specifically, this would look something like:
+  //     int gx,gy,gz;
+  //     field.ghost_depth(field.field_id("density"), &gx, &gy, &gz);
+  //     if (cello::rank() < 1) gx = 0;
+  //     if (cello::rank() < 2) gy = 0;
+  //     if (cello::rank() < 3) gz = 0;
 
-  const int in = cello::index_static();
-
-  gx = EnzoBlock::ghost_depth[in*3+0];
-  gy = EnzoBlock::ghost_depth[in*3+1];
-  gz = EnzoBlock::ghost_depth[in*3+2];
+  const int rank = cello::rank();
+  int gx = (rank < 1) ? 0 : cello::config()->field_ghost_depth[0];
+  int gy = (rank < 2) ? 0 : cello::config()->field_ghost_depth[1];
+  int gz = (rank < 3) ? 0 : cello::config()->field_ghost_depth[2];
 
   GridDimension[0]  = nx + 2*gx;
   GridDimension[1]  = ny + 2*gy;

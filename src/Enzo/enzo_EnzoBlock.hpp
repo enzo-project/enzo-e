@@ -57,10 +57,6 @@ public:
   static int PPMDiffusionParameter[CONFIG_NODE_SIZE];
   static int PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
-  // PPM
-
-  static int ghost_depth[3*CONFIG_NODE_SIZE];
-
   // Fields
 
   static int NumberOfBaryonFields[CONFIG_NODE_SIZE];  // active baryon fields

@@ -21,7 +21,6 @@ module enzo {
   readonly int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
   readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
 
   PUPable EnzoBoundary;
