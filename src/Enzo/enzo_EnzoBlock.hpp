@@ -31,13 +31,6 @@ class EnzoBlock : public CBase_EnzoBlock
   friend class EnzoInitialImplosion2;
   friend class EnzoInitialSedovArray2;
 
-  //----------------------------------------------------------------------
-  // functions
-
-  static void initialize (const EnzoConfig * enzo_config)
-  { /* this used to do something */ }
-
-
 public: // interface
 
 #ifdef BYPASS_CHARM_MEM_LEAK
