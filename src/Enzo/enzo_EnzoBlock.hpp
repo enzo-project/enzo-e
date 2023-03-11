@@ -57,11 +57,6 @@ public:
   static int PPMDiffusionParameter[CONFIG_NODE_SIZE];
   static int PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
-  // Domain
-
-  static enzo_float DomainLeftEdge [3*CONFIG_NODE_SIZE];
-  static enzo_float DomainRightEdge[3*CONFIG_NODE_SIZE];
-
   // PPM
 
   static int GridRank[CONFIG_NODE_SIZE];

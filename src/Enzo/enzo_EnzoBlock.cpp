@@ -30,11 +30,6 @@ int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
-// Domain
-
-enzo_float EnzoBlock::DomainLeftEdge [3*CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::DomainRightEdge[3*CONFIG_NODE_SIZE];
-
 // PPM
 
 int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
@@ -74,8 +69,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
     int i;
 
     for (i=0; i<MAX_DIMENSION; i++) {
-      DomainLeftEdge [in*3+i] = 0;
-      DomainRightEdge[in*3+i] = 0;
       ghost_depth[in*3+i] = 0;
     }
 
@@ -109,14 +102,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 	      "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
 	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields[in] );
     }
-
-    DomainLeftEdge [in*3+0] = enzo_config->domain_lower[0];
-    DomainLeftEdge [in*3+1] = enzo_config->domain_lower[1];
-    DomainLeftEdge [in*3+2] = enzo_config->domain_lower[2];
-
-    DomainRightEdge[in*3+0] = enzo_config->domain_upper[0];
-    DomainRightEdge[in*3+1] = enzo_config->domain_upper[1];
-    DomainRightEdge[in*3+2] = enzo_config->domain_upper[2];
 
   }
 
@@ -302,19 +287,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 	   PPMDiffusionParameter[in]);
   fprintf (fp,"EnzoBlock: PPMSteepeningParameter %d\n",
 	   PPMSteepeningParameter[in]);
-
-  // Domain
-
-  fprintf (fp,"EnzoBlock: DomainLeftEdge %g %g %g\n",
-	   DomainLeftEdge [in*3+0],
-	   DomainLeftEdge [in*3+1],
-	   DomainLeftEdge [in*3+2]);
-  fprintf (fp,"EnzoBlock: DomainRightEdge %g %g %g\n",
-	   DomainRightEdge[in*3+0],
-	   DomainRightEdge[in*3+1],
-	   DomainRightEdge[in*3+2]);
-
-  // Fields
 
   // Grid
 

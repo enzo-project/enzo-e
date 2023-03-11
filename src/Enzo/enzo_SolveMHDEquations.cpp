@@ -33,6 +33,18 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
   const int in = cello::index_static();
   if (NumberOfBaryonFields[in] > 0) {
 
+    // load the position of the lower left edge of the grid.
+    //
+    // TODO: make DomainLeftEdge hold values in double precision (we don't
+    // currently do that to avoid breaking tests)
+    std::array<double,3> lo_arr_;
+    cello::hierarchy()->lower(&lo_arr_[0], &lo_arr_[1], &lo_arr_[2]);
+
+    const std::array<enzo_float, 3> DomainLeftEdge = {enzo_float(lo_arr_[0]),
+                                                      enzo_float(lo_arr_[1]),
+                                                      enzo_float(lo_arr_[2])};
+
+
     /* initialize */
 
     int dim, i,  size;
@@ -137,7 +149,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 
      for (dim = 0; dim < GridRank[in]; dim++)
        GridGlobalStart[dim] =
-     	NINT((GridLeftEdge[dim] - DomainLeftEdge[in*3+dim])/CellWidth[dim]) -
+     	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
      	GridStartIndex[dim];
 
     /* fix grid quantities so they are defined to at least 3 dims */
