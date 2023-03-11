@@ -37,7 +37,7 @@ class EnzoBlock : public CBase_EnzoBlock
   static void initialize (const EnzoConfig * enzo_config);
 
   //----------------------------------------------------------------------
-  // variables
+  // variables - TODO: remove these!
 
 public:
 
@@ -46,33 +46,16 @@ public:
   static int UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   static enzo_float MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
 
-  // Chemistry
-
-  static int MultiSpecies[CONFIG_NODE_SIZE];
-
   // Physics
 
   static int PressureFree[CONFIG_NODE_SIZE];
   static enzo_float GravitationalConstant[CONFIG_NODE_SIZE];
-
-  // Problem-specific
-
-  static int ProblemType[CONFIG_NODE_SIZE];
 
   // Method PPM
 
   static int PPMFlatteningParameter[CONFIG_NODE_SIZE];
   static int PPMDiffusionParameter[CONFIG_NODE_SIZE];
   static int PPMSteepeningParameter[CONFIG_NODE_SIZE];
-
-  // Parallel
-
-  //  static int ProcessorNumber;
-
-  // Numerics
-
-  static enzo_float InitialRedshift[CONFIG_NODE_SIZE];
-  static enzo_float InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
 
   // Domain
 

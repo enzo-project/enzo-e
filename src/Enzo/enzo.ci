@@ -16,15 +16,11 @@ module enzo {
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
   readonly int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::DomainLeftEdge [CONFIG_NODE_SIZE_3];
   readonly enzo_float EnzoBlock::DomainRightEdge[CONFIG_NODE_SIZE_3];
   readonly int EnzoBlock::GridRank[CONFIG_NODE_SIZE];

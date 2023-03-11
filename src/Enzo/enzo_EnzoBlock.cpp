@@ -19,29 +19,16 @@
 int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
 enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
 
-// Chemistry
-
-int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
-
 // Physics
 
 int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
 enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
-
-// Problem-specific
-
-int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
 
 // Method PPM
 
 int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
 int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-
-// Numerics
-
-enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
 
 // Domain
 
@@ -94,17 +81,9 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
     GridRank[in]            = enzo_config->mesh_root_rank;
 
-    // Chemistry parameters
-
-    MultiSpecies[in] = 0;    // 0:0 1:6 2:9 3:12
-
     // Gravity parameters
 
     GravitationalConstant[in]           = 1.0;  // used only in SetMinimumSupport()
-
-    //Problem specific parameter
-
-    ProblemType[in] = 0;
 
     // PPM parameters
 
@@ -138,8 +117,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
     DomainRightEdge[in*3+0] = enzo_config->domain_upper[0];
     DomainRightEdge[in*3+1] = enzo_config->domain_upper[1];
     DomainRightEdge[in*3+2] = enzo_config->domain_upper[2];
-
-    InitialTimeInCodeUnits[in] = time;
 
   }
 
@@ -310,24 +287,12 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: MinimumPressureSupportParameter %g\n",
 	   MinimumPressureSupportParameter[in]);
 
-  // Chemistry
-
-  fprintf (fp,"EnzoBlock: MultiSpecies %d\n",
-	   MultiSpecies[in]);
-
   // Physics
 
   fprintf (fp,"EnzoBlock: PressureFree %d\n",
 	   PressureFree[in]);
-  //fprintf (fp,"EnzoBlock: Gamma %g\n",
-  //	   Gamma[in]);
   fprintf (fp,"EnzoBlock: GravitationalConstant %g\n",
 	   GravitationalConstant[in]);
-
-  // Problem-specific
-
-  fprintf (fp,"EnzoBlock: ProblemType %d\n",
-	   ProblemType[in]);
 
   // Method PPM
 
@@ -337,30 +302,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 	   PPMDiffusionParameter[in]);
   fprintf (fp,"EnzoBlock: PPMSteepeningParameter %d\n",
 	   PPMSteepeningParameter[in]);
-
-  // Numerics
-
-  /*
-  fprintf (fp,"EnzoBlock: DualEnergyFormalism %d\n",
-	   DualEnergyFormalism[in]);
-  fprintf (fp,"EnzoBlock: DualEnergyFormalismEta1 %g\n",
-	   DualEnergyFormalismEta1[in]);
-  fprintf (fp,"EnzoBlock: DualEnergyFormalismEta2 %g\n",
-	   DualEnergyFormalismEta2[in]);
-  fprintf (fp,"EnzoBlock: pressure_floor %g\n",
-	   pressure_floor[in]);
-  fprintf (fp,"EnzoBlock: density_density_floor %g\n",
-	   density_floor[in]);
-  fprintf (fp,"EnzoBlock: number_density_floor %g\n",
-	   number_density_floor[in]);
-  fprintf (fp,"EnzoBlock: temperature_floor %g\n",
-	   temperature_floor[in]);
-  */
-
-  fprintf (fp,"EnzoBlock: InitialRedshift %g\n",
-	   InitialRedshift[in]);
-  fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",
-	   InitialTimeInCodeUnits[in]);
 
   // Domain
 
