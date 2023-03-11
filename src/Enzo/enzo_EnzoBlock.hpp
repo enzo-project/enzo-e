@@ -59,8 +59,6 @@ public:
 
   // PPM
 
-  static int GridRank[CONFIG_NODE_SIZE];
-
   static int ghost_depth[3*CONFIG_NODE_SIZE];
 
   // Fields

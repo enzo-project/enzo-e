@@ -32,8 +32,6 @@ int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
 // PPM
 
-int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
-
 int EnzoBlock::ghost_depth[3*CONFIG_NODE_SIZE];
 
 // Fields
@@ -63,7 +61,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
   for (int in=0; in<CONFIG_NODE_SIZE; in++) {
 
-    GridRank[in] = 0;
     NumberOfBaryonFields[in] = 0;
 
     int i;
@@ -71,8 +68,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
     for (i=0; i<MAX_DIMENSION; i++) {
       ghost_depth[in*3+i] = 0;
     }
-
-    GridRank[in]            = enzo_config->mesh_root_rank;
 
     // Gravity parameters
 
@@ -290,7 +285,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // Grid
 
-  fprintf (fp,"EnzoBlock: GridRank %d\n",    GridRank[in]);
   fprintf (fp,"EnzoBlock: GridDimension %d %d %d\n",
 	   GridDimension[0],GridDimension[1],GridDimension[2]);
   fprintf (fp,"EnzoBlock: GridStartIndex %d %d %d\n",

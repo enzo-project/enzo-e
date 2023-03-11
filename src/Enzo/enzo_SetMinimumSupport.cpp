@@ -34,9 +34,11 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     enzo_float CosmoFactor = 1.0/cosmo_a;
  
     /* Determine the size of the grids. */
+
+    const int GridRank = cello::rank();
  
     int dim, size = 1, i;
-    for (dim = 0; dim < GridRank[in]; dim++)
+    for (dim = 0; dim < GridRank; dim++)
       size *= GridDimension[dim];
  
     Field field = data()->field();
@@ -77,7 +79,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
       for (i = 0; i < size; i++)
 	internal_energy[i] = MAX(internal_energy[i],
 				 MinimumSupportEnergyCoefficient*density[i]);
-      if (GridRank[in] != 3) return ENZO_FAIL;
+      if (GridRank != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
 	total_energy[i] = 
 	  MAX((enzo_float)
