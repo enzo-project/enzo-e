@@ -586,7 +586,14 @@ Method * EnzoProblem::create_method_
 
   if (name == "ppm") {
 
-    method = new EnzoMethodPpm(store_fluxes_for_corrections);
+    method = new EnzoMethodPpm
+      (store_fluxes_for_corrections,
+       enzo_config->ppm_diffusion,
+       enzo_config->ppm_flattening,
+       enzo_config->ppm_pressure_free,
+       enzo_config->ppm_steepening,
+       enzo_config->ppm_use_minimum_pressure_support,
+       enzo_config->ppm_minimum_pressure_support_parameter);
 /*
   } else if (name == "hydro") {
 

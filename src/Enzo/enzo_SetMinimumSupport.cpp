@@ -12,10 +12,11 @@
 //----------------------------------------------------------------------
  
 int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
+                                 enzo_float minimum_pressure_support_parameter,
 				 bool comoving_coordinates)
 {
   const int in = cello::index_static();
-   
+
   Field field = data()->field();
   if (field.num_permanent() > 0) {  // TODO: revisit if-clause. This could be
                                     // improved. (plus we probably want to
@@ -54,10 +55,14 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 
     /* Set minimum GE. */
 
+    // ToDo: figure out how to properly configure this variable. It used to be
+    // a static global variable of EnzoBlock, but it could never be configured
+    const enzo_float GravitationalConstant = 1.0;
+
     const enzo_float gamma = enzo::fluid_props()->gamma();
     MinimumSupportEnergyCoefficient =
-      GravitationalConstant[in]/(4.0*cello::pi) / (cello::pi * (gamma*(gamma-1.0))) *
-      CosmoFactor * MinimumPressureSupportParameter[in] *
+      GravitationalConstant/(4.0*cello::pi) / (cello::pi * (gamma*(gamma-1.0))) *
+      CosmoFactor * minimum_pressure_support_parameter *
       CellWidth[0] * CellWidth[0];
 
     /* PPM: set GE. */

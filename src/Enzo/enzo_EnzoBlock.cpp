@@ -16,55 +16,6 @@
 
 //======================================================================
 
-int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-
-// Physics
-
-int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
-
-// Method PPM
-
-int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
-int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
-int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-
-//----------------------------------------------------------------------
-
-// STATIC
-void EnzoBlock::initialize(const EnzoConfig * enzo_config)
-{
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d DEBUG_ENZO_BLOCK [static] EnzoBlock::initialize()\n",
-            CkMyPe());
-#endif
-  
-
-  double time  = enzo_config->initial_time;
-
-  for (int in=0; in<CONFIG_NODE_SIZE; in++) {
-
-    // Gravity parameters
-
-    GravitationalConstant[in]           = 1.0;  // used only in SetMinimumSupport()
-
-    // PPM parameters
-
-    PressureFree[in]              = enzo_config->ppm_pressure_free;
-    UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
-    MinimumPressureSupportParameter[in] =
-      enzo_config->ppm_minimum_pressure_support_parameter;
-
-    PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
-    PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
-    PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
-  }
-
-} // void initialize()
-
-//----------------------------------------------------------------------
-
 //======================================================================
 #ifdef BYPASS_CHARM_MEM_LEAK
 //======================================================================
@@ -222,27 +173,6 @@ void EnzoBlock::pup(PUP::er &p)
 void EnzoBlock::write(FILE * fp) throw ()
 {
   const int in = cello::index_static();
-
-  fprintf (fp,"EnzoBlock: UseMinimumPressureSupport %d\n",
-	   UseMinimumPressureSupport[in]);
-  fprintf (fp,"EnzoBlock: MinimumPressureSupportParameter %g\n",
-	   MinimumPressureSupportParameter[in]);
-
-  // Physics
-
-  fprintf (fp,"EnzoBlock: PressureFree %d\n",
-	   PressureFree[in]);
-  fprintf (fp,"EnzoBlock: GravitationalConstant %g\n",
-	   GravitationalConstant[in]);
-
-  // Method PPM
-
-  fprintf (fp,"EnzoBlock: PPMFlatteningParameter %d\n",
-	   PPMFlatteningParameter[in]);
-  fprintf (fp,"EnzoBlock: PPMDiffusionParameter %d\n",
-	   PPMDiffusionParameter[in]);
-  fprintf (fp,"EnzoBlock: PPMSteepeningParameter %d\n",
-	   PPMSteepeningParameter[in]);
 
   // Grid
 

@@ -14,13 +14,6 @@ module enzo {
   readonly int EnzoMsgCheck::counter[CONFIG_NODE_SIZE];
 
   readonly EnzoConfig g_enzo_config;
-  readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
