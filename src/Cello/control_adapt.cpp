@@ -1037,6 +1037,8 @@ void Block::initialize_child_face_levels_()
         adapt_.face_level(ip3,Adapt::LevelType::curr);
       int level_child_face = (inp == thisIndex) ?
         (level + 1) : level_face;
+      if (refine_during_initialization(in))
+        level_child_face++;
       set_child_face_level_curr(ic3,if3, level_child_face);
     }
 

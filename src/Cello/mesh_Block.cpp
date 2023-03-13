@@ -195,7 +195,6 @@ void Block::init_refine_
     while (it_face.next(if3)) {
       Index neighbor_index = index_.index_neighbor(if3, na3);
       bool refine = refine_during_initialization(neighbor_index);
-      // TODO: This assumes we only refine to level 1 during initialization.
       face_levels[IF3(if3)] = refine ? 1 : 0;
     }
     adapt_.copy_face_level(Adapt::LevelType::curr, face_levels);
@@ -728,20 +727,6 @@ void Block::init_adapt_(Adapt * adapt_parent)
         }
       }
     }
-
-    // replace neighbor blocks with their child blocks if they refine
-    // during the initialization phase.
-    int max_initial_level = cello::config()->mesh_max_initial_level;
-    for (int level_i=0; level_i < max_initial_level; level_i++){
-      std::vector<Index> neighbors = adapt_.index_neighbors();
-      for (int i=0; i<(int) neighbors.size(); i++){
-        Index neighbor_index = neighbors.at(i);
-        if (neighbor_index.level() == level_i){
-          if (refine_during_initialization(neighbor_index))
-            adapt_.refine_neighbor(neighbor_index);
-        }
-      }
-    }
   
   } else if (level > 0) {
     // else if a refined Block, initialize adapt from its incoming
@@ -755,6 +740,20 @@ void Block::init_adapt_(Adapt * adapt_parent)
     adapt_parent->print("init_adapt parent",this);
     adapt_.print("init_adapt child after",this);
 #endif    
+  }
+
+  // replace neighbor blocks with their child blocks if they refine
+  // during the initialization phase.
+  int max_initial_level = cello::config()->mesh_max_initial_level;
+  for (int level_i=level; level_i < max_initial_level; level_i++) {
+    std::vector<Index> neighbors = adapt_.index_neighbors();
+    for (int i=0; i<(int) neighbors.size(); i++) {
+      Index neighbor_index = neighbors.at(i);
+      if (neighbor_index.level() == level_i) {
+        if (refine_during_initialization(neighbor_index))
+          adapt_.refine_neighbor(neighbor_index);
+      }
+    }
   }
 }
 
