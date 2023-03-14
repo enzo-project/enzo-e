@@ -11,6 +11,8 @@
 // Used to write inference array bounds and "bubble" coordinates for plotting
 // #define TRACE_INFER
 
+# define PRINT_FIELD_VALUES
+
 //----------------------------------------------------------------------
 
 EnzoMethodInference::EnzoMethodInference
@@ -957,11 +959,6 @@ void EnzoLevelArray::apply_inference()
     enzo_float * vy = field_values_[3].data();
     enzo_float * vz = field_values_[4].data();
 
-    // create metallicity derived field
-    //enzo_float * metallicity = new enzo_float[nix_*niy_*niz_];
-    //enzo_float * density       = field_values_[0].data();
-    //enzo_float * metal_density = field_values_[5].data();
-
     int nx,ny,nz;
     cello::hierarchy()->root_size(&nx,&ny,&nz);
 
@@ -1012,14 +1009,30 @@ void EnzoLevelArray::apply_inference()
                 8358.282154906454/vunit,
                 6.23778749095905e-13, 531795315558.7779/(vunit*vunit)};
 
+
+#ifdef PRINT_FIELD_VALUES
+  for (int i_f = 0; i_f < num_fields_; i_f++) {
+      // print out all field values
+      for (int iz=0; iz<niz_; iz++){
+        for (int iy=0; iy<niy_; iy++){
+          for (int ix=0; ix<nix_; ix++){
+            int i = ix + nix_*(iy + niy_*iz);
+            CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f,ix,iy,iz, field_values_[i_f].data()[i]);
+          }
+        }
+      }
+  }
+#endif
+
+    // i_f = iterator for fields in "inference" group
+    // i_f_ = iterator for fields going into model
     int i_f_ = 0; 
     for (int i_f=0; i_f < num_fields_; i_f++) {
+
       enzo_float * array;
       if (i_f == 2) {
         array = velocity_divergence; // vx, vy, and vz are all included in this, so skip i=2-4
         i_f = 4; // metal_density
-   //   } else if (i_f == 5) { // metal_density
-   //       array = metallicity;
       } else {
           array = field_values_[i_f].data();
       }
@@ -1029,6 +1042,8 @@ void EnzoLevelArray::apply_inference()
           for (int ix=0; ix<nix_; ix++){
             //int i = INDEX(ix,iy,iz,nix_,niy_);
             int i = ix + nix_*(iy + niy_*iz);
+//            CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f_,ix,iy,iz, array[i]);
+
             field_data[0][i_f_][ix][iy][iz] = (array[i] - means[i_f_])/stds[i_f_];
           } // ix
         } // iy
@@ -1056,7 +1071,7 @@ void EnzoLevelArray::apply_inference()
       double pnostar = num_0 / (num_0 + num_1);
       double pstar   = num_1 / (num_0 + num_1);
  
-      CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
+      //CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
 
     //ASSERT("EnzoMethodInference::apply_inference()",
     //       "pstar+pnostar != 1.0", pstar+pnostar == 1.0);
@@ -1095,7 +1110,7 @@ void EnzoLevelArray::apply_inference()
 
              mask[i] = true;
 
-            CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", lower[0]+(ix+0.5)*hx, lower[1]+(iy+0.5)*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
+            //CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", lower[0]+(ix+0.5)*hx, lower[1]+(iy+0.5)*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
            } 
            else mask[i] = false;
          } // ix
