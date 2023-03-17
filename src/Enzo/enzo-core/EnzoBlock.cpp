@@ -278,15 +278,10 @@ void EnzoBlock::create_child_blocks(){
 
 void EnzoBlock::instantiate_children() {
   child_face_level_curr_.resize(cello::num_children()*27);
-
-  int count_adapt;
-  int    cycle = 0;
-  double time  = 0.0;
-  double dt    = 0.0;
   int num_field_blocks = 1;
 
-  int ix, iy, iz, nx, ny, nz;
-  index_global(&ix, &iy, &iz, &nx, &ny, &nz);
+  int nx, ny, nz;
+  data()->field().size(&nx, &ny, &nz);
 
   const int rank = cello::rank();
   ItChild it_child(rank);
