@@ -318,7 +318,7 @@ jobs:
 
       - compile-enzoe:
           usedouble: << parameters.usedouble >>
-          tag: gold-standard-001
+          tag: gold-standard-002
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
 
