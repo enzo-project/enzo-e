@@ -16,6 +16,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 (
  GrackleChemistryData my_chemistry,
  bool use_cooling_timestep,
+ const double radiation_redshift,
  const double physics_cosmology_initial_redshift,
  const double time
 )
@@ -26,10 +27,16 @@ EnzoMethodGrackle::EnzoMethodGrackle
     grackle_units_(),
     grackle_rates_(),
     time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED),
+    radiation_redshift_(radiation_redshift),
     use_cooling_timestep_(use_cooling_timestep)
 #endif
 {
 #ifdef CONFIG_USE_GRACKLE
+  // sanity check:
+  if ((radiation_redshift >= 0) && (enzo::cosmology() != nullptr)){
+    ERROR("EnzoMethodGrackle::EnzoMethodGrackle",
+          "radiation redshift should not be specified in cosmological sims");
+  }
 
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
@@ -220,7 +227,7 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data
 
 void EnzoMethodGrackle::setup_grackle_units (double current_time,
                                              code_units * grackle_units
-                                             ) throw()
+                                             ) const throw()
 {
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
@@ -256,9 +263,8 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
     grackle_units->a_value = cosmo_a;
 
-  } else if (enzo_config->method_grackle_radiation_redshift > -1){
-    grackle_units->a_value = 1.0 /
-                         (1.0 + enzo_config->method_grackle_radiation_redshift);
+  } else if (radiation_redshift_ >= 0){
+    grackle_units->a_value = 1.0 / (1.0 + radiation_redshift_);
   }
 
   return;
@@ -272,7 +278,7 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
 
 void EnzoMethodGrackle::setup_grackle_units (const EnzoFieldAdaptor& fadaptor,
                                              code_units * grackle_units
-                                             ) throw()
+                                             ) const throw()
 {
   const EnzoConfig * config = enzo::config();
     double current_time =
