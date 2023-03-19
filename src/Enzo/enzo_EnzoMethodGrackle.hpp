@@ -12,30 +12,10 @@
 #ifndef ENZO_ENZO_METHOD_GRACKLE_HPP
 #define ENZO_ENZO_METHOD_GRACKLE_HPP
 
-
-#ifdef CONFIG_USE_GRACKLE
-// PUP operator for Grackle's code_units
-inline void operator|(PUP::er &p, code_units &c){
-  // Make sure to change this if code_units ever changes
-  // all are just single values (int or float)
-
-  p | c.comoving_coordinates;
-  p | c.density_units;
-  p | c.length_units;
-  p | c.time_units;
-  p | c.velocity_units;
-  p | c.a_units;
-  p | c.a_value;
-
-}
-
 typedef int (*grackle_local_property_func)(chemistry_data*,
 					   chemistry_data_storage *,
 					   code_units*, grackle_field_data*,
 					   enzo_float*);
-#endif
-
-
 
 class EnzoMethodGrackle : public Method {
 
@@ -55,55 +35,28 @@ public: // interface
                     const double time);
 
   // Destructor
-  virtual ~EnzoMethodGrackle() throw() { deallocate_grackle_rates_(); }
+  virtual ~EnzoMethodGrackle() throw() { }
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGrackle);
 
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m)
-    : Method (m)
-#ifdef CONFIG_USE_GRACKLE
-      , my_chemistry_()
-      , grackle_units_()
-      , grackle_rates_()
-      , time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED)
-      , radiation_redshift_(-1.0)
-      , use_cooling_timestep_(false)
-#endif
-    {  }
+    : Method (m),
+      grackle_facade_(nullptr),
+      use_cooling_timestep_(false)
+  {  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-
     // NOTE: change this function whenever attributes change
-
-  #ifdef CONFIG_USE_GRACKLE
 
     TRACEPUP;
 
     Method::pup(p);
-    p | my_chemistry_;
-    p | grackle_units_;
-    double last_init_time = time_grackle_data_initialized_;
-    p | last_init_time;
-    p | radiation_redshift_;
+    pup_GrackleFacade(p, grackle_facade_);
     p | use_cooling_timestep_;
-    if (p.isUnpacking()) {
-      ASSERT("EnzoMethodGrackle::pup",
-             "grackle_chemistry_data must have previously been initialized",
-             last_init_time!=ENZO_FLOAT_UNDEFINED);
-      // the following recomputes grackle_rates_ (and sets the value of
-      // time_grackle_data_initialized_ to last_init_time). This is done
-      // to avoid writing pup methods for all of Grackle's internal data
-      // structures.
-      time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
-      initialize_grackle_chemistry_data(last_init_time, true);
-    }
-
-  #endif /* CONFIG_USE_GRACKLE */
-
   }
 
   /// Apply the method to advance a block one timestep
@@ -118,20 +71,13 @@ public: // interface
   /// returns the stored instance of GrackleChemistryData, if the simulation is
   /// configured to actually use grackle
   const GrackleChemistryData* try_get_chemistry() const throw() {
-#ifndef CONFIG_USE_GRACKLE
-    return nullptr;
-#else
-    return (my_chemistry_.get<int>("use_grackle") == 1) ?
-      &my_chemistry_ : nullptr;
-#endif
+    return (grackle_facade_ != nullptr) ?
+      grackle_facade_->get_chemistry() : nullptr;
   }
 
 #ifdef CONFIG_USE_GRACKLE
 
   void define_required_grackle_fields();
-
-  void initialize_grackle_chemistry_data(double current_time,
-                                         bool preinitialized_units = false);
 
   /// sets up grackle units
   ///
@@ -147,22 +93,35 @@ public: // interface
   /// allow code_units to be passed as an option, but that really isn't used
   /// anywhere (we plan to drop that in the near future).
   void setup_grackle_units (double current_time,
-                            code_units * grackle_units) const throw();
+                            code_units * grackle_units) const throw()
+  {
+    require_valid_facade();
+    grackle_facade_->setup_grackle_units(current_time, grackle_units);
+  }
 
   void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
-                           code_units * grackle_units) const throw();
+                           code_units * grackle_units) const throw()
+  {
+    require_valid_facade();
+    grackle_facade_->setup_grackle_units(fadaptor, grackle_units);
+  }
 
   void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
                             grackle_field_data * grackle_fields,
                             int stale_depth = 0,
-                            bool omit_cell_width = false) const throw();
+                            bool omit_cell_width = false) const throw()
+  {
+    require_valid_facade();
+    grackle_facade_->setup_grackle_fields(fadaptor, grackle_fields,
+                                          stale_depth, omit_cell_width);
+  }
 
   void setup_grackle_fields(Block * block,
                             grackle_field_data * grackle_fields,
                             int i_hist = 0 ) const throw()
   {
-    setup_grackle_fields(EnzoFieldAdaptor(block, i_hist),
-                         grackle_fields, 0, false);
+    require_valid_facade();
+    grackle_facade_->setup_grackle_fields(block, grackle_fields, i_hist);
   }
 
   /// Assists with problem initialization
@@ -177,33 +136,10 @@ public: // interface
 
   void delete_grackle_fields(grackle_field_data * grackle_fields) const throw()
   {
-      grackle_fields->density         = NULL;
-      grackle_fields->internal_energy = NULL;
-      grackle_fields->x_velocity      = NULL;
-      grackle_fields->y_velocity      = NULL;
-      grackle_fields->z_velocity      = NULL;
-      grackle_fields->HI_density      = NULL;
-      grackle_fields->HII_density     = NULL;
-      grackle_fields->HeI_density     = NULL;
-      grackle_fields->HeII_density    = NULL;
-      grackle_fields->HeIII_density   = NULL;
-      grackle_fields->e_density       = NULL;
-      grackle_fields->HM_density      = NULL;
-      grackle_fields->H2I_density     = NULL;
-      grackle_fields->H2II_density    = NULL;
-      grackle_fields->DI_density      = NULL;
-      grackle_fields->DII_density     = NULL;
-      grackle_fields->HDI_density     = NULL;
-      grackle_fields->metal_density   = NULL;
-      grackle_fields->volumetric_heating_rate = NULL;
-      grackle_fields->specific_heating_rate   = NULL;
-
-      delete [] grackle_fields->grid_dimension; grackle_fields->grid_dimension = NULL;
-      delete [] grackle_fields->grid_start;     grackle_fields->grid_start      = NULL;
-      delete [] grackle_fields->grid_end;       grackle_fields->grid_end        = NULL;
-
-      return;
+    require_valid_facade();
+    grackle_facade_->delete_grackle_fields(grackle_fields);
   }
+
 
   void enforce_metallicity_floor(Block * block) throw();
 
@@ -213,9 +149,9 @@ public: // interface
 			      grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    compute_local_property_(fadaptor, ct, stale_depth, grackle_units,
-                            grackle_fields, &local_calculate_cooling_time,
-			    "local_calculate_cooling_time");
+    require_valid_facade();
+    grackle_facade_->calculate_cooling_time(fadaptor, ct, stale_depth,
+                                            grackle_units, grackle_fields);
   }
 
   void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
@@ -224,9 +160,9 @@ public: // interface
 			  grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    compute_local_property_(fadaptor, pressure, stale_depth, grackle_units,
-                            grackle_fields, &local_calculate_pressure,
-			    "local_calculate_pressure");
+    require_valid_facade();
+    grackle_facade_->calculate_pressure(fadaptor, pressure, stale_depth,
+                                        grackle_units, grackle_fields);
   }
 
   void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
@@ -235,32 +171,21 @@ public: // interface
 			     grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    compute_local_property_(fadaptor, temperature, stale_depth, grackle_units,
-                            grackle_fields, &local_calculate_temperature,
-			    "local_calculate_temperature");
+    require_valid_facade();
+    grackle_facade_->calculate_temperature(fadaptor, temperature, stale_depth,
+                                           grackle_units, grackle_fields);
   }
 
-
-#endif
-
-
-protected: // methods
-
-  void deallocate_grackle_rates_() throw();
-
-#ifdef CONFIG_USE_GRACKLE
-
-  // when grackle_units is NULL, new values are temporarily allocated
-  void compute_local_property_(const EnzoFieldAdaptor& fadaptor,
-                               enzo_float* values, int stale_depth,
-			       code_units* grackle_units,
-			       grackle_field_data* grackle_fields,
-			       grackle_local_property_func func,
-			       std::string func_name) const throw();
-
 #endif
 
 protected: // methods
+
+  void require_valid_facade() const throw() {
+    if (grackle_facade_.get() == nullptr) {
+      ERROR("EnzoMethodGrackle::require_valid_facade()",
+            "grackle_facade_ can't be a nullptr");
+    }
+  }
 
 #ifdef CONFIG_USE_GRACKLE
   void compute_( Block * block) throw();
@@ -270,20 +195,8 @@ protected: // methods
 #endif
 
 protected: // attributes
-#ifdef CONFIG_USE_GRACKLE
-
-  GrackleChemistryData my_chemistry_;
-  code_units grackle_units_;
-  chemistry_data_storage grackle_rates_;
-  double time_grackle_data_initialized_;
-
-  /// the following parameter is only used in non-cosmological simulations. It
-  /// specifies the redshift of the UV background
-  double radiation_redshift_;
-
+  std::unique_ptr<GrackleFacade> grackle_facade_;
   bool use_cooling_timestep_;
-
-#endif
 
 };
 
