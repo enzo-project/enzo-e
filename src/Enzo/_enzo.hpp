@@ -151,6 +151,14 @@ struct enzo_fluxes
 extern "C" {
   #include <grackle.h>
 }
+#else
+extern "C" { // declare the names of Grackle types so can reduce the usage of
+             // ifdef statements
+  struct chemistry_data;
+  struct chemistry_data_storage;
+  struct code_units;
+  struct grackle_field_data;
+}
 #endif
 
 //----------------------------------------------------------------------
@@ -167,9 +175,13 @@ extern "C" {
 #include "enzo_EnzoFluidFloorConfig.hpp"
 #include "enzo_EnzoPhysicsFluidProps.hpp"
 
-#include "enzo_GrackleChemistryData.hpp"
-
 #include "enzo_EnzoUnits.hpp"
+
+// [order dependencies:]
+#include "enzo_EnzoEFltArrayMap.hpp"
+#include "enzo_EnzoFieldAdaptor.hpp"
+#include "enzo_GrackleChemistryData.hpp"
+#include "enzo_GrackleFacade.hpp"
 
 #include "enzo_EnzoFactory.hpp"
 
@@ -222,12 +234,10 @@ extern "C" {
 #include "enzo_EnzoFluxSinkParticle.hpp"
 
 // [order dependencies:]
-#include "enzo_EnzoEFltArrayMap.hpp"
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoEOSIdeal.hpp"
 
 #include "enzo_EnzoCenteredFieldRegistry.hpp"
-#include "enzo_EnzoFieldAdaptor.hpp"
 #include "enzo_EnzoIntegrationQuanUpdate.hpp"
 #include "enzo_EnzoLazyPassiveScalarFieldList.hpp"
 #include "enzo_EnzoPermutedCoordinates.hpp"
