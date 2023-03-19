@@ -157,14 +157,13 @@ void pup_GrackleFacade(PUP::er &p,
 
     std::unique_ptr<GrackleFacade> tmp
       ( new GrackleFacade(std::move(my_chemistry), std::move(grackle_units),
-                          radiation_redshift, time_grackle_data_initialized)
+                          radiation_redshift)
       );
     ptr = std::move(tmp);
 
   } else {
     p | ptr->my_chemistry_;
     p | (ptr->grackle_units_).get();
-    p | ptr->time_grackle_data_initialized_;
     p | ptr->radiation_redshift_;
   }
 }
@@ -180,7 +179,7 @@ GrackleFacade::GrackleFacade(GrackleChemistryData&& my_chemistry,
      std::move(std::unique_ptr<code_units>(setup_grackle_u_(time,
                                                             radiation_redshift,
                                                             nullptr))),
-     radiation_redshift, time)
+     radiation_redshift)
 {
   if ((radiation_redshift >= 0) && (enzo::cosmology() != nullptr)){
     ERROR("GrackleFacade::GrackleFacade",
@@ -191,7 +190,17 @@ GrackleFacade::GrackleFacade(GrackleChemistryData&& my_chemistry,
 //----------------------------------------------------------------------------
 
 GrackleFacade::~GrackleFacade() noexcept
-{ deallocate_grackle_rates_(); }
+{
+  // deallocate the previously allocated fields of grackle_rates_. This doesn't
+  // do either of the following:
+  // - affect the contents of my_chemistry_ (that's handled later in its
+  //   destructor)
+  // - deallocate the grackle_rates_ pointer (that's handled later by the
+  //   destructor of std::unique_ptr)
+#ifdef CONFIG_USE_GRACKLE
+  _free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
+#endif
+}
 
 //----------------------------------------------------------------------------
 
@@ -467,51 +476,18 @@ void GrackleFacade::compute_local_property_
 
 GrackleFacade::GrackleFacade(GrackleChemistryData&& my_chemistry,
                              std::unique_ptr<code_units>&& grackle_units,
-                             const double radiation_redshift,
-                             const double units_init_time)
+                             const double radiation_redshift)
   : my_chemistry_(std::move(my_chemistry)),
     grackle_units_(std::move(grackle_units)),
     grackle_rates_(nullptr),
-    time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED),
     radiation_redshift_(radiation_redshift)
 {
-  init_grackle_rates_(units_init_time, true);
-}
+#ifndef CONFIG_USE_GRACKLE
+  ERROR("GrackleFacade::GrackleFacade", "grackle isn't linked");
+#else
 
-//----------------------------------------------------------------------
-
-void GrackleFacade::init_grackle_rates_(double current_time,
-                                        bool first_initialization) noexcept
-{
-#ifdef CONFIG_USE_GRACKLE
-
-  if (first_initialization) {
-    ASSERT("GrackleFacade::init_grackle_rates_",
-           "During first initialization, grackle_rates_ should be a nullptr",
-           grackle_rates_ == nullptr);
-    std::unique_ptr<chemistry_data_storage> tmp(new chemistry_data_storage);
-    grackle_rates_ = std::move(tmp);
-
-    // this branch assumes that this->grackle_units_ is fully initialized for
-    // current_time. This allows us to avoid assuming that enzo::cosmology()
-    // returns a pointer to a properly configured object, when this method is
-    // called during deserialization.
-  } else {
-    ASSERT("GrackleFacade::init_grackle_rates_",
-           "grackle_rates_ should NOT be a nullptr",
-           grackle_rates_ != nullptr);
-
-    // check for early exit
-    if (this->time_grackle_data_initialized_ == current_time) { return; }
-
-    // prepare this->grackle_rates_ for reinitialization by deallocating
-    // the previously allocated grackle_rates_ fields (this doesn't affect
-    // the grackle_rates_ pointer itself, just the struct members)
-    deallocate_grackle_rates_();
-
-    // reinitialize this->grackle_units_ for the current_time
-    setup_grackle_units (current_time, (this->grackle_units_).get());
-  }
+  grackle_rates_ = std::move
+    (std::unique_ptr<chemistry_data_storage>(new chemistry_data_storage));
 
   TRACE("Calling _initialize_chemistry_data");
 
@@ -521,27 +497,5 @@ void GrackleFacade::init_grackle_rates_(double current_time,
     ERROR("GrackleFacade::initialize_grackle_chemistry_data",
           "Error in _initialize_chemistry_data");
   }
-
-  this->time_grackle_data_initialized_ = current_time;
-
-#endif //CONFIG_USE_GRACKLE
-}
-
-//----------------------------------------------------------------------
-
-void GrackleFacade::deallocate_grackle_rates_() noexcept
-{
-
-#ifdef CONFIG_USE_GRACKLE
-  if (time_grackle_data_initialized_ == ENZO_FLOAT_UNDEFINED){
-    ERROR("GrackleFacade::deallocate_grackle_rates_",
-	  "grackle_rates_ data has not been allocated");
-  }
-
-  // deallocate the previously allocated allocated grackle_rates_ (doesn't
-  // actually affect the chemistry_data pointer)
-  _free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
-  // signal that grackle_rates_ is not initialized
-  time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
-#endif //CONFIG_USE_GRACKLE
+#endif
 }

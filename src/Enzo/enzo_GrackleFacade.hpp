@@ -26,18 +26,6 @@ class GrackleFacade {
   /// significantly!
   ///
   /// @note
-  /// Currently, this class requires that we re-initialize the code_units and
-  /// grackle_data_storage structs at every simulation time. From looking at
-  /// the internals of Grackle, and the way that enzo-classic uses Grackle,
-  /// this isn't necessary - we should just need to initialize once. With that
-  /// said, while initially introducing this class into Enzo-E, we are choosing
-  /// to maintaining this existing behavior so that we are only modifying one
-  /// aspect of the Grackle-wrapping code at a time. Once we are satisfied that
-  /// this class works, we will look at removing this behavior (this will also
-  /// let us stop tracking the simulation time at which these structs are
-  /// initialized).
-  ///
-  /// @note
   /// It turns out that the invariant that instances are ALWAYS fully
   /// initialized, complicates serialization with the pup framework. The pup
   /// framework implicitly assumes that the object gets constructed in
@@ -50,8 +38,7 @@ class GrackleFacade {
   /// In that case, the GrackleFacade(CkMigrateMessage *m) constructor would be
   /// the only way to create an unitialized GrackleFacade instance. When that
   /// constructor is invoked, it should always be followed by a pup call.
-  /// In either case, we plan to revisit this after we remove the need to
-  /// reinitialize the data structures during every simulation time.
+  /// We plan to revisit this.
 
   static bool linked_against_grackle() noexcept;
 
@@ -127,23 +114,6 @@ public: // low-level legacy methods - these will (probably) be removed or made
 
   void delete_grackle_fields(grackle_field_data* grackle_fields) const noexcept;
 
-  /// this method reinitializes the object if current_time differs from the
-  /// previous time when this object was initialized
-  ///
-  /// @note
-  /// Inspection of the grackle source code strongly suggests that this method
-  /// is unnecessary (we should only need to configure once). In the immediate
-  /// short-term we are maintaining the current behavior (while testing this
-  /// class), and then we will test removal of this functionallity in the near
-  /// future.
-  bool ensure_configured_for_curtime(double current_time) noexcept{
-    if (time_grackle_data_initialized_ != current_time){
-      init_grackle_rates_(current_time, false);
-      return true;
-    }
-    return false;
-  }
-
 public: // wrapped grackle functions:
 
   /// light-weight wrapper around local_solve_chemistry function from grackle
@@ -179,10 +149,7 @@ public: // wrapped grackle functions:
                             grackle_fields, GracklePropertyEnum::temperature);
   }
 
-
-
 private: // helper methods
-
 
   // when grackle_units is nullptr, new values are temporarily allocated
   void compute_local_property_(const EnzoFieldAdaptor& fadaptor,
@@ -191,31 +158,11 @@ private: // helper methods
 			       grackle_field_data* grackle_fields,
 			       GracklePropertyEnum func_choice) const noexcept;
 
-
   // this is private because its only used internally by the public constructor
   // and the pup routine during deserialization
   GrackleFacade(GrackleChemistryData&& my_chemistry,
                 std::unique_ptr<code_units>&& grackle_units_,
-                const double radiation_redshift,
-                const double units_init_time);
-
-  /// this (re)initializes the grackle_rates_ pointer.
-  ///
-  /// the following difference arise based on ``first_initialization``'s value:
-  ///   - when ``true``, ``grackle_units_`` is assumed to be completely
-  ///     initialized (i.e. allocated and initialized for the specified value
-  ///     of ``current_time``), but ``grackle_rates_`` holds ``nullptr``.
-  ///   - when ``false``, both ``grackle_units_`` and ``grackle_rates_`` are
-  ///     assumed not to be ``nullptr``, but may need to be initialized based
-  ///     on the value of ``current_time``.
-  ///
-  /// In both cases, this function modifies/(re)allocates values held by fields
-  /// of ``grackle_rates_``. It also ensures that
-  /// ``time_grackle_data_initialized_`` matches ``current_time``.
-  void init_grackle_rates_(double current_time,
-                           bool first_initialization = false) noexcept;
-
-  void deallocate_grackle_rates_() noexcept;
+                const double radiation_redshift);
 
 private: // attributes
   /// wrapper around chemistry_data struct, which stores runtime parameters
@@ -229,11 +176,9 @@ private: // attributes
   /// statements in this header file, it should NEVER actually hold a nullptr)
   std::unique_ptr<chemistry_data_storage> grackle_rates_;
 
-  /// stores the last simulation time when grackle_rates_ was initialized.
-  double time_grackle_data_initialized_;
-
   /// the following parameter is only used in non-cosmological simulations. It
-  /// specifies the redshift of the UV background. A negative
+  /// specifies the redshift of the UV background. A negative value means that
+  /// this is unset
   double radiation_redshift_;
 
 };
