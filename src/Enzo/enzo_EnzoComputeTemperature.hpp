@@ -73,8 +73,7 @@ public: // interface
     enzo_float * t,
     bool recompute_presure = true
 #ifdef CONFIG_USE_GRACKLE
- , code_units * grackle_units = NULL,
-   grackle_field_data * grackle_fields = NULL
+  , grackle_field_data * grackle_fields = NULL
 #endif
  );
 

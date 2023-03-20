@@ -69,8 +69,7 @@ void EnzoComputePressure::compute_(Block * block,
                                    enzo_float * p,
                                    int stale_depth /* 0 */
 #ifdef CONFIG_USE_GRACKLE
-                                 , code_units * grackle_units, /*NULL*/
-                                   grackle_field_data * grackle_fields /*NULL*/
+                                 , grackle_field_data * grackle_fields /*NULL*/
 #endif
                                    )
 {
@@ -137,8 +136,7 @@ void EnzoComputePressure::compute_pressure
  int stale_depth, /* 0 */
  bool ignore_grackle /*false*/
 #ifdef CONFIG_USE_GRACKLE
- , code_units * grackle_units, /*nullptr*/
- grackle_field_data * grackle_fields /*nullptr*/
+ , grackle_field_data * grackle_fields /*nullptr*/
 #endif
  ) throw()
 {
@@ -160,7 +158,7 @@ void EnzoComputePressure::compute_pressure
     }
     const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
     grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth,
-                                       grackle_units, grackle_fields);
+                                       grackle_fields);
 #else
     ERROR("EnzoComputePressure::compute_()",
           "Attempting to compute pressure with method Grackle " 

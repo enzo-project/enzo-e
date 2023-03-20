@@ -68,8 +68,7 @@ public: // interface
                 enzo_float * p,
                 int stale_depth = 0
 #ifdef CONFIG_USE_GRACKLE
-                , code_units * grackle_units = nullptr,
-                grackle_field_data * grackle_fields = nullptr
+                , grackle_field_data * grackle_fields = nullptr
 #endif
                 );
 
@@ -101,8 +100,7 @@ public: // interface
                                int stale_depth = 0,
                                bool ignore_grackle = false
 #ifdef CONFIG_USE_GRACKLE
-                              , code_units * grackle_units = nullptr,
-                               grackle_field_data * grackle_fields = nullptr
+                               , grackle_field_data * grackle_fields = nullptr
 #endif
                                ) throw();
 

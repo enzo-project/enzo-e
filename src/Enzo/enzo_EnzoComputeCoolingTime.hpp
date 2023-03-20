@@ -45,7 +45,6 @@ public: // interface
 
   void compute_(Block * block,
    enzo_float * ct,
-   code_units * grackle_units = NULL,
    grackle_field_data * grackle_fields = NULL
  );
 

@@ -122,14 +122,11 @@ public: // wrapped grackle functions:
   ///     computed.
   /// @param[out] values Output buffer that is used to hold the results.
   /// @param[in]  stale_depth Specifies stale depth of the field
-  /// @param[in]  grackle_units Pointer to a precomputed code_units struct.
-  ///     When this is a nullptr, a temporary is constructed.
   /// @param[in]  grackle_fields Pointer to a precomputed grackle_field_data
   ///     struct. When this is a nullptr, a temporary is constructed.
   void compute_property(const EnzoFieldAdaptor& fadaptor,
                         GracklePropertyEnum func_choice,
                         enzo_float* values, int stale_depth = 0,
-                        code_units* grackle_units = nullptr,
                         grackle_field_data* grackle_fields = nullptr
                         ) const noexcept;
 

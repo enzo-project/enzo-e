@@ -428,8 +428,8 @@ std::pair<grackle_local_property_func, const char*> get_fptr_name_pair_
 
 void GrackleFacade::compute_property
 (const EnzoFieldAdaptor& fadaptor, GracklePropertyEnum func_choice,
- enzo_float* values, int stale_depth, code_units* grackle_units,
- grackle_field_data* grackle_fields) const noexcept
+ enzo_float* values, int stale_depth, grackle_field_data* grackle_fields)
+  const noexcept
 {
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::compute_local_property_", "grackle isn't being used");
@@ -439,14 +439,11 @@ void GrackleFacade::compute_property
   grackle_local_property_func fn_ptr = temp.first;
   const char* fn_name = temp.second;
 
-  code_units cur_grackle_units_;
-  grackle_field_data cur_grackle_fields;
+  // setup code_units struct
+  code_units my_units;
+  this->setup_grackle_units(fadaptor, &my_units);
 
-  // setup grackle units if they are not already provided
-  if (!grackle_units){
-    grackle_units = &cur_grackle_units_;
-    this->setup_grackle_units(fadaptor, grackle_units);
-  }
+  grackle_field_data cur_grackle_fields;
 
   // if grackle fields are not provided, define them
   bool delete_grackle_fields = false;
@@ -487,7 +484,7 @@ void GrackleFacade::compute_property
     = const_cast<chemistry_data_storage *>(grackle_rates_.get());
 
   if ((*fn_ptr)(chemistry_data_ptr, grackle_rates_ptr,
-                grackle_units, grackle_fields, values) == ENZO_FAIL){
+                &my_units, grackle_fields, values) == ENZO_FAIL){
     ERROR1("GrackleFacade::compute_local_property_()",
 	   "Error in call to Grackle's %s routine", fn_name);
   }

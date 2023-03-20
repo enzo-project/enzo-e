@@ -80,8 +80,7 @@ void EnzoComputeTemperature::compute_(Block * block,
                                       enzo_float * t,
                                       bool recompute_pressure /* true */
 #ifdef CONFIG_USE_GRACKLE
-                                    , code_units * grackle_units /* NULL */ ,
-                                      grackle_field_data * grackle_fields /* NULL */
+                                    , grackle_field_data * grackle_fields /* NULL */
 #endif
                                     )
 {
@@ -96,7 +95,7 @@ void EnzoComputeTemperature::compute_(Block * block,
 #ifdef CONFIG_USE_GRACKLE
     const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
     grackle_method->calculate_temperature(EnzoFieldAdaptor(block, i_hist_), t,
-                                          0, grackle_units, grackle_fields);
+                                          0, grackle_fields);
 #else
     ERROR("EnzoComputeTemperature::compute_()",
           "Attempting to compute temperature with method Grackle "

@@ -137,38 +137,32 @@ public: // interface
   void enforce_metallicity_floor(Block * block) throw();
 #endif
 
-  void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
-                              int stale_depth = 0,
-			      code_units* grackle_units = nullptr,
+  void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor,
+                              enzo_float* ct, int stale_depth = 0,
 			      grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
     grackle_facade_.compute_property(fadaptor,
                                      GracklePropertyEnum::cooling_time,
-                                     ct, stale_depth, grackle_units,
-                                     grackle_fields);
+                                     ct, stale_depth, grackle_fields);
   }
 
   void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
                           enzo_float* pressure, int stale_depth = 0,
-			  code_units* grackle_units = nullptr,
 			  grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
     grackle_facade_.compute_property(fadaptor, GracklePropertyEnum::pressure,
-                                     pressure, stale_depth, grackle_units,
-                                     grackle_fields);
+                                     pressure, stale_depth, grackle_fields);
   }
 
   void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
                              enzo_float* temperature, int stale_depth = 0,
-			     code_units* grackle_units = nullptr,
 			     grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
     grackle_facade_.compute_property(fadaptor, GracklePropertyEnum::temperature,
-                                     temperature, stale_depth, grackle_units,
-                                     grackle_fields);
+                                     temperature, stale_depth, grackle_fields);
   }
 
 protected: // methods
