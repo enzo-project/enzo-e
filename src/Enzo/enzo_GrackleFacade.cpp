@@ -122,51 +122,27 @@ code_units* setup_grackle_u_(double current_time, double radiation_redshift,
 #endif /* CONFIG_USE_GRACKLE */
 }
 
-} // anonymous namespace
-
 //----------------------------------------------------------------------------
 
-void pup_GrackleFacade(PUP::er &p,
-                       std::unique_ptr<GrackleFacade>& ptr) noexcept
+std::unique_ptr<chemistry_data_storage> init_rates_
+(GrackleChemistryData& my_chemistry, code_units* grackle_units)
 {
-  const bool up = p.isUnpacking();
+#ifndef CONFIG_USE_GRACKLE
+  ERROR("init_rates_", "Grackle isn't linked");
+#else
 
-  if ((ptr.get() != nullptr) && up){
-    ERROR("pup_GrackleFacade",
-          "when unpacking, the object pointer must be a nullptr");
-  } else if ((ptr.get() == nullptr) && !up){
-    ERROR("pup_GrackleFacade",
-          "the pointer must refer to a valid object when unpacking");
+  std::unique_ptr<chemistry_data_storage> out(new chemistry_data_storage);
+
+  if (_initialize_chemistry_data(my_chemistry.get_ptr(),
+				 out.get(), grackle_units) == ENZO_FAIL) {
+    ERROR("init_rates_", "Error in _initialize_chemistry_data");
   }
 
-  // NOTE: initializing grackle_units_ from scratch requires that
-  //       enzo::physics() returns a properly configured global physics object.
-  //       We choose to pup grackle_units_ directly so that we don't need to
-  //       about whether that global object has already been unpacked.
-
-  if (up){
-    GrackleChemistryData my_chemistry;
-    p | my_chemistry;
-
-    std::unique_ptr<code_units> grackle_units(new code_units);
-    p | grackle_units.get();
-
-    double time_grackle_data_initialized, radiation_redshift;
-    p | time_grackle_data_initialized;
-    p | radiation_redshift;
-
-    std::unique_ptr<GrackleFacade> tmp
-      ( new GrackleFacade(std::move(my_chemistry), std::move(grackle_units),
-                          radiation_redshift)
-      );
-    ptr = std::move(tmp);
-
-  } else {
-    p | ptr->my_chemistry_;
-    p | (ptr->grackle_units_).get();
-    p | ptr->radiation_redshift_;
-  }
+  return out;
+#endif /* CONFIG_USE_GRACKLE */
 }
+
+} // anonymous namespace
 
 //----------------------------------------------------------------------------
 
@@ -174,16 +150,58 @@ GrackleFacade::GrackleFacade(GrackleChemistryData&& my_chemistry,
                              const double radiation_redshift,
                              const double physics_cosmology_initial_redshift,
                              const double time) throw()
-  : GrackleFacade
-    (std::move(my_chemistry),
-     std::move(std::unique_ptr<code_units>(setup_grackle_u_(time,
-                                                            radiation_redshift,
-                                                            nullptr))),
-     radiation_redshift)
+  : my_chemistry_(std::move(my_chemistry)),
+    grackle_units_(nullptr),
+    grackle_rates_(nullptr),
+    radiation_redshift_(radiation_redshift)
 {
   if ((radiation_redshift >= 0) && (enzo::cosmology() != nullptr)){
     ERROR("GrackleFacade::GrackleFacade",
           "radiation redshift should not be specified in cosmological sims");
+  }
+  grackle_units_ = std::unique_ptr<code_units>
+    (setup_grackle_u_(time,radiation_redshift, nullptr));
+  grackle_rates_ = init_rates_(my_chemistry_, grackle_units_.get());
+}
+
+//----------------------------------------------------------------------------
+
+GrackleFacade::GrackleFacade()
+  : my_chemistry_(),
+    grackle_units_(nullptr),
+    grackle_rates_(nullptr),
+    radiation_redshift_(-1)
+{ }
+
+//----------------------------------------------------------------------------
+
+void GrackleFacade::pup(PUP::er &p) {
+  const bool up = p.isUnpacking();
+  const bool initialized = is_initialized();
+
+  if (up && initialized){
+    ERROR("GrackleFacade::pup",
+          "can't unpack data into an already initialized instance");
+  } else if ( (!up) && (!initialized) ) {
+    ERROR("GrackleFacade::pup",
+          "can't serialize data from an unitialized instance");
+  }
+
+  // NOTE: initializing grackle_units_ from scratch requires that
+  //       enzo::physics() returns a properly configured global physics object.
+  //       We choose to pup grackle_units_ directly so that we don't need to
+  //       worry about whether that global object has already been unpacked.
+
+  p | my_chemistry_;
+
+  if (up) {
+    this->grackle_units_ = std::unique_ptr<code_units>(new code_units);
+  }
+  p | grackle_units_.get();
+  p | radiation_redshift_;
+
+  if (up) {
+    grackle_rates_ = init_rates_(my_chemistry_, grackle_units_.get());
   }
 }
 
@@ -198,7 +216,9 @@ GrackleFacade::~GrackleFacade() noexcept
   // - deallocate the grackle_rates_ pointer (that's handled later by the
   //   destructor of std::unique_ptr)
 #ifdef CONFIG_USE_GRACKLE
-  _free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
+  if (is_initialized()){
+    _free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
+  }
 #endif
 }
 
@@ -208,6 +228,7 @@ void GrackleFacade::setup_grackle_units(double current_time,
                                         code_units* grackle_units)
   const noexcept
 {
+  require_initialized();
   if (grackle_units == nullptr) {
     ERROR("GrackleFacade::setup_grackle_units",
           "grackle_units argument can't be a nullptr");
@@ -238,6 +259,8 @@ void GrackleFacade::setup_grackle_fields
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::setup_grackle_fields", "grackle isn't being used");
 #else
+  require_initialized();
+
   // Grackle grid dimenstion and grid size
   grackle_fields->grid_rank      = cello::rank();
   grackle_fields->grid_dimension = new int[3];
@@ -341,6 +364,7 @@ void GrackleFacade::solve_chemistry(Block* block, double dt) const noexcept
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::solve_chemistry", "grackle isn't being used");
 #else
+  require_initialized();
 
   EnzoFieldAdaptor fadaptor(block, 0);
 
@@ -409,6 +433,7 @@ void GrackleFacade::compute_local_property_
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::compute_local_property_", "grackle isn't being used");
 #else
+  require_initialized();
 
   auto temp = get_fptr_name_pair_(func_choice);
   grackle_local_property_func fn_ptr = temp.first;
@@ -470,32 +495,4 @@ void GrackleFacade::compute_local_property_
     this->delete_grackle_fields(grackle_fields);
   }
 #endif /* CONFIG_USE_GRACKLE */
-}
-
-//----------------------------------------------------------------------
-
-GrackleFacade::GrackleFacade(GrackleChemistryData&& my_chemistry,
-                             std::unique_ptr<code_units>&& grackle_units,
-                             const double radiation_redshift)
-  : my_chemistry_(std::move(my_chemistry)),
-    grackle_units_(std::move(grackle_units)),
-    grackle_rates_(nullptr),
-    radiation_redshift_(radiation_redshift)
-{
-#ifndef CONFIG_USE_GRACKLE
-  ERROR("GrackleFacade::GrackleFacade", "grackle isn't linked");
-#else
-
-  grackle_rates_ = std::move
-    (std::unique_ptr<chemistry_data_storage>(new chemistry_data_storage));
-
-  TRACE("Calling _initialize_chemistry_data");
-
-  if (_initialize_chemistry_data(my_chemistry_.get_ptr(),
-				 grackle_rates_.get(), grackle_units_.get())
-      == ENZO_FAIL) {
-    ERROR("GrackleFacade::initialize_grackle_chemistry_data",
-          "Error in _initialize_chemistry_data");
-  }
-#endif
 }

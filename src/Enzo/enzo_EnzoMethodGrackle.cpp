@@ -21,10 +21,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
  const double time
 )
   : Method(),
-    grackle_facade_(new GrackleFacade(std::move(my_chemistry),
-                                      radiation_redshift,
-                                      physics_cosmology_initial_redshift,
-                                      time)),
+    grackle_facade_(std::move(my_chemistry), radiation_redshift,
+                    physics_cosmology_initial_redshift, time),
     use_cooling_timestep_(use_cooling_timestep)
 {
   // todo drop the ifdef
@@ -288,8 +286,7 @@ void EnzoMethodGrackle::compute_ ( Block * block) throw()
   }
 
   // Solve chemistry
-  require_valid_facade();
-  grackle_facade_->solve_chemistry(block, block->dt());
+  grackle_facade_.solve_chemistry(block, block->dt());
 
   // now we have to do some extra-work after the fact (such as adjusting total
   // energy density and applying floors...)

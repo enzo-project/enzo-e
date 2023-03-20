@@ -43,7 +43,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m)
     : Method (m),
-      grackle_facade_(nullptr),
+      grackle_facade_(),
       use_cooling_timestep_(false)
   {  }
 
@@ -55,7 +55,7 @@ public: // interface
     TRACEPUP;
 
     Method::pup(p);
-    pup_GrackleFacade(p, grackle_facade_);
+    p | grackle_facade_;
     p | use_cooling_timestep_;
   }
 
@@ -70,9 +70,15 @@ public: // interface
 
   /// returns the stored instance of GrackleChemistryData, if the simulation is
   /// configured to actually use grackle
+  ///
+  /// In practice, if this were to ever return a nullptr, then this
+  /// EnzoMethodGrackle instance probably shouldn't exist (the program will
+  /// probably abort somewhere along the lines)
   const GrackleChemistryData* try_get_chemistry() const throw() {
-    return (grackle_facade_ != nullptr) ?
-      grackle_facade_->get_chemistry() : nullptr;
+    ASSERT("GrackleFacade::try_get_chemistry", // sanity check!
+           "grackle_facade_ attribute should always be initialized (except "
+           "during deserialization).", grackle_facade_.is_initialized());
+    return grackle_facade_.try_get_chemistry();
   }
 
 #ifdef CONFIG_USE_GRACKLE
@@ -95,15 +101,13 @@ public: // interface
   void setup_grackle_units (double current_time,
                             code_units * grackle_units) const throw()
   {
-    require_valid_facade();
-    grackle_facade_->setup_grackle_units(current_time, grackle_units);
+    grackle_facade_.setup_grackle_units(current_time, grackle_units);
   }
 
   void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
                            code_units * grackle_units) const throw()
   {
-    require_valid_facade();
-    grackle_facade_->setup_grackle_units(fadaptor, grackle_units);
+    grackle_facade_.setup_grackle_units(fadaptor, grackle_units);
   }
 
   void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
@@ -111,17 +115,15 @@ public: // interface
                             int stale_depth = 0,
                             bool omit_cell_width = false) const throw()
   {
-    require_valid_facade();
-    grackle_facade_->setup_grackle_fields(fadaptor, grackle_fields,
-                                          stale_depth, omit_cell_width);
+    grackle_facade_.setup_grackle_fields(fadaptor, grackle_fields,
+                                         stale_depth, omit_cell_width);
   }
 
   void setup_grackle_fields(Block * block,
                             grackle_field_data * grackle_fields,
                             int i_hist = 0 ) const throw()
   {
-    require_valid_facade();
-    grackle_facade_->setup_grackle_fields(block, grackle_fields, i_hist);
+    grackle_facade_.setup_grackle_fields(block, grackle_fields, i_hist);
   }
 
   /// Assists with problem initialization
@@ -136,8 +138,7 @@ public: // interface
 
   void delete_grackle_fields(grackle_field_data * grackle_fields) const throw()
   {
-    require_valid_facade();
-    grackle_facade_->delete_grackle_fields(grackle_fields);
+    grackle_facade_.delete_grackle_fields(grackle_fields);
   }
 
 
@@ -149,9 +150,8 @@ public: // interface
 			      grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    require_valid_facade();
-    grackle_facade_->calculate_cooling_time(fadaptor, ct, stale_depth,
-                                            grackle_units, grackle_fields);
+    grackle_facade_.calculate_cooling_time(fadaptor, ct, stale_depth,
+                                           grackle_units, grackle_fields);
   }
 
   void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
@@ -160,9 +160,8 @@ public: // interface
 			  grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    require_valid_facade();
-    grackle_facade_->calculate_pressure(fadaptor, pressure, stale_depth,
-                                        grackle_units, grackle_fields);
+    grackle_facade_.calculate_pressure(fadaptor, pressure, stale_depth,
+                                       grackle_units, grackle_fields);
   }
 
   void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
@@ -171,21 +170,13 @@ public: // interface
 			     grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    require_valid_facade();
-    grackle_facade_->calculate_temperature(fadaptor, temperature, stale_depth,
-                                           grackle_units, grackle_fields);
+    grackle_facade_.calculate_temperature(fadaptor, temperature, stale_depth,
+                                          grackle_units, grackle_fields);
   }
 
 #endif
 
 protected: // methods
-
-  void require_valid_facade() const throw() {
-    if (grackle_facade_.get() == nullptr) {
-      ERROR("EnzoMethodGrackle::require_valid_facade()",
-            "grackle_facade_ can't be a nullptr");
-    }
-  }
 
 #ifdef CONFIG_USE_GRACKLE
   void compute_( Block * block) throw();
@@ -195,9 +186,14 @@ protected: // methods
 #endif
 
 protected: // attributes
-  std::unique_ptr<GrackleFacade> grackle_facade_;
+  /// the GrackleFacade instance provides an interface to all operations in the
+  /// Grackle library and stores the current configuration.
+  ///
+  /// While instances can technically have an "unitialized" state, that should
+  /// never be the case within this class (except during the brief gap between
+  /// EnzoMethodGrackle(CkMigrateMessage*) and pup)
+  GrackleFacade grackle_facade_;
   bool use_cooling_timestep_;
-
 };
 
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */

@@ -20,37 +20,18 @@ class GrackleFacade {
   /// @class    GrackleFacade
   /// @ingroup  Enzo
   ///
-  /// An important invariant is that an instance of this object always
-  /// represents a fully initialized object (it will not hold nullptrs or be
-  /// partially initialized). That simplifies reasoning about the object
-  /// significantly!
+  /// An instance of this class is always either:
+  ///    - fully initialized (i.e. all grackle structs are properly configured)
+  ///    - uninitialized (code_units and grackle_rate_storage are nullptrs)
   ///
-  /// @note
-  /// It turns out that the invariant that instances are ALWAYS fully
-  /// initialized, complicates serialization with the pup framework. The pup
-  /// framework implicitly assumes that the object gets constructed in
-  /// some default state, and then uses a pup method to update the fields of
-  /// the existing object. This implies that GrackleFacade should have a
-  /// default constructor (which represents a null state).
-  ///
-  /// @par
-  /// Alternatively, we could have GrackleFacade use the PUP::able machinery.
-  /// In that case, the GrackleFacade(CkMigrateMessage *m) constructor would be
-  /// the only way to create an unitialized GrackleFacade instance. When that
-  /// constructor is invoked, it should always be followed by a pup call.
-  /// We plan to revisit this.
-
-  static bool linked_against_grackle() noexcept;
-
-  /// either pack up a GrackleFacade or unpack and allocate an instance
-  ///
-  /// @note
-  /// This interface is a little funky to account for the class's invariant.
-  /// In the overview documentation, we discuss when we may revist this choice.
-  friend void pup_GrackleFacade(PUP::er &p,
-                                std::unique_ptr<GrackleFacade> &ptr) noexcept;
+  /// If you create an unitialized instance (through the default constructor),
+  /// the ONLY way to initialize it is through deserialization. The ONLY reason
+  /// we allow creation of uninitialized instances is to simplify
+  /// (de)serialization.
 
 public: // interface
+
+  static bool linked_against_grackle() noexcept;
 
   /// public-facing constructor
   GrackleFacade(GrackleChemistryData&& my_chemistry,
@@ -58,17 +39,37 @@ public: // interface
                 const double physics_cosmology_initial_redshift,
                 const double time) noexcept;
 
+  /// Default constructor - primarily intended for use with pup routine
+  GrackleFacade();
+
+  /// CHARM++ Pack / Unpack function
+  void pup(PUP::er &p);
+
   /// Destructor
   ~GrackleFacade() noexcept;
-
-  // delete the default constructor
-  GrackleFacade() = delete;
 
   // delete copy/move constructor and assignment (could be added later)
   GrackleFacade(GrackleFacade&&) = delete;
   GrackleFacade& operator=(GrackleFacade&&) = delete;
   GrackleFacade(const GrackleFacade&) = delete;
   GrackleFacade& operator=(const GrackleFacade&) = delete;
+
+  bool is_initialized() const noexcept {
+    bool initialized_units = (grackle_units_.get() != nullptr);
+    bool initialized_rates = (grackle_rates_.get() != nullptr);
+
+    if (initialized_units != initialized_rates){
+      ERROR("GrackleFacade::is_initialized", "something is horribly wrong");
+    }
+    return initialized_units;
+  }
+
+  void require_initialized() const noexcept {
+    if (!is_initialized()){
+      ERROR("GrackleFacade::require_initialized",
+            "something is wrong, instance is expected to be initialized");
+    }
+  }
 
   /// returns a pointer to the stored instance of GrackleChemistryData, if the
   /// simulation is configured to actually use grackle
@@ -77,7 +78,7 @@ public: // interface
   /// We may be able to simplify this implementation. I'm pretty sure that
   /// Grackle MUST be used for an instance of GrackleFacade to exist at all
   /// (in which case, we never need to worry about returning nullptr)
-  const GrackleChemistryData* get_chemistry() const noexcept
+  const GrackleChemistryData* try_get_chemistry() const noexcept
   {
     bool not_null = (GrackleFacade::linked_against_grackle() &&
                      (my_chemistry_.get<int>("use_grackle") == 1));
@@ -158,22 +159,16 @@ private: // helper methods
 			       grackle_field_data* grackle_fields,
 			       GracklePropertyEnum func_choice) const noexcept;
 
-  // this is private because its only used internally by the public constructor
-  // and the pup routine during deserialization
-  GrackleFacade(GrackleChemistryData&& my_chemistry,
-                std::unique_ptr<code_units>&& grackle_units_,
-                const double radiation_redshift);
-
 private: // attributes
   /// wrapper around chemistry_data struct, which stores runtime parameters
   GrackleChemistryData my_chemistry_;
 
-  /// pointer to code_units struct (this is only a pointer to avoid ifdef
-  /// statements in this header file, it should NEVER actually hold a nullptr)
-  std::unique_ptr<code_units> grackle_units_;
+  // the following 2 attributes are primarily pointers in order to avoid
+  // including ifdef statements in this header file.
 
-  /// pointer to chemistry_data_storage (this is only a pointer to avoid ifdef
-  /// statements in this header file, it should NEVER actually hold a nullptr)
+  /// pointer to code_units struct
+  std::unique_ptr<code_units> grackle_units_;
+  /// pointer to chemistry_data_storage
   std::unique_ptr<chemistry_data_storage> grackle_rates_;
 
   /// the following parameter is only used in non-cosmological simulations. It
