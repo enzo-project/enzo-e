@@ -96,7 +96,25 @@ public: // low-level legacy methods - these will (probably) be removed or made
 public: // wrapped grackle functions:
 
   /// light-weight wrapper around local_solve_chemistry function from grackle
-  void solve_chemistry(Block* block, double dt) const noexcept;
+  ///
+  /// @param[in] block Holds the field data that will be passed through to
+  ///     Grackle (and will be mutated).
+  /// @param[in] compute_time The nominal simulation time at which this
+  ///     evaluation occurs. This only matters in cosmological simulations.
+  /// @param[in] dt The integration timestep in code units
+  ///
+  /// @note
+  /// This function nominally modifies the internal energy field and the
+  /// species density fields. But, based on the inputs and how Grackle is
+  /// configured, other fields may be modified as well. This can happen in 1 of
+  /// 2 ways:
+  ///    1. Internally, Grackle may perform some transformations in place (e.g.
+  ///       converting comoving values to proper values), and while it always
+  ///       reverts the transformation before returning, floating point errors
+  ///       could lead to slightly different field values at the end.
+  ///    2. Grackle may also apply some floors to other field values
+  void solve_chemistry(Block* block, double compute_time,
+                       double dt) const noexcept;
 
 
   /// wrapper around the various methods for computing various grackle

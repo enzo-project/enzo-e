@@ -73,8 +73,6 @@ public: // interface
     return grackle_facade_.try_get_chemistry();
   }
 
-#ifdef CONFIG_USE_GRACKLE
-
   void define_required_grackle_fields();
 
   void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
@@ -110,7 +108,6 @@ public: // interface
 
 
   void enforce_metallicity_floor(Block * block) throw();
-#endif
 
   void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor,
                               enzo_float* ct, int stale_depth = 0,
@@ -142,12 +139,9 @@ public: // interface
 
 protected: // methods
 
-#ifdef CONFIG_USE_GRACKLE
   void compute_( Block * block) throw();
 
   void ResetEnergies ( Block * block) throw();
-
-#endif
 
 protected: // attributes
   /// the GrackleFacade instance provides an interface to all operations in the

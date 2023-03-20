@@ -89,9 +89,7 @@ module enzo {
   PUPable EnzoMatrixIdentity;
 
   // EnzoMethod
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoMethodGrackle;
-#endif
   PUPable EnzoMethodAccretion;
   PUPable EnzoMethodBackgroundAcceleration;
   PUPable EnzoMethodBondiHoyleAccretion;

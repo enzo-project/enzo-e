@@ -25,8 +25,6 @@ EnzoMethodGrackle::EnzoMethodGrackle
                     physics_cosmology_initial_redshift, time),
     use_cooling_timestep_(use_cooling_timestep)
 {
-  // todo drop the ifdef
-#ifdef CONFIG_USE_GRACKLE
 
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
@@ -39,12 +37,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
-#endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_GRACKLE
  
 void EnzoMethodGrackle::define_required_grackle_fields
 ()
@@ -135,7 +130,6 @@ void EnzoMethodGrackle::define_required_grackle_fields
   }
 
 }
-#endif /* CONFIG_USE_GRACKLE */
 
 //----------------------------------------------------------------------
 
@@ -147,8 +141,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 #ifndef CONFIG_USE_GRACKLE
 
     ERROR("EnzoMethodGrackle::compute()",
-          "Trying to use method 'grackle' with "
-          "Grackle configuration turned off!");
+          "Can't use method 'grackle' when Enzo-E isn't linked to Grackle");
 
 #else /* CONFIG_USE_GRACKLE */
 
@@ -172,12 +165,14 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------------
 
-#ifdef CONFIG_USE_GRACKLE
-
 void EnzoMethodGrackle::update_grackle_density_fields(
                                Block * block,
                                grackle_field_data * grackle_fields
                                ) const throw() {
+#ifndef CONFIG_USE_GRACKLE
+  ERROR("EnzoMethodGrackle::update_grackle_density_fields",
+        "Enzo-E isn't linked to grackle");
+#else
 
   // Intended for use at problem initialization. Scale species
   // density fields to be sensible mass fractions of the initial
@@ -263,16 +258,17 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   }
 
   return;
-}
 
-#endif
+#endif // CONFIG_USE_GRACKLE
+}
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_GRACKLE
-
 void EnzoMethodGrackle::compute_ ( Block * block) throw()
 {
+#ifndef CONFIG_USE_GRACKLE
+  ERROR("EnzoMethodGrackle::compute_", "Enzo-E isn't linked to grackle");
+#else
   const EnzoConfig * enzo_config = enzo::config();
   if (block->cycle() == enzo_config->initial_cycle) {
     bool nohydro = ( (enzo::problem()->method("ppm") == nullptr) |
@@ -286,7 +282,10 @@ void EnzoMethodGrackle::compute_ ( Block * block) throw()
   }
 
   // Solve chemistry
-  grackle_facade_.solve_chemistry(block, block->dt());
+  // NOTE: should we set compute_time to `block->time() + 0.5*block->dt()`?
+  //       I think that's what enzo-classic does...
+  double compute_time = block->time(); // only matters in cosmological sims
+  grackle_facade_.solve_chemistry(block, compute_time, block->dt());
 
   // now we have to do some extra-work after the fact (such as adjusting total
   // energy density and applying floors...)
@@ -346,8 +345,8 @@ void EnzoMethodGrackle::compute_ ( Block * block) throw()
   delete_grackle_fields(&grackle_fields);
 
   return;
+#endif // CONFIG_USE_GRACKLE
 }
-#endif // config use grackle
 
 //----------------------------------------------------------------------
 
@@ -355,7 +354,6 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
 {
   double dt = std::numeric_limits<double>::max();;
 
-#ifdef CONFIG_USE_GRACKLE
   if (use_cooling_timestep_){
     Field field = block->data()->field();
 
@@ -399,14 +397,11 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
       delete [] cooling_time;
     }
   }
-#endif
 
   return dt * courant_;
 }
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_GRACKLE
 
 void EnzoMethodGrackle::enforce_metallicity_floor(Block * block) throw()
 {
@@ -449,10 +444,9 @@ void EnzoMethodGrackle::enforce_metallicity_floor(Block * block) throw()
   }
   return;
 }
-#endif
+
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
 {
    const EnzoConfig * enzo_config = enzo::config();
@@ -551,7 +545,5 @@ void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
 
   return;
 }
-
-#endif //CONFIG_USE_GRACKLE
 
 //======================================================================

@@ -356,14 +356,15 @@ void GrackleFacade::delete_grackle_fields(grackle_field_data * grackle_fields)
 
 //----------------------------------------------------------------------------
 
-void GrackleFacade::solve_chemistry(Block* block, double dt) const noexcept
+void GrackleFacade::solve_chemistry(Block* block, double compute_time,
+                                    double dt) const noexcept
 {
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::solve_chemistry", "grackle isn't being used");
 #else
 
   code_units grackle_units;
-  setup_grackle_u_(block->time(), radiation_redshift_, &grackle_units);
+  setup_grackle_u_(compute_time, radiation_redshift_, &grackle_units);
 
   EnzoFieldAdaptor fadaptor(block, 0);
   grackle_field_data grackle_fields;
