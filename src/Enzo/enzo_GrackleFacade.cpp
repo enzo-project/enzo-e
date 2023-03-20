@@ -391,12 +391,10 @@ void GrackleFacade::solve_chemistry(Block* block, double dt) const noexcept
 
 //----------------------------------------------------------------------------
 
-/*
 typedef int (*grackle_local_property_func)(chemistry_data*,
                                            chemistry_data_storage *,
                                            code_units*, grackle_field_data*,
                                            enzo_float*);
-*/
 
 //----------------------------------------------------------------------------
 
@@ -409,6 +407,11 @@ std::pair<grackle_local_property_func, const char*> get_fptr_name_pair_
   switch (func_choice) {
     case GracklePropertyEnum::cooling_time:
       return {&local_calculate_cooling_time, "local_calculate_cooling_time"};
+    case GracklePropertyEnum::dust_temperature:
+      return {&local_calculate_dust_temperature,
+              "local_calculate_dust_temperature"};
+    case GracklePropertyEnum::gamma:
+      return {&local_calculate_gamma, "local_calculate_gamma"};
     case GracklePropertyEnum::pressure:
       return {&local_calculate_pressure, "local_calculate_pressure"};
     case GracklePropertyEnum::temperature:
@@ -423,10 +426,10 @@ std::pair<grackle_local_property_func, const char*> get_fptr_name_pair_
 
 //----------------------------------------------------------------------------
 
-void GrackleFacade::compute_local_property_
-(const EnzoFieldAdaptor& fadaptor, enzo_float* values, int stale_depth,
- code_units* grackle_units, grackle_field_data* grackle_fields,
- GracklePropertyEnum func_choice) const noexcept
+void GrackleFacade::compute_property
+(const EnzoFieldAdaptor& fadaptor, GracklePropertyEnum func_choice,
+ enzo_float* values, int stale_depth, code_units* grackle_units,
+ grackle_field_data* grackle_fields) const noexcept
 {
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::compute_local_property_", "grackle isn't being used");

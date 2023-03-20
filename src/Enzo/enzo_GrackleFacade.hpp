@@ -11,9 +11,8 @@
 #ifndef ENZO_ENZO_GRACKLE_FACADE_HPP
 #define ENZO_ENZO_GRACKLE_FACADE_HPP
 
-// this probably needs to be extended in the future to include
-// gamma, mmw, dust_temperature
-enum class GracklePropertyEnum{ cooling_time, pressure, temperature };
+enum class GracklePropertyEnum
+  { cooling_time, dust_temperature, gamma, pressure, temperature };
 
 class GrackleFacade : public PUP::able {
 
@@ -112,44 +111,27 @@ public: // wrapped grackle functions:
   /// light-weight wrapper around local_solve_chemistry function from grackle
   void solve_chemistry(Block* block, double dt) const noexcept;
 
-  void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
-                              int stale_depth = 0,
-			      code_units* grackle_units = nullptr,
-			      grackle_field_data* grackle_fields = nullptr)
-    const noexcept
-  {
-    compute_local_property_(fadaptor, ct, stale_depth, grackle_units,
-                            grackle_fields, GracklePropertyEnum::cooling_time);
-  }
 
-  void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
-                          enzo_float* pressure, int stale_depth = 0,
-			  code_units* grackle_units = nullptr,
-			  grackle_field_data* grackle_fields = nullptr)
-    const noexcept
-  {
-    compute_local_property_(fadaptor, pressure, stale_depth, grackle_units,
-                            grackle_fields, GracklePropertyEnum::pressure);
-  }
-
-  void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
-                             enzo_float* temperature, int stale_depth = 0,
-			     code_units* grackle_units = nullptr,
-			     grackle_field_data* grackle_fields = nullptr)
-    const noexcept
-  {
-    compute_local_property_(fadaptor, temperature, stale_depth, grackle_units,
-                            grackle_fields, GracklePropertyEnum::temperature);
-  }
-
-private: // helper methods
-
-  // when grackle_units is nullptr, new values are temporarily allocated
-  void compute_local_property_(const EnzoFieldAdaptor& fadaptor,
-                               enzo_float* values, int stale_depth,
-			       code_units* grackle_units,
-			       grackle_field_data* grackle_fields,
-			       GracklePropertyEnum func_choice) const noexcept;
+  /// wrapper around the various methods for computing various grackle
+  /// properties.
+  ///
+  /// This wraps calls to local_calculate_* family of Grackle functions.
+  ///
+  /// @param[in]  fadaptor Field data to be used in the calculation.
+  /// @param[in]  func_choice Specifies the choice of quantity that should be
+  ///     computed.
+  /// @param[out] values Output buffer that is used to hold the results.
+  /// @param[in]  stale_depth Specifies stale depth of the field
+  /// @param[in]  grackle_units Pointer to a precomputed code_units struct.
+  ///     When this is a nullptr, a temporary is constructed.
+  /// @param[in]  grackle_fields Pointer to a precomputed grackle_field_data
+  ///     struct. When this is a nullptr, a temporary is constructed.
+  void compute_property(const EnzoFieldAdaptor& fadaptor,
+                        GracklePropertyEnum func_choice,
+                        enzo_float* values, int stale_depth = 0,
+                        code_units* grackle_units = nullptr,
+                        grackle_field_data* grackle_fields = nullptr
+                        ) const noexcept;
 
 private: // attributes
   /// wrapper around chemistry_data struct, which stores runtime parameters

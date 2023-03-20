@@ -12,11 +12,6 @@
 #ifndef ENZO_ENZO_METHOD_GRACKLE_HPP
 #define ENZO_ENZO_METHOD_GRACKLE_HPP
 
-typedef int (*grackle_local_property_func)(chemistry_data*,
-					   chemistry_data_storage *,
-					   code_units*, grackle_field_data*,
-					   enzo_float*);
-
 class EnzoMethodGrackle : public Method {
 
   /// @class    EnzoMethodGrackle
@@ -140,6 +135,7 @@ public: // interface
 
 
   void enforce_metallicity_floor(Block * block) throw();
+#endif
 
   void calculate_cooling_time(const EnzoFieldAdaptor& fadaptor, enzo_float* ct,
                               int stale_depth = 0,
@@ -147,8 +143,10 @@ public: // interface
 			      grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    grackle_facade_.calculate_cooling_time(fadaptor, ct, stale_depth,
-                                           grackle_units, grackle_fields);
+    grackle_facade_.compute_property(fadaptor,
+                                     GracklePropertyEnum::cooling_time,
+                                     ct, stale_depth, grackle_units,
+                                     grackle_fields);
   }
 
   void calculate_pressure(const EnzoFieldAdaptor& fadaptor,
@@ -157,8 +155,9 @@ public: // interface
 			  grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    grackle_facade_.calculate_pressure(fadaptor, pressure, stale_depth,
-                                       grackle_units, grackle_fields);
+    grackle_facade_.compute_property(fadaptor, GracklePropertyEnum::pressure,
+                                     pressure, stale_depth, grackle_units,
+                                     grackle_fields);
   }
 
   void calculate_temperature(const EnzoFieldAdaptor& fadaptor,
@@ -167,11 +166,10 @@ public: // interface
 			     grackle_field_data* grackle_fields = nullptr)
     const throw()
   {
-    grackle_facade_.calculate_temperature(fadaptor, temperature, stale_depth,
-                                          grackle_units, grackle_fields);
+    grackle_facade_.compute_property(fadaptor, GracklePropertyEnum::temperature,
+                                     temperature, stale_depth, grackle_units,
+                                     grackle_fields);
   }
-
-#endif
 
 protected: // methods
 
