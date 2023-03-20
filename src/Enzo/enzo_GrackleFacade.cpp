@@ -166,8 +166,9 @@ GrackleFacade::GrackleFacade(GrackleChemistryData&& my_chemistry,
 
 //----------------------------------------------------------------------------
 
-GrackleFacade::GrackleFacade()
-  : my_chemistry_(),
+GrackleFacade::GrackleFacade(CkMigrateMessage *m)
+  : PUP::able(m),
+    my_chemistry_(),
     grackle_units_(nullptr),
     grackle_rates_(nullptr),
     radiation_redshift_(-1)
@@ -177,14 +178,10 @@ GrackleFacade::GrackleFacade()
 
 void GrackleFacade::pup(PUP::er &p) {
   const bool up = p.isUnpacking();
-  const bool initialized = is_initialized();
-
-  if (up && initialized){
+  if (up && ((grackle_units_.get() != nullptr) ||
+             (grackle_rates_.get() != nullptr)) ){
     ERROR("GrackleFacade::pup",
           "can't unpack data into an already initialized instance");
-  } else if ( (!up) && (!initialized) ) {
-    ERROR("GrackleFacade::pup",
-          "can't serialize data from an unitialized instance");
   }
 
   // NOTE: initializing grackle_units_ from scratch requires that
@@ -192,6 +189,7 @@ void GrackleFacade::pup(PUP::er &p) {
   //       We choose to pup grackle_units_ directly so that we don't need to
   //       worry about whether that global object has already been unpacked.
 
+  PUP::able::pup(p);
   p | my_chemistry_;
 
   if (up) {
@@ -216,9 +214,12 @@ GrackleFacade::~GrackleFacade() noexcept
   // - deallocate the grackle_rates_ pointer (that's handled later by the
   //   destructor of std::unique_ptr)
 #ifdef CONFIG_USE_GRACKLE
-  if (is_initialized()){
-    _free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
-  }
+
+  // the ONLY way grackle_rates could be a nullptr is if something went wrong
+  // and the pup method never got called after the migration constructor
+  // (in that case the program would already have aborted)
+  _free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
+
 #endif
 }
 
@@ -228,7 +229,6 @@ void GrackleFacade::setup_grackle_units(double current_time,
                                         code_units* grackle_units)
   const noexcept
 {
-  require_initialized();
   if (grackle_units == nullptr) {
     ERROR("GrackleFacade::setup_grackle_units",
           "grackle_units argument can't be a nullptr");
@@ -259,7 +259,6 @@ void GrackleFacade::setup_grackle_fields
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::setup_grackle_fields", "grackle isn't being used");
 #else
-  require_initialized();
 
   // Grackle grid dimenstion and grid size
   grackle_fields->grid_rank      = cello::rank();
@@ -364,7 +363,6 @@ void GrackleFacade::solve_chemistry(Block* block, double dt) const noexcept
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::solve_chemistry", "grackle isn't being used");
 #else
-  require_initialized();
 
   EnzoFieldAdaptor fadaptor(block, 0);
 
@@ -433,7 +431,6 @@ void GrackleFacade::compute_local_property_
 #ifndef CONFIG_USE_GRACKLE
   ERROR("GrackleFacade::compute_local_property_", "grackle isn't being used");
 #else
-  require_initialized();
 
   auto temp = get_fptr_name_pair_(func_choice);
   grackle_local_property_func fn_ptr = temp.first;

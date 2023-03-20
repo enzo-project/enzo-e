@@ -43,7 +43,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m)
     : Method (m),
-      grackle_facade_(),
+      grackle_facade_(m),
       use_cooling_timestep_(false)
   {  }
 
@@ -75,9 +75,6 @@ public: // interface
   /// EnzoMethodGrackle instance probably shouldn't exist (the program will
   /// probably abort somewhere along the lines)
   const GrackleChemistryData* try_get_chemistry() const throw() {
-    ASSERT("GrackleFacade::try_get_chemistry", // sanity check!
-           "grackle_facade_ attribute should always be initialized (except "
-           "during deserialization).", grackle_facade_.is_initialized());
     return grackle_facade_.try_get_chemistry();
   }
 
@@ -187,11 +184,8 @@ protected: // methods
 
 protected: // attributes
   /// the GrackleFacade instance provides an interface to all operations in the
-  /// Grackle library and stores the current configuration.
-  ///
-  /// While instances can technically have an "unitialized" state, that should
-  /// never be the case within this class (except during the brief gap between
-  /// EnzoMethodGrackle(CkMigrateMessage*) and pup)
+  /// Grackle library and stores the current configuration. You can assume that
+  /// this is always correctly initialized
   GrackleFacade grackle_facade_;
   bool use_cooling_timestep_;
 };

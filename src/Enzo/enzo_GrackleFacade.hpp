@@ -15,19 +15,22 @@
 // gamma, mmw, dust_temperature
 enum class GracklePropertyEnum{ cooling_time, pressure, temperature };
 
-class GrackleFacade {
+class GrackleFacade : public PUP::able {
 
   /// @class    GrackleFacade
   /// @ingroup  Enzo
   ///
-  /// An instance of this class is always either:
-  ///    - fully initialized (i.e. all grackle structs are properly configured)
-  ///    - uninitialized (code_units and grackle_rate_storage are nullptrs)
+  /// The key invariant of this class is that an instance is ALWAYS properly
+  /// initialized (i.e. all grackle structs are properly configured).
   ///
-  /// If you create an unitialized instance (through the default constructor),
-  /// the ONLY way to initialize it is through deserialization. The ONLY reason
-  /// we allow creation of uninitialized instances is to simplify
-  /// (de)serialization.
+  /// There is one minor caveat to this rule: the Charm++ migration constructor
+  /// leaves it in a partially initialized state. But that's ok because the
+  /// migration constructor is ALWAYS followed by unpacking.
+  ///   - This is actually the ONLY reason why this class has been declared as
+  ///     PUPable
+  ///   - Alternatively, we'd have to support a default constructor that could
+  ///     be used at any time
+
 
 public: // interface
 
@@ -39,8 +42,11 @@ public: // interface
                 const double physics_cosmology_initial_redshift,
                 const double time) noexcept;
 
-  /// Default constructor - primarily intended for use with pup routine
-  GrackleFacade();
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(GrackleFacade);
+
+  /// CHARM++ migration constructor for PUP::able
+  GrackleFacade(CkMigrateMessage *m);
 
   /// CHARM++ Pack / Unpack function
   void pup(PUP::er &p);
@@ -48,28 +54,14 @@ public: // interface
   /// Destructor
   ~GrackleFacade() noexcept;
 
+  /// delete default constructor
+  GrackleFacade() = delete;
+
   // delete copy/move constructor and assignment (could be added later)
   GrackleFacade(GrackleFacade&&) = delete;
   GrackleFacade& operator=(GrackleFacade&&) = delete;
   GrackleFacade(const GrackleFacade&) = delete;
   GrackleFacade& operator=(const GrackleFacade&) = delete;
-
-  bool is_initialized() const noexcept {
-    bool initialized_units = (grackle_units_.get() != nullptr);
-    bool initialized_rates = (grackle_rates_.get() != nullptr);
-
-    if (initialized_units != initialized_rates){
-      ERROR("GrackleFacade::is_initialized", "something is horribly wrong");
-    }
-    return initialized_units;
-  }
-
-  void require_initialized() const noexcept {
-    if (!is_initialized()){
-      ERROR("GrackleFacade::require_initialized",
-            "something is wrong, instance is expected to be initialized");
-    }
-  }
 
   /// returns a pointer to the stored instance of GrackleChemistryData, if the
   /// simulation is configured to actually use grackle
