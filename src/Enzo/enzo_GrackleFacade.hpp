@@ -79,19 +79,6 @@ public: // interface
 public: // low-level legacy methods - these will (probably) be removed or made
         // private in the near future
 
-  /// sets up grackle units.
-  ///
-  /// @param[in]  current_time The current time. A negative value can be passed
-  ///     if the current value is not known or convenient to get. In that case,
-  ///     the program will abort if the current time is needed (i.e. because
-  ///     this is a cosmological simulation)
-  /// @param[out] grackle_units The object pointed to by this pointer is set up
-  void setup_grackle_units(double current_time,
-                           code_units * grackle_units) const noexcept;
-
-  void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
-                           code_units * grackle_units) const noexcept;
-
   void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
                             grackle_field_data * grackle_fields,
                             int stale_depth = 0,

@@ -77,31 +77,6 @@ public: // interface
 
   void define_required_grackle_fields();
 
-  /// sets up grackle units
-  ///
-  /// @param[in]  current_time The current time. A negative value can be passed
-  ///     if the current value is not known or convenient to get. In that case,
-  ///     the program will abort if the current time is needed (i.e. because
-  ///     this is a cosmological simulation)
-  /// @param[out] grackle_units The object pointed to by this pointer is set up
-  ///
-  /// @note
-  /// This used to be a global method, but there isn't much need for any other
-  /// object to use this method. Some of the Compute object still nominally
-  /// allow code_units to be passed as an option, but that really isn't used
-  /// anywhere (we plan to drop that in the near future).
-  void setup_grackle_units (double current_time,
-                            code_units * grackle_units) const throw()
-  {
-    grackle_facade_.setup_grackle_units(current_time, grackle_units);
-  }
-
-  void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
-                           code_units * grackle_units) const throw()
-  {
-    grackle_facade_.setup_grackle_units(fadaptor, grackle_units);
-  }
-
   void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
                             grackle_field_data * grackle_fields,
                             int stale_depth = 0,

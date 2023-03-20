@@ -14,8 +14,10 @@
 //----------------------------------------------------------------------------
 
 #ifndef CONFIG_USE_GRACKLE
-// provide dummy definitions of code_units and chemistry_data_storage (these
-// are required by std::unique_ptr
+// provide dummy definitions of code_units and chemistry_data_storage
+// - these are both required by std::unique_ptr
+// - the dummy definition of code_units also comes in handy for defining some
+//   helper functions that are local to this file
 extern "C" {
   struct code_units { int dummy; };
   struct chemistry_data_storage { int dummy; };
@@ -68,6 +70,18 @@ void operator|(PUP::er &p, code_units *c){
 /// When grackle_units is a nullptr, this allocates the returned code_units
 /// object on the heap. Otherwise, the configured/returned object is the one
 /// that was passed to the grackle_units argument
+///
+/// It's worth discussing a weird quirk in Grackle's API when it comes to the
+/// ``code_units`` struct:
+///  - as a general rule, after initializing Grackle none of ``code_units``'s
+///    fields should EVER be mutated (if they change, there's a strong chance
+///    that the units data probably becomes invalidated).
+///  - The only exception to this rule is the ``a_value`` field when using
+///    comoving coordinates (this affects the quantities like the UV
+///    background)
+/// In principle, one could mutate the initial ``code_units`` struct or mutate
+/// a copy of the original. However, we currently just rebuild it from scratch
+/// every time we need it.
 code_units* setup_grackle_u_(double current_time, double radiation_redshift,
                              code_units* grackle_units = nullptr) noexcept
 {
@@ -225,27 +239,11 @@ GrackleFacade::~GrackleFacade() noexcept
 
 //----------------------------------------------------------------------------
 
-void GrackleFacade::setup_grackle_units(double current_time,
-                                        code_units* grackle_units)
-  const noexcept
-{
-  if (grackle_units == nullptr) {
-    ERROR("GrackleFacade::setup_grackle_units",
-          "grackle_units argument can't be a nullptr");
-  }
-  setup_grackle_u_(current_time, radiation_redshift_, grackle_units);
-}
+namespace { // things within anonymous namespace are local to this file
 
-//----------------------------------------------------------------------------
 
-void GrackleFacade::setup_grackle_units (const EnzoFieldAdaptor& fadaptor,
-                                         code_units * grackle_units)
-  const noexcept
-{
-  double current_time =
-    (enzo::cosmology() != nullptr) ? fadaptor.compute_time() : -1.0;
-  setup_grackle_units(current_time, grackle_units);
-}
+
+} // anonymous namespace
 
 //----------------------------------------------------------------------------
 
@@ -364,11 +362,10 @@ void GrackleFacade::solve_chemistry(Block* block, double dt) const noexcept
   ERROR("GrackleFacade::solve_chemistry", "grackle isn't being used");
 #else
 
-  EnzoFieldAdaptor fadaptor(block, 0);
-
   code_units grackle_units;
-  setup_grackle_units(fadaptor, &grackle_units);
+  setup_grackle_u_(block->time(), radiation_redshift_, &grackle_units);
 
+  EnzoFieldAdaptor fadaptor(block, 0);
   grackle_field_data grackle_fields;
   setup_grackle_fields(fadaptor, &grackle_fields);
 
@@ -400,22 +397,30 @@ typedef int (*grackle_local_property_func)(chemistry_data*,
 
 namespace { // things within anonymous namespace are local to this file
 
+struct GracklePropFnInfo{
+  grackle_local_property_func ptr;
+  const char* name_suffix;
+  bool has_z_dependence;
+};
+
+//----------------------------------------------------------------------------
+
 #ifdef CONFIG_USE_GRACKLE
-std::pair<grackle_local_property_func, const char*> get_fptr_name_pair_
-(GracklePropertyEnum func_choice)
+GracklePropFnInfo get_fn_info_(GracklePropertyEnum func_choice)
 {
+  // the value of the has_z_dependence field was determined by inspecting
+  // Grackle's source code.
   switch (func_choice) {
     case GracklePropertyEnum::cooling_time:
-      return {&local_calculate_cooling_time, "local_calculate_cooling_time"};
+      return {&local_calculate_cooling_time,     "cooling_time",     true};
     case GracklePropertyEnum::dust_temperature:
-      return {&local_calculate_dust_temperature,
-              "local_calculate_dust_temperature"};
+      return {&local_calculate_dust_temperature, "dust_temperature", true};
     case GracklePropertyEnum::gamma:
-      return {&local_calculate_gamma, "local_calculate_gamma"};
+      return {&local_calculate_gamma,            "gamma",            false};
     case GracklePropertyEnum::pressure:
-      return {&local_calculate_pressure, "local_calculate_pressure"};
+      return {&local_calculate_pressure,         "pressure",         false};
     case GracklePropertyEnum::temperature:
-      return {&local_calculate_temperature, "local_calculate_temperature"};
+      return {&local_calculate_temperature,      "temperature",      false};
     default:
       ERROR("GrackleFacade::compute_local_property_", "unknown func_choice");
   }
@@ -435,13 +440,13 @@ void GrackleFacade::compute_property
   ERROR("GrackleFacade::compute_local_property_", "grackle isn't being used");
 #else
 
-  auto temp = get_fptr_name_pair_(func_choice);
-  grackle_local_property_func fn_ptr = temp.first;
-  const char* fn_name = temp.second;
+  GracklePropFnInfo fn_info = get_fn_info_(func_choice);
 
   // setup code_units struct
   code_units my_units;
-  this->setup_grackle_units(fadaptor, &my_units);
+  double compute_time =
+    (enzo::cosmology() != nullptr) ? fadaptor.compute_time() : -1.0;
+  setup_grackle_u_(compute_time, radiation_redshift_, &my_units);
 
   grackle_field_data cur_grackle_fields;
 
@@ -483,10 +488,11 @@ void GrackleFacade::compute_property
   chemistry_data_storage * grackle_rates_ptr
     = const_cast<chemistry_data_storage *>(grackle_rates_.get());
 
-  if ((*fn_ptr)(chemistry_data_ptr, grackle_rates_ptr,
-                &my_units, grackle_fields, values) == ENZO_FAIL){
+  if ((*(fn_info.ptr))(chemistry_data_ptr, grackle_rates_ptr,
+                       &my_units, grackle_fields, values) == ENZO_FAIL){
     ERROR1("GrackleFacade::compute_local_property_()",
-	   "Error in call to Grackle's %s routine", fn_name);
+	   "Error during call to Grackle's local_calculate_%s routine",
+           fn_info.name_suffix);
   }
   if (delete_grackle_fields){
     this->delete_grackle_fields(grackle_fields);
