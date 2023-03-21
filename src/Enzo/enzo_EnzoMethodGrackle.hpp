@@ -19,6 +19,12 @@ class EnzoMethodGrackle : public Method {
   ///
   /// This class interfaces the Grackle primordial chemistry / cooling
   /// library with Cello
+  ///
+  /// In more detail, this class implements higher-level functionallity,
+  /// (e.g. related to the intricacies of implementing a ``Method`` subclass),
+  /// while the ``GrackleFacade`` attribute is responsible for low-level
+  /// Grackle details (e.g. managing the lifetime of Grackle's configuration
+  /// structs).
 
 public: // interface
 

@@ -18,13 +18,61 @@ class GrackleFacade : public PUP::able {
 
   /// @class    GrackleFacade
   /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Grackle's state and operations
+  ///
+  /// This class is named for the Facade design pattern (the name could be
+  /// improved). Instances of this class manage Grackle's state, hide away
+  /// certain details (e.g. users of the class never have to worry about the
+  /// ``code_units`` or ``chemistry_data_storage``) and provides a clean
+  /// interface for each of Grackle's operations, which can be categorized as:
+  ///    - solving chemistry over an integration timestep
+  ///    - computing chemistry-related (e.g. cooling time) or thermodynamic
+  ///      quantities (e.g. pressure, temperature)
+  /// This class is somewhat analogous to the python extension class provided
+  /// by Grackle, but it enforces stronger invariants.
   ///
   /// The key invariant of this class is that an instance is ALWAYS properly
-  /// initialized (i.e. all grackle structs are properly configured).
+  /// initialized (i.e. all Grackle structs are properly configured). At the
+  /// end of the description, we include a note detailing how this is
+  /// accomplished with deserialization.
   ///
-  /// There is one minor caveat to this rule: the Charm++ migration constructor
-  /// leaves it in a partially initialized state. But that's ok because the
-  /// migration constructor is ALWAYS followed by unpacking.
+  /// To simplify this class's semantics and to help enforce the above
+  /// invariant, the attributes of a given instance are treated as immutable
+  /// after construction or deserialization (see below for more discussion).
+  /// This is hard to enforce with the type-system (especially while supporting
+  /// ``pup`` routines), so it is accomplished with the API.
+  ///
+  /// This choice of immutability has two subtleties that deserve further
+  /// elaboration. Both of these relate to the other structs involved in
+  /// initializing the ``chemistry_data_storage`` struct. They include:
+  ///
+  ///   1. Certain parameters within the ``chemistry_data`` struct (managed by
+  ///      the ``GrackleChemistryData`` class) are overwritten. For example,
+  ///      ``HydrogenFractionByMass`` is always overwritten when primordial
+  ///      chemistry is ``0``. Likewise, ``UVbackground_redshift_off`` and
+  ///      ``UVbackground_redshift_drop`` also can be overwritten. While
+  ///      nothing is currently done about these parameters, if we want to
+  ///      introduce handling for them, we should make sure to build-in the
+  ///      adjustments to these values of ``GrackleChemistryData`` to happen
+  ///      right after ``chemistry_data_storage`` is initialized.
+  ///
+  ///   2. As a general rule, the fields in the ``code_units`` struct shouldn't
+  ///      change after initializing ``chemistry_data_storage`` (lots of data
+  ///      in the storage struct are stored in terms of the specified units).
+  ///      The notable exception is that the ``a_value`` field must be kept up
+  ///      to date when using comoving-coordinates. To maintain our general
+  ///      rule about immutability, we generate a new copy of ``code_units``
+  ///      every time we need it. The overhead of this should be minimal.
+  ///      However, if we want to further reduce the overhead, we can instead
+  ///      mutate a copy of the stored ``code_units`` struct in the future
+  ///      (since ``code_units`` is small, a ``memcpy`` will be cheap!)
+  ///
+  /// @note
+  /// (De)serialization poses a challenge for maintaining the invariant that
+  /// instances of this class are always in a valid state. In practice, we
+  /// actually have the Charm++ migration constructor construct this object in
+  /// an invalid state. However, this is ok because that constructor is
+  /// GUARANTEED to be followed by an unpacking call to the pup method.
   ///   - This is actually the ONLY reason why this class has been declared as
   ///     PUPable
   ///   - Alternatively, we'd have to support a default constructor that could
@@ -116,7 +164,6 @@ public: // wrapped grackle functions:
   void solve_chemistry(Block* block, double compute_time,
                        double dt) const noexcept;
 
-
   /// wrapper around the various methods for computing various grackle
   /// properties.
   ///
@@ -136,6 +183,8 @@ public: // wrapped grackle functions:
                         ) const noexcept;
 
 private: // attributes
+  // the attributes are treated as immutable after construction/deserialization
+
   /// wrapper around chemistry_data struct, which stores runtime parameters
   GrackleChemistryData my_chemistry_;
 
