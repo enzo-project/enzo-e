@@ -108,7 +108,7 @@ public: // public interface (implementation is independent of Grackle details)
 
   /// exchange the contents of this with other
   void swap(GrackleChemistryData& other) noexcept
-  { ptr_.swap(other.ptr_); str_allocs_.swap(str_allocs_); }
+  { ptr_.swap(other.ptr_); str_allocs_.swap(other.str_allocs_); }
 
   /// returns a pointer to the managed chemistry_data struct
   ///
