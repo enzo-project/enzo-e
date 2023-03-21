@@ -71,10 +71,8 @@ public: // interface
 
   void compute_(Block * block,
     enzo_float * t,
-    bool recompute_presure = true
-#ifdef CONFIG_USE_GRACKLE
-  , grackle_field_data * grackle_fields = NULL
-#endif
+    bool recompute_presure = true,
+    grackle_field_data * grackle_fields = nullptr
  );
 
 private: // functions

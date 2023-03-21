@@ -5,8 +5,6 @@
 /// @date     2019-05-07
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputeCoolingTime functions
 
-#ifdef CONFIG_USE_GRACKLE
-
 #ifndef ENZO_ENZO_COMPUTE_COOLINGTIME_HPP
 #define ENZO_ENZO_COMPUTE_COOLINGTIME_HPP
 
@@ -56,5 +54,3 @@ private: // attributes
 };
 
 #endif /* ENZO_ENZO_COMPUTE_COOLINGTIME_HPP */
-
-#endif

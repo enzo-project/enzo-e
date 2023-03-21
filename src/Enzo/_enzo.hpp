@@ -67,9 +67,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_feedback,
   enzo_sync_id_method_radiative_transfer,
-#ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
-#endif
   enzo_sync_id_method_gravity,
   enzo_sync_id_method_gravity_continue,
   enzo_sync_id_method_heat,
@@ -297,9 +295,7 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "enzo_EnzoComputeCicInterp.hpp"
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
-#ifdef CONFIG_USE_GRACKLE
-  #include "enzo_EnzoComputeCoolingTime.hpp"
-#endif
+#include "enzo_EnzoComputeCoolingTime.hpp"
 
 #include "enzo_EnzoSolverBiCgStab.hpp"
 #include "enzo_EnzoSolverCg.hpp"

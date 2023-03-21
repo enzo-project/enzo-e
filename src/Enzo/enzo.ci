@@ -74,10 +74,7 @@ module enzo {
   PUPable EnzoRefineMass;
 
   // EnzoCompute
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoComputeCoolingTime;
-#endif
-
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;

@@ -5,8 +5,6 @@
 /// @date     2019-05-07
 /// @brief    Implements the EnzoComputeCoolingTime class
 
-#ifdef CONFIG_USE_GRACKLE
-
 #include "cello.hpp"
 #include "enzo.hpp"
 
@@ -68,12 +66,10 @@ void EnzoComputeCoolingTime::compute_(Block * block,
                                       grackle_field_data * grackle_fields /* NULL */
                                     )
 {
+  const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
   ASSERT("EnzoComputeCoolingTime::compute_()",
          "Grackle must be enabled in order to compute the cooling time",
-         enzo::config()->method_grackle_use_grackle );
-  const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
+         grackle_method != nullptr);
   grackle_method->calculate_cooling_time(EnzoFieldAdaptor(block, i_hist_), ct,
                                          0, grackle_fields);
 }
-
-#endif
