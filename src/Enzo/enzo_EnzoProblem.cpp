@@ -583,7 +583,6 @@ Method * EnzoProblem::create_method_
     std::find(mlist.begin(), mlist.end(), "flux_correct") != mlist.end();
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
-
   if (name == "ppm") {
 
     method = new EnzoMethodPpm(store_fluxes_for_corrections);
@@ -640,6 +639,10 @@ Method * EnzoProblem::create_method_
 
 #endif /* CONFIG_USE_GRACKLE */
 
+  } else if (name == "balance") {
+    
+    method = new EnzoMethodBalance;
+    
   } else if (name == "turbulence") {
 
     method = new EnzoMethodTurbulence

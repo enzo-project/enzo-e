@@ -65,6 +65,7 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     coarsened_(false),
     is_leaf_((thisIndex.level() >= 0)),
     age_(0),
+    ip_next_(-1),
     name_(""),
     index_method_(-1),
     index_solver_(),
@@ -152,6 +153,7 @@ Block::Block ( MsgRefine * msg )
     coarsened_(false),
     is_leaf_((thisIndex.level() >= 0)),
     age_(0),
+    ip_next_(-1),
     name_(""),
     index_method_(-1),
     index_solver_(),
@@ -390,6 +392,7 @@ void Block::pup(PUP::er &p)
   p | coarsened_;
   p | is_leaf_;
   p | age_;
+  p | ip_next_;
   p | name_;
   p | index_method_;
   p | index_solver_;
@@ -402,7 +405,12 @@ void Block::pup(PUP::er &p)
   }
   p | refresh_sync_list_;
 
-  //  std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
+  int len=refresh_msg_list_.size();
+  p | len;
+  if (up) {
+    refresh_msg_list_.resize(len);
+    for (int i=0; i<len; i++) refresh_msg_list_[i].clear();
+  }
 
 }
 
@@ -473,34 +481,56 @@ Solver * Block::solver () throw ()
 
 //----------------------------------------------------------------------
 
-void Block::print () const
+void Block::print (FILE * fp_in) const
 {
-  CkPrintf ("--------------------\n");
-  CkPrintf ("PRINT_BLOCK name_ = %s\n",name().c_str());
-  CkPrintf ("PRINT_BLOCK data_ = %p\n",(void*)data_);
-  CkPrintf ("PRINT_BLOCK child_data_ = %p\n",(void*)child_data_);
+  FILE * fp = nullptr;
+  if (fp_in == nullptr) {
+    fp = fopen ((std::string("CB-")+name_).c_str(),"a");
+  } else {
+    fp = fp_in;
+  }
+  fprintf (fp,"%d %s PRINT_BLOCK data_ = %p\n",CkMyPe(),name_.c_str(),(void*)data_);
+  fprintf (fp,"%d %s PRINT_BLOCK child_data_ = %p\n",CkMyPe(),name_.c_str(),(void*)child_data_);
   int v3[3];index().values(v3);
-  CkPrintf ("PRINT_BLOCK index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
-  CkPrintf ("PRINT_BLOCK level_next_ = %d\n",level_next_);
-  CkPrintf ("PRINT_BLOCK cycle_ = %d\n",cycle_);
-  CkPrintf ("PRINT_BLOCK time_ = %f\n",time_);
-  CkPrintf ("PRINT_BLOCK dt_ = %f\n",dt_);
-  CkPrintf ("PRINT_BLOCK stop_ = %d\n",stop_);
-  CkPrintf ("PRINT_BLOCK index_initial_ = %d\n",index_initial_);
-  CkPrintf ("PRINT_BLOCK children_.size() = %lu\n",children_.size());
-  CkPrintf ("PRINT_BLOCK child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
-  CkPrintf ("PRINT_BLOCK child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
-  CkPrintf ("PRINT_BLOCK count_coarsen_ = %d\n",count_coarsen_);
-  CkPrintf ("PRINT_BLOCK adapt_step_ = %d\n",adapt_step_);
-  CkPrintf ("PRINT_BLOCK adapt_ready_ = %s\n",adapt_ready_?"true":"false");
-  CkPrintf ("PRINT_BLOCK adapt_balanced_ = %s\n",adapt_balanced_?"true":"false");
-  CkPrintf ("PRINT_BLOCK adapt_changed_ = %d\n",adapt_changed_);
-  CkPrintf ("PRINT_BLOCK coarsened_ = %d\n",coarsened_);
-  CkPrintf ("PRINT_BLOCK is_leaf_ = %d\n",is_leaf_);
-  CkPrintf ("PRINT_BLOCK age_ = %d\n",age_);
-  CkPrintf ("PRINT_BLOCK index_method_ = %d\n",index_method_);
-  adapt_.print("Adapt",this);
-  //  CkPrintf ("index_solver_ = %d\n",index_solver());
+  fprintf (fp,"%d %s PRINT_BLOCK index_ = %0x %0x %0x\n",CkMyPe(),name_.c_str(),v3[0],v3[1],v3[2]);
+  fprintf (fp,"%d %s PRINT_BLOCK array_ = %d %d %d\n",CkMyPe(),name_.c_str(),array_[0],array_[1],array_[2]);
+  fprintf (fp,"%d %s PRINT_BLOCK level_next_ = %d\n",CkMyPe(),name_.c_str(),level_next_);
+  fprintf (fp,"%d %s PRINT_BLOCK cycle_ = %d\n",CkMyPe(),name_.c_str(),cycle_);
+  fprintf (fp,"%d %s PRINT_BLOCK time_ = %f\n",CkMyPe(),name_.c_str(),time_);
+  fprintf (fp,"%d %s PRINT_BLOCK dt_ = %f\n",CkMyPe(),name_.c_str(),dt_);
+  fprintf (fp,"%d %s PRINT_BLOCK stop_ = %d\n",CkMyPe(),name_.c_str(),stop_);
+  fprintf (fp,"%d %s PRINT_BLOCK index_initial_ = %d\n",CkMyPe(),name_.c_str(),index_initial_);
+  fprintf (fp,"%d %s PRINT_BLOCK children_.size() = %lu\n",CkMyPe(),name_.c_str(),children_.size());
+  fprintf (fp,"%d %s PRINT_BLOCK child_face_level_curr_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_curr_.size());
+  for (int i=0; i<child_face_level_curr_.size(); i++) {fprintf (fp,"%d ",child_face_level_curr_[i]);} fprintf (fp,"\n");
+  sync_coarsen_.print("PRINT_BLOCK",fp);
+  fprintf (fp,"%d %s PRINT_BLOCK sync_count_ %d: ",sync_count_.size());
+  for (int i=0; i<sync_count_.size(); i++) {fprintf (fp,"%d ",sync_count_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK sync_max_ %d: ",sync_max_.size());
+  for (int i=0; i<sync_max_.size(); i++) {fprintf (fp,"%d ",sync_max_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK child_face_level_next_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_next_.size());
+  for (int i=0; i<child_face_level_next_.size(); i++) {fprintf (fp,"%d ",child_face_level_next_[i]);} fprintf (fp,"\n");
+
+  fprintf (fp,"%d %s PRINT_BLOCK count_coarsen_ = %d\n",CkMyPe(),name_.c_str(),count_coarsen_);
+  fprintf (fp,"%d %s PRINT_BLOCK adapt_step_ = %d\n",CkMyPe(),name_.c_str(),adapt_step_);
+  fprintf (fp,"%d %s PRINT_BLOCK adapt_ready_ = %s\n",CkMyPe(),name_.c_str(),adapt_ready_?"true":"false");
+  fprintf (fp,"%d %s PRINT_BLOCK adapt_balanced_ = %s\n",CkMyPe(),name_.c_str(),adapt_balanced_?"true":"false");
+  fprintf (fp,"%d %s PRINT_BLOCK adapt_changed_ = %d\n",CkMyPe(),name_.c_str(),adapt_changed_);
+  fprintf (fp,"%d %s PRINT_BLOCK adapt_msg_list_.size() = %lu\n",CkMyPe(),name_.c_str(),adapt_msg_list_.size());
+
+  fprintf (fp,"%d %s PRINT_BLOCK coarsened_ = %d\n",CkMyPe(),name_.c_str(),coarsened_);
+  fprintf (fp,"%d %s PRINT_BLOCK is_leaf_ = %d\n",CkMyPe(),name_.c_str(),is_leaf_);
+  fprintf (fp,"%d %s PRINT_BLOCK age_ = %d\n",CkMyPe(),name_.c_str(),age_);
+  fprintf (fp,"%d %s PRINT_BLOCK ip_next_ = %d\n",CkMyPe(),name_.c_str(),ip_next_);
+  fprintf (fp,"%d %s PRINT_BLOCK index_method_ = %d\n",CkMyPe(),name_.c_str(),index_method_);
+  fprintf (fp,"%d %s PRINT_BLOCK index_solver_.size() = %lu\n",CkMyPe(),name_.c_str(),index_solver_.size());
+  adapt_.print(std::string("Adapt-")+name_,this,fp);
+
+  for (int i=0; i<refresh_.size(); i++) { refresh_[i]->print(fp); }
+
+  if (fp_in == nullptr) {
+    fclose (fp);
+  }
 }
 
 //=====================================================================
@@ -694,6 +724,7 @@ Block::Block ()
     coarsened_(false),
     is_leaf_((thisIndex.level() >= 0)),
     age_(0),
+    ip_next_(-1),
     name_(""),
     index_method_(-1),
     index_solver_(),
@@ -703,41 +734,6 @@ Block::Block ()
   init_adapt_(nullptr);
 
   for (int i=0; i<3; i++) array_[i]=0;
-}
-
-
-Block::Block (CkMigrateMessage *m)
-  : CBase_Block(m),
-    data_(NULL),
-    child_data_(NULL),
-    level_next_(0),
-    cycle_(0),
-    time_(0.0),
-    dt_(0.0),
-    stop_(false),
-    index_initial_(0),
-    children_(),
-    sync_coarsen_(),
-    sync_count_(),
-    sync_max_(),
-    adapt_(),
-    child_face_level_curr_(),
-    child_face_level_next_(),
-    count_coarsen_(0),
-    adapt_step_(0),
-    adapt_ready_(false),
-    adapt_balanced_(false),
-    adapt_changed_(0),
-    coarsened_(false),
-    is_leaf_((thisIndex.level() >= 0)),
-    age_(0),
-    name_(""),
-    index_method_(-1),
-    index_solver_(),
-    refresh_()
-{
-  init_refresh_();
-  init_adapt_(nullptr);
 }
 
 //----------------------------------------------------------------------

@@ -17,45 +17,42 @@
 
 
 BEGIN {
-    print "* [[file:test/out.scons][WARNINGS]] [/]";
+    printf "* [[file:%s][WARNINGS]] [/]\n",ARGV[1];
     c=0;
     fwarning = 0;
 }
 /warning:/ {
-    c=c+1; 
-    split($1,a,":"); 
-    b="";  
+    c=c+1;
+    split($1,a,":");
+    b="";
     t=match ($1,"/");
-    a[1] = "src"substr(a[1],t);
-    sub(/include/,"src/Cello",a[1]);
     for (i=3; i<=NF; i++) {
 	sub(/\[/,"(",$i);
 	sub(/\]/,")",$i);
-	b = (b " " $i); 
+	b = (b " " $i);
     }
     print "** TODO [[file:"a[1]"::"a[2]"][Warning "c": " b"]]"
 }
 {
-    if (ferr == 1) 
-	{
-	    ferr = 0;
-	    c=c+1; 
-	    split($1,a,":"); 
-	    b="";  
-	    sub(/build/, "src",a[1]); 
-	    sub(/include/,"src/Cello",a[1]);
-	    for (i=3; i<=NF; i++) {
-		sub(/\[/,"(",$i);
-		sub(/\]/,")",$i);
-		b = (b " " $i); 
-	    }
-	    split(a[2],A,".")
-	    print "** TODO [[file:"a[1]"::"A[1]"][Warning "c": "fwarning"]]"
-	};
-	
+    if (ferr == 1)
+    {
+        ferr = 0;
+        c=c+1;
+        split($1,a,":");
+        b="";
+        sub(/build/, "src",a[1]);
+        sub(/include/,"src/Cello",a[1]);
+        for (i=3; i<=NF; i++) {
+            sub(/\[/,"(",$i);
+            sub(/\]/,")",$i);
+            b = (b " " $i);
+        }
+        split(a[2],A,".")
+        print "** TODO [[file:"a[1]"::"A[1]"][Warning "c": "fwarning"]]"
+    };
 }
 /Warning:/ {
     ferr = 1;
     fwarning = $0
-    sub(/Warning:/, "",fwarning); 
+    sub(/Warning:/, "",fwarning);
 }

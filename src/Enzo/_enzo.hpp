@@ -265,6 +265,7 @@ extern "C" {
 #include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
+#include "enzo_EnzoMethodBalance.hpp"
 #include "enzo_EnzoMethodSinkMaker.hpp"
 #include "enzo_EnzoMethodStarMaker.hpp"
 #include "enzo_EnzoMethodStarMakerSTARSS.hpp"
