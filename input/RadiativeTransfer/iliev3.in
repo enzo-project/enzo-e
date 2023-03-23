@@ -1,0 +1,299 @@
+# Problem: RT test of I-front trapping in a dense clump and the formation of a shadow
+# Author: William Hicks (whicks@ucsd.edu)
+
+# This setup is adapted from "Test 3", described in Iliev et al. 2006
+
+ Boundary {
+     Fx0 {
+         field_list = "flux_x_0";
+         type = "inflow";
+         value = [ 5.848559690225788e+63,  x  <=  0.000000000000000 , 1.308402615263040e+42 ];
+     };
+     Fx1 {
+         field_list = "flux_x_1";
+         type = "inflow";
+         value = [ 6.463508919399417e+63,  x  <=  0.000000000000000 , 1.308402615263040e+42 ];
+     };
+     Fx2 {
+         field_list = "flux_x_2";
+         type = "inflow";
+         value = [ 7.719575430051935e+62,  x  <=  0.000000000000000 , 1.308402615263040e+42 ];
+     };
+     N0 {
+         field_list = "photon_density_0";
+         type = "inflow";
+         value = [ 1.259813889082893e+63,  x  <=  0.000000000000000 , 8.449277459299774e+50 ];
+     };
+     N1 {
+         field_list = "photon_density_1";
+         type = "inflow";
+         value = [ 1.392277541849998e+63,  x  <=  0.000000000000000 , 8.449277459299774e+50 ];
+     };
+     N2 {
+         field_list = "photon_density_2";
+         type = "inflow";
+         value = [ 1.662841598565787e+62,  x  <=  0.000000000000000 , 8.449277459299774e+50 ];
+     };
+     list = [ "N0", "N1", "N2", "Fx0", "Fx1", "Fx2" ];
+     x_upper {
+         axis = "x";
+         face = "upper";
+         type = "outflow";
+     };
+     y_periodic {
+         axis = "y";
+         type = "periodic";
+     };
+     z_periodic {
+         axis = "z";
+         type = "periodic";
+     };
+ }
+
+ Domain {
+     lower = [ 0.000000000000000, 0.000000000000000, 0.000000000000000 ];
+     upper = [ 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.400000000000000;
+     ghost_depth = 4;
+     list = [ "density", "internal_energy", "total_energy", "velocity_x", "velocity_y", "velocity_z", "pressure", "temperature", "photon_density", "flux_x", "flux_y", "flux_z", "photon_density_0", "flux_x_0", "flux_y_0", "flux_z_0", "photon_density_1", "flux_x_1", "flux_y_1", "flux_z_1", "photon_density_2", "flux_x_2", "flux_y_2", "flux_z_2", "metal_density", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density", "RT_heating_rate", "RT_HI_ionization_rate", "RT_HeI_ionization_rate", "RT_HeII_ionization_rate" ];
+ }
+
+ Group {
+     color {
+         field_list = [ "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density" ];
+     };
+     derived {
+         field_list = [ "temperature", "pressure" ];
+     };
+     list = [ "color", "derived" ];
+ }
+
+ Initial {
+     list = [ "value" ];
+     value {
+         HII_density = 0.000000000000000;
+         HI_density = [ 0.04000000000000000,  sqrt(((( x  -  0.7575757575600000 ) * ( x  -  0.7575757575760000 )) + (( y  -  0.5000000000000000 ) * ( y  -  0.5000000000000000 ))) + (( z  -  0.5000000000000000 ) * ( z  -  0.5000000000000000 )))  <=  0.1212121212121000 , 0.0002000000000000000 ];
+         HeIII_density = 0.000000000000000;
+         HeII_density = 0.000000000000000;
+         HeI_density = 0.000000000000000;
+         density = [ 0.04000000000000000,  sqrt(((( x  -  0.7575757575600000 ) * ( x  -  0.7575757575760000 )) + (( y  -  0.5000000000000000 ) * ( y  -  0.5000000000000000 ))) + (( z  -  0.5000000000000000 ) * ( z  -  0.5000000000000000 )))  <=  0.1212121212121000 , 0.0002000000000000000 ];
+         e_density = 0.000000000000000;
+         flux_x_0 = 1e-10;
+         flux_x_1 = 1e-10;
+         flux_x_2 = 1e-10;
+         flux_y_0 = 1e-10;
+         flux_y_1 = 1e-10;
+         flux_y_2 = 1e-10;
+         flux_z_0 = 1e-10;
+         flux_z_1 = 1e-10;
+         flux_z_2 = 1e-10;
+         internal_energy = [ 1.977823508551398e-08,  sqrt(((( x  -  0.7575757575600000 ) * ( x  -  0.7575757575760000 )) + (( y  -  0.5000000000000000 ) * ( y  -  0.5000000000000000 ))) + (( z  -  0.5000000000000000 ) * ( z  -  0.5000000000000000 )))  <=  0.1212121212121000 , 3.955647017102796e-06 ];
+         photon_density_0 = 1e-10;
+         photon_density_1 = 1e-10;
+         photon_density_2 = 1e-10;
+         total_energy = [ 1.977823508551398e-08,  sqrt(((( x  -  0.7575757575600000 ) * ( x  -  0.7575757575760000 )) + (( y  -  0.5000000000000000 ) * ( y  -  0.5000000000000000 ))) + (( z  -  0.5000000000000000 ) * ( z  -  0.5000000000000000 )))  <=  0.1212121212121000 , 3.955647017102796e-06 ];
+     };
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [ 128, 128, 128 ];
+ }
+
+ Method {
+     grackle {
+         CaseBRecombination = 1;
+         HydrogenFractionByMass = 1.000000000000000;
+         UVbackground = 0;
+         data_file = ".";
+         metal_cooling = 0;
+         primordial_chemistry = 1;
+         self_shielding_method = 0;
+         use_cooling_timestep = false;
+         use_radiative_transfer = 1;
+         with_radiative_cooling = 1;
+     };
+     list = [ "null", "m1_closure", "grackle" ];
+     m1_closure {
+         N_groups = 3;
+         Nphotons_per_sec = 0.000000000000000;
+         energy_lower = [ 13.60000000000000, 24.59000000000000, 54.42000000000000 ];
+         energy_upper = [ 24.59000000000000, 54.42000000000000, 100.0000000000000 ];
+         clight_frac = 0.1000000000000000;
+         courant = 1.000000000000000;
+         cross_section_calculator = "custom";
+         flux_function = "GLF";
+         radiation_spectrum = "none";
+         recombination_radiation = false;
+         sigmaE = [ 2.780000000000000e-18, 0.000000000000000, 0.000000000000000, 5.040000000000000e-19, 0.000000000000000, 0.000000000000000, 7.460000000000000e-20, 0.000000000000000, 0.000000000000000 ];
+         sigmaN = [ 3.000000000000000e-18, 0.000000000000000, 0.000000000000000, 5.690000000000000e-19, 0.000000000000000, 0.000000000000000, 7.890000000000000e-20, 0.000000000000000, 0.000000000000000 ];
+     };
+     null {
+         dt = 5.000000000000000e-05;
+     };
+ }
+
+ Output {
+     Fx {
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "flux_x" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         name = [ "RT_Fx-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     Fy {
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "flux_y" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         name = [ "RT_Fy-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     Fz {
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "flux_z" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         name = [ "RT_Fz-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     HI {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "HI_density" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "RT_HI-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     HII {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "HII_density" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "RT_HII-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     N {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "photon_density" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "RT_N-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     check {
+         dir = [ "checkpoint-%06d", "count" ];
+         schedule {
+             start = 10100;
+             step = 10000;
+             var = "cycle";
+         };
+         type = "checkpoint";
+     };
+     e {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "e_density" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "RT_e-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     hdf5 {
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "photon_density", "flux_x", "flux_y", "flux_z", "density", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density", "temperature", "pressure", "internal_energy", "total_energy", "RT_heating_rate", "RT_HI_ionization_rate", "RT_HeI_ionization_rate", "RT_HeII_ionization_rate", "photon_density_0", "photon_density_1", "photon_density_2" ];
+         name = [ "data-%03d-%02d.h5", "count", "proc" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "data";
+     };
+     list = [ "N", "Fx", "Fy", "Fz", "e", "HI", "HII", "hdf5", "check" ];
+     mesh {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "ILIEV3-%06d", "cycle" ];
+         field_list = [ "photon_density" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         image_type = "mesh";
+         name = [ "RT_N_mesh-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 100;
+             var = "cycle";
+         };
+         type = "image";
+     };
+ }
+
+ Particle {
+     list = [ "star" ];
+     star {
+         attributes = [ "x", "double", "y", "double", "z", "double", "vx", "double", "vy", "double", "vz", "double", "ax", "double", "ay", "double", "az", "double", "id", "double", "mass", "double", "is_copy", "int64", "creation_time", "double", "lifetime", "double", "metal_fraction", "double" ];
+         groups = [ "is_gravitating" ];
+         mass_is_mass = true;
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+     };
+ }
+
+ Stopping {
+     cycle = 100000;
+     time = 15.00000000000000;
+ }
+
+ Units {
+     density = 1.674000000000000e-24;
+     length = 2.036760000000000e+22;
+     time = 31540000000000.00;
+ }

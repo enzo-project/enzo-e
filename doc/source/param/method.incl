@@ -782,6 +782,11 @@ mhd_vlct
 
 .. include:: method_mhd_vlct.incl
 
+m1_closure
+----------
+
+.. include:: method_m1_closure.incl
+
 null
 ----
 
