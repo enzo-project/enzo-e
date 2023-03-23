@@ -63,10 +63,13 @@ Configuring the Answer Test Suite
 Before the answer tests can be run, a few environment variables must be set to
 configure behavior.
 
- * TEST_RESULTS_DIR: points to a directory in which answers will be stored
- * CHARM_PATH: points to the directory in which ``charmrun`` is located
- * GENERATE_TEST_RESULTS: "true" to generate test results, "false" to compare
-   with existing results.
+ * ``TEST_RESULTS_DIR``: points to a directory in which answers will be stored
+ * ``CHARM_PATH``: points to the directory in which ``charmrun`` is located
+ * ``ENZO_PATH``: points to the ``enzo-e`` binary to use.
+   If this is not specified, this defaults to the ``<PATH/TO/ENZO-E/REPO>/build/bin/enzo-e``
+ * ``GENERATE_TEST_RESULTS``: "true" to generate test results, "false" to compare with existing results.
+ * ``GRACKLE_INPUT_DATA_DIR``: points to the directory where ``Grackle`` input files are installed.
+   If not specified, then all tests involving ``Grackle`` will be skipped.
 
 .. code-block:: bash
 
@@ -173,6 +176,27 @@ To make a new test, one must create a new Python class that subclasses the
        parameter_file = "vlct/dual_energy_cloud/hllc_cloud.in"
        max_runtime = 30
        ncpus = 1
+
+Tests involving ``Grackle``
+###########################
+
+If the class is associated with a test simulation that invokes ``Grackle``, you need to annotate the class declaration with the ``uses_grackle`` decorator.
+
+.. code-block:: python
+
+   from answer_testing import EnzoETest, uses_grackle
+
+   @uses_grackle
+   class TestGrackleGeneral(EnzoETest):
+       ...
+
+For all classes annotated with this decorator:
+
+ * the framework knows that it must make symbolic links to all files in the directory run by ``GRACKLE_INPUT_DATA_DIR`` before it runs the simulation associated with this class.
+ * the testing framwork also knows to skip the associated test(s) if the ``GRACKLE_INPUT_DATA_DIR`` environment variable is unset.
+ 
+If you forget to add this label, ``Enzo-E`` will not be able to locate the data file needed for Grackle (in a portable way).
+Thus, the associated simulation and test will fail.
 
 Creating the Test Function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
