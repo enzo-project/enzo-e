@@ -738,6 +738,10 @@ Method * EnzoProblem::create_method_
       method = new EnzoMethodFeedback();
     }
 
+  } else if (name == "m1_closure") {
+
+    method = new EnzoMethodM1Closure(enzo_config->method_m1_closure_N_groups);
+
   } else if (name == "check") {
 
     // Method for checkpointing the simulation

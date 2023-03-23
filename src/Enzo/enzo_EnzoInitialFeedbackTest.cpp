@@ -31,6 +31,7 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
       this->position[dim].resize(this->num_particles);
     }
     this->mass.resize(this->num_particles);
+    this->luminosity.resize(this->num_particles);
 
     std::fstream inFile;
     inFile.open("initial_feedback_stars.in", std::ios::in);
@@ -39,7 +40,7 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
            inFile.is_open());
 
     int i = 0;
-    while(inFile >> this->mass[i] >> this->position[0][i] >> this->position[1][i] >> this->position[2][i]){
+    while(inFile >> this->mass[i] >> this->position[0][i] >> this->position[1][i] >> this->position[2][i] >> this->luminosity[i]){
       i++;
     }
 
@@ -48,6 +49,7 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
   } else {
     this->num_particles = 1;
     this->mass.resize(this->num_particles);
+    this->luminosity.resize(this->num_particles);
 
     for (int dim = 0; dim < 3; dim++){
       this->position[dim].resize(this->num_particles);
@@ -55,6 +57,7 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
       this->position[dim][0] = config->initial_feedback_test_position[dim];
     }
     this->mass[0] = config->initial_feedback_test_star_mass;
+    this->luminosity[0] = config->initial_feedback_test_luminosity;
   }
 
   return;
@@ -102,12 +105,6 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * ge = (enzo_float *) field.values("internal_energy");
   enzo_float * te = (enzo_float *) field.values("total_energy");
 
-  enzo_float * v3[3] = { (enzo_float *) field.values("velocity_x"),
-                         (enzo_float *) field.values("velocity_y"),
-                         (enzo_float *) field.values("velocity_z")};
-
-  enzo_float * metal = (enzo_float *) field.values("metal_density");
-
   enzo_float * d_HI = (enzo_float *) field.values("HI_density");
   enzo_float * d_HII = (enzo_float *) field.values("HII_density");
   enzo_float * d_HeI = (enzo_float *) field.values("HeI_density");
@@ -115,6 +112,12 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * d_HeIII = (enzo_float *) field.values("HeIII_density");
   enzo_float * d_electron = (enzo_float *) field.values("e_density");
   enzo_float * temperature = (enzo_float *) field.values("temperature");
+
+  enzo_float * v3[3] = { (enzo_float *) field.values("velocity_x"),
+                         (enzo_float *) field.values("velocity_y"),
+                         (enzo_float *) field.values("velocity_z")};
+
+  enzo_float * metal = (enzo_float *) field.values("metal_density");
 
   // Block size (excluding ghosts)
   int nx,ny,nz;
@@ -155,7 +158,6 @@ void EnzoInitialFeedbackTest::enforce_block
          d_HeII[i]  = enzo_config->initial_feedback_test_HeII_density / enzo_units->density();
          d_HeIII[i]  = enzo_config->initial_feedback_test_HeIII_density / enzo_units->density();
          d_electron[i]  = enzo_config->initial_feedback_test_e_density / enzo_units->density();
-         temperature[i] = enzo_config->initial_feedback_test_temperature / enzo_units->kelvin_per_energy_units();
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
@@ -187,6 +189,9 @@ void EnzoInitialFeedbackTest::enforce_block
   int ia_vz = particle.attribute_index (it, "vz");
   int ia_cop  = particle.attribute_index (it, "is_copy");
   int ia_id   = particle.attribute_index (it, "id");
+  
+  int ia_L     = particle.has_attribute (it, "luminosity") ?
+                 particle.attribute_index(it,"luminosity") : -1;
 
   int ia_to    = particle.has_attribute(it,"creation_time") ?
                  particle.attribute_index(it,"creation_time") : -1;
@@ -203,6 +208,7 @@ void EnzoInitialFeedbackTest::enforce_block
   // this will point to the particular value in the
   // particle attribute array
   enzo_float * pmass = 0;
+  enzo_float * plum = 0;
   enzo_float * px   = 0;
   enzo_float * py   = 0;
   enzo_float * pz   = 0;
@@ -232,6 +238,7 @@ void EnzoInitialFeedbackTest::enforce_block
 
   id   = (int64_t *) particle.attribute_array(it, ia_id, ib);
   pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+  plum  = (enzo_float *) particle.attribute_array(it, ia_L, ib);
   px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
   py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
   pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
@@ -258,6 +265,7 @@ void EnzoInitialFeedbackTest::enforce_block
       px[ipp]    = this->position[0][i];
       py[ipp]    = this->position[1][i];
       pz[ipp]    = this->position[2][i];
+      plum[ipp]  = this->luminosity[i] * enzo_units->time(); // luminosity in photons/time
       pvx[ipp]   = 0.0;
       pvy[ipp]   = 0.0;
       pvz[ipp]   = 0.0;
