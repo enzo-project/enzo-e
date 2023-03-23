@@ -871,10 +871,50 @@ void Parameters::group_clear() throw ()
 
 //----------------------------------------------------------------------
 
-std::vector<std::string> Parameters::leaf_parameter_names() const throw()
+namespace { // define function local to this file
+
+void validate_abs_group_name_(const char* func_name, const std::string& name)
 {
+  const std::size_t size = name.size();
+
+  ASSERT(func_name, "\"\" is an invalid absolute group name", size > 0);
+  ASSERT1(func_name, "\"%s\" is an invalid group name: contains whitespace",
+          name.c_str(), name.find_first_of(" \t\n") == std::string::npos);
+  ASSERT1(func_name, "%s is an invalid absolute group name: starts with ':'",
+          name.c_str(), name[0] != ':');
+
+  std::size_t grp_start = 0;
+  while (grp_start < size) {
+    std::size_t rslt = name.find(':', grp_start);
+    std::size_t grp_stop = (rslt != std::string::npos) ? rslt : size;
+    ASSERT1(func_name,
+            "%s is an invalid group name: it has multiple colons in a row",
+            name.c_str(), grp_stop > grp_start);
+
+    // grp_stop specifies the location of a colon or is equal to size
+    grp_start = grp_stop + 1;
+  }
+}
+
+} // end anonymous namespace
+
+//----------------------------------------------------------------------
+
+std::vector<std::string> Parameters::leaf_parameter_names
+(const std::string& full_group_name) const throw()
+{
+  // validate full_group_name
+  validate_abs_group_name_("Parameters::leaf_parameter_names",
+                           full_group_name);
+
+  std::string prefix;
+  if (full_group_name[full_group_name.size()-1] == ':') { // size always > 0
+    prefix = full_group_name;
+  } else {
+    prefix = full_group_name + ':';
+  }
+
   std::vector<std::string> out;
-  std::string prefix = full_name("");
   std::size_t prefix_size = prefix.size();
 
   for (auto it_param =  parameter_map_.lower_bound(prefix);
@@ -901,6 +941,19 @@ std::vector<std::string> Parameters::leaf_parameter_names() const throw()
     }
   }
   return out;
+}
+
+//----------------------------------------------------------------------
+
+std::vector<std::string> Parameters::leaf_parameter_names() const throw()
+{
+  std::string full_group_name = full_name("");
+  ASSERT("Parameters::leaf_parameter_names",
+         "the version of this method that returns the leaf parameter names in "
+         "the current parameter-group can't be called when the current "
+         "parameter-group is empty",
+         full_group_name != ":");
+  return leaf_parameter_names(full_group_name);
 }
 
 //----------------------------------------------------------------------
