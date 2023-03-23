@@ -1540,7 +1540,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
        "type", "courant"};
 
     method_grackle_chemistry = GrackleChemistryData::from_parameters
-      (*p, {"Method", "grackle"}, forbid_leaf_names, ignore_leaf_names);
+      (*p, "Method:grackle", forbid_leaf_names, ignore_leaf_names);
 
     // now let's manually initialize the handful of remaining runtime
     // parameters that are stored within method_grackle_chemistry

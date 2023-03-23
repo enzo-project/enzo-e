@@ -462,7 +462,7 @@ bool GrackleChemistryData::try_set_str_(const std::string& field,
 //----------------------------------------------------------------------
 
 GrackleChemistryData GrackleChemistryData::from_parameters
-(Parameters& p, const str_vec_t& parameter_groups,
+(Parameters& p, const std::string& parameter_group,
  const std::unordered_set<std::string>& forbid_leaf_names,
  const std::unordered_set<std::string>& ignore_leaf_names) noexcept
 {
@@ -470,23 +470,15 @@ GrackleChemistryData GrackleChemistryData::from_parameters
   ERROR("GrackleChemistryData::from_parameters", "Grackle isn't linked");
 #else
 
-  // save the groups for now...
-  std::vector<std::string> group_v;
-  for (int i = 0; i < p.group_count(); i++) { group_v.push_back(p.group(i)); }
-  p.group_clear();
+  std::size_t pgrp_len = parameter_group.size();
+  ASSERT("GrackleChemistryData::from_parameters", "parameter_group is \"\"",
+         pgrp_len > 0);
+  const std::string config_name_prefix = (parameter_group[pgrp_len - 1] == ':')
+    ? parameter_group : parameter_group + ':';
+  const str_vec_t leaf_parameter_names
+    = p.leaf_parameter_names(config_name_prefix);
 
-  std::string config_name_prefix = "";
-  for (const std::string& part : parameter_groups){
-    config_name_prefix.append(part + ":");
-    p.group_push(part);
-  }
-  const str_vec_t leaf_parameter_names = p.leaf_parameter_names();
-  p.group_clear();
-
-  // restore the groups
-  for (const std::string e : group_v) { p.group_push(e); }
-
-  // ToDo: check that there aren't any groups with the shared prefix
+  // ToDo: check that there aren't any groups within parameter_group
 
   auto general_param_err =
     [config_name_prefix](const std::string& name, const std::string& user_type)

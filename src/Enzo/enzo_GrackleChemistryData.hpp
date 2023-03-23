@@ -68,8 +68,8 @@ public: // public interface (implementation is tied to Grackle details)
   /// factory method that builds GrackleChemistryData from a Parameters object
   ///
   /// @param[in] p the titular Parameters object
-  /// @param[in] parameter_groups vector holding the group names (usually it
-  ///     will just be ``{"Method", "grackle"}``.
+  /// @param[in] parameter_group string holding the full group name (usually it
+  ///     will just be ``"Method:grackle"``.
   /// @param[in] forbid_leaf_names names of parameters that correspond to
   ///     grackle parameters that are not allowed to appear in the
   ///     "Method:grackle:*" group. These parameters are usually mutated after
@@ -83,7 +83,7 @@ public: // public interface (implementation is tied to Grackle details)
   /// function is VERY aggressive about reporting any unexpected parameters as
   /// an error.
   GrackleChemistryData static from_parameters
-    (Parameters& p, const str_vec_t& parameter_groups,
+    (Parameters& p, const std::string& parameter_group,
      const std::unordered_set<std::string>& forbid_leaf_names,
      const std::unordered_set<std::string>& ignore_leaf_names) noexcept;
 
