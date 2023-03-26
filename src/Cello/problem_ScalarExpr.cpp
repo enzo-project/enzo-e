@@ -53,8 +53,17 @@ void ScalarExpr::evaluate (T * value, double t,
 	  ndx,ndy,ndz,nx,ny,nz,
 	  (ndx >= nx) && (ndy >= ny) && (ndz >= nz));
 
-  // NOTE: it would be nice to include a fast-path that avoids all of the heap
-  // allocations when ((!param_) && (!mask)) - relevant for inflow boundaries
+  if ((!param_) && (!mask)) {
+    // fast-path that avoid heap allocations - relevant for inflow conditions
+    for (int ix=0; ix<nx; ix++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int iz=0; iz<nz; iz++) {
+          value[ix + ndx*(iy + ndy*iz)] = (T)value_;
+        }
+      }
+    }
+    return;
+  }
 
   bool * mv = 0;
   if (mask) {

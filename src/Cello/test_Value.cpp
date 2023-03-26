@@ -47,6 +47,22 @@ double expected2(double t, double x, double y, double z) noexcept
 double expected3(double t, double x, double y, double z) noexcept
 { return (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2)); }
 
+#define EXPR4_VAL (17.0)
+#define EXPR4_STR "17.0"
+
+double expected4(double t, double x, double y, double z) noexcept
+{ return EXPR4_VAL; }
+
+#define EXPR5_VAL1 (17.0)
+#define EXPR5_STR1 "17.0"
+#define MASK5_VAL1  (x < y)
+#define MASK5_STR1 "(x < y)"
+#define EXPR5_VAL2  (1.0 + 2.0*x + 4.0*y + 8.0*z + 16.0*t)
+#define EXPR5_STR2 "(1.0 + 2.0*x + 4.0*y + 8.0*z + 16.0*t)"
+
+double expected5(double t, double x, double y, double z) noexcept
+{ return MASK5_VAL1 ? (EXPR5_VAL1) : (EXPR5_VAL2); }
+
 //----------------------------------------------------------------------
 
 void generate_input()
@@ -64,6 +80,8 @@ void generate_input()
   fp << "    value1 = [" EXPR1_STR "];  \n";
   fp << "    value2 = [" EXPR2_STR1 ",\n" MASK2_STR1 ",\n" EXPR2_STR2 ",\n" MASK2_STR2 ",\n" EXPR2_STR3 "];\n";
   fp << "    value3 = [" EXPR3_STR1 ",\n" MASK3_STR1 ",\n" EXPR3_STR2 "];\n";
+  fp << "    value4 = [" EXPR4_STR "];  \n";
+  fp << "    value5 = [" EXPR5_STR1 ",\n" MASK5_STR1 ",\n" EXPR5_STR2 "];\n";
   fp << "}\n";
 
   fp.close();
@@ -109,7 +127,9 @@ void test_value_obj_(const Value& value, int num, std::string prefix = "") {
     case 1: descr = "[expr]";                     expect_fn = &expected1; break;
     case 2: descr = "[expr,mask,expr,mask,expr]"; expect_fn = &expected2; break;
     case 3: descr = "[expr,mask(png),expr]";      expect_fn = &expected3; break;
-    default:  ERROR("test_value_obj_", "the num argument must be 1, 2, or 3");
+    case 4: descr = "[float]";                    expect_fn = &expected4; break;
+    case 5: descr = "[float,mask,expr]";          expect_fn = &expected5; break;
+    default:  ERROR("test_value_obj_", "the num argument must be 1-5");
   }
 
   // this function explicitly makes a copy of name to avoid lifetime issues
@@ -164,7 +184,7 @@ PARALLEL_MAIN_BEGIN
     unit_class("Value");
 
     // iterate over the test cases:
-    for (int i = 1; i <= 3; i++){
+    for (int i = 1; i <= 5; i++){
       std::string param_str = "Group:value" + std::to_string(i);
 
       // the curly braces are used to tell the compiler it can destroy the
