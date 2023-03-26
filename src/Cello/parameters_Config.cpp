@@ -319,21 +319,7 @@ void Config::read_adapt_ (Parameters * p) throw()
 
     std::string param_str = prefix + "field_list";
 
-    int type = p->type(param_str);
-
-    if (type == parameter_list) {
-      const int n = p->list_length(param_str);
-      adapt_field_list[ia].resize(n);
-      for (int index=0; index<n; index++) {
-	adapt_field_list[ia][index] = p->value(index,param_str,"none");
-      }
-    } else if (type == parameter_string) {
-      adapt_field_list[ia].resize(1);
-      adapt_field_list[ia][0] = p->value_string (param_str,"none");
-    } else if (type != parameter_unknown) {
-      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      type,param_str.c_str());
-    }
+    adapt_field_list[ia] = p->value_full_strlist(prefix+"field_list", true);
 
     //--------------------------------------------------
 
@@ -467,25 +453,8 @@ void Config::read_boundary_ (Parameters * p) throw()
     boundary_mask[ib] = (p->type(prefix+"mask") 
 			 == parameter_logical_expr);
 
-    std::string param_str = prefix+"field_list";
-    int field_list_type = p->type(param_str);
-    if (field_list_type == parameter_list) {
-      const int n = p->list_length(param_str);
-      boundary_field_list[ib].resize(n);
-      for (int index=0; index<n; index++) {
-	boundary_field_list[ib][index] = p->list_value_string 
-	  (index,param_str);
-      }
-    } else if (field_list_type == parameter_string) {
-      boundary_field_list[ib].resize(1);
-      boundary_field_list[ib][0] = p->value_string(param_str);
-    } else if (field_list_type != parameter_unknown) {
-      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      field_list_type,param_str.c_str());
-    }
-	
+    boundary_field_list[ib] = p->value_full_strlist(prefix+"field_list", true);
   }
-
 }
 
 //----------------------------------------------------------------------
