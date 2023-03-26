@@ -57,20 +57,7 @@ void generate_input()
 
 //----------------------------------------------------------------------
 
-PARALLEL_MAIN_BEGIN
-{
-
-  PARALLEL_INIT;
-
-  unit_init(0,1);
-
-  Parameters parameters;
-
-  generate_input();
-  parameters.read("test.in");
-
-  unit_class("Value");
-
+void test_value_obj_(const Value* value, int num) {
 
   const int nx = 16;
   const int ny = 8;
@@ -100,95 +87,140 @@ PARALLEL_MAIN_BEGIN
   double x=xv[0];
   double y=yv[0];
   double z=zv[0];
-    
-  unit_func ("evaluate(scalar) [expr] ");
 
-  Value * value1 = new Value(&parameters, "Group:value1");
-  unit_assert (value1 != NULL);
+  unit_assert (value != NULL);
 
-  unit_assert(value1->evaluate(t,xv[0],yv[0],zv[0]) == EXPR1_VAL);
+  if (num == 1) {
+    unit_func ("evaluate(scalar) [expr] ");
+    unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) == EXPR1_VAL);
 
-  value1->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
+    unit_func ("evaluate(array) [expr]");
+    value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
 
-  unit_func ("evaluate(array) [expr]");
-
-  bool l_equal = true;
-  for (int ix=0; ix<nx; ix++) {
-    double x=xv[ix];
-    for (int iy=0; iy<ny; iy++) {
-      double y=yv[iy];
-      for (int iz=0; iz<nz; iz++) {
-	int i=ix+nx*(iy+ny*iz);
-	double z=zv[iz];
-        l_equal = l_equal &&  (dvalues[i] == EXPR1_VAL);
+    bool l_equal = true;
+    for (int ix=0; ix<nx; ix++) {
+      double x=xv[ix];
+      for (int iy=0; iy<ny; iy++) {
+        double y=yv[iy];
+        for (int iz=0; iz<nz; iz++) {
+          int i=ix+nx*(iy+ny*iz);
+          double z=zv[iz];
+          l_equal = l_equal &&  (dvalues[i] == EXPR1_VAL);
+        }
       }
     }
-  }
-  unit_assert (l_equal);
-  
-  
-  //--------------------------------------------------
+    unit_assert (l_equal);
 
-  unit_func ("evaluate(scalar) [expr,mask,expr] ");
+  } else if (num == 2) {
+    unit_func ("evaluate(scalar) [expr,mask,expr,mask,expr]");
+    double val2 = (MASK2_VAL1 ? (EXPR2_VAL1)
+                              : ( (MASK2_VAL2 ? (EXPR2_VAL2)
+                                              : (EXPR2_VAL3) ))
+                   );
+    unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) == val2);
 
-  Value * value2 = new Value(&parameters, "Group:value2");
-  unit_assert (value2 != NULL);
+    unit_func ("evaluate(array) [expr,mask,expr,mask,expr]");
+    value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
 
-  double val2 = (MASK2_VAL1 ? (EXPR2_VAL1) : ( (MASK2_VAL2 ? (EXPR2_VAL2) : (EXPR2_VAL3))));
-  unit_assert(value2->evaluate(t,xv[0],yv[0],zv[0]) == val2);
-
-  for (int i=0; i<n; i++) dvalues[i] = -999.0;
-  value2->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
-
-  unit_func ("evaluate(array) [expr,mask,expr]");
-
-  l_equal = true;
-  for (int ix=0; ix<nx; ix++) {
-    double x=xv[ix];
-    for (int iy=0; iy<ny; iy++) {
-      double y=yv[iy];
-      for (int iz=0; iz<nz; iz++) {
-	int i=ix+nx*(iy+ny*iz);
-	double z=zv[iz];
-	val2 = (MASK2_VAL1 ? (EXPR2_VAL1) : ( (MASK2_VAL2 ? (EXPR2_VAL2) : (EXPR2_VAL3))));
-        l_equal = l_equal &&  (dvalues[i] == val2);
+    bool l_equal = true;
+    for (int ix=0; ix<nx; ix++) {
+      double x=xv[ix];
+      for (int iy=0; iy<ny; iy++) {
+        double y=yv[iy];
+        for (int iz=0; iz<nz; iz++) {
+          int i=ix+nx*(iy+ny*iz);
+          double z=zv[iz];
+          val2 = (MASK2_VAL1 ? (EXPR2_VAL1)
+                              : ( (MASK2_VAL2 ? (EXPR2_VAL2)
+                                              : (EXPR2_VAL3) ))
+                 );
+          l_equal = l_equal &&  (dvalues[i] == val2);
+        }
       }
     }
-  }
 
-  unit_assert (l_equal);
-  //--------------------------------------------------
+    unit_assert (l_equal);
 
-  unit_func ("evaluate(scalar) [expr,mask(png),expr] ");
+  } else if (num == 3) {
+    unit_func ("evaluate(scalar) [expr,mask(png),expr]");
+    double val3 = (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2));
+    unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) == val3);
 
-  Value * value3 = new Value(&parameters, "Group:value3");
-  unit_assert (value3 != NULL);
+    unit_func ("evaluate(array) [expr,mask(png),expr]");
+    value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
 
-  double val3 = (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2));
-  unit_assert(value3->evaluate(t,xv[0],yv[0],zv[0]) == val3);
-
-  for (int i=0; i<n; i++) dvalues[i] = -999.0;
-  value3->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
-
-  unit_func ("evaluate(array) [expr,mask(png),expr]");
-
-  l_equal = true;
-  for (int ix=0; ix<nx; ix++) {
-    double x=xv[ix];
-    for (int iy=0; iy<ny; iy++) {
-      double y=yv[iy];
-      for (int iz=0; iz<nz; iz++) {
-	int i=ix+nx*(iy+ny*iz);
-	double z=zv[iz];
-	val3 = (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2));
-	l_equal = l_equal &&  (dvalues[i] == val3);
+    bool l_equal = true;
+    for (int ix=0; ix<nx; ix++) {
+      double x=xv[ix];
+      for (int iy=0; iy<ny; iy++) {
+        double y=yv[iy];
+        for (int iz=0; iz<nz; iz++) {
+          int i=ix+nx*(iy+ny*iz);
+          double z=zv[iz];
+          val3 = (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2));
+          l_equal = l_equal &&  (dvalues[i] == val3);
+        }
       }
     }
-  }
 
   unit_assert (l_equal);
 
-  //----------------------------------------------------------------------
+  } else {
+    ERROR("test_value_obj_", "the num argument must be 1, 2, or 3");
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+PARALLEL_MAIN_BEGIN
+{
+
+  PARALLEL_INIT;
+
+  unit_init(0,1);
+
+  // we explicitly put functions in a separate scope to ensure that the
+  // constructor runs for the Parameters object and each of the Value objects.
+  // - This explicitly happens to explicitly try to catch a hypothetical bug at
+  //   one time where the parameters object and underlying members in the Value
+  //   object may have deleted a Param object more than once (in practice this
+  //   never happened - because Value's destructor didn't deallocate the
+  //   contained objects)
+  {
+    Parameters parameters;
+
+    generate_input();
+    parameters.read("test.in");
+
+    unit_class("Value");
+
+    // test case 1
+    {
+      Value value = Value(&parameters, "Group:value1");
+      test_value_obj_(&value, 1);
+    }
+
+    //--------------------------------------------------
+
+    // test case 2
+
+    {
+      Value value = Value(&parameters, "Group:value2");
+      test_value_obj_(&value, 2);
+    }
+
+    //--------------------------------------------------
+
+    // test case 3
+    {
+      Value value = Value(&parameters, "Group:value3");
+      test_value_obj_(&value, 3);
+    }
+
+    //----------------------------------------------------------------------
+
+  }
 
   unit_finalize();
 
