@@ -72,7 +72,7 @@ void generate_input()
 
 //----------------------------------------------------------------------
 
-void test_value_obj_(const Value& value, int num) {
+void test_value_obj_(const Value& value, int num, std::string prefix = "") {
 
   const int nx = 16;
   const int ny = 8;
@@ -118,12 +118,12 @@ void test_value_obj_(const Value& value, int num) {
   // now, actually perform the tests:
 
   // test scalar evaluation
-  set_unit_func ( "evaluate(scalar) " + descr);
+  set_unit_func ( prefix + "evaluate(scalar) " + descr);
   unit_assert(value.evaluate(t,xv[0],yv[0],zv[0]) ==
               expect_fn(t,xv[0],yv[0],zv[0]));
 
   // test evaluation over a full array
-  set_unit_func ( "evaluate(array) " + descr);
+  set_unit_func ( prefix + "evaluate(array) " + descr);
   value.evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
 
   bool l_equal = true;
@@ -163,30 +163,35 @@ PARALLEL_MAIN_BEGIN
 
     unit_class("Value");
 
-    // test case 1
-    {
-      Value value = Value(&parameters, "Group:value1");
-      test_value_obj_(value, 1);
+    // iterate over the test cases:
+    for (int i = 1; i <= 3; i++){
+      std::string param_str = "Group:value" + std::to_string(i);
+
+      // the curly braces are used to tell the compiler it can destroy the
+      // objects outsude of the region
+      {
+        // first, check the Value object under normal conditions
+        Value orig_value = Value(&parameters, param_str);
+        test_value_obj_(orig_value, i);
+
+        // next, check a move-constructed Value object
+        Value move_constructed(std::move(orig_value));
+        test_value_obj_(move_constructed, i, "move-constructed: ");
+
+        // now, let's see what with a move-assigned Value object
+        Value move_assigned; // default constructor
+        move_assigned = std::move(move_constructed);
+        test_value_obj_(move_assigned, i, "move-assigned: ");
+      }
+
+      // now, let's explicitly check again with a freshly constructed value
+      // object (this should help detect any issues with the destructor)
+      {
+        // first, check the Value object under normal conditions
+        Value value = Value(&parameters, param_str);
+        test_value_obj_(value, i, "freshly-reconstructed: ");
+      }
     }
-
-    //--------------------------------------------------
-
-    // test case 2
-
-    {
-      Value value = Value(&parameters, "Group:value2");
-      test_value_obj_(value, 2);
-    }
-
-    //--------------------------------------------------
-
-    // test case 3
-    {
-      Value value = Value(&parameters, "Group:value3");
-      test_value_obj_(value, 3);
-    }
-
-    //----------------------------------------------------------------------
 
   }
 
