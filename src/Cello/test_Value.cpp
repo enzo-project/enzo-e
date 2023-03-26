@@ -14,7 +14,8 @@
 
 #define EXPR1_VAL  (1.0*x + 2.0*y - 5.0*z + t)
 #define EXPR1_STR "(1.0*x + 2.0*y - 5.0*z + t)"
-double expected_val1(double t, double x, double y, double z) noexcept
+
+double expected1(double t, double x, double y, double z) noexcept
 { return EXPR1_VAL; }
 
 #define EXPR2_VAL1  (1.0 + 2.0*x + 4.0*y + 8.0*z + 16.0*t)
@@ -28,7 +29,7 @@ double expected_val1(double t, double x, double y, double z) noexcept
 #define EXPR2_VAL3  (100.0 - 1.0*x - 2.0*y - 5.0*z - t)
 #define EXPR2_STR3 "(100.0 - 1.0*x - 2.0*y - 5.0*z - t)"
 
-double expected_val2(double t, double x, double y, double z) noexcept
+double expected2(double t, double x, double y, double z) noexcept
 {
   return (MASK2_VAL1 ? (EXPR2_VAL1)
                      : ( (MASK2_VAL2 ? (EXPR2_VAL2)
@@ -43,7 +44,7 @@ double expected_val2(double t, double x, double y, double z) noexcept
 #define EXPR3_VAL2  (1.0 - t - 10.0*x - 100.0*y - 1000.0*z)
 #define EXPR3_STR2 "(1.0 - t - 10.0*x - 100.0*y - 1000.0*z)"
 
-double expected_val3(double t, double x, double y, double z) noexcept
+double expected3(double t, double x, double y, double z) noexcept
 { return (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2)); }
 
 //----------------------------------------------------------------------
@@ -71,7 +72,7 @@ void generate_input()
 
 //----------------------------------------------------------------------
 
-void test_value_obj_(const Value* value, int num) {
+void test_value_obj_(const Value& value, int num) {
 
   const int nx = 16;
   const int ny = 8;
@@ -85,59 +86,52 @@ void test_value_obj_(const Value* value, int num) {
   const double zp =  3.0;
   const double t =   7.0;
 
-  FieldDescr * field_descr = new FieldDescr;
-  ParticleDescr * particle_descr = new ParticleDescr;
-
-  Data data(nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp,
-	    field_descr, particle_descr);
-
+  // setup xv, yv, zv
   double xv[nx], yv[ny], zv[nz];
-  double dvalues[n];
+  {
+    FieldDescr field_descr;
+    ParticleDescr particle_descr;
 
-  for (int i=0; i<n; i++) dvalues[i] = -999.0;
+    Data data(nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp,
+              &field_descr, &particle_descr);
 
-  data.field_cells(xv,yv,zv);
-
-  unit_assert (value != NULL);
-
-  const char* scalar_fn_name;
-  const char* array_fn_name;
-  double (*get_expected)(double, double, double, double);
-
-  if (num == 1) {
-    scalar_fn_name = "evaluate(scalar) [expr] ";
-    array_fn_name  = "evaluate(array) [expr]";
-    get_expected = &expected_val1;
-  } else if (num == 2) {
-    scalar_fn_name = "evaluate(scalar) [expr,mask,expr,mask,expr]";
-    array_fn_name  = "evaluate(array) [expr,mask,expr,mask,expr]";
-    get_expected = &expected_val2;
-  } else if (num == 3) {
-    scalar_fn_name = "evaluate(scalar) [expr,mask(png),expr]";
-    array_fn_name  = "evaluate(array) [expr,mask(png),expr]";
-    get_expected = &expected_val3;
-  } else {
-    ERROR("test_value_obj_", "the num argument must be 1, 2, or 3");
+    data.field_cells(xv,yv,zv);
   }
 
+  // setup array where outputs will get stored
+  double dvalues[n];
+  for (int i=0; i<n; i++) dvalues[i] = -999.0;
+
+  // get the description and func ptr that yields expected value for test case
+  std::string descr;
+  double (*expect_fn)(double, double, double, double);
+  switch (num) {
+    case 1: descr = "[expr]";                     expect_fn = &expected1; break;
+    case 2: descr = "[expr,mask,expr,mask,expr]"; expect_fn = &expected2; break;
+    case 3: descr = "[expr,mask(png),expr]";      expect_fn = &expected3; break;
+    default:  ERROR("test_value_obj_", "the num argument must be 1, 2, or 3");
+  }
+
+  // this function explicitly makes a copy of name to avoid lifetime issues
+  auto set_unit_func = [](std::string name) { unit_func(name.c_str()); };
+
+  // now, actually perform the tests:
+
   // test scalar evaluation
-  unit_func (scalar_fn_name);
-  unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) ==
-              get_expected(t,xv[0],yv[0],zv[0]));
+  set_unit_func ( "evaluate(scalar) " + descr);
+  unit_assert(value.evaluate(t,xv[0],yv[0],zv[0]) ==
+              expect_fn(t,xv[0],yv[0],zv[0]));
 
   // test evaluation over a full array
-  unit_func (array_fn_name);
-  value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
+  set_unit_func ( "evaluate(array) " + descr);
+  value.evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
 
   bool l_equal = true;
   for (int ix=0; ix<nx; ix++) {
-    double x=xv[ix];
     for (int iy=0; iy<ny; iy++) {
-      double y=yv[iy];
       for (int iz=0; iz<nz; iz++) {
         int i=ix+nx*(iy+ny*iz);
-        double z=zv[iz];
-        l_equal = l_equal &&  (dvalues[i] == get_expected(t,x,y,z));
+        l_equal = l_equal && (dvalues[i] == expect_fn(t,xv[ix],yv[iy],zv[iz]));
       }
     }
   }
@@ -172,7 +166,7 @@ PARALLEL_MAIN_BEGIN
     // test case 1
     {
       Value value = Value(&parameters, "Group:value1");
-      test_value_obj_(&value, 1);
+      test_value_obj_(value, 1);
     }
 
     //--------------------------------------------------
@@ -181,7 +175,7 @@ PARALLEL_MAIN_BEGIN
 
     {
       Value value = Value(&parameters, "Group:value2");
-      test_value_obj_(&value, 2);
+      test_value_obj_(value, 2);
     }
 
     //--------------------------------------------------
@@ -189,7 +183,7 @@ PARALLEL_MAIN_BEGIN
     // test case 3
     {
       Value value = Value(&parameters, "Group:value3");
-      test_value_obj_(&value, 3);
+      test_value_obj_(value, 3);
     }
 
     //----------------------------------------------------------------------
