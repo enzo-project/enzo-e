@@ -17,25 +17,8 @@ ScalarExpr::ScalarExpr (Param * param) throw()
 {
   if (param_->type() == parameter_float) {
     value_ = param_->get_float();
-    param_ = 0;
+    param_ = nullptr;
   }
-}
-
-//----------------------------------------------------------------------
-
-ScalarExpr::~ScalarExpr() throw()
-{
-  delete param_;
-  param_ = NULL;
-}
-
-//----------------------------------------------------------------------
-
-void ScalarExpr::copy_(const ScalarExpr & scalar_expr) throw()
-{
- 
-  param_ = (scalar_expr.param_) ? new Param(*scalar_expr.param_) : 0;
-  value_ = scalar_expr.value_;
 }
 
 //----------------------------------------------------------------------
@@ -69,6 +52,9 @@ void ScalarExpr::evaluate (T * value, double t,
 	  "value dimension (%d %d %d) needs to be at least (%d %d %d)",
 	  ndx,ndy,ndz,nx,ny,nz,
 	  (ndx >= nx) && (ndy >= ny) && (ndz >= nz));
+
+  // NOTE: it would be nice to include a fast-path that avoids all of the heap
+  // allocations when ((!param_) && (!mask)) - relevant for inflow boundaries
 
   bool * mv = 0;
   if (mask) {
