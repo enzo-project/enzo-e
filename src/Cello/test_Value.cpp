@@ -14,6 +14,8 @@
 
 #define EXPR1_VAL  (1.0*x + 2.0*y - 5.0*z + t)
 #define EXPR1_STR "(1.0*x + 2.0*y - 5.0*z + t)"
+double expected_val1(double t, double x, double y, double z) noexcept
+{ return EXPR1_VAL; }
 
 #define EXPR2_VAL1  (1.0 + 2.0*x + 4.0*y + 8.0*z + 16.0*t)
 #define EXPR2_STR1 "(1.0 + 2.0*x + 4.0*y + 8.0*z + 16.0*t)"
@@ -26,12 +28,24 @@
 #define EXPR2_VAL3  (100.0 - 1.0*x - 2.0*y - 5.0*z - t)
 #define EXPR2_STR3 "(100.0 - 1.0*x - 2.0*y - 5.0*z - t)"
 
+double expected_val2(double t, double x, double y, double z) noexcept
+{
+  return (MASK2_VAL1 ? (EXPR2_VAL1)
+                     : ( (MASK2_VAL2 ? (EXPR2_VAL2)
+                                     : (EXPR2_VAL3) ))
+         );
+}
+
 #define EXPR3_VAL1  (t + 10.0*x + 100.0*y + 1000.0*z)
 #define EXPR3_STR1 "(t + 10.0*x + 100.0*y + 1000.0*z)"
 #define MASK3_VAL1  (x + y >= 1.99 || y - x > 2.001)
 #define MASK3_STR1  "\"input/testValue.png\""
 #define EXPR3_VAL2  (1.0 - t - 10.0*x - 100.0*y - 1000.0*z)
 #define EXPR3_STR2 "(1.0 - t - 10.0*x - 100.0*y - 1000.0*z)"
+
+double expected_val3(double t, double x, double y, double z) noexcept
+{ return (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2)); }
+
 //----------------------------------------------------------------------
 
 void generate_input()
@@ -84,90 +98,50 @@ void test_value_obj_(const Value* value, int num) {
 
   data.field_cells(xv,yv,zv);
 
-  double x=xv[0];
-  double y=yv[0];
-  double z=zv[0];
-
   unit_assert (value != NULL);
 
+  const char* scalar_fn_name;
+  const char* array_fn_name;
+  double (*get_expected)(double, double, double, double);
+
   if (num == 1) {
-    unit_func ("evaluate(scalar) [expr] ");
-    unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) == EXPR1_VAL);
-
-    unit_func ("evaluate(array) [expr]");
-    value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
-
-    bool l_equal = true;
-    for (int ix=0; ix<nx; ix++) {
-      double x=xv[ix];
-      for (int iy=0; iy<ny; iy++) {
-        double y=yv[iy];
-        for (int iz=0; iz<nz; iz++) {
-          int i=ix+nx*(iy+ny*iz);
-          double z=zv[iz];
-          l_equal = l_equal &&  (dvalues[i] == EXPR1_VAL);
-        }
-      }
-    }
-    unit_assert (l_equal);
-
+    scalar_fn_name = "evaluate(scalar) [expr] ";
+    array_fn_name  = "evaluate(array) [expr]";
+    get_expected = &expected_val1;
   } else if (num == 2) {
-    unit_func ("evaluate(scalar) [expr,mask,expr,mask,expr]");
-    double val2 = (MASK2_VAL1 ? (EXPR2_VAL1)
-                              : ( (MASK2_VAL2 ? (EXPR2_VAL2)
-                                              : (EXPR2_VAL3) ))
-                   );
-    unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) == val2);
-
-    unit_func ("evaluate(array) [expr,mask,expr,mask,expr]");
-    value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
-
-    bool l_equal = true;
-    for (int ix=0; ix<nx; ix++) {
-      double x=xv[ix];
-      for (int iy=0; iy<ny; iy++) {
-        double y=yv[iy];
-        for (int iz=0; iz<nz; iz++) {
-          int i=ix+nx*(iy+ny*iz);
-          double z=zv[iz];
-          val2 = (MASK2_VAL1 ? (EXPR2_VAL1)
-                              : ( (MASK2_VAL2 ? (EXPR2_VAL2)
-                                              : (EXPR2_VAL3) ))
-                 );
-          l_equal = l_equal &&  (dvalues[i] == val2);
-        }
-      }
-    }
-
-    unit_assert (l_equal);
-
+    scalar_fn_name = "evaluate(scalar) [expr,mask,expr,mask,expr]";
+    array_fn_name  = "evaluate(array) [expr,mask,expr,mask,expr]";
+    get_expected = &expected_val2;
   } else if (num == 3) {
-    unit_func ("evaluate(scalar) [expr,mask(png),expr]");
-    double val3 = (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2));
-    unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) == val3);
-
-    unit_func ("evaluate(array) [expr,mask(png),expr]");
-    value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
-
-    bool l_equal = true;
-    for (int ix=0; ix<nx; ix++) {
-      double x=xv[ix];
-      for (int iy=0; iy<ny; iy++) {
-        double y=yv[iy];
-        for (int iz=0; iz<nz; iz++) {
-          int i=ix+nx*(iy+ny*iz);
-          double z=zv[iz];
-          val3 = (MASK3_VAL1 ? (EXPR3_VAL1) : (EXPR3_VAL2));
-          l_equal = l_equal &&  (dvalues[i] == val3);
-        }
-      }
-    }
-
-  unit_assert (l_equal);
-
+    scalar_fn_name = "evaluate(scalar) [expr,mask(png),expr]";
+    array_fn_name  = "evaluate(array) [expr,mask(png),expr]";
+    get_expected = &expected_val3;
   } else {
     ERROR("test_value_obj_", "the num argument must be 1, 2, or 3");
   }
+
+  // test scalar evaluation
+  unit_func (scalar_fn_name);
+  unit_assert(value->evaluate(t,xv[0],yv[0],zv[0]) ==
+              get_expected(t,xv[0],yv[0],zv[0]));
+
+  // test evaluation over a full array
+  unit_func (array_fn_name);
+  value->evaluate(dvalues,t,nx,nx,xv,ny,ny,yv,nz,nz,zv);
+
+  bool l_equal = true;
+  for (int ix=0; ix<nx; ix++) {
+    double x=xv[ix];
+    for (int iy=0; iy<ny; iy++) {
+      double y=yv[iy];
+      for (int iz=0; iz<nz; iz++) {
+        int i=ix+nx*(iy+ny*iz);
+        double z=zv[iz];
+        l_equal = l_equal &&  (dvalues[i] == get_expected(t,x,y,z));
+      }
+    }
+  }
+  unit_assert (l_equal);
 
 }
 
