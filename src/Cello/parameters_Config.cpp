@@ -421,8 +421,14 @@ void Config::read_boundary_ (Parameters * p) throw()
 
   for (int ib=0; ib<num_boundary; ib++) {
 
-    boundary_list[ib] = multi_boundary ?
-      p->list_value_string(ib,"Boundary:list","unknown") : "boundary";
+    if (!multi_boundary){
+      boundary_list[ib] = "#boundary#";
+    } else {
+      boundary_list[ib] = p->list_value_string(ib,"Boundary:list","unknown");
+      ASSERT("Config::read_boundary_()",
+             "'#' character can't appear in any strings in Boundary:list",
+             boundary_list[ib].find('#') == std::string::npos);
+    }
 
     std::string prefix = "Boundary:";
 

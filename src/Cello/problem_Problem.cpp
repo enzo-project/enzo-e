@@ -143,9 +143,18 @@ void Problem::initialize_boundary(Config * config,
 
     Boundary * boundary = create_boundary_(type,index,config,parameters);
 
-    ASSERT1("Problem::initialize_boundary",
-	  "Boundary type %s not recognized",
-	  type.c_str(),  boundary != nullptr);
+    if (boundary == nullptr) {
+      // the default err_prefix assumes a single boundary (and Boundary::list)
+      // wasn't used
+      std::string err_prefix = "";
+      if (config->boundary_list[index].find('#') == std::string::npos){
+        err_prefix = "\"Boundary:" + config->boundary_list[index] + "\" has ";
+      }
+
+      ERROR2("Problem::initialize_boundary",
+             "%sunrecognized Boundary type: \"%s\"",
+             err_prefix.c_str(), type.c_str());
+    }
 
     boundary_list_.push_back(boundary);
   }
