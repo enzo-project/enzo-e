@@ -139,10 +139,12 @@
 
      yedge {
          type = "outflow";
+         axis = "y";
      };
 
      zedge {
          type = "outflow";
+         axis = "z";
      };
  }
 
