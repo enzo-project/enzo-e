@@ -60,6 +60,9 @@ public: // interface
 
   double evaluate (double t, double x, double y, double z) const throw ();
 
+  /// returns a string that summarizes contents (for debugging)
+  std::string debug_string() const throw();
+
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change

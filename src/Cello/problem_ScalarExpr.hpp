@@ -99,6 +99,10 @@ public: // interface
     evaluate(value,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,0,0);
   }
 
+
+  /// method used for debugging
+  std::string expr_to_string() const throw();
+
 private: // attributes
 
   /// Value if param_ type is precision_float_expr

@@ -150,3 +150,15 @@ template void ScalarExpr::evaluate
  int ndz, int nz, double * z, 
  std::shared_ptr<Mask> mask, long double * deflt) const;
 
+//----------------------------------------------------------------------
+
+std::string ScalarExpr::expr_to_string() const throw()
+{
+  if (param_){
+    return param_->value_to_string(param_write_monitor);
+  } else {
+    char buffer[25] = "";
+    sprintf(buffer, "%#.16g", value_);
+    return std::string(buffer);
+  }
+}

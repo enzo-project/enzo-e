@@ -103,3 +103,15 @@ template void Value::evaluate
  int ndz, int nz, double * z) const throw ();
 
 //----------------------------------------------------------------------
+
+std::string Value::debug_string() const throw()
+{
+  std::string out = "Value{";
+  for (std::size_t i = 0; i < scalar_expr_list_.size(); i++) {
+    out += scalar_expr_list_[i].expr_to_string();
+    if (i < mask_list_.size() && (mask_list_[i] != nullptr)) {
+      out += ", mask, ";
+    }
+  }
+  return out + '}';
+}
