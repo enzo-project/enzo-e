@@ -77,6 +77,8 @@ Parameters specific to individual initializers are specified in subgroups.
 
 ----
 
+.. _value-initializer-param-ref:
+
 value
 -----
 
