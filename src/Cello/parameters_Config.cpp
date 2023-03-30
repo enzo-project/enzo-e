@@ -45,6 +45,7 @@ void Config::pup (PUP::er &p)
   // Balance
 
   p | balance_schedule_index;
+  p | balance_type;
 
   // Boundary
 
@@ -375,8 +376,6 @@ void Config::read_adapt_ (Parameters * p) throw()
     } else {
       adapt_schedule_index[ia] = -1;
     }
-
-    
   }
 }
 
@@ -389,6 +388,13 @@ void Config::read_balance_ (Parameters * p) throw()
   //--------------------------------------------------
 
   p->group_clear();
+
+  balance_type = p->value_string ("Balance:type","charm");
+  ASSERT1 ("Config::read_balance_",
+          "Unknown Balance:type parameter %s; valid are \"charm\" or \"cello\"",
+           balance_type.c_str(),
+           ((balance_type == "charm") ||
+            (balance_type == "cello")));
 
   const bool balance_scheduled = 
     (p->type("Balance:schedule:var") != parameter_unknown);

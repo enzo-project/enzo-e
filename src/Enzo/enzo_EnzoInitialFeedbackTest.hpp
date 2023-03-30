@@ -43,6 +43,7 @@ private:
   int num_particles;
   std::vector<double> position[3];
   std::vector<double> mass;
+  std::vector<double> luminosity;
 
 };
 
