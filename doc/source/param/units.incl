@@ -1,43 +1,47 @@
 
 
-:Parameter:  :p:`Units` : :p:`length`
-:Summary: :s:`Units scaling factor for length`
-:Type:    :t:`double`
-:Default: :d:`1.0`
-:Scope:     :c:`Cello`
+.. par:parameter:: Units:length
 
-:e:`Units scaling factor for length.`
+   :Summary: :s:`Units scaling factor for length`
+   :Type:    :par:typefmt:`double`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Cello`
 
-----
-
-
-:Parameter:  :p:`Units` : :p:`mass`
-:Summary: :s:`Units scaling factor for mass`
-:Type:    :t:`double`
-:Default: :d:`1.0`
-:Scope:     :c:`Cello`
-
-:e:`Units scaling factor for mass.  Only one of mass and density Units parameters can be initialized to	≠ 0.`
+   :e:`Units scaling factor for length.`
 
 ----
 
 
-:Parameter:  :p:`Units` : :p:`time`
-:Summary: :s:`Units scaling factor for time`
-:Type:    :t:`double`
-:Default: :d:`1.0`
-:Scope:     :c:`Cello`
+.. par:parameter:: Units:mass
 
-:e:`Units scaling factor for time.`
+   :Summary: :s:`Units scaling factor for mass`
+   :Type:    :par:typefmt:`double`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Cello`
+
+   :e:`Units scaling factor for mass.  Only one of mass and density Units parameters can be initialized to	≠ 0.`
 
 ----
 
 
-:Parameter:  :p:`Units` : :p:`density`
-:Summary: :s:`Units scaling factor for density`
-:Type:    :t:`double`
-:Default: :d:`1.0`
-:Scope:     :c:`Cello`
+.. par:parameter:: Units:time
 
-:e:`Units scaling factor for density.  Only one of mass and density Units parameters can be initialized to	≠ 0.`
+   :Summary: :s:`Units scaling factor for time`
+   :Type:    :par:typefmt:`double`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Cello`
+
+   :e:`Units scaling factor for time.`
+
+----
+
+
+.. par:parameter:: Units:density
+
+   :Summary: :s:`Units scaling factor for density`
+   :Type:    :par:typefmt:`double`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Cello`
+
+   :e:`Units scaling factor for density.  Only one of mass and density Units parameters can be initialized to	≠ 0.`
 
