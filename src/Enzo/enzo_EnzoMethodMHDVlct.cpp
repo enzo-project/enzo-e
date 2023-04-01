@@ -54,9 +54,6 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
          fluid_floor_config.has_density_floor() &
          fluid_floor_config.has_pressure_floor());
 
-  // Initialize equation of state (check the validity of quantity floors)
-  eos_ = new EnzoEOSIdeal(fluid_props->gamma());
-
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
     // we can remove the following once EnzoMethodGrackle no longer requires
@@ -162,7 +159,6 @@ EnzoMethodMHDVlct::bfield_choice EnzoMethodMHDVlct::parse_bfield_choice_
 
 EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
 {
-  delete eos_;
   delete half_dt_recon_;
   delete full_dt_recon_;
   delete riemann_solver_;
@@ -185,7 +181,6 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p|eos_;
   p|half_dt_recon_;
   p|full_dt_recon_;
   p|riemann_solver_;
@@ -706,7 +701,7 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   fluid_props->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities
-  const enzo_float gamma = eos_->get_gamma();
+  const enzo_float gamma = fluid_props->gamma();
   EFlt3DArray density = integration_map.at("density");
   EFlt3DArray velocity_x = integration_map.at("velocity_x");
   EFlt3DArray velocity_y = integration_map.at("velocity_y");

@@ -221,10 +221,6 @@ extern "C" {
 #include "enzo_EnzoBondiHoyleSinkParticle.hpp"
 #include "enzo_EnzoFluxSinkParticle.hpp"
 
-// [order dependencies:]
-#include "enzo_EnzoEquationOfState.hpp"
-#include "enzo_EnzoEOSIdeal.hpp"
-
 #include "enzo_EnzoCenteredFieldRegistry.hpp"
 #include "enzo_EnzoFieldAdaptor.hpp"
 #include "enzo_EnzoIntegrationQuanUpdate.hpp"
