@@ -24,7 +24,7 @@ The ``par`` extension
 We have also written an extension for Sphinx to assist with formatting Cello/Enzo-E's parameters, called ``par``.
 At present, this extension provides 3 primary features:
 
-    1. A directive called, :rst:dir:`par:parameter`, that is to be used when defining a new parameter in the reference section.
+    1. A directive called :rst:dir:`par:parameter` that is to be used when defining a new parameter in the reference section.
        Parameters defined with this directive automatically provide an anchor point to facillitate cross-referencing (i.e. using the :rst:role:`par:param` role).
 
     2. Pretty-formatting of parameter names.
