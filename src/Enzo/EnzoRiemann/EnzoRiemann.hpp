@@ -89,7 +89,6 @@ public: // interface
   ///     having values on the exterior faces of the block)
   /// @param[in]     dim Dimension along which to compute Riemann fluxes.
   ///     Values of 0, 1, and 2 correspond to the x, y, and z directions.
-  /// @param[in]     eos Instance of the fluid's EnzoEquationOfState object
   /// @param[in]     stale_depth indicates the current stale_depth.
   /// @param[in]     passive_list A list of keys for passive scalars.
   /// @param[in,out] interface_velocity Pointer to an array to hold the
@@ -111,8 +110,8 @@ public: // interface
   /// return `true` in each case.
   virtual void solve
   (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
-   EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
-   const int stale_depth, const str_vec_t &passive_list,
+   EnzoEFltArrayMap &flux_map, const int dim, const int stale_depth,
+   const str_vec_t &passive_list,
    const CelloArray<enzo_float,3> * const interface_velocity) const = 0;
 
   /// Return the expected keys (and key-order) that the `solve` method expects

@@ -616,7 +616,7 @@ void EnzoMethodMHDVlct::compute_flux_
   }
 
   // Next, compute the fluxes
-  riemann_solver_->solve(priml_map, primr_map, flux_map, dim, eos_,
+  riemann_solver_->solve(priml_map, primr_map, flux_map, dim,
                          cur_stale_depth, passive_list,
                          interface_velocity_arr_ptr);
 

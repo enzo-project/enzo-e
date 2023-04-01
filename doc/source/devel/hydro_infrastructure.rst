@@ -556,7 +556,7 @@ The main interface function of ``EnzoRiemann`` is:
 
    void solve(const EnzoEFltArrayMap &prim_map_l,
               const EnzoEFltArrayMap &prim_map_r,
-              EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
+              EnzoEFltArrayMap &flux_map, int dim,
               int stale_depth, const str_vec_t &passive_list,
               const CelloArray<enzo_float,3> * const interface_velocity) const;
 

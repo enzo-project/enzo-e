@@ -197,7 +197,7 @@ public: // interface
   void solve (const EnzoEFltArrayMap &prim_map_l,
 	      const EnzoEFltArrayMap &prim_map_r,
               EnzoEFltArrayMap &flux_map, const int dim,
-	      const EnzoEquationOfState *eos, const int stale_depth,
+	      const int stale_depth,
 	      const str_vec_t &passive_list,
               const CelloArray<enzo_float,3> * const interface_velocity) const;
 
@@ -265,14 +265,14 @@ EnzoRiemannImpl<KernelFunctor>::EnzoRiemannImpl
 template <class KernelFunctor>
 void EnzoRiemannImpl<KernelFunctor>::solve
 (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
- EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
+ EnzoEFltArrayMap &flux_map, const int dim,
  const int stale_depth, const str_vec_t &passive_list,
  const CelloArray<enzo_float,3> * const interface_velocity) const
 {
 
   // Currently just going to assume that we have an Ideal Equation of State
   // (should probably test that...)
-  const enzo_float gamma = eos->get_gamma();
+  const enzo_float gamma = enzo::fluid_props()->gamma();
   const EOSStructIdeal eos_struct = {gamma};
 
   static_assert(std::is_same<EOSStructIdeal, EOSStructT>::value,
