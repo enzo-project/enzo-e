@@ -165,6 +165,11 @@ extern "C" {
 
 #include "enzo_EnzoPhysicsCosmology.hpp"
 
+// [order dependencies:]
+#include "enzo_EnzoEOSIdeal.hpp"
+#include "enzo_EnzoEOSIsothermal.hpp"
+#include "enzo_EnzoEOSVariant.hpp"
+
 #include "enzo_EnzoDualEnergyConfig.hpp"
 #include "enzo_EnzoFluidFloorConfig.hpp"
 #include "enzo_EnzoPhysicsFluidProps.hpp"

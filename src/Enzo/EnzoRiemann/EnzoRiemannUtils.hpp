@@ -18,26 +18,6 @@
 
 //----------------------------------------------------------------------
 
-namespace{
-
-  /// computes the squared magnitude of a 3D vector
-  ///
-  /// @note
-  /// This function uses parentheses to dictate the order of operations.
-  /// This is primarily done to take advantage of the `-fprotect-parens` flag
-  /// provided by several mainstream c++ compilers (e.g. gcc, clang, icpc).
-  /// This flag will honor the order of operations specified by parentheses
-  /// even when value-unsafe optimizations for floating-point operations are
-  /// enabled (e.g. -ffast-math).
-  FORCE_INLINE enzo_float squared_mag_vec3D(enzo_float i,
-                                            enzo_float j,
-                                            enzo_float k) noexcept
-  { return ((i*i) + ((j*j) + (k*k))); }
-
-}
-
-//----------------------------------------------------------------------
-
 struct EOSStructIdeal{
   /// @class    EOSStructIdeal
   /// @ingroup  Enzo
@@ -105,7 +85,8 @@ public:
                                             const enzo_float bfield_k)
     const noexcept
   {
-    const enzo_float B2 = squared_mag_vec3D(bfield_i, bfield_j, bfield_k);
+    const enzo_float B2 = enzo_utils::squared_mag_vec3D(bfield_i, bfield_j,
+                                                        bfield_k);
     const enzo_float cs2 = sound_speed_sq_(density, pressure);
 
     // the following branch is evaluated at compile-time
@@ -137,7 +118,7 @@ namespace enzo_riemann_utils{
     enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
     enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
     enzo_float bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
-    return 0.5 * squared_mag_vec3D(bi, bj, bk);
+    return 0.5 * enzo_utils::squared_mag_vec3D(bi, bj, bk);
   }
 
   //----------------------------------------------------------------------
@@ -179,7 +160,7 @@ namespace enzo_riemann_utils{
       const enzo_float vj = prim[LUT::velocity_j];
       const enzo_float vk = prim[LUT::velocity_k];
       const enzo_float kinetic_edens
-        = 0.5 * density * squared_mag_vec3D(vi, vj, vk);
+        = 0.5 * density * enzo_utils::squared_mag_vec3D(vi, vj, vk);
 
       enzo_float magnetic_edens = mag_pressure<LUT>(prim);
 

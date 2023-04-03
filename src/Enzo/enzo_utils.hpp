@@ -11,6 +11,26 @@
 /// Namespace for global constants and functions
 namespace enzo_utils {
 
+  /// computes the squared magnitude of a 3D vector
+  ///
+  /// @note
+  /// This function uses parentheses to dictate the order of operations.
+  /// This is primarily done to take advantage of the `-fprotect-parens` flag
+  /// provided by several mainstream c++ compilers (e.g. gcc, clang, icpc).
+  /// This flag will honor the order of operations specified by parentheses
+  /// even when value-unsafe optimizations for floating-point operations are
+  /// enabled (e.g. -ffast-math).
+  ///
+  /// @note
+  /// The choice to annotate this function with FORCE_INLINE was made while
+  /// optimizing the Riemann Solvers
+  FORCE_INLINE enzo_float squared_mag_vec3D(enzo_float i,
+                                            enzo_float j,
+                                            enzo_float k) noexcept
+  { return ((i*i) + ((j*j) + (k*k))); }
+
+  //----------------------------------------------------------------------
+
   /// Applies the floor to a quantity.
   ///
   /// This function has primarily been factored out to allow for identifying
