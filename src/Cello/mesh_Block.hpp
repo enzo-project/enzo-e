@@ -260,7 +260,10 @@ public: // interface
   //--------------------------------------------------
 
   /// Initiate applying the sequence of Initial conditions
-  void initial_new_begin_(int level);
+  void r_initial_new_begin(CkReductionMsg * msg)
+  { delete msg; initial_new_begin_(); }
+  void initial_new_begin_();
+
   /// Continue to the next Initial conditions object
   void r_initial_new_next(CkReductionMsg * msg)
   { delete msg; initial_new_next_(); }
