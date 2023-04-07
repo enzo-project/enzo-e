@@ -537,7 +537,8 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
     const bool initial_new = cello::config()->initial_new;
     if (initial_new) {
 
-      initial_new_begin_(0);
+      // TODO: Move to control_charm??
+      control_sync_barrier (CkIndex_Block::r_initial_new_begin(NULL));
 
     } else {
       // Apply initial conditions

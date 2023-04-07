@@ -168,6 +168,7 @@ void EnzoInitialHdf5::enforce_block
     }
   }
 
+  initialize_particle_mass(block);
   block->initial_done();
 }
 
@@ -269,6 +270,7 @@ void EnzoInitialHdf5::recv_data (Block * block, MsgInitial * msg_initial)
     // reset for next call (note not resetting at start since may get
     // called after messages received)
     sync_msg->reset();
+    initialize_particle_mass(block);
     block->initial_done();
   }
   delete msg_initial;
@@ -293,13 +295,52 @@ void EnzoInitialHdf5::root_block_range_(Index index, int array_lower[3], int arr
 {
   // Get array-of-octrees blocking
   int root_blocks[3];
-  cello::hierarchy()->root_blocks
-    (root_blocks,  root_blocks+1, root_blocks+2);
+  cello::hierarchy()->root_blocks(root_blocks,  root_blocks+1, root_blocks+2);
   // Get this (reader) block index in root blocking
   index.array(array_lower, array_lower+1,array_lower+2);
   array_upper[0] = std::min(array_lower[0] + blocking_[0],root_blocks[0]);
   array_upper[1] = std::min(array_lower[1] + blocking_[1],root_blocks[1]);
   array_upper[2] = std::min(array_lower[2] + blocking_[2],root_blocks[2]);
+}
+
+void EnzoInitialHdf5::initialize_particle_mass(Block * block) {
+  Particle particle = block->data()->particle();
+  int divisor = std::pow(std::pow(2.0, cello::rank()), block->level());
+
+  for (int it=0; it<particle.num_types(); it++) {
+    if (particle.has_constant(it, "root_level_mass")) {
+      //TODO: print warning if masses read from data file is being over written
+
+      int ic = particle.constant_index(it, "root_level_mass");
+      int ia = particle.attribute_index(it, "mass");
+
+      union {
+        float *  array_float;
+        double * array_double;
+      };
+
+      int type_array = particle.attribute_type(it,ia);
+
+      if (type_array == type_single) {
+        float*  root_mass = (float*)  particle.constant_value(it, ic);
+        initialize_particle_mass(array_float,  particle, it, ia, ((float)  *root_mass) / divisor);
+      } else if (type_array == type_double) {
+        double* root_mass = (double*) particle.constant_value(it, ic);
+        initialize_particle_mass(array_double, particle, it, ia, ((double) *root_mass) / divisor);
+      }
+    }
+  }
+}
+
+template <class T>
+void EnzoInitialHdf5::initialize_particle_mass(T * array, Particle particle, int it, int ia, T mass) {
+  int np = particle.num_particles(it);
+  for (int ip=0; ip<np; ip++) {
+    int ib, io;
+    particle.index(ip,&ib,&io);
+    array = (T*) particle.attribute_array(it,ia,ib);
+    array[io] = mass;
+  }
 }
 
 

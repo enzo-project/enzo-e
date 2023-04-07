@@ -98,7 +98,7 @@ void Simulation::r_initialize_block_array(CkReductionMsg * msg)
 // NEW INITIAL
 //======================================================================
 
-void  Block::initial_new_begin_(int level)
+void  Block::initial_new_begin_()
 {
   TRACE_INITIAL("initial_new_begin_",this);
   index_initial_ = 0;

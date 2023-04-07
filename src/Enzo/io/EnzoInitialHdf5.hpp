@@ -215,6 +215,12 @@ public: // interface
   // Use the provided DataLoader to load data onto blocks at the specified level.
   void load_data(int & count_messages, Block * block, int level, int min_level, DataLoader & loader);
 
+    // initialize particle masses from root level mass constant.
+  void initialize_particle_mass(Block * block);
+
+  template <class T>
+  void initialize_particle_mass(T * array, Particle particle, int it, int ia, T mass);
+
 protected: // functions
  
 /// Access the Sync counter for messages
