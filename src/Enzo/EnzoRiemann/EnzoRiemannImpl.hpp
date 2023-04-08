@@ -272,11 +272,8 @@ void EnzoRiemannImpl<KernelFunctor>::solve
 
   // Currently just going to assume that we have an Ideal Equation of State
   // (should probably test that...)
-  const enzo_float gamma = enzo::fluid_props()->gamma();
-  const EOSStructIdeal eos_struct = {gamma};
-
-  static_assert(std::is_same<EOSStructIdeal, EOSStructT>::value,
-                "We currently assume that all EOSs are ideal");
+  const EnzoEOSIdeal eos_struct
+    = enzo::fluid_props()->eos_variant().get<EnzoEOSIdeal>();
 
   // The strategy is to allocate some scratch space for internal_energy_flux &
   // velocity_i_bar_array, even if we don't care about dual-energy in order to
