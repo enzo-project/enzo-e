@@ -184,10 +184,10 @@ public: // interface
   {
     cleanup_(); // if we skipped the default constructor, we could also
                 // skip this, but let's just be safe
-    switch(tag_) {
+    switch(other.tag_) {
       #define EOS_ENTRY_(IND, T)                                             \
         case IND: {                                                          \
-          this->ptr_union_.alt_##IND = new T(*other.ptr_union_.alt_##IND);   \
+          this->ptr_union_.alt_##IND = new T{*other.ptr_union_.alt_##IND};   \
           break;                                                             \
         }
       EOS_ALTERNATIVE_LIST
