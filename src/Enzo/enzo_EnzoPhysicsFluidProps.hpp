@@ -22,11 +22,12 @@ public: // interface
   /// Constructor
   EnzoPhysicsFluidProps(const EnzoDualEnergyConfig& de_config,
                         const EnzoFluidFloorConfig& fluid_floor_config,
-                        enzo_float gamma, enzo_float mol_weight) noexcept
+                        const EnzoEOSVariant& eos_variant,
+                        enzo_float mol_weight) noexcept
   : Physics(),
     de_config_(de_config),
     fluid_floor_config_(fluid_floor_config),
-    gamma_(gamma),
+    eos_variant_(eos_variant),
     mol_weight_(mol_weight)
   { }
 
@@ -49,7 +50,7 @@ public: // interface
 
     p|de_config_;
     p|fluid_floor_config_;
-    p|gamma_;
+    ::pup(p,eos_variant_);
     p|mol_weight_;
   }
 
@@ -57,15 +58,24 @@ public: // interface
   const EnzoDualEnergyConfig& dual_energy_config() const noexcept
   { return de_config_; }
 
+  /// Access the fluid-floor properties
   const EnzoFluidFloorConfig& fluid_floor_config() const noexcept
   { return fluid_floor_config_; }
 
-  enzo_float gamma() const noexcept
-  { return gamma_; }
+  /// Access the EOS
+  const EnzoEOSVariant& eos_variant() const noexcept
+  { return eos_variant_; }
 
-  /// in the future, it might make sense to move this method to the EOS itself
-  bool has_barotropic_eos() const noexcept
-  { return false; }
+  /// Utility method that tries to retrieve gamma from the stored eos_variant.
+  /// When the stored eos variant doesn't contain a value of gamma, the program
+  /// aborts with an error.
+  ///
+  /// If you want to provide alternate behavior for the case in which gamma
+  /// isn't defined, you should really be querying the eos_variant directly.
+  enzo_float gamma() const noexcept;
+
+  /// Utility method that retrieves whether the stored eos is barotropic
+  bool has_barotropic_eos() const noexcept;
 
   enzo_float mol_weight() const noexcept
   { return mol_weight_; }
@@ -157,11 +167,17 @@ private: // attributes
   EnzoDualEnergyConfig de_config_;
   EnzoFluidFloorConfig fluid_floor_config_;
 
-  /// the adiabatic index used for hydro-related calculations.
+  /// stores the fully-configured EOS object (which may itself store
+  /// information like adiabatic index). The information stored within an EOS
+  /// object is primarily relevant for hydro-related quantities.
+  ///
+  /// Currently, it doesn't really track properties that are related to
+  /// temperature (such as molecular weight).
   ///
   /// When Grackle is configured with primordial_chemistry>1, its routines will
-  /// use a different value of gamma.
-  enzo_float gamma_;
+  /// use a different value of gamma than the one stored within the EOS tracked
+  /// by eos_variant_ (the tracked EOS should presumably track an ideal gas)
+  EnzoEOSVariant eos_variant_;
 
   /// the nominal mean molecular weight (i.e. this multiplied by the mass of
   /// hydrogen gives mean molecular mass)

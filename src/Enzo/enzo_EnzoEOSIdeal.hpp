@@ -62,6 +62,16 @@ private:
 
 public:
 
+  /// static method used to build the EnzoEOSIdeal object
+  ///
+  /// this is a static method (not a constructor) in order to ensure that this
+  /// struct is considered an aggregate
+  static EnzoEOSIdeal construct(double gamma) noexcept
+  {
+    ASSERT("EnzoEOSIdeal::construct", "gamma should exceed 1.0", gamma > 1.0);
+    return {gamma};
+  }
+
   /// returns the adiabatic index
   FORCE_INLINE enzo_float get_gamma() const noexcept { return gamma; }
 

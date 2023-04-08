@@ -144,8 +144,8 @@ public: // interface
       physics_cosmology_final_redshift(0.0),
       // FluidProps
       physics_fluid_props_de_config(),
+      physics_fluid_props_eos_variant(),
       physics_fluid_props_fluid_floor_config(),
-      physics_fluid_props_gamma(0.0),
       physics_fluid_props_mol_weight(0.0),
       // Gravity
       physics_gravity(false),
@@ -617,8 +617,8 @@ public: // attributes
 
   /// FluidProps
   EnzoDualEnergyConfig       physics_fluid_props_de_config;
+  EnzoEOSVariant             physics_fluid_props_eos_variant;
   EnzoFluidFloorConfig       physics_fluid_props_fluid_floor_config;
-  double                     physics_fluid_props_gamma;
   double                     physics_fluid_props_mol_weight;
 
   /// Gravity

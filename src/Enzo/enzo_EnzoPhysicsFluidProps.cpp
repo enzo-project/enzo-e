@@ -10,6 +10,56 @@
 
 //----------------------------------------------------------------------
 
+namespace { // define helper struct only used in this function
+  struct NameVisitor {
+    template<typename T> std::string operator()(T obj) { return T::name(); }
+  };
+}
+
+enzo_float EnzoPhysicsFluidProps::gamma() const noexcept {
+
+  // in c++17 this whole function simplifies down to:
+  //
+  // return eos_variant_.visit([](auto eos) -> enzo_float {
+  //   using T = std::decay_t<decltype(eos)>;
+  //   if constexpr (std::is_same<T,EnzoEOSIdeal>::value) { return eos.gamma; }
+  //
+  //   std::string name = T::name();
+  //   ERROR1("EnzoPhysicsFluidProps::gamma()",
+  //          "can't return gamma for eos of type \"%s\". Either that type "
+  //          "doesn't support it OR it's a new type & this function has not "
+  //          "yet been updated to support it.", name.c_str());
+  //   }
+  // });
+
+  if (eos_variant_.holds_alternative<EnzoEOSIdeal>()) {
+    return eos_variant_.get<EnzoEOSIdeal>().gamma;
+  }
+
+  std::string name = eos_variant_.visit(NameVisitor());
+  ERROR1("EnzoPhysicsFluidProps::gamma()",
+         "can't return gamma for eos of type \"%s\". Either that type "
+         "doesn't support it OR it's a new type & this function has not "
+         "yet been updated to support it.", name.c_str());
+}
+
+//----------------------------------------------------------------------
+
+namespace { // define helper struct only used in this function
+  struct IsBarotropicVisitor {
+    template <typename T>
+    bool operator()(T eos) const { return T::is_barotropic(); }
+  };
+}
+
+bool EnzoPhysicsFluidProps::has_barotropic_eos() const noexcept {
+  // in c++14 this function simplifies down to:
+  // return eos_variant_.visit([](auto eos) { return eos.is_barotropic(); });
+  return eos_variant_.visit(IsBarotropicVisitor());
+}
+
+//----------------------------------------------------------------------
+
 void EnzoPhysicsFluidProps::primitive_from_integration
 (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
  const int stale_depth, const str_vec_t &passive_list,
