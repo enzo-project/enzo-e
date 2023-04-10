@@ -31,6 +31,21 @@ namespace enzo_utils {
 
   //----------------------------------------------------------------------
 
+  /// compute the minimum of 3 values
+  ///
+  /// @note
+  /// adapted from Enzo's ReconstructionRoutines.h
+  template <typename T>
+  T min(T a, T b, T c){
+    if (a<b) {
+      return (c<a) ? c : a;
+    } else {
+      return (c<b) ? c : b;
+    }
+  }
+
+  //----------------------------------------------------------------------
+
   /// Applies the floor to a quantity.
   ///
   /// This function has primarily been factored out to allow for identifying
@@ -52,6 +67,39 @@ namespace enzo_utils {
     out = std::max(value,floor);
     #endif
     return out;
+  }
+
+
+  /// Utiltity template function used for executing a Compute-Kernel (currently
+  /// only used for CPU bound tasks)
+  ///
+  /// This is most useful when K is a lambda
+  template<class K>
+  void exec_loop(int mz, int my, int mx, int stale_depth, K& kernel) {
+    const int rank = cello::rank();
+
+    const int ix_start = stale_depth;
+    const int ix_stop = mx - stale_depth;
+
+    const int iy_start = (rank > 1) ? stale_depth : 0;
+    const int iy_stop  = (rank > 1) ? my - stale_depth : my;
+
+    const int iz_start = (rank > 2) ? stale_depth : 0;
+    const int iz_stop  = (rank > 2) ? mz - stale_depth : mz;
+
+    if ((ix_start >= ix_stop) | (iy_start >= iy_stop) | (iz_start >= iz_stop)){
+      ERROR("enzo_utils::exec_loop", "stale_depth is too large");
+    } else if (stale_depth < 0){
+      ERROR("enzo_utils::exec_loop", "stale_depth is negative");
+    }
+
+    for (int iz = iz_start; iz < iz_stop; iz++){
+      for (int iy = iy_start; iy < iy_stop; iy++){
+        for (int ix = ix_start; ix < ix_stop; ix++){
+          kernel(iz, iy, ix);
+        }
+      }
+    }
   }
 
 }

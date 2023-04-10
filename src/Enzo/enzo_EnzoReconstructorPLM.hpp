@@ -272,24 +272,6 @@ inline enzo_float sign(enzo_float val) { return (0.0 < val) - (val < 0.0); }
 
 //----------------------------------------------------------------------
 
-// taken from Enzo's ReconstructionRoutines.h
-inline enzo_float Min(enzo_float a, enzo_float b, enzo_float c)
-{
-  if (a<b) {
-    if (c<a)
-      return c;
-    else 
-      return a;
-  } else {
-    if (c<b)
-      return c;
-    else 
-      return b;
-  }
-}
-
-//----------------------------------------------------------------------
-
 struct PLM_EnzoRKLimiter
 {
   /// @class    PLM_EnzoRKLimiter
@@ -332,8 +314,9 @@ struct PLM_EnzoRKLimiter
     //   +1   if (dv_l>0 & dv_r>0)
     //   -1   if (dv_l<0 & dv_r<0)
     //    0   if ((dv_l<0 & dv_r>0) || (dv_l<0 & dv_r>0))
-    // the Min function evaluates to 0 if (dv_l == 0 || dv_r == 0)
-    return (0.5*(sign(dv_l)+sign(dv_r)))*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c));
+    // the min function evaluates to 0 if (dv_l == 0 || dv_r == 0)
+    return (0.5*(sign(dv_l)+sign(dv_r))) *
+      enzo_utils::min<enzo_float>(fabs(dv_l),fabs(dv_r),fabs(dv_c));
   }
 };
 

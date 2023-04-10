@@ -96,6 +96,16 @@ public:
   /// @tparam fixed_cos2 When set to -1, this has no effect. When set to 0 or
   ///     to 1, this fixes cos2 to that value
   ///
+  /// The formula for the fast magnetosonic speed typically (cos(theta))^2
+  /// where theta is the angle between the velocity component. However, this
+  /// method is geared towards 2 main contexts:
+  ///    1) determining the signal speed as part of computing the maximum
+  ///       timestep (in that case we force (cos(theta))^2 to be 0).
+  ///    2) usage within the Riemann solver. In this context, we either want to
+  ///       assume that (cos(theta))^2 is 1 OR we assume that the velocity is
+  ///       entirely aligned with the ith dimension.
+  ///
+  /// @note
   /// This method has been implemented so that it will return the correct
   /// answer when all components of the magnetic field are set to 0.
   template<int fixed_cos2 = -1>
@@ -111,7 +121,12 @@ public:
     const enzo_float cs2 = sound_speed_sq_(density, pressure);
 
     // the following branch is evaluated at compile-time
-    if ((fixed_cos2 == 0) | (fixed_cos2 == 1)){
+    if (fixed_cos2 == 0) {
+      enzo_float va2 = B2/density;
+      return std::sqrt(va2+cs2);
+    } else if (fixed_cos2 == 1) {
+      // TODO: we can simplify the returned value, but that will affect the
+      //   exact outputs in some of our tests
       enzo_float va2 = B2/density;
       return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
                                               4.*cs2*va2*fixed_cos2)));

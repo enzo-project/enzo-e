@@ -697,66 +697,76 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   // Compute thermal pressure (this presently requires that "pressure" is a
   // permanent field)
   Field field = block->data()->field();
-  EFlt3DArray pressure = field.view<enzo_float>("pressure");
+  CelloArray<enzo_float, 3> pressure = field.view<enzo_float>("pressure");
   fluid_props->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities
-  const enzo_float gamma = fluid_props->gamma();
-  EFlt3DArray density = integration_map.at("density");
-  EFlt3DArray velocity_x = integration_map.at("velocity_x");
-  EFlt3DArray velocity_y = integration_map.at("velocity_y");
-  EFlt3DArray velocity_z = integration_map.at("velocity_z");
+  using RdOnlyEFltArr = CelloArray<const enzo_float, 3>;
+  const RdOnlyEFltArr density = integration_map.at("density");
 
-  const bool mhd = (mhd_choice_ != bfield_choice::no_bfield);
-  EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
-  if (mhd) {
-    bfieldc_x = integration_map.at("bfield_x");
-    bfieldc_y = integration_map.at("bfield_y");
-    bfieldc_z = integration_map.at("bfield_z");
-  }
+  const RdOnlyEFltArr velocity_x = integration_map.at("velocity_x");
+  const RdOnlyEFltArr velocity_y = integration_map.at("velocity_y");
+  const RdOnlyEFltArr velocity_z = integration_map.at("velocity_z");
+
+  // this will raise an error if not Ideal EOS
+  const EnzoEOSIdeal eos = fluid_props->eos_variant().get<EnzoEOSIdeal>();
 
   // widths of cells
   EnzoBlock * enzo_block = enzo::block(block);
-  double dx = enzo_block->CellWidth[0];
-  double dy = enzo_block->CellWidth[1];
-  double dz = enzo_block->CellWidth[2];
+  const double dx = enzo_block->CellWidth[0];
+  const double dy = enzo_block->CellWidth[1];
+  const double dz = enzo_block->CellWidth[2];
 
-  // initialize
-  double dtBaryons = ENZO_HUGE_VAL;
+  // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+signal_speed) for all
+  // dimensions.
+  //   - dr_i and v_i are the the width of the cell and velocity along
+  //     dimension i.
+  //   - signal_speed is sound speed without Bfields and fast-magnetosonic
+  //     speed with Bfields
 
-  // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+cfast) for all dimensions.
-  // dr_i and v_i are the the width of the cell and velocity along dimension i.
-  // cfast = fast magnetosonic speed (Convention is to use max value:
-  // cfast = (va^2+cs^2)
+  // initialize returned value
+  double dtBaryons = std::numeric_limits<double>::max();
 
-  for (int iz=0; iz<density.shape(0); iz++) {
-    for (int iy=0; iy<density.shape(1); iy++) {
-      for (int ix=0; ix<density.shape(2); ix++) {
-	enzo_float bmag_sq = 0.0;
-        if (mhd){
-          bmag_sq = (bfieldc_x(iz,iy,ix) * bfieldc_x(iz,iy,ix) +
-		     bfieldc_y(iz,iy,ix) * bfieldc_y(iz,iy,ix) +
-		     bfieldc_z(iz,iy,ix) * bfieldc_z(iz,iy,ix));
-        }
-	// Using "Rationalized" Gaussian units (where the magnetic permeability
-	// is mu=1 and pressure = B^2/2)
-	// To convert B to normal Gaussian units, multiply by sqrt(4*pi)
-	enzo_float inv_dens= 1./density(iz,iy,ix);
-	double cfast = (double) std::sqrt(gamma * pressure(iz,iy,ix) *
-					  inv_dens + bmag_sq * inv_dens);
+  if (mhd_choice_ == bfield_choice::no_bfield) {
+    auto loop_body = [=, &dtBaryons](int iz, int iy, int ix)
+      {
+        double cs = (double) eos.sound_speed(density(iz,iy,ix),
+                                             pressure(iz,iy,ix));
+        double local_dt = enzo_utils::min<double>
+          (dx/(std::fabs((double) velocity_x(iz,iy,ix)) + cs),
+           dy/(std::fabs((double) velocity_y(iz,iy,ix)) + cs),
+           dz/(std::fabs((double) velocity_z(iz,iy,ix)) + cs));
+        dtBaryons = std::min(dtBaryons, local_dt);
+      };
+    enzo_utils::exec_loop(density.shape(0), density.shape(1), density.shape(2),
+                          0, loop_body);
 
-	dtBaryons = std::min(dtBaryons,
-			     dx/(std::fabs((double) velocity_x(iz,iy,ix)) +
-				 cfast));
-	dtBaryons = std::min(dtBaryons,
-			     dy/(std::fabs((double) velocity_y(iz,iy,ix)) +
-				 cfast));
-	dtBaryons = std::min(dtBaryons,
-			     dz/(std::fabs((double) velocity_z(iz,iy,ix))
-				 + cfast));
-      }
-    }
+  } else {
+    const RdOnlyEFltArr bfieldc_x = integration_map.at("bfield_x");
+    const RdOnlyEFltArr bfieldc_y = integration_map.at("bfield_y");
+    const RdOnlyEFltArr bfieldc_z = integration_map.at("bfield_z");
+
+    auto loop_body = [=, &dtBaryons](int iz, int iy, int ix)
+      {
+        // if the bfield is 0 at any given point, the fast magnetosonic speed
+        // correctly reduces to the sound speed.
+        //
+        // We follow the convention of using the maximum value of the fast
+        // magnetosonic speed:     cfast = sqrt(va^2+cs^2)
+        double cfast = (double) eos.fast_magnetosonic_speed<0>
+          (density(iz,iy,ix), pressure(iz,iy,ix),
+           bfieldc_x(iz,iy,ix), bfieldc_y(iz,iy,ix), bfieldc_z(iz,iy,ix));
+
+        double local_dt = enzo_utils::min<double>
+           (dx/(std::fabs((double) velocity_x(iz,iy,ix)) + cfast),
+            dy/(std::fabs((double) velocity_y(iz,iy,ix)) + cfast),
+            dz/(std::fabs((double) velocity_z(iz,iy,ix)) + cfast));
+        dtBaryons = std::min(dtBaryons, local_dt);
+      };
+    enzo_utils::exec_loop(density.shape(0), density.shape(1), density.shape(2),
+                          0, loop_body);
   }
+
   // Multiply resulting dt by CourantSafetyNumber (for extra safety!).
   // This should be less than 0.5 for standard algorithm
   dtBaryons *= courant_;
