@@ -43,6 +43,9 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 {
   // check compatability with EnzoPhysicsFluidProps
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "can't currently handle the case with a non-ideal EOS",
+         fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>());
   const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
   ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
          "selected formulation of dual energy formalism is incompatible",
