@@ -231,6 +231,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
 
   double mu = static_cast<double>(enzo::fluid_props()->mol_weight());
+  double mel_mpro = enzo_constants::mass_electron / enzo_constants::mass_hydrogen;
   // iterate over all cells (not including ghost zones)
   for (int iz=gz; iz<nz+gz; iz++){
     for (int iy=gy; iy<ny+gy; iy++){
@@ -243,7 +244,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #ifdef CONFIG_USE_GRACKLE
           int primordial_chemistry = (enzo::config()->method_grackle_chemistry)->primordial_chemistry;
           if (primordial_chemistry > 0) {
-            mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
+            mu = d_el[i]*mel_mpro + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
 
             if (primordial_chemistry > 1) {
               mu += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);

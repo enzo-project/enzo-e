@@ -19,7 +19,7 @@
 
 //#ifdef NOTDEFINED // for now... since not done coding
 
-#define DEBUG_FEEDBACK_STARSS
+//#define DEBUG_FEEDBACK_STARSS
 //#define DEBUG_FEEDBACK_STARSS_SN
 
 // =============================================================================
@@ -944,6 +944,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
      M_shell > 0 iff v_shell > v_gas 
   */ 
   double Z_mean=0, d_mean=0, n_mean=0, v_mean=0, mu_mean=0;
+  double mel_mpro = enzo_constants::mass_electron / enzo_constants::mass_hydrogen;
   double mu = static_cast<double>(enzo::fluid_props()->mol_weight());
 
   for (int ix_ = ix-1; ix_ < ix+2; ix_++) {
@@ -957,7 +958,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           if (enzo_config->method_grackle_use_grackle) {
             int primordial_chemistry = (enzo::config()->method_grackle_chemistry)->primordial_chemistry;
             if (primordial_chemistry > 0) {
-              mu = dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
+              mu = d_el[ind]*mel_mpro + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
 
               if (primordial_chemistry > 1) {
                 mu += dHM[ind] + 0.5*(dH2I[ind]+dH2II[ind]);
