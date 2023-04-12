@@ -39,6 +39,7 @@ public: // interface
     adapt_output(),
     adapt_schedule_index(),
     balance_schedule_index(0),
+    balance_type(),
     num_boundary(0),
     boundary_list(),
     boundary_type(),
@@ -214,6 +215,7 @@ public: // interface
       adapt_output(),
       adapt_schedule_index(),
       balance_schedule_index(-1),
+      balance_type(),
       num_boundary(0),
       boundary_list(),
       boundary_type(),
@@ -406,6 +408,7 @@ public: // attributes
   // Balance (dynamic load balancing)
 
   int                        balance_schedule_index;
+  std::string                balance_type;
 
   // Boundary
 
