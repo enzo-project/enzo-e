@@ -477,8 +477,8 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           // Here, te_dep_a and ge_dep_a are carrying "energy density" (not specific energy)
           // and vx_dep_a, vy_dep_a, and vy_dep_a are carrying velocity of the shell (not momentum density)
  
-          te[i] = te[i] / M_scale_tot + std::max(te_dep_a[i], 0.0) * inv_dens_new; 
-          ge[i] = ge[i] / M_scale_tot + std::max(ge_dep_a[i], 0.0) * inv_dens_new;
+          te[i] = te[i] / M_scale_tot + std::max( (double) te_dep_a[i], 0.0) * inv_dens_new; 
+          ge[i] = ge[i] / M_scale_tot + std::max( (double) ge_dep_a[i], 0.0) * inv_dens_new;
           vx[i] += vx_dep_a[i] * M_scale_shell;
           vy[i] += vy_dep_a[i] * M_scale_shell;
           vz[i] += vz_dep_a[i] * M_scale_shell;
