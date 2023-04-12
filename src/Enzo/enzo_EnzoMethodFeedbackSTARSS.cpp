@@ -918,15 +918,15 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
       double inv_norm = 1.0 / norm;
       double xbaMag = A * A * norm * norm;
 
-      /* turn the vectors into unit-vectors */
-      CloudParticleVectorZ[cpInd] *= inv_norm;
-      CloudParticleVectorY[cpInd] *= inv_norm;
-      CloudParticleVectorX[cpInd] *= inv_norm;
       // get position 
       CloudParticlePositionX[cpInd] = xp + CloudParticleVectorX[cpInd] * A;
       CloudParticlePositionY[cpInd] = yp + CloudParticleVectorY[cpInd] * A;
       CloudParticlePositionZ[cpInd] = zp + CloudParticleVectorZ[cpInd] * A;
 
+      /* turn the vectors into unit-vectors */
+      CloudParticleVectorZ[cpInd] *= inv_norm;
+      CloudParticleVectorY[cpInd] *= inv_norm;
+      CloudParticleVectorX[cpInd] *= inv_norm;
   }
 
      /* 
