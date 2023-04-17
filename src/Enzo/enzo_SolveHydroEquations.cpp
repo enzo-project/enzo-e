@@ -139,13 +139,13 @@ int EnzoBlock::SolveHydroEquations
   /* Set density floor. */
   const EnzoFluidFloorConfig& fluid_floor_config
                = fluid_props->fluid_floor_config();
-  double density_floor = fluid_floor_config.has_density_floor() ?
+  enzo_float density_floor = fluid_floor_config.has_density_floor() ?
                  fluid_floor_config.density() : 0.0;
 
   if (density_floor > 0.0) {
     for (int i=0; i<mx*my*mz; i++) {
       double d_pre = density[i];
-      density[i] = std::max(d_pre, density_floor);
+      density[i] = std::max(d_pre, (double) density_floor);
 
       // rescale color fields to account for possible change in
       // baryon mass from enforcing density floor
