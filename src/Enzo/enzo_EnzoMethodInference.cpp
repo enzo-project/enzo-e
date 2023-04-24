@@ -12,9 +12,7 @@
 // #define TRACE_INFER
 // #define DEBUG_INFER
 
-# define PRINT_FIELD_VALUES
-
-# define PRINT_FIELD_VALUES
+// # define PRINT_FIELD_VALUES
 
 //----------------------------------------------------------------------
 
@@ -1064,10 +1062,10 @@ void EnzoLevelArray::apply_inference()
 
     std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
                 -793.0158410664843/vunit, 
-                2.656904298376402e-07, 96878457078.45897/(vunit*vunit)};
+                2.656904298376402e-07/rhounit, 96878457078.45897}; ///(vunit*vunit)};
     std::vector <double> stds  = {4.858201188227477e-26/rhounit, 7.886306542228033e-29/rhounit, 
                 8358.282154906454/vunit,
-                6.23778749095905e-13, 531795315558.7779/(vunit*vunit)};
+                6.23778749095905e-13/rhounit, 531795315558.7779}; ///(vunit*vunit)};
 
 
 #ifdef PRINT_FIELD_VALUES
@@ -1131,7 +1129,7 @@ void EnzoLevelArray::apply_inference()
       double pnostar = num_0 / (num_0 + num_1);
       double pstar   = num_1 / (num_0 + num_1);
  
-      //CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
+      CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
 
     //ASSERT("EnzoMethodInference::apply_inference()",
     //       "pstar+pnostar != 1.0", pstar+pnostar == 1.0);
@@ -1152,6 +1150,7 @@ void EnzoLevelArray::apply_inference()
       at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
 
       bool * mask = new bool[nix_*niy_*niz_]; // boolean array containing indices of Pop III SF
+      bool print_fields = false;
       for (int i=0; i<nix_*niy_*niz_; i++) mask[i] = false;
 
       int N_edge = 4; // number of edge layers to ignore
@@ -1169,8 +1168,9 @@ void EnzoLevelArray::apply_inference()
            if (pstar_i > pnostar_i) {
 
              mask[i] = true;
+             //print_fields = true;
 
-            //CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", lower[0]+(ix+0.5)*hx, lower[1]+(iy+0.5)*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
+            CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", lower[0]+(ix+0.5)*hx, lower[1]+(iy+0.5)*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
            } 
            else mask[i] = false;
          } // ix
@@ -1178,7 +1178,21 @@ void EnzoLevelArray::apply_inference()
       } // iz
      
       delete [] mask;
-    } // if pstar > pnostar in a block
+      if (print_fields) {
+        for (int i_f = 0; i_f < num_fields_; i_f++) {
+          // print out all field values
+          for (int iz=0; iz<niz_; iz++){
+            for (int iy=0; iy<niy_; iy++){
+              for (int ix=0; ix<nix_; ix++){
+                int i = ix + nix_*(iy + niy_*iz);
+                CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f,ix,iy,iz, field_values_[i_f].data()[i]);
+              }
+            }
+          }
+       }
+     }
+    
+  } // if pstar > pnostar in a block
 
   #endif
 
