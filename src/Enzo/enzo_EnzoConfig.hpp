@@ -87,8 +87,8 @@ inline void operator|(PUP::er &p, chemistry_data &c){
   p | c.collisional_ionisation_rates;
   p | c.recombination_cooling_rates;
   p | c.bremsstrahlung_cooling_rates;
-//  p | c.max_iterations;
-//  p | c.exit_after_iterations_exceeded;
+  //p | c.max_iterations;
+  //p | c.exit_after_iterations_exceeded;
 
 # ifdef CONFIG_SMP_MODE
   // Corresponds to -D_OPENMP in Grackle
