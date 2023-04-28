@@ -1003,8 +1003,7 @@ void EnzoLevelArray::apply_inference()
     
     // Deserialize stage-1 checkpoint from a file using torch::jit::load().
     torch::jit::script::Module stage1 = torch::jit::load(stage1_checkpoint); 
-
-    torch::Tensor field_data = torch::zeros({1,5,nix_,niy_,niz_}); // array that gets passed into model
+    torch::Tensor field_data = torch::zeros({1,5,nix_,niy_,niz_}, torch::dtype(torch::kFloat32)); // array that gets passed into model
 
     // array increments
     const int idx = 1;
@@ -1032,15 +1031,15 @@ void EnzoLevelArray::apply_inference()
           double divVx=0.0, divVy=0.0, divVz=0.0;
 
           if (ix == 0)         divVx = vx[i+idx]-vx[i];
-          else if (ix == nix_) divVx = vx[i]-vx[i-idx];
+          else if (ix == nix_-1) divVx = vx[i]-vx[i-idx];
           else                 divVx = 0.5 * (vx[i+idx] - vx[i-idx]);
 
           if (iy == 0)         divVy = vy[i+idy]-vy[i];
-          else if (iy == niy_) divVy = vy[i]-vy[i-idy];
+          else if (iy == niy_-1) divVy = vy[i]-vy[i-idy];
           else                 divVy = 0.5 * (vy[i+idy] - vy[i-idy]);
 
           if (iz == 0)         divVz = vz[i+idz]-vz[i];
-          else if (iz == niz_) divVz = vz[i]-vz[i-idz];
+          else if (iz == niz_-1) divVz = vz[i]-vz[i-idz];
           else                 divVz = 0.5 * (vz[i+idz] - vz[i-idz]);
 
           velocity_divergence[i] = divVx + divVy + divVz;
@@ -1059,14 +1058,12 @@ void EnzoLevelArray::apply_inference()
  
     // means and stds from StarNetRuntime/resources/Scaling_64x160.torch
     // All values are in CGS units except for total_energy
-
     std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
                 -793.0158410664843/vunit, 
                 2.656904298376402e-07/rhounit, 96878457078.45897}; ///(vunit*vunit)};
     std::vector <double> stds  = {4.858201188227477e-26/rhounit, 7.886306542228033e-29/rhounit, 
                 8358.282154906454/vunit,
                 6.23778749095905e-13/rhounit, 531795315558.7779}; ///(vunit*vunit)};
-
 
 #ifdef PRINT_FIELD_VALUES
   for (int i_f = 0; i_f < num_fields_; i_f++) {
@@ -1086,6 +1083,7 @@ void EnzoLevelArray::apply_inference()
     // i_f_ = iterator for fields going into model
     int i_f_ = 0; 
     for (int i_f=0; i_f < num_fields_; i_f++) {
+      //CkPrintf("field %d\n", i_f);
 
       enzo_float * array;
       if (i_f == 2) {
@@ -1100,9 +1098,13 @@ void EnzoLevelArray::apply_inference()
           for (int ix=0; ix<nix_; ix++){
             //int i = INDEX(ix,iy,iz,nix_,niy_);
             int i = ix + nix_*(iy + niy_*iz);
-//            CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f_,ix,iy,iz, array[i]);
+            //CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f_,ix,iy,iz, (double) array[i] - means[i_f_]/stds[i_f_]);
+// 
+            //field_data[0][i_f_][ix][iy][iz] = ( (double) array[i] - means[i_f_])/stds[i_f_];
+            // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
+            field_data.index_put_( {0,i_f_,ix,iy,iz}, 
+                         ((double) array[i] - means[i_f_])/stds[i_f_] );
 
-            field_data[0][i_f_][ix][iy][iz] = (array[i] - means[i_f_])/stds[i_f_];
           } // ix
         } // iy
       } // iz
@@ -1122,6 +1124,7 @@ void EnzoLevelArray::apply_inference()
     bool star_in_block = true;
     if (enzo_config->method_inference_starnet_S1) {
       // see step 4 of https://pytorch.org/tutorials/advanced/cpp_export.html 
+
       at::Tensor prediction_s1 = stage1.forward(sample).toTensor(); //(pstar, pnostar)
     
       double num_0 = std::exp(prediction_s1.index({0,0}).item<double>());
@@ -1153,7 +1156,7 @@ void EnzoLevelArray::apply_inference()
       bool print_fields = false;
       for (int i=0; i<nix_*niy_*niz_; i++) mask[i] = false;
 
-      int N_edge = 4; // number of edge layers to ignore
+      int N_edge = 4; // number of edge layers to ignore for evaluating S2 predictions
       double pstar_i, pnostar_i, num_0_i, num_1_i;
       for (int iz=N_edge; iz<niz_ - N_edge; iz++){
        for (int iy=N_edge; iy<niy_ - N_edge; iy++){
