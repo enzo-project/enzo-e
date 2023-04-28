@@ -1,0 +1,40 @@
+include "input/LoadBalance/test_balance.incl"
+
+ Method {
+     list = [ "ppm", "pm_deposit", "gravity", "pm_update", "comoving_expansion"];
+     gravity { solver = "bcg"; }
+ }
+
+ Output {
+     list = [ "de", "dark", "mesh" ];
+
+     check { dir = [ "Dir_BALANCE_OFF_%04d-checkpoint", "count" ]; }
+     ax    { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     ay    { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     az    { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     dark  { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     de    { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     dep   { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     depa  { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     hdf5  { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     po    { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ]; }
+     mesh  { dir = [ "Dir_BALANCE_OFF_%04d", "cycle" ];
+             image_reduce_type = "max";
+             image_mesh_color = "process";
+            }
+ }
+
+ Solver {
+     bcg {
+         iter_max = 1000;
+         monitor_iter = 10;
+         res_tol = 0.01;
+         type = "bicgstab";
+     }
+     list = [ "bcg" ];
+ }
+
+ Stopping {
+     cycle = 1000;
+     redshift = 3.0;
+ }

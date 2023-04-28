@@ -147,6 +147,16 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 //----------------------------------------------------------------------
 
+EnzoBlock::EnzoBlock (CkMigrateMessage *m)
+  : CBase_EnzoBlock (m)
+    // dt(0.0),
+    // redshift(0.0)
+{
+  TRACE("CkMigrateMessage");
+  // EnzoSimulation[0] counts migrated Blocks
+  proxy_enzo_simulation[0].p_method_balance_check();
+}
+
 //======================================================================
 #ifdef BYPASS_CHARM_MEM_LEAK
 //======================================================================

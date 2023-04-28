@@ -56,6 +56,13 @@ public: // functions
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
 
+  // EnzoMethodBalance
+
+  /// Count number of Blocks that are planning on load-balancing
+  void r_method_balance_count(CkReductionMsg * msg);
+  /// Count down of migrating blocks (plus root-Block in case none)
+  void p_method_balance_check();
+
   /// EnzoMethodCheck
   void r_method_check_enter (CkReductionMsg *);
   void p_check_done();
@@ -121,6 +128,8 @@ private: // attributes
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;
 
+  /// Balance Method synchronization
+  Sync sync_method_balance_;
   /// Current restart level
   int restart_level_; 
 #ifdef BYPASS_CHARM_MEM_LEAK
