@@ -188,12 +188,12 @@ public: // interface
                           int ax, int ay, int az);
   Index index_from_global(int ix, int iy, int iz, int level, int min_level);
 
-  /// Create child blocks during initialization
-  virtual void create_child_blocks() {};
+  /// Create child blocks during initialization.
+  virtual void create_initial_child_blocks() {};
 
   /// Return boolean indicating if the indicated block should refine
   /// during the initialization phase.
-  bool refine_during_initialization(Index index);
+  bool refine_during_initialization (Index index) const throw();
 
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
@@ -259,9 +259,8 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
-  /// Initiate applying the sequence of Initial conditions
-  void r_initial_new_begin(CkReductionMsg * msg)
-  { delete msg; initial_new_begin_(); }
+  /// Initiate applying all Initial conditions.
+  void p_initial_new_begin() { initial_new_begin_(); }
   void initial_new_begin_();
 
   /// Continue to the next Initial conditions object

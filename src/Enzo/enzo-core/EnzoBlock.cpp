@@ -247,7 +247,8 @@ void EnzoBlock::initialize () throw()
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }
 
-bool EnzoBlock::spawn_child_blocks(){
+bool EnzoBlock::spawn_child_blocks() throw()
+{
   int level = index_.level();
   if (level >= 0) {
     
@@ -271,12 +272,14 @@ bool EnzoBlock::spawn_child_blocks(){
   return false;
 }
 
-void EnzoBlock::create_child_blocks(){
+void EnzoBlock::create_initial_child_blocks()
+{
   bool spawn_children = spawn_child_blocks();
   if (spawn_children) {instantiate_children();}
 }
 
-void EnzoBlock::instantiate_children() {
+void EnzoBlock::instantiate_children() throw()
+{
   child_face_level_curr_.resize(cello::num_children()*27);
   int num_field_blocks = 1;
 

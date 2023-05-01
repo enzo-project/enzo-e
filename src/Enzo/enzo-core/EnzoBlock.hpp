@@ -85,11 +85,11 @@ public: // interface
   //--------------------------------------------------
 
   /// Check if this block should create child blocks during initialization.
-  bool spawn_child_blocks();
+  bool spawn_child_blocks() throw();
 
   /// Create child blocks.
-  virtual void create_child_blocks();
-  void instantiate_children();
+  virtual void create_initial_child_blocks();
+  void instantiate_children() throw();
 
   //----------------------------------------------------------------------
   // Original Enzo functions

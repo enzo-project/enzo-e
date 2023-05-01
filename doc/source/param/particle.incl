@@ -71,14 +71,35 @@
 
 ----
 
-.. par:parameter:: Particle:particle_type:interleaved
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`constants`
+:Summary: :s:`List of constant names, data types and values.`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`none`
+:Scope:     :c:`Cello`
 
-   :Summary: :s:`Format of output files`
-   :Type:    :par:typefmt:`logical`
-   :Default: :d:`false`
-   :Scope:     :c:`Cello`
+:e:`Each particle type can have multiple constants of varying types, which are defined by the` :p:`constants` :e:`parameter`.  The` :p:`constants` :e:`parameter is a list, alternating between the name of the parameter, its type and value.  Names may include` :t:`"mass"`, :t:`"root_level_mass"`,
+:e:`etc.  Types may include` :t:`"single"`, :t:`"double"`, :t:`"quadruple"`, :t:`"int8"`, :t:`"int16"`, :t:`"int32"`, or :t:`"int64"`.
 
-   :e:`Particle attributes within a batch of particles may be stored in memory either particle-by-particle, or "interleaved" (attribute-by-attribute).  If` |aij| :e:`represents the jth attribute of particle i, then with` :p:`interleaved = false`, :e:`attributes would be stored as` |a00| ... |am0|, |a01| ... |am1| ... |a0n| ... |amn|. :e:`If, however,` :p:`interleaved = true`, :e:`then attributes would be stored as`   |a00| ... |a0n|, |a10| ... |a1n| ... |am0| ... |amn|. :e:`Non-interleaved particle attributes have array accesses of stride 1 and minimal storage overhead, but may not utilize cache well.  Interleaved particle attributes` *may* :e:`have improved cache utilization, but will have stride > 1, and may require memory padding for correct alignment of attributes in memory.  The default is` :t:`false.`
+   ::
+
+    Parameter {
+
+        list = ["trace", "dark"];
+
+        dark {
+            constants = ["mass", "double", 0.8426229508200000 / (64.0*64.0*64.0) ];
+        }
+    }
+
+:e: The constant "mass" sets the mass of every particle on the initial mesh to the specified value.
+:e: The constant "root_level_mass" sets the mass of every particle on level zero of the mesh to the specified value. The mass of particles on level n (n > 0) is set to the zero level mass divided by the appropriate factor (two to the power of the rank of the simulation) n times.
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`interleaved`
+:Summary: :s:`Format of output files`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :c:`Cello`
 
 
 
@@ -109,7 +130,7 @@
      ::
 
 
-       Particle 
+       Particle {
            list = ["trace","dark","star"];
        }
 
