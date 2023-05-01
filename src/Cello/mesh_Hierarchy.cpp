@@ -309,7 +309,8 @@ void Hierarchy::create_subblock_array () throw()
 
 // --------------------------------------------------------------------
 
-void Hierarchy::refined_region_lower(int* region_lower, int level){
+void Hierarchy::refined_region_lower(int* region_lower, int level) throw()
+{
   if (level >= 0){
     region_lower[0] = refined_regions_lower_.at(level).at(0);
     region_lower[1] = refined_regions_lower_.at(level).at(1);
@@ -321,7 +322,8 @@ void Hierarchy::refined_region_lower(int* region_lower, int level){
   }
 }
 
-void Hierarchy::refined_region_upper(int* region_upper, int level){
+void Hierarchy::refined_region_upper(int* region_upper, int level) throw()
+{
   if (level >= 0) {
     region_upper[0] = refined_regions_upper_.at(level).at(0);
     region_upper[1] = refined_regions_upper_.at(level).at(1);

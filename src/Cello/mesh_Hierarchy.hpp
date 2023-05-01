@@ -205,8 +205,10 @@ public: // interface
   void create_subblock_array () throw();
 
   // Getter/Setter functions for refined_regions_lower/upper members.
-  void refined_region_lower(int region_lower[3], int level);
-  void refined_region_upper(int region_upper[3], int level);
+  void refined_region_lower(int region_lower[3], int level) throw();
+  void refined_region_upper(int region_upper[3], int level) throw();
+  std::vector< std::vector<int> > refined_region_lower() {return refined_regions_lower_;}
+  std::vector< std::vector<int> > refined_region_upper() {return refined_regions_upper_;}
   void set_refined_regions_lower(std::vector< std::vector<int> > lower) throw() {
     refined_regions_lower_ = lower;
   }

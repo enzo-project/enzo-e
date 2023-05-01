@@ -27,4 +27,25 @@
    :Default: :d:`[ 1, 1, 1 ]`
    :Scope:     :c:`Cello`
 
-   :e:`This parameter specifies the total size of the root-level mesh.  For example, [400, 400] specifies a two dimensional root-level discretization of 400 x 400 zones, excluding ghost zones.`
+:e:`This parameter specifies the total size of the root-level mesh.  For example, [400, 400] specifies a two dimensional root-level discretization of 400 x 400 zones, excluding ghost zones.`
+
+----
+
+:Parameter:  :p:`Mesh` : :p:`level_n_lower`
+:Summary: :s:`The lower coordinates of a region in level n-1 to refine in order to create the mesh at level n.`
+:Type:    :t:`list` ( :t:`integer` )
+:Default: :d:`[ 1, 1, 1 ]`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the coordinates of a block in level n-1 of the array of octrees. This block is taken as the lower block defining a region of block in level n-1 to be refined in order to create level n.`
+
+
+----
+
+:Parameter:  :p:`Mesh` : :p:`level_n_upper`
+:Summary: :s:`The upper coordinates of a region in level n-1 to refine in order to create the mesh at level n.`
+:Type:    :t:`list` ( :t:`integer` )
+:Default: :d:`[ 1, 1, 1 ]`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the coordinates of a block in level n-1 of the array of octrees. This block is taken as the upper block defining a region of block in level n-1 to be refined in order to create level n.` 
