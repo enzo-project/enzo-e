@@ -66,6 +66,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_feedback,
+  enzo_sync_id_method_radiative_transfer,
 #ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
 #endif
@@ -248,6 +249,7 @@ extern "C" {
 #include "particle/EnzoMethodAccretion.hpp"
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "particle/EnzoMethodBondiHoyleAccretion.hpp"
+#include "enzo-core/EnzoMethodBalance.hpp"
 #include "enzo-core/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
@@ -258,19 +260,20 @@ extern "C" {
 #include "assorted/EnzoMethodGrackle.hpp"
 #include "gravity/EnzoMethodGravity.hpp"
 #include "assorted/EnzoMethodHeat.hpp"
+#include "hydro-mhd/EnzoMethodHydro.hpp"
 #include "particle/EnzoMethodMergeSinks.hpp"
+#include "hydro-mhd/EnzoMethodMHDVlct.hpp"
+#include "assorted/EnzoMethodM1Closure.hpp"
 #include "gravity/EnzoMethodPmDeposit.hpp"
 #include "particle/EnzoMethodPmUpdate.hpp"
+#include "hydro-mhd/EnzoMethodPpm.hpp"
+#include "hydro-mhd/EnzoMethodPpml.hpp"
 #include "particle/EnzoMethodSinkMaker.hpp"
 #include "particle/EnzoMethodStarMaker.hpp"
 #include "particle/EnzoMethodStarMakerSTARSS.hpp"
 #include "particle/EnzoMethodStarMakerStochasticSF.hpp"
 #include "particle/EnzoMethodThresholdAccretion.hpp"
 #include "assorted/EnzoMethodTurbulence.hpp"
-#include "hydro-mhd/EnzoMethodHydro.hpp"
-#include "hydro-mhd/EnzoMethodMHDVlct.hpp"
-#include "hydro-mhd/EnzoMethodPpm.hpp"
-#include "hydro-mhd/EnzoMethodPpml.hpp"
 
 #include "gravity/EnzoMatrixDiagonal.hpp"
 #include "gravity/EnzoMatrixIdentity.hpp"
@@ -282,6 +285,7 @@ extern "C" {
 #include "utils/EnzoComputeCicInterp.hpp"
 #include "fluid-props/EnzoComputePressure.hpp"
 #include "fluid-props/EnzoComputeTemperature.hpp"
+
 #ifdef CONFIG_USE_GRACKLE
   #include "assorted/EnzoComputeCoolingTime.hpp"
 #endif

@@ -213,6 +213,7 @@ int EnzoBlock::SolveHydroEquations
   int l3[3] = {gx,gy,gz};
   int u3[3] = {mx-gx-1,my-gy-1,mz-gz-1};
   const int nf = flux_data->num_fields();
+
 #ifdef DEBUG_FLUX
   long long min=std::numeric_limits<long long>::max();
   long long max=std::numeric_limits<long long>::lowest();
@@ -235,7 +236,6 @@ int EnzoBlock::SolveHydroEquations
       flux_index = colindex + 3*2*index_color;
       index_color++;
     }
-
     for (int axis=0; axis<rank; axis++) {
       leftface[axis] = l3[axis];
       rightface[axis] = u3[axis];
