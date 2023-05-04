@@ -70,7 +70,7 @@ public: // interface
   Block();
 
   /// Initialize a migrated Block
-  Block (CkMigrateMessage *m);
+  Block (CkMigrateMessage *m) : CBase_Block(m) { }
 
   /// CHARM pupper
   virtual void pup(PUP::er &p);
@@ -111,6 +111,12 @@ public: // interface
   int age() const throw()
   { return age_; };
 
+  /// Return process to migrate to next if different from current
+  int ip_next() const throw() { return ip_next_; }
+
+  /// Set  process to migrate to next
+  void set_ip_next(int ip) { ip_next_ = ip; }
+
   /// Return the current timestep
   double dt() const throw()
   { return dt_; };
@@ -126,7 +132,7 @@ public: // interface
 
   /// Return whether this Block is a leaf in the octree array
   bool is_leaf() const
-  { return is_leaf_ && ! (index_.level() < 0); }
+  { return is_leaf_; }
 
   /// Index of the Block
   const Index & index() const
@@ -805,7 +811,7 @@ public: // virtual functions
    Refresh * refresh,
    bool new_refresh) const;
 
-  virtual void print () const;
+  virtual void print (FILE * fp = nullptr) const;
 
   const Adapt * adapt() const { return & adapt_; }
 
@@ -990,6 +996,9 @@ protected: // attributes
 
   /// Age of the Block in cycles (for OutputImage)
   int age_;
+
+  /// Process to migrate to if different from current; -1 to skip
+  int ip_next_;
 
   /// String for storing bit ID name
   mutable std::string name_;

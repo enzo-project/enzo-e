@@ -220,6 +220,10 @@ public: // interface
   { return Scalar<long double>
       (cello::scalar_descr_long_double(),
        &scalar_data_long_double_); }
+  Scalar<double> scalar_double()
+  { return Scalar<double>
+      (cello::scalar_descr_double(),
+       &scalar_data_double_); }
   Scalar<int> scalar_int()
   { return Scalar<int>
       (cello::scalar_descr_int(),

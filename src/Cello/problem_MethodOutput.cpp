@@ -366,6 +366,7 @@ void MethodOutput::write(Block * block, MsgOutput * msg_output_in )
     FileHdf5 * file = msg_output->file();
     file->file_close();
     delete file;
+    delete msg_output;
 
     // Close *.block_list file
     ScalarData<void *> * scalar_void = block->data()->scalar_data_void();

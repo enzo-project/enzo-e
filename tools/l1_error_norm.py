@@ -1,4 +1,5 @@
 import argparse
+from collections import UserDict
 import os.path
 import warnings
 import numpy as np
@@ -232,20 +233,56 @@ def norm_L1_error(ds, ds2, comparison_fields, Nx=None, Ny=None, Nz=None,
                                  sum_axis)
     return np.sqrt(np.sum(np.square(err_vector),axis=0))
 
+def _coerced_field_search(ds, fields):
+    """
+    Returns the 2-tuple forms of fields that are in ds and the names of fields
+    (in whatever format they were specified) that can't be found
+    """
+    assert isinstance(ds, yt.data_objects.static_output.Dataset)
+
+    # come up with the order of field-types that we consider when attempting to
+    # coerce a string to a 2-tuple. We prefer the frontend field-type so we
+    # minimize unit conversions (in reality, it probably doesn't matter much)
+    if 'enzoe' in ds.fluid_types:
+        ftypes = ('enzoe', 'index', 'gas')
+    elif 'enzop' in ds.fluid_types: # for older yt versions (drop in future)
+        ftypes = ('enzop', 'index', 'gas')
+    else:
+        raise RuntimeError("unrecognized frontend")
+
+    found_fields, missing_fields = [], []
+    for field in fields:
+        if not isinstance(field, tuple): # need to coerce string to 2-tuple
+            for ftype in ftypes:
+                if (ftype, field) in ds.derived_field_list:
+                    found_fields.append((ftype, field))
+                    break
+            else: # only executed if we didn't break out of prior for-loop
+                missing_fields.append(field)
+        else:
+            assert len(field) == 2
+            if field in derived_field_list:
+                found_fields.append(field)
+            else:
+                missing_fields.append(field)
+    return found_fields, missing_fields
+
 _DEFAULT_COMMON_FIELDS \
     = ["density", "total_energy", "velocity_x", "velocity_y", "velocity_z",
        "bfield_x", "bfield_y", "bfield_z"]
 
 def find_common_fields(ds1, ds2, verbose, fields = None):
     """
-    Returns a list of fields common to ds1 and ds2
+    Returns a list of fields common to ds1 and ds2. This coerces single-string
+    field names into 2-tuples (that are suitable for yt-datasets).
 
     Parameters
     ----------
     ds1, ds2 : `yt.data_objects.static_output.Dataset` or `dict` of `ndarray`
         These represent the different datasets. Field names are obtained for 
         the former type by accessing the `derived_field_list` attribute. For
-        the latter type, they are obtained by calling the `keys` method.
+        the latter type, they are obtained by calling the `keys` method. At
+        least one of these should be yt dataset.
     verbose : `bool`
         If True, prints the list of common fields
     fields : `list` of strings or `None` (optional)
@@ -254,34 +291,40 @@ def find_common_fields(ds1, ds2, verbose, fields = None):
         this selectively returns the subset of common fields from the 
         `_DEFAULT_COMMON_FIELDS`.
     """
-    if isinstance(ds1,yt.data_objects.static_output.Dataset):
-        field_list1 = [elem[1] for elem in ds1.derived_field_list]
-    else:
-        field_list1 = ds1.keys()
 
-    if isinstance(ds2,yt.data_objects.static_output.Dataset):
-        field_list2 = [elem[1] for elem in ds2.derived_field_list]
-    else:
-        field_list2 = ds2.keys()
+    if not isinstance(ds1, yt.data_objects.static_output.Dataset):
+        if isinstance(ds2, yt.data_objects.static_output.Dataset):
+            return find_common_fields(ds2, ds1, verbose, fields)
+        else:
+            raise ValueError("either ds1 or ds2 must be a yt-dataset")
 
+    user_specified_fields = fields is not None
     if fields is None:
-        intersect = []
-        for elem in _DEFAULT_COMMON_FIELDS:
-            if elem in field_list1 and elem in field_list2:
-                intersect.append(elem)
-        #if len(intersect) == 0:
-        #    intersect = [elem for elem in field_list1 if elem in field_list2]
-    else:
-        # check that both datasets have all of the user-specified fields
-        for field in fields:
-            if (field not in field_list1) or (field not in field_list2):
-                raise ValueError("Both datasets do not have the field "
-                                 +"\"{:s}\".".format(field))
-        intersect = fields
+        fields = _DEFAULT_COMMON_FIELDS
 
-    if verbose:
-        print("field_list: {:}".format(str(intersect)))
-    return intersect
+    # at this point, ds1 is always always a yt-dataset. Coerce the fields
+    coerced_fields, missing_fields = _coerced_field_search(ds1, fields)
+
+    # determine which of the coerced fields are also in ds2
+    shared_fields = []
+    if isinstance(ds2, yt.data_objects.static_output.Dataset):
+        has_field = lambda field: field in ds2.derived_field_list
+    else:
+        has_field = lambda field: field[1] in ds2
+    for field in coerced_fields:
+        if has_field(field):
+            shared_fields.append(field)
+        else:
+            missing_fields.append(field)
+
+    # now check if missing fields are problematic
+    # note: missing fields might include strings and 2-tuples
+    if user_specified_fields and (len(missing_fields) > 0):
+        raise ValueError("At least 1 dataset doesn't have the "
+                         f"{missing_field[0]!r} field")
+    elif verbose:
+        print("field_list: {:}".format(str(shared_fields)))
+    return shared_fields
 
 
 # Functions used to compute the L1Error Norm between a simulation and 1D
@@ -349,28 +392,82 @@ def build_3D_grid(ds, dim_edges):
                                         domain_left_edge, i)
         dims.append(stop_ind-start_ind)
     return ds.covering_grid(0,left_edge = grid_left_edge, dims = dims)
-        
 
-def load_reference_table(fname):
-    
-    skip = 0
+class RefTableDict(UserDict):
+    """
+    A class that is used to hold tabulated 1D reference data.
+
+    This behaves exactly like an ordinary dictionary, but also allows users to
+    specify two-element string tuples as keys when accessing data. When that is
+    done, instances of this class just ignore the first element and uses the
+    second element to identify the requested data (this makes comparisons with
+    simulation data much easier).
+    """
+    def __getitem__(self, key):
+        if isinstance(key, tuple):
+            assert len(key) == 2
+            return self.data[key[1]] # we just ignore the first part of the key
+        return self.data[key]
+
+def load_reference_table(fname, coerce_pos_key = False):
+    """
+    Loads 1D reference data for comparisons with simulation results
+
+    Parameters
+    ----------
+    fname: str
+        Path to the file holding the reference data
+    coerce_pos_key: bool, optional
+        If True, confirm that the table has 1 column specifying position
+        (called "position", "pos", "x", "y", or "z"), ensures that it
+        monotonically increases, and renames it so that it is called "pos"
+
+    Notes
+    -----
+    An underlying assumption has been that the problem is scale-free (i.e. the
+    precise choice of units are unimportant).
+    """
+
+    header_line_count = 0
+
+    # load the meta_data
     meta_data = {}
     with open(fname,"r") as f:
         for line in f.readlines():
             if (line[0]) == "#":
-                skip+=1
+                header_line_count += 1
                 if "=" in line:
                     words = line[1:].split("=")
                     if len(words) == 2:
                         meta_data[words[0].strip()] = words[1].strip()
             else:
                 break
-    rec = np.recfromtxt(fname, skip_header=skip,comments="#",dtype=None,
-                        delimiter=',',names=True,encoding='utf-8')
-    
-    out_data = {}
+
+    # load the actual data
+    rec = np.recfromtxt(fname, skip_header = header_line_count, comments = "#",
+                        dtype = None, delimiter = ',', names = True,
+                        encoding='utf-8')
+    # reformat the actual data
+    out_data = RefTableDict()
     for field in rec.dtype.fields:
         out_data[field] = rec[field]
+
+    if coerce_pos_key:
+        pos_keys = ["position", "pos", "x", "y", "z"]
+        intersect = [val for val in out_data.keys() if val in pos_keys]
+        if len(intersect) == 0:
+            raise ValueError("table does not have a column labelled "
+                             "position, pos, x, y, or z")
+        elif len(intersect) >1:
+            raise ValueError("table must have only one column labelled "
+                             "position, pos, x, y, or z")
+        elif (np.diff(out_data[intersect[0]])<=0).any():
+            raise ValueError(f"the {intersect[0]} column in table must "
+                             "monotonically increase")
+        else:
+            pos = out_data.pop(intersect[0])
+            out_data["pos"] = pos
+
     return meta_data, out_data
 
 def vector_name_iterator(data):
@@ -399,7 +496,7 @@ def vector_name_iterator(data):
         candidates[prefix][ax_map[dim]] = elem
     return candidates.items()
 
-def permute_vector_quantites(data, verbose, permute):
+def permute_vector_quantities(data, verbose, permute):
 
     if permute is None:
         return None
@@ -445,22 +542,9 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
     # if op_func is None, returns the total L1 Error Norm
     # otherwise op_func is applied on all parallel L1 Error Norms
 
-    meta_data, ref_data = load_reference_table(tab_fname)
-
-    pos_keys = ["position","pos", "x", "y", "z"]
-    intersect = [val for val in ref_data.keys() if val in pos_keys]
-    if len(intersect) == 0:
-        raise ValueError("table does not have a column labelled "
-                         "position, pos, x, y, or z")
-    elif len(intersect) >1:
-        raise ValueError("table must have only one column labelled "
-                         "position, pos, x, y, or z")
-    else:
-        if (np.diff(ref_data[intersect[0]])<=0).any():
-            msg = 'the {} column in table must monotonically increase'
-            raise ValueError(msg.format(intersect[0]))
-        pos = ref_data.pop(intersect[0])
-        ref_data["pos"] = pos
+    meta_data, ref_data = load_reference_table(tab_fname,
+                                               coerce_pos_key = True)
+    pos = ref_data["pos"]
 
     # if offset_soln was specified, modify the position values
     cell_width = np.diff(pos)[0]
@@ -504,25 +588,17 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
         ax_ind = 0
         kwargs["Nx"] = len(pos)
 
-    # adjust the shape of the reference arrays
-    # and determine limits along problem_ax that we are interested in
-    temp = []
-    sub_grid_edges = []
-    for i in range(3):
-        if i != ax_ind:
-            temp.append(np.newaxis)
-            sub_grid_edges.append(None)
-        else:
-            temp.append(slice(None,None))
-            sub_grid_edges.append([left_edge,right_edge])
+    # adjust the shape of the reference data so that it is 3D
+    idx = tuple(slice(None) if i == ax_ind else np.newaxis
+                for i in range(3))
+    ref = RefTableDict( (field, arr[idx]) for field,arr in ref_data.items() )
 
-    idx = tuple(temp)
-    ref = {}
-    for field,arr in ref_data.items():
-        ref[field] = arr[idx]
+    # determine limits along problem_ax that we are interested in comparing
+    sub_grid_edges = [[left_edge,right_edge] if i == ax_ind else None
+                      for i in range(3)]
 
     # optionally permute some vector quantities
-    permute_vector_quantites(ref, verbose, permute)
+    permute_vector_quantities(ref, verbose, permute)
 
     # optionally add some fixed background velocities
     if bkd_velocity != []:
