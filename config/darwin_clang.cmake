@@ -4,7 +4,7 @@
 
 # This is the configuration for a generic macOS installation using clang and
 # gfortran
-# - this was tested on clean installation of version 12.5 of macOS on an
+# - this was tested on a clean installation of version 12.5 of macOS on an
 #   Intel-based MacBook Pro on July 24, 2022
 # - historically there were challenges associated with installing Charm++ and
 #   Cello/Enzo-E on Macs, but these issues seem to have been implicitly
@@ -36,15 +36,18 @@ if(NOT __processedUserDefaults)
   set(CMAKE_Fortran_COMPILER gfortran CACHE STRING "")
   set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132" CACHE STRING "Default Fortran flags")
 
-  # Set some architecture-specific optimization flags
-  set(__ARCH_C_OPT_FLAGS "-O3 -DNDEBUG -funroll-loops")
+  # these flag(s) are currently only used when using openmp-simd optimizations
+  # (to specify available/prefered instruction sets).
+  # This particular value tells the compiler to optimize the code for the
+  # instruction set of the machine used to compile the code.
+  set(CONFIG_ARCH_FLAGS "-march=native")
 
-  set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
+  # add flag to unroll loops (this flag would also be enabled anyways when
+  # OPTIMIZE_FP=TRUE)
+  set(CMAKE_C_FLAGS "-funroll-loops" CACHE STRING "Default C flags")
+  set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Default C++ flags")
 
-  # Setting package paths (e.g., Grackle)
+  # Setting package paths (e.g., Grackle) - (meant for personal machine files)
 
   # Mark done
   set(__processedUserDefaults ON)
