@@ -1,3 +1,5 @@
+.. _HydroMHDInfrastructure-page:
+
 ****************************
 Hydro/MHD C++ Infrastructure
 ****************************
@@ -334,59 +336,7 @@ array in the primitive map).
 Equation Of State
 =================
 
-.. note::
-   This is about to be removed
-
-All of the operations related to the equation of state are handled by
-subclasses of the abstract base class, ``EnzoEquationOfState``. The
-class has a number of responsibilities. Currently the only concrete
-subclass of ``EnzoEquationOfState`` is the ``EnzoEOSIdeal`` class
-which encapsulates the properties of an ideal, adiabatic gas. This
-class can optionally support use of the dual-energy formalism (For
-details about the currently expected implementation of the
-dual-energy formalism see the ``"modern"`` section of
-:ref:`using-fluid_props-de` ).
-
-The ``EnzoEquationOfState`` has the following interface:
-
-.. code-block:: c++
-
-   bool is_barotropic();
-
-Returns whether the equation of state is barotropic or not.
-
-*Currently, no barotropic equations of state have been implemented and
-none of the wavespeed calculations for the Riemann solvers currently
-support barotropic equations of state.*
-
-.. code-block:: c++
-
-   enzo_float get_gamma();
-
-Returns the ratio of the specific heats. This is only required to
-yield a reasonable value if the gas is not barotropic.
-
-.. code-block:: c++
-
-   enzo_float get_isothermal_sound_speed();
-
-Returns the isothermal sound speed. This is only required to yield a
-reasonable value for barotropic equations of state.
-
-*In the future, it might be worth considering making this into a subclass
-of Cello's ``Physics`` class. If that is done, it may be advisable to
-allow for switching between different dual-energy formalism
-implementations.*
-
-
-How to extend
--------------
-
-New equations of state can be added by subclassing and providing the
-subclass with implementations for the pure virtual functions
-``EnzoEquationOfState``. *Once a second concrete subclass of*
-``EnzoEquationOfState`` *is provided, it may be worthwhile to introduce
-a factory method.*
+All equation of state functionality is described :ref:`here <EOS-Developer-Guide>`.
 
 =============
 Reconstructor
@@ -613,9 +563,10 @@ short each kernel:
     unique array indices). See :ref:`EnzoRiemannLUT-section` for
     more details.
 
-  * Specifies the expected equation of state, by specifying the expected
-    type of EOS Struct objects. See :ref:`EOSStructObject-section` for
-    more details about EOS Struct objects.
+  * Specifies the expected type of the equation of state, by specifying
+    the expected the corresponding EOS class. Follow
+    :ref:`this link <EOSClassDescription-section>` for more details
+    about EOS Struct objects.
 
   * are configured by an instance of ``KernelConfig<EOSStructT>`` (see
     :ref:`KernelConfig-section` for more details).
@@ -782,43 +733,7 @@ density at a single location for an arbitrary lookup table:
      return 0.5(v2*prim[LUT::density] + b2);
    }
 
-
-.. _EOSStructObject-section:
-
-EOSStruct Objects
-~~~~~~~~~~~~~~~~~~
-
-These objects are supposed to be lightweight struct/classes that
-encapsulate an equation of state.  It's also important that these
-objects are cheap to copy. It's our intention to keep these
-independent of the other Riemann Solver tooling (particularly
-``EnzoRiemannLUT``).
-
-Our only concrete example at this time is ``EOSStructIdeal``. But
-this very much expresses the basic idea. The struct provides methods
-that just require density and pressure values to compute:
-
-  * specific internal energy
-  * internal energy density
-  * sound speed
-  * fast magnetosonic speed (this requires magnetic field values to
-    also be specified)
-
-In the future, we may need to slightly revisit the expected signature
-if/when we add support for an isothermal fluid.
-
-.. note::
-
-   At this time, ``EOSStructIdeal`` is completely independent of the
-   ``EnzoEOSIdeal`` subclass of ``EnzoEquationOfState``.
-
-   In the immediate future, there are plans to unify these
-   implementations (the ``EnzoEquationOfState`` machinery will be
-   refactored to make use of these ``EOSStruct`` objects). When that
-   comes to pass, we will flesh out this section in greater detail.
-
-
-    .. _KernelConfig-section:
+.. _KernelConfig-section:
 
 ``KernelConfig<EOSStructT>``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
