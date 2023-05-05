@@ -14,7 +14,6 @@
 #include <limits> // std::numeric_limits
 #include <type_traits> // std::is_same
 #include <utility> // std::move
-#include <functional> // std::function
 
 //----------------------------------------------------------------------
 
@@ -39,29 +38,18 @@ std::string param_type_name(){
 
 //----------------------------------------------------------------------
 
-/// returns the number of parameters of a given type. This is currently very
-/// inefficient, but a function is being added to grackle to provide this exact
-/// information in constant time
+/// returns the number of parameters of a given type
 template<typename T>
 int num_params(){
-  std::function<const char*(std::size_t)> fn;
-  if (std::is_same<T, int>::value) {
-    fn = &param_name_int;
-  } else if (std::is_same<T, double>::value) {
-    fn = &param_name_double;
-  } else if (std::is_same<T, std::string>::value) {
-    fn = &param_name_string;
-  } else {
-    ERROR("num_params", "invalid template type");
-  }
-
-  std::size_t i = 0;
-  while (fn(i) != nullptr) { i++; }
-
-  ASSERT("num_params()", "unexpected result!", // this shouldn't happen!
-         (std::size_t)(std::numeric_limits<int>::max()) >= i);
-
-  return (int)i;
+  // store std::string in a temp variable to avoid lifetime issues with c_str()
+  std::string type_name = param_type_name<T>();
+  std::size_t out = grackle_num_params(type_name.c_str());
+  ASSERT1("num_params",
+          ("There are 0 known grackle parameters of type \"%s\". This result "
+           "probably indicates that the quoted string does not match the "
+           "strings that grackle uses internally to represent dtypes."),
+          type_name.c_str(), out != 0);
+  return int(out);
 }
 
 //----------------------------------------------------------------------
@@ -176,15 +164,7 @@ GrackleChemistryData::GrackleChemistryData()
   // it's VERY important that we set the chemistry_data struct to its default
   // values (as new parameters get added, they are set to defaults that may
   // should minimize changes in behavior)
-  //
-  // we explicitly use _set_default_chemistry_parameters() over
-  // set_default_chemistry_parameters because the former is thread-safe (they
-  // are both equivalent). For proof that this is the correct function to use,
-  // see how the implementation of grackle's python extension
-  //
-  // there is an open pr that will let us replace this with a new function
-  // called local_initialize_chemistry_parameters
-  (*ptr_) = _set_default_chemistry_parameters();
+  local_initialize_chemistry_parameters(ptr_.get());
 }
 #endif /* CONFIG_USE_GRACKLE */
 
