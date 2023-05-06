@@ -153,11 +153,6 @@ private:
 
 public: // interface
 
-  /// General factory method
-  static EnzoEOSVariant factory(const std::string& eos_type,
-                                const std::unordered_map<std::string,double>&);
-
-
   // define converting constructors
   //   EnzoEOSVariant(EnzoEOSIdeal eos);
   //   EnzoEOSVariant(EnzoEOSIsothermal eos);
