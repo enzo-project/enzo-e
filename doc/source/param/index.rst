@@ -229,13 +229,16 @@ Physics
 schedule
 --------
 
-"schedule" is a parameter *subgroup* that defines when to do something, such as
-perform output, apply a method, or to apply the dynamic load balancer.
-Schedules can be specified as a :p:`list` of values, or as an interval of
-values specified using some subset of :p:`start`, :p:`stop`, and
-:p:`step`.  The associated variable, set using :p:`var`, can be "cycle",
-"time", or "seconds".  Here "time" refers to simulation time, and
-"seconds" to wall-clock time.  At each cycle, all schedules are
+"schedule" is a parameter *subgroup* that defines when to do
+something, such as perform output, apply a method, or to apply the
+dynamic load balancer.  Schedules can be specified as either
+
+   * a :par:param:`~schedule:list` of values
+   * an interval of values specified using some subset of :par:param:`~schedule:start`, :par:param:`schedule:stop`, and :par:param:`~schedule:step`.
+
+The associated variable, set using :par:param:`~schedule:var`, can be
+"cycle", "time", or "seconds".  Here "time" refers to simulation time,
+and "seconds" to wall-clock time.  At each cycle, all schedules are
 checked to see if the cycle number, simulation time or wall-clock
 seconds match the list or interval of values.  If there is a match,
 the associated output or is performed; otherwise, it is skipped.
