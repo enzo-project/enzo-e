@@ -144,16 +144,19 @@ int EnzoBlock::SolveHydroEquations
 
   if (density_floor > 0.0) {
     for (int i=0; i<mx*my*mz; i++) {
-      double d_pre = density[i];
-      density[i] = std::max(d_pre, (double) density_floor);
 
-      // rescale color fields to account for possible change in
-      // baryon mass from enforcing density floor
-      double density_ratio = density[i] / d_pre;
-      for (int ic = 0; ic < ncolor; ic++){
-        enzo_float * cfield = (enzo_float *)
-        field.values(field.groups()->item("color",ic));
-        cfield[i] *= density_ratio;
+      if (density[i] < density_floor) {
+          double d_pre = density[i];
+          density[i] = density_floor;
+          double density_ratio = density[i] / d_pre;
+
+          // rescale color fields to account for change in
+          // baryon mass from enforcing density floor
+          for (int ic = 0; ic < ncolor; ic++){
+            enzo_float * cfield = (enzo_float *)
+            field.values(field.groups()->item("color",ic));
+            cfield[i] *= density_ratio;
+          }
       }
     }
   }
