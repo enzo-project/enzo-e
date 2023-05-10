@@ -53,6 +53,9 @@ Parameters::~Parameters()
   for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
+    ASSERT1("Parameters::~Parameters",
+            "parameter \"%s\" associated with a nullptr. This isn't allowed",
+            (it_param->first).c_str(), (it_param->second != nullptr));
     delete it_param->second;
   }
 #endif  
@@ -83,26 +86,18 @@ void Parameters::pup (PUP::er &p)
 	 ++it_param) {
       std::string name = it_param->first;
       Param * param = it_param->second;
+      ASSERT1("Parameters::pup",
+              "parameter \"%s\" associated with a nullptr. This isn't allowed",
+              name.c_str(), (param != nullptr));
       p | name;
-      int lparam = (param != NULL);
-      p | lparam;
-      ASSERT("Parameters::pup",
-             "param is expected to be non-null",
-             ((! lparam) && (param == NULL)) ||
-             (  lparam  && (param != NULL)));
-      if (lparam) p | *param;
+      p | *param;
     } 
   } else {
     for (int i=0; i<n; i++) {
       std::string name;
       p | name;
-      int lparam=0;
-      p | lparam;
-      Param * param = NULL;
-      if (lparam) {
-	param = new Param;
-	p | *param;
-      }
+      Param * param = new Param;
+      p | *param;
       parameter_map_[name] = param;
     }
   }
@@ -203,66 +198,67 @@ void Parameters::write ( FILE * fp, int type )
        it_param != parameter_map_.end();
        ++it_param) {
 
-    // Does the current parameter have a value?
-    if (it_param->second) {
+    // Ensure that the current parameter have a value
+    ASSERT1("Parameters::write",
+            "parameter \"%s\" associated with a nullptr. This isn't allowed",
+            (it_param->first).c_str(), (it_param->second != nullptr));
 
-      // Determine groups of the current parameter
-      int n_curr = extract_groups_(it_param->first,group_curr);
+    // Determine groups of the current parameter
+    int n_curr = extract_groups_(it_param->first,group_curr);
 
-      // Determine the first group that differs, if any
-      int i_group;
-      for (i_group = 0; 
-	   i_group < n_prev && i_group < n_curr &&
-	     group_prev[i_group] == group_curr[i_group];
-	   i_group++) {
-	// (Intentionally blank)
-      }
-
-      // End old groups
-
-      for (int i=i_group; i<n_prev; i++) {
-	--group_depth;
-	indent_string = indent_string.substr(0, indent_string.size()-indent_size);
-	if (type != param_write_monitor) {
-	  fprintf (fp, "%s}%c\n",indent_string.c_str(),
-		   (group_depth==0) ? '\n' : ';' );
-	}
-      }
-
-      // Begin new groups
-
-      for (int i=i_group; i<n_curr; i++) {
-	if (type != param_write_monitor) {
-	  const char * format =
-	    (type==param_write_libconfig) ? "%s%s : {\n" : "%s%s {\n";
-	  fprintf (fp, format ,indent_string.c_str(),
-		   group_curr[i].c_str());
-	}
-	indent_string = indent_string + indent_amount;
-	++group_depth;
-      }
-
-      // Print parameter
-      if (type == param_write_monitor) {
-	Monitor monitor;
-	monitor.set_mode(monitor_mode_all);
-	// display Monitor prefix if full_names
-	monitor.write(fp,"Parameters","");
-	for (int i=0; i < n_curr; i++) {
-	  fprintf (fp,"%s:",group_curr[i].c_str());
-	}
-      } else {	
-	fprintf (fp,"%s",indent_string.c_str());
-      }
-      it_param->second->write(fp,it_param->first,type);
-
-      // Copy current groups to previous groups (inefficient)
-      n_prev = n_curr;
-      for (int i=0; i<n_prev; i++) {
-	group_prev[i] = group_curr[i];
-      }
-
+    // Determine the first group that differs, if any
+    int i_group;
+    for (i_group = 0;
+         i_group < n_prev && i_group < n_curr &&
+           group_prev[i_group] == group_curr[i_group];
+         i_group++) {
+      // (Intentionally blank)
     }
+
+    // End old groups
+
+    for (int i=i_group; i<n_prev; i++) {
+      --group_depth;
+      indent_string = indent_string.substr(0, indent_string.size()-indent_size);
+      if (type != param_write_monitor) {
+        fprintf (fp, "%s}%c\n",indent_string.c_str(),
+                 (group_depth==0) ? '\n' : ';' );
+      }
+    }
+
+    // Begin new groups
+
+    for (int i=i_group; i<n_curr; i++) {
+      if (type != param_write_monitor) {
+        const char * format =
+          (type==param_write_libconfig) ? "%s%s : {\n" : "%s%s {\n";
+        fprintf (fp, format ,indent_string.c_str(),
+                 group_curr[i].c_str());
+      }
+      indent_string = indent_string + indent_amount;
+      ++group_depth;
+    }
+
+    // Print parameter
+    if (type == param_write_monitor) {
+      Monitor monitor;
+      monitor.set_mode(monitor_mode_all);
+      // display Monitor prefix if full_names
+      monitor.write(fp,"Parameters","");
+      for (int i=0; i < n_curr; i++) {
+        fprintf (fp,"%s:",group_curr[i].c_str());
+      }
+    } else {
+      fprintf (fp,"%s",indent_string.c_str());
+    }
+    it_param->second->write(fp,it_param->first,type);
+
+    // Copy current groups to previous groups (inefficient)
+    n_prev = n_curr;
+    for (int i=0; i<n_prev; i++) {
+      group_prev[i] = group_curr[i];
+    }
+
   }
 
   // End old groups
@@ -875,10 +871,50 @@ void Parameters::group_clear() throw ()
 
 //----------------------------------------------------------------------
 
-std::vector<std::string> Parameters::leaf_parameter_names() const throw()
+namespace { // define function local to this file
+
+void validate_abs_group_name_(const char* func_name, const std::string& name)
 {
+  const std::size_t size = name.size();
+
+  ASSERT(func_name, "\"\" is an invalid absolute group name", size > 0);
+  ASSERT1(func_name, "\"%s\" is an invalid group name: contains whitespace",
+          name.c_str(), name.find_first_of(" \t\n") == std::string::npos);
+  ASSERT1(func_name, "%s is an invalid absolute group name: starts with ':'",
+          name.c_str(), name[0] != ':');
+
+  std::size_t grp_start = 0;
+  while (grp_start < size) {
+    std::size_t rslt = name.find(':', grp_start);
+    std::size_t grp_stop = (rslt != std::string::npos) ? rslt : size;
+    ASSERT1(func_name,
+            "%s is an invalid group name: it has multiple colons in a row",
+            name.c_str(), grp_stop > grp_start);
+
+    // grp_stop specifies the location of a colon or is equal to size
+    grp_start = grp_stop + 1;
+  }
+}
+
+} // end anonymous namespace
+
+//----------------------------------------------------------------------
+
+std::vector<std::string> Parameters::leaf_parameter_names
+(const std::string& full_group_name) const throw()
+{
+  // validate full_group_name
+  validate_abs_group_name_("Parameters::leaf_parameter_names",
+                           full_group_name);
+
+  std::string prefix;
+  if (full_group_name[full_group_name.size()-1] == ':') { // size always > 0
+    prefix = full_group_name;
+  } else {
+    prefix = full_group_name + ':';
+  }
+
   std::vector<std::string> out;
-  std::string prefix = full_name("");
   std::size_t prefix_size = prefix.size();
 
   for (auto it_param =  parameter_map_.lower_bound(prefix);
@@ -890,6 +926,11 @@ std::vector<std::string> Parameters::leaf_parameter_names() const throw()
 	((it_param->first).size() <= prefix_size) ) {
       break;
     }
+
+    ASSERT1("Parameters::leaf_parameter_names",
+            "parameter \"%s\" associated with a nullptr. This isn't allowed",
+            (it_param->first).c_str(), (it_param->second != nullptr));
+
     std::string suffix = (it_param->first).substr(prefix_size,
 						  std::string::npos);
     if (suffix.find(':') != std::string::npos){
@@ -900,6 +941,19 @@ std::vector<std::string> Parameters::leaf_parameter_names() const throw()
     }
   }
   return out;
+}
+
+//----------------------------------------------------------------------
+
+std::vector<std::string> Parameters::leaf_parameter_names() const throw()
+{
+  std::string full_group_name = full_name("");
+  ASSERT("Parameters::leaf_parameter_names",
+         "the version of this method that returns the leaf parameter names in "
+         "the current parameter-group can't be called when the current "
+         "parameter-group is empty",
+         full_group_name != ":");
+  return leaf_parameter_names(full_group_name);
 }
 
 //----------------------------------------------------------------------
@@ -1055,7 +1109,16 @@ int Parameters::readline_
 Param * Parameters::param (std::string parameter, int index)
 {
   if (index == -1) {
-    return parameter_map_[parameter_name_(parameter)];
+    std::string full_name = parameter_name_(parameter);
+    // this branch was previously equivalent to:
+    //     return parameter_map_[full_name];
+    // however, when full_name wasn't a key within parameter_map_, that
+    // implicity inserted the key-value pair (full_name, nullptr) within
+    // parameter_map_
+    //
+    // The modern implementation avoids mutating parameter_map_
+    auto search = parameter_map_.find(full_name);
+    return (search != parameter_map_.end()) ? search->second : nullptr;
   } else {
     Param * list = this->param(parameter);
     Param * param = NULL;
@@ -1123,7 +1186,10 @@ void Parameters::check()
   for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
-    if (it_param->second && ! it_param->second->accessed()) {
+    ASSERT1("Parameters::check",
+            "parameter \"%s\" associated with a nullptr. This isn't allowed",
+            (it_param->first).c_str(), (it_param->second != nullptr));
+    if (! it_param->second->accessed()) {
       WARNING1 ("Parameters::check()",
 		"Parmeter \"%s\" not accessed",
 		it_param->first.c_str());
