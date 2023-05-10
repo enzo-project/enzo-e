@@ -1,0 +1,275 @@
+:p:`Method:m1_closure` parameters are used to initialize parameters for
+Enzo-E's multigroup M1 Closure radiative transfer solver. 
+
+----
+
+.. par:parameter:: Method:m1_closure:N_groups
+
+   :Summary: :s:`The number of groups to define`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`1`
+   :Scope:     :c:`Enzo`
+
+   :e:`This parameter specifies the number of energy groups to use for radiative transfer. The transport equation will be solved separately for each group.` :par:param:`!N_groups` must be >= 1.
+
+----
+
+.. par:parameter:: Method:m1_closure:energy_lower
+
+   :Summary: :s:`Lower bin edges of groups in eV`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`range(1.0, 100.0, 100.0/N_groups)`
+   :Scope:     :c:`Enzo`
+
+   :e:`This parameter specifies the lower bounds for energy groups in eV. Bins are not required to be contiguous. Lower bounds are inclusive.`
+
+----
+
+.. par:parameter:: Method:m1_closure:energy_upper
+
+   :Summary: :s:`Upper bin edges of groups in eV`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`range(100.0/N_groups, 100.0 + 100.0/N_groups, 100.0/N_groups)`
+   :Scope:     :c:`Enzo`
+
+   :e:`This parameter specifies the lower bounds for energy groups in eV. Bins are not required to be contiguous. Upper bounds are non-inclusive.`
+
+----
+
+.. par:parameter:: Method:m1_closure:energy_mean
+
+   :Summary: :s:`Group mean energy in eV`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`0.5 * (energy_lower[i] + energy_upper[i])`
+   :Scope:     :c:`Enzo`
+
+   :e:`This parameter specifies the group mean energies in eV.`
+
+----
+
+.. par:parameter:: Method:m1_closure:clight_frac
+
+   :Summary: :s:`Speed-of-light fraction`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`Speed of light fraction to use for radiative transfer.`
+
+----
+
+.. par:parameter:: Method:m1_closure:photon_escape_fraction
+
+   :Summary: :s:`Escape fraction of photons from gas around star particles`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`Calculated photon densities for star particle radiation are multiplied by this value before being deposited onto the mesh.`
+
+----
+
+.. par:parameter:: Method:m1_closure:courant
+
+   :Summary: :s:`Courant number for radiative transfer`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`The radiation timestep is calculated as dt = courant * dx/(3*clight_frac*C).`
+
+----
+
+.. par:parameter:: Method:m1_closure:cross_section_calculator
+
+   :Summary: :s:`Choose calculator for group-mean cross-sections`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"vernier"`
+   :Scope:     :c:`Enzo`
+
+   :e:`Specifies which group-mean photoionization cross section to use. Options include:`
+
+     * ``"vernier"`` :e:`Calculates the group-mean cross section using fits from `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>`. The midpoint energy is used for each group (e.g. :code:`energy = 0.5 * (E_lower + E_upper)` ).`
+
+     * ``"vernier_average"`` :e:`Same as `"vernier"`, with the added step of averaging the cross section over all star particles in the simulation, weighted by mass * luminosity, where luminosity in this case is converted to units of photons/s.`
+
+     * ``"custom"`` :e:`Specify cross sections explicitly in the parameter file using the` :par:param:`~Method:m1_closure:sigmaN` and :par:param:`~Method:m1_closure:sigmaE` parameters.
+   
+----
+
+.. par:parameter:: Method:m1_closure:flux_function
+
+   :Summary: :s:`Choose flux function for radiative transfer`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"GLF"`
+   :Scope:     :c:`Enzo`
+
+   :e:`Specifies which flux function to use for converting cell-centered fluxes to face-centered fluxes in the transport step. For the following functions,` :math:`\mathcal{F}` and :math:`\mathcal{U}` are vectors of unknowns defined such that :math:`\frac{\partial \mathcal{U}}{\partial t} + \nabla \mathcal{F}\left(\mathcal{U}\right).``
+
+     * ``"GLF"`` :math:`\mathcal{F}_{i+1/2}=\frac{1}{2}\left(\mathcal{F}_i+\mathcal{F}_{i+1}\right) + \frac{c}{2}\left(\mathcal{U}_{i+1}+\mathcal{U}_i\right)``
+
+     * ``"HLL"`` :math:`\mathcal{F}_{i+1/2}=\frac{\lambda^+\mathcal{F}_i-\lambda^-\mathcal{F}_{i+1} + \lambda^+\lambda^-\left(\mathcal{U}_{i+1}+\mathcal{U}_i\right)}{\lambda^+-\lambda^-}`, where :math:`\lambda^+` and :math:`\lambda^-` are eigenvalues of the Jacobian :math:`\frac{\partial \mathcal{F}}{\partial \mathcal{U}}`. `Requires path to eigenvalue text file using the :p:`hll_file` parameter.
+
+    Broadly speaking, "GLF" is more diffusive than "HLL", but is better at handling radiation from isotropic sources. On the other hand, "HLL" is better for simulating beams of radiation and shadows. 
+    See` `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ for a more detailed comparison. 
+
+----
+
+.. par:parameter:: Method:m1_closure:hll_file
+
+   :Summary: :s:`Path to text file containing table of eigenvalues`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"hll_evals.list"`
+   :Scope:     :c:`Enzo`
+
+   :e:`Path to text file containing table of eigenvalues. A table with eiganvalues calculated by` `Gonzalez, Audut, & Huynh (2007) <https://www.aanda.org/articles/aa/abs/2007/11/aa5486-06/aa5486-06.html>`_ is provided in the ``input/RadiativeTransfer`` directory.
+
+----
+
+.. par:parameter:: Method:m1_closure:min_photon_density
+
+   :Summary: :s:`Minimum photon density in CGS units`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`Minimum photon density in units of` :math:`\mathrm{cm}^{-3}`.
+
+----
+
+.. par:parameter:: Method:m1_closure:particle_luminosity
+
+   :Summary: :s:`User-specified luminosity for star particles in erg/s`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`-1.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`If` :par:param:`!particle_luminosity` ``>= 0.0``, all star particles will be given the emission rate specified using this parameter. Otherwise, the `"luminosity"` particle attribute will be checked unless :par:param:`~Method:m1_closure:radiation_spectrum` equals ``"blackbody"`` .
+   
+----
+
+.. par:parameter:: Method:m1_closure:radiation_spectrum
+
+   :Summary: :s:`Type of radiation spectrum for star particle`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"custom"`
+   :Scope:     :c:`Enzo`
+
+   :e:`Options include:`
+
+     * ``"blackbody"`` :e:`Calculates emission rate into each radiation group by integrating over a Planck function`
+
+     * ``"custom"`` :e:`Specify SED explicitly in the parameter file using the` :p:`SED` parameter
+   
+----
+
+.. par:parameter:: Method:m1_closure:attenuation
+
+   :Summary: :s:`Whether to attenuate radiation`
+   :Type:    :par:typefmt:`bool`
+   :Default: :d:`true`
+   :Scope:     :c:`Enzo`
+
+   :e:`Whether to include attenuation in the radiative transport equation. Requires color fields to be defined for six-species chemistry (HI, HII, HeI, HeII, HeIII, and` :math:`e^-`.) If no density fields are defined, the attenuation calculation will be skipped by default.
+   
+----
+
+.. par:parameter:: Method:m1_closure:thermochemistry
+
+   :Summary: :s:`Whether to include thermochemistry`
+   :Type:    :par:typefmt:`bool`
+   :Default: :d:`true`
+   :Scope:     :c:`Enzo`
+
+   :e:`Whether to include thermochemistry. If` :par:param:`!thermochemistry` == true, photoionization and heating rates are calculated and stored in the following fields: `"RT_HI_ionization_rate"`, `"RT_HeI_ionization_rate"`, `"RT_HeII_ionization_rate"`, and `"RT_heating_rate"`. The actual updates to species fields and the solving of the energy equation are handled by Grackle. As such, this method must be run in tandem with Grackle using :par:param:`!Method:grackle:with_radiative_transfer` = 1.
+   
+----
+
+.. par:parameter:: Method:m1_closure:recombination_radiation
+
+   :Summary: :s:`Whether to include recombination radiation`
+   :Type:    :par:typefmt:`bool`
+   :Default: :d:`"false"`
+   :Scope:     :c:`Enzo`
+
+   :e:`Whether to source photons from recombination radiation. Ignoring recombination radiation is known as the on-the-spot approximation. This is valid in gas that is optically thick to ionizing radiation.`
+
+----
+
+.. par:parameter:: Method:m1_closure:lyman_werner_background
+
+   :Summary: :s:`Whether to include a Lyman-Werner background`
+   :Type:    :par:typefmt:`bool`
+   :Default: :d:`"false"`
+   :Scope:     :c:`Enzo`
+
+   :e:`Whether to include an H2-photodissociating Lyman-Werner background. Requires radiation group 0 to be defined corresponding to energies in the Lyman-Werner band (11.18-13.6 eV). A constant intensity can be specified using the` :par:param:`~Method:m1_closure:LWB_J21` :e:`parameter. If` :par:param:`~Method:m1_closure:LWB_J21` :e:`is not set, the intensity will be calculated using the redshift-dependent polynomial fit defined in Equation 16 of` `Wise et al. (2012) <https://academic.oup.com/mnras/article/427/1/311/1029262>`_.
+
+----
+
+.. par:parameter:: Method:m1_closure:LWB_J21
+
+   :Summary: :s:`Intensity of the LW background in units of 1e-21 erg s^-1 cm^-2 Hz^-1 sr^-1`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`-1.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`Intensity of the LW background in units of 1e-21 erg s^-1 cm^-2 Hz^-1 sr^-1.`
+
+----
+
+.. par:parameter:: Method:m1_closure:H2_photodissociation
+
+   :Summary: :s:`Whether to include H2 photodissociation from LW radiation`
+   :Type:    :par:typefmt:`bool`
+   :Default: :d:`"false"`
+   :Scope:     :c:`Enzo`
+
+   :e:`Whether to include an H2 photodissociation from Lyman-Werner radiation. If true, H2 photodissication rates are calculated and stored in a field called "RT_H2_dissociation_rate". Requires radiation group 0 to be defined corresponding to energies in the Lyman-Werner band (11.18-13.6 eV).`
+
+----
+
+.. par:parameter:: Method:m1_closure:SED
+
+   :Summary: :s:`User-specified SED for radiating point sources`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`Flat spectrum, where each group is given an emission rate of` 1.0/:p:`N_groups`
+   :Scope:     :c:`Enzo`
+
+   :e:`User-specified SED for radiating point sources. This is a list, where each entry corresponds to an energy fraction to inject into each group every timestep.
+   For example, if` :par:param:`!SED` = [0.1, 0.6, 0.3], the emitted radiation will be split into three groups such that L1 = 0.1*L, L2 = 0.6*L, and L = 0.3*L, where L is the total luminosity of the particle.
+
+----
+
+.. par:parameter:: Method:m1_closure:sigmaE
+
+   :Summary: :s:`User-specified group-mean cross sections in cm^2, averaged by energy`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`0.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`User-specified group-mean cross sections, averaged by energy. Requires` :par:param:`~Method:m1_closure:cross_section_calculator` to be set to `"custom"`. If this parameter is set, :par:param:`~Method:m1_closure:sigmaN` must also be set. This list has length :par:param:`~Method:m1_closure:N_groups` * 3 ( :par:param:`~Method:m1_closure:N_groups` * 4 if :par:param:`~Method:m1_closure:H2_photodissociation` is ``true``), where the number 3 (or 4) represents the number of chemical species (HI, HeI, HeII, and optionally H2I). For example, a simulation could use three radiation groups with :par:param:`~Method:m1_closure:energy_mean` = [21.62, 30.0, 60.0]. In this case, setting :par:param:`!sigmaE` = [1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
+
+----
+
+.. par:parameter:: Method:m1_closure:sigmaN
+
+   :Summary: :s:`User-specified group-mean cross sections in cm^2, averaged by photon density`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`0.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`User-specified group-mean cross sections, averaged by photon number. Requires` :par:param:`~Method:m1_closure:cross_section_calculator` to be set to `"custom"`. If this parameter is set, :par:param:`~Method:m1_closure:sigmaE` must also be set. This list has length :par:param:`~Method:m1_closure:N_groups` * 3 ( :par:param:`~Method:m1_closure:N_groups` * 4 if :par:param:`~Method:m1_closure:H2_photodissociation` is ``true``), where the number 3 (or 4) represents the number of chemical species (HI, HeI, HeII, and optionally H2I). For example, a simulation could use three radiation groups with :par:param:`~Method:m1_closure:energy_mean` = [21.62, 30.0, 60.0]. In this case, setting :par:param:`~Method:m1_closure:sigmaE` = [1.78e-18,0.0,0.0, 7.03e-19,5.36e-18,0.0, 9.19e-20,1.37e-18,1.22e-18] would produce the same cross sections as the fits from  `Vernier et al. (1996) <https://ui.adsabs.harvard.edu/abs/1996ApJ...465..487V/abstract>_`.
+
+----
+
+.. par:parameter:: Method:m1_closure:temperature_blackbody
+
+   :Summary: :s:`User-specified blackbody temperature for radiating point sources`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:     :c:`Enzo`
+
+   :e:`User-specified blackbody temperature for radiating point sources. Requires` :par:param:`~Method:m1_closure:radiation_spectrum` to be set to ``"blackbody"``.
+   
+----

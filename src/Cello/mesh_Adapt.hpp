@@ -269,7 +269,7 @@ public: // interface
   inline Index index(int i) const { return neighbor_list_.at(i).index_; }
 
   /// Display Adapt attributes for debugging
-  void print(std::string message, const Block * block = nullptr) const;
+  void print(std::string message, const Block * block = nullptr, FILE * fp=nullptr) const;
 
   /// Write block's neighbors to file for debugging
   void write(std::string filename, const Block * block, int cycle_start = 0) const;

@@ -18,3 +18,4 @@ refinement criteria, etc.
    array
    hydro_infrastructure
    debugging
+   writing-docs

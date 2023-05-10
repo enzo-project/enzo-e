@@ -117,6 +117,18 @@ public: // virtual methods
     return (enzo_constants::mass_hydrogen * (vel_units * vel_units) /
 	    enzo_constants::kboltz);
   }
+
+  /// Return photon number density units scaling factor (derived)
+  double photon_number_density() const
+  {
+    // The ratio of ionizing photons emitted per hydrogen atom at reionization is
+    // just 1.5-3 (Bolton and Haehnelt 2007), so it makes sense to define our
+    // cosmological photon number density units as proportional to
+    // the cosmological baryon density units to keep the numbers of order unity in code units.
+    return (cosmology_ == NULL) ?
+      1.0 / Units::volume() : 0.76 * cosmology_->density_units() /
+                              enzo_constants::mass_hydrogen;
+  }
   
 private: // functions
 

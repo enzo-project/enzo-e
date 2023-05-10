@@ -50,11 +50,6 @@ find_package(Charm REQUIRED)
 # Link executables with the charmc wrapper
 STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
        CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
-# for book-keeping purposes create a library representing the external
-# Charm-library. We are going to make this an interface library (a header-only)
-# library since the charmc wrapper makes sure we link to the correct library
-add_library(CHARM_EXTERNAL INTERFACE)
-target_include_directories(CHARM_EXTERNAL INTERFACE ${CHARM_INCLUDE_DIRS})
 
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
@@ -292,10 +287,13 @@ if (use_papi)
   endif()
 endif()
 
-option(USE_SIMD "Use OpenMP SIMD directives. Also enables value-unsafe floating-point optimizations which may already be enable on some compilers (like icc)." OFF)
-include("cmake/EnableOMPSIMD.cmake")
-if (USE_SIMD)
-  enableOMPSIMD()
+option(OPTIMIZE_FP "Enables value-unsafe floating-point optimizations (this may already be enabled on some compilers like icc)." OFF)
+option(USE_SIMD "Use OpenMP SIMD directives. This may already be enabled on some compilers (like icc)." OFF)
+include("cmake/EnableFPOptimizations.cmake")
+if (OPTIMIZE_FP)
+  enableFPOptimizations(USE_SIMD)
+elseif (USE_SIMD)
+  message(FATAL_ERROR "Can only use `USE_SIMD=ON` when `OPTIMIZE_FP=ON`.")
 endif()
 
 # Include machine file second time (if used initially) to set additional options that may depend

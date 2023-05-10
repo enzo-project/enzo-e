@@ -450,7 +450,6 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
     size_t index_src = field_list_src[i_f];
     size_t index_dst = field_list_dst[i_f];
-
     CHECK_COARSE(field_src,index_src);
 
     int m3[3],n3[3],g3[3],c3[3];
@@ -933,7 +932,7 @@ void FieldFace::div_by_density_
   Grouping * groups = cello::field_groups();
 
   void * field_density = field.values("density");
-  
+ 
   const std::string field_name = field.field_name(index_field);
 
   const bool scale_by_density =
