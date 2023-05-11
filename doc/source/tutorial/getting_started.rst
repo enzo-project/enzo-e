@@ -135,6 +135,8 @@ This can be done with the following commands:
 
 This is **NOT** a requirement for building and running Enzo-E, but it is used in some tests.
 
+.. _how-to_configure_build:
+
 Configuring/Building
 ====================
 

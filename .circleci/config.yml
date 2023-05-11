@@ -67,7 +67,7 @@ commands:
       - run:
           name: "Install grackle."
           command: |
-            git clone -b master https://github.com/grackle-project/grackle $HOME/grackle
+            git clone -b main https://github.com/grackle-project/grackle $HOME/grackle
             cd $HOME/grackle
             ./configure
             cd src/clib
@@ -318,7 +318,7 @@ jobs:
 
       - compile-enzoe:
           usedouble: << parameters.usedouble >>
-          tag: gold-standard-002
+          tag: gold-standard-003
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
 

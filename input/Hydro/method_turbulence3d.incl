@@ -137,12 +137,7 @@ Mesh { root_rank = 3; }
          type = "image";
      }
      mesh {
-         colormap = [ 0.0, 0.0, 0.0, 
-                      0.0, 0.0, 1.0, 
-                      0.0, 1.0, 1.0, 
-                      0.0, 1.0, 0.0, 
-                      1.0, 1.0, 0.0, 
-                      1.0, 0.0, 0.0 ];
+         colormap = [ "black", "blue", "cyan", "lime", "yellow", "red" ];
          image_min = 0.0;
          image_max = 6.0;
          image_reduce_type = "max";
@@ -153,9 +148,9 @@ Mesh { root_rank = 3; }
          type = "image";
      }
      refine_shock {
-         colormap = [0.0, 1.0, 0.0,   # green coarsen,
-                     0.0, 0.0, 0.0,   # white same
-                     1.0, 0.0, 0.0];  # red refine
+         colormap = ["lime",   # green coarsen,
+                     "black",   # black same
+                     "red"];    # red refine
          image_size = [ 1024, 1024 ];
          field_list = [ "refine_shock" ];
          name = [ "turbulence3d-refine_shock-%04d.png", "count" ];
@@ -163,9 +158,9 @@ Mesh { root_rank = 3; }
          type = "image";
      }
      refine_shear {
-         colormap = [0.0, 1.0, 0.0,   # green coarsen,
-                     0.0, 0.0, 0.0,   # white same
-                     1.0, 0.0, 0.0];  # red refine
+         colormap = ["lime",   # green coarsen,
+                     "black",   # black same
+                     "red"];    # red refine
 
          include "input/Colormap/colormap_rainbow.incl"
          image_size = [ 1024, 1024 ];
