@@ -71,10 +71,7 @@ include "input/flux_correct.incl"
          type     = "image";
 	 image_type = "data";
          field_list = ["density"];
-	 colormap = [0.0,0.0,0.0,
-                     1.0,0.0,0.0,
-                     1.0,1.0,0.0,
-                     1.0,1.0,1.0];
+	 colormap = ["black", "red", "yellow", "white"];
          name     = ["implosion-d-%03d.png","count"];
          schedule {
             var =  "cycle";
@@ -86,12 +83,7 @@ include "input/flux_correct.incl"
          type = "image";
 	 image_type = "mesh";
 	 image_reduce_type = "max";
-         colormap = [0.0, 0.0, 0.0,
-                     0.0, 0.0, 1.0,
-                     0.0, 1.0, 1.0,
-                     0.0, 1.0, 0.0,
-                     1.0, 1.0, 0.0,
-                     1.0, 0.0, 0.0 ];
+         colormap = ["black", "blue", "cyan", "lime", "yellow", "red" ];
          name     = ["implosion-mesh-%03d.png","count"];
 	 image_size = [513,513];
          schedule {
