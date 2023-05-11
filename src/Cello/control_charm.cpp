@@ -79,7 +79,7 @@ void Block::adapt_exit_()
   TRACE_CONTROL("adapt_exit");
 
   //  verify_neighbors();
-  
+
   control_sync_quiescence(CkIndex_Main::p_output_enter());
 }
 

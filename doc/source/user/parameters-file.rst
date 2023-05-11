@@ -277,10 +277,7 @@ underlying grammar and syntax are relatively fixed.
              type = "image";
              image_type = "data";
              field_list = [ "density" ];
-             colormap = [ 0.0, 0.0, 0.0,
-                          1.0, 0.0, 0.0,
-                          1.0, 1.0, 0.0,
-                          1.0, 1.0, 1.0 ];
+             colormap = [ "black", "red", "yellow", "white"  ];
              schedule {
                  step = 10;
                  type = "interval";
@@ -294,12 +291,7 @@ underlying grammar and syntax are relatively fixed.
              image_type = "mesh";
              image_reduce_type = "max";
              image_size = [ 513, 513 ];
-             colormap = [ 0.0, 0.0, 0.0,
-                          0.0, 0.0, 1.0,
-                          0.0, 1.0, 1.0,
-                          0.0, 1.0, 0.0,
-                          1.0, 1.0, 0.0,
-                          1.0, 0.0, 0.0 ];
+             colormap = [ "black", "blue", "cyan", "green", "yellow", "red" ];
              schedule {
                  step = 10;
                  type = "interval";

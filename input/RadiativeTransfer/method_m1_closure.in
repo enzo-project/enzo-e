@@ -1,0 +1,176 @@
+# Problem: RT in vacuum with radiation sourced from a star particle
+# Author: William Hicks (whicks@ucsd.edu)
+
+ Boundary {
+     type = "outflow";
+ }
+
+ Domain {
+     lower = [ 0.000000000000000, 0.000000000000000, 0.000000000000000 ];
+     upper = [ 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.400000000000000;
+     ghost_depth = 4;
+     list  = [ "photon_density", "flux_x", "flux_y", "flux_z" ];
+     list += ["photon_density_0", "flux_x_0", "flux_y_0", "flux_z_0"];
+     list += ["photon_density_1", "flux_x_1", "flux_y_1", "flux_z_1"];
+     list += ["photon_density_2", "flux_x_2", "flux_y_2", "flux_z_2"];
+
+     #need to define these for feedback_test initializer
+     list += ["density", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "e_density","metal_density", "velocity_x", "velocity_y", "velocity_z", "internal_energy", "total_energy"]; 
+ }
+
+ Initial {
+     feedback_test {
+         HII_density = 0.0;
+         HI_density = 0.0;
+         HeIII_density = 0.0;
+         HeII_density = 0.0;
+         HeI_density = 0.0;
+         density = 0.0;
+         e_density = 0.0;
+         position = [ 0.40000000000000000, 0.40000000000000000, 0.40000000000000000 ];
+         star_mass = 100.0000000000000;
+         temperature = 100.0000000000000;
+         luminosity = 1e10;
+     };
+
+     value {
+         photon_density_0 = 0.0;
+         photon_density_1 = 0.0;
+         photon_density_2 = 0.0;
+
+         flux_x_0 = 0.0;
+         flux_x_1 = 0.0;
+         flux_x_2 = 0.0;
+
+         flux_y_0 = 0.0;
+         flux_y_1 = 0.0;
+         flux_y_2 = 0.0;
+
+         flux_z_0 = 0.0;
+         flux_z_1 = 0.0;
+         flux_z_2 = 0.0;
+     }
+
+     list = [ "feedback_test", "value" ];
+ }
+
+ Mesh {
+     root_blocks = [ 2, 2, 2 ];
+     root_rank = 3;
+     root_size = [ 64, 64, 64 ];
+ }
+
+ Method {
+     list = [ "m1_closure" ];
+     m1_closure {
+         N_groups = 2;
+         particle_luminosity = 1e10;
+         SED = [ 0.6, 0.4 ];
+         energy_lower = [ 13.60000000000000, 24.5900000000000 ];
+         energy_upper = [ 24.59000000000000, 54.4200000000000 ];
+         clight_frac = 1e-2;
+         radiation_spectrum = "custom";
+         recombination_radiation = false;
+         attenuation = false;
+         thermochemistry = false;
+         cross_section_calculator = "custom";
+         sigmaN = [0.0,0.0,0.0, 0.0,0.0,0.0];
+         sigmaE = [0.0,0.0,0.0, 0.0,0.0,0.0];
+         min_photon_density = 0.0;
+     };
+ }
+
+ Output {
+     list = [ "N", "Fx", "Fy", "Fz" ];
+     Fx {
+         dir = [ "method_M1-%06d", "cycle" ];
+         field_list = [ "flux_x" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         name = [ "RT_Fx-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     Fy {
+         dir = [ "method_M1-%06d", "cycle" ];
+         field_list = [ "flux_y" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         name = [ "RT_Fy-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     Fz {
+         dir = [ "method_M1-%06d", "cycle" ];
+         field_list = [ "flux_z" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         name = [ "RT_Fz-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     N {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "method_M1-%06d", "cycle" ];
+         field_list = [ "photon_density" ];
+         image_log = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "RT_N-%06d.png", "cycle" ];
+         schedule {
+             start = 0;
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     hdf5 {
+         dir = [ "method_M1-%06d", "cycle" ];
+         field_list = [ "photon_density", "flux_x", "flux_y", "flux_z", "photon_density_0", "photon_density_1", "photon_density_2" ];
+         name = [ "data-%03d-%02d.h5", "count", "proc" ];
+         schedule {
+             start = 0;
+             step = 10;
+             var = "cycle";
+         };
+         type = "data";
+     };
+ }
+
+ Particle {
+     list = [ "star" ];
+     star {
+         attributes = [ "x", "double", "y", "double", "z", "double", "vx", "double", "vy", "double", "vz", "double", "ax", "double", "ay", "double", "az", "double", "id", "double", "mass", "double", "is_copy", "int64", "creation_time", "double", "lifetime", "double", "metal_fraction", "double", "luminosity", "double" ];
+         groups = [ "is_gravitating" ];
+         mass_is_mass = true;
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+     };
+ }
+
+ Stopping {
+     cycle = 20;
+ }
+
+# Units {
+#     density = 1.674000000000000e-24;
+#     length = 4.073520000000000e+22 / 4.0; #3.3 kpc
+#     time = 31540000000000.00;
+# }

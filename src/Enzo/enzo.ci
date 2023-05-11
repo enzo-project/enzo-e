@@ -98,6 +98,7 @@ module enzo {
   PUPable EnzoMethodDistributedFeedback;
   PUPable EnzoMethodFeedback;
   PUPable EnzoMethodFeedbackSTARSS;
+  PUPable EnzoMethodM1Closure;
   PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
@@ -108,6 +109,7 @@ module enzo {
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
+  PUPable EnzoMethodBalance;
   PUPable EnzoMethodSinkMaker;
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
@@ -168,6 +170,11 @@ module enzo {
     entry void p_get_msg_refine(Index index);
     entry void p_get_msg_check(Index index);
 #endif
+
+    //EnzoMethodBalance
+    entry void r_method_balance_count(CkReductionMsg * msg);
+    entry void p_method_balance_check();
+
     // EnzoMethodCheck
     entry void r_method_check_enter(CkReductionMsg *);
     entry void p_check_done();
@@ -187,7 +194,7 @@ module enzo {
     entry void p_set_level_array(CProxy_EnzoLevelArray proxy);
   };
 
-  //----------------------------------------------------------------------%
+  //----------------------------------------------------------------------
   array[Index] EnzoBlock : Block {
 
 #ifdef BYPASS_CHARM_MEM_LEAK
@@ -202,11 +209,19 @@ module enzo {
  
     // EnzoMethodFeedbackSTARSS synchronization entry methods
     entry void p_method_feedback_starss_end();
-  
+ 
+    // EnzoMethodM1Closure synchronization entry methods
+    entry void p_method_m1_closure_solve_transport_eqn();
+    entry void p_method_m1_closure_set_global_averages(CkReductionMsg *msg);  
+ 
     // EnzoMethodTurbulence synchronization entry methods
     entry void r_method_turbulence_end(CkReductionMsg *msg);
 
     entry void p_initial_hdf5_recv(MsgInitial * msg_initial);
+
+    // EnzoMethodBalance
+    entry void p_method_balance_migrate();
+    entry void p_method_balance_done();
 
     // EnzoMethodGravity synchronization entry methods
     entry void p_method_gravity_continue();
@@ -238,7 +253,6 @@ module enzo {
     // EnzoSolverCg synchronization entry methods
 
     entry void p_solver_cg_matvec();
-
     entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
     entry void r_solver_cg_loop_0b(CkReductionMsg *msg);
     entry void r_solver_cg_shift_1(CkReductionMsg *msg);

@@ -1,62 +1,79 @@
-:p: `Method:feedback` parameters.
+:par:paramfmt:`Method:feedback` parameters.
 
 ----
 
-Parameter:  :p:`Method` : :p:`feedback` : :p:`supernovae`
-:Summary: :s:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
-:Type:   :t:`logical`
-:Default: :d:`true`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:feedback:supernovae
 
-:e:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
+   :Summary: :s:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:     :z:`Enzo`
 
-----
-
-Parameter:  :p:`Method` : :p:`feedback` : :p:`unrestricted_sn`
-:Summary: :s:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
-:Type:   :t:`logical`
-:Default: :d:`true`
-:Scope:     :z:`Enzo`
-
-:e:`Allow for > 1 supernova event per star particle in a timestep.`
+   :e:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
 
 ----
 
-Parameter:  :p:`Method` : :p:`feedback` : :p:`stellar_winds`
-:Summary: :s:`Whether to turn on stellar winds in EnzoMethodFeedbackSTARSS`
-:Type:   :t:`logical`
-:Default: :d:`true`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:feedback:unrestricted_sn
 
-:e:`Whether to turn on stellar wind feedback in EnzoMethodFeedbackSTARSS`
+   :Summary: :s:`Whether to turn on supernova feedback in EnzoMethodFeedbackSTARSS`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:     :z:`Enzo`
 
-----
-
-Parameter:  :p:`Method` : :p:`feedback` : :p:`analytic_SNR_shell_mass`
-:Summary: :s:`Calculates supernova remnant shell mass via analytic formulae`
-:Type:   :t:`logical`
-:Default: :d:`true`
-:Scope:     :z:`Enzo`
-
-:e:`Calculates supernova remnant shell mass via analytic formulae`
+   :e:`Allow for > 1 supernova event per star particle in a timestep.`
 
 ----
 
-Parameter:  :p:`Method` : :p:`feedback` : :p:`fade_SNR`
-:Summary: :s:`Allow coupling to fading phase of SNe in EnzoMethodFeedbackSTARSS`
-:Type:   :t:`logical`
-:Default: :d:`true`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:feedback:stellar_winds
 
-:e:`Allow coupling to fading phase of SNe in EnzoMethodFeedbackSTARSS if cell width is greater than fading radius.`
+   :Summary: :s:`Whether to turn on stellar winds in EnzoMethodFeedbackSTARSS`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:     :z:`Enzo`
+
+   :e:`Whether to turn on stellar wind feedback in EnzoMethodFeedbackSTARSS`
 
 ----
 
-Parameter:  :p:`Method` : :p:`feedback` : :p:`NEvents`
-:Summary: :s:`Manually set off supernovae in test problems`
-:Type:   :t:`integer`
-:Default: :d:`-1`
-:Scope:     :z:`Enzo`
+.. par:parameter::  Method:feedback:radiation
 
-:e:`If -1, will probabilistically model supernova. If "NEvents" > 0, will set off N-supernovae per particle, (1 per timestep for each particle). If NEvents = 0, no supernovae will go off. Mostly for testing purposes.`
+   :Summary: :s:`Whether to turn on radiation in EnzoMethodFeedbackSTARSS`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:     :z:`Enzo`
+
+   :e:`Whether to turn on ionizing radiation in EnzoMethodFeedbackSTARSS. If true, updates the "luminosity" attribute of "star" particles using piecewise rates taken from Appendix A of` `Hopkins et al. (2018) <https://academic.oup.com/mnras/article/480/1/800/5046474>`_.
+
+----
+
+.. par:parameter:: Method:feedback:analytic_SNR_shell_mass
+
+   :Summary: :s:`Calculates supernova remnant shell mass via analytic formulae`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:     :z:`Enzo`
+
+   :e:`Calculates supernova remnant shell mass via analytic formulae`
+
+----
+
+.. par:parameter:: Method:feedback:fade_SNR
+
+   :Summary: :s:`Allow coupling to fading phase of SNe in EnzoMethodFeedbackSTARSS`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:     :z:`Enzo`
+
+   :e:`Allow coupling to fading phase of SNe in EnzoMethodFeedbackSTARSS if cell width is greater than fading radius.`
+
+----
+
+.. par:parameter:: Method:feedback:NEvents
+
+   :Summary: :s:`Manually set off supernovae in test problems`
+   :Type:   :par:typefmt:`integer`
+   :Default: :d:`-1`
+   :Scope:     :z:`Enzo`
+
+   :e:`If -1, will probabilistically model supernova. If "NEvents" > 0, will set off N-supernovae per particle, (1 per timestep for each particle). If NEvents = 0, no supernovae will go off. Mostly for testing purposes.`
 

@@ -34,7 +34,7 @@ public: // interface
   /// Allocate scalars
   void allocate(const ScalarDescr * scalar_descr)
   { value_.resize(scalar_descr->size()); }
-  
+
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change

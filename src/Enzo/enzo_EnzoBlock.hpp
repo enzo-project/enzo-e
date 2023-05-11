@@ -112,9 +112,7 @@ public: // interface
        redshift(0.0)
   {
     performance_start_(perf_block);
-#ifdef TRACE_BLOCK
-    CkPrintf ("%d %p TRACE_BLOCK EnzoBlock()\n",CkMyPe(),(void *)this);
-#endif
+
     for (int i=0; i<MAX_DIMENSION; i++) {
       GridLeftEdge[i] = 0;
       GridDimension[i] = 0;
@@ -125,31 +123,8 @@ public: // interface
     performance_stop_(perf_block);
   }
 
-  /// Initialize a migrated EnzoBlock
-  EnzoBlock (CkMigrateMessage *m)
-    : CBase_EnzoBlock (m),
-      dt(0.0),
-      redshift(0.0)
-  {
-#ifdef TRACE_BLOCK
-    CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(CkMigrateMessage)\n",
-              CkMyPe(),(void *)this, name(thisIndex).c_str());
-#endif
-    performance_start_(perf_block);
-    TRACE("CkMigrateMessage");
-    for (int i=0; i<MAX_DIMENSION; i++) {
-      GridLeftEdge[i] = 0;
-      GridDimension[i] = 0;
-      GridStartIndex[i] = 0;
-      GridEndIndex[i] = 0;
-      CellWidth[i] = 0.0;
-    }
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(CkMigrateMessage *)\n",CkMyPe(),(void *)this);
-  print();
-#endif
-    performance_start_(perf_block);
-  }
+  /// Charm++ Migration constructor
+  EnzoBlock (CkMigrateMessage *m);
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program
   void pup(PUP::er &p);
@@ -218,6 +193,10 @@ public: /// entry methods
   double timestep() { return dt; }
 
   //--------------------------------------------------
+
+  // EnzoMethodBalance
+  void p_method_balance_migrate();
+  void p_method_balance_done();
 
   /// Synchronize after potential solve and before accelerations
   void p_method_gravity_continue();
@@ -360,19 +339,24 @@ public: /// entry methods
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   // EnzoMethodFeedbackSTARSS
-
   void p_method_feedback_starss_end();
 
+  //EnzoMethodM1Closure
+  void p_method_m1_closure_solve_transport_eqn();
+  void p_method_m1_closure_set_global_averages(CkReductionMsg * msg);
+
   virtual void print() const {
-    CkPrintf ("PRINT_ENZO_BLOCK name = %s\n",name().c_str());
-    CkPrintf ("PRINT_ENZO_BLOCK dt = %g\n",dt);
-    CkPrintf ("PRINT_ENZO_BLOCK redshift = %g\n",redshift);
-    CkPrintf ("PRINT_ENZO_BLOCK GridLeftEdge[] = %g %g %g\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
-    CkPrintf ("PRINT_ENZO_BLOCK GridDimension[] = %d %d %d\n",GridDimension[0],GridDimension[1],GridDimension[2]);
-    CkPrintf ("PRINT_ENZO_BLOCK GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
-    CkPrintf ("PRINT_ENZO_BLOCK GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
-    CkPrintf ("PRINT_ENZO_BLOCK CellWidth[] = %g %g %g\n",CellWidth[0],CellWidth[1],CellWidth[2]);
-    Block::print();
+    FILE *fp = fopen ((std::string("EB-")+name_).c_str(),"a");
+    fprintf (fp,"PRINT_ENZO_BLOCK name = %s\n",name().c_str());
+    fprintf (fp,"PRINT_ENZO_BLOCK dt = %g\n",dt);
+    fprintf (fp,"PRINT_ENZO_BLOCK redshift = %g\n",redshift);
+    fprintf (fp,"PRINT_ENZO_BLOCK GridLeftEdge[] = %g %g %g\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
+    fprintf (fp,"PRINT_ENZO_BLOCK GridDimension[] = %d %d %d\n",GridDimension[0],GridDimension[1],GridDimension[2]);
+    fprintf (fp,"PRINT_ENZO_BLOCK GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
+    fprintf (fp,"PRINT_ENZO_BLOCK GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
+    fprintf (fp,"PRINT_ENZO_BLOCK CellWidth[] = %g %g %g\n",CellWidth[0],CellWidth[1],CellWidth[2]);
+    Block::print(fp);
+    fclose (fp);
   }
 
 protected: // methods

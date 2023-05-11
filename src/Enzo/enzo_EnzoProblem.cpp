@@ -583,7 +583,6 @@ Method * EnzoProblem::create_method_
     std::find(mlist.begin(), mlist.end(), "flux_correct") != mlist.end();
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
-
   if (name == "ppm") {
 
     method = new EnzoMethodPpm(store_fluxes_for_corrections);
@@ -651,6 +650,10 @@ Method * EnzoProblem::create_method_
        enzo_config->method_inference_field_group,
        enzo_config->method_inference_overdensity_threshold);
 
+  } else if (name == "balance") {
+    
+    method = new EnzoMethodBalance;
+    
   } else if (name == "turbulence") {
 
     method = new EnzoMethodTurbulence
@@ -745,6 +748,10 @@ Method * EnzoProblem::create_method_
     }  else { // does not do anything
       method = new EnzoMethodFeedback();
     }
+
+  } else if (name == "m1_closure") {
+
+    method = new EnzoMethodM1Closure(enzo_config->method_m1_closure_N_groups);
 
   } else if (name == "check") {
 

@@ -48,7 +48,7 @@ Hierarchy::Hierarchy
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
-				   
+
   num_blocks_level_.resize(max_level - min_level + 1);
 
   for (int i=0; i<3; i++) {

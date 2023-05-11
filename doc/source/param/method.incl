@@ -1,115 +1,121 @@
-:Parameter:  :p:`Method` : :p:`list`
-:Summary: :s:`Sequence of numerical methods to apply.`
-:Type:    :t:`list` ( :t:`string` )
-:Default: :d:`none`
-:Scope:     :c:`Cello`
+.. par:parameter:: Method:list
 
-:e:`This parameter specifies the list of numerical methods to use, and
-is analagous to "EvolveLevel" routine in ENZO.  Each method in the
-list is applied in the order specified.  Possible methods include:`
+   :Summary: :s:`Sequence of numerical methods to apply.`
+   :Type:    :par:typefmt:`list ( string )`
+   :Default: :d:`none`
+   :Scope:     :c:`Cello`
 
-  * :t:`"comoving_expansion"` :e:`adds comoving expansion terms to the
-    physical variables.`
-  * :t:`"cosmology"` :e:`for writing redshift to monitor output.`
-  * :t:`"flux_correct"` :e:`for performing flux corrections when using AMR.`
-  * :t:`"grackle"` :e:`for heating and cooling methods in the Enzo
-    Grackle library`
-  * :t:`"gravity"` :e:`solves for the gravitational potential given gas
-    and particle density fields.`
-  * :t:`"heat"` :e:`for the forward-Euler heat-equation solver, which
-    is used primarily for demonstrating how new Methods are
-    implemented in Enzo-E`
-  * :t:`"pm_deposit"` :e:`deposits "dark" particle density into
-    "density_particle" field using CIC for "gravity" method.`
-  * :t:`"pm_update"` :e:`moves cosmological "dark" particles based on
-    positions, velocities, and accelerations.`  **This will be phased out
-    in favor of a more general "move_particles" method.**
-  * :t:`"ppm"` :e:`for Enzo-E's PPM hydrodynamics method.`  *This may be
-    phased out in favor of using a more general "hydro" method
-    instead, with a specific hydro solver specified.*
-  * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
-    out in favor of using a more general "mhd" method instead, with a
-    specific mhd solver specified.*
-  * :t:`"mhd_vlct"` :e:`for the VL + CT (van Leer + Constrained Transport) MHD
-    solver.`
-  * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
-    out in favor of a more general "move_particles" method.**
-  * :t:`"turbulence"` :e:`computes random forcing for turbulence
-    simulations.`
+   :e:`This parameter specifies the list of numerical methods to use, and
+   is analagous to "EvolveLevel" routine in ENZO.  Each method in the
+   list is applied in the order specified.  Possible methods include:`
+
+     * :t:`"comoving_expansion"` :e:`adds comoving expansion terms to the
+       physical variables.`
+     * :t:`"cosmology"` :e:`for writing redshift to monitor output.`
+     * :t:`"flux_correct"` :e:`for performing flux corrections when using AMR.`
+     * :t:`"grackle"` :e:`for heating and cooling methods in the Enzo
+       Grackle library`
+     * :t:`"gravity"` :e:`solves for the gravitational potential given gas
+       and particle density fields.`
+     * :t:`"heat"` :e:`for the forward-Euler heat-equation solver, which
+       is used primarily for demonstrating how new Methods are
+       implemented in Enzo-E`
+     * :t:`"pm_deposit"` :e:`deposits "dark" particle density into
+       "density_particle" field using CIC for "gravity" method.`
+     * :t:`"pm_update"` :e:`moves cosmological "dark" particles based on
+       positions, velocities, and accelerations.`  **This will be phased out
+       in favor of a more general "move_particles" method.**
+     * :t:`"ppm"` :e:`for Enzo-E's PPM hydrodynamics method.`  *This may be
+       phased out in favor of using a more general "hydro" method
+       instead, with a specific hydro solver specified.*
+     * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
+       out in favor of using a more general "mhd" method instead, with a
+       specific mhd solver specified.*
+     * :t:`"mhd_vlct"` :e:`for the VL + CT (van Leer + Constrained Transport) MHD
+       solver.`
+     * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
+       out in favor of a more general "move_particles" method.**
+     * :t:`"turbulence"` :e:`computes random forcing for turbulence
+       simulations.`
 
 
-:e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
+   :e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
 
-     Method {
-        list = ["ppm"];
-        ppm {
-           diffusion   = true;
-           flattening  = 3;
-           steepening  = true;
-           dual_energy = false;
+        Method {
+           list = ["ppm"];
+           ppm {
+              diffusion   = true;
+              flattening  = 3;
+              steepening  = true;
+              dual_energy = false;
+           }
         }
-     }
 
-:e:`For more detailed documentation on Methods, see` :ref:`using-methods`
-   
+   :e:`For more detailed documentation on Methods, see` :ref:`using-methods`
+
 ----
 
-:Parameter:  :p:`Method` : :p:`courant`
-:Summary: :s:`Global Courant safety factor`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     :c:`Cello`
+.. par:parameter:: Method:courant
 
-:e:`The global Courant safety factor is a multiplication factor for
-the time step applied on top of any Field or Particle specific Courant
-safety factors.`
+   :Summary: :s:`Global Courant safety factor`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :c:`Cello`
+
+   :e:`The global Courant safety factor is a multiplication factor for
+   the time step applied on top of any Field or Particle specific Courant
+   safety factors.`
 
 accretion
------------
+---------
 
-:Parameter:  :p:`Method` : :p:`accretion` : :p:`accretion_radius_cells`
-:Summary:    :s:`The radius of the spherical accretion zone around each sink particle, in
-                 units of the minimum cell width.`
-:Type:       :t:`float`
-:Default:    :d:`4.0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:accretion:accretion_radius_cells
 
-:e:`The accretion radius (i.e., the radius of the spherical accretion zone) in units of the minimum cell width (i.e., if the cell width along all the x, y, and z-axes are hx, hy, and hz, then the minimum cell width is the minimum of hx, hy, and hz),, at the highest refinement level. Its value must be less than one fewer than the minimum ghost depth  for "flux" accretion, and less than the minimum ghost depth for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
+   :Summary:    :s:`The radius of the spherical accretion zone around each sink particle, in
+                    units of the minimum cell width.`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`4.0`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`accretion` : :p:`flavor`
-:Summary:    :s:`The flavor of accretion used.`
-:Type:       :t:`string`
-:Default:    :d:`""`
-:Scope:     :z:`Enzo`
-
-:e:`The flavor of accretion used, which can be either "threshold", "bondi_hoyle", "flux", or "dummy". If this parameter is not set in the parameter file, or if some other string is provided, then Enzo-E will exit with an error message.`
+   :e:`The accretion radius (i.e., the radius of the spherical accretion zone) in units of the minimum cell width (i.e., if the cell width along all the x, y, and z-axes are hx, hy, and hz, then the minimum cell width is the minimum of hx, hy, and hz),, at the highest refinement level. Its value must be less than one fewer than the minimum ghost depth  for "flux" accretion, and less than the minimum ghost depth for other flavors of accretion. The ghost depth is 4 (along all axes) by default.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`accretion` : :p:`physical_density_threshold_cgs`
-:Summary:    :s:`The value of the accretion (physical) density threshold in cgs units.`
-:Type:       :t:`float`
-:Default:    :d:`1.0e-24`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:accretion:flavor
 
-:e:`The value of the (physical) density threshold in cgs units. The density in each cell in the accretion zone cannot go below this value during the accretion process. The value of this parameter in code density units must be greater than or equal to the value of the density floor imposed by the hydro method (either "ppm" or "mhd_vlct". In cosmological simulations, the density unit is the
-mean matter density of the universe which decreases with time, which means that the value of a density quantity expressed in these units will increase with time, while the density floor is fixed
-in comoving units. The consequence is that is is sufficient for the density threshold to be above
-the density floor at the start of the simulation to guarantee that it will be above the floor
-at all subsequent times.`
+   :Summary:    :s:`The flavor of accretion used.`
+   :Type:       :par:typefmt:`string`
+   :Default:    :d:`""`
+   :Scope:     :z:`Enzo`
+
+   :e:`The flavor of accretion used, which can be either "threshold", "bondi_hoyle", "flux", or "dummy". If this parameter is not set in the parameter file, or if some other string is provided, then Enzo-E will exit with an error message.`
+
+----
+
+.. par:parameter:: Method:accretion:physical_density_threshold_cgs
+
+   :Summary:    :s:`The value of the accretion (physical) density threshold in cgs units.`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`1.0e-24`
+   :Scope:     :z:`Enzo`
+
+   :e:`The value of the (physical) density threshold in cgs units. The density in each cell in the accretion zone cannot go below this value during the accretion process. The value of this parameter in code density units must be greater than or equal to the value of the density floor imposed by the hydro method (either "ppm" or "mhd_vlct". In cosmological simulations, the density unit is the
+   mean matter density of the universe which decreases with time, which means that the value of a density quantity expressed in these units will increase with time, while the density floor is fixed
+   in comoving units. The consequence is that is is sufficient for the density threshold to be above
+   the density floor at the start of the simulation to guarantee that it will be above the floor
+   at all subsequent times.`
 
 ----
 
 
-:Parameter:  :p:`Method` : :p:`accretion` : :p:`max_mass_fraction`
-:Summary:    :s:`The maximum fraction of mass which can be accreted from a cell in one timestep.`
-:Type:       :t:`float`
-:Default:    :d:`0.25`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:accretion:max_mass_fraction
 
-:e:`This parameter specifies the maximum fraction of mass which can be accreted from a cell in one timestep. This value of this parameter must be between 0 and 1.`
+   :Summary:    :s:`The maximum fraction of mass which can be accreted from a cell in one timestep.`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`0.25`
+   :Scope:     :z:`Enzo`
+
+   :e:`This parameter specifies the maximum fraction of mass which can be accreted from a cell in one timestep. This value of this parameter must be between 0 and 1.`
 
 feedback
 --------
@@ -119,72 +125,74 @@ feedback
 flux_correct
 ------------
 
-:Parameter:  :p:`Method` : :p:`flux_correct` : :p:`group`
-:Summary: :s:`Name of group of fields to apply flux correction to`
-:Type:    :t:`string`
-:Default: :d:`"conserved"`
-:Scope:     :z:`Cello`
+.. par:parameter:: Method:flux_correct:group
 
-:e:`Flux correction must be applied to conserved fields in AMR simulations to maintain conserved quantities across mesh resolution jumps.  This parameter selects the group of fields to which the "flux_correct" method will be applied.`
+   :Summary: :s:`Name of group of fields to apply flux correction to`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"conserved"`
+   :Scope:     :z:`Cello`
 
-:e:`Fields that store a conserved quantity divided by density`
-(e.g. ``"total_energy"``, ``"velocity_x"``) :e:`have special
-handling. Such fields must be included in both the group specified by
-this parameter AND the` ``"make_field_conservative"`` :e:`group. Flux
-corrections are applied to an element of such fields according to the
-following procedure:`
+   :e:`Flux correction must be applied to conserved fields in AMR simulations to maintain conserved quantities across mesh resolution jumps.  This parameter selects the group of fields to which the "flux_correct" method will be applied.`
 
-  1. :e:`The element is multiplied by the corresponding element of
-     the` ``"density"`` :e:`field (before the flux corrections are
-     applied to the` ``"density"`` :e:`field).`
+   :e:`Fields that store a conserved quantity divided by density`
+   (e.g. ``"total_energy"``, ``"velocity_x"``) :e:`have special
+   handling. Such fields must be included in both the group specified by
+   this parameter AND the` ``"make_field_conservative"`` :e:`group. Flux
+   corrections are applied to an element of such fields according to the
+   following procedure:`
 
-  2. :e:`Flux corrections are applied to the product from step 1.`
+     1. :e:`The element is multiplied by the corresponding element of
+        the` ``"density"`` :e:`field (before the flux corrections are
+        applied to the` ``"density"`` :e:`field).`
 
-  3. :e:`Finally, the element in the original field is assigned the
-     value computed in step 2 divided by the corresponding element
-     from the` ``"density"`` :e:`field (after flux corrections are
-     applied to the` ``"density"`` :e:`field).`
+     2. :e:`Flux corrections are applied to the product from step 1.`
 
-:e:`An error will be raised if these special fields are detected, and
-the` ``"density"`` :e:`field is not included in the group specified by
-this parameter.`
+     3. :e:`Finally, the element in the original field is assigned the
+        value computed in step 2 divided by the corresponding element
+        from the` ``"density"`` :e:`field (after flux corrections are
+        applied to the` ``"density"`` :e:`field).`
+
+   :e:`An error will be raised if these special fields are detected, and
+   the` ``"density"`` :e:`field is not included in the group specified by
+   this parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`flux_correct` : :p:`min_digits`
-:Summary: :s:`Number of digits expected to be conserved by fields in tests`
-:Type:    :t:`list`
-:Default: :d:`[]`
-:Scope:     :z:`Cello`
+.. par:parameter:: Method:flux_correct:min_digits
 
-:e:`Specifies the minimum number of digits that are expected to be conserved
-by fields. This is used for testing purposes (the simulation will
-check at each timestep whether this expectation has been met). Entries of this list should alternate between the name of fields (a string) and the expected number of conserved digits for that field (a float).`
+   :Summary: :s:`Number of digits expected to be conserved by fields in tests`
+   :Type:    :par:typefmt:`list`
+   :Default: :d:`[]`
+   :Scope:     :z:`Cello`
 
-:e:`The example provided below indicates that the` ``"density"`` :e:`field and the product of the` ``"density"`` :e:`&` ``"velocity_x"`` :e:`fields are expected to be conserved to` ``7.1`` :e:`and` ``4.9`` :e:`digits, respectively`::
+   :e:`Specifies the minimum number of digits that are expected to be conserved
+   by fields. This is used for testing purposes (the simulation will
+   check at each timestep whether this expectation has been met). Entries of this list should alternate between the name of fields (a string) and the expected number of conserved digits for that field (a float).`
 
-     Method {
-        flux_correct {
-           min_digits = ["density", 7.1,
-                         "velocity_x", 4.9];
+   :e:`The example provided below indicates that the` ``"density"`` :e:`field and the product of the` ``"density"`` :e:`&` ``"velocity_x"`` :e:`fields are expected to be conserved to` ``7.1`` :e:`and` ``4.9`` :e:`digits, respectively`::
+
+        Method {
+           flux_correct {
+              min_digits = ["density", 7.1,
+                            "velocity_x", 4.9];
+           }
         }
-     }
 
-     Group {
-        list = [ "conserved", "make_field_conservative" ];
-        conserved {
-           field_list = [ "density", "velocity_x"];
+        Group {
+           list = [ "conserved", "make_field_conservative" ];
+           conserved {
+              field_list = [ "density", "velocity_x"];
+           }
+           make_field_conservative {
+              field_list = [ "velocity_x"];
+           }
         }
-        make_field_conservative {
-           field_list = [ "velocity_x"];
-        }
-     }
 
-:e:`For the sake of backwards compatibility, this parameter can be
-assigned a single float (that is not in a list). In this case, the
-value is assumed to be the expected minimum number of digits conserved
-by the` ``"density"`` :e:`field.` *(Support for this type of parameter
-may be removed in the future)*
+   :e:`For the sake of backwards compatibility, this parameter can be
+   assigned a single float (that is not in a list). In this case, the
+   value is assumed to be the expected minimum number of digits conserved
+   by the` ``"density"`` :e:`field.` *(Support for this type of parameter
+   may be removed in the future)*
 
 grackle
 -------
@@ -198,518 +206,563 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`density_units`
-
-:Summary: :s:`Units for the density field`
-:Type:    :t:`float`
-:Default: :d:`1.67e-24  (1 m_H/cc)`
-:Scope:     :z:`Enzo`
-
-:e:`Units of density for the Grackle chemistry and cooling solver library.`
+.. par:parameter:: Method:grackle:density_units
 
 
-----
+   :Summary: :s:`Units for the density field`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.67e-24  (1 m_H/cc)`
+   :Scope:     :z:`Enzo`
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`length_units`
-
-:Summary: :s:`Units for distance`
-:Type:    :t:`float`
-:Default: :d:`3.086e21 (1 kpc)`
-:Scope:     :z:`Enzo`
-
-:e:`Units of length for the Grackle chemistry and cooling solver library.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`time_units`
-
-:Summary: :s:`Units for time`
-:Type:    :t:`float`
-:Default: :d:`3.15569e13 (1 Myr)`
-:Scope:     :z:`Enzo`
-
-:e:`Units of time for the Grackle chemistry and cooling solver library.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`a_units`
-:Summary: :s:`Units for the cosmological expansion factor`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     :z:`Enzo`
-
-:e:`Units of the cosmological expansion factor for the Grackle chemistry and cooling solver library.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`gamma`
-:Summary: :s:`The ratio of specific heats for an ideal gas`
-:Type:    :t:`float`
-:Default: :d:`5/3`
-:Scope:     :z:`Enzo`
-
-:e:`The ratio of specific heats for an ideal gas. A direct calculation for the molecular component is used if` :p:`primordial_chemistry` :e:`> 1.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`with_radiative_cooling`
-:Summary:    :s:`Include radiative cooling`
-:Type:       :t:`logical`
-:Default:    :d:`true`
-:Scope:     :z:`Enzo`
-
-:e:`Flag to include radiative cooling and actually update the thermal energy during the chemistry solver. If off, the chemistry species will still be updated. The most common reason to set this to off is to iterate the chemistry network to an equilibrium state.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`primordial_chemistry`
-:Summary: :s:`Flag to control which primordial chemistry network is used`
-:Type:    :t:`logical`
-:Default:  :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Flag to control which primordial chemistry network is used.`
-
-  **0:** :e:`no chemistry network. Radiative cooling for primordial species is solved by interpolating from lookup tables calculated with Cloudy. A simplified set of functions are available (though not required) for use in this mode. For more information, see` `Pure Tabulated Mode <http://grackle.readthedocs.org/en/grackle-1.0/Integration.html#tabulated-mode>`_.
-
-  **1:** :e:`6-species atomic H and He. Active species:` |H|, |H+|, |He|, |He+|, |++|, |e-|.
-
-  **2:** :e:`9-species network including atomic species above and species for molecular hydrogen formation. This network includes formation from the` |H-| :e:`and` |H2+| :e:`channels, three-body formation` ( |H| + |H| + |H|  :e:`and`  |H| + |H| + |H2|), |H2| :e:`rotational transitions, chemical heating, and collision-induced emission (optional). Active species: above +` |H-|, |H2|, |H2+|.
-
-  **3:** :e:`12-species network include all above plus HD rotation cooling. Active species: above plus D,` |D+|, :e:`HD.`
-
-  **Note:** :e:`In order to make use of the non-equilibrium chemistry network (primordial_chemistry options 1-3), you must add and advect baryon fields for each of the species used by that particular option.`
+   :e:`Units of density for the Grackle chemistry and cooling solver library.`
 
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`metal_cooling`
-:Summary:  :s:`Flag to enable metal cooling using the Cloudy tables`
-:Type:     :t:`logical`
-:Default:  :d:`false`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:grackle:length_units
 
-:e:`Flag to enable metal cooling using the Cloudy tables. If enabled, the cooling table to be used must be specified with the Grackle` :p:`data_file` :e:`parameter.`
 
-**Note:** :e:`In order to use the metal cooling, you must add and advect a metal density field.`
+   :Summary: :s:`Units for distance`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`3.086e21 (1 kpc)`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`h2_on_dust`
-:Summary:     :s:`Flag to enable H2 formation`
-:Type:        :t:`logical`
-:Default:     :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Flag to enable H2 formation on dust grains, dust cooling, and dust-gas heat transfer follow Omukai (2000). This assumes that the dust to gas ratio scales with the metallicity.`
+   :e:`Units of length for the Grackle chemistry and cooling solver library.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`cmb_temperature_floor`
-:Summary:    :s:`Flag to enable an effective CMB temperature floor.`
-:Type:       :t:`logical`
-:Default:    :d:`true`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:grackle:time_units
 
-:e:`Flag to enable an effective CMB temperature floor. This is implemented by subtracting the value of the cooling rate at TCMB from the total cooling rate.`
 
-----
+   :Summary: :s:`Units for time`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`3.15569e13 (1 Myr)`
+   :Scope:     :z:`Enzo`
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`data_file`
-:Summary:     :s:`Path to the data file containing the metal cooling and UV background tables.`
-:Type:        :t:`string`
-:Default:     :d:`""`
-:Scope:     :z:`Enzo`
-
-:e:`Path to the data file containing the metal cooling and UV background tables.`
+   :e:`Units of time for the Grackle chemistry and cooling solver library.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`three_body_rate`
-:Summary:      :s:`Flag to control which three-body H2 formation rate is used.`
-:Type:        :t:`integer`
-:Default:     :d:`0`
-:Scope:     :z:`Enzo`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:a_units
 
+   :Summary: :s:`Units for the cosmological expansion factor`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :z:`Enzo`
 
-:e:`Flag to control which three-body H2 formation rate is used.`
-
-   **0:** `Abel, Bryan & Norman (2002) <http://adsabs.harvard.edu/abs/2002Sci...295...93A>`_
-
-   **1:** `Palla, Salpeter & Stahler (1983) <http://adsabs.harvard.edu/abs/1983ApJ...271..632P>`_
-
-   **2:** `Cohen & Westberg (1983) <http://adsabs.harvard.edu/abs/1983JPCRD..12..531C>`_
-
-   **3:** `Flower & Harris (2007) <http://adsabs.harvard.edu/abs/2007MNRAS.377..705F>`_
-
-   **4:** `Glover (2008) <http://adsabs.harvard.edu/abs/2008AIPC..990...25G.>`_
-
-   :e:`These are discussed in` `Turk et. al. (2011) <http://adsabs.harvard.edu/abs/2011ApJ...726...55T>`_
+   :e:`Units of the cosmological expansion factor for the Grackle chemistry and cooling solver library.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`cie_cooling`
-:Summary:    :s:`Flag to enable |H2| collision-induced emission cooling`
-:Type:        :t:`logical`
-:Default:     :d:`false`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:grackle:gamma
 
-:e:`Flag to enable` |H2| :e:`collision-induced emission cooling from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
+   :Summary: :s:`The ratio of specific heats for an ideal gas`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`5/3`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`h2_optical_depth_approximation`
-:Summary: :s:`Flag to enable |H2| cooling attenuation`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-   
-:e:`Flag to enable H2 cooling attenuation from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
+   :e:`The ratio of specific heats for an ideal gas. A direct calculation for the molecular component is used if` :p:`primordial_chemistry` :e:`> 1.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`photoelectric_heating`
-:Summary: 
-:Type:    
-:Default:
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:grackle:with_radiative_cooling
 
-:e:`Flag to enable a spatially uniform heating term approximating photo-electric heating from dust from Tasker & Bryan (2008)http://adsabs.harvard.edu/abs/2008ApJ...673..810T.`
+   :Summary:    :s:`Include radiative cooling`
+   :Type:       :par:typefmt:`logical`
+   :Default:    :d:`true`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`photoelectric_heating_rate`
-:Summary: 
-:Type:    
-:Default:  :d:`8.5e-26`
-:Scope:     :z:`Enzo`
-
-:e:`If` :p:`photoelectric_heating` :e:`is enabled, the heating rate in units of erg cm-3 s-1.`
+   :e:`Flag to include radiative cooling and actually update the thermal energy during the chemistry solver. If off, the chemistry species will still be updated. The most common reason to set this to off is to iterate the chemistry network to an equilibrium state.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`UVbackground`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo:  :o:`write`
+.. par:parameter:: Method:grackle:primordial_chemistry
 
-----
+   :Summary: :s:`Flag to control which primordial chemistry network is used`
+   :Type:    :par:typefmt:`logical`
+   :Default:  :d:`false`
+   :Scope:     :z:`Enzo`
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`UVbackground_redshift_on`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo:       :o:`write`
-:Status:  **Not accessed**
+   :e:`Flag to control which primordial chemistry network is used.`
 
-----
+     **0:** :e:`no chemistry network. Radiative cooling for primordial species is solved by interpolating from lookup tables calculated with Cloudy. A simplified set of functions are available (though not required) for use in this mode. For more information, see` `Pure Tabulated Mode <http://grackle.readthedocs.org/en/grackle-1.0/Integration.html#tabulated-mode>`_.
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`UVbackground_redshift_off`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo:       :o:`write`
-:Status:  **Not accessed**
+     **1:** :e:`6-species atomic H and He. Active species:` |H|, |H+|, |He|, |He+|, |++|, |e-|.
 
-----
+     **2:** :e:`9-species network including atomic species above and species for molecular hydrogen formation. This network includes formation from the` |H-| :e:`and` |H2+| :e:`channels, three-body formation` ( |H| + |H| + |H|  :e:`and`  |H| + |H| + |H2|), |H2| :e:`rotational transitions, chemical heating, and collision-induced emission (optional). Active species: above +` |H-|, |H2|, |H2+|.
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`UVbackground_redshift_fullon`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+     **3:** :e:`12-species network include all above plus HD rotation cooling. Active species: above plus D,` |D+|, :e:`HD.`
 
-   
-
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`UVbackground_redshift_drop`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
-
-   
+     **Note:** :e:`In order to make use of the non-equilibrium chemistry network (primordial_chemistry options 1-3), you must add and advect baryon fields for each of the species used by that particular option.`
 
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`Compton_xray_heating`
-:Summary: 
-:Type:    
-:Default:   :d:`0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:grackle:metal_cooling
 
+   :Summary:  :s:`Flag to enable metal cooling using the Cloudy tables`
+   :Type:     :par:typefmt:`logical`
+   :Default:  :d:`false`
+   :Scope:     :z:`Enzo`
 
-:e:`Flag to enable Compton heating from an X-ray background following Madau & Efstathiou (1999)http://adsabs.harvard.edu/abs/1999ApJ...517L...9M.`
+   :e:`Flag to enable metal cooling using the Cloudy tables. If enabled, the cooling table to be used must be specified with the Grackle` :p:`data_file` :e:`parameter.`
 
-----
-
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`LWbackground_intensity`
-:Summary: 
-:Type:    
-:Default: :d:`0`
-:Scope:     :z:`Enzo`
-
-:e:`Intensity of a constant Lyman-Werner H2 photo-dissociating radiation field in units of 10-21 erg s-1 cm-2 Hz-1 sr-1.`
+   **Note:** :e:`In order to use the metal cooling, you must add and advect a metal density field.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`LWbackground_sawtooth_suppression`
-:Summary: 
-:Type:    
-:Default: :d:`0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:grackle:h2_on_dust
+
+   :Summary:     :s:`Flag to enable H2 formation`
+   :Type:        :par:typefmt:`logical`
+   :Default:     :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`Flag to enable H2 formation on dust grains, dust cooling, and dust-gas heat transfer follow Omukai (2000). This assumes that the dust to gas ratio scales with the metallicity.`
+
+----
+
+.. par:parameter:: Method:grackle:cmb_temperature_floor
+
+   :Summary:    :s:`Flag to enable an effective CMB temperature floor.`
+   :Type:       :par:typefmt:`logical`
+   :Default:    :d:`true`
+   :Scope:     :z:`Enzo`
+
+   :e:`Flag to enable an effective CMB temperature floor. This is implemented by subtracting the value of the cooling rate at TCMB from the total cooling rate.`
+
+----
+
+.. par:parameter:: Method:grackle:data_file
+
+   :Summary:     :s:`Path to the data file containing the metal cooling and UV background tables.`
+   :Type:        :par:typefmt:`string`
+   :Default:     :d:`""`
+   :Scope:     :z:`Enzo`
+
+   :e:`Path to the data file containing the metal cooling and UV background tables.`
+
+----
+
+.. par:parameter:: Method:grackle:three_body_rate
+
+   :Summary:      :s:`Flag to control which three-body H2 formation rate is used.`
+   :Type:        :par:typefmt:`integer`
+   :Default:     :d:`0`
+   :Scope:     :z:`Enzo`
+   :Status:  **Not accessed**
 
 
-:e:`Flag to enable suppression of Lyman-Werner flux due to Lyman-series absorption (giving a sawtooth pattern), taken from Haiman & Abel, & Rees (2000)http://adsabs.harvard.edu/abs/2000ApJ...534...11H.`
+   :e:`Flag to control which three-body H2 formation rate is used.`
+
+      **0:** `Abel, Bryan & Norman (2002) <http://adsabs.harvard.edu/abs/2002Sci...295...93A>`_
+
+      **1:** `Palla, Salpeter & Stahler (1983) <http://adsabs.harvard.edu/abs/1983ApJ...271..632P>`_
+
+      **2:** `Cohen & Westberg (1983) <http://adsabs.harvard.edu/abs/1983JPCRD..12..531C>`_
+
+      **3:** `Flower & Harris (2007) <http://adsabs.harvard.edu/abs/2007MNRAS.377..705F>`_
+
+      **4:** `Glover (2008) <http://adsabs.harvard.edu/abs/2008AIPC..990...25G.>`_
+
+      :e:`These are discussed in` `Turk et. al. (2011) <http://adsabs.harvard.edu/abs/2011ApJ...726...55T>`_
+
+----
+
+.. par:parameter:: Method:grackle:cie_cooling
+
+   :Summary:    :s:`Flag to enable |H2| collision-induced emission cooling`
+   :Type:        :par:typefmt:`logical`
+   :Default:     :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`Flag to enable` |H2| :e:`collision-induced emission cooling from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
+
+----
+
+.. par:parameter:: Method:grackle:h2_optical_depth_approximation
+
+   :Summary: :s:`Flag to enable |H2| cooling attenuation`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`Flag to enable H2 cooling attenuation from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
+
+----
+
+.. par:parameter:: Method:grackle:photoelectric_heating
+
+   :Summary: 
+   :Type:
+   :Default:
+   :Scope:     :z:`Enzo`
+
+   :e:`Flag to enable a spatially uniform heating term approximating photo-electric heating from dust from Tasker & Bryan (2008)http://adsabs.harvard.edu/abs/2008ApJ...673..810T.`
+
+----
+
+.. par:parameter:: Method:grackle:photoelectric_heating_rate
+
+   :Summary: 
+   :Type:
+   :Default:  :d:`8.5e-26`
+   :Scope:     :z:`Enzo`
+
+   :e:`If` :p:`photoelectric_heating` :e:`is enabled, the heating rate in units of erg cm-3 s-1.`
+
+----
+
+.. par:parameter:: Method:grackle:UVbackground
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo:  :o:`write`
+
+----
+
+.. par:parameter:: Method:grackle:UVbackground_redshift_on
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo:       :o:`write`
+   :Status:  **Not accessed**
+
+----
+
+.. par:parameter:: Method:grackle:UVbackground_redshift_off
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo:       :o:`write`
+   :Status:  **Not accessed**
+
+----
+
+.. par:parameter:: Method:grackle:UVbackground_redshift_fullon
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
+
 
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`HydrogenFractionByMass`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:UVbackground_redshift_drop
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
+
+
+
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`DeuteriumToHydrogenRatio`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:Compton_xray_heating
+
+   :Summary: 
+   :Type:
+   :Default:   :d:`0`
+   :Scope:     :z:`Enzo`
+
+
+   :e:`Flag to enable Compton heating from an X-ray background following Madau & Efstathiou (1999)http://adsabs.harvard.edu/abs/1999ApJ...517L...9M.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`SolarMetalFractionByMass`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:LWbackground_intensity
+
+   :Summary: 
+   :Type:
+   :Default: :d:`0`
+   :Scope:     :z:`Enzo`
+
+   :e:`Intensity of a constant Lyman-Werner H2 photo-dissociating radiation field in units of 10-21 erg s-1 cm-2 Hz-1 sr-1.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`NumberOfTemperatureBins`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:LWbackground_sawtooth_suppression
+
+   :Summary: 
+   :Type:
+   :Default: :d:`0`
+   :Scope:     :z:`Enzo`
+
+
+   :e:`Flag to enable suppression of Lyman-Werner flux due to Lyman-series absorption (giving a sawtooth pattern), taken from Haiman & Abel, & Rees (2000)http://adsabs.harvard.edu/abs/2000ApJ...534...11H.`
+
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`ih2co`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:HydrogenFractionByMass
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`ipiht`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:DeuteriumToHydrogenRatio
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`TemperatureStart`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:SolarMetalFractionByMass
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`TemperatureEnd`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:NumberOfTemperatureBins
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`comp_xray`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:ih2co
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`temp_xray`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:ipiht
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`CaseBRecombination`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:TemperatureStart
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`NumberOfDustTemperatureBins`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:TemperatureEnd
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`DustTemperatureStart`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:comp_xray
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`DustTemperatureEnd`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:temp_xray
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 ----
 
-:Parameter:  :p:`Method` : :p:`grackle` : :p:`cloudy_electron_fraction_factor`
-:Summary: 
-:Type:    
-:Default: 
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
-:Status:  **Not accessed**
+.. par:parameter:: Method:grackle:CaseBRecombination
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
+
+----
+
+.. par:parameter:: Method:grackle:NumberOfDustTemperatureBins
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
+
+----
+
+.. par:parameter:: Method:grackle:DustTemperatureStart
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
+
+----
+
+.. par:parameter:: Method:grackle:DustTemperatureEnd
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
+
+----
+
+.. par:parameter:: Method:grackle:cloudy_electron_fraction_factor
+
+   :Summary: 
+   :Type:
+   :Default: 
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
+   :Status:  **Not accessed**
 
 gravity
 -------
 
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`solver`
-:Summary: :s:`Name of the linear solver to use`
-:Type:    :t:`string`
-:Default: :d:`"unknown"`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:gravity:solver
 
-:e:`Identifier for the linear solver to use, which must be included in the "Solver:list" parameter.`
+   :Summary: :s:`Name of the linear solver to use`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"unknown"`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`grav_const`
-:Summary: :s:`Gravitational constant`
-:Type:    :t:`float`
-:Default: :d:`6.67384e-8`
-:Scope:     :z:`Enzo`
-
-Gravitational constant used in place of G.  The default is G in cgs units.
-For non-cosmological simulations, if the user wants to use
-the standard value for the gravitational constant, the user must set a
-value which is consistent with their choice of units; i.e.,
-its value must be :math:`G_{cgs}\times M \times T^2 \times L^{-3}`, or equivalently,
-:math:`G_{cgs}\times D \times T^2`, where :math:`M, D, T, L` are the mass, density, time,
-and length units, and :math:`G_{cgs}` is the value of the gravitational constant in cgs units.
-
-In cosmological simulations, this parameter is ignored.
-
+   :e:`Identifier for the linear solver to use, which must be included in the "Solver:list" parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`order`
-:Summary: :s:`Order of accuracy discretization to use for the discrete Laplacian`
-:Type:    :t:`integer`
-:Default: :d:`4`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:gravity:grav_const
 
-:e:`Second, fourth, and sixth order discretizations of the Laplacian
-are available; valid values are 2, 4, or 6.`
+   :Summary: :s:`Gravitational constant`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`6.67384e-8`
+   :Scope:     :z:`Enzo`
 
-----
+   Gravitational constant used in place of G.  The default is G in cgs units.
+   For non-cosmological simulations, if the user wants to use
+   the standard value for the gravitational constant, the user must set a
+   value which is consistent with their choice of units; i.e.,
+   its value must be :math:`G_{cgs}\times M \times T^2 \times L^{-3}`, or equivalently,
+   :math:`G_{cgs}\times D \times T^2`, where :math:`M, D, T, L` are the mass, density, time,
+   and length units, and :math:`G_{cgs}` is the value of the gravitational constant in cgs units.
 
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`accumulate`
-:Summary: :s:`Whether to add one layer of ghost zones when refreshing particle density`
-:Type:    :t:`logical`
-:Default: :d:`true`
-:Scope:     :z:`Enzo`
+   In cosmological simulations, this parameter is ignored.
 
-:e:`This should be true for all runs with particles, since particle
-mass deposited in the "density_particle" field may bleed into the
-first layer of ghost zones.  This parameter ensures that that mass
-will be included in "density_total".`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`gravity` : :p:`dt_max`
-:Summary: :s:`The maximum timestep returned by EnzoMethodGravity::timestep`
-:Type:    :t:`float`
-:Default: :d:`1.0e10`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:gravity:order
 
-:e:`The timestep returned by EnzoMethodGravity::timestep (when called on a
-block) is calculated as follows. First, the geometric mean of the cell-widths
-in all dimensions is found, which we call the "mean cell width". Next, the
-quantity "epsilon" is calculated, as the mean cell width divided by the square
-of dt_max. Then, the maximum acceleration magnitude across all cells in the
-block is found, which we call "a_mag_max". We then calculate the
-mean cell width divided by the sum of a_mag_max and epsilon. The timestep is
-then the square root of this quantity. This means that if all the accelerations
-are zero (such as at the first time step), the timestep is equal to dt_max.
-Defining the timestep in this way also means that the value of the
-timestep is independent of how the acceleration vectors are oriented relative
-to the mesh.`
+   :Summary: :s:`Order of accuracy discretization to use for the discrete Laplacian`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`4`
+   :Scope:     :z:`Enzo`
+
+   :e:`Second, fourth, and sixth order discretizations of the Laplacian
+   are available; valid values are 2, 4, or 6.`
+
+----
+
+.. par:parameter:: Method:gravity:accumulate
+
+   :Summary: :s:`Whether to add one layer of ghost zones when refreshing particle density`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:     :z:`Enzo`
+
+   :e:`This should be true for all runs with particles, since particle
+   mass deposited in the "density_particle" field may bleed into the
+   first layer of ghost zones.  This parameter ensures that that mass
+   will be included in "density_total".`
+
+----
+
+.. par:parameter:: Method:gravity:dt_max
+
+   :Summary: :s:`The maximum timestep returned by EnzoMethodGravity::timestep`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0e10`
+   :Scope:     :z:`Enzo`
+
+   :e:`The timestep returned by EnzoMethodGravity::timestep (when called on a
+   block) is calculated as follows. First, the geometric mean of the cell-widths
+   in all dimensions is found, which we call the "mean cell width". Next, the
+   quantity "epsilon" is calculated, as the mean cell width divided by the square
+   of dt_max. Then, the maximum acceleration magnitude across all cells in the
+   block is found, which we call "a_mag_max". We then calculate the
+   mean cell width divided by the sum of a_mag_max and epsilon. The timestep is
+   then the square root of this quantity. This means that if all the accelerations
+   are zero (such as at the first time step), the timestep is equal to dt_max.
+   Defining the timestep in this way also means that the value of the
+   timestep is independent of how the acceleration vectors are oriented relative
+   to the mesh.`
 
 
 heat
 ----
 
-:Parameter:  :p:`Method` : :p:`heat` : :p:`alpha`
-:Summary:    :s:`Parameter for the forward euler heat equation solver`
-:Type:       :t:`float`
-:Default:    :d:`1.0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:heat:alpha
 
-:e:`Thermal diffusivity parameter for the heat equation.`
+   :Summary:    :s:`Parameter for the forward euler heat equation solver`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`1.0`
+   :Scope:     :z:`Enzo`
+
+   :e:`Thermal diffusivity parameter for the heat equation.`
 
 .. _Inference Parameters:
 
@@ -722,43 +775,51 @@ inference
 merge_sinks
 -----------
 
-:Parameter:  :p:`Method` : :p:`merge_sinks` : :p:`merging_radius_cells`
-:Summary:    :s:`The distance within which sink particles merge with
-                 each other, in units of the minimum cell width`
-:Type:       :t:`float`
-:Default:    :d:`8.0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:merge_sinks:merging_radius_cells
 
-:e:`The distance within which sink particles merge with each other, in units of the minimum cell width, i.e., the minimum of the cell widths in all 3 dimensions, at the highest level of refinement.`
+   :Summary:    :s:`The distance within which sink particles merge with
+                    each other, in units of the minimum cell width`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`8.0`
+   :Scope:     :z:`Enzo`
+
+   :e:`The distance within which sink particles merge with each other, in units of the minimum cell width, i.e., the minimum of the cell widths in all 3 dimensions, at the highest level of refinement.`
 
 mhd_vlct
 --------
 
 .. include:: method_mhd_vlct.incl
 
+m1_closure
+----------
+
+.. include:: method_m1_closure.incl
+
 null
 ----
 
-:Parameter:  :p:`Method` : :p:`null` : :p:`dt`
-:Summary:    :s:`Set the time step for the "null" Method`
-:Type:       :t:`float`
-:Default:    :d:`max (float)`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:null:dt
 
-:e:`Sets the time step for the` :p:`null` :e:`Method.  This is typically used for testing the AMR meshing infrastructure without having to use any specific method.  It can also be used to add an additional maximal time step value for other methods.`
+   :Summary:    :s:`Set the time step for the "null" Method`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`max (float)`
+   :Scope:     :z:`Enzo`
+
+   :e:`Sets the time step for the` :p:`null` :e:`Method.  This is typically used for testing the AMR meshing infrastructure without having to use any specific method.  It can also be used to add an additional maximal time step value for other methods.`
 
 pm_deposit
 ----------
 
-:Parameter:  :p:`Method` : :p:`pm_deposit` : :p:`alpha`
-:Summary:    :s:`Compute the total gravitating density field at time t + alpha*dt`
-:Type:       :t:`float`
-:Default:    :d:`0.5`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:pm_deposit:alpha
 
-:e:`Sets the factor defining at what time to deposit mass into the
-density_total field.  The default is 0.5, meaning density_total is
-computed at t + 0.5*dt.`
+   :Summary:    :s:`Compute the total gravitating density field at time t + alpha*dt`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`0.5`
+   :Scope:     :z:`Enzo`
+
+   :e:`Sets the factor defining at what time to deposit mass into the
+   density_total field.  The default is 0.5, meaning density_total is
+   computed at t + 0.5*dt.`
 
 ppm
 ---
@@ -769,108 +830,117 @@ ppm
 sink_maker
 ----------
 
-:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`jeans_length_resolution_cells`
-:Summary:    :s:`Determines how many cell widths are required to resolve the local Jeans length for a cell not to form a sink.`
-:Type:       :t:`float`
-:Default:    :d:`4.0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:sink_maker:jeans_length_resolution_cells
 
-:e:`If the local Jeans length in a cell is less than this quantity multiplied by the maximum cell width, then the cell is a candidate for forming a sink. The maximum cell width is maximum value out of hx, hy, and hz, where hx, hy, and hz are the cell widths across the x-, y- and z-axes, respectively.`
+   :Summary:    :s:`Determines how many cell widths are required to resolve the local Jeans length for a cell not to form a sink.`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`4.0`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`physical_density_threshold_cgs`
-:Summary:    :s:`The minimum physical density required for a cell to form a sink particle in cgs units.`
-:Type:       :t:`float`
-:Default:    :d:`1.0e-24`
-:Scope:     :z:`Enzo`
-
-:e:`The value of the physical density threshold in cgs units. The density in a cell must be
-greater than the density threshold to be able to form a sink. The density in a cell after
-sink formation will be no less than the density threshold. The value of
-the density threshold in code units must be greater than or equal to the value of the
-density floor imposed by the hydro method.`
+   :e:`If the local Jeans length in a cell is less than this quantity multiplied by the maximum cell width, then the cell is a candidate for forming a sink. The maximum cell width is maximum value out of hx, hy, and hz, where hx, hy, and hz are the cell widths across the x-, y- and z-axes, respectively.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`max_mass_fraction`
-:Summary:    :s:`The maximum fraction of a cell's gas mass which can be turned into a sink particle in one timestep.`
-:Type:       :t:`float`
-:Default:    :d:`0.25`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:sink_maker:physical_density_threshold_cgs
 
-:e:`The mass of a newly-formed sink is bounded above by this parameter multiplied by the cell
-density multiplied by the cell volume. The value of this parameter must be between
-0 and 1.`
+   :Summary:    :s:`The minimum physical density required for a cell to form a sink particle in cgs units.`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`1.0e-24`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`min_sink_mass_solar`
-:Summary:    :s:`The minimum mass of a newly-formed sink particle, in solar mass units.`
-:Type:       :t:`float`
-:Default:    :d:`0.0`
-:Scope:     :z:`Enzo`
-
-:e:`The minimum mass of a newly-formed sink particle, in solar mass units. If there is not enough
-gas mass in a cell to form a sink with at least this mass, no sink is formed.`
+   :e:`The value of the physical density threshold in cgs units. The density in a cell must be
+   greater than the density threshold to be able to form a sink. The density in a cell after
+   sink formation will be no less than the density threshold. The value of
+   the density threshold in code units must be greater than or equal to the value of the
+   density floor imposed by the hydro method.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`check_density_maximum`
-:Summary:    :s:`Determines whether a cell is required to be a local density maximum in order to form a sink particle.`
-:Type:       :t:`logical`
-:Default:    :d:`true`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:sink_maker:max_mass_fraction
 
-:e:`If true, then a cell will only form a sink particle if its density is larger than the density in all 26 neighboring cells.`
+   :Summary:    :s:`The maximum fraction of a cell's gas mass which can be turned into a sink particle in one timestep.`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`0.25`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`max_offset_cell_fraction`
-:Summary:    :s:`Controls the size of the random displacement of a sink particle's initial position relative to the center of the cell`
-:Type:       :t:`float`
-:Default:    :d:`0.0`
-:Scope:     :z:`Enzo`
-
-:e:`When a cell creates a sink particle, the x/y/z coordinate of its initial position will be
-the x/y/z coordinate of the center of the cell, plus a random value generated from a
-uniform distribution on the interval [-A,A], where A is equal to
-this parameter multiplied by the cell width along the x/y/z axis.`
-
+   :e:`The mass of a newly-formed sink is bounded above by this parameter multiplied by the cell
+   density multiplied by the cell volume. The value of this parameter must be between
+   0 and 1.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`sink_maker` : :p:`offset_seed_shift`
-:Summary:    :s:`Seed used to generate the random displacement of a sink particle's initial position relative to the center of the cell`
-:Type:       :t:`integer`
-:Default:    :d:`0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:sink_maker:min_sink_mass_solar
 
-:e:`When computing the random offset for the initial position of a sink particle, we compute
-an unsigned 64 bit integer value from the cycle number, the block index, and the cell
-index, and then add on this value to give the seed for the random number generator.`
+   :Summary:    :s:`The minimum mass of a newly-formed sink particle, in solar mass units.`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`0.0`
+   :Scope:     :z:`Enzo`
+
+   :e:`The minimum mass of a newly-formed sink particle, in solar mass units. If there is not enough
+   gas mass in a cell to form a sink with at least this mass, no sink is formed.`
+
+----
+
+.. par:parameter:: Method:sink_maker:check_density_maximum
+
+   :Summary:    :s:`Determines whether a cell is required to be a local density maximum in order to form a sink particle.`
+   :Type:       :par:typefmt:`logical`
+   :Default:    :d:`true`
+   :Scope:     :z:`Enzo`
+
+   :e:`If true, then a cell will only form a sink particle if its density is larger than the density in all 26 neighboring cells.`
+
+----
+
+.. par:parameter:: Method:sink_maker:max_offset_cell_fraction
+
+   :Summary:    :s:`Controls the size of the random displacement of a sink particle's initial position relative to the center of the cell`
+   :Type:       :par:typefmt:`float`
+   :Default:    :d:`0.0`
+   :Scope:     :z:`Enzo`
+
+   :e:`When a cell creates a sink particle, the x/y/z coordinate of its initial position will be
+   the x/y/z coordinate of the center of the cell, plus a random value generated from a
+   uniform distribution on the interval [-A,A], where A is equal to
+   this parameter multiplied by the cell width along the x/y/z axis.`
+
+
+----
+
+.. par:parameter:: Method:sink_maker:offset_seed_shift
+
+   :Summary:    :s:`Seed used to generate the random displacement of a sink particle's initial position relative to the center of the cell`
+   :Type:       :par:typefmt:`integer`
+   :Default:    :d:`0`
+   :Scope:     :z:`Enzo`
+
+   :e:`When computing the random offset for the initial position of a sink particle, we compute
+   an unsigned 64 bit integer value from the cycle number, the block index, and the cell
+   index, and then add on this value to give the seed for the random number generator.`
 
 star_maker
 ----------
 
 .. include:: method_star_maker.incl
 
-	     
+
 turbulence
 ----------
 
-:Parameter:  :p:`Method` : :p:`turbulence` : :p:`edot`
-:Summary: :s:`Initial value for edot for turbulence Method`
-:Type:    :t:`float`
-:Default: :d:`-1.0`
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
+.. par:parameter:: Method:turbulence:edot
+
+   :Summary: :s:`Initial value for edot for turbulence Method`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`-1.0`
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`turbulence` : :p:`mach_number`
-:Summary: :s:`Value for Mach number in turbulence problem`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:     :z:`Enzo`
-:Todo: :o:`write`
+.. par:parameter:: Method:turbulence:mach_number
+
+   :Summary: :s:`Value for Mach number in turbulence problem`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:     :z:`Enzo`
+   :Todo: :o:`write`
