@@ -12,6 +12,8 @@
 # - See the CMake Primer section of the developer documentation for more details
 file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
   *.cpp *.hpp
+  feedback/*.cpp feedback/*.hpp
+  formation/*.cpp formation/*.hpp
 )
 
 target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
