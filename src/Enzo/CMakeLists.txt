@@ -79,12 +79,13 @@ add_subdirectory(enzo-core)
 add_subdirectory(hydro-mhd)
 
 # add source files from other subdirectories to the enzo target
-add_subdirectory(amr)
 add_subdirectory(assorted)
 add_subdirectory(cosmology)
-add_subdirectory(initial)
 add_subdirectory(fluid-props)
 add_subdirectory(gravity)
+add_subdirectory(initial)
+add_subdirectory(io)
+add_subdirectory(mesh)
 add_subdirectory(particle)
 add_subdirectory(utils)
 

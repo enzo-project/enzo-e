@@ -179,9 +179,9 @@ extern "C" {
 
 #include "enzo-core/EnzoBlock.hpp"
 
-#include "enzo-core/IoEnzoBlock.hpp"
-#include "enzo-core/IoEnzoReader.hpp"
-#include "enzo-core/IoEnzoWriter.hpp"
+#include "io/IoEnzoBlock.hpp"
+#include "io/IoEnzoReader.hpp"
+#include "io/IoEnzoWriter.hpp"
 
 #include "enzo-core/EnzoBoundary.hpp"
 
@@ -191,10 +191,10 @@ extern "C" {
 #include "initial/EnzoInitialCosmology.hpp"
 #include "initial/EnzoInitialFeedbackTest.hpp"
 #include "initial/EnzoInitialGrackleTest.hpp"
-#include "initial/EnzoInitialHdf5.hpp"
+#include "io/EnzoInitialHdf5.hpp"
 #include "initial/EnzoInitialImplosion2.hpp"
 #include "initial/EnzoInitialInclinedWave.hpp"
-#include "initial/EnzoInitialMusic.hpp"
+#include "io/EnzoInitialMusic.hpp"
 #include "initial/EnzoInitialPm.hpp"
 #include "initial/EnzoInitialPpmlTest.hpp"
 #include "initial/EnzoInitialSedovArray2.hpp"
@@ -210,9 +210,9 @@ extern "C" {
 #include "initial/EnzoInitialShuCollapse.hpp"
 #include "initial/EnzoInitialBBTest.hpp"
 
-#include "amr/EnzoRefineShock.hpp"
-#include "amr/EnzoRefineParticleMass.hpp"
-#include "amr/EnzoRefineMass.hpp"
+#include "mesh/EnzoRefineShock.hpp"
+#include "mesh/EnzoRefineParticleMass.hpp"
+#include "mesh/EnzoRefineMass.hpp"
 
 // [order dependencies:]
 #include "particle/formation/EnzoSinkParticle.hpp"
@@ -250,7 +250,7 @@ extern "C" {
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "particle/formation/EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo-core/EnzoMethodBalance.hpp"
-#include "enzo-core/EnzoMethodCheck.hpp"
+#include "io/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
 #include "particle/feedback/EnzoMethodDistributedFeedback.hpp"
@@ -299,9 +299,9 @@ extern "C" {
 
 #include "enzo-core/EnzoStopping.hpp"
 
-#include "amr/EnzoProlong.hpp"
-#include "amr/EnzoProlongMC1.hpp"
-#include "amr/EnzoProlongPoisson.hpp"
-#include "amr/EnzoRestrict.hpp"
+#include "mesh/EnzoProlong.hpp"
+#include "mesh/EnzoProlongMC1.hpp"
+#include "mesh/EnzoProlongPoisson.hpp"
+#include "mesh/EnzoRestrict.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */
