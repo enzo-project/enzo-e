@@ -18,7 +18,7 @@ namespace detail{ // helper functions not meant to be used elsewhere
 /// helper function that actually writes ``arr`` to an open HDF5 file
 ///
 /// This assumes that ``file`` has been opened and that the appropriate group
-/// has been created (and is openned)
+/// has been created (and has already been opened)
 template<typename T>
 void dump_array_to_hdf5_(FileHdf5& file, const std::string &arr_name,
                          CelloArray<T,3> arr)
