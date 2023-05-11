@@ -1593,10 +1593,10 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
 	   "no value specified for \"Method:grackle:data_file\"",
 	   grackle_data_file_.length() > 0);
 
-    method_grackle_chemistry->grackle_data_file
-      = new char[grackle_data_file_.length() + 1];
-    strcpy(method_grackle_chemistry->grackle_data_file,
-	   grackle_data_file_.c_str());
+    char* tmp_var = new char[grackle_data_file_.length() + 1];
+
+    strcpy(tmp_var, grackle_data_file_.c_str());
+    method_grackle_chemistry->grackle_data_file = tmp_var;
 
     method_grackle_chemistry->cie_cooling = p->value_integer
       ("Method:grackle:cie_cooling",
