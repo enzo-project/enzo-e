@@ -155,7 +155,7 @@ int DataMsg::data_size () const
     size += 3*sizeof(int); // ifmr3_cf_
     size += 3*sizeof(int); // ifpr3_cf_
   }
-  
+
   return size;
 }
 
@@ -322,7 +322,7 @@ char * DataMsg::load_data (char * buffer)
       ifpr3_cf_[i] = (*pi++);
     }
   }
-    
+
   return pc;
 }
 
@@ -439,50 +439,51 @@ void DataMsg::update (Data * data, bool is_local, bool is_kept)
 
 //----------------------------------------------------------------------
 
-void DataMsg::print (const char * message) const
+void DataMsg::print (const char * message, FILE * fp_in) const
 {
-  CkPrintf ("%s DATA_MSG field_face_    = %p\n",
+  FILE * fp = fp_in ? fp_in : stdout;
+  
+  fprintf (fp,"%s DATA_MSG %p\n",message,(void*)this);
+  fprintf (fp,"%s DATA_MSG field_face_    = %p\n",
             message,(void*)field_face_);
-  CkPrintf ("%s DATA_MSG field_data_u_    = %p\n",
+  fprintf (fp,"%s DATA_MSG field_data_u_    = %p\n",
             message,(void*)field_data_u_);
-  CkPrintf ("%s DATA_MSG particle_data_ = %p\n",
+  fprintf (fp,"%s DATA_MSG particle_data_ = %p\n",
             message,(void*)particle_data_);
   if (particle_data_) {
-    CkPrintf ("%s DATA_MSG num-particles = %d\n",
+    fprintf (fp,"%s DATA_MSG num-particles = %d\n",
               message,particle_data_->num_particles(cello::particle_descr()));
   }
-  CkPrintf ("%s DATA_MSG particle_data_delete_ = %d\n",
+  fprintf (fp,"%s DATA_MSG particle_data_delete_ = %d\n",
             message,particle_data_delete_?1:0);
-  CkPrintf ("%s DATA_MSG |face_fluxes_list_| = %lu\n",
+  fprintf (fp,"%s DATA_MSG |face_fluxes_list_| = %lu\n",
             message,face_fluxes_list_.size());
-  CkPrintf ("%s DATA_MSG |face_fluxes_delete_| = %lu\n",
+  fprintf (fp,"%s DATA_MSG |face_fluxes_delete_| = %lu\n",
             message,face_fluxes_delete_.size());
-  CkPrintf ("%s DATA_MSG field_face_delete_ = %d\n",
+  fprintf (fp,"%s DATA_MSG field_face_delete_ = %d\n",
             message,field_face_delete_?1:0);
-  CkPrintf ("%s DATA_MSG field_data_delete_ = %d\n",
+  fprintf (fp,"%s DATA_MSG field_data_delete_ = %d\n",
             message,field_data_delete_?1:0);
-  CkPrintf ("%s DATA_MSG coarse_field_buffer_.sum = %f\n", message,
+  fprintf (fp,"%s DATA_MSG coarse_field_buffer_.sum = %f\n", message,
             std::accumulate(coarse_field_buffer_.begin(),coarse_field_buffer_.end(),0.0));
-  CkPrintf ("%s DATA_MSG coarse_field_list_src_.sum = %d\n", message,
+  fprintf (fp,"%s DATA_MSG coarse_field_list_src_.sum = %d\n", message,
             std::accumulate
             (coarse_field_list_src_.begin(),
              coarse_field_list_src_.end(),0));
-  CkPrintf ("%s DATA_MSG coarse_field_list_dst_.sum = %d\n", message,
+  fprintf (fp,"%s DATA_MSG coarse_field_list_dst_.sum = %d\n", message,
             std::accumulate
             (coarse_field_list_dst_.begin(),
              coarse_field_list_dst_.end(),0));
-  CkPrintf ("%s DATA_MSG coarse iam3_cf_   = %d %d %d\n",
+  fprintf (fp,"%s DATA_MSG coarse iam3_cf_   = %d %d %d\n",
             message,iam3_cf_[0],iam3_cf_[1],iam3_cf_[2]);
-  CkPrintf ("%s DATA_MSG coarse iap3_cf_   = %d %d %d\n",
+  fprintf (fp,"%s DATA_MSG coarse iap3_cf_   = %d %d %d\n",
             message,iap3_cf_[0],iap3_cf_[1],iap3_cf_[2]);
-  CkPrintf ("%s DATA_MSG coarse ifms3_cf_   = %d %d %d\n",
+  fprintf (fp,"%s DATA_MSG coarse ifms3_cf_   = %d %d %d\n",
             message,ifms3_cf_[0],ifms3_cf_[1],ifms3_cf_[2]);
-  CkPrintf ("%s DATA_MSG coarse ifps3_cf_   = %d %d %d\n",
+  fprintf (fp,"%s DATA_MSG coarse ifps3_cf_   = %d %d %d\n",
             message,ifps3_cf_[0],ifps3_cf_[1],ifps3_cf_[2]);
-  CkPrintf ("%s DATA_MSG coarse ifmr3_cf_   = %d %d %d\n",
+  fprintf (fp,"%s DATA_MSG coarse ifmr3_cf_   = %d %d %d\n",
             message,ifmr3_cf_[0],ifmr3_cf_[1],ifmr3_cf_[2]);
-  CkPrintf ("%s DATA_MSG coarse ifpr3_cf_   = %d %d %d\n",
+  fprintf (fp,"%s DATA_MSG coarse ifpr3_cf_   = %d %d %d\n",
             message,ifpr3_cf_[0],ifpr3_cf_[1],ifpr3_cf_[2]);
-    
-  fflush(stdout);
 }

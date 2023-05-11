@@ -30,10 +30,17 @@ inline void operator|(PUP::er &p, chemistry_data &c){
   int length = (skip_strlen) ? 0 : strlen(c.grackle_data_file);
   p | length;
   if (length > 0){
+    char* temp;
     if (p.isUnpacking()){
-      c.grackle_data_file=new char[length+1];
+      temp = new char[length+1];
+      c.grackle_data_file= temp;
+    } else {
+      // this is a hack that's necessary because PUParray won't work with a
+      // const char* type (i.e. we need to cast away the const).
+      // -> This won't be necessary after PR #290
+      temp = (char*)temp;
     }
-    PUParray(p, c.grackle_data_file,length+1);
+    PUParray(p, temp, length+1);
   } else {
     c.grackle_data_file = NULL;
   }
@@ -213,6 +220,7 @@ public: // interface
       initial_feedback_test_metal_fraction(),
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
+      initial_feedback_test_luminosity(),
 #ifdef CONFIG_USE_GRACKLE
       // EnzoGrackleTest
       initial_grackle_test_maximum_H_number_density(1000.0),
@@ -353,7 +361,15 @@ public: // interface
       method_feedback_supernova_energy(1.0),
       method_feedback_time_first_sn(-1.0), // in Myr
       method_feedback_use_ionization_feedback(false),
-
+      /// EnzoMethodFeedbackSTARSS
+      method_feedback_supernovae(true),
+      method_feedback_unrestricted_sn(true),
+      method_feedback_stellar_winds(true),
+      method_feedback_radiation(true),
+      method_feedback_min_level(0),
+      method_feedback_analytic_SNR_shell_mass(true),
+      method_feedback_fade_SNR(true),
+      method_feedback_NEvents(-1),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
 
@@ -368,15 +384,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-
-      /// EnzoMethodFeedbackSTARSS
-      method_feedback_supernovae(true),
-      method_feedback_unrestricted_sn(true),
-      method_feedback_stellar_winds(true),
-      method_feedback_min_level(0),
-      method_feedback_analytic_SNR_shell_mass(true),
-      method_feedback_fade_SNR(true),
-      method_feedback_NEvents(-1),
 
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
@@ -400,6 +407,30 @@ public: // interface
       method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
       method_star_maker_min_level(0), // minimum refinement level for star formation
       method_star_maker_turn_off_probability(false),
+      // EnzoMethodM1Closure
+      method_m1_closure(false),
+      method_m1_closure_N_groups(1), // # of frequency bins
+      method_m1_closure_flux_function("GLF"), // which flux function to use
+      method_m1_closure_hll_file("hll_evals.list"), // path to hll eigenvalue table
+      method_m1_closure_clight_frac(1.0), // fraction of speed of light value to use
+      method_m1_closure_photon_escape_fraction(1.0),
+      method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles 
+      method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
+      method_m1_closure_particle_luminosity(-1.0), // specify emission rate from sources
+      method_m1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
+      method_m1_closure_min_photon_density(0.0),
+      method_m1_closure_attenuation(true),
+      method_m1_closure_thermochemistry(true),
+      method_m1_closure_recombination_radiation(false),
+      method_m1_closure_H2_photodissociation(false),
+      method_m1_closure_lyman_werner_background(false),
+      method_m1_closure_LWB_J21(-1.0),
+      method_m1_closure_cross_section_calculator("vernier"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
+      method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
+      method_m1_closure_sigmaE(), 
+      method_m1_closure_energy_lower(),
+      method_m1_closure_energy_upper(),
+      method_m1_closure_energy_mean(), // mean energy for bin
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -546,6 +577,7 @@ protected: // methods
   void read_method_ppm_(Parameters *);
   void read_method_sink_maker_(Parameters *);
   void read_method_star_maker_(Parameters *);
+  void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_vlct_(Parameters *);
   
@@ -748,6 +780,7 @@ public: // attributes
   /// EnzoInitialFeedbackTest
 
   double                     initial_feedback_test_position[3];
+  double                     initial_feedback_test_luminosity;
   double                     initial_feedback_test_density;
   double                     initial_feedback_test_HI_density;
   double                     initial_feedback_test_HII_density;
@@ -856,11 +889,13 @@ public: // attributes
   bool                      method_feedback_shift_cell_center;
   bool                      method_feedback_use_ionization_feedback;
 
+  
   /// EnzoMethodFeedbackSTARSS
   
   bool                       method_feedback_supernovae;
   bool                       method_feedback_unrestricted_sn;
   bool                       method_feedback_stellar_winds;
+  bool                       method_feedback_radiation;
   int                        method_feedback_min_level;
   bool                       method_feedback_analytic_SNR_shell_mass;
   bool                       method_feedback_fade_SNR;
@@ -890,6 +925,33 @@ public: // attributes
   double                    method_star_maker_maximum_star_mass;
   int                       method_star_maker_min_level;
   bool                      method_star_maker_turn_off_probability;
+
+
+  /// EnzoMethodM1Closure
+  
+  bool                      method_m1_closure; 
+  int                       method_m1_closure_N_groups;
+  std::string               method_m1_closure_flux_function;
+  std::string               method_m1_closure_hll_file;
+  double                    method_m1_closure_clight_frac;
+  double                    method_m1_closure_photon_escape_fraction;
+  std::string               method_m1_closure_radiation_spectrum;
+  double                    method_m1_closure_temperature_blackbody; 
+  double                    method_m1_closure_particle_luminosity;
+  std::vector<double>       method_m1_closure_SED;
+  double                    method_m1_closure_min_photon_density;
+  bool                      method_m1_closure_attenuation;
+  bool                      method_m1_closure_thermochemistry;
+  bool                      method_m1_closure_recombination_radiation;
+  bool                      method_m1_closure_H2_photodissociation;
+  bool                      method_m1_closure_lyman_werner_background;
+  double                    method_m1_closure_LWB_J21;
+  std::string               method_m1_closure_cross_section_calculator;
+  std::vector<double>       method_m1_closure_sigmaN;
+  std::vector<double>       method_m1_closure_sigmaE;
+  std::vector<double>       method_m1_closure_energy_lower;
+  std::vector<double>       method_m1_closure_energy_upper;
+  std::vector<double>       method_m1_closure_energy_mean;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

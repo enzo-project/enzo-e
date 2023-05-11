@@ -131,7 +131,7 @@ void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
 
     ASSERT1("IoEnzoWriter",
             "Cannot open hierarchy file %s for writing",
-            name_file,stream_file_list);
+            name_file.c_str(),stream_file_list);
 
     stream_file_list << std::setfill('0');
     int max_digits = log(check_num_files_-1)/log(10) + 1;
@@ -262,7 +262,7 @@ std::ofstream IoEnzoWriter::create_block_list_(std::string name_dir, std::string
 
   ASSERT1("Simulation::create_block_list_",
           "Cannot open block_list file %s for writing",
-          name_file,stream_block_list);
+          name_file.c_str(),stream_block_list);
 
   return stream_block_list;
 }

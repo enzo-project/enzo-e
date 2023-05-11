@@ -40,7 +40,7 @@ public: // interface
       ifmr3_cf_[i]  =0;
       ifpr3_cf_[i]  =0;
     }
-    ++counter[cello::index_static()]; 
+    ++counter[cello::index_static()];
   }
 
   ~DataMsg()
@@ -213,7 +213,7 @@ public: // interface
   void update (Data * data, bool is_local, bool is_kept = true);
 
   /// Debugging
-  void print (const char * message) const;
+  void print (const char * message, FILE * fp = nullptr) const;
 
 protected: // attributes
 
