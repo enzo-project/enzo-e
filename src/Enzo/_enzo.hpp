@@ -275,9 +275,9 @@ extern "C" {
 #include "particle/formation/EnzoMethodThresholdAccretion.hpp"
 #include "assorted/EnzoMethodTurbulence.hpp"
 
-#include "gravity/EnzoMatrixDiagonal.hpp"
-#include "gravity/EnzoMatrixIdentity.hpp"
-#include "gravity/EnzoMatrixLaplace.hpp"
+#include "gravity/matrix/EnzoMatrixDiagonal.hpp"
+#include "gravity/matrix/EnzoMatrixIdentity.hpp"
+#include "gravity/matrix/EnzoMatrixLaplace.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 
@@ -290,12 +290,12 @@ extern "C" {
   #include "assorted/EnzoComputeCoolingTime.hpp"
 #endif
 
-#include "gravity/EnzoSolverBiCgStab.hpp"
-#include "gravity/EnzoSolverCg.hpp"
-#include "gravity/EnzoSolverDd.hpp"
-#include "gravity/EnzoSolverDiagonal.hpp"
-#include "gravity/EnzoSolverJacobi.hpp"
-#include "gravity/EnzoSolverMg0.hpp"
+#include "gravity/solvers/EnzoSolverBiCgStab.hpp"
+#include "gravity/solvers/EnzoSolverCg.hpp"
+#include "gravity/solvers/EnzoSolverDd.hpp"
+#include "gravity/solvers/EnzoSolverDiagonal.hpp"
+#include "gravity/solvers/EnzoSolverJacobi.hpp"
+#include "gravity/solvers/EnzoSolverMg0.hpp"
 
 #include "enzo-core/EnzoStopping.hpp"
 
