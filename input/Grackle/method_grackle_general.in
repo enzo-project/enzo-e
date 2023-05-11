@@ -1,8 +1,9 @@
 # this file is used for checking general consistency of grackle results
 # (without using a timestep based on the minimum cooling time)
 #
-# The automated test will also overwrite the entry in
-# Method:grackle:data_file parameter with a valid path
+# To run this simulation outside of the answer testing framework, you should
+# copy the data file, specified by method:grackle:data_file to the root of the
+# repository and execute the simulation from there.
 
 include "input/Grackle/grackle.incl"
 

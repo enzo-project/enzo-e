@@ -36,9 +36,13 @@ a 3D array of Sedov blast waves.
 ``"implosion_2d"``
    Initialize an "implosion" test problem.
 
-``"inclined_wave``
+``"inclined_wave"``
    Initialize an inclined wave test problem. (Primarily used for
    testing the VL+CT MHD solver).
+
+``"m1_closure"``
+   Initializer for M1 Closure radiative transfer. Initializes RT fields
+   and reads eigenvalue table for the ``"HLL"`` flux function.
 
 ``"merge_sinks_test"``
    Initialise sink particles with masses, positions, and velocities read

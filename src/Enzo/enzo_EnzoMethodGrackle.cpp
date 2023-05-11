@@ -83,6 +83,7 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   const int chemistry_level    = grackle_chemistry->primordial_chemistry;
   const int specific_heating   = grackle_chemistry->use_specific_heating_rate;
   const int volumetric_heating = grackle_chemistry->use_volumetric_heating_rate;
+  const int radiative_transfer = grackle_chemistry->use_radiative_transfer;
 
   // Metal cooling fields
 
@@ -109,8 +110,16 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 
   if (chemistry_level >= 3) {
     cello::define_field_in_group ("DI_density",  "color");
-    cello::define_field_in_group ("DII_density", "color" );
+    cello::define_field_in_group ("DII_density", "color");
     cello::define_field_in_group ("HDI_density", "color");
+  }
+
+  if (radiative_transfer) {
+    cello::define_field("RT_heating_rate");
+    cello::define_field("RT_HI_ionization_rate");
+    cello::define_field("RT_HeI_ionization_rate");
+    cello::define_field("RT_HeII_ionization_rate");
+    cello::define_field("RT_H2_dissociation_rate");
   }
 
   if (specific_heating) {
@@ -347,6 +356,13 @@ void EnzoMethodGrackle::setup_grackle_fields
 
   grackle_fields->metal_density   = fadaptor.ptr_for_grackle("metal_density");
 
+  //  RADIATIVE TRANSFER HEATING AND IONIZATION RATES
+  grackle_fields->RT_heating_rate         = fadaptor.ptr_for_grackle("RT_heating_rate");
+  grackle_fields->RT_HI_ionization_rate   = fadaptor.ptr_for_grackle("RT_HI_ionization_rate");
+  grackle_fields->RT_HeI_ionization_rate  = fadaptor.ptr_for_grackle("RT_HeI_ionization_rate");
+  grackle_fields->RT_HeII_ionization_rate = fadaptor.ptr_for_grackle("RT_HeII_ionization_rate");
+  grackle_fields->RT_H2_dissociation_rate = fadaptor.ptr_for_grackle("RT_H2_dissociation_rate");
+
   /* Leave these as NULL for now and save for future development */
   gr_float * volumetric_heating_rate = NULL;
   gr_float * specific_heating_rate = NULL;
@@ -413,7 +429,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
         if(grackle_chemistry->primordial_chemistry > 0){
-          grackle_fields->HI_density[i]   = grackle_fields->density[i] * grackle_chemistry->HydrogenFractionByMass;
+          grackle_fields->HI_density[i]    = grackle_fields->density[i] * grackle_chemistry->HydrogenFractionByMass;
           grackle_fields->HII_density[i]   = grackle_fields->density[i] * tiny_number;
           grackle_fields->HeI_density[i]   = grackle_fields->density[i] * (1.0 - grackle_chemistry->HydrogenFractionByMass);
           grackle_fields->HeII_density[i]  = grackle_fields->density[i] * tiny_number;

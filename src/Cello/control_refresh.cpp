@@ -629,10 +629,11 @@ int Block::delete_non_local_particles_(int it){
   Particle particle (cello::particle_descr(),
 		     data()->particle_data());
 
+  const std::string type_name = particle.type_name(it);
   ASSERT1("Block::clean_up_particles_",
 	  "This function has been called for particle type"
 	  " %s, which has no is_copy attribute",
-	  particle.type_name(it),
+	  type_name.c_str(),
 	  particle.has_attribute(it,"is_copy"));
 
   const int rank = cello::rank();
@@ -1261,11 +1262,13 @@ void Block::particle_scatter_neighbors_
     for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
 
        int it = *it_type;
+
+       const std::string type_name = particle.type_name(it);
        
        ASSERT1("Block::particle_scatter_neighbors_",
 	       "Trying to copy particle type %s, but it has no "
 	       "is_copy attribute",
-	       particle.type_name(it),
+	       type_name.c_str(),
 	       particle.has_attribute(it,"is_copy"));
 
       int ia_copy = particle.attribute_index(it, "is_copy");
