@@ -83,9 +83,6 @@ Output {
       type       = "image";
       name       = [ "initial_png-%02d.png","cycle" ];
       include "input/Schedule/schedule_cycle_10.incl"
-      colormap = [0.00, 0.00, 0.00,  
-                  1.00, 0.00, 0.00, 
-                  1.00, 1.00, 0.00, 
-                  1.00, 1.00, 1.00];
+      colormap = ["black", "red", "yellow", "white" ];
    }
 }

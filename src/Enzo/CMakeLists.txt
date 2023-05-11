@@ -26,7 +26,7 @@ target_link_libraries(main_enzoCharmModule INTERFACE enzoCharmModule)
 #   the CONFIGURE_DEPENDS flag.
 # - See the CMake Primer section of the developer documentation for more details
 file(GLOB SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *F *hpp fortran.h fortran_types.h
+  *.cpp *.F *.hpp fortran.h fortran_types.h
 )
 
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
