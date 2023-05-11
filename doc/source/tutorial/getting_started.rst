@@ -162,6 +162,7 @@ See the following subsection for more configuration options.
         -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
   make -j4 # -j4 tells make to execute up to 4 commands in parallel
 
+To build on a Mac, you should only need to replace ``linux_gcc`` with ``darwin_clang``.
 
 Note, if ``ninja`` is installed, the ``ninja`` build system can be used for faster build times.
 This is done by adding ``-GNinja`` to the ``cmake`` command (before the ``..``) and calling ``ninja`` afterwards instead of ``make``.
@@ -434,7 +435,7 @@ If errors like
     Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password,hostbased).
     Charmrun> Error 255 returned from remote shell (localhost:0)
 
-are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by add ``++local`` to ``charmrun``, e.g.:
+are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by adding ``++local`` to ``charmrun``, e.g.:
 
      ``~/Charm/bin/charmrun ++local +p4 bin/enzo-e input/HelloWorld/Hi.in``
 
