@@ -30,10 +30,17 @@ inline void operator|(PUP::er &p, chemistry_data &c){
   int length = (skip_strlen) ? 0 : strlen(c.grackle_data_file);
   p | length;
   if (length > 0){
+    char* temp;
     if (p.isUnpacking()){
-      c.grackle_data_file=new char[length+1];
+      temp = new char[length+1];
+      c.grackle_data_file= temp;
+    } else {
+      // this is a hack that's necessary because PUParray won't work with a
+      // const char* type (i.e. we need to cast away the const).
+      // -> This won't be necessary after PR #290
+      temp = (char*)temp;
     }
-    PUParray(p, c.grackle_data_file,length+1);
+    PUParray(p, temp, length+1);
   } else {
     c.grackle_data_file = NULL;
   }
