@@ -19,6 +19,10 @@ endif()
 #Define project and languages
 project(Enzo-E VERSION 1.0.0 LANGUAGES C CXX Fortran)
 
+# We need C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Don't allow in-source builds
@@ -50,11 +54,6 @@ find_package(Charm REQUIRED)
 # Link executables with the charmc wrapper
 STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
        CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
-# for book-keeping purposes create a library representing the external
-# Charm-library. We are going to make this an interface library (a header-only)
-# library since the charmc wrapper makes sure we link to the correct library
-add_library(CHARM_EXTERNAL INTERFACE)
-target_include_directories(CHARM_EXTERNAL INTERFACE ${CHARM_INCLUDE_DIRS})
 
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
