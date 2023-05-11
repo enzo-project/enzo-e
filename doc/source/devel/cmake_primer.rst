@@ -14,7 +14,7 @@ As an aside, when searching for online CMake documentation and guides, you shoul
 History of Enzo-E's build system
 ================================
 
-Historically, Enzo-E made use of the `SCons <https://scons.org/>`_ build system. Howver, in 2022 Enzo-E migrated to the CMake build system.
+Historically, Enzo-E made use of the `SCons <https://scons.org/>`_ build system. However, in 2022 Enzo-E migrated to the CMake build system.
 
 While there are a number of viable build systems, there has been a general convergence among C++ developers towards using CMake (this is evidenced by large projects like Boost and Charm++).
 Given the very large userbase of CMake, bugs are found and fixed relatively quickly.
