@@ -88,6 +88,7 @@ add_subdirectory(io)
 add_subdirectory(mesh)
 add_subdirectory(obsolete)
 add_subdirectory(particle)
+add_subdirectory(tests)
 add_subdirectory(utils)
 
 # Step 4: specify additional information about the Enzo library
