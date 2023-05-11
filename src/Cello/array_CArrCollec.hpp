@@ -230,8 +230,8 @@ private: // helper methods:
   // need to explicitly call destructor because we use placement new
   void dealloc_active_member_() noexcept{
     switch (tag_){
-      case Tag::CONTIG:     { single_arr_.~SingleAddressCArrCollec_(); break; }
-      case Tag::ARR_OF_PTR: { arr_of_ptr_.~ArrOfPtrsCArrCollec_(); break; }
+      case Tag::CONTIG:     { single_arr_.detail::SingleAddressCArrCollec_<T>::~SingleAddressCArrCollec_(); break; }
+      case Tag::ARR_OF_PTR: { arr_of_ptr_.detail::ArrOfPtrsCArrCollec_<T>::~ArrOfPtrsCArrCollec_(); break; }
     }
   }
 
