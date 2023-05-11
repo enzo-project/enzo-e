@@ -86,6 +86,7 @@ add_subdirectory(gravity)
 add_subdirectory(initial)
 add_subdirectory(io)
 add_subdirectory(mesh)
+add_subdirectory(obsolete)
 add_subdirectory(particle)
 add_subdirectory(utils)
 
