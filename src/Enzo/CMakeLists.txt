@@ -1,6 +1,22 @@
-
+#=======================
+# Define Charm++ modules
+#=======================
+# This section declares Charm++ module targets. These are header-only targets
+# that represent the .decl.h and .def.h headers generated from the .ci
+# interface files by the charm++ libraries.
+#
+# We also define dependencies between modules (represented by occurences of
+# extern in the .ci file)
 include(charm)
 addCharmModule( "enzo" )
+target_link_libraries(enzoCharmModule INTERFACE meshCharmModule)
+
+# note: main_enzoCharmModule was created in a previous CMakeLists.txt file
+target_link_libraries(main_enzoCharmModule INTERFACE enzoCharmModule)
+
+#==============
+# General setup
+#==============
 
 # Get the list of source files
 # - we do this using GLOB patterns. This approach is not recommended by the
@@ -40,16 +56,15 @@ add_library(enzo STATIC ${SRC_FILES})
 # -> we need to define it now (and as a separate target from the binary) in
 #    order to support tests that are defined in the subdirectory
 add_library(main_enzo OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/../Cello/main_enzo.cpp)
-add_dependencies(main_enzo main_enzoCharmModule)
 # TODO: we may want to reconsider the way that the code is structured so that
 # we aren't declaring targets with source files from the Cello layer
 target_include_directories (main_enzo
-  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../Cello # for main_enzo.decl.h, (which is
-                                              # in a public header: main.hpp)
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Cello # for main.hpp
 )
 target_link_libraries(main_enzo
   PRIVATE enzo parallel cello_component monitor Boost::filesystem
+  PUBLIC main_enzoCharmModule # this is public because main_enzo.decl.h is in
+                              # the public header file: main.hpp)
 )
 target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
@@ -57,7 +72,7 @@ target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 # -> these add other libraries that will be used when linking the enzo target
 # -> these also add source files to the enzo target
 
-# add files in core to enzo target (and define a unit test)
+# add files in enzo-core to enzo target (and define a unit test)
 add_subdirectory(enzo-core)
 
 # add files in hydro-mhd to enzo target and define the riemann library
@@ -74,13 +89,14 @@ add_subdirectory(particle)
 add_subdirectory(utils)
 
 # Step 4: specify additional information about the Enzo library
-add_dependencies(enzo enzoCharmModule)
-# dependencies are only PUBLIC because of the way that all headers are
-# transitively included in all targets. If they weren't public, the include
-# directories would not be properly inherited
-target_link_libraries(enzo PUBLIC riemann ${Cello_LIBS} ${External_LIBS})
+# (dependencies are only PUBLIC because of the way that all headers are
+#  transitively included in all targets. If they weren't public, the include
+#  directories would not be properly inherited)
+target_link_libraries(enzo
+  PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
+  PUBLIC enzoCharmModule
+)
 target_include_directories(enzo
-  PUBLIC ${CMAKE_CURRENT_BINARY_DIR} # enzo.decl.h is in a public header file
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} # for enzo.hpp when linking to a target in
                                      # separate directory
 )

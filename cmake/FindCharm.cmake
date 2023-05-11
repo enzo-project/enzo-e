@@ -43,12 +43,21 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # \brief     Find Charm++ from https://github.com/quinoacomputing/cmake-modules
 #
+# 2022/07/18 mabruzzo: refactoring logic for detecting whether Charm++ was compiled with SMP mode
+#
+# 2023/02/05 mabruzzo: add logic to export a target for including charm++ headers
 ################################################################################
 
 # Charm++: http://charmplusplus.org
 #
-#  CHARM_FOUND        - True if the charmc compiler wrapper was found
-#  CHARM_INCLUDE_DIRS - Charm++ include files paths
+#  CHARM_FOUND          - True if the charmc compiler wrapper was found
+#  CHARM_INCLUDE_DIRS   - Charm++ include files paths
+#
+#  CHARM::CHARM_HEADERS - target mostly just used for book-keeping purposes.
+#                         This manages include directories. It doesn't actually
+#                         specify library locations. Instead, that info is
+#                         automatically provided when using CHARM_COMPILER for
+#                         linking (that is shown down below)
 #
 #  Set CHARM_ROOT before calling find_package to a path to add an additional
 #  search path, e.g.,
@@ -220,6 +229,23 @@ if(CHARM_COMPILER AND NOT DEFINED CHARM_SMP)
     message(STATUS "Charm++ built in SMP mode")
   else()
     message(STATUS "Charm++ built in non-SMP mode")
+  endif()
+
+endif()
+
+# define a target primarily for book-keeping purposes
+# - this target provides appropriate include-directories used in linking
+# - it doesn't currently provide any information about the library location
+#   (this file currently assumes that ${CHARM_COMPILER} is used for linking,
+#    which provides that information automatically)
+if(CHARM_COMPILER)
+  if (NOT TARGET CHARM::CHARM_HEADERS)
+
+    add_library(CHARM::CHARM_HEADERS INTERFACE IMPORTED)
+    target_include_directories(CHARM::CHARM_HEADERS
+      INTERFACE ${CHARM_INCLUDE_DIRS}
+      )
+
   endif()
 
 endif()
