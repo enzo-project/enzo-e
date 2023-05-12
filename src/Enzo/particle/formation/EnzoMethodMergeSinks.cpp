@@ -14,7 +14,7 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
-#include "FofLib.hpp"
+#include "../FofLib.hpp" // should this be in "enzo.hpp"?
 #include <time.h>
 
 //#define DEBUG_MERGESINKS
