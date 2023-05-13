@@ -532,26 +532,30 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
     msg->update(data());
   } else {
     TRACE("Block::apply_initial_()");
-    const bool initial_new = cello::config()->initial_new;
-    if (initial_new) {
+    // Create child blocks if this block refines during the initialization
+    // phase.
+    create_initial_child_blocks();
 
-      // Create child blocks if this block refines during the initialization
-      // phase.
-      create_initial_child_blocks();
+    // Tell the root Simulation object this block is inserted and ready 
+    // to initialize data.
+    proxy_simulation[0].p_initial_block_created();
+  }
+}
 
-      // Tell the root Simulation object this block is inserted and ready 
-      // to initialize data.
-      proxy_simulation[0].p_initial_block_created();
+void Block::p_initial_begin()
+{
+  const bool initial_new = cello::config()->initial_new;
 
-    } else {
-      // Apply initial conditions
+  if (initial_new) {
+    initial_new_begin_();
 
-      index_initial_ = 0;
-      Problem * problem = cello::problem();
-      while (Initial * initial = problem->initial(index_initial_)) {
-        initial->enforce_block(this,cello::hierarchy());
-        index_initial_++;
-      }
+  } else {
+    // Apply initial conditions
+    index_initial_ = 0;
+    Problem * problem = cello::problem();
+    while (Initial * initial = problem->initial(index_initial_)) {
+      initial->enforce_block(this,cello::hierarchy());
+      index_initial_++;
     }
   }
 }

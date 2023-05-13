@@ -825,7 +825,7 @@ int Simulation::initial_block_count() throw() {
 void Simulation::p_initial_block_created() throw() {
   if (sync_init_block_count_.next()) {
     hierarchy_->block_array().doneInserting();
-    hierarchy_->block_array().p_initial_new_begin();
+    hierarchy_->block_array().p_initial_begin();
   }
 }
 //----------------------------------------------------------------------
