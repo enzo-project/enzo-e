@@ -1,0 +1,744 @@
+ Adapt {
+     # specify AMR refinement criteria.
+     # here, we're telling it to refine on DM and baryon overdensities
+     # overdensity = 8 -> refine
+     # overdensity = 0.125 -> coarsen
+   
+     list = [ "mass_baryon", "mass_dark" ];
+     mass_baryon {
+         field_list = [ "density" ];
+         mass_type = "baryon";
+         max_coarsen = 0.1250000000000000;
+         min_refine = 8.000000000000000;
+         type = "mass";
+     };
+     mass_dark {
+         field_list = [ "density_particle_accumulate" ];
+         mass_type = "dark";
+         max_coarsen = 0.1250000000000000;
+         min_refine = 8.000000000000000;
+         type = "mass";
+     };
+     max_initial_level = 3;
+     max_level = 4;
+     min_level = -2; # negative minimum level is required for the multigrid step in the DD gravity solver
+ }
+
+#--------------------
+
+ Boundary {
+     type = "periodic";
+ }
+
+#--------------------
+
+ Domain {
+     lower = [ 0.000000000000000, 0.000000000000000, 0.000000000000000 ];
+     upper = [ 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+ }
+
+#--------------------
+
+ Field {
+     alignment = 8;
+     gamma = 1.666700000000000;
+     ghost_depth = 4; # number of ghost zone layers per block
+
+     history = 1;     # some methods (e.g. gravity) require knowledge of field values at previous timesteps
+                      # 'history=1' tells Enzo-E/Cello to store field values for one timestep before deleting
+
+     # list which fields to track here
+
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "density_total", "density_particle", "density_particle_accumulate", "potential", "potential_copy", "density_gas", "pressure", "B", "X_copy", "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "HM_density", "H2I_density", "H2II_density", "e_density", "metal_density", "temperature" ];
+     padding = 0;
+ }
+
+#--------------------
+
+ Group {
+     # specify chemistry fields as color fields to be advected by PPM
+     color {
+         field_list = [ "HI_density", "HII_density", "HeI_density", "HeII_density", "HeIII_density", "HM_density", "H2I_density", "H2II_density", "e_density", "metal_density" ];
+     };
+
+     # derived fields to be calculated prior to data output
+     derived {
+         field_list = [ "temperature", "pressure" ];
+     };
+     list = [ "color", "derived" ];
+ }
+
+#--------------------
+
+ Initial {
+
+     list = [ "hdf5", "cosmology" ];
+
+     new = true; # required to use Initial:hdf5 
+
+     hdf5 {
+         blocking = [ 2, 2, 2 ]; 
+                                 
+         max_level = 3;
+
+         format = "music";
+
+         # which fields and particle attributes to load. In this case, we're loading baryon density, vx, vy, vz, 
+         # and DM x, y, z, vx, vy, vz
+
+         file_list = [ "FD0", "FVX0", "FVY0", "FVZ0", "PX0", "PY0", "PZ0", "PVX0", "PVY0", "PVZ0", 
+                       "FD1", "FVX1", "FVY1", "FVZ1", "PX1", "PY1", "PZ1", "PVX1", "PVY1", "PVZ1",
+                       "FD2", "FVX2", "FVY2", "FVZ2", "PX2", "PY2", "PZ2", "PVX2", "PVY2", "PVZ2",
+                       "FD3", "FVX3", "FVY3", "FVZ3", "PX3", "PY3", "PZ3", "PVX3", "PVY3", "PVZ3" ];
+
+         # Level 0 data
+         FD0 {
+              coords = "tzyx";
+              dataset = "GridDensity.0";
+              file = "input/Nested_ICs/ics32/GridDensity.0";
+              name = "density";
+              type = "field";
+              level= 0;
+         };
+         FVX0 {
+              coords = "tzyx";
+              dataset = "GridVelocities_x.0";
+              file = "input/Nested_ICs/ics32/GridVelocities_x.0";
+              name = "velocity_x";
+              type = "field";
+              level= 0;
+         };
+         FVY0 {
+              coords = "tzyx";
+              dataset = "GridVelocities_y.0";
+              file = "input/Nested_ICs/ics32/GridVelocities_y.0";
+              name = "velocity_y";
+              type = "field";
+              level= 0;
+         };
+         FVZ0 {
+              coords = "tzyx";
+              dataset = "GridVelocities_z.0";
+              file = "input/Nested_ICs/ics32/GridVelocities_z.0";
+              name = "velocity_z";
+              type = "field";
+              level= 0;
+         };
+         PVX0 {
+              attribute = "vx";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_x.0";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_x.0";
+              name = "dark";
+              type = "particle";
+              level= 0;
+         };
+         PVY0 {
+              attribute = "vy";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_y.0";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_y.0";
+              name = "dark";
+              type = "particle";
+              level= 0;
+         };
+         PVZ0 {
+              attribute = "vz";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_z.0";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_z.0";
+              name = "dark";
+              type = "particle";
+              level= 0;
+         };
+         PX0 {
+              attribute = "x";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_x.0";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_x.0";
+              name = "dark";
+              type = "particle";
+              level= 0;
+         };
+         PY0 {
+              attribute = "y";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_y.0";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_y.0";
+              name = "dark";
+              type = "particle";
+              level= 0;
+         };
+         PZ0 {
+              attribute = "z";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_z.0";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_z.0";
+              name = "dark";
+              type = "particle";
+              level= 0;
+         };
+         
+         
+         # Level 1 data
+         FD1 {
+              coords = "tzyx";
+              dataset = "GridDensity.1";
+              file = "input/Nested_ICs/ics32/GridDensity.1";
+              name = "density";
+              type = "field";
+              level= 1;
+         };
+         FVX1 {
+              coords = "tzyx";
+              dataset = "GridVelocities_x.1";
+              file = "input/Nested_ICs/ics32/GridVelocities_x.1";
+              name = "velocity_x";
+              type = "field";
+              level= 1;
+         };
+         FVY1 {
+              coords = "tzyx";
+              dataset = "GridVelocities_y.1";
+              file = "input/Nested_ICs/ics32/GridVelocities_y.1";
+              name = "velocity_y";
+              type = "field";
+              level= 1;
+         };
+         FVZ1 {
+              coords = "tzyx";
+              dataset = "GridVelocities_z.1";
+              file = "input/Nested_ICs/ics32/GridVelocities_z.1";
+              name = "velocity_z";
+              type = "field";
+              level= 1;
+         };
+         PVX1 {
+              attribute = "vx";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_x.1";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_x.1";
+              name = "dark";
+              type = "particle";
+              level= 1;
+         };
+         PVY1 {
+              attribute = "vy";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_y.1";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_y.1";
+              name = "dark";
+              type = "particle";
+              level= 1;
+         };
+         PVZ1 {
+              attribute = "vz";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_z.1";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_z.1";
+              name = "dark";
+              type = "particle";
+              level= 1;
+         };
+         PX1 {
+              attribute = "x";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_x.1";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_x.1";
+              name = "dark";
+              type = "particle";
+              level= 1;
+         };
+         PY1 {
+              attribute = "y";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_y.1";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_y.1";
+              name = "dark";
+              type = "particle";
+              level= 1;
+         };
+         PZ1 {
+              attribute = "z";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_z.1";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_z.1";
+              name = "dark";
+              type = "particle";
+              level= 1;
+         };
+         
+         # Level 2 data
+         FD2 {
+              coords = "tzyx";
+              dataset = "GridDensity.2";
+              file = "input/Nested_ICs/ics32/GridDensity.2";
+              name = "density";
+              type = "field";
+              level= 2;
+         };
+         FVX2 {
+              coords = "tzyx";
+              dataset = "GridVelocities_x.2";
+              file = "input/Nested_ICs/ics32/GridVelocities_x.2";
+              name = "velocity_x";
+              type = "field";
+              level= 2;
+         };
+         FVY2 {
+              coords = "tzyx";
+              dataset = "GridVelocities_y.2";
+              file = "input/Nested_ICs/ics32/GridVelocities_y.2";
+              name = "velocity_y";
+              type = "field";
+              level= 2;
+         };
+         FVZ2 {
+              coords = "tzyx";
+              dataset = "GridVelocities_z.2";
+              file = "input/Nested_ICs/ics32/GridVelocities_z.2";
+              name = "velocity_z";
+              type = "field";
+              level= 2;
+         };
+         PVX2 {
+              attribute = "vx";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_x.2";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_x.2";
+              name = "dark";
+              type = "particle";
+              level= 2;
+         };
+         PVY2 {
+              attribute = "vy";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_y.2";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_y.2";
+              name = "dark";
+              type = "particle";
+              level= 2;
+         };
+         PVZ2 {
+              attribute = "vz";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_z.2";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_z.2";
+              name = "dark";
+              type = "particle";
+              level= 2;
+         };
+         PX2 {
+              attribute = "x";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_x.2";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_x.2";
+              name = "dark";
+              type = "particle";
+              level= 2;
+         };
+         PY2 {
+              attribute = "y";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_y.2";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_y.2";
+              name = "dark";
+              type = "particle";
+              level= 2;
+         };
+         PZ2 {
+              attribute = "z";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_z.2";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_z.2";
+              name = "dark";
+              type = "particle";
+              level= 2;
+         };
+         
+         
+         # Level 3 data
+         FD3 {
+              coords = "tzyx";
+              dataset = "GridDensity.3";
+              file = "input/Nested_ICs/ics32/GridDensity.3";
+              name = "density";
+              type = "field";
+              level= 3;
+         };
+         FVX3 {
+              coords = "tzyx";
+              dataset = "GridVelocities_x.3";
+              file = "input/Nested_ICs/ics32/GridVelocities_x.3";
+              name = "velocity_x";
+              type = "field";
+              level= 3;
+         };
+         FVY3 {
+              coords = "tzyx";
+              dataset = "GridVelocities_y.3";
+              file = "input/Nested_ICs/ics32/GridVelocities_y.3";
+              name = "velocity_y";
+              type = "field";
+              level= 3;
+         };
+         FVZ3 {
+              coords = "tzyx";
+              dataset = "GridVelocities_z.3";
+              file = "input/Nested_ICs/ics32/GridVelocities_z.3";
+              name = "velocity_z";
+              type = "field";
+              level= 3;
+         };
+         PVX3 {
+              attribute = "vx";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_x.3";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_x.3";
+              name = "dark";
+              type = "particle";
+              level= 3;
+         };
+         PVY3 {
+              attribute = "vy";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_y.3";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_y.3";
+              name = "dark";
+              type = "particle";
+              level= 3;
+         };
+         PVZ3 {
+              attribute = "vz";
+              coords = "tzyx";
+              dataset = "ParticleVelocities_z.3";
+              file = "input/Nested_ICs/ics32/ParticleVelocities_z.3";
+              name = "dark";
+              type = "particle";
+              level= 3;
+         };
+         PX3 {
+              attribute = "x";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_x.3";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_x.3";
+              name = "dark";
+              type = "particle";
+              level= 3;
+         };
+         PY3 {
+              attribute = "y";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_y.3";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_y.3";
+              name = "dark";
+              type = "particle";
+              level= 3;
+         };
+         PZ3 {
+              attribute = "z";
+              coords = "tzyx";
+              dataset = "ParticleDisplacements_z.3";
+              file = "input/Nested_ICs/ics32/ParticleDisplacements_z.3";
+              name = "dark";
+              type = "particle";
+              level= 3;
+         };
+
+     };
+
+ }
+
+#--------------------
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [ 32, 32, 32 ];
+     
+     level_1_lower = [ 1, 1, 1 ];
+     level_1_upper = [ 3, 3, 3 ];
+     
+     level_2_lower = [ 3, 3, 3 ];
+     level_2_upper = [ 5, 5, 5 ];
+     
+     level_3_lower = [ 7, 7, 7 ];
+     level_3_upper = [ 8, 8, 8 ];
+ }
+
+#--------------------
+
+ Method {
+
+     # list of methods. Enzo-E will execute the methods in the order they appear in this list
+
+     #list = [ "star_maker", "feedback", "ppm", "grackle", "pm_deposit", "gravity", "pm_update", "comoving_expansion" ];
+     list = [ "star_maker", "feedback", "ppm", "pm_deposit", "gravity", "pm_update", "comoving_expansion" ];
+
+     star_maker {
+         # SF parameters
+
+         flavor = "STARSS"; # which SF method to use
+         min_level = 4;
+         critical_metallicity = 3.416666666666667e-06;
+         maximum_mass_fraction = 0.05000000000000000;
+         maximum_star_mass = 3000.000000000000000;
+         minimum_star_mass = 500.0000000000000;
+
+         use_self_gravitating = true;
+         use_altAlpha = true;
+         use_velocity_divergence = true;
+         use_jeans_mass = true;
+
+         turn_off_probability = false;
+         use_cooling_time = false;
+         use_critical_metallicity = false;
+         use_density_threshold = false;
+         use_h2_self_shielding = false;
+         use_overdensity_threshold = false;
+         use_temperature_threshold = false;
+     };
+
+     feedback {
+         # FB parameters
+
+         flavor = "STARSS"; # which FB method to use
+         NEvents = -1;
+         analytic_SNR_shell_mass = true;
+         fade_SNR = true;
+         single_sn = true;
+         stellar_winds = true;
+         unrestricted_sn = true;
+     };
+
+     gravity {
+         # gravity solver
+
+         accumulate = true;
+         grav_const = 1.000000000000000;
+         order = 2;
+         solver = "dd"; 
+     };
+
+     ppm {
+         # hydro solver
+
+         courant = 0.2000000000000000;
+         diffusion = false;
+         dual_energy = true;
+         flattening = 0;
+     };
+
+
+ }
+
+#--------------------
+
+ Output {
+
+     # can output images of any field you want inline
+     # add "hdf5" to list if you want data output
+	
+     list = ["dark","de","mesh"];
+
+     dark {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+         dir = [ "ENZOE-%06d", "cycle" ];
+         image_ghost = false;
+         image_size = [ 1024, 1024 ];
+         image_type = "data";
+         name = [ "dark-%06d.png", "cycle" ];
+         particle_list = [ "dark" ];
+         schedule {
+	     start = 0;
+             step = 2;
+             var = "cycle";
+         };
+         type = "image";
+     };
+
+     de {
+         dir = [ "ENZOE-%06d", "cycle" ];
+         field_list = [ "density" ];
+         image_ghost = false;
+         image_log = true;
+         image_size = [ 1024, 1024 ];
+         image_type = "data";
+         name = [ "de-%06d.png", "cycle" ];
+         schedule {
+	     start = 0;
+             step = 2;
+             var = "cycle";
+         };
+         type = "image";
+     };
+    
+     mesh {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "ENZOE-%06d", "cycle" ];
+         image_reduce_type = "max";
+         image_size = [ 1025, 1025 ];
+         image_type = "mesh";
+         name = [ "mesh-%06d.png", "cycle" ];
+         schedule {
+	     start = 0;
+             step = 2;
+             var = "cycle";
+         };
+         type = "image";
+     };
+
+
+}
+ 
+
+#--------------------
+
+ Particle {
+     list = ["dark", "star"];
+
+     # define particle attributes here
+     # note that DM mass is defined to be (omega_cdm_now / omega_matter_now)*dx^3, where dx = 1/64.0 in this case
+
+     dark {
+         attributes = [ 
+                        "x",  "double", "y",  "double", "z",  "double", 
+                        "vx", "double", "vy", "double", "vz", "double", 
+                        "ax", "double", "ay", "double", "az", "double", 
+                        "is_copy", "double", 
+                        "mass", "double" 
+                      ];
+
+         constants = [ "root_level_mass", "double", 0.8426229508200000 / (32.0*32.0*32.0) ];
+         group_list = [ "is_gravitating" ];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+     };
+     
+     star {
+         attributes = [ 
+                         "x",  "double", "y",  "double", "z",  "double", 
+                         "vx", "double", "vy", "double", "vz", "double", 
+                         "ax", "double", "ay", "double", "az", "double", 
+                         "is_copy",        "double", 
+                         "mass",           "double", 
+                         "creation_time",  "double", 
+                         "creation_level", "double", 
+                         "lifetime",       "double", 
+                         "metal_fraction", "double", 
+                         "number_of_sn",   "double", 
+                         "id",             "int64" 
+                       ];
+         group_list = [ "is_gravitating" ];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+     };
+
+     mass_is_mass = true;
+ }
+
+#--------------------
+
+ Physics {
+     
+     cosmology {
+         comoving_box_size   = 0.433300000000000;
+         final_redshift      = 2.000000000000000;
+         hubble_constant_now = 0.6766000000000000;
+         initial_redshift    = 99.00000000000000;
+         max_expansion_rate  = 0.01500000000000000;
+         omega_baryon_now    = 0.04896000000000000;
+         omega_cdm_now       = 0.2621400000000000;
+         omega_lambda_now    = 0.6889000000000000;
+         omega_matter_now    = 0.3111000000000000;
+     };
+     fluid_props {
+         floors {
+            density  = 1e-2; # overdensity of 0.01
+            metallicity = 3.416666666666667e-06; # metallicity floor in units of Zsun = 0.012
+         }
+     }
+
+     list = [ "cosmology", "fluid_props" ];
+ }
+
+#--------------------
+
+ Solver {
+     list = [ "dd", "dd_root", "dd_domain", "dd_smooth", "root_coarse", "root_pre", "root_post" ];
+     
+     # the dd solver is a combination of linear solvers run in sequence
+     #    (1) dd_root = multigrid w/ conjugate gradient (CG) on the root grid
+     #    (2) dd_domain = solve across leaf blocks with BiCGSTAB using boundary conditions on block edges generated by dd_root
+     #    (3) dd_smooth = Jacobi smoothing across leaf block boundaries to reduce grid artifacts
+
+     dd {
+         coarse_level = 0;
+         coarse_solve = "dd_root";
+         domain_solve = "dd_domain";
+         last_smooth = "dd_smooth";
+         max_level = 4;
+         min_level = -2;
+         monitor_iter = 1;
+         type = "dd";
+     };
+     dd_domain {
+         coarse_level = 0;
+         iter_max = 100;
+         max_level = 4;
+         min_level = -2;
+         monitor_iter = 0;
+         res_tol = 0.1000000000000000;
+         solve_type = "tree";
+         type = "bicgstab";
+     };
+     dd_root {
+         # NOTE: levels for this solver range from -2 -> 0 here because we're using the Mg0 solver
+         #       to find the root grid solution (level 0). 
+         #       The Mg0 solver does a V-cycle between max_level and min_level, where min_level is tuned
+         #       so that the entire domain at min_level is contained within one block (i.e. min_level = -log2(root_blocks[dim])).
+
+         coarse_level = -2;
+         coarse_solve = "root_coarse";
+         iter_max = 5;
+         max_level = 0;
+         min_level = -2;
+         monitor_iter = 0;
+         post_smooth = "root_post";
+         pre_smooth = "root_pre";
+         res_tol = 0.05000000000000000;
+         solve_type = "level";
+         type = "mg0";
+     };
+     dd_smooth {
+         iter_max = 5;
+         monitor_iter = 0;
+         solve_type = "leaf";
+         type = "jacobi";
+     };
+     root_coarse {
+         iter_max = 100;
+         monitor_iter = 0;
+         res_tol = 0.1000000000000000;
+         solve_type = "block";
+         type = "cg";
+     };
+     root_post {
+         iter_max = 2;
+         solve_type = "level";
+         type = "jacobi";
+     };
+     root_pre {
+         iter_max = 2;
+         solve_type = "level";
+         type = "jacobi";
+     };
+ }
+
+#--------------------
+
+ Stopping {
+     # stop at either redshift 2 or timestep `cycle`
+     cycle = 2;
+     redshift = 2.000000000000000;
+ }
