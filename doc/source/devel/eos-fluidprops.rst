@@ -10,7 +10,7 @@ The user documentation is described :ref:`here <user-fluid_props>`.
 As an aside, this section uses terms like "integration" and "primitive" quantities or "stale depth" that are defined in the :ref:`Hydro/MHD Infrastructure section <HydroMHDInfrastructure-page>`.
 
 ===========
-fluid props
+Fluid props
 ===========
 
 The primary goal of the :cpp:class:`!EnzoPhysicsFluidProps` class is to hold general data about fluid properties (that may affect multiple parts of the codebase) in a central location and provide methods for accessing this information.
@@ -18,7 +18,7 @@ An important guiding principle is that the class is immutable: once it's initial
 
 With that said, it does provide some other miscellaneous useful methods.
 
-primary methods
+Primary methods
 ---------------
 
 All of the primary methods return references to immutable objects that can be used to query information related to the fluid properties.
@@ -27,7 +27,7 @@ All of the primary methods return references to immutable objects that can be us
                   EnzoPhysicsFluidProps::dual_energy_config() \
                   const noexcept
 
-  Access a constant reference to the contained dual energy configuration object
+  Access a constant reference to the contained dual energy configuration object.
 
 .. cpp:function:: const EnzoFluidFloorConfig& \
                   EnzoPhysicsFluidProps::fluid_floor_config() const noexcept
@@ -41,13 +41,13 @@ All of the primary methods return references to immutable objects that can be us
   It holds an object that represents the caloric EOS used by the simulation.
   See the :ref:`EOS-Developer-Guide` section for more details about the design of the EOS functionality (and how to use it).
 
-misc useful methods
+Misc useful methods
 -------------------
-The functionallity described in this subsection are only defined as methods of :cpp:class:`!EnzoPhysicsFluidProps` for a lack of better place to define them.
+The functionality described in this subsection are only defined as methods of :cpp:class:`!EnzoPhysicsFluidProps` for a lack of better place to define them.
 In the future, it might make sense to move them around.
 
 It's important that none of these functions actually mutate the contents of :cpp:class:`!EnzoPhysicsFluidProps`.
-As in the Hydro/MHD Infrastructure section, many of these functions operations act on the contents of :cpp:class:`!EnzoEFltArrayMap` rather than directly on :cpp:class:`!Block` objects for additional flexibility.
+As in the Hydro/MHD Infrastructure section, many of these function operations act on the contents of :cpp:class:`!EnzoEFltArrayMap` rather than directly on :cpp:class:`!Block` objects for additional flexibility.
 
 .. cpp:function:: void EnzoPhysicsFluidProps::primitive_from_integration \
                   (const EnzoEFltArrayMap &integration_map, \
@@ -94,27 +94,27 @@ Overviews
 This section documents how different caloric/isothermal equations of state are supported in Enzo-E.
 For reference, these govern the relationship between density, pressure, and internal (or thermal) energy.
 
-Currently, Enzo-E supports relatively few EOS.
+Currently, Enzo-E supports relatively few equations of state.
 Over time, Hydro codes have a tendency to add support for multiple different types of equations of state.
-It’s therefore important to have a solid strategy in place, early-on to support multiple equations of state.
-Unlike other simulation codes (e.g. Athena++) that partially configure physics-features (like the choice of EOS) at compile-time, Enzo-E tends to takes the approach of compiling all physics at once. Thus, Enzo-E needs to support the selection of the EOS at runtime.
+It’s therefore important to have a solid strategy in place early on to support multiple equations of state.
+Unlike other simulation codes (e.g., Athena++) that partially configure physics-features (like the choice of EOS) at compile-time, Enzo-E tends to takes the approach of compiling all physics at once. Thus, Enzo-E needs to support the selection of the EOS at runtime.
 
 The obvious strategy (and the original approach that we took) is to use inheritance with virtual methods.
-However, virtual methods are not well-suited for being used within compute kernels (i.e. in the body of a for-loop).
+However, virtual methods are not well-suited for being used within compute kernels (i.e., in the body of a for-loop).
 Issues arise because: (i) there is overhead associated with virtual method calls and (ii) there are problems with invoking the virtual methods on GPUs.
-While we can get around this to some degree by designing virtual methods to be called outside of the for-loop, there will always be cases where EOS-details must be known within a for-loop (e.g. in a Riemann Solver).
+While we can get around this to some degree by designing virtual methods to be called outside of the for-loop, there will always be cases where EOS details must be known within a for-loop (e.g., in a Riemann Solver).
 
 For this reason, we choose a different approach for achieving polymorphism, which involves using a `tagged union <https://en.m.wikipedia.org/wiki/Tagged_union>`_.
 The idea is that we represent each type of EOS as a stand-alone class and the type-safe union holds an instance of one of those classes (unlike a typical union, the type-safe union explicitly prohibits unsafe access of any union member other than the one that is currently stored)
-This is an approach popular in functional programming, modern languages (e.g. Rust) and that has received support in C++17.
-While this approach still incurs some overhead analogous to that of a virtual function, it provides much greater flexibility in choosing where/when we pay this still overhead.
+This is an approach popular in functional programming, in modern languages (e.g., Rust), and that has received support in C++17.
+While this approach still incurs some overhead analogous to that of a virtual function, it provides much greater flexibility in choosing where/when we pay this overhead.
 For example, we can choose to pay this cost just before a for-loop.
 
 High-Level Design
 -----------------
 As mentioned above, :cpp:class:`!EnzoEOSVariant`, is simply a container that holds an EOS object.
 An EOS object is an instance of one of a few (unrelated, standalone) classes like :cpp:class:`!EnzoEOSIdeal` or :cpp:class:`!EnzoEOSIsothermal`.
-that acts as a typesafe union that always holds an instance of one of these classes.
+that acts as a typesafe union which always holds an instance of one of these classes.
 
 When the :cpp:class:`!EnzoPhysicsFluidProps` physics object is constructed, it creates an instance of the EOS class and holds it internally within an instance of :cpp:class:`!EnzoEOSVariant`.
 Throughout the remainder of the simulation, the :cpp:class:`!EnzoPhysicsFluidProps` physics object prevents mutation of the :cpp:class:`!EnzoEOSVariant` instance that it owns (and consequently to the contained EOS object).
@@ -135,18 +135,18 @@ EOS Classes
 
 These classes are supposed to be lightweight struct/classes that encapsulate an equation of state.
 It's also important that these objects are cheap to copy.
-They are all entirely defined in header files to facillitate inlining.
+They are all entirely defined in header files to facilitate inlining.
 
-We currently expect an EOS class, ``EOSClass`` to provide the following methods:
+We currently expect an EOS class, ``EOSClass``, to provide the following methods:
 
   * ``constexpr static const char* EOSClass::name() noexcept`` This returns the name of the EOS class (it should match the name a user would specify in a parameter file)
 
-  * ``constexpr static bool EOSClass::is_barotropic() noexcept`` This should return true when the pressure field is just a function of density (e.g. in an isothermal gas).
+  * ``constexpr static bool EOSClass::is_barotropic() noexcept`` This should return true when the pressure field is just a function of density (e.g., in an isothermal gas).
 
-  * ``std::string EOSClass::debug_string() const noexcept`` This should return a string (for debugging purposes) that represents the internal state of the eos object.
+  * ``std::string EOSClass::debug_string() const noexcept`` This should return a string (for debugging purposes) that represents the internal state of the EOS object.
 
 Other methods supported by an EOS may include calculation of sound speed, fast magnetosonic speed, internal energy, etc.
-Essentially all (non-static) methods of an eos-object are declared as ``const`` (i.e. there's no reason for them to mutate internal state).
+Essentially all (non-static) methods of an EOS-object are declared as ``const`` (i.e. there's no reason for them to mutate internal state).
 
 One of the perks of using tagged unions is that different types of EOS objects don't NEED to implement the same methods.
 For example, it doesn't make much sense for an isothermal eos to support methods that compute the thermal energy.
@@ -197,8 +197,8 @@ When discussing how to use :cpp:class:`!EnzoEOSVariant`, it is most instructive 
 Retrieving the EOS Object
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's first imagine we want to write some code that assumes that Enzo-E is configured with an ideal EOS, and requires knowledge of the adiabatic index, ``gamma``.
-If Enzo-E is configured with a different type of EOS, the codebase should terminate with an error.
+Let's first imagine we want to write some code that assumes that Enzo-E is configured with an ideal EOS and requires knowledge of the adiabatic index, ``gamma``.
+If Enzo-E is configured with a different type of EOS the codebase should terminate with an error.
 
 The following snippet shows a verbose approach for accomplishing this:
 
@@ -230,7 +230,7 @@ Now, let's break this down in slightly more detail.
 
   2. fetch a const reference to the :cpp:class:`!EnzoEOSVariant` instance held within the object pointed to by ``fluid_props``
 
-  3. fetch a const reference to the eos within ``eos_variant``, if it currently holds an :cpp:class:`!EnzoEOSIdeal`.
+  3. fetch a const reference to the eos within ``eos_variant`` if it currently holds an :cpp:class:`!EnzoEOSIdeal`.
      In other cases, the program aborts with an error.
 
 We can write a much more concise form of the above function:
@@ -246,12 +246,12 @@ We can write a much more concise form of the above function:
     // do work with gamma...
   }
 
-In both of these snippets, we make use of the method:
+In both of these snippets we make use of the method:
 
 .. cpp:function:: template<typename T> \
                   const T& EnzoEOSVariant::get() const
 
-  Accessor method that returns a reference to the contained EOS object, if ``this`` curently holds the EOS object of type ``T``.
+  Accessor method that returns a reference to the contained EOS object if ``this`` currently holds the EOS object of type ``T``.
   Otherwise, the program aborts with an error message.
   A non-``const``-qualified version of this method also exists.
 
@@ -285,7 +285,7 @@ This snippet makes use of
 
   Accessor method that returns a pointer to the contained EOS object, if ``this`` curently holds the EOS object of type ``T``.
   Otherwise, a ``nullptr`` is returned.
-  The program aborts with an error, if ``T`` is a type that :cpp:class:`!EnzoEOSVariant` is incapable of holding.
+  The program aborts with an error if ``T`` is a type that :cpp:class:`!EnzoEOSVariant` is incapable of holding.
   A non-``const``-qualified version of this method also exists.
 
   This is a counterpart of the ``std::get_if`` template function.
@@ -313,7 +313,7 @@ This last snappet employs the following method:
   Returns whether ``this`` currently holds the alternative EOS type, ``T``.
   The program aborts with an error, if ``T`` is a type that :cpp:class:`!EnzoEOSVariant` is incapable of holding.
 
-  This acts as a backports for one of C++17's ``std::holds_alternative``
+  This acts as a backport for one of C++17's ``std::holds_alternative``
 
 Using ``EnzoEOSVariant`` (General semantics)
 --------------------------------------------
@@ -328,10 +328,10 @@ If you call:
   EnzoEOSVariant my_eos_variant;
 
 Then the variable ``my_eos_variant`` holds a default-constructed instance of :cpp:class:`!EnzoEOSVariant`.
-At the time of writing this, this object will contain an instance of an :cpp:class:`!EnzoEOSIsothermal`, but that is an implementation detail that may change over time.
+At the time of writing this documentation this object will contain an instance of an :cpp:class:`!EnzoEOSIsothermal`, but that is an implementation detail that may change over time.
 
 Like :cpp:class:`!std::variant`, :cpp:class:`!EnzoEOSVariant` also has value-like semantics.
-This means that any time you perform a copy on an instance of :cpp:class:`!EnzoEOSVariant`, it's a deepcopy.
+This means that any time you perform a copy on an instance of :cpp:class:`!EnzoEOSVariant` it's a deepcopy.
 
 .. code-block:: c++
 
@@ -348,7 +348,7 @@ Examples might include:
 
   * mutating the attributes of a stored object within ``my_eos_variant`` (one could imagine mutating the value of gamma stored within a :cpp:class:`!EnzoEOSIdeal` instance)
 
-**As an aside**, the API of :cpp:class:`!EnzoPhysicsFluidProps` is designed so that the user can't accidentally mutate the PE's eos object (you can only mutate copies of that object).
+**As an aside**, the API of :cpp:class:`!EnzoPhysicsFluidProps` is designed so that the user can't accidentally mutate the PE's EOS object (you can only mutate copies of that object).
 
     .. _eos-timestep-example:
 
@@ -380,8 +380,8 @@ It assumes that the pressure field has been precaluated it will abort if the pro
                    double courant_factor)
    {
      // the program aborts with an error if Enzo-E was not configured with an
-     // ideal eos (as an aside, we are technically making a copy of the eos
-     // here - that should be totally fine sinces its just a memcpy)
+     // ideal EOS (as an aside, we are technically making a copy of the EOS
+     // here - that should be totally fine sinces it's just a memcpy)
      const EnzoEOSIdeal eos = enzo::fluid_props()->eos_variant().get<EnzoEOSIdeal>();
 
      const int mx = density.shape(2);
@@ -423,7 +423,7 @@ The method that is used to accomplish this is defined below, but it's most usefu
 .. cpp:function:: template<class Visitor> \
                   EnzoEOSVariant::visit(Visitor&& vis) const noexcept
 
-  invokes the callable visitor, ``vis`` by passing the EOS instance held by ``this``.
+  invokes the callable visitor, ``vis``, by passing the EOS instance held by ``this``.
   The visitor must accept any of the EOS variants passed as an argument, by value, and return an output with a consistent type for all of them.
 
   This acts like a very crude port of :cpp:func:`!std::visit` from C++17.
@@ -449,7 +449,7 @@ Now the obvious way to write this is:
      }
    }
 
-Now the above snippet is fine, but it could get tedious to go modify that code every time that we introduce a new type of EOS.
+The code snippet shown above is fine, but it could get tedious to have to modify that code every time that we introduce a new type of EOS.
 Instead we can write the following snippet, which accomplishes the same thing (but without the caveat):
 
 .. code-block:: c++
@@ -472,7 +472,7 @@ It can further simplify in C++14 to:
      return eos_variant_.visit([](auto eos) { return eos.is_barotropic(); });
    }
 
-One could imagine that this example generalizes to any case where all EOS classes provide a common interface (e.g. calling the ``name`` method or the ``debug_string`` method).
+One could imagine that this example generalizes to any case where all EOS classes provide a common interface (e.g., calling the ``name`` method or the ``debug_string`` method).
 
 More Sophisticated cases
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -480,7 +480,7 @@ One could also apply the visitor design pattern in more sophisticated cases, lik
 
 .. note::
 
-   It’s a little unclear how well this visit design pattern works with compute kernels.
+   It’s a little unclear how well this visitor design pattern works with compute kernels.
    At the end of the day, it may make sense to just drop the ``visit`` method.
    (The method's complexity may not be worthwhile)
 
