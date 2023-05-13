@@ -228,6 +228,10 @@ setup_test_serial(Music-411 InitialMusic/Music-411  input/InitialMusic/initial_m
 setup_test_serial(Music-141 InitialMusic/Music-141  input/InitialMusic/initial_music-141.in)
 setup_test_serial(Music-114 InitialMusic/Music-114  input/InitialMusic/initial_music-114.in)
 
+# Nested Initial
+setup_test_serial(Nested-Initial-serial Nested_ICs/serial/ input/Nested_ICs/nested_ics_serial.in)
+setup_test_parallel(Nested-Initial-parallel Nested_ICs/parallel input/Nested_ICs/nested_ics_parallel.in)
+
 # Output
 setup_test_parallel(Output-Stride-1 Output/Output-Stride-1  input/Output/output-stride-1.in)
 setup_test_parallel(Output-Stride-2 Output/Output-Stride-2  input/Output/output-stride-2.in)

@@ -590,6 +590,7 @@ void ParticleLoader::copy_data_remote(Index index_block, char * data) {
 }
 
 void ParticleLoader::copy_dataset_to_particle_(char * data) {
+  if (!block->is_leaf()) {return;}
   // Create particles and initialize them
   Particle particle = block->data()->particle();
 
