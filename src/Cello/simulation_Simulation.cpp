@@ -801,9 +801,11 @@ int Simulation::initial_block_count() throw() {
   int block_count = nx * ny * nz;
 
   // Count blocks below level 0.
-  while (nx > 0) {
-    nx >>= 1; ny >>= 1; nz >>= 1;
-    block_count += nx * ny * nz;
+  if (hierarchy_->min_level() < 0) {
+    while (nx > 0) {
+      nx >>= 1; ny >>= 1; nz >>= 1;
+      block_count += nx * ny * nz;
+    }
   }
 
   // Count blocks above level 0.
