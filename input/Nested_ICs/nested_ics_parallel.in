@@ -19,7 +19,7 @@
          min_refine = 8.000000000000000;
          type = "mass";
      };
-     max_initial_level = 3;
+     max_initial_level = 2;
      max_level = 4;
      min_level = -2; # negative minimum level is required for the multigrid step in the DD gravity solver
  }
@@ -79,7 +79,7 @@
      hdf5 {
          blocking = [ 2, 2, 2 ]; 
                                  
-         max_level = 3;
+         max_level = 2;
 
          format = "music";
 
@@ -88,8 +88,7 @@
 
          file_list = [ "FD0", "FVX0", "FVY0", "FVZ0", "PX0", "PY0", "PZ0", "PVX0", "PVY0", "PVZ0", 
                        "FD1", "FVX1", "FVY1", "FVZ1", "PX1", "PY1", "PZ1", "PVX1", "PVY1", "PVZ1",
-                       "FD2", "FVX2", "FVY2", "FVZ2", "PX2", "PY2", "PZ2", "PVX2", "PVY2", "PVZ2",
-                       "FD3", "FVX3", "FVY3", "FVZ3", "PX3", "PY3", "PZ3", "PVX3", "PVY3", "PVZ3" ];
+                       "FD2", "FVX2", "FVY2", "FVZ2", "PX2", "PY2", "PZ2", "PVX2", "PVY2", "PVZ2" ];
 
          # Level 0 data
          FD0 {
@@ -355,95 +354,6 @@
               type = "particle";
               level= 2;
          };
-         
-         
-         # Level 3 data
-         FD3 {
-              coords = "tzyx";
-              dataset = "GridDensity.3";
-              file = "input/Nested_ICs/ics32/GridDensity.3";
-              name = "density";
-              type = "field";
-              level= 3;
-         };
-         FVX3 {
-              coords = "tzyx";
-              dataset = "GridVelocities_x.3";
-              file = "input/Nested_ICs/ics32/GridVelocities_x.3";
-              name = "velocity_x";
-              type = "field";
-              level= 3;
-         };
-         FVY3 {
-              coords = "tzyx";
-              dataset = "GridVelocities_y.3";
-              file = "input/Nested_ICs/ics32/GridVelocities_y.3";
-              name = "velocity_y";
-              type = "field";
-              level= 3;
-         };
-         FVZ3 {
-              coords = "tzyx";
-              dataset = "GridVelocities_z.3";
-              file = "input/Nested_ICs/ics32/GridVelocities_z.3";
-              name = "velocity_z";
-              type = "field";
-              level= 3;
-         };
-         PVX3 {
-              attribute = "vx";
-              coords = "tzyx";
-              dataset = "ParticleVelocities_x.3";
-              file = "input/Nested_ICs/ics32/ParticleVelocities_x.3";
-              name = "dark";
-              type = "particle";
-              level= 3;
-         };
-         PVY3 {
-              attribute = "vy";
-              coords = "tzyx";
-              dataset = "ParticleVelocities_y.3";
-              file = "input/Nested_ICs/ics32/ParticleVelocities_y.3";
-              name = "dark";
-              type = "particle";
-              level= 3;
-         };
-         PVZ3 {
-              attribute = "vz";
-              coords = "tzyx";
-              dataset = "ParticleVelocities_z.3";
-              file = "input/Nested_ICs/ics32/ParticleVelocities_z.3";
-              name = "dark";
-              type = "particle";
-              level= 3;
-         };
-         PX3 {
-              attribute = "x";
-              coords = "tzyx";
-              dataset = "ParticleDisplacements_x.3";
-              file = "input/Nested_ICs/ics32/ParticleDisplacements_x.3";
-              name = "dark";
-              type = "particle";
-              level= 3;
-         };
-         PY3 {
-              attribute = "y";
-              coords = "tzyx";
-              dataset = "ParticleDisplacements_y.3";
-              file = "input/Nested_ICs/ics32/ParticleDisplacements_y.3";
-              name = "dark";
-              type = "particle";
-              level= 3;
-         };
-         PZ3 {
-              attribute = "z";
-              coords = "tzyx";
-              dataset = "ParticleDisplacements_z.3";
-              file = "input/Nested_ICs/ics32/ParticleDisplacements_z.3";
-              name = "dark";
-              type = "particle";
-              level= 3;
-         };
 
      };
 
@@ -461,9 +371,6 @@
      
      level_2_lower = [ 3, 3, 3 ];
      level_2_upper = [ 5, 5, 5 ];
-     
-     level_3_lower = [ 7, 7, 7 ];
-     level_3_upper = [ 8, 8, 8 ];
  }
 
 #--------------------
@@ -627,7 +534,8 @@
                          "lifetime",       "double", 
                          "metal_fraction", "double", 
                          "number_of_sn",   "double", 
-                         "id",             "int64" 
+                         "id",             "int64",
+                         "luminosity",     "double"
                        ];
          group_list = [ "is_gravitating" ];
          position = [ "x", "y", "z" ];
