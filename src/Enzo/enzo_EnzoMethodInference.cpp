@@ -1156,7 +1156,7 @@ void EnzoLevelArray::apply_inference()
       bool print_fields = false;
       for (int i=0; i<nix_*niy_*niz_; i++) mask[i] = false;
 
-      int N_edge = 4; // number of edge layers to ignore for evaluating S2 predictions
+      int N_edge = 0; // number of edge layers to ignore for evaluating S2 predictions
       double pstar_i, pnostar_i, num_0_i, num_1_i;
       for (int iz=N_edge; iz<niz_ - N_edge; iz++){
        for (int iy=N_edge; iy<niy_ - N_edge; iy++){
