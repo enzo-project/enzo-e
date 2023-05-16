@@ -26,7 +26,7 @@ enzo_float EnzoPhysicsFluidProps::gamma() const noexcept {
   //
   //   std::string name = T::name();
   //   ERROR1("EnzoPhysicsFluidProps::gamma()",
-  //          "can't return gamma for eos of type \"%s\". Either that type "
+  //          "can't return gamma for EOS of type \"%s\". Either that type "
   //          "doesn't support it OR it's a new type & this function has not "
   //          "yet been updated to support it.", name.c_str());
   //   }
@@ -38,7 +38,7 @@ enzo_float EnzoPhysicsFluidProps::gamma() const noexcept {
 
   std::string name = eos_variant_.visit(NameVisitor());
   ERROR1("EnzoPhysicsFluidProps::gamma()",
-         "can't return gamma for eos of type \"%s\". Either that type "
+         "can't return gamma for EOS of type \"%s\". Either that type "
          "doesn't support it OR it's a new type & this function has not "
          "yet been updated to support it.", name.c_str());
 }
@@ -67,7 +67,7 @@ void EnzoPhysicsFluidProps::primitive_from_integration
 {
 
   ASSERT("EnzoPhysicsFluidProps::primitive_from_integration",
-         "the current implementation assumes a non-barotropic eos",
+         "the current implementation assumes a non-barotropic EOS",
          !this->has_barotropic_eos());
 
   // load shape ahead of time and declare them const for optimization purposes

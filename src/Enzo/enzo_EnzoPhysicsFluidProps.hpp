@@ -67,7 +67,7 @@ public: // interface
   { return eos_variant_; }
 
   /// Utility method that tries to retrieve gamma from the stored eos_variant.
-  /// When the stored eos variant doesn't contain a value of gamma, the program
+  /// When the stored EOS variant doesn't contain a value of gamma, the program
   /// aborts with an error.
   ///
   /// If you want to provide alternate behavior for the case in which gamma

@@ -563,8 +563,8 @@ short each kernel:
     unique array indices). See :ref:`EnzoRiemannLUT-section` for
     more details.
 
-  * Specifies the expected type of the equation of state, by specifying
-    the expected the corresponding EOS class. Follow
+  * Specifies the expected type of the equation of state by specifying
+    the expected corresponding EOS class. Follow
     :ref:`this link <EOSClassDescription-section>` for more details
     about EOS Struct objects.
 
