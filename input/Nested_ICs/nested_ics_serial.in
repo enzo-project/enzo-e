@@ -414,14 +414,14 @@
 
      dark {
          attributes = [ 
-                        "x",  "double", "y",  "double", "z",  "double", 
-                        "vx", "double", "vy", "double", "vz", "double", 
-                        "ax", "double", "ay", "double", "az", "double", 
-                        "is_copy", "double", 
-                        "mass", "double" 
+                        "x",  "default", "y",  "default", "z",  "default", 
+                        "vx", "default", "vy", "default", "vz", "default", 
+                        "ax", "default", "ay", "default", "az", "default", 
+                        "is_copy", "default", 
+                        "mass", "default" 
                       ];
 
-         constants = [ "root_level_mass", "double", 0.8426229508200000 / (32.0*32.0*32.0) ];
+         constants = [ "root_level_mass", "default", 0.8426229508200000 / (32.0*32.0*32.0) ];
          group_list = [ "is_gravitating" ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
@@ -429,18 +429,18 @@
      
      star {
          attributes = [ 
-                         "x",  "double", "y",  "double", "z",  "double", 
-                         "vx", "double", "vy", "double", "vz", "double", 
-                         "ax", "double", "ay", "double", "az", "double", 
-                         "is_copy",        "double", 
-                         "mass",           "double", 
-                         "creation_time",  "double", 
-                         "creation_level", "double", 
-                         "lifetime",       "double", 
-                         "metal_fraction", "double", 
-                         "number_of_sn",   "double", 
+                         "x",  "default", "y",  "default", "z",  "default", 
+                         "vx", "default", "vy", "default", "vz", "default", 
+                         "ax", "default", "ay", "default", "az", "default", 
+                         "is_copy",        "default", 
+                         "mass",           "default", 
+                         "creation_time",  "default", 
+                         "creation_level", "default", 
+                         "lifetime",       "default", 
+                         "metal_fraction", "default", 
+                         "number_of_sn",   "default", 
                          "id",             "int64",
-                         "luminosity",     "double"
+                         "luminosity",     "default"
                        ];
          group_list = [ "is_gravitating" ];
          position = [ "x", "y", "z" ];
