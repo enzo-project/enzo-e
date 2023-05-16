@@ -225,7 +225,7 @@ The following snippet shows a verbose approach for accomplishing this:
 
 Now, let's break this down in slightly more detail.
 
-  1. As you're probably aware, :cpp:func:`!enzo::fluid_props()` returns a pointer to the instance of the :cpp:class:`!EnzoPhysicsFluidProps` that is configured for the Processing Element (PE).
+  1. :cpp:func:`!enzo::fluid_props()` returns a pointer to the instance of the :cpp:class:`!EnzoPhysicsFluidProps` that is configured for the Processing Element (PE).
      This pointer can't be a ``nullptr`` (if it is, the function will abort with an error).
 
   2. fetch a const reference to the :cpp:class:`!EnzoEOSVariant` instance held within the object pointed to by ``fluid_props``
@@ -366,8 +366,9 @@ In the process, they may need to compute:
 
 where :math:`C_0` is the courant factor (a constant between 0 and 1) and :math:`\Delta x,\, \Delta y,\, \Delta z` specify cell widths.
 
-The following code snippet shows a somewhat simplified example of how you might do this.
-It assumes that the pressure field has been precaluated it will abort if the program does not use an ideal eos:
+The following code snippet shows a somewhat simplified example of how you might perform this calculation.
+This snippet will abort with an error if each Processing Element's global :cpp:class:`!EnzoPhysicsFluidProps` instance was configured to hold anything other than an ideal EOS.
+
 
 .. code-block:: c++
 
@@ -389,9 +390,9 @@ It assumes that the pressure field has been precaluated it will abort if the pro
      const int mz = density.shape(0);
 
      double dt = std::numeric_limits<double>::max();
-     for (int iz; iz < mz; iz++) {
-       for (int iy; iy < my; iy++) {
-         for (int ix; ix < mx; ix++) {
+     for (int iz = 0; iz < mz; iz++) {
+       for (int iy = 0; iy < my; iy++) {
+         for (int ix = 0; ix < mx; ix++) {
 
            double cs = (double) eos.sound_speed(density(iz,iy,ix),
                                                 pressure(iz,iy,ix));
