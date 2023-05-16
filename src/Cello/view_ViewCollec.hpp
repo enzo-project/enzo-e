@@ -229,9 +229,17 @@ private: // helper methods:
   // used in destructor and to help switch the active member of the enum
   // need to explicitly call destructor because we use placement new
   void dealloc_active_member_() noexcept{
+    // note, we need to use the full qualified names of destructors to avoid
+    // errors with the nvidia compiler
     switch (tag_){
-      case Tag::CONTIG:     { single_arr_.~SingleAddressViewCollec_(); break; }
-      case Tag::ARR_OF_PTR: { arr_of_ptr_.~ArrOfPtrsViewCollec_(); break; }
+      case Tag::CONTIG: {
+        single_arr_.detail::SingleAddressViewCollec_<T>::~SingleAddressViewCollec_();
+        break;
+      }
+      case Tag::ARR_OF_PTR: {
+        arr_of_ptr_.detail::ArrOfPtrsViewCollec_<T>::~ArrOfPtrsViewCollec_();
+        break;
+      }
     }
   }
 

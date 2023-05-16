@@ -346,68 +346,64 @@ std::vector<Index> Adapt::index_neighbors() const
 
 //----------------------------------------------------------------------
 
-void Adapt::print(std::string message, const Block * block) const
+void Adapt::print(std::string message, const Block * block, FILE * fp) const
 {
-  char prefix[255];
-  if (block) {
-    sprintf (prefix,"%d DEBUG_ADAPT %s %s %p",CkMyPe(),block->name().c_str(),message.c_str(),(void*)this);
-  } else {
-    sprintf (prefix,"DEBUG_ADAPT %s",message.c_str());
-  }
-  CkPrintf ("DEBUG_ADAPT face_level curr: ");
-  for (int i=0; i<face_level_[0].size(); i++) {
-    CkPrintf ("%d ", face_level_[0].at(i));
-  }
-  CkPrintf ("\n");
-  CkPrintf ("DEBUG_ADAPT face_level next: ");
-  for (int i=0; i<face_level_[1].size(); i++) {
-    CkPrintf ("%d ", face_level_[1].at(i));
-  }
-  CkPrintf ("\n");
-  CkPrintf ("DEBUG_ADAPT periodicity %d %d %d\n",
-            periodicity_[0],
-            periodicity_[1],
-            periodicity_[2]);
-  for (int i=0; i<face_level_[2].size(); i++) {
-    if (i%27==0) CkPrintf ("\nDEBUG_ADAPT face_level last: ");
-    CkPrintf ("%2d ", face_level_[2].at(i));
-  }
-  CkPrintf ("\n");
-  CkPrintf ("%s (%d <= %d <= %d) C%d\n",
-            prefix,
-            self_.level_min_,
-            self_.level_now_,
-            self_.level_max_,
-            self_.can_coarsen_?1:0);
-
-  const int n = num_neighbors();
-  CkPrintf ("%s    num_neighbors %d\n",prefix,n);
-  for (int i=0; i<n; i++) {
-    const LevelInfo & info = neighbor_list_.at(i);
-    int il3[3];
-    info.index_.index_level(il3,max_level_);
-    int level = info.index_.level();
-    char neighbor_block[80];
-    if (block) {
-      sprintf (neighbor_block,"%s",block->name(info.index_).c_str());
-    } else {
-      int it3[3],ia3[3];
-      info.index_.array(ia3,ia3+1,ia3+2);
-      info.index_.tree(it3,it3+1,it3+2);
-      sprintf (neighbor_block,"%X:%X %X:%X,%X:%X",
-               ia3[0],it3[0],
-               ia3[1],it3[1],
-               ia3[2],it3[2]);
+  if (fp != nullptr) {
+    std::string prefix = std::string("DEBUG_ADAPT ")+message;
+    fprintf (fp,"%s face_level curr: ",prefix.c_str());
+    for (int i=0; i<face_level_[0].size(); i++) {
+      fprintf (fp,"%d ", face_level_[0].at(i));
     }
-    const int l = 1 << (max_level_ - level);
-    CkPrintf ("%s   %d %s [%d %d] S%d C%d\n",
-              prefix,
-              i,neighbor_block,
-              info.level_min_,
-              info.level_max_,
-              info.is_sibling_?1:0,
-              info.can_coarsen_?1:0);
-    fflush(stdout);
+    fprintf (fp,"\n");
+    fprintf (fp,"%s face_level next: ",prefix.c_str());
+    for (int i=0; i<face_level_[1].size(); i++) {
+      fprintf (fp,"%d ", face_level_[1].at(i));
+    }
+    fprintf (fp,"\n");
+    fprintf (fp,"%s periodicity %d %d %d\n",
+              prefix.c_str(),
+              periodicity_[0],
+              periodicity_[1],
+              periodicity_[2]);
+
+    for (int i=0; i<face_level_[2].size(); i++) {
+      if (i%27==0) fprintf (fp,"\n%s face_level last: ",prefix.c_str());
+      fprintf (fp,"%2d ", face_level_[2].at(i));
+    }
+    fprintf (fp,"\n");
+    fprintf (fp,"%s (%d <= %d <= %d) C%d\n",prefix.c_str(),
+              self_.level_min_,
+              self_.level_now_,
+              self_.level_max_,
+              self_.can_coarsen_?1:0);
+
+    const int n = num_neighbors();
+    fprintf (fp,"%s num_neighbors %d\n",prefix.c_str(),n);
+    for (int i=0; i<n; i++) {
+      const LevelInfo & info = neighbor_list_.at(i);
+      int il3[3];
+      info.index_.index_level(il3,max_level_);
+      int level = info.index_.level();
+      char neighbor_block[80];
+      if (block) {
+        sprintf (neighbor_block,"%s",block->name(info.index_).c_str());
+      } else {
+        int it3[3],ia3[3];
+        info.index_.array(ia3,ia3+1,ia3+2);
+        info.index_.tree(it3,it3+1,it3+2);
+        sprintf (neighbor_block,"%X:%X %X:%X,%X:%X",
+                 ia3[0],it3[0],
+                 ia3[1],it3[1],
+                 ia3[2],it3[2]);
+      }
+      const int l = 1 << (max_level_ - level);
+      fprintf (fp,"%s   %d %s [%d %d] S%d C%d\n",
+                prefix.c_str(),i,neighbor_block,
+                info.level_min_,
+                info.level_max_,
+                info.is_sibling_?1:0,
+                info.can_coarsen_?1:0);
+    }
   }
 }
 

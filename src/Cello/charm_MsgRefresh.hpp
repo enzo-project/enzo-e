@@ -48,7 +48,7 @@ public: // interface
   /// Update the Data with data stored in this message
   void update (Data * data);
 
-  void print(const char * message);
+  void print(const char * message, FILE * fp=nullptr);
   
 public: // static methods
 

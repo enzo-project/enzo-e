@@ -389,7 +389,7 @@ private: // attributes
   std::vector<int> temporary_size_;
 
   /// Array of temporary fields
-  std::vector<char *> array_temporary_;
+  std::vector< std::vector<char> > array_temporary_;
 
   /// Offsets into values_ of the first element of each field
   std::vector<int> offsets_;
@@ -414,7 +414,7 @@ private: // attributes
   std::vector<int> coarse_dimensions_;
 
   /// Coarse fields with one ghost zone for padded Prolong
-  std::vector<char *> array_coarse_;
+  std::vector< std::vector<char> > array_coarse_;
 
 };   
 

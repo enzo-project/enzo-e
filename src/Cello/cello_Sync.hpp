@@ -74,6 +74,12 @@ public:
   inline void set_state (RefreshState state)
   { state_ = state; }
 
+  inline void print(std::string message, FILE * fp_in = nullptr) const {
+    FILE * fp = fp_in ? fp_in : stdout;
+    fprintf (fp,"DEBUG_SYNC %p %s %d/%d done %d\n",
+             (void *)this,message.c_str(),index_curr_,index_stop_,is_done_?1:0);
+  }
+
 private: // methods
 
   /// Increment counter
