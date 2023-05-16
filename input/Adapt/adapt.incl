@@ -55,7 +55,7 @@ Output {
        field_list = ["total_energy"];
        type     = "image";
        include "input/Schedule/schedule_time_0.02.incl"
-       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+       colormap = ["white", "red", "#B04000", "yellow", "lime", "blue", "#80ff80" ];
     }
 
     vx {
@@ -63,7 +63,7 @@ Output {
        field_list = ["velocity_x"];
        type     = "image";
        include "input/Schedule/schedule_time_0.02.incl"
-       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+       colormap = ["white", "red", "#B04000", "yellow", "lime", "blue", "#80ff80" ];
     }
 
     vy {
@@ -71,7 +71,7 @@ Output {
        field_list = ["velocity_y"];
        type     = "image";
        include "input/Schedule/schedule_time_0.02.incl"
-       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+       colormap = ["white", "red", "#B04000", "yellow", "lime", "blue", "#80ff80" ];
     }
 
     mesh {

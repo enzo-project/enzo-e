@@ -71,6 +71,13 @@ function(addCelloLib LIBNAME EXTRASRCS)
   # Add static library based on glob for the library name and including
   # (potentially) excessive dependencies.
 
+  # Get the list of source files
+  # - we do this using GLOB patterns. This approach is not recommended by the
+  #   authors of CMake (their recommendation is to explicitly list all files
+  #   that must be compiled).
+  # - Some of the disadvantages of this approach are mitigated by inclusion of
+  #   the CONFIGURE_DEPENDS flag.
+  # - See the CMake Primer section of the documentation for more details
   file(GLOB SRC_FILES ${LIBNAME}*.cpp *{LIBNAME}*.hpp)
   add_library(${LIBNAME} STATIC ${SRC_FILES} ${EXTRASRCS})
   setupCelloLibHelper(${LIBNAME})
@@ -126,18 +133,18 @@ target_link_libraries(parallel
 #     file of the target (and not one of the target's headers), we can then
 #     declare the dependency to be PRIVATE
 #
-# Note: Some components seem include the headers of some unnecessary dependent
-# targets (e.g. does the compute component NEED to directly depend on the disk
-# component?) We could definitely remove some of these dependencies (and rely
-# upon on CMake's ability to handle such transitive dependencies for us). This
-# might help speed up incremental re-compilation
+# Note: Some components seem to include the headers of some unnecessary
+# dependent targets (e.g. does the compute component NEED to directly depend on
+# the disk component?). We could definitely remove some of these dependencies
+# (and rely upon on CMake's ability to handle such transitive dependencies for
+# us). This might help speed up incremental re-compilation
 
 # first, we define 2 targets that have "special names"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # These names were chosen to minimize confusion (we have other targets that
 # share similar names)
 
-# note: in the near future, we may a separate target called something like
+# note: in the near future, we may make a separate target called something like
 # CELLO_COMBINED to represent the complete library that is composed of the
 # components in this directory
 file(GLOB CELLO_COMP_SRC_FILES cello*.cpp *cello*.hpp)

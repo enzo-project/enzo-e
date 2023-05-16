@@ -18,4 +18,5 @@ refinement criteria, etc.
    array
    hydro_infrastructure
    eos-fluidprops
+   cmake_primer
    writing-docs
