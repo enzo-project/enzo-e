@@ -51,10 +51,7 @@ Output {
         # image_block_size  = 1; # DEPRECIATED
         image_size = [1921,1081];
 	include "input/schedule_cycle_1.incl"
-        colormap = [1.00, 1.00, 1.00,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00, 
-                    0.00, 0.00, 1.00];
+        colormap = ["white", "lime", "red", "blue"];
         name = ["prac-mesh-%06d.png","cycle"];
         
       }

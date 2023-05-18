@@ -893,7 +893,7 @@ this class as lightweight as possible to encourage the compiler to
 make similar optimizations. The declaration of ``KernelConfig`` is
 reproduced below:
 
-.. literalinclude:: ../../../src/Enzo/EnzoRiemann/EnzoRiemannImpl.hpp
+.. literalinclude:: ../../../src/Enzo/hydro-mhd/riemann/EnzoRiemannImpl.hpp
    :language: c++
    :start-after: SPHINX-SNIPPET-KERNELCONFIG-START-INCLUDE
    :end-before: SPHINX-SNIPPET-KERNELCONFIG-END-INCLUDE

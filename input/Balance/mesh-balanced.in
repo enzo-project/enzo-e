@@ -59,10 +59,7 @@ Output {
 #	image_ghost  = true;
         field_list = ["density"];
         include "input/Schedule/schedule_cycle_10.incl"
-        colormap = [0.0, 0.0, 0.0,  
-                    1.0, 0.0, 0.0, 
-                    1.0, 1.0, 0.0, 
-                    1.0, 1.0, 1.0];
+        colormap = ["black", "red", "yellow", "white"];
         name = ["mesh-balanced-de.%03d.png","cycle"];
       }
       te {
@@ -72,10 +69,7 @@ Output {
 #	image_ghost  = true;
         field_list = ["total_energy"];
         include "input/Schedule/schedule_cycle_10.incl"
-        colormap = [0.0, 0.0, 0.0,  
-                    1.0, 0.0, 0.0, 
-                    1.0, 1.0, 0.0, 
-                    1.0, 1.0, 1.0];
+        colormap = ["black", "red", "yellow", "white"];
         name = ["mesh-balanced-te.%03d.png","cycle"];
       }
       vx {
@@ -85,9 +79,7 @@ Output {
 #	image_ghost  = true;
         field_list = ["velocity_x"];
         include "input/Schedule/schedule_cycle_10.incl"
-        colormap = [1.0, 0.0, 0.0,  
-                    0.0, 0.0, 0.0,
-                    0.0, 0.0, 1.0];
+        colormap = ["red", "black", "blue"];
         name = ["mesh-balanced-vx.%03d.png","cycle"];
       }
       vy {
@@ -97,9 +89,7 @@ Output {
 #	image_ghost  = true;
         field_list = ["velocity_y"];
         include "input/Schedule/schedule_cycle_10.incl"
-        colormap = [1.0, 0.0, 0.0,  
-                    0.0, 0.0, 0.0,
-                    0.0, 0.0, 1.0];
+        colormap = ["red", "black", "blue"];
         name = ["mesh-balanced-vy.%03d.png","cycle"];
       }
       mesh {
@@ -113,16 +103,9 @@ Output {
         image_max = 6.000000000000000;
         image_min = 0.000000000000000;
         include "input/Schedule/schedule_cycle_10.incl"
-        colormap = [1.0, 1.0, 1.0,  
-                    1.0, 1.0, 0.0,
-		    0.0, 1.0, 1.0,
-		    1.0, 0.0, 1.0,
-		    1.0, 0.0, 0.0,
-		    0.0, 1.0, 0.0,
-		    0.0, 0.0, 1.0];
-
+        colormap = ["white", "yellow", "cyan", "magenta",
+                    "red", "lime", "blue" ];
         name = ["mesh-balanced-mesh.%03d.png","cycle"];
-        
       }
 }
 
