@@ -23,12 +23,6 @@
 //----------------------------------------------------------------------
 
 #include "view_CelloView.hpp"
-
-// for backwards compatability, we define CelloArray as an alias for CelloView
-// (new code should avoid using this alias)
-template<typename T, std::size_t D>
-using CelloArray = CelloView<T, D>;
-
 #include "view_ViewCollec.hpp"
 #include "view_StringIndRdOnlyMap.hpp"
 
