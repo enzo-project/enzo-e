@@ -1,13 +1,16 @@
 
 /*
-  Styles implementing markup in roles.incl used mainly in param files 
+  Styles implementing markup in roles.incl used mainly in param files
+
+  We also define some styles used by the "par" extensions because we want them
+  to share definitions with some of the roles
 */
-.p{
+.p, .param-style{
   font-family: "Courier";
   font-weight: bold; 
   color: #000066;
 }
-.g{
+.g, .param-style-var-comp{
   font-weight: bold;
   font-style: italic;
   color: #660099;
@@ -16,7 +19,7 @@
   font-style: italic;
 /*  color: #006600; */
 }
-.t{
+.t, .param-type-style{
   color: #660000;
   font-family: courier;
   font-weight: bold;
