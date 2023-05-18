@@ -105,7 +105,7 @@ The introduction of this formalism has 2 key benefits:
 
   1. Simplifies calculation of the required ghost depth.
 
-  2. When used alongside ``CelloArray``, it drastically simplifies the
+  2. When used alongside ``CelloView``, it drastically simplifies the
      determination of which indices to iterate over. The
      ``EnzoFieldArrayFactory`` can take the stale depth as an argument
      in its constructor and then all arrays that an instance builds
@@ -243,7 +243,7 @@ The basic unit that get's operated on by these operation classes are
 instances of the ``EnzoEFltArrayMap`` class. As the name may suggest,
 these classes serve as a map/dictionary of instances of
 ``EFlt3DArray`` (or equivalently, instances of
-``CelloArray<enzo_float,3>``). For more details about how to use
+``CelloView<enzo_float,3>``). For more details about how to use
 ``EnzoEFltArrayMap``, see :ref:`EnzoEFltArrayMap-Description`
 
 In the context of this toolkit, the keys of an ``EnzoEFltArrayMap``
@@ -402,7 +402,7 @@ energy. If the equation of state is barotropic, this should do nothing.
 .. code-block:: c++
 
    void pressure_from_integration(const EnzoEFltArrayMap &integration_map,
-                                  const CelloArray<enzo_float, 3> &pressure,
+                                  const CelloView<enzo_float, 3> &pressure,
                                   int stale_depth,
                                   bool ignore_grackle = false);
 
@@ -617,7 +617,7 @@ The main interface function of ``EnzoRiemann`` is:
               const EnzoEFltArrayMap &prim_map_r,
               EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
               int stale_depth, const str_vec_t &passive_list,
-              const CelloArray<enzo_float,3> * const interface_velocity) const;
+              const CelloView<enzo_float,3> * const interface_velocity) const;
 
 In this function, the ``prim_map_l`` and ``prim_map_r`` arguments are
 references to the ``EnzoEFltArrayMap`` objects holding the arrays of

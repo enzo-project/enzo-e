@@ -375,7 +375,7 @@ namespace enzo_riemann_utils{
   static void solve_passive_advection
   (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
    EnzoEFltArrayMap &flux_map,
-   const CelloArray<const enzo_float,3> &density_flux,
+   const CelloView<const enzo_float,3> &density_flux,
    const int stale_depth, const str_vec_t &passive_list) noexcept
   {
     const std::size_t num_keys = passive_list.size();
@@ -384,10 +384,10 @@ namespace enzo_riemann_utils{
     // This was essentially transcribed from hydro_rk in Enzo:
 
     // load array of fields
-    CelloArray<const enzo_float, 3> *wl_arrays =
-      new CelloArray<const enzo_float, 3>[num_keys];
-    CelloArray<const enzo_float, 3> *wr_arrays =
-      new CelloArray<const enzo_float, 3>[num_keys];
+    CelloView<const enzo_float, 3> *wl_arrays =
+      new CelloView<const enzo_float, 3>[num_keys];
+    CelloView<const enzo_float, 3> *wr_arrays =
+      new CelloView<const enzo_float, 3>[num_keys];
     EFlt3DArray *flux_arrays = new EFlt3DArray[num_keys];
 
     for (std::size_t ind=0; ind<num_keys; ind++){
@@ -442,8 +442,8 @@ namespace enzo_riemann_utils{
     /// If the scratch-space arrays have not been pre-allocated, they will be
     /// allocated by this method
     void get_arrays(int mx, int my, int mz,
-                    CelloArray<enzo_float,3>& internal_energy_flux,
-                    CelloArray<enzo_float,3>& velocity_i_bar_array) noexcept
+                    CelloView<enzo_float,3>& internal_energy_flux,
+                    CelloView<enzo_float,3>& velocity_i_bar_array) noexcept
     {
       if (internal_energy_flux_.is_null()){
         // make the scratch space bigger than necessary (since the shape will
@@ -468,8 +468,8 @@ namespace enzo_riemann_utils{
 
   private: // attributes
 
-    CelloArray<enzo_float,3> internal_energy_flux_;
-    CelloArray<enzo_float,3> velocity_i_bar_array_;
+    CelloView<enzo_float,3> internal_energy_flux_;
+    CelloView<enzo_float,3> velocity_i_bar_array_;
   };
 
   //----------------------------------------------------------------------
@@ -481,10 +481,10 @@ namespace enzo_riemann_utils{
   /// data, even if we don't technically need it, in order to avoid branching
   static void prep_dual_energy_arrays_
   (bool calculate_internal_energy_flux, EnzoEFltArrayMap &flux_map,
-   const CelloArray<enzo_float,3> * const interface_velocity,
+   const CelloView<enzo_float,3> * const interface_velocity,
    ScratchArrays_ * ptr,
-   CelloArray<enzo_float,3>& internal_energy_flux,
-   CelloArray<enzo_float,3>& velocity_i_bar_array)
+   CelloView<enzo_float,3>& internal_energy_flux,
+   CelloView<enzo_float,3>& velocity_i_bar_array)
   {
     if ((calculate_internal_energy_flux) && (interface_velocity == nullptr)){
       ERROR("EnzoRiemannImpl2::solve",

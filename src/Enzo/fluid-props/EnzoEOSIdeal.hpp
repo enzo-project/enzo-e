@@ -57,7 +57,7 @@ public: // interface
 
   void pressure_from_integration
   (const EnzoEFltArrayMap &integration_map,
-   const CelloArray<enzo_float, 3> &pressure,
+   const CelloView<enzo_float, 3> &pressure,
    const int stale_depth, const bool ignore_grackle) const;
 
   inline enzo_float get_density_floor() const { return density_floor_; }

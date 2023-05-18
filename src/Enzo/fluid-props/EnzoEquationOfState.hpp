@@ -125,7 +125,7 @@ public: // interface
   /// This nominally wraps EnzoComputePressure.
   virtual void pressure_from_integration
   (const EnzoEFltArrayMap &integration_map,
-   const CelloArray<enzo_float, 3> &pressure,
+   const CelloView<enzo_float, 3> &pressure,
    const int stale_depth, const bool ignore_grackle = false) const = 0;
 
   /// returns the density floor

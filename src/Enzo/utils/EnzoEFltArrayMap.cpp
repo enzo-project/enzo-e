@@ -73,13 +73,13 @@ bool EnzoEFltArrayMap::validate_key_order(const std::vector<std::string> &ref,
 
 //----------------------------------------------------------------------
 
-CelloArray<enzo_float, 3> EnzoEFltArrayMap::at_(const std::string& key)
+CelloView<enzo_float, 3> EnzoEFltArrayMap::at_(const std::string& key)
   const noexcept
 { return arrays_[str_index_map_.at(key)]; }
 
 //----------------------------------------------------------------------
 
-CelloArray<enzo_float, 3> EnzoEFltArrayMap::at_(const std::size_t index)
+CelloView<enzo_float, 3> EnzoEFltArrayMap::at_(const std::size_t index)
   const noexcept
 {
   ASSERT("EnzoEFltArrayMap::at_",
@@ -102,12 +102,12 @@ EFlt3DArray exclude_stale_cells_(const EFlt3DArray &arr, int stale_depth)
 }
 
 
-CelloArray<enzo_float, 3> EnzoEFltArrayMap::get_(const std::string& key,
+CelloView<enzo_float, 3> EnzoEFltArrayMap::get_(const std::string& key,
                                                  int stale_depth) const noexcept
 {
   ASSERT("EnzoEFltArrayMap::get_", "stale_depth must be >= 0",
          stale_depth >= 0);
-  CelloArray<enzo_float, 3> arr = this->at_(key);
+  CelloView<enzo_float, 3> arr = this->at_(key);
   return (stale_depth > 0) ? exclude_stale_cells_(arr,stale_depth) : arr;
 }
 
@@ -174,7 +174,7 @@ void EnzoEFltArrayMap::validate_invariants_() const noexcept
   // - StringIndRdOnlyMap implicitly enforces that there aren't any duplicate
   //   keys, and that a unique key is associated with each integer index from 0
   //   through (str_index_map_.size() - 1)
-  // - CArrCollec enforces that all arrays have the same shape
+  // - ViewCollec enforces that all arrays have the same shape
   ASSERT("EnzoEFltArrayMap::validate_invariants_",
          "str_index_map_ and arrays_ don't have the same length",
          arrays_.size() == str_index_map_.size());

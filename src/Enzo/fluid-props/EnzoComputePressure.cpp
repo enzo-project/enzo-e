@@ -74,13 +74,13 @@ void EnzoComputePressure::compute_(Block * block,
 #endif
                                    )
 {
-  // make a CelloArray that wraps p
+  // make a CelloView that wraps p
   Field field = block->data()->field();
   int gx,gy,gz;
   field.ghost_depth (field.field_id("density"),&gx,&gy,&gz);
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);
-  CelloArray<enzo_float,3> p_arr(p, nz + 2*gz, ny + 2*gy, nx + 2*gx);
+  CelloView<enzo_float,3> p_arr(p, nz + 2*gz, ny + 2*gy, nx + 2*gx);
 
   EnzoFieldAdaptor f_adaptor(block, i_hist_);
 
@@ -130,7 +130,7 @@ namespace { // local function
 
 void EnzoComputePressure::compute_pressure
 (const EnzoFieldAdaptor& fadaptor,
- const CelloArray<enzo_float, 3>& p,
+ const CelloView<enzo_float, 3>& p,
  bool mhd,
  bool dual_energy,
  double gamma,
@@ -168,7 +168,7 @@ void EnzoComputePressure::compute_pressure
 #endif
   } else {
 
-    using RdOnlyEFltArr = CelloArray<const enzo_float, 3>;
+    using RdOnlyEFltArr = CelloView<const enzo_float, 3>;
 
     const RdOnlyEFltArr d = fadaptor.view("density");
 

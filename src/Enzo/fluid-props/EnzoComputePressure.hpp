@@ -96,7 +96,7 @@ public: // interface
   /// this scenario (if the simulation does not use `EnzoMethodGrackle`, then
   /// the value of `ignore_grackle` is meaningless).
   static void compute_pressure(const EnzoFieldAdaptor& fadaptor,
-                               const CelloArray<enzo_float, 3>& p,
+                               const CelloView<enzo_float, 3>& p,
                                bool mhd, bool dual_energy, double gamma,
                                int stale_depth = 0,
                                bool ignore_grackle = false

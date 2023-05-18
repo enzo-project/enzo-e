@@ -124,10 +124,10 @@ void EnzoIntegrationQuanUpdate::accumulate_flux_component
 
       // define:  fl(k,j,i)        -> flux(k, j, i+1/2)
       //          fr(k,j,i)        -> flux(k, j, i+3/2)
-      const CelloArray<const enzo_float,3> flux = flux_map.get(key,stale_depth);
-      const CelloArray<const enzo_float,3> fl
+      const CelloView<const enzo_float,3> flux = flux_map.get(key,stale_depth);
+      const CelloView<const enzo_float,3> fl
         = coord.get_subarray(flux, full_ax, full_ax, CSlice(0, -1));
-      const CelloArray<const enzo_float,3> fr
+      const CelloView<const enzo_float,3> fr
         = coord.get_subarray(flux, full_ax, full_ax, CSlice(1, nullptr));
 
       for (int iz=0; iz<dU_center.shape(0); iz++) {
@@ -162,13 +162,13 @@ EnzoIntegrationQuanUpdate::load_integration_quan_(EnzoEFltArrayMap &map,
 
 //----------------------------------------------------------------------
 
-const std::vector<CelloArray<const enzo_float, 3>>
+const std::vector<CelloView<const enzo_float, 3>>
 EnzoIntegrationQuanUpdate::load_integration_quan_(const EnzoEFltArrayMap &map,
                                                   int stale_depth)
   const noexcept
 {
   std::size_t nfields = integration_keys_.size();
-  std::vector<CelloArray<const enzo_float, 3>> out;
+  std::vector<CelloView<const enzo_float, 3>> out;
   out.reserve(nfields);
   for (std::size_t i = 0; i<nfields; i++){
     out.push_back(map.get(integration_keys_[i], stale_depth));
@@ -196,7 +196,7 @@ void EnzoIntegrationQuanUpdate::update_quantities
     (initial_integration_map, stale_depth);
   const std::vector<EFlt3DArray> out_prim = load_integration_quan_
     (out_integration_map,stale_depth);
-  const std::vector<CelloArray<const enzo_float,3>> dU = load_integration_quan_
+  const std::vector<CelloView<const enzo_float,3>> dU = load_integration_quan_
     (dUcons_map, stale_depth);
   const std::size_t nfields = integration_keys_.size();
 
@@ -250,7 +250,7 @@ void EnzoIntegrationQuanUpdate::update_passive_scalars_
     const EFlt3DArray cur_conserved = initial_integration_map.get(key,
 								  stale_depth);
     const EFlt3DArray out_conserved = out_integration_map.get(key, stale_depth);
-    const CelloArray<const enzo_float, 3> dU = dUcons_map.get(key, stale_depth);
+    const CelloView<const enzo_float, 3> dU = dUcons_map.get(key, stale_depth);
 
     for (int iz=1; iz<mz-1; iz++) {
       for (int iy=1; iy<my-1; iy++) {

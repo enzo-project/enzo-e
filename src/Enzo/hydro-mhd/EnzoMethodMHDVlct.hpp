@@ -405,7 +405,7 @@ public: // attributes
   /// Riemann Solver(to use in the calculation of the internal energy source
   /// term). If not using the dual energy formalism, this isn't doesn't
   /// allocate memory.
-  const CelloArray<enzo_float,3> interface_vel_arr;
+  const CelloView<enzo_float,3> interface_vel_arr;
 
   /// Map for storing the integration quantities at the half timestep
   EnzoEFltArrayMap temp_integration_map;

@@ -126,7 +126,7 @@ private:
    EnzoEFltArrayMap &out_integration_map, const int stale_depth,
    const str_vec_t &passive_list) const;
 
-  /// Constructs a vector ``EFlt3DArray`` or ``CelloArray<const enzo_float,3>``
+  /// Constructs a vector ``EFlt3DArray`` or ``CelloView<const enzo_float,3>``
   /// that are loaded from `map` using the ordering of keys in integration_keys_
   /// @param[in] map Map of arrays holding data related to each integration
   ///   quantities registered in integration_keys_
@@ -135,7 +135,7 @@ private:
   const std::vector<EFlt3DArray> load_integration_quan_
   (EnzoEFltArrayMap &map, const int stale_depth) const noexcept;
 
-  const std::vector<CelloArray<const enzo_float, 3>> load_integration_quan_
+  const std::vector<CelloView<const enzo_float, 3>> load_integration_quan_
   (const EnzoEFltArrayMap &map, int stale_depth) const noexcept;
 
 private: // attributes

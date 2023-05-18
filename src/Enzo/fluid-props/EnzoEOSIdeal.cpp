@@ -31,7 +31,7 @@ void EnzoEOSIdeal::primitive_from_integration
  const bool ignore_grackle) const
 {
 
-  const CelloArray<const enzo_float, 3> density = integration_map.at("density");
+  const CelloView<const enzo_float, 3> density = integration_map.at("density");
   const int mz = density.shape(0);
   const int my = density.shape(1);
   const int mx = density.shape(2);
@@ -47,8 +47,8 @@ void EnzoEOSIdeal::primitive_from_integration
       continue;
     }
 
-    const CelloArray<const enzo_float, 3> integ_array = integration_map.at(key);
-    const CelloArray<enzo_float, 3> prim_array = primitive_map.at(key);
+    const CelloView<const enzo_float, 3> integ_array = integration_map.at(key);
+    const CelloView<enzo_float, 3> prim_array = primitive_map.at(key);
 
 #ifdef DEBUG_MATCHING_ARRAY_SHAPES
     ASSERT6("EnzoEOSIdeal::primitive_from_integration",
@@ -74,9 +74,9 @@ void EnzoEOSIdeal::primitive_from_integration
   // Convert the passive scalars from conserved-form (i.e. a density) to
   // specific-form (mass fractions)
   for (const std::string& key : passive_list){
-    const CelloArray<const enzo_float, 3> cur_conserved
+    const CelloView<const enzo_float, 3> cur_conserved
       = integration_map.at(key);
-    const CelloArray<enzo_float, 3> out_specific = primitive_map.at(key);
+    const CelloView<enzo_float, 3> out_specific = primitive_map.at(key);
 
     for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
       for (int iy = stale_depth; iy < my - stale_depth; iy++) {
@@ -156,7 +156,7 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   const EFlt3DArray eint =
     (idual) ? integration_map.at("internal_energy") : EFlt3DArray();
 
-  using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+  using RdOnlyEFlt3DArray = CelloView<const enzo_float, 3>;
   const RdOnlyEFlt3DArray density = integration_map.at("density");
   const RdOnlyEFlt3DArray vx = integration_map.at("velocity_x");
   const RdOnlyEFlt3DArray vy = integration_map.at("velocity_y");
