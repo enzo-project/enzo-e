@@ -165,7 +165,6 @@
          type = "image";
      };
      de {
-#         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
          field_list = [ "density" ];
          image_size = [ 256, 256 ];
          image_specify_bounds = true;
@@ -180,7 +179,6 @@
          type = "image";
      };
      dt {
-#         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
          field_list = [ "density_total" ];
          image_size = [ 256, 256 ];
          image_specify_bounds = true;
@@ -195,7 +193,6 @@
          type = "image";
      };
      po {
-#         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
          field_list = [ "potential" ];
          image_size = [ 256, 256 ];
          image_specify_bounds = true;
@@ -224,7 +221,6 @@
          type = "data";
      };
      vx {
-#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
          field_list = [ "velocity_x" ];
          image_size = [ 256, 256 ];
          image_type = "data";
@@ -238,7 +234,6 @@
          type = "image";
      };
      vy {
-#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
          field_list = [ "velocity_y" ];
          image_size = [ 256, 256 ];
          image_type = "data";
@@ -252,7 +247,6 @@
          type = "image";
      };
      vz {
-#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
          field_list = [ "velocity_z" ];
          image_size = [ 256, 256 ];
          image_type = "data";
@@ -266,7 +260,6 @@
          type = "image";
      };
      ax {
-#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
          field_list = [ "acceleration_x" ];
          image_size = [ 256, 256 ];
          image_type = "data";
@@ -280,7 +273,6 @@
          type = "image";
      };
      ay {
-#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
          field_list = [ "acceleration_y" ];
          image_size = [ 256, 256 ];
          image_type = "data";
@@ -294,7 +286,6 @@
          type = "image";
      };
      az {
-#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
          field_list = [ "acceleration_z" ];
          image_size = [ 256, 256 ];
          image_type = "data";
