@@ -14,7 +14,7 @@ index of the pointer using knowledge of the underlying shape of the
 array represented by the pointer.
 
 To simplify and enhance the readability of code in Enzo-E, we have
-implemented ``CelloView``, which all of the operations associated with
+implemented ``CelloView``, which encapsulates the operations associated with
 Multi-dimensional data. This class template draws loose inspiration
 from Athena++’s ``AthenaArray`` and numpy’s ``ndarray``.  This class
 was initially called ``CelloArray``, but the name was changed for
@@ -388,7 +388,7 @@ library container.
      - ``CelloView<T,D>`` Semantics
      - Container Semantics
    * - Null-State
-     - * a ``CelloView<T, D>`` technically supports an "null" state,
+     - * a ``CelloView<T, D>`` technically supports a "null" state,
          which signals that it's uninitialized. (This is directly
          analogous to a ``nullptr``).
        * the ``CelloView<T, D>::is_null()`` method is provided for checking
@@ -953,7 +953,7 @@ determine which approach is being used.
    required ``CelloView``\s before an expensive nested for-loop or in
    the outermost level of a nested for-loop.
 
-   As an aside, the way that ``EnzoEFltArrayMap`` implements could be
+   As an aside, the way that ``EnzoEFltArrayMap`` implements key-lookups could be
    refactored and sped up considerably.
 
 
