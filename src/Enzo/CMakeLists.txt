@@ -80,6 +80,7 @@ add_subdirectory(hydro-mhd)
 
 # add source files from other subdirectories to the enzo target
 add_subdirectory(assorted)
+add_subdirectory(chemistry)
 add_subdirectory(cosmology)
 add_subdirectory(fluid-props)
 add_subdirectory(gravity)
