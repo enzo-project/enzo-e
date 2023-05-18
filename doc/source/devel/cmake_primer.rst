@@ -14,7 +14,7 @@ As an aside, when searching for online CMake documentation and guides, you shoul
 History of Enzo-E's build system
 ================================
 
-Historically, Enzo-E made use of the `SCons <https://scons.org/>`_ build system. Howver, in 2022 Enzo-E migrated to the CMake build system.
+Historically, Enzo-E made use of the `SCons <https://scons.org/>`_ build system. However, in 2022 Enzo-E migrated to the CMake build system.
 
 While there are a number of viable build systems, there has been a general convergence among C++ developers towards using CMake (this is evidenced by large projects like Boost and Charm++).
 Given the very large userbase of CMake, bugs are found and fixed relatively quickly.
@@ -30,7 +30,7 @@ Additionally, support staff at clusters are less likely to be familiar with SCon
 How Does a CMake Build Work?
 ============================
 
-For people mostly familar with build systems like makefiles, CMake may seem a little unintuitive.
+For people mostly familiar with build systems like makefiles, CMake may seem a little unintuitive.
 It may be insightful to walk through some commands step-by-step that would be used in a fresh Enzo-E build.
 
 1. Unlike some other build systems, CMake specializes in out-of-source builds (see :ref:`out-of-source_builds` for some additional details/benefits).
@@ -55,7 +55,7 @@ It may be insightful to walk through some commands step-by-step that would be us
 
 ..  code-block:: bash
 
-  cmake -D-DCHARM_ROOT=<PATH/TO/charm/build-dir> \
+  cmake -DCHARM_ROOT=<PATH/TO/charm/build-dir> \
         -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
 
 3. The last step is to actually invoke the generated build files.
@@ -217,9 +217,9 @@ What is Ninja?
 
 `Ninja <https://ninja-build.org/>`_ is an alternative build-system to something like Make.
 Ninja was designed to be a smaller, less-feature-rich alternative to Make that is intended to be used with tools (like CMake) that generate its input files.
-These design goals can facillitate faster build-times in large projects.
+These design goals can facilitate faster build-times in large projects.
 
-To use ``Ninja``, you need to make sure it is installed on your machine and you need to specify ``-GNinja`` as one of the configuration arguments in the second step described in :ref:`how_a_cmake_build_works`.
+To use ``Ninja``, you need to make sure it is installed on your machine and you need to specify ``-G Ninja`` as one of the configuration arguments in the second step described in :ref:`how_a_cmake_build_works`.
 Then in the build step, replace ``make`` with ``ninja``.
 
 Does CMake save a log of compiler outputs to any files?

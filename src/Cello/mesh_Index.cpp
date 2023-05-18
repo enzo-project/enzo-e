@@ -266,7 +266,9 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
   const int s2 = 1<<(LM-L2);
 
   const size_t shift = (1<<LM);
-  const int ip3[3] = {p3[0]*shift,p3[1]*shift,p3[2]*shift};
+  const int ip3[3] = {static_cast<int>(p3[0]*shift),
+		      static_cast<int>(p3[1]*shift),
+		      static_cast<int>(p3[2]*shift)};
 
   int la3[3]={0},ra3[3]={0},lb3[3]={0},rb3[3]={0};
   int a = false;

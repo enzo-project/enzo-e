@@ -1,31 +1,34 @@
 ----
 
-:Parameter:  :p:`Group` : :p:`list`
-:Summary: :s:`List of groups`
-:Type:    :t:`list` ( :t:`string` )
-:Default: :d:`[]`
-:Scope:     :c:`Cello`
+.. par:parameter:: Group:list
 
-:e:`This parameter defines all groups.`
+   :Summary: :s:`List of groups`
+   :Type:    :par:typefmt:`list ( string )`
+   :Default: :d:`[]`
+   :Scope:     :c:`Cello`
 
-----
-
-:Parameter:  :p:`Group` : :g:`<group>` : :p:`field_list`
-
-:Summary: :s:`List of fields belonging to the group`
-:Type:    :t:`list` ( :t:`string` )
-:Default: :d:`[]`
-:Scope:     :c:`Cello`
-
-:e:`This parameter is used to assign fields to a given group.`
+   :e:`This parameter defines all groups.`
 
 ----
 
-:Parameter:  :p:`Group` : :g:`<group>` : :p:`particle_list`
+.. par:parameter:: Group:<group>:field_list
 
-:Summary: :s:`List of particle types belonging to the group`
-:Type:    :t:`list` ( :t:`string` )
-:Default: :d:`[]`
-:Scope:     :c:`Cello`
 
-:e:`This parameter is used to assign particle groups to a given group.`
+   :Summary: :s:`List of fields belonging to the group`
+   :Type:    :par:typefmt:`list ( string )`
+   :Default: :d:`[]`
+   :Scope:     :c:`Cello`
+
+   :e:`This parameter is used to assign fields to a given group.`
+
+----
+
+.. par:parameter:: Group:<group>:particle_list
+
+
+   :Summary: :s:`List of particle types belonging to the group`
+   :Type:    :par:typefmt:`list ( string )`
+   :Default: :d:`[]`
+   :Scope:     :c:`Cello`
+
+   :e:`This parameter is used to assign particle groups to a given group.`

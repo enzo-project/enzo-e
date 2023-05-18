@@ -4,6 +4,14 @@
 
 version: 2
 
+build:
+  os: ubuntu-22.04
+  tools:
+    # the python version currently just matches the version used for building
+    # the docs with CircleCi
+    python: "3.10"
+
+
 python:
    install:
    - requirements: doc/source/requirements.txt
