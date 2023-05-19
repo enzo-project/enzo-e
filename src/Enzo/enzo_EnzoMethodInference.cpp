@@ -1056,7 +1056,7 @@ void EnzoLevelArray::apply_inference()
     double lunit = enzo_units->length();
     double Zunit = enzo_constants::metallicity_solar;
  
-    // means and stds from StarNetRuntime/resources/Scaling_64x160.torch
+    // means and stds from StarNetRuntime/resources/Scaling_64x160.torch (generated from the Phoenix simulations) 
     // All values are in CGS units except for total_energy
     std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
                 -793.0158410664843/vunit, 
@@ -1096,11 +1096,7 @@ void EnzoLevelArray::apply_inference()
       for (int iz=0; iz<niz_; iz++){
         for (int iy=0; iy<niy_; iy++){
           for (int ix=0; ix<nix_; ix++){
-            //int i = INDEX(ix,iy,iz,nix_,niy_);
             int i = ix + nix_*(iy + niy_*iz);
-            //CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f_,ix,iy,iz, (double) array[i] - means[i_f_]/stds[i_f_]);
-// 
-            //field_data[0][i_f_][ix][iy][iz] = ( (double) array[i] - means[i_f_])/stds[i_f_];
             // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
             field_data.index_put_( {0,i_f_,ix,iy,iz}, 
                          ((double) array[i] - means[i_f_])/stds[i_f_] );
@@ -1111,7 +1107,6 @@ void EnzoLevelArray::apply_inference()
       i_f_ += 1;
     } // i_field
 
-    //std::cout << field_data << std::endl;
     delete [] velocity_divergence;
   //  delete [] metallicity;
 
@@ -1152,12 +1147,12 @@ void EnzoLevelArray::apply_inference()
 
       at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
 
-      bool * mask = new bool[nix_*niy_*niz_]; // boolean array containing indices of Pop III SF
-      bool print_fields = false;
-      for (int i=0; i<nix_*niy_*niz_; i++) mask[i] = false;
-
       int N_edge = 0; // number of edge layers to ignore for evaluating S2 predictions
       double pstar_i, pnostar_i, num_0_i, num_1_i;
+      double rho_x = 0.0, rho_y = 0.0, rho_z = 0.0, rho = 0.0; // for calculating mean position
+
+      enzo_float * density = field_values_[0].data();
+
       for (int iz=N_edge; iz<niz_ - N_edge; iz++){
        for (int iy=N_edge; iy<niy_ - N_edge; iy++){
          for (int ix=N_edge; ix<nix_ - N_edge; ix++){
@@ -1170,30 +1165,43 @@ void EnzoLevelArray::apply_inference()
 
            if (pstar_i > pnostar_i) {
 
-             mask[i] = true;
-             //print_fields = true;
+             double x_i = lower[0]+(ix+0.5)*hx;
+             double y_i = lower[1]+(iy+0.5)*hy;
+             double z_i = lower[2]+(iz+0.5)*hz;
 
-            CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", lower[0]+(ix+0.5)*hx, lower[1]+(iy+0.5)*hy, lower[2]+(iz+0.5)*hz, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
+            CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", x_i, y_i, z_i, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
+
+            // contribute to the mean predicted position
+            double rho_i = density[i];
+            rho += rho_i;
+            rho_x += rho_i * x_i;
+            rho_y += rho_i * y_i;
+            rho_z += rho_i * z_i;
+
            } 
-           else mask[i] = false;
          } // ix
        } // iy
       } // iz
+
+      // center of FB sphere is (xmean, ymean, zmean)
+      double rho_inv = 1.0 / rho;
+      double xmean = rho_x * rho_inv;
+      double ymean = rho_y * rho_inv;
+      double zmean = rho_z * rho_inv;
      
-      delete [] mask;
-      if (print_fields) {
-        for (int i_f = 0; i_f < num_fields_; i_f++) {
+//      if (print_fields) {
+//        for (int i_f = 0; i_f < num_fields_; i_f++) {
           // print out all field values
-          for (int iz=0; iz<niz_; iz++){
-            for (int iy=0; iy<niy_; iy++){
-              for (int ix=0; ix<nix_; ix++){
-                int i = ix + nix_*(iy + niy_*iz);
-                CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f,ix,iy,iz, field_values_[i_f].data()[i]);
-              }
-            }
-          }
-       }
-     }
+//          for (int iz=0; iz<niz_; iz++){
+//            for (int iy=0; iy<niy_; iy++){
+//              for (int ix=0; ix<nix_; ix++){
+//                int i = ix + nix_*(iy + niy_*iz);
+//                CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f,ix,iy,iz, field_values_[i_f].data()[i]);
+//              }
+//            }
+//          }
+//       }
+//     }
     
   } // if pstar > pnostar in a block
 
