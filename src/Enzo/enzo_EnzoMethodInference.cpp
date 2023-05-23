@@ -9,8 +9,8 @@
 #include "enzo.hpp"
 
 // Used to write inference array bounds and "bubble" coordinates for plotting
-#define TRACE_INFER
-#define DEBUG_INFER
+// #define TRACE_INFER
+// #define DEBUG_INFER
 
 //----------------------------------------------------------------------
 
@@ -286,10 +286,10 @@ void EnzoMethodInference::compute_overdensity_
       for (int ix=gx; ix<mx-gx; ix++) {
         int kx=((ix-gx)*nx)/(mx-2*gx);
         int i=ix + mx*(iy + my*iz);
-        //        if (de[i] > overdensity_threshold_*de_avg) {
+        if (de[i] > overdensity_threshold_*de_avg) {
           int k=kx + nx*(ky + ny*kz);
           mask[k] = 1;
-          //        }
+        }
       }
     }
   }
