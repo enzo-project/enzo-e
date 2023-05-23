@@ -80,10 +80,8 @@ protected: // functions
    int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz);
 
   void copy_
-  (enzo_float * af,
-   int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz,
-   const enzo_float * ac,
-   int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz);
+  (      enzo_float * af, int mfx, int mfy, int mfz, int nfx, int nfy, int nfz,
+   const enzo_float * ac, int mcx, int mcy, int mcz, int ncx, int ncy, int ncz);
 
 private: // attributes
 
