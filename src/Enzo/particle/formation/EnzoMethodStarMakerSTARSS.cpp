@@ -245,21 +245,25 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         // compute MMW -- TODO: Make EnzoComputeMeanMolecularWeight class and reference
         // mu_field here?
         if (primordial_chemistry > 0) {
-          mu = d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
+          // use species fields to get number density times mass_Hydrogen
+          // (note: "e_density" field tracks ndens_electron * mass_Hydrogen)
+          double ndens_times_mH
+            =  d_el[i] + dHI[i] + dHII[i] + 0.25*(dHeI[i]+dHeII[i]+dHeIII[i]);
 
           if (primordial_chemistry > 1) {
-            mu += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);
+            ndens_times_mH += dHM[i] + 0.5*(dH2I[i]+dH2II[i]);
           }
           if (primordial_chemistry > 2) {
-            mu += 0.5*(dDI[i] + dDII[i]) + dHDI[i]/3.0;
+            ndens_times_mH += 0.5*(dDI[i] + dDII[i]) + dHDI[i]/3.0;
           }
-          mu /= density[i];
+          // MA: NOTE previous versions of the code did NOT include the effect
+          //     of metals on the mmw. To include it, uncomment next line:
+          // if (metal) { ndens_times_mH += metal[i]/16.0; }
+
+          mu = density[i] / ndens_times_mH;
         } else {
           mu = dflt_mu;
-          // in an older version, mu = dflt_mu/d[ind], but I think that was a
-          // typo
         }
-        mu = 1.0/mu;
 
         double rho_cgs = density[i] * enzo_units->density();
         double mean_particle_mass = mu * enzo_constants::mass_hydrogen;

@@ -701,8 +701,8 @@ void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
    enzo_float * DII_density   = (enzo_float *) field.values("DII_density");
    enzo_float * HDI_density   = (enzo_float *) field.values("HDI_density");
 
-   // JB: NOTE note metal_density field not accessed
-   //enzo_float * metal_density = (enzo_float*) field.values("metal_density");
+
+   enzo_float * metal_density = (enzo_float*) field.values("metal_density");
 
    // Field size
    int nx,ny,nz;
@@ -743,12 +743,16 @@ void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
          enzo_float mu = e_density[i] + HI_density[i] + HII_density[i] +
             (HeI_density[i] + HeII_density[i] + HeIII_density[i])*0.25;
 
-         if (primordial_chemistry){
+         if (primordial_chemistry > 1){
            mu += HM_density[i] + 0.5 * (H2I_density[i] + H2II_density[i]);
          }
 
-         if (primordial_chemistry){
+         if (primordial_chemistry > 2){
            mu += (DI_density[i] + DII_density[i])*0.5 + HDI_density[i]/3.0;
+         }
+
+         if (metal_density != nullptr){
+           mu += metal_density[i] / 16.0;
          }
 
          mu = density[i] / mu;
