@@ -264,9 +264,6 @@ protected: // methods
 
 #ifdef CONFIG_USE_GRACKLE
   void compute_( Block * block) throw();
-
-  void ResetEnergies ( Block * block) throw();
-
 #endif
 
 protected: // attributes
