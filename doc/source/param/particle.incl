@@ -78,22 +78,26 @@
    :Default: :d:`none`
    :Scope:     :c:`Cello`
 
-   :e:`Each particle type can have multiple constants of varying types, which are defined by the` :p:`constants` :e:`parameter`.  The` :p:`constants` :e:`parameter is a list, alternating between the name of the parameter, its type and value.  Names may include` :t:`"mass"`, :t:`"root_level_mass"`,
-   :e:`etc.  Types may include` :t:`"single"`, :t:`"double"`, :t:`"quadruple"`, :t:`"int8"`, :t:`"int16"`, :t:`"int32"`, or :t:`"int64"`.
+   :e:`Each particle type can have multiple constants of varying types, which are defined by the` :p:`constants` :e:`parameter`.  The` :p:`constants` :e:`parameter is a list, alternating between the name of the parameter, its type and value.  Names may include` :t:`"mass"`, :t:`"root_level_mass"` :e:`,`
+   :e:`etc.  Types may include` :t:`"single"`, :t:`"double"`, :t:`"quadruple"`, :t:`"int8"`, :t:`"int16"`, :t:`"int32"`, or :t:`"int64"` :e:`.`
 
       ::
 
-      Parameter {
+         Parameter {
 
-         list = ["trace", "dark"];
+            list = ["trace", "dark"];
 
-         dark {
-               constants = ["mass", "double", 0.8426229508200000 / (64.0*64.0*64.0) ];
+            dark {
+
+                  constants = ["mass", "double", 0.8426229508200000 / (64.0*64.0*64.0) ];
+               
+            }
+
          }
-      }
 
-   :e: The constant "mass" sets the mass of every particle on the initial mesh to the specified value.
-   :e: The constant "root_level_mass" sets the mass of every particle on level zero of the mesh to the specified value. The mass of particles on level n (n > 0) is set to the zero level mass divided by the appropriate factor (two to the power of the rank of the simulation) n times.
+   :e:`The constant "mass" sets the mass of every particle on the initial mesh to the specified value.`
+   :e:`The constant "root_level_mass" sets the mass of every particle on level zero of the mesh to the specified value. The mass of particles on level n (n > 0) is set to the zero level mass divided by the appropriate factor (two to the power of the rank of the simulation) n times.`
+
 ----
 
 .. par:parameter:: Particle:particle_type:interleaved
