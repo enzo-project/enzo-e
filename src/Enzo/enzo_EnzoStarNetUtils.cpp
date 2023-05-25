@@ -63,8 +63,6 @@ void FBNet::read_file(std::string file, std::vector< std::vector<double> * > * v
   for (std::string line; std::getline(inFile, line, '\n'); ) {
     std::stringstream s(line);
     for (std::string val; std::getline(s, val, ' '); ) {
-      std::cout << file << ' ' << line_counter << std::endl;
-      std::cout << *((*vars)[line_counter]) << std::endl;
       (*((*vars)[line_counter])).push_back(std::stod(val));
     }
     line_counter++;
