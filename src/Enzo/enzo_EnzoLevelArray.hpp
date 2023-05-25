@@ -119,6 +119,11 @@ private: // attributes
 
   /// List of spheres
   std::vector<ObjectSphere> spheres_;
+
+  /// Utility functions for StarFind and FBNet (used when inference_method == "starnet")
+  StarFind * starfind_;
+  FBNet * fbnet_;
+
 };
 
 #endif /* ENZO_IO_ENZO_LEVEL_ARRAY_HPP */

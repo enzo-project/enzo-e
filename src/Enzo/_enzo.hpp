@@ -188,6 +188,8 @@ extern "C" {
 #include "enzo_IoEnzoBlock.hpp"
 #include "enzo_IoEnzoReader.hpp"
 #include "enzo_IoEnzoWriter.hpp"
+
+#include "enzo_EnzoStarNetUtils.hpp"
 #include "enzo_EnzoLevelArray.hpp"
 
 #include "enzo_EnzoBoundary.hpp"
@@ -225,6 +227,7 @@ extern "C" {
 #include "enzo_EnzoSinkParticle.hpp"
 #include "enzo_EnzoBondiHoyleSinkParticle.hpp"
 #include "enzo_EnzoFluxSinkParticle.hpp"
+
 
 // [order dependencies:]
 #include "enzo_EnzoEFltArrayMap.hpp"

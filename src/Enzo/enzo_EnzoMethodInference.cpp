@@ -125,6 +125,7 @@ EnzoMethodInference::EnzoMethodInference
 
   //    level array chare array element to simulation[0] sync counter
   enzo::simulation()->set_sync_infer_create(0);
+
 }
 
 //----------------------------------------------------------------------
@@ -1001,8 +1002,8 @@ void EnzoLevelArray::apply_inference()
 
     const std::string stage1_checkpoint = "/home1/07320/whick002/StarNetRuntime/model_checkpoints/smalldense.jtpt";
     
-    // Deserialize stage-1 checkpoint from a file using torch::jit::load().
-    torch::jit::script::Module stage1 = torch::jit::load(stage1_checkpoint); 
+    // Deserialized stage-1 checkpoint (U-net)
+    torch::jit::script::Module stage1 = starfind_->stage1(); 
     torch::Tensor field_data = torch::zeros({1,5,nix_,niy_,niz_}, torch::dtype(torch::kFloat32)); // array that gets passed into model
 
     // array increments
@@ -1139,11 +1140,8 @@ void EnzoLevelArray::apply_inference()
 
       CkPrintf("EnzoMethodInference::Calling S2 inception U-net...\n");
       
-      // load stage-2 model (incepunet)
-      const std::string stage2_checkpoint = "/home1/07320/whick002/StarNetRuntime/model_checkpoints/incepunet.jtpt";
-      
-      // Deserialize the ScriptModule from a file using torch::jit::load().
-      torch::jit::script::Module stage2 = torch::jit::load(stage2_checkpoint); // shape = {1,2,nx,ny,nz}
+      // Deserialized stage-2 checkpoint (inception net)
+      torch::jit::script::Module stage2 = starfind_->stage2(); // shape = {1,2,nx,ny,nz}
 
       at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
 
