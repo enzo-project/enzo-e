@@ -40,6 +40,7 @@ module simulation {
 
     entry void p_set_block_array (CProxy_Block block_array);
 
+    entry void p_update_state(MsgState *);
   };
 
   /// Initial mapping of array elements

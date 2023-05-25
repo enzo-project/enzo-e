@@ -66,9 +66,9 @@ module enzo {
   PUPable IoEnzoBlock;
 
   // EnzoRefine
-  PUPable EnzoRefineShock;
-  PUPable EnzoRefineParticleMass;
   PUPable EnzoRefineMass;
+  PUPable EnzoRefineParticleMass;
+  PUPable EnzoRefineShock;
 
   // EnzoCompute
 #ifdef CONFIG_USE_GRACKLE
@@ -176,14 +176,14 @@ module enzo {
     // EnzoMethodCheck
     entry void r_method_check_enter(CkReductionMsg *);
     entry void p_check_done();
-    entry void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+    entry void p_set_io_writer(CProxy_IoEnzoWriter proxy);
 
     // enzo_control_restart
-    entry void p_set_io_reader(CProxy_IoEnzoReader io_reader);
+    entry void p_set_io_reader(CProxy_IoEnzoReader proxy);
     entry void p_io_reader_created();
     entry void p_restart_next_level();
     entry void p_restart_level_created();
-}
+  };
 
   //----------------------------------------------------------------------
   array[Index] EnzoBlock : Block {
@@ -287,7 +287,6 @@ module enzo {
     entry void r_solver_mg0_barrier(CkReductionMsg* msg);
     entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
-
   };
 
   array[1D] IoEnzoReader : IoReader {
@@ -301,8 +300,9 @@ module enzo {
 
   array[1D] IoEnzoWriter : IoWriter {
     entry IoEnzoWriter();
-    entry IoEnzoWriter (int num_files, std::string ordering, int monitor_iter);
+    entry IoEnzoWriter (int num_files, std::string ordering,
+                        int monitor_iter, int include_ghosts);
     entry void p_write(EnzoMsgCheck * );
-  }
+  };
 
 };

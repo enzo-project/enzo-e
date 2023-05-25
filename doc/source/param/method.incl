@@ -117,6 +117,12 @@ accretion
 
    :e:`This parameter specifies the maximum fraction of mass which can be accreted from a cell in one timestep. This value of this parameter must be between 0 and 1.`
 
+
+check
+-----
+
+.. include:: method_check.incl
+
 feedback
 --------
 

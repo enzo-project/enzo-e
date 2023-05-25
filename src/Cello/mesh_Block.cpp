@@ -297,7 +297,7 @@ void Block::init_refine_
     refresh->add_all_data();
 
     FieldFace * field_face = create_face
-      (if3, ic3, g3, refresh_fine, refresh, true);
+      (if3, ic3, g3, refresh_fine, refresh);
 
     // Copy refined field data
     field_face -> array_to_face (array, data()->field());
@@ -646,7 +646,7 @@ Block::~Block()
     refresh->add_all_data();
 
     FieldFace * field_face = create_face
-      ( if3,ic3,g3,refresh_coarse,refresh,true);
+      ( if3,ic3,g3,refresh_coarse,refresh);
 
     field_face->face_to_array(data()->field(),&n,&array);
     delete field_face;
@@ -689,7 +689,7 @@ void Block::p_refresh_child
   refresh->add_all_data();
 
   FieldFace * field_face = create_face
-    (if3, ic3, g3, refresh_coarse,refresh,true);
+    (if3, ic3, g3, refresh_coarse,refresh);
 
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;

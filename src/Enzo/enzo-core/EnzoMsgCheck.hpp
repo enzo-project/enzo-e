@@ -11,7 +11,7 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-#define ADAPT_BUFFER_SIZE 800
+#define ADAPT_BUFFER_SIZE 1000
 
 class EnzoBlock;
 
@@ -140,6 +140,10 @@ public: // static methods
 
 protected: // methods
 
+  int size_();
+  char * load_(char *);
+  char * save_(char *);
+
   void copy_(const EnzoMsgCheck & enzo_msg_check)
   {
     is_local_      = enzo_msg_check.is_local_;
@@ -213,9 +217,10 @@ protected: // attributes
 
   /// Array holding serialized Array object
   int adapt_buffer_[ADAPT_BUFFER_SIZE];
-  
+
   /// Index for io_reader for restart
   int index_file_;
+
 };
 
 #endif /* CHARM_ENZO_MSG_CHECK_HPP */

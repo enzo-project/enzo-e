@@ -404,7 +404,7 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader)
   Refresh * refresh = new Refresh;
   refresh->add_all_data();
   FieldFace * field_face = create_face
-    (if3,ic3,g3, refresh_fine, refresh, true);
+    (if3,ic3,g3, refresh_fine, refresh);
 
   // Create data message object to send
   DataMsg * data_msg = new DataMsg;
@@ -549,39 +549,34 @@ std::ifstream IoEnzoReader::stream_open_blocks_
 void IoEnzoReader::file_read_hierarchy_()
 {
   // Simulation data
-  IoSimulation io_simulation = (cello::simulation());
-  for (size_t i=0; i<io_simulation.meta_count(); i++) {
+  if (thisIndex == 0) {
+    IoSimulation io_simulation = (cello::simulation());
+    for (size_t i=0; i<io_simulation.meta_count(); i++) {
 
-    void * buffer;
-    std::string name;
-    int type_scalar;
-    int nx,ny,nz;
+      void * buffer;
+      std::string name;
+      int type_scalar;
+      int nx,ny,nz;
 
-    // Get object's ith metadata
-    io_simulation.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+      // Get object's ith metadata
+      io_simulation.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
 
-    // Read object's ith metadata
-    file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+      // Read object's ith metadata
+      file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+    }
+
+    // Get current state
+    double time,dt;
+    int cycle;
+    io_simulation.get_state(time,dt,cycle);
+
+    // Create and initialize state message
+    MsgState * msg_state = new MsgState;;
+    msg_state->set_state(time,dt,cycle,false);
+
+    // Send state to all Simulation objects on all processes
+    proxy_enzo_simulation.p_update_state(msg_state);
   }
-
-  io_simulation.save_to(cello::simulation());
-
-  // Hierarchy data
-  IoHierarchy io_hierarchy = (cello::hierarchy());
-  for (size_t i=0; i<io_hierarchy.meta_count(); i++) {
-
-    void * buffer;
-    std::string name;
-    int type_scalar;
-    int nx,ny,nz;
-
-    // Get object's ith metadata
-    io_hierarchy.meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
-
-    // Read object's ith metadata
-    file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
-  }
-  io_hierarchy.save_to(cello::hierarchy());
 }
 
 //----------------------------------------------------------------------
@@ -627,16 +622,26 @@ void IoEnzoReader::file_read_block_
   FieldDescr * field_descr = cello::field_descr();
   ParticleDescr * particle_descr = cello::particle_descr();
 
-  Data * data = new Data
-    (nx, ny, nz, num_field_blocks, xm,xp, ym,yp, zm,zp,
-     field_descr, particle_descr);
+  file_read_block_particles_(data_msg);
 
-  data->allocate();
+  file_read_block_fields_ (data_msg,nx,ny,nz,io_block);
 
-  // Loop through fields and read them in
+  file_->group_close();
+}
+
+//----------------------------------------------------------------------
+
+void IoEnzoReader::file_read_block_fields_
+(DataMsg * data_msg,
+ int nx, int ny, int nz, IoEnzoBlock * io_block)
+{
+  FieldDescr * field_descr = cello::field_descr();
+  // Initialize field data
+  FieldData * field_data = new FieldData (field_descr,nx,ny,nz);
+  field_data->allocate_permanent(field_descr,true);
+  Field field(field_descr,field_data);
 
   const int num_fields = field_descr->num_permanent();
-  Field field = data->field();
 
   if (num_fields > 0) {
     // If any fields, add them to DataMsg
@@ -650,8 +655,8 @@ void IoEnzoReader::file_read_block_
     field_face -> set_ghost(true,true,true);
     field_face -> set_refresh(refresh,true);
     bool is_new;
-    data_msg -> set_field_face (field_face,        is_new=true);
-    data_msg -> set_field_data (data->field_data(),is_new=true);
+    data_msg -> set_field_face (field_face,is_new=true);
+    data_msg -> set_field_data (field_data,is_new=true);
   }
   for (int i_f=0; i_f<num_fields; i_f++) {
 
@@ -681,16 +686,22 @@ void IoEnzoReader::file_read_block_
     file_->data_close();
 
   }
+}
 
-  // Read in particle data
+//----------------------------------------------------------------------
 
-  Particle particle = data->particle();
+void IoEnzoReader::file_read_block_particles_ (DataMsg * data_msg)
+{
+  ParticleDescr * particle_descr = cello::particle_descr();
+  ParticleData * particle_data = new ParticleData;
+  particle_data->allocate(particle_descr);
+  Particle particle (particle_descr,particle_data);
 
   // for each particle type
   const int num_types = particle_descr->num_types();
   if (num_types > 0) {
     // If any fields, add them to DataMsg
-    data_msg -> set_particle_data (particle.particle_data(),true);
+    data_msg -> set_particle_data (particle_data,true);
   }
   for (int it=0; it<num_types; it++) {
 
@@ -715,7 +726,7 @@ void IoEnzoReader::file_read_block_
                 name_block.c_str(),it,ia,np);
 #endif
       if (ia==0) {
-        particle.insert_particles(it,np);
+        particle_data->insert_particles(particle_descr,it,np);
       }
 
       // read particle attribute into single array first...
@@ -764,7 +775,6 @@ void IoEnzoReader::file_read_block_
       delete [] buffer;
     }
   }
-  file_->group_close();
 }
 
 //----------------------------------------------------------------------
@@ -773,6 +783,7 @@ template <class T>
 void IoEnzoReader::copy_buffer_to_particle_attribute_
 (T * buffer, Particle particle, int it, int ia, int np)
 {
+
   for (int ip=0; ip<np; ip++) {
     int ib,io;
     particle.index(ip,&ib,&io);
@@ -838,21 +849,31 @@ void IoEnzoReader::file_read_dataset_
   // field size
   int n4[4];
   n4[0] = n4[1] = n4[2] = n4[3] = 1;
-  n4[0] = nx;
-  n4[1] = ny;
-  n4[2] = nz;
+  n4[0] = std::min(nx,m4[0]);
+  n4[1] = std::min(ny,m4[1]);
+  n4[2] = std::min(nz,m4[2]);
 
   // determine offsets
   int o4[4] = {0,0,0,0};
 
   // open the dataspace
+
   file_-> data_slice
     (m4[0],m4[1],m4[2],m4[3],
      n4[0],n4[1],n4[2],n4[3],
      o4[0],o4[1],o4[2],o4[3]);
 
   // create memory space
-  file_->mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
+  if (nx > m4[0]) {
+    // include_ghosts = false
+    const int gx=(nx-m4[0])/2;
+    const int gy=(ny-m4[1])/2;
+    const int gz=(nz-m4[2])/2;
+    file_->mem_create (nx,ny,nz,m4[0],m4[1],m4[2],gx,gy,gz);
+  } else {
+    // include_ghosts = true
+    file_->mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
+  }
 
   file_->data_read (buffer);
 }

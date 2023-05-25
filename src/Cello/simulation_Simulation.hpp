@@ -204,6 +204,8 @@ public: // virtual functions
   /// stopping criteria
   virtual void update_state(int cycle, double time, double dt, double stop) ;
 
+  void p_update_state(MsgState *);
+
   /// initialize the Simulation given a parameter file
   virtual void initialize() throw();
 
@@ -579,6 +581,7 @@ protected: // attributes
   std::string restart_directory_;
   int         restart_num_files_;
   std::ifstream restart_stream_file_list_;
+
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

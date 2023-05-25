@@ -34,11 +34,15 @@ int Simulation::file_counter_ = 0;
 //----------------------------------------------------------------------
 
 EnzoMethodCheck::EnzoMethodCheck
-(int num_files, std::string ordering, std::vector<std::string> directory, int monitor_iter)
+(int num_files, std::string ordering,
+ std::vector<std::string> directory,
+ int monitor_iter,
+ bool include_ghosts)
   : Method(),
     num_files_(num_files),
     ordering_(ordering),
-    directory_(directory)
+    directory_(directory),
+    include_ghosts_(include_ghosts)
 {
   TRACE_CHECK("[1] EnzoMethodCheck::EnzoMethodCheck()");
   Refresh * refresh = cello::refresh(ir_post_);
@@ -53,9 +57,8 @@ EnzoMethodCheck::EnzoMethodCheck
 
     CkArrayOptions opts(num_files);
     opts.setMap(io_map);
-  
     proxy_io_enzo_writer = CProxy_IoEnzoWriter::ckNew
-      (num_files, ordering,monitor_iter, opts);
+      (num_files, ordering,monitor_iter, include_ghosts_, opts);
 
     proxy_io_enzo_writer.doneInserting();
 
@@ -152,11 +155,15 @@ void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
 //----------------------------------------------------------------------
 
 IoEnzoWriter::IoEnzoWriter
-(int num_files, std::string ordering, int monitor_iter) throw ()
+(int num_files,
+ std::string ordering,
+ int monitor_iter,
+ bool include_ghosts) throw ()
   : CBase_IoEnzoWriter(),
     num_files_(num_files),
     ordering_(ordering),
-    monitor_iter_(monitor_iter)
+    monitor_iter_(monitor_iter),
+    include_ghosts_(include_ghosts)
 {
   TRACE_CHECK("[4] IoEnzoWriter::IoEnzoWriter()");
 }
@@ -196,6 +203,7 @@ void EnzoBlock::p_check_write_next(int num_files, std::string ordering)
 
 void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
 {
+  TRACE_CHECK("[A] IoEnzoWriter::p_write");
   std::string name_this, name_next;
   Index index_this, index_next;
   long long index_block;
@@ -246,7 +254,6 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
     file_->file_close();
   }
 
-  TRACE_CHECK("[A] IoEnzoWriter::p_write_first");
   if (!is_last) {
     enzo::block_array()[index_next].p_check_write_next(num_files_, ordering_);
   } else {
@@ -285,7 +292,7 @@ void IoEnzoWriter::close_block_list_()
 
 void EnzoSimulation::p_check_done()
 {
-  TRACE_CHECK("[B] EnzoSimulation::p_check_done");
+  TRACE_CHECK("[B] EnzoSimulation::p_check_done()");
   if (sync_check_done_.next()) {
     enzo::block_array().p_check_done();
   }
@@ -295,7 +302,7 @@ void EnzoSimulation::p_check_done()
 
 void EnzoBlock::p_check_done()
 {
-  TRACE_CHECK_BLOCK("[C] EnzoBlock::p_check_done",this);
+  TRACE_CHECK_BLOCK("[C] EnzoBlock::p_check_done()",this);
   compute_done();
 }
 
@@ -515,6 +522,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
         const int index_field = i_f;
 ;
         IoFieldData * io_field_data = enzo::factory()->create_io_field_data();
+        io_field_data -> set_include_ghosts (include_ghosts_);
 
         void * buffer;
         std::string name;
@@ -524,17 +532,16 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
 
         io_field_data->set_field_data((FieldData*)field_data);
         io_field_data->set_field_index(index_field);
-
         io_field_data->field_array
           (&buffer, &name, &type, &mx,&my,&mz, &nx,&ny,&nz);
 
-        file_->mem_create(nx,ny,nz,nx,ny,nz,0,0,0);
+        file_->mem_create(mx,my,mz,nx,ny,nz,0,0,0);
         if (mz > 1) {
-          file_->data_create(name.c_str(),type,mz,my,mx,1,nz,ny,nx,1);
+          file_->data_create(name.c_str(),type,nz,ny,nx,1,nz,ny,nx,1);
         } else if (my > 1) {
-          file_->data_create(name.c_str(),type,my,mx,  1,1,ny,nx, 1,1);
+          file_->data_create(name.c_str(),type,ny,nx,  1,1,ny,nx, 1,1);
         } else {
-          file_->data_create(name.c_str(),type,mx,  1,  1,1,nx,  1,1,1);
+          file_->data_create(name.c_str(),type,nx,  1,  1,1,nx,  1,1,1);
         }
         file_->data_write(buffer);
         file_->data_close();
@@ -644,7 +651,7 @@ DataMsg * EnzoBlock::create_data_msg_ ()
 
   // Create FieldFace object specifying fields to send
   FieldFace * field_face = create_face
-    (if3,ic3,g3, refresh_same, refresh, true);
+    (if3,ic3,g3, refresh_same, refresh);
 
   // Create data message object to send
   DataMsg *   data_msg   = new DataMsg;

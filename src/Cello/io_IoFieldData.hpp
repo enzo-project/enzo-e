@@ -42,6 +42,8 @@ public: // interface
   void set_field_data (FieldData * field_data) throw()
   { field_data_ = field_data;};
 
+  void set_include_ghosts (bool include_ghosts)
+  { include_ghosts_ = include_ghosts; }
 
   /// Return the ith data item associated with the object
   virtual void field_array 
@@ -66,7 +68,7 @@ protected: // functions
 
 private: // attributes
 
-
+  bool include_ghosts_;
 };
 
 #endif /* IO_IO_FIELD_DATA_HPP */

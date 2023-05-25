@@ -62,6 +62,8 @@ protected: // functions
   void file_open_block_list_(std::string name_dir, std::string name_file);
   void file_read_block_(EnzoMsgCheck * msg_check, std::string file_name,
                         IoEnzoBlock * io_block);
+  void file_read_block_fields_(DataMsg * data_msg, int nx, int ny, int nz, IoEnzoBlock * io_block);
+  void file_read_block_particles_(DataMsg * data_msg);
   bool read_block_list_(std::string & block_name, int & level);
   void file_close_block_list_();
 

@@ -12,8 +12,8 @@
 IoFieldData::IoFieldData() throw ()
   : Io(),
     field_data_(0),
-    field_index_(0)
-
+    field_index_(0),
+    include_ghosts_(true)
 {
   // meta_name_.push_back("size");
   // meta_name_.push_back("array_size");
@@ -36,6 +36,7 @@ void IoFieldData::pup (PUP::er &p)
   WARNING ("IoFieldData::pup","skipping field_data_");
   //  p | *field_data_;
   p | field_index_;
+  p | include_ghosts_;
 }
 
 //----------------------------------------------------------------------
@@ -51,8 +52,8 @@ void IoFieldData::meta_value
 
 void IoFieldData::field_array
 (void ** buffer, std::string * name, int * type,
- int * mx, int * my, int * mz,
- int * nx,  int * ny,  int * nz) throw()
+ int * pmx, int * pmy, int * pmz,
+ int * pnx,  int * pny,  int * pnz) throw()
 {
   FieldDescr * field_descr = cello::field_descr();
   
@@ -60,58 +61,67 @@ void IoFieldData::field_array
 		field_data_->values(field_descr,field_index_);
   if (name)   (*name) = 
 		std::string("field_") +	field_descr->field_name(field_index_);
+  int type_size = 0;
   if (type) {
 
     precision_type precision = field_descr->precision(field_index_);
     if (precision == precision_default) precision = default_precision;
-
     switch (precision) {
-    case precision_single: (*type) = type_float; break;
-    case precision_double: (*type) = type_double; break;
-    case precision_quadruple: (*type) = type_quadruple; break;
+    case precision_single:
+      (*type) = type_float;
+      type_size = sizeof(float);
+      break;
+    case precision_double:
+      (*type) = type_double;
+      type_size = sizeof(double);
+      break;
+    case precision_quadruple:
+      (*type) = type_quadruple;
+      type_size = sizeof(long double);
+      break;
     default:
       ERROR2 ("IoFieldData",
 	      "Unsupported precision type %d for field %s",
 	      precision, field_descr->field_name(field_index_).c_str());
     }
   }
-  int nbx,nby,nbz;
-  field_data_->size(&nbx,&nby,&nbz);
+  int mx,my,mz;
+  int nx,ny,nz;
+  int gx,gy,gz;
+  int cx,cy,cz;
 
-  int ngx=0,ngy=0,ngz=0;
-
-  field_descr->ghost_depth(field_index_,&ngx,&ngy,&ngz);
-
-  int cx=0,cy=0,cz=0;
+  field_data_->dimensions(field_descr,field_index_,&mx,&my,&mz);
+  field_data_->size(&nx,&ny,&nz);
+  field_descr->ghost_depth(field_index_,&gx,&gy,&gz);
   field_descr->centering(field_index_,&cx,&cy,&cz);
+
+  if (pmx) (*pmx) = mx;
+  if (pmy) (*pmy) = my;
+  if (pmz) (*pmz) = mz;
 
   if (field_data_->ghosts_allocated()) {
 
-    if (mx) (*mx) = nbx + 2*ngx + cx;
-    if (my) (*my) = nby + 2*ngy + cy;
-    if (mz) (*mz) = nbz + 2*ngz + cz;
+    if (include_ghosts_) {
 
-    // Exclude ghosts when writing
+      if (pnx) (*pnx) = mx;
+      if (pny) (*pny) = my;
+      if (pnz) (*pnz) = mz;
 
-    //    if (nx) (*nx) = nbx;
-    //    if (ny) (*ny) = nby;
-    //    if (nz) (*nz) = nbz;
+    } else {
 
-    // Include ghosts when writing
+      // adjust buffer pointer to start of non-ghost values
+      if (buffer) (*buffer) += type_size*(gx+mx*(gy+my*gz));
+      if (pnx) (*pnx) = nx + cx;
+      if (pny) (*pny) = ny + cy;
+      if (pnz) (*pnz) = nz + cz;
 
-     if (nx) (*nx) = nbx + 2*ngx + cx;
-     if (ny) (*ny) = nby + 2*ngy + cy;
-     if (nz) (*nz) = nbz + 2*ngz + cz;
+    }
 
   } else {
 
-    if (mx) (*mx) = nbx + cx;
-    if (my) (*my) = nby + cy;
-    if (mz) (*mz) = nbz + cz;
-
-    if (nx) (*nx) = nbx + cx;
-    if (ny) (*ny) = nby + cy;
-    if (nz) (*nz) = nbz + cz;
+    if (pnx) (*pnx) = mx;
+    if (pny) (*pny) = my;
+    if (pnz) (*pnz) = mz;
 
   }
 }
