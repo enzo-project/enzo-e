@@ -849,6 +849,16 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
   initial_hdf5_max_level = p->value_integer (name_initial + "max_level", 0);
   initial_hdf5_format    = p->value_string  (name_initial + "format", "music");
 
+  // Ensure hdf5 max level agrees with adapt max initial level.
+  int adapt_max_level = p->value_integer("Adapt:max_level", 0);
+  int adapt_max_initial_level = p->value_integer("Adapt:max_initial_level", adapt_max_level);
+  if (initial_hdf5_max_level > 0 && adapt_max_initial_level != initial_hdf5_max_level) {
+    ERROR2("Config::read_initial_hdf5_()",
+    "The hdf5 max level (%d) should equal Adapt:max_initial_level (%d)",
+    initial_hdf5_max_level,
+    adapt_max_initial_level);
+  }
+
   for (int i=0; i<3; i++) {
     initial_hdf5_blocking[i] =
       p->list_value_integer(i,name_initial+"blocking",1);
