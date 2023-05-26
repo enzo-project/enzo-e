@@ -46,14 +46,14 @@ public: // interface
   { include_ghosts_ = include_ghosts; }
 
   /// Return the ith data item associated with the object
-  virtual void field_array 
+  virtual void field_array
   (void ** buffer, std::string * name, int * type,
-   int * nxd=0, int * nyd=0, int * nzd=0,
-   int * nx=0,  int * ny=0,  int * nz=0) throw();
+   int * pmx, int * pmy, int * pmz,
+   int * pnx, int * pny, int * pnz) throw();
 
   /// Return the ith metadata item associated with the object
-  virtual void meta_value 
-  (int index, 
+  virtual void meta_value
+  (int index,
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 

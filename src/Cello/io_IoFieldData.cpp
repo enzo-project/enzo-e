@@ -53,7 +53,12 @@ void IoFieldData::meta_value
 void IoFieldData::field_array
 (void ** buffer, std::string * name, int * type,
  int * pmx, int * pmy, int * pmz,
- int * pnx,  int * pny,  int * pnz) throw()
+ int * pnx, int * pny, int * pnz) throw()
+/// @param buffer [out] pointer to start of memory containing the requested data item
+/// @param name   [out] identifier for the requested data item
+/// @param type   [out] type and precision of the the requested data item
+/// @param pmx,pmy,pmz [out] pointer to the array data item's allocated size
+/// @param pnx,pny,pnz [out] pointer to the array data item's actual size
 {
   FieldDescr * field_descr = cello::field_descr();
   
@@ -99,23 +104,13 @@ void IoFieldData::field_array
   if (pmy) (*pmy) = my;
   if (pmz) (*pmz) = mz;
 
-  if (field_data_->ghosts_allocated()) {
+  if ((! include_ghosts_) && (field_data_->ghosts_allocated())) {
 
-    if (include_ghosts_) {
-
-      if (pnx) (*pnx) = mx;
-      if (pny) (*pny) = my;
-      if (pnz) (*pnz) = mz;
-
-    } else {
-
-      // adjust buffer pointer to start of non-ghost values
-      if (buffer) (*buffer) += type_size*(gx+mx*(gy+my*gz));
-      if (pnx) (*pnx) = nx + cx;
-      if (pny) (*pny) = ny + cy;
-      if (pnz) (*pnz) = nz + cz;
-
-    }
+    // adjust buffer pointer to start of non-ghost values
+    if (buffer) (*buffer) += type_size*(gx+mx*(gy+my*gz));
+    if (pnx) (*pnx) = nx + cx;
+    if (pny) (*pny) = ny + cy;
+    if (pnz) (*pnz) = nz + cz;
 
   } else {
 
