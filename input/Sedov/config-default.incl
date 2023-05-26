@@ -62,10 +62,7 @@ Method {
 #	 image_block_size  = 5; # DEPRECIATED
 	image_size = [513,513];
 #	image_size = [1201,1201];
-          colormap = [1.00, 1.00, 1.00,  
-                     0.00, 1.00, 0.00, 
-                     1.00, 0.00, 0.00, 
-                     0.00, 0.00, 1.00];
+          colormap = ["white", "lime", "red", "blue"];
        include "config-output-schedule.incl"
       };
 
@@ -75,26 +72,19 @@ Method {
         name     = ["sedov-de-%03d.png","cycle"];
          image_reduce_type = "avg";
         field_list = ["density"];
-        colormap = [0.0, 0.0, 0.0,  
-                    1.0, 0.0, 0.0, 
-                    1.0, 1.0, 0.0, 
-                    1.0, 1.0, 1.0];
+        colormap = ["black", "red", "yellow", "white"];
         
        include "config-output-schedule.incl"
       };
 
       te {
-    
+
        image_log = true;
-        axis = "z";    
+        axis = "z";
 	type     = "image";
         name     = ["sedov-te-%03d.png","cycle"];
         field_list = ["total_energy"];
-        colormap = [0.0, 0.0, 0.0,  
-                    1.0, 0.0, 0.0, 
-                    1.0, 1.0, 0.0, 
-                    1.0, 1.0, 1.0];
-        
+       colormap = ["black", "red", "yellow", "white"];
        include "config-output-schedule.incl"
       };
    }

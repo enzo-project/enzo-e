@@ -84,9 +84,6 @@
          field_list = ["density"];
          type     = "image";
          schedule {var = "cycle"; step = 1;}
-         colormap = [0.00, 0.00, 0.50,  
-                     0.00, 1.00, 0.00, 
-                     1.00, 1.00, 0.00, 
-                     1.00, 0.00, 0.00];
+         colormap = ["navy", "lime", "yellow", "red"];
       }
    }

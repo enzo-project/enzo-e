@@ -255,7 +255,7 @@ public: // interface
   const char * values (std::string name, int index_history=0) const throw ()
   { return field_data_->values(field_descr_,name,index_history); }
 
-  /// Return a CelloArray that acts as a view of the corresponding field
+  /// Return a CelloView that acts as a view of the corresponding field
   ///
   /// If the field cannot be found the program will abort with an error.
   ///
@@ -267,27 +267,27 @@ public: // interface
   ///
   /// @returns view of the specified field.
   template<class T>
-  CelloArray<T, 3> view(int id_field,
-                        ghost_choice choice = ghost_choice::include,
-                        int index_history=0) throw()
+  CelloView<T, 3> view(int id_field,
+                       ghost_choice choice = ghost_choice::include,
+                       int index_history=0) throw()
   { return field_data_->view<T>(field_descr_,id_field,choice,index_history); }
 
   template<class T>
-  CelloArray<T, 3> view(std::string name,
-                        ghost_choice choice = ghost_choice::include,
-                        int index_history=0) throw()
+  CelloView<T, 3> view(std::string name,
+                       ghost_choice choice = ghost_choice::include,
+                       int index_history=0) throw()
   { return field_data_->view<T>(field_descr_,name,choice,index_history); }
 
   template<class T>
-  CelloArray<const T, 3> view(int id_field,
-                              ghost_choice choice = ghost_choice::include,
-			      int index_history=0) const throw()
+  CelloView<const T, 3> view(int id_field,
+                             ghost_choice choice = ghost_choice::include,
+			     int index_history=0) const throw()
   { return field_data_->view<T>(field_descr_,id_field,choice,index_history); }
 
   template<class T>
-  CelloArray<const T, 3> view(std::string name,
-                              ghost_choice choice = ghost_choice::include,
-                              int index_history=0) const throw()
+  CelloView<const T, 3> view(std::string name,
+                             ghost_choice choice = ghost_choice::include,
+                             int index_history=0) const throw()
   { return field_data_->view<T>(field_descr_,name,choice,index_history); }
 
   /// Return array for the corresponding coarse field
@@ -298,7 +298,7 @@ public: // interface
   const char * coarse_values (int id_field) const throw ()
   { return field_data_->coarse_values (field_descr_,id_field); }
 
-  /// Return a CelloArray that acts as a view of the corresponding coarse field
+  /// Return a CelloView that acts as a view of the corresponding coarse field
   ///
   /// If the coarse field cannot be found the program will abort with an error.
   ///
@@ -308,11 +308,11 @@ public: // interface
   ///
   /// @returns view of the specified coarse field.
   template<class T>
-  CelloArray<T, 3> coarse_view(int id_field) throw()
+  CelloView<T, 3> coarse_view(int id_field) throw()
   { return field_data_->coarse_view<T>(field_descr_, id_field); }
 
   template<class T>
-  CelloArray<const T, 3> coarse_view(int id_field) const throw()
+  CelloView<const T, 3> coarse_view(int id_field) const throw()
   { return field_data_->coarse_view<T>(field_descr_, id_field); }
 
   /// Return array for the corresponding field, which does not contain

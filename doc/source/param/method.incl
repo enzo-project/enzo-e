@@ -199,7 +199,7 @@ grackle
 
 "`Grackle <https://grackle.readthedocs.io/en/latest/>`_ is a chemistry and radiative cooling library for astrophysical
 simulations. 
-It is a generalized and trimmed down version of the chemistry network of the Enzo simulation code."
+It is a generalized and updated version of the chemistry network of the Enzo simulation code."
 
 While most of the parameters come directly from Grackle, there are a few notable exceptions.
 These generally affect how Enzo-E uses Grackle and don't have direct counterparts listed on the `Grackle parameters section <https://grackle.readthedocs.io/en/latest/Parameters.html>`_ of the Grackle website.
@@ -226,7 +226,7 @@ These parameters include:
    :Default: :d:`false`
    :Scope:   :z:`Enzo`
 
-   :e:`Units of the cosmological expansion factor for the Grackle chemistry and cooling solver library. By default, usage of Grackle does not limit the timestep. When this parameter is set to` ``true``, :e:`the timestep is limited by the product of the minimum cooling time and` :par:param:`Method:grackle:courant`.
+   :e:`By default, usage of Grackle does not limit the timestep. When this parameter is set to` ``true``, :e:`the timestep is limited by the product of the minimum cooling time and` :par:param:`Method:grackle:courant`.
 
 ----
 
@@ -237,21 +237,26 @@ These parameters include:
    :Default: :d:`-1.0`
    :Scope:     :z:`Enzo`
 
-   :e:`In non-cosmological simulations, this parameter is used to specify the redshift of the UV background.`
+   :e:`In non-cosmological simulations, this parameter is used to specify the redshift of the UV background.
+   The default value,` ``-1.0``, :e:`is used to indicate that this parameter is unset.`
+
+   * :e:`When this parameter has a value other than the default value in a cosmological simulation, the program will abort with an error message.`
+
+   * :e:`When this parameter has a default value in a non-cosmological simulation, the radiation redshift is set to 0.0, internally.`
 
 ----
 
-All of the other allowed parameters are used to directly configure the grackle-parameters stored in Grackle's configuration object, which are each listed on the `Grackle parameters section <https://grackle.readthedocs.io/en/latest/Parameters.html>`_ of the Grackle website.
+All of the other allowed parameters are used to directly configure the grackle parameters stored in Grackle's configuration object, which are each listed on the `Grackle parameters section <https://grackle.readthedocs.io/en/latest/Parameters.html>`_ of the Grackle website.
 In general, to configure a given parameter on that page, ``<grackle-param>``, just assign your desired value to :par:param:`!Method:grackle:<grackle-param>`.
-The primary exceptions to this guideline are for the following grackle-parameters:
+The primary exceptions to this guideline are for the following grackle parameters:
 
   * ``use_grackle``: when the grackle method is in use, this is always set to ``1``.
-  * ``Gamma``: this grackle-parameter is instead initialized by :par:param:`Physics:fluid_props:eos:gamma`
-  * ``grackle_data_field``: this grackle-parameter is initialized with the value of :par:param:`Method:grackle:data_file`
+  * ``Gamma``: this grackle parameter is instead initialized by :par:param:`Physics:fluid_props:eos:gamma`
+  * ``grackle_data_field``: this grackle parameter is initialized with the value of :par:param:`Method:grackle:data_file`
 
-If you choose not to specify a value for a given grackle-parameter, the default value is selected by the Grackle library.
+If you choose not to specify a value for a given grackle parameter, the default value is selected by the Grackle library.
 
-For brevity (and to avoid having out-of-date documentation), we omit descriptions for the vast majority of recognized parameters that are directly used to initialize a corresponding grackle-parameter.
+For brevity (and to avoid having out-of-date documentation), we omit descriptions for the vast majority of recognized parameters that are directly used to initialize a corresponding grackle parameter.
 With that said, we make exceptions for a small handful of these parameters (primarily in cases where a parameter's value may necessitate the existence of a field) and provide descriptions for them down below:
 
 .. par:parameter:: Method:grackle:data_file
