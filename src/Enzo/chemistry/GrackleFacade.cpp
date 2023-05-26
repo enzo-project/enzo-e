@@ -147,8 +147,8 @@ std::unique_ptr<chemistry_data_storage> init_rates_
 
   std::unique_ptr<chemistry_data_storage> out(new chemistry_data_storage);
 
-  if (_initialize_chemistry_data(my_chemistry.get_ptr(),
-				 out.get(), grackle_units) == ENZO_FAIL) {
+  if (local_initialize_chemistry_data(my_chemistry.get_ptr(),
+                                      out.get(), grackle_units) == ENZO_FAIL) {
     ERROR("init_rates_", "Error in _initialize_chemistry_data");
   }
 
@@ -232,18 +232,10 @@ GrackleFacade::~GrackleFacade() noexcept
   // the ONLY way grackle_rates could be a nullptr is if something went wrong
   // and the pup method never got called after the migration constructor
   // (in that case the program would already have aborted)
-  _free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
+  local_free_chemistry_data(my_chemistry_.get_ptr(), grackle_rates_.get());
 
 #endif
 }
-
-//----------------------------------------------------------------------------
-
-namespace { // things within anonymous namespace are local to this file
-
-
-
-} // anonymous namespace
 
 //----------------------------------------------------------------------------
 

@@ -147,6 +147,7 @@ struct enzo_fluxes
 #ifdef CONFIG_USE_GRACKLE
 #include <stdlib.h>
 extern "C" {
+  #define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
   #include <grackle.h>
 }
 #else
