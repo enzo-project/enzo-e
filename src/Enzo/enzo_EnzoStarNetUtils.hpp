@@ -54,19 +54,68 @@ public:
 
   double metal_yield_PISNe(double mass) throw();
 
-  void get_bincounts(std::vector<int> * bin_counts,
-                       std::vector<double> * masses   , std::vector<double> * creationtimes,
-                       std::vector<double> * mass_bins, std::vector<double> * time_bins) throw(); 
+  double get_radius(std::vector<double> * masses, std::vector<double> * creationtimes) throw(); 
 
 private:
   void read_file(std::string file, std::vector<std::vector<double>*> * vars) throw();
 
-  void tokenize_sample() throw();
+  int get_binindex(double val, std::vector<double> * bins) throw();
+
+  int model_time_, model_dt_;
+  double Nstar_mean_, Nstar_std_;
 
   std::vector<double> mass_CDF_, mass_CDF_bins_; 
   std::vector<double> Nstar_CDF_, Nstar_CDF_bins_;
   std::vector<double> creationtime_CDF_, creationtime_CDF_bins_;
 
   std::vector<double> M0_, M1_, M2_, M3_; 
+};
 
+class EnzoObjectFeedbackSphere : public ObjectSphere {
+  // extension of Cello's ObjectSphere class to include metal yields
+  // TODO: Splice this off into different file?
+  public:
+    /// Constructor
+    EnzoObjectFeedbackSphere(double center[3], double radius, 
+      double metal_yield_SNe, double metal_yield_HNe, double metal_yield_PISNe) 
+      throw()
+      : ObjectSphere(center, radius),
+        metal_yield_SNe_(metal_yield_SNe),
+        metal_yield_HNe_(metal_yield_HNe),
+        metal_yield_PISNe_(metal_yield_PISNe)
+        { };
+
+    EnzoObjectFeedbackSphere() throw()
+      : ObjectSphere()
+    { };
+
+    /// Charm++ PUP::able declarations
+    PUPable_decl(EnzoObjectFeedbackSphere);
+
+    EnzoObjectFeedbackSphere (CkMigrateMessage *m)
+      : ObjectSphere(m),
+        metal_yield_SNe_(0),
+        metal_yield_HNe_(0),
+        metal_yield_PISNe_(0)
+    { }
+
+    void pup (PUP::er &p)
+    {
+      TRACEPUP;
+
+      ObjectSphere::pup(p);
+      p | metal_yield_SNe_;
+      p | metal_yield_HNe_;
+      p | metal_yield_PISNe_; 
+    }
+
+  public:
+
+    double metal_mass_SNe()   {return metal_yield_SNe_;}
+    double metal_mass_HNe()   {return metal_yield_HNe_;}
+    double metal_mass_PISNe() {return metal_yield_PISNe_;}
+
+  private:
+
+    double metal_yield_SNe_, metal_yield_HNe_, metal_yield_PISNe_;
 };

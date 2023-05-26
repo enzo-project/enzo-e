@@ -1118,6 +1118,7 @@ void EnzoLevelArray::apply_inference()
     // are treated as potential star-forming blocks 
     // and will be fed into the stage 2 inception network
     bool star_in_block = true;
+
     if (enzo_config->method_inference_starnet_S1) {
       // see step 4 of https://pytorch.org/tutorials/advanced/cpp_export.html 
 
@@ -1136,6 +1137,11 @@ void EnzoLevelArray::apply_inference()
     star_in_block = (pstar > pnostar);
     }
 
+    bool SF_confirmed = false; // flag for if S2 network identified star-forming regions
+
+    double sphere_x=0.0, sphere_y=0.0, sphere_z=0.0;
+    double sphere_r=0.0;
+    double yield_SNe=0.0, yield_HNe=0.0, yield_PISNe=0.0;
     if (star_in_block && enzo_config->method_inference_starnet_S2) {
 
       CkPrintf("EnzoMethodInference::Calling S2 inception U-net...\n");
@@ -1162,6 +1168,7 @@ void EnzoLevelArray::apply_inference()
            pstar_i   = num_1_i / (num_0_i + num_1_i);
 
            if (pstar_i > pnostar_i) {
+             SF_confirmed = true;
 
              double x_i = lower[0]+(ix+0.5)*hx;
              double y_i = lower[1]+(iy+0.5)*hy;
@@ -1181,26 +1188,39 @@ void EnzoLevelArray::apply_inference()
        } // iy
       } // iz
 
-      // center of FB sphere is (xmean, ymean, zmean)
-      double rho_inv = 1.0 / rho;
-      double xmean = rho_x * rho_inv;
-      double ymean = rho_y * rho_inv;
-      double zmean = rho_z * rho_inv;
+      bool method_inference_starnet_feedback = true; // TODO: Make this a parameter
+      // only do FB if S2 network identifies star-forming regions
+      if (SF_confirmed && method_inference_starnet_feedback) {
+        // center of FB sphere is (xmean, ymean, zmean)
+        double rho_inv = 1.0 / rho;
+        sphere_x = rho_x * rho_inv;
+        sphere_y = rho_y * rho_inv;
+        sphere_z = rho_z * rho_inv;
      
-//      if (print_fields) {
-//        for (int i_f = 0; i_f < num_fields_; i_f++) {
-          // print out all field values
-//          for (int iz=0; iz<niz_; iz++){
-//            for (int iy=0; iy<niy_; iy++){
-//              for (int ix=0; ix<nix_; ix++){
-//                int i = ix + nix_*(iy + niy_*iz);
-//                CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f,ix,iy,iz, field_values_[i_f].data()[i]);
-//              }
-//            }
-//          }
-//       }
-//     }
-    
+        // determine properties of population and metal yields
+        std::vector<double> masses, creationtimes;
+      
+        int Nstars = fbnet_->get_Nstars();
+        for (int i=0; i<Nstars; i++) {
+          double mass = fbnet_->get_mass();
+          if ((11.0 <= mass) && (mass < 20.0)) {
+            yield_SNe += fbnet_->metal_yield_SNe(mass);
+          }
+          else if ((20.0 <= mass) && (mass < 40.0)) {
+            yield_HNe += fbnet_->metal_yield_HNe(mass);
+          }
+          else if ((140.0 <= mass) && (mass < 260.0)) {
+            yield_PISNe += fbnet_->metal_yield_PISNe(mass);
+          }
+          masses.push_back(mass);
+          creationtimes.push_back(fbnet_->get_creationtime());
+        }
+      
+        // calculate radius of evolved remnant
+        sphere_r = fbnet_->get_radius( &masses, &creationtimes );
+        CkPrintf("EnzoMethodInference::FBNet predicts a region with radius %1.2e kpc and metal yields (%1.2e, %1.2e, %1.2e) Msun\n", sphere_r, yield_SNe, yield_HNe, yield_PISNe);
+    }
+   
   } // if pstar > pnostar in a block
 
   #endif
@@ -1208,15 +1228,11 @@ void EnzoLevelArray::apply_inference()
   // Update blocks with inference results
 
   //    find center of inference array
-  double center[3] = {
-    0.5*(lower[0]+upper[0]),
-    0.5*(lower[1]+upper[1]),
-    0.5*(lower[2]+upper[2])};
+  double center[3] = {sphere_x, sphere_y, sphere_z};
 
   //    put a sphere there and add it to a list sphere_list
-  double radius = 0.1*(upper[0]-lower[0]);
-  ObjectSphere sphere(center,radius);
-  std::vector<ObjectSphere> sphere_list;
+  EnzoObjectFeedbackSphere sphere(center, sphere_r, yield_SNe, yield_HNe, yield_PISNe);
+  std::vector<EnzoObjectFeedbackSphere> sphere_list;
   sphere_list.push_back(sphere);
 
 #ifdef TRACE_INFER
@@ -1231,11 +1247,11 @@ void EnzoLevelArray::apply_inference()
 
   //    allocate buffer
   int n = 0;
-  SIZE_VECTOR_TYPE(n,ObjectSphere,sphere_list);
+  SIZE_VECTOR_TYPE(n,EnzoObjectFeedbackSphere,sphere_list);
   //    initialize buffer
   char * buffer = new char [n];
   char *pc = buffer;
-  SAVE_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
+  SAVE_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
 
   //    Send data to leaf blocks via base-level block
   Index index_block = get_block_index_();
@@ -1267,15 +1283,18 @@ void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[
 {
   // Unpack buffer into sphere_list
 
-  std::vector<ObjectSphere> sphere_list;
+  std::vector<EnzoObjectFeedbackSphere> sphere_list;
   char *pc = buffer;
-  LOAD_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
+  LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
 
   Index index_block = block->index();
   const int level = block->level();
 
   if (block->is_leaf()) {
 
+    for (auto sphere : sphere_list) {
+      CkPrintf("EnzoMethodInference::update -- FB sphere pos = (%.2f, %.2f, %.2f);  radius: %1.2e; yields = (%1.2e, %1.2e, %1.2e)\n", sphere.pos(0), sphere.pos(1), sphere.pos(2), sphere.r(), sphere.metal_mass_SNe(), sphere.metal_mass_HNe(), sphere.metal_mass_PISNe() );    
+    }
     // if leaf block, we're done, tell level array element
     Index3 index3(il3[0],il3[1],il3[2]);
 
