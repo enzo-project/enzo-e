@@ -226,7 +226,7 @@ static EnzoEFltArrayMap get_accel_map_(Block* block) noexcept
   }
 
   str_vec_t field_list = {"acceleration_x", "acceleration_y", "acceleration_z"};
-  std::vector<CelloArray<enzo_float,3>> arrays
+  std::vector<CelloView<enzo_float,3>> arrays
     = {field.view<enzo_float>("acceleration_x"),
        field.view<enzo_float>("acceleration_y"),
        field.view<enzo_float>("acceleration_z")};
@@ -273,7 +273,7 @@ void EnzoMethodMHDVlct::save_fluxes_for_corrections_
     const std::string field_name = field.field_name(index_field);
 
     // note the field_name is the same as the key
-    CelloArray<const enzo_float, 3> flux_arr = flux_map.at(field_name);
+    CelloView<const enzo_float, 3> flux_arr = flux_map.at(field_name);
 
     FaceFluxes * left_ff = flux_data->block_fluxes(dim,0,i_f);
     FaceFluxes * right_ff = flux_data->block_fluxes(dim,1,i_f);
@@ -700,16 +700,16 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   // Compute thermal pressure (this presently requires that "pressure" is a
   // permanent field)
   Field field = block->data()->field();
-  CelloArray<enzo_float, 3> pressure = field.view<enzo_float>("pressure");
+  CelloView<enzo_float, 3> pressure = field.view<enzo_float>("pressure");
   fluid_props->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities
-  using RdOnlyEFltArr = CelloArray<const enzo_float, 3>;
-  const RdOnlyEFltArr density = integration_map.at("density");
+  using RdOnlyEFltView = CelloView<const enzo_float, 3>;
+  const RdOnlyEFltView density = integration_map.at("density");
 
-  const RdOnlyEFltArr velocity_x = integration_map.at("velocity_x");
-  const RdOnlyEFltArr velocity_y = integration_map.at("velocity_y");
-  const RdOnlyEFltArr velocity_z = integration_map.at("velocity_z");
+  const RdOnlyEFltView velocity_x = integration_map.at("velocity_x");
+  const RdOnlyEFltView velocity_y = integration_map.at("velocity_y");
+  const RdOnlyEFltView velocity_z = integration_map.at("velocity_z");
 
   // this will raise an error if not Ideal EOS
   const EnzoEOSIdeal eos = fluid_props->eos_variant().get<EnzoEOSIdeal>();
@@ -745,9 +745,9 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
                           0, loop_body);
 
   } else {
-    const RdOnlyEFltArr bfieldc_x = integration_map.at("bfield_x");
-    const RdOnlyEFltArr bfieldc_y = integration_map.at("bfield_y");
-    const RdOnlyEFltArr bfieldc_z = integration_map.at("bfield_z");
+    const RdOnlyEFltView bfieldc_x = integration_map.at("bfield_x");
+    const RdOnlyEFltView bfieldc_y = integration_map.at("bfield_y");
+    const RdOnlyEFltView bfieldc_z = integration_map.at("bfield_z");
 
     auto loop_body = [=, &dtBaryons](int iz, int iy, int ix)
       {

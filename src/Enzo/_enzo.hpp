@@ -174,6 +174,8 @@ extern "C" {
 #include "fluid-props/EnzoFluidFloorConfig.hpp"
 #include "fluid-props/EnzoPhysicsFluidProps.hpp"
 
+#include "chemistry/GrackleChemistryData.hpp"
+
 #include "enzo-core/EnzoUnits.hpp"
 
 #include "enzo-core/EnzoFactory.hpp"
@@ -259,7 +261,7 @@ extern "C" {
 #include "particle/feedback/EnzoMethodFeedback.hpp"
 #include "particle/feedback/EnzoMethodFeedbackSTARSS.hpp"
 #include "particle/formation/EnzoMethodFluxAccretion.hpp"
-#include "assorted/EnzoMethodGrackle.hpp"
+#include "chemistry/EnzoMethodGrackle.hpp"
 #include "gravity/EnzoMethodGravity.hpp"
 #include "assorted/EnzoMethodHeat.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
@@ -289,7 +291,7 @@ extern "C" {
 #include "fluid-props/EnzoComputeTemperature.hpp"
 
 #ifdef CONFIG_USE_GRACKLE
-  #include "assorted/EnzoComputeCoolingTime.hpp"
+  #include "chemistry/EnzoComputeCoolingTime.hpp"
 #endif
 
 #include "gravity/solvers/EnzoSolverBiCgStab.hpp"

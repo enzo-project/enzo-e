@@ -37,8 +37,8 @@ void EnzoInitialBCenter::initialize_bfield_center( Block * block )
 //----------------------------------------------------------------------
 
 void bfieldi_helper_(EFlt3DArray &bfield,
-                     CelloArray<double,3> &Aj,
-                     CelloArray<double,3> &Ak,
+                     CelloView<double,3> &Aj,
+                     CelloView<double,3> &Ak,
 		     int dim, double dj, double dk)
 {
 
@@ -52,7 +52,7 @@ void bfieldi_helper_(EFlt3DArray &bfield,
   int fc_my = bfield.shape(1);
   int fc_mz = bfield.shape(0);
 
-  CelloArray<double,3> Ak_left, Ak_right,Aj_right, Aj_left;
+  CelloView<double,3> Ak_left, Ak_right,Aj_right, Aj_left;
 
   if (dim == 0){
     // Aj_right = Ay(iz+1/2,iy,ix-1/2), Ak_right = Az(iz, iy+1/2,ix-1/2)
@@ -104,9 +104,9 @@ void bfieldi_helper_(EFlt3DArray &bfield,
 //    ( Ay(k-1/2,     j, i+1/2) - Ay(k-1/2,     j, i-1/2) )/dx -
 //    ( Ax(k-1/2, j+1/2,     i) - Ax(k-1/2, j-1/2,     i) )/dy
 void EnzoInitialBCenter::initialize_bfield_interface( Block * block,
-						      CelloArray<double,3> &Ax,
-						      CelloArray<double,3> &Ay,
-						      CelloArray<double,3> &Az)
+						      CelloView<double,3> &Ax,
+						      CelloView<double,3> &Ay,
+						      CelloView<double,3> &Az)
 {
 
   Field field = block->data()->field();
@@ -179,9 +179,9 @@ void EnzoInitialBCenter::enforce_block( Block * block,
     }
 
     // initialize arrays wrapping the data
-    CelloArray<double,3> Ax(data_ptrs[0],mz+1,my+1,mx);
-    CelloArray<double,3> Ay(data_ptrs[1],mz+1,my,mx+1);
-    CelloArray<double,3> Az(data_ptrs[2],mz,my+1,mx+1);
+    CelloView<double,3> Ax(data_ptrs[0],mz+1,my+1,mx);
+    CelloView<double,3> Ay(data_ptrs[1],mz+1,my,mx+1);
+    CelloView<double,3> Az(data_ptrs[2],mz,my+1,mx+1);
 
     EnzoInitialBCenter::initialize_bfield_interface(block,Ax,Ay,Az);
 

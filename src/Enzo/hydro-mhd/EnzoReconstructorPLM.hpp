@@ -203,11 +203,11 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
       // define:   wc_left(k,j,i)   -> w(k,j,i)
       //           wc_center(k,j,i) -> w(k,j,i+1)
       //           wc_right(k,j,i)  -> w(k,j,i+2)
-      const CelloArray<const enzo_float,3> wc_left
+      const CelloView<const enzo_float,3> wc_left
         = prim_map.get(key, stale_depth);
-      const CelloArray<const enzo_float,3> wc_center
+      const CelloView<const enzo_float,3> wc_center
         = coord.left_edge_offset(wc_left, 0, 0, 1);
-      const CelloArray<const enzo_float,3> wc_right
+      const CelloView<const enzo_float,3> wc_right
         = coord.left_edge_offset(wc_left, 0, 0, 2);
 
       // Prepare face-centered arrays

@@ -71,15 +71,16 @@ void EnzoPhysicsFluidProps::primitive_from_integration
          !this->has_barotropic_eos());
 
   // load shape ahead of time and declare them const for optimization purposes
-  const int mz = integration_map.array_shape(0);
-  const int my = integration_map.array_shape(1);
-  const int mx = integration_map.array_shape(2);
+  const CelloView<const enzo_float, 3> density = integration_map.at("density");
+  const int mz = density.shape(0);
+  const int my = density.shape(1);
+  const int mx = density.shape(2);
 
-  // When this method was originally written, the EOS object didn't necessarily
-  // know what the integration quantities are. For that reason, we take
-  // something of an exhaustive approach. 
+  // This method was originally written as a method of the EOS class and since
+  // then, we the EOS object didn't necessarily know what the integration
+  // quantities are. For that reason, we take a somewhat exhaustive approach. 
   // - This operation could be more efficient if if were made a part of the
-  //    Hydro/MHD Integrator
+  //   Hydro/MHD Integrator
   // - alternatively, the EnzoPhysicsFluidProps should be able to infer this
   //   information in the future (if we pass this function hints about bfields
   //   and CRs)
@@ -91,8 +92,8 @@ void EnzoPhysicsFluidProps::primitive_from_integration
       continue;
     }
 
-    const CelloArray<const enzo_float, 3> integ_array = integration_map.at(key);
-    const CelloArray<enzo_float, 3> prim_array = primitive_map.at(key);
+    const CelloView<const enzo_float, 3> integ_array = integration_map.at(key);
+    const CelloView<enzo_float, 3> prim_array = primitive_map.at(key);
 
 #ifdef DEBUG_MATCHING_ARRAY_SHAPES
     ASSERT6("EnzoPhysicsFluidProps::primitive_from_integration",
@@ -117,11 +118,10 @@ void EnzoPhysicsFluidProps::primitive_from_integration
 
   // Convert the passive scalars from conserved-form (i.e. a density) to
   // specific-form (mass fractions)
-  const CelloArray<const enzo_float, 3> density = integration_map.at("density");
   for (const std::string& key : passive_list){
-    const CelloArray<const enzo_float, 3> cur_conserved
+    const CelloView<const enzo_float, 3> cur_conserved
       = integration_map.at(key);
-    const CelloArray<enzo_float, 3> out_specific = primitive_map.at(key);
+    const CelloView<enzo_float, 3> out_specific = primitive_map.at(key);
 
     for (int iz = stale_depth; iz < mz - stale_depth; iz++) {
       for (int iy = stale_depth; iy < my - stale_depth; iy++) {
@@ -217,7 +217,7 @@ void EnzoPhysicsFluidProps::apply_floor_to_energy_and_sync
   const EFlt3DArray eint =
     (idual) ? integration_map.at("internal_energy") : EFlt3DArray();
 
-  using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+  using RdOnlyEFlt3DArray = CelloView<const enzo_float, 3>;
   const RdOnlyEFlt3DArray density = integration_map.at("density");
   const RdOnlyEFlt3DArray vx = integration_map.at("velocity_x");
   const RdOnlyEFlt3DArray vy = integration_map.at("velocity_y");

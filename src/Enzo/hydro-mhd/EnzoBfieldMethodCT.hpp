@@ -111,8 +111,8 @@ public: // interface
   ///
   /// @note this function is called in `update_all_bfield_components`
   static void compute_center_bfield
-  (int dim, const CelloArray<enzo_float,3> &bfieldc_comp,
-   const CelloArray<const enzo_float,3> &bfieldi_comp, int stale_depth = 0);
+  (int dim, const CelloView<enzo_float,3> &bfieldc_comp,
+   const CelloView<const enzo_float,3> &bfieldi_comp, int stale_depth = 0);
 
 protected: // methods
 
@@ -172,11 +172,11 @@ protected: // methods
   ///
   /// @note this function is called in compute_all_edge_efields
   void static compute_edge_efield
-  (int dim, const CelloArray<const enzo_float, 3> &center_efield,
-   const CelloArray<enzo_float, 3> &edge_efield,
+  (int dim, const CelloView<const enzo_float, 3> &center_efield,
+   const CelloView<enzo_float, 3> &edge_efield,
    const EnzoEFltArrayMap &jflux_map,
    const EnzoEFltArrayMap &kflux_map,
-   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   const std::array< CelloView<const enzo_float, 3>, 3> &weight_l,
    int stale_depth);
 
   /// Compute the all of the edge-centered electric fields using the current
@@ -211,7 +211,7 @@ protected: // methods
   (const EnzoEFltArrayMap &integration_map, const EnzoEFltArrayMap &xflux_map,
    const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
    EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
-   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   const std::array< CelloView<const enzo_float, 3>, 3> &weight_l,
    int stale_depth);
 
   /// Updates the face-centered B-field component along the ith dimension using
@@ -244,9 +244,9 @@ protected: // methods
   ///     quantities
   static void update_bfield
   (const enzo_float* &cell_widths, int dim,
-   const std::array<CelloArray<const enzo_float, 3>, 3> &efield_l,
-   const CelloArray<enzo_float, 3> &cur_interface_bfield,
-   const CelloArray<enzo_float, 3> &out_interface_bfield,
+   const std::array<CelloView<const enzo_float, 3>, 3> &efield_l,
+   const CelloView<enzo_float, 3> &cur_interface_bfield,
+   const CelloView<enzo_float, 3> &out_interface_bfield,
    enzo_float dt, int stale_depth);
 
 protected: // attributes

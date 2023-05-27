@@ -1,8 +1,8 @@
-.. _using-CelloArray:
+.. _using-CelloView:
 
-****************
-Using CelloArray
-****************
+***************
+Using CelloView
+***************
 
 ==========
 Background
@@ -14,19 +14,20 @@ index of the pointer using knowledge of the underlying shape of the
 array represented by the pointer.
 
 To simplify and enhance the readability of code in Enzo-E, we have
-implemented ``CelloArray``, a Multi-dimensional Array class template
-that wraps the data and encapsulate array operations. This class
-template draw’s loose inspiration from Athena++’s ``AthenaArray`` and
-numpy’s ``ndarray``.
+implemented ``CelloView``, which encapsulates the operations associated with
+Multi-dimensional data. This class template draws loose inspiration
+from Athena++’s ``AthenaArray`` and numpy’s ``ndarray``.  This class
+was initially called ``CelloArray``, but the name was changed for
+reasons described in :ref:`array-vs-view-name`.
 
 See the first two cases listed in :ref:`array-examples`
-for comparisons of snipets written using ``CelloArray`` and traditional
+for comparisons of snipets written using ``CelloView`` and traditional
 pointer operations. These examples reflect operations performed in
 Enzo-E.
 
 
 Throughout the Enzo portion of the codebase, we extensively use the type
-``EFlt3DArray`` which acts is an alias for ``CelloArray<enzo_float,3>``.
+``EFlt3DArray`` which acts is an alias for ``CelloView<enzo_float,3>``.
 
 ============
 Design Goals
@@ -43,15 +44,15 @@ The design of the class was primarily driven by the following specifications:
     * Simple benchmarks show that the current implementation achieves
       performance comparable to c-style array access
 
-  * The CelloArray needs tp be able to allocate and manage its own memory AND
+  * The ``CelloView`` needs to be able to allocate and manage its own memory AND
     wrap existing pointers (namely the pointers allocated by the Cello’s Field
     framework)
 
-    * This allows code using the ``CelloArray`` to coexist alongside code which
+    * This allows code using the ``CelloView`` to coexist alongside code which
       use pointers in a more conventional way.
 
-  * ``CelloArray`` needs be able to represent a view of a (mostly contiguous)
-    subarray of a pre-existing instance of ``CelloArray``. This facilitates the
+  * ``CelloView`` needs be able to represent a view of a (mostly contiguous)
+    subarray of a pre-existing instance of ``CelloView``. This facilitates the
     encapsulation of a directional mesh operation in a single generalized
     function (e.g. writing a single flux function for all directions rather
     than separate functions to compute flux along the x, y, and z directions).
@@ -61,18 +62,18 @@ The design of the class was primarily driven by the following specifications:
 User Interface
 ==============
 
-The class template is formally defined as ``CelloArray<T,D>`` where
-``T`` is the contained type (frequently ``enzo_float``) and ``D`` is
+The class template is formally defined as ``CelloView<T,D>`` where
+``T`` is the element type (frequently ``enzo_float``) and ``D`` is
 the number of dimensionsions of the array.
 
-At a high-level, this template class has semantics like a pointer or
-``std::shared_ptr`` (there are also similarities to numpy's ,
+At a high-level, this class template has semantics like a pointer or
+``std::shared_ptr`` (there are also similarities to numpy's
 ``ndarray``).  These objects serve as a 
 smart-pointer with methods for treating the data as a specialized
 array.  These semantics explicitly differ from the C++ standard
 library containers (like ``std::vector``).
 
-In other words, ``CelloArray<T,D>`` acts as an address
+In other words, ``CelloView<T,D>`` acts as an address
 for the underlying data. The copy constructor and copy
 assignment operation effectively make shallow copies and
 deepcopies are made by explicitly invoking special methods. A
@@ -80,9 +81,9 @@ consequnce of this is that any modifications made to the elements of
 an array within a function, where the array had been passed by value,
 will affect the value of the array outside of the function.
 We will return to this topic below in
-:ref:`CelloArray-Pointer-Semantics`
+:ref:`CelloView-Pointer-Semantics`
 
-To provide a more detailed description of ``CelloArray<T,D>``'s
+To provide a more detailed description of ``CelloView<T,D>``'s
 user interface it is most straightforward to describe the different
 operations with examples (rather than providing a detailed API).
 
@@ -90,7 +91,7 @@ Array Creation
 --------------
 Simplest initialization:
 
-  * Use the constructor ``CelloArray(Args... args)`` to construct an
+  * Use the constructor ``CelloView(Args... args)`` to construct an
     array of 0s of shape ``(arg0, arg1, ... arg{D-1})``.  The resulting
     array owns the underlying memory and deallocation is entirely
     taken care of
@@ -101,19 +102,19 @@ Simplest initialization:
 
     .. code-block:: c++
 
-       CelloArray<double,3> arr(2,3,4);
+       CelloView<double,3> arr(2,3,4);
 
 
     * Construct an array of shape ``(5,)`` that holds ints:
        
     .. code-block:: c++
 
-       CelloArray<int,1> arr(5); 
-       CelloArray<int,1> arr2 = CelloArray<int,1>(5); // yields same result
+       CelloView<int,1> arr(5); 
+       CelloView<int,1> arr2 = CelloView<int,1>(5); // yields same result
 
 Wrap a pre-existing pointer:
 
-  * Use the constructor ``CelloArray(T* array, Args... args);`` to wrap the
+  * Use the constructor ``CelloView(T* array, Args... args);`` to wrap the
     pointer ``array`` which represents an array with shape
     ``(arg0, arg1, ... arg{D-1})``.
 
@@ -122,15 +123,15 @@ Wrap a pre-existing pointer:
   .. code-block:: c++
 
      int data[] = {0,1,2,3,4,5};
-     CelloArray<int,2> arr(data,2,3);
+     CelloView<int,2> arr(data,2,3);
 
 We can also forward declare an array and assign values to it later.
 
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloArray<int,2> arr; 
-   arr = CelloArray<int,2>(data,2,3);
+   CelloView<int,2> arr; 
+   arr = CelloView<int,2>(data,2,3);
 
 
 Dimension Size
@@ -157,7 +158,7 @@ The ``operator()(Args... args)`` method returns a reference or copy
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloArray<int,2> arr(data,2,3);
+   CelloView<int,2> arr(data,2,3);
    printf("%d\n", arr(0,2)); // prints "2"
    // printf("%d\n", arr(2));       This would fail to compile
    // printf("%d\n", arr(0,0,2));   This would fail to compile
@@ -171,10 +172,10 @@ Shallow copies are produced via ordinary assignment.
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloArray<int,2> a(data,2,3);
-   CelloArray<int,2> b = a; // b is now a shallow copy of a
-   CelloArray<int,2> c(2,2); // c represents [[0,0],[0,0]]
-   CelloArray<int,2> d = c; // d is now a shallow copy of c
+   CelloView<int,2> a(data,2,3);
+   CelloView<int,2> b = a; // b is now a shallow copy of a
+   CelloView<int,2> c(2,2); // c represents [[0,0],[0,0]]
+   CelloView<int,2> d = c; // d is now a shallow copy of c
    c = a; // c is now a shallow copy of a
 
 When ``c`` is assinged the contents of ``a``, ``c`` becomes a shallow
@@ -186,8 +187,8 @@ To perform a deepcopy, assign the the results of the ``deepcopy`` method.
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloArray<int,2> a(data,2,3);
-   CelloArray<int,2> e = a.deepcopy(); // e is now a deep copy of a
+   CelloView<int,2> a(data,2,3);
+   CelloView<int,2> e = a.deepcopy(); // e is now a deep copy of a
    
 Modifications to the contents of ``e`` will not be reflected in ``a``
 or ``data`` (and vice-versa)
@@ -221,8 +222,8 @@ and represents the array ``[[0,1,2],[3,4,5]]``).
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloArray<int,2> arr(data,2,3);
-   CelloArray<int,2> sub = arr.subarray(CSlice(0,2),CSlice(1,3));
+   CelloView<int,2> arr(data,2,3);
+   CelloView<int,2> sub = arr.subarray(CSlice(0,2),CSlice(1,3));
    printf("%d\n", sub(1,0)) // prints "4";
 
 At this point ``sub`` represents the subarray ``[[1,2],[4,5]]``
@@ -240,14 +241,14 @@ After executing the above block of code, ``arr`` now represents
 ``[[0,-100,2],[3,4,-15]]`` and ``sub`` represents the subarray
 ``[[-100,2],[4,-15]]``.
 
-``CelloArray`` also provides support for taking subarrays of
+``CelloView`` also provides support for taking subarrays of
 subarrays (or taking subarrays of shallow copies). If we define
 a subarray of ``sub`` the result will represent a view of the
 same underlying data
 
 .. code-block:: c++
 
-   CelloArray<int,2> sub_of_sub = sub.subarray(CSlice(0,2),CSlice(0,1));
+   CelloView<int,2> sub_of_sub = sub.subarray(CSlice(0,2),CSlice(0,1));
    sub_of_sub(1,0) +=8;
 
 After the above operations, ``arr`` now reflects the full array
@@ -261,8 +262,8 @@ tracked by all subarrays and subcopies are unaffected.
 
 .. code-block:: c++
 
-   CelloArray<int,2> sub2 = arr.subarray(CSlice(1,2),CSlice(0,3));
-   arr = CelloArray<int, 2>(3,3); // setting arr equal to another array
+   CelloView<int,2> sub2 = arr.subarray(CSlice(1,2),CSlice(0,3));
+   arr = CelloView<int, 2>(3,3); // setting arr equal to another array
    sub(1,0) /= -2;
 
 After execution of the preceeding block of code, ``sub`` represents
@@ -272,20 +273,20 @@ After execution of the preceeding block of code, ``sub`` represents
 ``[0, -100, 2, 3, -6, -15]``).
 
 The fact that ``arr`` originally wrapped ``data`` has no bearing on
-the outcomes described above for each instance of ``CelloArray``.
+the outcomes described above for each instance of ``CelloView``.
 We illustrate this below with an analogous abreviated example, where
 the analog to ``arr``, called ``array``, originally owns its data.
 
 .. code-block:: c++
 
-   CelloArray<int,2> array(2,3);
+   CelloView<int,2> array(2,3);
    array(0,0) = 0;    array(0,1) = 1;    array(0,2) = 2;
    array(1,0) = 3;    array(1,1) = 4;    array(1,2) = 5;
-   CelloArray<int,2> subarray = array.subarray(CSlice(0,2), CSlice(1,3));
+   CelloView<int,2> subarray = array.subarray(CSlice(0,2), CSlice(1,3));
    array(1,3) *= -3;
    subarray(0,0) = -100;
-   CelloArray<int,2> subarray_of_subarray = subarray.subarray(CSlice(0,2),
-                                                              CSlice(0,1));
+   CelloView<int,2> subarray_of_subarray = subarray.subarray(CSlice(0,2),
+                                                             CSlice(0,1));
    subarray_of_subarray(1,0) += 8;
 
 After executing the preceeding block of code, ``array`` reflects
@@ -301,8 +302,8 @@ of its subarrays and shallow copies will be unaffected.
 
 .. code-block:: c++
 
-   CelloArray<int,2> subarray2 = array.subarray(CSlice(1,2),CSlice(0,3));
-   array = CelloArray<int, 2>(3,3);
+   CelloView<int,2> subarray2 = array.subarray(CSlice(1,2),CSlice(0,3));
+   array = CelloView<int, 2>(3,3);
    subarray(1,0) /= -2;
 
 Now, ``subarray`` represents ``[[-100,2],[-6,-15]]`` from the full
@@ -319,7 +320,7 @@ subarrays/shallowcopies that view the original data are destroyed).
 Additional CSlice features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 ``CSlice`` provides two additional features to simplify code when
-the generating subarrays of a ``CelloArray`` instance. These are
+the generating subarrays of a ``CelloView`` instance. These are
 
   1. The constructor supports negative indexing. For example
      ``CSlice(1,-1)`` represents a slice starting at the second
@@ -350,16 +351,16 @@ Copying Elements between arrays
 -------------------------------
 
 We also provide the ``copy_to`` instance method in order to copy
-elements between elements between two ``CelloArray`` instances.
+elements between elements between two ``CelloView`` instances.
 
 An example is illustrated below:
 
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5,6,7,8,9,10,11};
-   CelloArray<int,2> arr(data,3,4);
+   CelloView<int,2> arr(data,3,4);
    // arr reflects: [[0,1,2,3],[4,5,6,7],[8,9,10,11]]
-   CelloArray<int,2> arr2(2,2); // arr2 is initially [[0,0],[0,0]]
+   CelloView<int,2> arr2(2,2); // arr2 is initially [[0,0],[0,0]]
    arr2(0,0) = 7;
    arr2(0,1) = 7;
    arr2(1,0) = 7;
@@ -369,13 +370,13 @@ An example is illustrated below:
    arr2(0,1) = 4; // arr2 is now [[7,4],[7,7]] and arr is unaffected
 
 
-.. _CelloArray-Pointer-Semantics:
+.. _CelloView-Pointer-Semantics:
 
 Pointer Semantics
 -----------------
 
 The following table is provided to highlight some of the differences
-between the ``CelloArray``'s semantics and the semantics of a standard
+between the ``CelloView``'s semantics and the semantics of a standard
 library container.
 
 
@@ -384,15 +385,15 @@ library container.
    :header-rows: 1
 
    * -
-     - ``CelloArray<T,D>`` Semantics
+     - ``CelloView<T,D>`` Semantics
      - Container Semantics
    * - Null-State
-     - * a ``CelloArray<T, D>`` technically supports an "null" state,
+     - * a ``CelloView<T, D>`` technically supports a "null" state,
          which signals that it's uninitialized. (This is directly
          analogous to a ``nullptr``).
-       * the ``CelloArray<T, D>::is_null()`` method is provided for checking
+       * the ``CelloView<T, D>::is_null()`` method is provided for checking
          this condition.
-       * The default constructor will create an uninitialized CelloArray
+       * The default constructor will create an uninitialized CelloView
      - A container always has a valid state. A default-constructed container
        is simply an empty container.
 
@@ -402,31 +403,28 @@ library container.
 
    * - ``const`` correctness
      - * like a ``float * const`` or a ``const
-         std::shared_ptr<float>``, a ``const CelloArray<float, N>``
+         std::shared_ptr<float>``, a ``const CelloView<float, N>``
          points to values at a fixed location in memory. While the
          memory address can’t be modified, the values stored at that
          address can still be mutated.
        * like a ``const float*`` or a ``std::shared_ptr<const
-         float>``, a ``CelloArray<const float, N>`` points to a region
+         float>``, a ``CelloView<const float, N>`` points to a region
          in memory whose values cannot be modified. :superscript:`1` In
          other words the compiler will raise errors if you try to
          modify any of the values within the array.
-       * Note: a ``CelloArray<float, N>`` can be implicitly converted
-         to a ``CelloArray<const float, N>`` (e.g. you can pass the
+       * Note: a ``CelloView<float, N>`` can be implicitly converted
+         to a ``CelloView<const float, N>`` (e.g. you can pass the
          former to a function that expecting the latter). It’s about
          as seemless as converting a ``float*`` to a ``const
          float*``. :superscript:`2`
 
-         (In contrast, ``std::const_pointer_cast`` is
-         required for converting a ``std::shared_ptr<float>`` to a
-         ``std::shared_ptr<const float>``)
      - The contents of a ``const`` container are immutable. For example,
        a ``const std::vector<float>``, won't let you modify it's values.
 
 :superscript:`1` For completeness, we note that there's technically
-nothing stopping you from having a ``CelloArray<float, N>`` that
-aliases the same data as a ``CelloArray<const float, N>``. In that
-case, you are could modify the values using the ``CelloArray<float,
+nothing stopping you from having a ``CelloView<float, N>`` that
+aliases the same data as a ``CelloView<const float, N>``. In that
+case, you are could modify the values using the ``CelloView<float,
 N>``.
 
 :superscript:`2` In contrast, ``std::const_pointer_cast`` is
@@ -438,23 +436,23 @@ Convenience
 ===========
 
 In the Enzo layer of the codebase, we provide several short-cuts for
-performing frequent actions related to the ``CelloArray`` to reduce
+performing frequent actions related to the ``CelloView`` to reduce
 boilerplate code.
 
   * We define and make extensive use of the type ``EFlt3DArray`` which
-    is an alias for ``CelloArray<enzo_float,3>``.
+    is an alias for ``CelloView<enzo_float,3>``.
 
   * We define the class ``EnzoFieldArrayFactory`` which drastically
     reduces the boilerplate code associated with the initialization of
-    instances of ``CelloArray`` that wrap Cello fields.
+    instances of ``CelloView`` that wrap Cello fields.
 
   * We define the class ``EnzoPermutedCoordinates`` convenience class
     which helps reduce boilerplate code associated with writing
-    functions using instances of ``CelloArray`` that are generalized
+    functions using instances of ``CelloView`` that are generalized
     with respect to dimension.
 
 Two additional, features that can be enabled at compile-time to assist
-with debugging by defining macros before the inclusion of the ``CelloArray``
+with debugging by defining macros before the inclusion of the ``CelloView``
 header file.
 
   * Defining the ``CHECK_BOUNDS`` macro, will cause checks of the validity of
@@ -471,12 +469,12 @@ Examples
 ========
 
 Below, we show some factored out, simplified examples, ways in which how
-``CelloArray`` might simplify code:
+``CelloView`` might simplify code:
 
 Copying Elements
 ----------------
 
-This example illustrates how ``CelloArray`` simplifies the code
+This example illustrates how ``CelloView`` simplifies the code
 required to copy elements between arrays. (We illustrate how one might
 write Nearest Neighbor reconstruction along the x-direction).
 
@@ -490,12 +488,12 @@ have:
 
   * An ``(mz,my,mx-1)`` array of right reconstructed values, ``wr`` 
 
-First is an the ``CelloArray`` version:
+First is an the ``CelloView`` version:
     
 .. code-block:: c++
 
    typedef double enzo_float;
-   typedef CelloArray<enzo_float,3> EFlt3DArray;
+   typedef CelloView<enzo_float,3> EFlt3DArray;
 
    void reconstruct_NN_x(EFlt3DArray &w, EFlt3DArray &wl, 
                          EFlt3DArray &wr){
@@ -533,7 +531,7 @@ Adding Flux Divergence
 
 We show a factored out, slightly simplified version of the code used
 to add the flux divergence in an unsplit manner. This example is one
-of the more notable cases where the ``CelloArray`` leads to more
+of the more notable cases where the ``CelloView`` leads to more
 transparent code.
 
 This code assumes a mesh with shape (mz, my, mx). Suppose we have:
@@ -558,7 +556,7 @@ This code assumes a mesh with shape (mz, my, mx). Suppose we have:
 .. code-block:: c++
 
    typedef double enzo_float;
-   typedef CelloArray<enzo_float,3> EFlt3DArray;
+   typedef CelloView<enzo_float,3> EFlt3DArray;
 
    void  update_cons(EFlt3DArray &u, EFlt3DArray &out,
                      EFlt3DArray &xflux, EFlt3DArray &yflux,
@@ -585,7 +583,7 @@ The analogous function using conventional pointer operations is provided below:
 .. code-block:: c++
 
    typedef double enzo_float;
-   typedef CelloArray<enzo_float,3> EFlt3DArray;
+   typedef CelloView<enzo_float,3> EFlt3DArray;
 
    void update_cons(enzo_float *u, enzo_float *out, 
                     enzo_float *xflux, enzo_float *yflux,
@@ -623,7 +621,7 @@ Direction Generalized Functions
 -------------------------------
 
 This example illustrates how subarrays allows functions using
-``CelloArray`` to be written so that they are generalized with respect
+``CelloView`` to be written so that they are generalized with respect
 to Cartesian direction. Due to the simplicity of the example, code
 with conventional pointer operations is comparable to the code using
 arrays (however arrays make more complex examples more understandable)
@@ -648,7 +646,7 @@ This code assumes a mesh with shape ``(mz, my, mx)``. Suppose we have:
 .. code-block:: c++
 
    typedef double enzo_float;
-   typedef CelloArray<enzo_float,3> EFlt3DArray;
+   typedef CelloView<enzo_float,3> EFlt3DArray;
 
    void calc_center_bfield(EFlt3DArray &bc, EFlt3DArray &bi, int dim){
      EFlt3DArray bi_l = bi;
@@ -673,16 +671,42 @@ This code assumes a mesh with shape ``(mz, my, mx)``. Suppose we have:
      }
    }
 
+.. _array-vs-view-name:
+
+=============================
+Why is it named ``CelloView``
+=============================
+
+``CelloView`` was originally called ``CelloArray``, but the name was
+changed to reflect subtle differences between ``CelloView`` and what
+is typically called an array in C and in C++'s standard library.
+
+For context, when we declare a variable as a C-style array (e.g. ``int
+data[4];``), or a ``std::array``, the lifetime of the associated data
+is tied to the variable's lifetime (when the variable leaves scope,
+the data is deallocated). In other words, these arrays manage the
+lifetime of the associated data.
+
+While a ``CelloView`` *can* manage the lifetime of the associated
+data, that is not a hard requirement. It really acts as a "view" of a
+region of memory (that it may or may not own): it provides useful methods
+for probing that memory and associates useful metadata with it (i.e. the
+shape/layout).
+
+A consequence of this difference is that ``CelloView`` has different
+semantics from standard library containers (described above).
+
+
 .. _EnzoEFltArrayMap-Description:
 
 ====================
 ``EnzoEFltArrayMap``
 ====================
 
-A class that is frequently used alongside ``CelloArray`` is the
+A class that is frequently used alongside ``CelloView`` is the
 ``EnzoEFltArrayMap`` class. As the name may suggest, these classes
 serve as a map/dictionary of instances of ``EFlt3DArray`` (or
-equivalently, instances of ``CelloArray<enzo_float,3>``). The keys
+equivalently, instances of ``CelloView<enzo_float,3>``). The keys
 of the map are always strings.
 
 Overview
@@ -711,8 +735,8 @@ configurable "struct of arrays".
 .. note::
 
    In the future, we may replace this ``EnzoEFltArrayMap`` with a
-   template class (e.g. ``CelloArrayMap<T, D>``) that can represent a
-   map of ``CelloArray``\s that have a datatype other than
+   template class (e.g. ``ViewMap<T, D>``) that can represent a
+   map of ``CelloView``\s that have a datatype other than
    ``enzo_float`` and numbers of dimensions other than 3. In that
    case, we would probably define ``EnzoEFltArrayMap`` as an alias
    to maintain backwards compatability.
@@ -722,7 +746,7 @@ Basic Usage
 
 Below, we provide a brief (non-exhaustive) overview of how the
 ``EnzoEFltArrayMap`` class is used. This is not as detailed as the
-description for the ``CelloArray`` template class.
+description for the ``CelloView`` template class.
 
 Creation
 ~~~~~~~~
@@ -731,25 +755,25 @@ There are 2 primary ways to construct a new ``EnzoEFltArrayMap``
 instance.
 
   1. The following code snippet illustrates how to construct an instance
-     that holds existing ``CelloArray`` instances.
+     that holds existing ``CelloView`` instances.
 
      .. code-block:: c++
 
        // let's assume we have arrays holding density and velocity_x
        // (it does NOT matter whether any of these arrays allocate their own
        // data or wrap a pre-existing pointer)
-       CelloArray<enzo_float,3> density_arr(4,5,6);
-       CelloArray<enzo_float,3> velocity_x_arr(4,5,6);
-       CelloArray<enzo_float,3> velocity_y_arr(4,5,6);
-       CelloArray<enzo_float,3> velocity_z_arr(4,5,6);
+       CelloView<enzo_float,3> density_arr(4,5,6);
+       CelloView<enzo_float,3> velocity_x_arr(4,5,6);
+       CelloView<enzo_float,3> velocity_y_arr(4,5,6);
+       CelloView<enzo_float,3> velocity_z_arr(4,5,6);
 
        std::string map_name = "My Wrapper Map";
        std::vector<std::string> key_l = {"density", "velocity_x",
                                          "velocity_y", "velocity_z"};
-       std::vector<CelloArray<enzo_float,3>> arr_l = {density_arr,
-                                                      velocity_x_arr,
-                                                      velocity_y_arr,
-                                                      velocity_z_arr};
+       std::vector<CelloView<enzo_float,3>> arr_l = {density_arr,
+                                                     velocity_x_arr,
+                                                     velocity_y_arr,
+                                                     velocity_z_arr};
        EnzoEFltArrayMap wrapper_arr_map(map_name, key_l, arr_l);
 
      In the above example, we gave our array map the name ``"My
@@ -782,7 +806,7 @@ instance.
      Scratch Map"``. ``scratch_arr_map`` contains the same keys as
      ``wrapper_arr_map`` and each of the contained arrays have the same
      shape. The values inside each array of ``scratch_arr_map`` were set
-     by the constructor of ``CelloArray``.
+     by the constructor of ``CelloView``.
 
      If we didn't want to name our array map, we could alternatively use:
 
@@ -794,7 +818,7 @@ Element Access
 ~~~~~~~~~~~~~~
 
 The following snippet shows two ways to access a
-``CelloArray<enzo_float,3>`` associated with a given key
+``CelloView<enzo_float,3>`` associated with a given key
 
 .. code-block:: c++
 
@@ -803,34 +827,34 @@ The following snippet shows two ways to access a
    std::array<int,3> shape = {4,5,6};
    EnzoEFltArrayMap scratch_arr_map(map_name, key_l, shape);
 
-   CelloArray<enzo_float,3> my_arr1 = scratch_arr_map["density"];
-   CelloArray<enzo_float,3> my_arr2 = scratch_arr_map.at("density");
+   CelloView<enzo_float,3> my_arr1 = scratch_arr_map["density"];
+   CelloView<enzo_float,3> my_arr2 = scratch_arr_map.at("density");
 
-Due to the pointer-semantics of ``CelloArray``, ``my_arr1`` and
+Due to the pointer-semantics of ``CelloView``, ``my_arr1`` and
 ``my_arr2`` are shallow-copies of one-another. For the same reason,
 ``other_arr1`` and ``other_arr2`` in the following snipet are also
 shallow copies of ``density_arr``.
 
 .. code-block:: c++
 
-   CelloArray<enzo_float,3> density_arr(4,5,6);
-   CelloArray<enzo_float,3> velocity_x_arr(4,5,6);
+   CelloView<enzo_float,3> density_arr(4,5,6);
+   CelloView<enzo_float,3> velocity_x_arr(4,5,6);
    std::vector<std::string> key_l = {"density", "velocity_x"};
-   std::vector<CelloArray<enzo_float,3>> arr_l = {density_arr, velocity_x_arr};
+   std::vector<CelloView<enzo_float,3>> arr_l = {density_arr, velocity_x_arr};
    EnzoEFltArrayMap other_arr_map(key_l, arr_l);
 
-   CelloArray<enzo_float,3> other_arr1 = scratch_arr_map["density"];
-   CelloArray<enzo_float,3> other_arr2 = scratch_arr_map.at("density");
+   CelloView<enzo_float,3> other_arr1 = scratch_arr_map["density"];
+   CelloView<enzo_float,3> other_arr2 = scratch_arr_map.at("density");
 
 Unlike the element access methods of something like
-``std::map<std::string, CelloArray<enzo_float,3>``, these methods
+``std::map<std::string, CelloView<enzo_float,3>``, these methods
 cannot be used to add new key-value pairs to an ``EnzoEFltArrayMap``
-or to replace the ``CelloArray`` associated with a given
+or to replace the ``CelloView`` associated with a given
 key. (naturally, you can still change elements within the retrieved
-``CelloArray`` instances).
+``CelloView`` instances).
 
 ``EnzoEFltArrayMap`` also supports index-access to it's contents.
-``scratch_arr_map[i]`` accesses the ``CelloArray`` associated with the
+``scratch_arr_map[i]`` accesses the ``CelloView`` associated with the
 ``i``th key (using the order specified during construction). Note that
 we don't support passing an integer value to ``EnzoEFltArrayMap::at``.
 
@@ -839,16 +863,16 @@ Copy and ``const`` Semantics
 
 Making a copy of an ``EnzoEFltArrayMap`` instance (e.g. with a copy
 constructor) always effectively produces a shallow copy. This is a
-natural consequnce of the ``CelloArray``\'s pointer semantics. For
-example, each element in a copy of a ``std::vector<CelloArray<T,D>>``
+natural consequnce of the ``CelloView``\'s pointer semantics. For
+example, each element in a copy of a ``std::vector<CelloView<T,D>>``
 would be a shallow copy of the corresponding element in the orginal
 vector.
 
 A ``const EnzoEFltArrayMap`` is effectively read-only. For reference,
 element-access of an ``EnzoEFltArrayMap`` instance yields a
-``CelloArray<enzo_float,3>`` instance (whose elements can be modified).
+``CelloView<enzo_float,3>`` instance (whose elements can be modified).
 In comparison, element-access of a ``const EnzoEFltArrayMap`` yields a
-``CelloArray<const enzo_float,3>`` which prevents direct modification of
+``CelloView<const enzo_float,3>`` which prevents direct modification of
 array elements.
 
 
@@ -885,19 +909,19 @@ Internal Data Organization
 This class *currently* supports two approaches for internally storing
 the values of the map:
 
-  1. The default, flexible approach stores the ``CelloArray`` values
+  1. The default, flexible approach stores the ``CelloView`` values
      in a ``vector``. This storage approach is analogous to having an
      array of pointers. This is the approach that is used when a
      ``EnzoEFltArrayMap`` is constructed that wraps pre-existing
-     ``CelloArray`` instances.
+     ``CelloView`` instances.
 
   2. The secondary, more specialized approach stores the individual
-     ``CelloArray`` values in a single ``CelloArray<enzo_float, 4>``
-     instance. Access of individual ``CelloArray`` values is
+     ``CelloView`` values in a single ``CelloView<enzo_float, 4>``
+     instance. Access of individual ``CelloView`` values is
      accomplished with the overload of the
-     ``CelloArray<T,D>::subarray`` method. This approach is used when
+     ``CelloView<T,D>::subarray`` method. This approach is used when
      you construct an ``EnzoEFltArrayMap`` that allocates memory for
-     the contained ``CelloArray``\s.
+     the contained ``CelloView``\s.
 
 
 From an API-perspective, both approaches are nearly
@@ -907,7 +931,7 @@ provide better data locality.
 The **only** API difference introduced by these approaches is the
 instances using the latter one supports the
 ``EnzoEFltArrayMap::get_backing_array()`` method, which provides
-access to the underlying ``CelloArray<enzo_float, 4>``.  If that
+access to the underlying ``CelloView<enzo_float, 4>``.  If that
 method is invoked on an instance that uses the first approach, the
 program will abort and print an error message. To that end, the
 ``EnzoEFltArrayMap::contiguous_arrays()`` instance method let's you
@@ -926,9 +950,10 @@ determine which approach is being used.
    We **strongly** advise that you avoid using this method unless you
    deem it absolutely necessary. In many cases, the API of
    ``EnzoEFltArrayMap`` is sufficiently fast for retrieving the
-   required ``CelloArray``\s before an expensive nested for-loop or in
+   required ``CelloView``\s before an expensive nested for-loop or in
    the outermost level of a nested for-loop.
 
-   As an aside, the way that ``EnzoEFltArrayMap`` implements key-lookups
-   is very crude. The implemenation could be refactored and sped up
-   considerably.
+   As an aside, the way that ``EnzoEFltArrayMap`` implements key-lookups could be
+   refactored and sped up considerably.
+
+

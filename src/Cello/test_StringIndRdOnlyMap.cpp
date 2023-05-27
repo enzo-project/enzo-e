@@ -7,7 +7,7 @@
 
 #include "main.hpp"
 #include "test.hpp"
-#include "array.hpp"
+#include "view.hpp"
 
 //----------------------------------------------------------------------
 

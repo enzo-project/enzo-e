@@ -82,7 +82,7 @@ public:
 			const enzo_float cell_width,
                         const EnzoEFltArrayMap &prim_map,
                         EnzoEFltArrayMap &dUcons_map,
-                        const CelloArray<const enzo_float,3> &interface_velocity,
+                        const CelloView<const enzo_float,3> &interface_velocity,
 			const int stale_depth)
     const throw();
 };

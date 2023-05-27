@@ -25,8 +25,8 @@ void EnzoReconstructorNN::reconstruct_interface
              &prim_map, &priml_map, &primr_map](const std::string &key)
     {
       // define wc_offset(k,j,i) -> wc(k,j,i+1)
-      const CelloArray<const enzo_float,3> wc = prim_map.get(key, stale_depth);
-      const CelloArray<const enzo_float,3> wc_offset
+      const CelloView<const enzo_float,3> wc = prim_map.get(key, stale_depth);
+      const CelloView<const enzo_float,3> wc_offset
         = coord.left_edge_offset(wc, 0, 0, 1);
 
       const EFlt3DArray wl = priml_map.get(key, stale_depth);

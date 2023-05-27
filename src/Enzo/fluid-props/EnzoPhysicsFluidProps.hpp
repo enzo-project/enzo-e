@@ -132,7 +132,7 @@ public: // interface
   /// It's unclear if this really belongs as a method of EnzoPhysicsFluidProps
   virtual void pressure_from_integration
   (const EnzoEFltArrayMap &integration_map,
-   const CelloArray<enzo_float, 3> &pressure,
+   const CelloView<enzo_float, 3> &pressure,
    const int stale_depth, const bool ignore_grackle = false) const;
 
   /// applies the pressure floor to the specific total energy field. If using

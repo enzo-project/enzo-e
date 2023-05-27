@@ -36,7 +36,7 @@ struct EnzoEOSIdeal {
 
 public: // attributes
   // make sure to keep the associated pup function synchronized
-  
+
   /// stores the adiabtic index
   enzo_float gamma;
 
@@ -138,7 +138,6 @@ public:
                                               4.*cs2*va2_cos2)));
     }
   }
-
 };
 
 /// function responsible for PUPing

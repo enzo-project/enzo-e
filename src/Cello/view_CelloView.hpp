@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     array_CelloArray.hpp
+/// @file     view_CelloView.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 30 2019
-/// @brief    Declaration and implementation of the CelloArray class template
+/// @brief    Declaration and implementation of the CelloView class template
 
 #include <stdio.h>
 #include <cstddef>
@@ -13,17 +13,17 @@
 
 #include "cello_defines.hpp"
 
-#ifndef ARRAY_CELLO_ARRAY_HPP
-#define ARRAY_CELLO_ARRAY_HPP
+#ifndef VIEW_CELLO_VIEW_HPP
+#define VIEW_CELLO_VIEW_HPP
 
 //----------------------------------------------------------------------
 
-// CelloArray
+// CelloView
 // Like arrays in Athena++, the indices are listed in order of increasing
 //   access speed. Imagine a 3D array with shape {mz,my,mx} array(k,j,i) is
 //   equivalent to accessing index ((k*my + j)*mx + i) of the pointer
 // Dimensions are numbered with increasing indexing speed (dim0, dim1, ...)
-// See the online documentation for a description of how to use CelloArray with
+// See the online documentation for a description of how to use CelloView with
 //   examples
 
 //----------------------------------------------------------------------
@@ -59,9 +59,9 @@ typedef std::conditional<sizeof(int) >= sizeof(std::ptrdiff_t),
 class CSlice
 {
   /// @class    CSlice
-  /// @ingroup  Array
-  /// @brief    [\ref Array] represents a slice along a single axis of a
-  ///           CelloArray
+  /// @ingroup  View
+  /// @brief    [\ref View] represents a slice along a single axis of a
+  ///           CelloView
 
 public:
 
@@ -85,7 +85,7 @@ public:
   /// 2. The class is equipped with a default constructor to allow for
   ///    construction of arrays of CSlice. However, all default constructed
   ///    instances MUST be assigned the value of non-default constructed
-  ///    instances before passing them to CelloArray.subarray (This is done to
+  ///    instances before passing them to CelloView.subarray (This is done to
   ///    help catch mistakes)
   template<class T1, class T2>
   CSlice(T1 start, T2 stop)
@@ -148,7 +148,7 @@ private:
 //----------------------------------------------------------------------
 
 /// This serves as the terminating function call in the tail recursion to check
-/// the validity of the indicies passed to CelloArray
+/// the validity of the indicies passed to CelloView
 ///
 /// @param shape pointer to the final element in the cstyle array holding the
 ///     shape of the array
@@ -159,7 +159,7 @@ template<typename T>
 bool check_bounds_(intp *shape, T first) {return *shape > first;}
 
 /// a helper function template that helps check the validity of indices passed
-/// to CelloArray if debugger mode for checking indices has been enabled
+/// to CelloView if debugger mode for checking indices has been enabled
 ///
 /// @param shape pointer to the current element of the cstyle array holding the
 ///     shape of the array. The number of elements in shape, after the first,
@@ -185,9 +185,9 @@ bool check_bounds_(intp *shape, T first, Rest... rest){
 // defined to actually check the validity of indices passed to the array
 #ifdef CHECK_BOUNDS
 #  define CHECK_BOUND3D(shape, k, j, i)                                       \
-  ASSERT("CelloArray","Invalid index", check_bounds_(shape,k,j,i));
+  ASSERT("CelloView","Invalid index", check_bounds_(shape,k,j,i));
 #  define CHECK_BOUNDND(shape, ARGS)                                          \
-  ASSERT("CelloArray","Invalid index", check_bounds_(shape, ARGS...));
+  ASSERT("CelloView","Invalid index", check_bounds_(shape, ARGS...));
 #else
 #  define CHECK_BOUND3D(shape, k, j, i)   /* ... */
 #  define CHECK_BOUNDND(shape, ARGS)      /* ... */
@@ -209,7 +209,7 @@ bool check_if_finite_(const T elem){
 // existing pointer holding a NaN or inf
 #ifdef CHECK_FINITE_ELEMENTS
 #  define CHECK_IF_FINITE(value)                                              \
-  ASSERT("CelloArray","Non-Finite Value", check_if_finite_(value));
+  ASSERT("CelloView","Non-Finite Value", check_if_finite_(value));
 #  define CHECK_IF_ARRAY_FINITE(value)    this->assert_all_entries_finite_();
 #else
 #  define CHECK_IF_FINITE(value)          /* ... */
@@ -218,7 +218,7 @@ bool check_if_finite_(const T elem){
 
 //----------------------------------------------------------------------
 
-// To define CelloArray to have arbitrary dimensions it needs to accept a
+// To define CelloView to have arbitrary dimensions it needs to accept a
 // variable number of arguments to indicate shape during construction, to
 // produce a subarray, and to access elements. The number of dimensions of the
 // array as a template argument and accept values with variadic template
@@ -254,7 +254,7 @@ template <bool... vals> using all_true = std::is_same<bool_pack<true, vals...>,
 
 /// This serves as the terminal tail recursion function call used to convert
 /// multi-dimensional indices to a single index of the underlying pointer
-/// wrapped by CelloArray
+/// wrapped by CelloView
 template<typename T>
 intp calc_index_(const intp* stride, T first, T last){
   // last element in stride is alway 1
@@ -268,7 +268,7 @@ intp calc_index_(const intp* stride, T first){return first;}
 
 /// a helper function template that helps convert multi-dimensional indices to
 /// a single index (or address) of the appropriate element in the underlying
-/// pointer wrapped by CelloArray
+/// pointer wrapped by CelloView
 ///
 /// @param stride pointer to the current element of the cstyle array holding the
 ///     strides for each array dimension. The number of elements in stride_,
@@ -354,22 +354,39 @@ static inline bool increment_outer_indices_(std::size_t D, intp *indices,
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-class CelloArray
+class CelloView
 {
-  /// @class    CelloArray
-  /// @ingroup  Array
-  /// @brief    [\ref Array] class template that encapsulates a
-  ///           multidimensional numeric array with a fixed number of
-  ///           dimensions.
+  /// @class    CelloView
+  /// @ingroup  View
+  /// @brief    [\ref View] encapsulates a "view" of multidimensional numeric
+  ///           array data with a fixed number of dimensions.
   ///
-  /// The semantics of this template class resemble those of numpy arrays and
-  /// pointers instead of those c++ standard library containers (like vectors).
-  /// The class effectively acts as an address to the underlying data. The
-  /// copy constructor and copy assignment operation effectively make shallow
-  /// copies and deepcopies must be explicitly created. Note that a consequnce
-  /// of this behavior is that when instances are passed to functions by value,
-  /// any modifications to the array within the function will be reflected
-  /// everywhere.
+  /// CelloView is effecitvely a smart pointer to a memory region that provides
+  /// methods that treat that region as a multidimensional array. A CelloView
+  /// can have one of three states: 
+  ///   1. it is empty (queryable with the ``is_null`` method)
+  ///   2. it provides a view onto memory that it manages (with
+  ///      reference-counting)
+  ///   3. it provides a view onto externally managed memory
+  ///
+  /// Because CelloView is a smart pointer, it has the semantics of other
+  /// pointers and numpy arrays. These semantics diverge from those of c++
+  /// standard library containers (like vectors). The copy constructor and copy
+  /// assignment operation effectively make shallow copies of the underlying
+  /// data and deepcopies must be explicitly created. Consequently, when a
+  /// CelloView is passed to a function by value, any modifications made within
+  /// the function to the CelloView's elements will be reflected everywhere.
+  ///
+  /// Similarly, CelloView's const-properties are similar to those of pointers:
+  ///   - Consider a ``const CelloView<float, 3>`` called ``view``. This is a
+  ///     constant view to mutatable data. In other words, one can freely
+  ///     modify the elements in ``view``, but one can't change the address of
+  ///     the memory that `view`` points at
+  ///   - Consider a ``CelloView<const float, 3>`` called ``view``. This is a
+  ///     view of const data. In this case, ``view`` won't let users modify its
+  ///     elements, but it will allow users to change the address of the data
+  ///     that it refers to
+  
 
 public: // interface
 
@@ -377,11 +394,11 @@ public: // interface
   typedef typename std::add_const<T>::type const_value_type;
   typedef typename std::remove_const<T>::type nonconst_value_type;
 
-  friend class CelloArray<const_value_type,D>;
-  friend class CelloArray<T,D+1>;
+  friend class CelloView<const_value_type,D>;
+  friend class CelloView<T,D+1>;
 
-  /// Default constructor. Constructs an uninitialized CelloArray.
-  CelloArray()
+  /// Default constructor. Constructs an uninitialized CelloView.
+  CelloView()
     : shared_data_(),
       offset_(0),
       shape_(),
@@ -394,7 +411,7 @@ public: // interface
   /// @param args the lengths of each dimension. There must by D values and
   ///     they must all have the same type - int or intp
   template<typename... Args, REQUIRE_INT(Args)>
-  CelloArray(Args... args);
+  CelloView(Args... args);
 
   /// Construct a multidimensional numeric array that wraps an existing pointer
   ///
@@ -402,22 +419,22 @@ public: // interface
   /// @param args the lengths of each dimension. There must by D values and
   ///     they must all have the same type - int or intp
   ///
-  /// @note Note that instances of CelloArray that wrap existing pointers are
+  /// @note Note that instances of CelloView that wrap existing pointers are
   ///     inherently less safe. Segmentation faults can more easily arise due
   ///     incorrect shapes being specified at this constructor and due to the
   ///     memory of the wrapped array being freed
   template<typename... Args, REQUIRE_INT(Args)>
-  CelloArray(T* array, Args... args);
+  CelloView(T* array, Args... args);
 
   /// conversion constructor that facilitates implicit casts from
-  /// CelloArray<nonconst_value_type,D> to CelloArray<const_value_type,D>
+  /// CelloView<nonconst_value_type,D> to CelloView<const_value_type,D>
   ///
   /// @note
-  /// This is only defined for instances of CelloArray for which T is const-
+  /// This is only defined for instances of CelloView for which T is const-
   /// qualified. If it were defined in cases where T is not const-qualified,
   /// then it would duplicate the copy-constructor.
   template<class = std::enable_if<std::is_same<T, const_value_type>::value>>
-  CelloArray(const CelloArray<nonconst_value_type, D> &other) : CelloArray() {
+  CelloView(const CelloView<nonconst_value_type, D> &other) : CelloView() {
     std::shared_ptr<const_value_type> other_shared_data
       = std::const_pointer_cast<const_value_type>(other.shared_data_);
     this->shallow_copy_init_helper_(other_shared_data, other.offset_,
@@ -425,14 +442,14 @@ public: // interface
   }
 
   // The following is defined to give nice error messages for invalid
-  // casts/copies. Without the following, the CelloArray(Args... args)
+  // casts/copies. Without the following, the CelloView(Args... args)
   // constructor gets invoked and the errors are hard to understand
   template<typename oT, std::size_t oD,
 	   class = std::enable_if<!std::is_same<T, const_value_type>::value ||
 	                          !std::is_same<T, oT>::value || oD != D>>
-  CelloArray(const CelloArray<oT, oD> &other) : CelloArray() {
+  CelloView(const CelloView<oT, oD> &other) : CelloView() {
     static_assert(!std::is_same<oT, const_value_type>::value,
-		  "can't cast CelloArray<const T,D> to CelloArray<T,D>");
+		  "can't cast CelloView<const T,D> to CelloView<T,D>");
     static_assert(!std::is_same<oT, T>::value,
 		  "incompatible types for cast/copy");
     static_assert(D == oD, "number of array dimensions must be equal");
@@ -441,23 +458,23 @@ public: // interface
   /// Copy constructor. Makes *this a shallow copy of other.
   ///
   /// @note The fact that this accepts const reference reflects the fact that
-  ///     CelloArray has pointer-like semantics
-  CelloArray(const CelloArray<T,D>& other) : CelloArray() {
+  ///     CelloView has pointer-like semantics
+  CelloView(const CelloView<T,D>& other) : CelloView() {
     this->shallow_copy_init_helper_(other.shared_data_, other.offset_,
                                     other.shape_, other.stride_);
   }
 
   /// Move constructor. Constructs the array with the contents of other
-  CelloArray(CelloArray<T,D>&& other) : CelloArray() {swap(*this,other);}
+  CelloView(CelloView<T,D>&& other) : CelloView() {swap(*this,other);}
 
   // Destructor
-  ~CelloArray() = default;
+  ~CelloView() = default;
 
   /// Copy assignment operator. Makes *this a shallow copy of other.
   ///
   /// (The contents of any previously created shallow copies or subarrays of
   /// *this are unaffected by this method)
-  CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
+  CelloView<T,D>& operator=(const CelloView<T,D>& other){
     this->shallow_copy_init_helper_(other.shared_data_, other.offset_,
                                     other.shape_, other.stride_);
     return *this;
@@ -468,7 +485,7 @@ public: // interface
   ///
   /// (Contents of any previously created shallow copies or subarrays of
   /// *this are unaffected)
-  CelloArray<T,D>& operator=(CelloArray<T,D>&& other) {
+  CelloView<T,D>& operator=(CelloView<T,D>&& other) {
     swap(*this,other);
     return *this;
   }
@@ -502,20 +519,23 @@ public: // interface
   ///    the same number of arguments must be provided as there are dimensions
   ///    of the array.
   ///
-  /// For a 3D CelloArray, the function declaration might look like:
-  /// CelloArray<T,3> subarray(CSlice k_slice, CSlice j_slice, CSlice i_slice);
+  /// For a 3D CelloView, the function declaration might look like:
+  /// CelloView<T,3> subarray(CSlice k_slice, CSlice j_slice, CSlice i_slice);
+  ///
+  /// @todo
+  /// rename this method subview
   template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
-  CelloArray<T,D> subarray(Args... args) const noexcept;
+  CelloView<T,D> subarray(Args... args) const noexcept;
 
   /// Return a subarray with one fewer dimensions
   template<class = std::enable_if< D>=2 >>
-  CelloArray<T,D-1> subarray(int i) const noexcept;
+  CelloView<T,D-1> subarray(int i) const noexcept;
 
   /// Returns the length of a given dimension
   ///
   /// @param dim Indicates the dimension for which we want the shape
   int shape(unsigned int dim) const noexcept{
-    ASSERT1("CelloArray::shape", "%ui is greater than the number of dimensions",
+    ASSERT1("CelloView::shape", "%ui is greater than the number of dimensions",
 	    dim, dim<D);
     return (int)shape_[dim];
   }
@@ -531,7 +551,7 @@ public: // interface
 
   /// Returns the stride for a given dimension
   int stride(unsigned int dim) const noexcept{
-    ASSERT1("CelloArray::stride",
+    ASSERT1("CelloView::stride",
             "%ui is greater than the number of dimensions",
 	    dim, dim<D);
     return (int)stride_[dim];
@@ -542,7 +562,7 @@ public: // interface
 
   /// Swaps the contents of this array with the contents of a different array.
   /// This is only defined for arrays with the same numbers of dimensions D
-  friend void swap(CelloArray<T,D> &first, CelloArray<T,D> &second){
+  friend void swap(CelloView<T,D> &first, CelloView<T,D> &second){
     std::swap(first.shared_data_, second.shared_data_);
     std::swap(first.offset_, second.offset_);
     std::swap(first.shape_, second.shape_);
@@ -555,7 +575,7 @@ public: // interface
     return (ptr == nullptr) ? nullptr : ptr + offset_;
   }
 
-  /// Returns whether the CelloArray wraps a nullptr (i.e. it's unitialized)
+  /// Returns whether the CelloView wraps a nullptr (i.e. it's unitialized)
   bool is_null() const noexcept{
     // it's *technically* possible for a std::shared_ptr to be empty and store
     // a non-nullptr. I'm fairly confident that this only happens if you do
@@ -569,14 +589,14 @@ public: // interface
   }
 
   /// Produce a deepcopy of the array.
-  CelloArray<T,D> deepcopy() const noexcept;
+  CelloView<T,D> deepcopy() const noexcept;
 
-  /// Returns whether CelloArray is a perfect alias of other.
+  /// Returns whether CelloView is a perfect alias of other.
   ///
   /// Returns False if there is just partial overlap, either array is
   /// uninitialized, or if the number of dimensions of the arrays differs.
   template<typename oT, std::size_t oD>
-  bool is_alias(const CelloArray<oT,oD>& other) const noexcept;
+  bool is_alias(const CelloView<oT,oD>& other) const noexcept;
 
   /// Copy elements from the current array to ``dest``. Both arrays must have
   /// the same shape.
@@ -585,22 +605,22 @@ public: // interface
   ///
   /// @note It might be better to make this a standalone function.
   /// @note This could be optimized
-  void copy_to(const CelloArray<T,D>& other) const noexcept;
+  void copy_to(const CelloView<T,D>& other) const noexcept;
 
 protected:
 
-  /// Assists with the initialization of the CelloArray instances
+  /// Assists with the initialization of the CelloView instances
   void init_helper_(const std::shared_ptr<T> &shared_data,
 		    const intp shape_arr[D], const intp offset,
                     bool require_valid_data = true);
 
-  /// helps initialize CelloArray instances by shallow copy
+  /// helps initialize CelloView instances by shallow copy
   void shallow_copy_init_helper_(const std::shared_ptr<T> &shared_data_o,
                                  intp offset_o, const intp shape_o[D],
                                  const intp stride_o[D]) {
     // if `*this` wasn't initialized, we won't require `shared_data` to be a
     // non-empty/non-null pointer. This let's us write code where we might
-    // conditionally initialize a ``const CelloArray`` using a ternary operator
+    // conditionally initialize a ``const CelloView`` using a ternary operator
     // (in the null-case, we would need to copy a default constructed array).
     bool require_valid_data = !(this->is_null());
     init_helper_(shared_data_o, shape_o, offset_o, require_valid_data);
@@ -638,12 +658,12 @@ private: // attributes
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-void CelloArray<T,D>::init_helper_(const std::shared_ptr<T> &shared_data,
+void CelloView<T,D>::init_helper_(const std::shared_ptr<T> &shared_data,
                                    const intp shape_arr[D], const intp offset,
                                    bool require_valid_data /* = true*/){
   if (require_valid_data & ((shared_data.get() == nullptr) ||
                             (shared_data.use_count() == 0)   )){
-    ERROR("CelloArray::init_helper_",
+    ERROR("CelloView::init_helper_",
           "shared_data must not hold a NULL pointer or be empty. The "
           "current array is probably being moved/copied from an "
           "uninitialized array.");
@@ -685,10 +705,10 @@ inline void check_array_shape_(intp shape[], std::size_t D)
 
 //----------------------------------------------------------------------
 
-// Constructor of CelloArray by allocating new data
+// Constructor of CelloView by allocating new data
 template<typename T, std::size_t D>
 template<typename... Args, class>
-CelloArray<T,D>::CelloArray(Args... args)
+CelloView<T,D>::CelloView(Args... args)
 {
   static_assert(D==sizeof...(args), "Incorrect number of dimensions");
   intp shape[D] = {((intp)args)...};
@@ -709,7 +729,7 @@ CelloArray<T,D>::CelloArray(Args... args)
 // Constructor of array that wraps an existing c-style array
 template<typename T, std::size_t D>
 template<typename... Args, class>
-CelloArray<T,D>::CelloArray(T* array, Args... args)
+CelloView<T,D>::CelloView(T* array, Args... args)
 {
   static_assert(D==sizeof...(args), "Incorrect number of dimensions");
   intp shape[D] = {((intp)args)...};
@@ -764,13 +784,13 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
 
 //----------------------------------------------------------------------
 
-// Returnd CelloArray representing a view of a subarray of the current instance
+// Returnd CelloView representing a view of a subarray of the current instance
 template<typename T, std::size_t D>
 template<typename... Args, class>
-CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
+CelloView<T,D> CelloView<T,D>::subarray(Args... args) const noexcept{
   static_assert(D == sizeof...(args),
 		"Number of slices don't match number of dimensions");
-  CelloArray<T,D> subarray;
+  CelloView<T,D> subarray;
   // the dummy value at the end of input_slices keeps the compiler from
   // freaking out when no arguments are passed
   CSlice input_slices[1+sizeof...(args)] = {args...,CSlice()};
@@ -795,13 +815,13 @@ CelloArray<T,D> CelloArray<T,D>::subarray(Args... args) const noexcept{
 
 template<typename T, std::size_t D>
 template<class>
-CelloArray<T,D-1> CelloArray<T,D>::subarray(int i) const noexcept{
-  //ASSERT2("CelloArray::subarray",
+CelloView<T,D-1> CelloView<T,D>::subarray(int i) const noexcept{
+  //ASSERT2("CelloView::subarray",
   //        "i value of %d must be >= 0 and < shape[0], where shape[0] = %d",
   //        i, shape_[0], start < shape_[0]);
   CHECK_BOUNDND(shape_, i); // checks i against shape_[0] when bounds checking
                             // is enabled
-  CelloArray<T,D-1> subarray;
+  CelloView<T,D-1> subarray;
   intp new_shape[D-1];
   for (std::size_t dim=0; dim<(D-1); dim++){
     new_shape[dim] = shape_[dim+1];
@@ -820,9 +840,9 @@ CelloArray<T,D-1> CelloArray<T,D>::subarray(int i) const noexcept{
 
 template<typename T, std::size_t D>
 template<typename oT, std::size_t oD>
-bool CelloArray<T,D>::is_alias(const CelloArray<oT,oD>& other) const noexcept {
-  typedef typename CelloArray<T,D>::const_value_type const_T;
-  typedef typename CelloArray<oT,oD>::const_value_type const_oT;
+bool CelloView<T,D>::is_alias(const CelloView<oT,oD>& other) const noexcept {
+  typedef typename CelloView<T,D>::const_value_type const_T;
+  typedef typename CelloView<oT,oD>::const_value_type const_oT;
   if (!std::is_same<const_T,const_oT>::value) {return false;}
 
   if (this->rank() != other.rank()) {return false;}
@@ -844,13 +864,13 @@ bool CelloArray<T,D>::is_alias(const CelloArray<oT,oD>& other) const noexcept {
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-void CelloArray<T,D>::copy_to(const CelloArray<T,D>& other) const noexcept{
+void CelloView<T,D>::copy_to(const CelloView<T,D>& other) const noexcept{
   const intp o_offset = other.offset_;
   const intp *o_stride = other.stride_;
   const intp *o_shape = other.shape_;
   T* o_data = other.shared_data_.get();
   for (std::size_t i = 0; i<D; i++){
-    ASSERT("CelloArray::copy_to", "shapes aren't the same.",
+    ASSERT("CelloView::copy_to", "shapes aren't the same.",
            this->shape_[i] == o_shape[i]);
   }
   bool continue_outer_iter = true;
@@ -869,10 +889,10 @@ void CelloArray<T,D>::copy_to(const CelloArray<T,D>& other) const noexcept{
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-CelloArray<T,D> CelloArray<T,D>::deepcopy() const noexcept
+CelloView<T,D> CelloView<T,D>::deepcopy() const noexcept
 {
   std::shared_ptr<T> new_data(new T[this->size()], std::default_delete<T[]>());
-  CelloArray<T,D> out;
+  CelloView<T,D> out;
   out.init_helper_(new_data, this->shape_, 0);
   this->copy_to(out);
   return out;
@@ -881,7 +901,7 @@ CelloArray<T,D> CelloArray<T,D>::deepcopy() const noexcept
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
-void CelloArray<T,D>::assert_all_entries_finite_() const noexcept
+void CelloView<T,D>::assert_all_entries_finite_() const noexcept
 {
   bool continue_outer_iter = true;
   intp indices[D] = {}; // all elements to 0
@@ -897,7 +917,7 @@ void CelloArray<T,D>::assert_all_entries_finite_() const noexcept
 	}
 	str_indices += std::to_string(i);
 
-	ASSERT1("CelloArray::assert_all_entries_finite_()",
+	ASSERT1("CelloView::assert_all_entries_finite_()",
                 "The element at (%s) has a non-finite value.",
 		str_indices.c_str(),false);
 
@@ -908,4 +928,4 @@ void CelloArray<T,D>::assert_all_entries_finite_() const noexcept
   }
 }
 
-#endif /* ARRAY_CELLO_ARRAY_HPP */
+#endif /* VIEW_CELLO_VIEW_HPP */
