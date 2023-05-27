@@ -1227,10 +1227,10 @@ void EnzoLevelArray::apply_inference()
 
   // Update blocks with inference results
 
-  //    find center of inference array
+  //    center of sphere
   double center[3] = {sphere_x, sphere_y, sphere_z};
 
-  //    put a sphere there and add it to a list sphere_list
+  //    put a sphere object there and add it to a list sphere_list
   EnzoObjectFeedbackSphere sphere(center, sphere_r, yield_SNe, yield_HNe, yield_PISNe);
   std::vector<EnzoObjectFeedbackSphere> sphere_list;
   sphere_list.push_back(sphere);
@@ -1292,9 +1292,9 @@ void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[
 
   if (block->is_leaf()) {
 
-    for (auto sphere : sphere_list) {
-      CkPrintf("EnzoMethodInference::update -- FB sphere pos = (%.2f, %.2f, %.2f);  radius: %1.2e; yields = (%1.2e, %1.2e, %1.2e)\n", sphere.pos(0), sphere.pos(1), sphere.pos(2), sphere.r(), sphere.metal_mass_SNe(), sphere.metal_mass_HNe(), sphere.metal_mass_PISNe() );    
-    }
+    // if inference_method == "starnet"
+    FBNet::update_mesh(enzo::block(block), &sphere_list);
+
     // if leaf block, we're done, tell level array element
     Index3 index3(il3[0],il3[1],il3[2]);
 
