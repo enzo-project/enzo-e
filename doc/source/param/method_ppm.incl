@@ -4,92 +4,99 @@ Enzo-E's PPM hydrodynamics method.
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`courant`
-:Summary: :s:`Courant safety factor`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:courant
 
-:e:`The method-specific courant safety factor. The method's minimum timestep is the minimum value of the following expression (which is computed for all cells):`
+   :Summary: :s:`Courant safety factor`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :z:`Enzo`
 
-.. math:: C \times \left( \frac{c_s + |v_x|}{a\, \Delta x} + \frac{c_s + |v_y|}{a\, \Delta y} + \frac{c_s + |v_z|}{a\, \Delta z} \right)^{-1}
+   :e:`The method-specific courant safety factor. The method's minimum timestep is the minimum value of the following expression (which is computed for all cells):`
 
-:e:`in which:`
+   .. math:: C \times \left( \frac{c_s + |v_x|}{a\, \Delta x} + \frac{c_s + |v_y|}{a\, \Delta y} + \frac{c_s + |v_z|}{a\, \Delta z} \right)^{-1}
 
-  * :math:`C` :e:`is the courant factor`
-  * :math:`a` :e:`is the cosmological scale factor`
-  * :math:`c_s` :e:`is the local sound speed`
-  * :math:`v_x,\ v_y,\ v_z` :e:`are the velocity components`
-  * :math:`\Delta x,\ \Delta y,\ \Delta z` :e:`are cell widths`
+   :e:`in which:`
 
-:e:`A value of 0.8 or smaller is generally recommended.`
+     * :math:`C` :e:`is the courant factor`
+     * :math:`a` :e:`is the cosmological scale factor`
+     * :math:`c_s` :e:`is the local sound speed`
+     * :math:`v_x,\ v_y,\ v_z` :e:`are the velocity components`
+     * :math:`\Delta x,\ \Delta y,\ \Delta z` :e:`are cell widths`
 
-.. warning::
+   :e:`A value of 0.8 or smaller is generally recommended.`
 
-   The way that parsing of the courant safety factor is currently
-   handled, the default value is fixed to 1.0 for all values (which is
-   too large for this method). Some near-term modifications are
-   planned that will resolve this issue.
+   .. warning::
 
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`diffusion`
-:Summary: :s:`PPM diffusion parameter`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`PPM diffusion parameter.`
+      The way that parsing of the courant safety factor is currently
+      handled, the default value is fixed to 1.0 for all values (which is
+      too large for this method). Some near-term modifications are
+      planned that will resolve this issue.
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`flattening`
-:Summary: :s:`PPM flattening parameter`
-:Type:   :t:`integer`
-:Default: :d:`3`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:diffusion
 
-:e:`PPM flattening parameter.`
+   :Summary: :s:`PPM diffusion parameter`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`minimum_pressure_support_parameter`
-:Summary: :s:`Enzo's MinimumPressureSupportParameter`
-:Type:   :t:`integer`
-:Default: :d:`100`
-:Scope:     :z:`Enzo`
-
-:e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
+   :e:`PPM diffusion parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`pressure_free`
-:Summary: :s:`Pressure-free flag`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:flattening
 
-:e:`Pressure-free flag.` 
+   :Summary: :s:`PPM flattening parameter`
+   :Type:   :par:typefmt:`integer`
+   :Default: :d:`3`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`steepening`
-:Summary: :s:`PPM steepening parameter`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`PPM steepening parameter.`
+   :e:`PPM flattening parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`use_minimum_pressure_support`
-:Summary: :s:`Minimum pressure support`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:minimum_pressure_support_parameter
 
-:e:`Enzo's` UseMinimumPressureSupport :e:`parameter.`
+   :Summary: :s:`Enzo's MinimumPressureSupportParameter`
+   :Type:   :par:typefmt:`integer`
+   :Default: :d:`100`
+   :Scope:     :z:`Enzo`
+
+   :e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
+
+----
+
+.. par:parameter:: Method:ppm:pressure_free
+
+   :Summary: :s:`Pressure-free flag`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`Pressure-free flag.` 
+
+----
+
+.. par:parameter:: Method:ppm:steepening
+
+   :Summary: :s:`PPM steepening parameter`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`PPM steepening parameter.`
+
+----
+
+.. par:parameter:: Method:ppm:use_minimum_pressure_support
+
+   :Summary: :s:`Minimum pressure support`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`Enzo's` UseMinimumPressureSupport :e:`parameter.`
 
 ----
 
@@ -98,84 +105,92 @@ Deprecated ppm parameters
 
 The following parameters have all been deprecated and will be removed
 in a future version of Enzo-E. Going forwards, the corresponding
-parameters in :p:`Physics` : :p:`fluid_props` should be used instead.
+parameters in :par:paramfmt:`Physics:fluid_props` should be used instead.
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`density_floor`
-:Summary: :s:`Lower limit on density`
-:Type:   :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:density_floor
 
-:e:`Density floor, which replaces Enzo's "tiny_number".`
+   :Summary: :s:`Lower limit on density`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`dual_energy`
-:Summary: :s:`Whether to use dual-energy formalism`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Whether to use the dual-energy formalism.`
+   :e:`Density floor, which replaces Enzo's "tiny_number".`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`dual_energy_eta_1`
-:Summary: :s:`Dual energy parameter eta 1`
-:Type:   :t:`float`
-:Default: :d:`0.001`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:dual_energy
 
-:e:`First dual-energy formalism parameter.`
+   :Summary: :s:`Whether to use dual-energy formalism`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`dual_energy_eta_2`
-:Summary: :s:`Dual energy parameter eta 2`
-:Type:   :t:`float`
-:Default: :d:`0.1`
-:Scope:     :z:`Enzo`
-
-:e:`Second dual-energy formalism parameter.`
+   :e:`Whether to use the dual-energy formalism.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`mol_weight`
-:Summary: :s:`Enzo's Mu parameter`
-:Type:   :t:`float`
-:Default: :d:`0.6`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:dual_energy_eta_1
 
-:e:`Enzo's` Mu molecular :e:`weight parameter.`
+   :Summary: :s:`Dual energy parameter eta 1`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`0.001`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`number_density_floor`
-:Summary: :s:`Lower limit on number density`
-:Type:   :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Number density floor, which replaces Enzo's "tiny_number".`
+   :e:`First dual-energy formalism parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`pressure_floor`
-:Summary: :s:`Lower limit on pressure`
-:Type:   :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:dual_energy_eta_2
 
-:e:`Pressure floor, which replaces Enzo's "tiny_number".`
+   :Summary: :s:`Dual energy parameter eta 2`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`0.1`
+   :Scope:     :z:`Enzo`
+
+   :e:`Second dual-energy formalism parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`ppm` : :p:`temperature_floor`
-:Summary: :s:`Lower limit on temperature`
-:Type:   :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Method:ppm:mol_weight
 
-:e:`Temperature floor, which replaces Enzo's "tiny_number".`
+   :Summary: :s:`Enzo's Mu parameter`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`0.6`
+   :Scope:     :z:`Enzo`
+
+   :e:`Enzo's` Mu molecular :e:`weight parameter.`
+
+----
+
+.. par:parameter:: Method:ppm:number_density_floor
+
+   :Summary: :s:`Lower limit on number density`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:     :z:`Enzo`
+
+   :e:`Number density floor, which replaces Enzo's "tiny_number".`
+
+----
+
+.. par:parameter:: Method:ppm:pressure_floor
+
+   :Summary: :s:`Lower limit on pressure`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:     :z:`Enzo`
+
+   :e:`Pressure floor, which replaces Enzo's "tiny_number".`
+
+----
+
+.. par:parameter:: Method:ppm:temperature_floor
+
+   :Summary: :s:`Lower limit on temperature`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:     :z:`Enzo`
+
+   :e:`Temperature floor, which replaces Enzo's "tiny_number".`

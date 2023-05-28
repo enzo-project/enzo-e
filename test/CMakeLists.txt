@@ -110,9 +110,9 @@ endfunction()
 ############################### UNIT TESTS ####################################
 # The following tests are self-contained binary of individual components
 
-setup_test_unit(CArrCollec ArrayComponent/CArrCollec test_carr_collec)
-setup_test_unit(Array ArrayComponent/Array test_cello_array)
-setup_test_unit(StringIndRdOnlyMap ArrayComponent/StringIndRdOnlyMap test_string_ind_rd_only_map)
+setup_test_unit(ViewCollec ViewComponent/ViewCollec test_view_collec)
+setup_test_unit(View ViewComponent/View test_cello_view)
+setup_test_unit(StringIndRdOnlyMap ViewComponent/StringIndRdOnlyMap test_string_ind_rd_only_map)
 
 setup_test_unit(CelloType Cello/Type test_type)
 
@@ -250,6 +250,8 @@ setup_test_serial(PPM-1 MethodPPM/Ppm-1  input/PPM/method_ppm-1.in)
 setup_test_parallel(PPM-8 MethodPPM/Ppm-8  input/PPM/method_ppm-8.in)
 setup_test_serial(PPM-1_color MethodPPM/Ppm-1_color  input/PPM/method_ppm-1_color.in)
 
+# M1 Closure RT
+setup_test_parallel(M1Closure RadiativeTransfer/M1Closure input/RadiativeTransfer/method_m1_closure.in)
 
 # define yt-based tests
 
@@ -283,43 +285,6 @@ setup_test_parallel_python(shu_collapse shu_collapse "input/shu_collapse/run_shu
 
 # BB Test
 setup_test_parallel_python(bb_test bb_test "input/bb_test/run_bb_test.py" "--prec=${PREC_STRING}")
-
-# Grackle tests
-#
-# because Grackle is a separate library, the user needs to specify the path
-# to the data directory where the grackle data files are installed. if this is
-# not specified, the Grackle tests are skipped
-
-if(NOT (DEFINED GRACKLE_INPUT_DATA_DIR))
-  set(GRACKLE_INPUT_DATA_DIR "")
-endif()
-
-if(USE_GRACKLE AND (GRACKLE_INPUT_DATA_DIR STREQUAL ""))
-  message(STATUS
-    "   IMPORTANT: No tests involving Grackle have been defined (even though Grackle is being used). To enable these tests, try `-DGRACKLE_INPUT_DATA_DIR=/path/to/grackle/data/dir`."
-  )
-elseif(USE_GRACKLE)
-  # (non-yt-based test)
-  setup_test_parallel_python(grackle_cooling_dt grackle
-    "input/Grackle/run_endtime_grackle_test.py"
-    "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
-    "--nominal-config-path=input/Grackle/method_grackle_cooling_dt.in"
-    # by using relative paths in the following 2 arguments, we effectively
-    # specify output files in the testing directory
-    "--generate-config-path=./temp_grackle_cooling_dt.in"
-    "--output-dump=./grackle_cooling_dt.log"
-  )
-
-  setup_test_parallel_python(grackle_general grackle
-    "input/Grackle/run_general_grackle_test.py"
-    "--prec=${PREC_STRING}"
-    "--grackle-data-file=${GRACKLE_INPUT_DATA_DIR}/CloudyData_UVB=HM2012_shielded.h5"
-    # by using relative paths in the following 2 arguments, we effectively
-    # specify output files in the testing directory
-    "--generate-config-path=./temp_grackle_general.in"
-    "--output-dump=./grackle_general_test.log"
-  )
-endif()
 
 # Convert markdown file to html file for more flexible viewing
 configure_file(${CMAKE_SOURCE_DIR}/test/TEST_RESULTS.md ${PROJECT_BINARY_DIR}/TEST_RESULTS.md COPYONLY)

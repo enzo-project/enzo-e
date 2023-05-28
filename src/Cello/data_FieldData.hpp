@@ -69,7 +69,7 @@ public: // interface
 		       std::string name, int history=0) const throw ()
   { return values (field_descr,field_descr->field_id(name),history); }
 
-  /// Return a CelloArray that acts as a view of the corresponding field
+  /// Return a CelloView that acts as a view of the corresponding field
   ///
   /// If the field cannot be found the program will abort with an error.
   ///
@@ -82,33 +82,33 @@ public: // interface
   ///
   /// @returns view of the specified field.
   template<class T>
-  CelloArray<T, 3> view(const FieldDescr * field_descr, int id_field,
-                        ghost_choice choice = ghost_choice::include,
-                        int history=0) throw()
+  CelloView<T, 3> view(const FieldDescr * field_descr, int id_field,
+                       ghost_choice choice = ghost_choice::include,
+                       int history=0) throw()
   {
     using noconst_T = typename std::remove_cv<T>::type;
     return make_view_<noconst_T>(field_descr, id_field, choice, history, false);
   }
 
   template<class T>
-  CelloArray<T, 3> view(const FieldDescr * field_descr, std::string name,
-                        ghost_choice choice = ghost_choice::include,
-                        int history=0) throw()
+  CelloView<T, 3> view(const FieldDescr * field_descr, std::string name,
+                       ghost_choice choice = ghost_choice::include,
+                       int history=0) throw()
   { return view<T>(field_descr, field_descr->field_id(name), choice, history); }
 
   template<class T>
-  CelloArray<const T, 3> view(const FieldDescr * field_descr, int id_field,
-                              ghost_choice choice = ghost_choice::include,
-                              int history=0) const throw()
+  CelloView<const T, 3> view(const FieldDescr * field_descr, int id_field,
+                             ghost_choice choice = ghost_choice::include,
+                             int history=0) const throw()
   {
     return const_cast<FieldData*>(this)->view<T>(field_descr, id_field,
                                                  choice, history);
   }
 
   template<class T>
-  CelloArray<const T, 3> view(const FieldDescr * field_descr, std::string name,
-                              ghost_choice choice = ghost_choice::include,
-                              int history=0) const throw()
+  CelloView<const T, 3> view(const FieldDescr * field_descr, std::string name,
+                             ghost_choice choice = ghost_choice::include,
+                             int history=0) const throw()
   { return view<T>(field_descr, field_descr->field_id(name), choice, history); }
 
   /// Return array for the corresponding coarse field
@@ -125,7 +125,7 @@ public: // interface
 		       std::string name, int history=0) const throw ()
   { return coarse_values (field_descr,field_descr->field_id(name),history); }
 
-  /// Return a CelloArray that acts as a view of the corresponding coarse field
+  /// Return a CelloView that acts as a view of the corresponding coarse field
   ///
   /// If the coarse field cannot be found the program will abort with an error.
   ///
@@ -137,7 +137,7 @@ public: // interface
   ///
   /// @returns view of the specified coarse field.
   template<class T>
-  CelloArray<T, 3> coarse_view(const FieldDescr * field_descr,
+  CelloView<T, 3> coarse_view(const FieldDescr * field_descr,
                                int id_field, int history=0) throw()
   {
     using noconst_T = typename std::remove_cv<T>::type;
@@ -146,14 +146,14 @@ public: // interface
   }
 
   template<class T>
-  CelloArray<T, 3> coarse_view(const FieldDescr * field_descr,
+  CelloView<T, 3> coarse_view(const FieldDescr * field_descr,
                                std::string name, int history=0) throw()
   {
     return coarse_view<T>(field_descr, field_descr->field_id(name), history);
   }
 
   template<class T>
-  CelloArray<const T, 3> coarse_view(const FieldDescr * field_descr,
+  CelloView<const T, 3> coarse_view(const FieldDescr * field_descr,
                                      int id_field, int history=0) const throw()
   {
     return const_cast<FieldData*>(this)->coarse_view<T>(field_descr, id_field,
@@ -161,7 +161,7 @@ public: // interface
   }
 
   template<class T>
-  CelloArray<const T, 3> coarse_view(const FieldDescr * field_descr,
+  CelloView<const T, 3> coarse_view(const FieldDescr * field_descr,
 				     std::string name,
                                      int history=0) const throw()
   { return coarse_view<T>(field_descr, field_descr->field_id(name), history); }
@@ -372,7 +372,7 @@ private: // functions
 
 
   template<class T>
-  CelloArray<T, 3> make_view_
+  CelloView<T, 3> make_view_
   (const FieldDescr * field_descr,
    int id_field, ghost_choice choice,
    int index_history,  bool coarse) throw();
@@ -389,7 +389,7 @@ private: // attributes
   std::vector<int> temporary_size_;
 
   /// Array of temporary fields
-  std::vector<char *> array_temporary_;
+  std::vector< std::vector<char> > array_temporary_;
 
   /// Offsets into values_ of the first element of each field
   std::vector<int> offsets_;
@@ -414,7 +414,7 @@ private: // attributes
   std::vector<int> coarse_dimensions_;
 
   /// Coarse fields with one ghost zone for padded Prolong
-  std::vector<char *> array_coarse_;
+  std::vector< std::vector<char> > array_coarse_;
 
 };   
 

@@ -34,6 +34,15 @@ Group {
 
 }
 
+Physics {
+  list += ["fluid_props"];
+  fluid_props {
+    floors {
+      metallicity = 1e-6;
+    }
+  }
+}
+
 Method {
      list = [ "pm_deposit", "gravity", "ppm", "grackle", "pm_update", "comoving_expansion" ];
     
@@ -57,7 +66,6 @@ Method {
         primordial_chemistry    = 1;  # 1, 2, or 3
         metal_cooling           = 1;  # 0 or 1 (off/on)
         UVbackground            = 1;  # on or off
-        metallicity_floor = 1e-6; # metallicity floor in solar units
         cmb_temperature_floor   = 1;
 
         self_shielding_method = 0;  # see pg. 23-24 of https://grackle.readthedocs.io/_/downloads/en/latest/pdf/

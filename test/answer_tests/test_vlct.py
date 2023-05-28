@@ -10,7 +10,7 @@ _base_file = os.path.basename(__file__)
 
 # Set test tolerance based on compile precision
 use_double = os.environ.get("USE_DOUBLE", "false").lower() == "true"
-yt.mylog.info(f"{_base_file}: {use_double=}")
+yt.mylog.info(f"{_base_file}: use_double = {use_double}")
 if use_double:
     decimals = 12
 else:

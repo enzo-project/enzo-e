@@ -34,7 +34,7 @@
 #include "_performance.hpp"
 #include "_problem.hpp"
 #include "_mesh.hpp"
-#include "_array.hpp"
+#include "_view.hpp"
 #include "_data.hpp"
 #include "_simulation.hpp"
 #include "_disk.hpp"
@@ -54,6 +54,7 @@ class EnzoPhysicsCosmology;
 class EnzoProblem;
 class EnzoSimulation;
 class EnzoUnits;
+class GrackleChemistryData;
 
 /// Namespace for Enzo global constants and accessor functions
 namespace enzo {
@@ -67,6 +68,13 @@ namespace enzo {
   EnzoPhysicsFluidProps *   fluid_props();
 
   const EnzoMethodGrackle * grackle_method();
+
+  /// Returns a pointer of GrackleChemistryData, if grackle is being used by
+  /// the simulation, otherwise it returns nullptr.
+  ///
+  /// For a returnd value, `ret`, it's safe to assume that when
+  /// `ret != nullptr` that `ret->get<int>("use_grackle") == 1`.
+  const GrackleChemistryData * grackle_chemistry();
 
   CProxy_EnzoBlock          block_array();
   EnzoBlock *               block ( Block * block);
