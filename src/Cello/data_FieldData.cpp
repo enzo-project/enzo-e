@@ -48,16 +48,6 @@ FieldData::FieldData
 FieldData::~FieldData() throw()
 {
   deallocate_permanent();
-  for (size_t i=0; i<array_temporary_.size(); i++) {
-    delete [] array_temporary_[i];
-    array_temporary_[i] = NULL;
-    temporary_size_[i] = 0;
-  }
-  for (size_t i=0; i<array_coarse_.size(); i++) {
-    delete [] array_coarse_[i];
-    array_coarse_[i] = NULL;
-    coarse_dimensions_[i] = 0;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -74,15 +64,15 @@ void FieldData::pup(PUP::er &p)
   int nt = temporary_size_.size();
   p | nt;
   if (p.isUnpacking()) {
-    array_temporary_.resize(nt,0);
+    array_temporary_.resize(nt);
   }
   for (int i=0; i<nt; i++) {
     int n = temporary_size_[i];
     if (n > 0) {
       if (p.isUnpacking()) {
-	array_temporary_[i] = new char[n];
+	array_temporary_[i].resize(n);
       }
-      PUParray(p,array_temporary_[i],n);
+      p | array_temporary_[i];
     }
   }
 
@@ -90,15 +80,15 @@ void FieldData::pup(PUP::er &p)
   int nc = coarse_dimensions_.size();
   p | nc;
   if (p.isUnpacking()) {
-    array_coarse_.resize(nc,0);
+    array_coarse_.resize(nc);
   }
   for (int i=0; i<nc; i++) {
     int n = coarse_dimensions_[i];
     if (n > 0) {
       if (p.isUnpacking()) {
-	array_coarse_[i] = new char[n];
+	array_coarse_[i].resize(n);
       }
-      PUParray(p,array_coarse_[i],n);
+      p | array_coarse_[i];
     }
   }
   p | offsets_;
@@ -175,10 +165,12 @@ char * FieldData::values
 
       // temporary field
 
-      int id_temporary = id_field - field_descr->num_permanent();
+      int id_temp = id_field - field_descr->num_permanent();
 
-      if (0 <= id_temporary && id_temporary < int(array_temporary_.size())) {
-	values = array_temporary_[id_temporary];
+      if (0 <= id_temp && id_temp < int(array_temporary_.size())) {
+	if (array_temporary_[id_temp].size() > 0) {
+          values = array_temporary_[id_temp].data();
+        }
       }
     }
   }
@@ -204,10 +196,10 @@ char * FieldData::coarse_values
   ASSERT("FieldData::coarse_values", "index_history must be 0",
          index_history == 0);
 #ifdef DEBUG_COARSE_ARRAY
-      CkPrintf ("DEBUG_COARSE_ARRAY %p returning %p[%d]\n",
-                (void*)this,(void *)array_coarse_[id_field],id_field);
+  CkPrintf ("DEBUG_COARSE_ARRAY %p returning %p[%d]\n",
+            (void*)this,(void *)array_coarse_[id_field],id_field);
 #endif
-  return array_coarse_[id_field];
+  return array_coarse_[id_field].data();
 }
 
 //----------------------------------------------------------------------
@@ -428,23 +420,23 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
 
   int index_field = id_field - field_descr->num_permanent();
   if (! (index_field < int(array_temporary_.size()))) {
-    array_temporary_.resize(index_field+1, 0);
-    temporary_size_. resize(index_field+1, 0);
+    array_temporary_.resize(index_field+1);
+    temporary_size_. resize(index_field+1);
   }
 
-  if (array_temporary_[index_field] == 0) {
+  if (array_temporary_[index_field].size() == 0) {
     int mx,my,mz;
     dimensions(field_descr,id_field,&mx,&my,&mz);
     int m = mx*my*mz;
     precision_type precision = field_descr->precision(id_field);
     if (precision == precision_single) {
-      array_temporary_[index_field] = (char*) new float [m];
+      array_temporary_[index_field].resize(m*sizeof(float));
       temporary_size_[index_field] = m*sizeof(float);
     } else if (precision == precision_double) {
-      array_temporary_[index_field] = (char*) new double [m];
+      array_temporary_[index_field].resize(m*sizeof(double));
       temporary_size_[index_field] = m*sizeof(double);
     } else if (precision == precision_quadruple) {
-      array_temporary_[index_field] = (char*) new long double [m];
+      array_temporary_[index_field].resize(m*sizeof(long double));
       temporary_size_[index_field] = m*sizeof(long double);
     } else {
       WARNING("FieldData::allocate_temporary",
@@ -461,8 +453,8 @@ void FieldData::allocate_coarse (const FieldDescr * field_descr) throw ()
   const int num_fields = field_descr->field_count();
 
   if (! (num_fields < int(array_coarse_.size()))) {
-      array_coarse_.resize(num_fields, nullptr);
-      coarse_dimensions_. resize(num_fields, 0);
+      array_coarse_.resize(num_fields);
+      coarse_dimensions_. resize(num_fields);
   }
 
   for (int id_field=0; id_field<num_fields; id_field++) {
@@ -476,27 +468,30 @@ void FieldData::allocate_coarse (const FieldDescr * field_descr, int id_field) t
 
 {
   if (! ((id_field+1) < int(array_coarse_.size()))) {
-      array_coarse_.resize((id_field+1), nullptr);
-      coarse_dimensions_. resize((id_field+1), 0);
+      array_coarse_.resize((id_field+1));
+      coarse_dimensions_. resize((id_field+1));
   }
 
-  if (array_coarse_[id_field] == nullptr) {
+  if (array_coarse_[id_field].size() == 0) {
     int mx,my,mz;
     coarse_dimensions(field_descr,id_field,&mx,&my,&mz);
     int m = mx*my*mz;
     precision_type precision = field_descr->precision(id_field);
     if (precision == precision_single) {
-      array_coarse_[id_field] = (char*) new float [m];
+      array_coarse_[id_field].resize(m*sizeof(float));
       coarse_dimensions_[id_field] = m*sizeof(float);
-      for (int i=0; i<m; i++) ((float*) array_coarse_[id_field])[i] = 0.0;
+      float * array = (float*)array_coarse_[id_field].data();
+      for (int i=0; i<m; i++) array[i] = 0.0;
     } else if (precision == precision_double) {
-      array_coarse_[id_field] = (char*) new double [m];
+      array_coarse_[id_field].resize(m*sizeof(double));
       coarse_dimensions_[id_field] = m*sizeof(double);
-      for (int i=0; i<m; i++) ((double*) array_coarse_[id_field])[i] = 0.0;
+      double * array = (double*)array_coarse_[id_field].data();
+      for (int i=0; i<m; i++) array[i] = 0.0;
     } else if (precision == precision_quadruple) {
-      array_coarse_[id_field] = (char*) new long double [m];
+      array_coarse_[id_field].resize(m*sizeof(long double));
       coarse_dimensions_[id_field] = m*sizeof(long double);
-      for (int i=0; i<m; i++) ((long double*) array_coarse_[id_field])[i] = 0.0;
+      long double * array = (long double*)array_coarse_[id_field].data();
+      for (int i=0; i<m; i++) array[i] = 0.0;
     } else {
       WARNING("FieldData::allocate_coarse",
               "Calling allocate_coarse() on already-allocated Field");
@@ -515,21 +510,13 @@ void FieldData::deallocate_temporary (const FieldDescr * field_descr,
   int index_field = id_field - field_descr->num_permanent();
 
   if (! (index_field < int(array_temporary_.size()))) {
-    array_temporary_.resize(index_field+1, 0);
-    temporary_size_. resize(index_field+1, 0);
+    array_temporary_.resize(index_field+1);
+    temporary_size_. resize(index_field+1);
   }
-  if (array_temporary_[index_field] != 0) {
-    precision_type precision = field_descr->precision(id_field);
-    if (precision == precision_single)
-      delete [] (float *)       array_temporary_[index_field];
-    if (precision == precision_double)
-      delete [] (double *)      array_temporary_[index_field];
-    if (precision == precision_quadruple)
-      delete [] (long double *) array_temporary_[index_field];
+  if (array_temporary_[index_field].size() != 0) {
+    array_temporary_[index_field].clear();
   }
-  array_temporary_[index_field] = 0;
   temporary_size_ [index_field] = 0;
-
 }
 
 //----------------------------------------------------------------------
@@ -547,8 +534,7 @@ void FieldData::deallocate_coarse () throw()
 void FieldData::deallocate_coarse (int index_field) throw()
 {
   if (index_field < (int)array_coarse_.size()) {
-    delete [] array_coarse_[index_field];
-    array_coarse_[index_field] = nullptr;
+    array_coarse_[index_field].clear();
     coarse_dimensions_ [index_field] = 0;
   }
 }
@@ -1051,14 +1037,15 @@ int FieldData::data_size (FieldDescr * field_descr) const
 
   SIZE_ARRAY_TYPE(size,int,size_,3);
   SIZE_VECTOR_TYPE(size,char,array_permanent_);
+  SIZE_VECTOR_TYPE(size,int,temporary_size_);
+  SIZE_VECTOR_VECTOR_TYPE(size,char,array_temporary_);
   SIZE_VECTOR_TYPE(size,int,offsets_);
   SIZE_SCALAR_TYPE(size,bool,ghosts_allocated_);
   SIZE_VECTOR_TYPE(size,int,history_id_);
   SIZE_VECTOR_TYPE(size,double,history_time_);
   SIZE_VECTOR_TYPE(size,double,units_scaling_);
   SIZE_VECTOR_TYPE(size,int,coarse_dimensions_);
-  /// Coarse fields with one ghost zone for padded Prolong
-  //  std::vector<char *> array_coarse_;
+  SIZE_VECTOR_VECTOR_TYPE(size,char,array_coarse_);
 
   return size;
 }
@@ -1077,14 +1064,15 @@ char * FieldData::save_data (FieldDescr * field_descr,
 
   SAVE_ARRAY_TYPE(pc,int,size_,3);
   SAVE_VECTOR_TYPE(pc,char,array_permanent_);
+  SAVE_VECTOR_TYPE(pc,int,temporary_size_);
+  SAVE_VECTOR_VECTOR_TYPE(pc,char,array_temporary_);
   SAVE_VECTOR_TYPE(pc,int,offsets_);
   SAVE_SCALAR_TYPE(pc,bool,ghosts_allocated_);
   SAVE_VECTOR_TYPE(pc,int,history_id_);
   SAVE_VECTOR_TYPE(pc,double,history_time_);
   SAVE_VECTOR_TYPE(pc,double,units_scaling_);
   SAVE_VECTOR_TYPE(pc,int,coarse_dimensions_);
-  /// Coarse fields with one ghost zone for padded Prolong
-  //  std::vector<char *> array_coarse_;
+  SAVE_VECTOR_VECTOR_TYPE(pc,char,array_coarse_);
 
   ASSERT2("FieldData::save_data()",
 	  "Buffer has size %ld but expecting size %d",
@@ -1108,14 +1096,15 @@ char * FieldData::load_data (FieldDescr * field_descr,
 
   LOAD_ARRAY_TYPE(pc,int,size_,3);
   LOAD_VECTOR_TYPE(pc,char,array_permanent_);
+  LOAD_VECTOR_TYPE(pc,int,temporary_size_);
+  LOAD_VECTOR_VECTOR_TYPE(pc,char,array_temporary_);
   LOAD_VECTOR_TYPE(pc,int,offsets_);
   LOAD_SCALAR_TYPE(pc,bool,ghosts_allocated_);
   LOAD_VECTOR_TYPE(pc,int,history_id_);
   LOAD_VECTOR_TYPE(pc,double,history_time_);
   LOAD_VECTOR_TYPE(pc,double,units_scaling_);
   LOAD_VECTOR_TYPE(pc,int,coarse_dimensions_);
-  /// Coarse fields with one ghost zone for padded Prolong
-  //  std::vector<char *> array_coarse_;
+  LOAD_VECTOR_VECTOR_TYPE(pc,char,array_coarse_);
 
   ASSERT2("FieldData::load_data()",
 	  "Buffer has size %ld but expecting size %d",
@@ -1341,7 +1330,7 @@ namespace{
 //----------------------------------------------------------------------
 
 template<class T>
-CelloArray<T, 3> FieldData::make_view_
+CelloView<T, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history,  bool coarse) throw()
@@ -1402,21 +1391,21 @@ CelloArray<T, 3> FieldData::make_view_
   if (ptr == nullptr){
     const char* field_type = (coarse) ? "coarse field" : "field";
     ERROR2("data_view_", "There is no %s with id %d", field_type, id_field);
-    // alternatively, we could just return CelloArray<T,3>()
+    // alternatively, we could just return CelloView<T,3>()
   }
 
-  return CelloArray<T, 3>(reinterpret_cast<T*>(ptr), mz, my, mx);
+  return CelloView<T, 3>(reinterpret_cast<T*>(ptr), mz, my, mx);
 }
 
-template CelloArray<float, 3> FieldData::make_view_
+template CelloView<float, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
-template CelloArray<double, 3> FieldData::make_view_
+template CelloView<double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
-template CelloArray<long double, 3> FieldData::make_view_
+template CelloView<long double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();

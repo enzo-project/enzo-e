@@ -23,7 +23,7 @@
 #include "_problem.hpp"
 #include "_compute.hpp"
 #include "_mesh.hpp"
-#include "_array.hpp"
+#include "_view.hpp"
 #include "_data.hpp"
 #include "_simulation.hpp"
 

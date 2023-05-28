@@ -156,10 +156,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(field_data->permanent_allocated());
   unit_assert(field_data->permanent_size() == array_size_with_ghosts);
 
-  
   //----------------------------------------------------------------------
   field_data->reallocate_permanent(field_descr,false);
-
 
   float       *v1,*u1;
   double      *v2,*u2;
@@ -171,19 +169,13 @@ PARALLEL_MAIN_BEGIN
   double      *vt3;
 
   unit_func("values");  // without ghosts
-  
+
   v1 = (float *)       field_data->values(field_descr,i1);
   v2 = (double *)      field_data->values(field_descr,i2);
   v3 = (double *)      field_data->values(field_descr,i3);
   v4 = (double *)      field_data->values(field_descr,i4);
   v5 = (long double *) field_data->values(field_descr,i5);
 
-  printf ("%s:%d v1 = %p\n",__FILE__,__LINE__,(void *)v1);
-  printf ("%s:%d v2 = %p\n",__FILE__,__LINE__,(void *)v2);
-  printf ("%s:%d v3 = %p\n",__FILE__,__LINE__,(void *)v3);
-  printf ("%s:%d v4 = %p\n",__FILE__,__LINE__,(void *)v4);
-  printf ("%s:%d v5 = %p\n",__FILE__,__LINE__,(void *)v5);
-  
   unit_func("temporary values");
 
   vt1 = (float *)   field_data->values(field_descr,it1);

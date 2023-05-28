@@ -45,6 +45,7 @@ void Config::pup (PUP::er &p)
   // Balance
 
   p | balance_schedule_index;
+  p | balance_type;
 
   // Boundary
 
@@ -375,8 +376,6 @@ void Config::read_adapt_ (Parameters * p) throw()
     } else {
       adapt_schedule_index[ia] = -1;
     }
-
-    
   }
 }
 
@@ -389,6 +388,13 @@ void Config::read_balance_ (Parameters * p) throw()
   //--------------------------------------------------
 
   p->group_clear();
+
+  balance_type = p->value_string ("Balance:type","charm");
+  ASSERT1 ("Config::read_balance_",
+          "Unknown Balance:type parameter %s; valid are \"charm\" or \"cello\"",
+           balance_type.c_str(),
+           ((balance_type == "charm") ||
+            (balance_type == "cello")));
 
   const bool balance_scheduled = 
     (p->type("Balance:schedule:var") != parameter_unknown);
@@ -1161,10 +1167,52 @@ void Config::read_output_ (Parameters * p) throw()
 
       if (p->type("colormap") == parameter_list) {
 	int size = p->list_length("colormap");
-	output_colormap[index_output].resize(size);
+	output_colormap[index_output].clear();
 	for (int i=0; i<size; i++) {
-	  output_colormap[index_output][i] = 
-	    p->list_value_float(i,"colormap",0.0);
+          if (p->list_type(i,"colormap") == parameter_float) {
+            // Assume red, green, blue triad if float
+            output_colormap[index_output].push_back
+              (p->list_value_float(i,"colormap",0.0));
+          } else if (p->list_type(i,"colormap") == parameter_string) {
+            std::string name = p->list_value_string(i,"colormap");
+            // Check for #rrggbb or color name
+            int color_rgb;
+            if (name[0] == '#') {
+              bool is_valid=true;
+              for (int i=1; i<name.size(); i++) {
+                is_valid = is_valid && isxdigit(name[i]);
+              }
+              ASSERT1 ("Config::read_output()",
+                       "Colormap error: Invalid hex digit in \"%s\"",
+                       name.c_str(), is_valid);
+              ASSERT1 ("Config::read_output()",
+                       "Colormap error: RGB hexadecimal color \"%s\" "
+                       "must have six digits, e.g. #0F0F0F or #Abacab",
+                       name.c_str(), name.size()==7);
+              std::stringstream ss;
+              ss << std::hex << name.data()+1;
+              ss >> color_rgb;
+            } else {
+              color_rgb = cello::color_get_rgb(name);
+              ASSERT1 ("Config::read_output()",
+                       "Unrecognized color \"%s\"",
+                       name.c_str(), color_rgb >= 0);
+            }
+
+            // Check for color name
+            const double r = ((color_rgb & 0xff0000) >> 16)/255.0;
+            const double g = ((color_rgb & 0xff00) >> 8)/255.0;
+            const double b = ((color_rgb & 0xff) >> 0)/255.0;
+
+            output_colormap[index_output].push_back(r);
+            output_colormap[index_output].push_back(g);
+            output_colormap[index_output].push_back(b);
+
+          } else {
+            ERROR1("Config::read_output()",
+                   "Unknown colormap list type %d\n",
+                   p->list_type(i,"colormap"));
+          }
 	}
       }
 
@@ -1426,7 +1474,7 @@ void Config::read_performance_ (Parameters * p) throw()
     performance_on_schedule_index  = i_on;
     performance_off_schedule_index = i_off;
   } else {
-    ERROR2("Config::read_performance-()",
+    ERROR2("Config::read_performance_()",
 	   "Performance:projections:schedule_on [%d] and Performance:projections:schedule_off [%d]\n"
 	   "must be both defined or both undefined",
 	   i_on,i_off);
