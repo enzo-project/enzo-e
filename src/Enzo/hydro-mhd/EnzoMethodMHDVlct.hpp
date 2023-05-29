@@ -160,66 +160,6 @@ protected: // methods
                                         const str_vec_t *passive_list)
     const noexcept;
 
-  /// Computes the fluxes along a given dimension, `dim`, and accumulate the
-  /// changes to the integration quantities in `dUcons_map`
-  ///
-  /// If using the dual energy formalism, this also computes a part of the
-  /// internal energy density source term,
-  ///    `dt * pressure * (dvx/dx + dvy/dy + dvz/dz)`
-  /// (`vx`, `vy`, `vz` are velocity components & scale factor dependence is
-  /// omitted), and adds it to the 'internal_energy' entry in `dUcons_map`.
-  /// More specifically, it handles the dimensionally split part of the term
-  /// involving the derivative along `dim`. The velocity component along `dim`
-  /// at the cell-interfaces (estimated by the Riemann Solver) to compute the
-  /// derivatives.
-  ///
-  /// This function should NOT be modified to directly compute any other source
-  /// terms unless they similarly have dependence on dimensional quantites
-  /// computed in this function AND can be dimensionally split. Other source
-  /// terms should be added to the `compute_source_terms_` method.
-  ///
-  /// @param[in]     dim Dimension along which to compute fluxes. Values of 0,
-  ///     1, and 2 correspond to the x, y, and z directions, respectively.
-  /// @param[in]     dt The current timestep.
-  /// @param[in]     cell_width The cell width along dimension `dim`.
-  /// @param[in]     primitive_map Map of arrays holding cell-centered
-  ///     primitive quantities that are to be reconstructed (This includes
-  ///     specific passive scalars).
-  /// @param[in]     priml_map,primr_map Maps of arrays used to temporarily
-  ///     hold the left/right reconstructed face-centered primitives. These
-  ///     arrays should have the shape as flux_map
-  /// @param[in]     flux_map Holds arrays where the calculated fluxes
-  ///     will be stored. The arrays should be face-centered along `dim`.
-  ///     If a cell-centered field holds `N` elements along `dim`, then this
-  ///     should only hold `N-1` elements along `dim`.
-  /// @param[in,out] dUcons_map Map of arrays where the changes to the
-  ///     integration quantities are accumulated. If constrained transport is
-  ///     being used, this won't include arrays for the magnetic fields.
-  /// @param[in]     interface_velocity_arr_ptr Pointer to an array to
-  ///     temporarily hold the computed component of the velocity at the cell
-  ///     interfaces along `dim`. If a cell-centered field holds `N` elements
-  ///     along `dim`, then this is only used to store `N-1` elements. This
-  ///     quantity is used to compute the internal energy source term (needed
-  ///     under the dual energy formalism). If the value is `nullptr`, then the
-  ///     interface velocity is not stored in the array.
-  /// @param[in]     reconstructor the instance of EnzoReconstructor to use to
-  ///     update reconstruct the face-centered primitives
-  /// @param[in,out] bfield_method When using running with bfield handling, this
-  ///     is a pointer to an instance of EnzoBfieldMethod. During the function
-  ///     call, the internal state is updated. If not handling bfields, this
-  ///     should be a `nullptr`.
-  /// @param[in]     stale_depth indicates the current stale depth (before
-  ///     performing reconstruction)
-  /// @param[in]     passive_list A list of keys for passively advected scalars.
-  void compute_flux_
-  (const int dim, const double cur_dt, const enzo_float cell_width,
-   EnzoEFltArrayMap &primitive_map,
-   EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
-   EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
-   const EFlt3DArray* const interface_velocity_arr_ptr,
-   EnzoReconstructor &reconstructor, EnzoBfieldMethod *bfield_method,
-   const int stale_depth, const str_vec_t& passive_list) const noexcept;
-
   /// Computes source terms and accumulate the changes to the integration
   /// quantities in `dUcons_map``dU_cons` accordingly.
   ///
