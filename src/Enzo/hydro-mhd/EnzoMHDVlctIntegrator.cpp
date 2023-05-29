@@ -47,106 +47,96 @@ void EnzoMHDVlctIntegrator::compute_update_step
 
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
 
-  const int i = static_cast<int>(step_index);
-  if (true) {
-    if (true) {
-      EnzoEFltArrayMap& cur_integration_map =
-        (i == 0) ? external_integration_map : temp_integration_map;
-      EnzoEFltArrayMap& out_integration_map =
-        (i == 0) ? temp_integration_map     : external_integration_map;
+  EnzoEFltArrayMap& cur_integration_map =
+    (step_index == 0) ? external_integration_map : temp_integration_map;
+  EnzoEFltArrayMap& out_integration_map =
+    (step_index == 0) ? temp_integration_map     : external_integration_map;
 
-      EnzoReconstructor *reconstructor;
+  EnzoReconstructor *reconstructor =
+    (step_index == 0) ? half_dt_recon_ : full_dt_recon_;
 
-      if (i == 0){
-        reconstructor = half_dt_recon_;
-      } else {
-        reconstructor = full_dt_recon_;
-      }
+  // set all elements of the arrays in dUcons_map to 0 (throughout the rest
+  // of the current loop, flux divergence and source terms will be
+  // accumulated in these arrays)
+  integration_quan_updater_->clear_dUcons_map(dUcons_map, 0., passive_list);
 
-      // set all elements of the arrays in dUcons_map to 0 (throughout the rest
-      // of the current loop, flux divergence and source terms will be
-      // accumulated in these arrays)
-      integration_quan_updater_->clear_dUcons_map(dUcons_map, 0., passive_list);
+  // Compute the primitive quantities from the integration quantites
+  // This basically copies all quantities that are both an integration
+  // quantity and a primitive and converts the passsive scalars from
+  // conserved-form to specific-form (i.e. from density to mass fraction).
+  // For a non-barotropic gas, this also computes pressure
+  // - for consistency with the Ppm solver, we explicitly avoid the Grackle
+  //   routine. This is only meaningful when grackle models molecular
+  //   hydrogen (which modifes the adiabtic index)
+  const bool ignore_grackle = true;
+  fluid_props->primitive_from_integration(cur_integration_map,
+                                          primitive_map,
+                                          stale_depth, passive_list,
+                                          ignore_grackle);
 
-      // Compute the primitive quantities from the integration quantites
-      // This basically copies all quantities that are both an integration
-      // quantity and a primitive and converts the passsive scalars from
-      // conserved-form to specific-form (i.e. from density to mass fraction).
-      // For a non-barotropic gas, this also computes pressure
-      // - for consistency with the Ppm solver, we explicitly avoid the Grackle
-      //   routine. This is only meaningful when grackle models molecular
-      //   hydrogen (which modifes the adiabtic index)
-      const bool ignore_grackle = true;
-      fluid_props->primitive_from_integration(cur_integration_map,
-                                              primitive_map,
-                                              stale_depth, passive_list,
-                                              ignore_grackle);
+  // Compute flux along each dimension
+  for (int dim = 0; dim < 3; dim++){
+    // trim the shape of priml_map and primr_map (they're bigger than
+    // necessary so that they can be reused for each dim).
+    CSlice x_slc = (dim == 0) ? CSlice(0,-1) : CSlice(0, nullptr);
+    CSlice y_slc = (dim == 1) ? CSlice(0,-1) : CSlice(0, nullptr);
+    CSlice z_slc = (dim == 2) ? CSlice(0,-1) : CSlice(0, nullptr);
 
-      // Compute flux along each dimension
-      for (int dim = 0; dim < 3; dim++){
-        // trim the shape of priml_map and primr_map (they're bigger than
-        // necessary so that they can be reused for each dim).
-        CSlice x_slc = (dim == 0) ? CSlice(0,-1) : CSlice(0, nullptr);
-        CSlice y_slc = (dim == 1) ? CSlice(0,-1) : CSlice(0, nullptr);
-        CSlice z_slc = (dim == 2) ? CSlice(0,-1) : CSlice(0, nullptr);
+    EnzoEFltArrayMap pl_map = priml_map.subarray_map(z_slc, y_slc, x_slc);
+    EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
 
-        EnzoEFltArrayMap pl_map = priml_map.subarray_map(z_slc, y_slc, x_slc);
-        EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
-
-        EFlt3DArray *interface_vel_arr_ptr, sliced_interface_vel_arr;
-        if (fluid_props->dual_energy_config().any_enabled()){
-          // when using dual energy formalism, trim the trim scratch-array for
-          // storing interface velocity values (computed by the Riemann Solver).
-          // This is used in the calculation of the internal energy source
-          // term). As with priml_map and primr_map, the array is bigger than
-          // necessary so it can be reused for each axis
-          sliced_interface_vel_arr =
-            interface_vel_arr.subarray(z_slc, y_slc, x_slc);
-          interface_vel_arr_ptr = &sliced_interface_vel_arr;
-        } else {
-          // no scratch-space was allocated, so we just pass a nullptr
-          interface_vel_arr_ptr = nullptr;
-        }
-
-        compute_flux_(dim, cur_dt, cell_widths_xyz[dim], primitive_map,
-                      pl_map, pr_map, flux_maps_xyz[dim], dUcons_map,
-                      interface_vel_arr_ptr, *reconstructor, bfield_method_,
-                      stale_depth, passive_list);
-      }
-
-      // increment the stale_depth
-      stale_depth+=reconstructor->immediate_staling_rate();
-
-      // Compute the source terms (use them to update dUcons_group)
-      compute_source_terms_(cur_dt, i == 1, external_integration_map,
-                            primitive_map, accel_map, dUcons_map, stale_depth);
-
-      // Update Bfields
-      if (bfield_method_ != nullptr) {
-        bfield_method_->update_all_bfield_components(cur_integration_map,
-                                                     flux_maps_xyz[0],
-                                                     flux_maps_xyz[1],
-                                                     flux_maps_xyz[2],
-                                                     out_integration_map,
-                                                     cur_dt,
-                                                     stale_depth);
-        bfield_method_->increment_partial_timestep();
-      }
-
-      // Update the integration quantities (includes flux divergence and source
-      // terms). This currently needs to happen after updating the
-      // cell-centered B-field so that the pressure floor can be applied to the
-      // total energy (and if necessary the total energy can be synchronized
-      // with the internal energy)
-      integration_quan_updater_->update_quantities
-        (external_integration_map, dUcons_map, out_integration_map,
-         stale_depth, passive_list);
-
-      // increment stale_depth since the inner values have been updated
-      // but the outer values have not
-      stale_depth+=reconstructor->delayed_staling_rate();
+    EFlt3DArray *interface_vel_arr_ptr, sliced_interface_vel_arr;
+    if (fluid_props->dual_energy_config().any_enabled()){
+      // when using dual energy formalism, trim the trim scratch-array for
+      // storing interface velocity values (computed by the Riemann Solver).
+      // This is used in the calculation of the internal energy source
+      // term). As with priml_map and primr_map, the array is bigger than
+      // necessary so it can be reused for each axis
+      sliced_interface_vel_arr =
+        interface_vel_arr.subarray(z_slc, y_slc, x_slc);
+      interface_vel_arr_ptr = &sliced_interface_vel_arr;
+    } else {
+      // no scratch-space was allocated, so we just pass a nullptr
+      interface_vel_arr_ptr = nullptr;
     }
+
+    compute_flux_(dim, cur_dt, cell_widths_xyz[dim], primitive_map,
+                  pl_map, pr_map, flux_maps_xyz[dim], dUcons_map,
+                  interface_vel_arr_ptr, *reconstructor, bfield_method_,
+                  stale_depth, passive_list);
   }
+
+  // increment the stale_depth
+  stale_depth+=reconstructor->immediate_staling_rate();
+
+  // Compute the source terms (use them to update dUcons_group)
+  compute_source_terms_(cur_dt, (step_index == 1), external_integration_map,
+                        primitive_map, accel_map, dUcons_map, stale_depth);
+
+  // Update Bfields
+  if (bfield_method_ != nullptr) {
+    bfield_method_->update_all_bfield_components(cur_integration_map,
+                                                 flux_maps_xyz[0],
+                                                 flux_maps_xyz[1],
+                                                 flux_maps_xyz[2],
+                                                 out_integration_map,
+                                                 cur_dt,
+                                                 stale_depth);
+    bfield_method_->increment_partial_timestep();
+  }
+
+  // Update the integration quantities (includes flux divergence and source
+  // terms). This currently needs to happen after updating the
+  // cell-centered B-field so that the pressure floor can be applied to the
+  // total energy (and if necessary the total energy can be synchronized
+  // with the internal energy)
+  integration_quan_updater_->update_quantities
+    (external_integration_map, dUcons_map, out_integration_map,
+     stale_depth, passive_list);
+
+  // increment stale_depth since the inner values have been updated
+  // but the outer values have not
+  stale_depth+=reconstructor->delayed_staling_rate();
 }
 
 //----------------------------------------------------------------------
