@@ -30,8 +30,9 @@ public:
   /// Delete EnzoMHDVlctIntegrator object
   ~EnzoMHDVlctIntegrator();
 
-  void compute_update_stage(EnzoEFltArrayMap external_integration_map,
-                            EnzoEFltArrayMap temp_integration_map,
+  void compute_update_stage(EnzoEFltArrayMap tstep_begin_integration_map,
+                            EnzoEFltArrayMap cur_stage_integration_map,
+                            EnzoEFltArrayMap out_integration_map,
                             EnzoEFltArrayMap primitive_map,
                             EnzoEFltArrayMap priml_map,
                             EnzoEFltArrayMap primr_map,

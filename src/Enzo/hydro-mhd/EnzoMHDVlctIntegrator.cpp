@@ -25,8 +25,9 @@ EnzoMHDVlctIntegrator::~EnzoMHDVlctIntegrator()
 //----------------------------------------------------------------------
 
 void EnzoMHDVlctIntegrator::compute_update_stage
-(EnzoEFltArrayMap external_integration_map,
- EnzoEFltArrayMap temp_integration_map,
+(EnzoEFltArrayMap tstep_begin_integration_map,
+ EnzoEFltArrayMap cur_stage_integration_map,
+ EnzoEFltArrayMap out_integration_map,
  EnzoEFltArrayMap primitive_map,
  EnzoEFltArrayMap priml_map, EnzoEFltArrayMap primr_map,
  std::array<EnzoEFltArrayMap, 3> flux_maps_xyz,
@@ -42,15 +43,10 @@ void EnzoMHDVlctIntegrator::compute_update_stage
  const std::array<enzo_float,3> cell_widths_xyz
  )
 {
-  ASSERT("EnzoMHDVlctIntegrator::compute_step",
+  ASSERT("EnzoMHDVlctIntegrator::compute_update_stage",
          "stage_index must satisfy 0 <= stage_index < 2", stage_index < 2);
 
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
-
-  EnzoEFltArrayMap& cur_integration_map =
-    (stage_index == 0) ? external_integration_map : temp_integration_map;
-  EnzoEFltArrayMap& out_integration_map =
-    (stage_index == 0) ? temp_integration_map     : external_integration_map;
 
   EnzoReconstructor *reconstructor =
     (stage_index == 0) ? half_dt_recon_ : full_dt_recon_;
@@ -69,7 +65,7 @@ void EnzoMHDVlctIntegrator::compute_update_stage
   //   routine. This is only meaningful when grackle models molecular
   //   hydrogen (which modifes the adiabtic index)
   const bool ignore_grackle = true;
-  fluid_props->primitive_from_integration(cur_integration_map,
+  fluid_props->primitive_from_integration(cur_stage_integration_map,
                                           primitive_map,
                                           stale_depth, passive_list,
                                           ignore_grackle);
@@ -110,12 +106,12 @@ void EnzoMHDVlctIntegrator::compute_update_stage
   stale_depth+=reconstructor->immediate_staling_rate();
 
   // Compute the source terms (use them to update dUcons_group)
-  compute_source_terms_(cur_dt, (stage_index == 1), external_integration_map,
+  compute_source_terms_(cur_dt, (stage_index == 1), tstep_begin_integration_map,
                         primitive_map, accel_map, dUcons_map, stale_depth);
 
   // Update Bfields
   if (bfield_method_ != nullptr) {
-    bfield_method_->update_all_bfield_components(cur_integration_map,
+    bfield_method_->update_all_bfield_components(cur_stage_integration_map,
                                                  flux_maps_xyz[0],
                                                  flux_maps_xyz[1],
                                                  flux_maps_xyz[2],
@@ -131,7 +127,7 @@ void EnzoMHDVlctIntegrator::compute_update_stage
   // total energy (and if necessary the total energy can be synchronized
   // with the internal energy)
   integration_quan_updater_->update_quantities
-    (external_integration_map, dUcons_map, out_integration_map,
+    (tstep_begin_integration_map, dUcons_map, out_integration_map,
      stale_depth, passive_list);
 
   // increment stale_depth since the inner values have been updated
