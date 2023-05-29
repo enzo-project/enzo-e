@@ -90,6 +90,46 @@ public:
    EnzoReconstructor &reconstructor, EnzoBfieldMethod *bfield_method,
    const int stale_depth, const str_vec_t& passive_list) const noexcept;
 
+  /// Computes source terms and accumulate the changes to the integration
+  /// quantities in `dUcons_map``dU_cons` accordingly.
+  ///
+  /// At this time, the source terms handled by this method are fairly limited,
+  /// but we expect them to grow over time. Note, that the `compute_flux_`
+  /// method computes a subset of source terms that can be dimensionally-split
+  /// and explicitly depend on relevant dimensional quantities computed by that
+  /// method. See the description of that method for more details.
+  ///
+  /// @param[in]     cur_dt The current timestep.
+  /// @param[in]     full_timestep Indicates whether this method is being
+  ///     called during the full timestep.
+  /// @param[in]     orig_integration_map Map of arrays holding integration
+  ///     quantities from the start of the current timestep (this argument
+  ///     should be unchanged when calling this method for the partial and then
+  ///     full timestep). This nominally includes passive scalars in conserved
+  ///     form.
+  /// @param[in]     primitive_map Map of arrays holding the current values of
+  ///     the primitives (this SHOULD change when calling this method for the
+  ///     partial and then full timestep). This nominally includes the
+  ///     specific passive scalars
+  /// @param[in]     accel_map Map that optionally holds arrays corresponding
+  ///     to thr components of the acceleration vector field. This should
+  ///     either hold no entries or 3 entries associated with the keys:
+  ///     `"acceleration_x"`, `"acceleration_y"`, and `"acceleration_z"`.
+  /// @param[in,out] dU_cons Map of arrays where the changes to the
+  ///     integration quantities are accumulated.
+  /// @param[in]     stale_depth indicates the current stale depth (before
+  ///     performing reconstruction)
+  ///
+  /// @note
+  /// The interface of this method will almost certainly need to be updated as
+  /// additional source terms get introduced.
+  void compute_source_terms_
+  (const double cur_dt, const bool full_timestep,
+   const EnzoEFltArrayMap &orig_integration_map,
+   const EnzoEFltArrayMap &primitive_map,
+   const EnzoEFltArrayMap &accel_map,
+   EnzoEFltArrayMap &dU_cons, const int stale_depth) const noexcept;
+
 public:
   /// Pointer to the Riemann solver
   EnzoRiemann *riemann_solver_;

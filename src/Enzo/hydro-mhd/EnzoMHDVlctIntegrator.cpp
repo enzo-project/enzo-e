@@ -81,3 +81,37 @@ void EnzoMHDVlctIntegrator::compute_flux_
 }
 
 //----------------------------------------------------------------------
+
+void EnzoMHDVlctIntegrator::compute_source_terms_
+(const double cur_dt, const bool full_timestep,
+ const EnzoEFltArrayMap &orig_integration_map,
+ const EnzoEFltArrayMap &primitive_map,
+ const EnzoEFltArrayMap &accel_map,
+ EnzoEFltArrayMap &dUcons_map,  const int stale_depth) const noexcept
+{
+  // As we add more source terms, we may want to store them in a std::vector
+  // instead of manually invoking them
+
+  // add any source-terms that are used for partial and full timesteps
+  // (there aren't any right now...)
+
+  // add any source-terms that are only included for full-timestep
+  if (full_timestep & (accel_map.size() != 0)){
+    // include gravity source terms.
+    //
+    // The inclusion of these terms are not based on any external paper. Thus,
+    // we include the following bullets to explain our thought process:
+    // - to be safe, we will use the density & velocity values from the start
+    //   of the timestep to compute the source terms.
+    // - we should reconsider this choice if we later decide to include the
+    //   source term for both the partial & full timesteps.
+    // - to include the source term during the partial & full timesteps, we
+    //   would probably want to recompute the gravitational potential and
+    //   acceleration fields at the partial timestep
+    EnzoSourceGravity gravity_source;
+    gravity_source.calculate_source(cur_dt, orig_integration_map, dUcons_map,
+                                    accel_map, stale_depth);
+  }
+}
+
+//----------------------------------------------------------------------
