@@ -30,21 +30,21 @@ public:
   /// Delete EnzoMHDVlctIntegrator object
   ~EnzoMHDVlctIntegrator();
 
-  void compute_update_step(EnzoEFltArrayMap external_integration_map,
-                           EnzoEFltArrayMap temp_integration_map,
-                           EnzoEFltArrayMap primitive_map,
-                           EnzoEFltArrayMap priml_map,
-                           EnzoEFltArrayMap primr_map,
-                           std::array<EnzoEFltArrayMap, 3> flux_maps_xyz,
-                           EnzoEFltArrayMap dUcons_map,
-                           const EnzoEFltArrayMap accel_map,
-                           EFlt3DArray interface_vel_arr,
-                           const str_vec_t& passive_list,
-                           EnzoBfieldMethod* bfield_method_,
-                           unsigned short step_index,
-                           double cur_dt,
-                           int& stale_depth,
-                           const std::array<enzo_float,3> cell_widths_xyz);
+  void compute_update_stage(EnzoEFltArrayMap external_integration_map,
+                            EnzoEFltArrayMap temp_integration_map,
+                            EnzoEFltArrayMap primitive_map,
+                            EnzoEFltArrayMap priml_map,
+                            EnzoEFltArrayMap primr_map,
+                            std::array<EnzoEFltArrayMap, 3> flux_maps_xyz,
+                            EnzoEFltArrayMap dUcons_map,
+                            const EnzoEFltArrayMap accel_map,
+                            EFlt3DArray interface_vel_arr,
+                            const str_vec_t& passive_list,
+                            EnzoBfieldMethod* bfield_method_,
+                            unsigned short step_index,
+                            double cur_dt,
+                            int& stale_depth,
+                            const std::array<enzo_float,3> cell_widths_xyz);
 
 protected:
   /// Computes the fluxes along a given dimension, `dim`, and accumulate the

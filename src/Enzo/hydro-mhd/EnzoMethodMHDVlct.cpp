@@ -443,19 +443,19 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     int stale_depth = 0;
 
     // repeat the following loop twice (for half time-step and full time-step)
-    for (unsigned short step_index = 0; step_index < 2; step_index++){
-      double cur_dt = (step_index == 0) ? dt/2. : dt;
+    for (unsigned short stage_index = 0; stage_index < 2; stage_index++){
+      double cur_dt = (stage_index == 0) ? dt/2. : dt;
 
-      integrator_->compute_update_step
+      integrator_->compute_update_stage
         (external_integration_map, temp_integration_map,
          primitive_map, priml_map, primr_map,
          flux_maps_xyz, dUcons_map, accel_map, interface_vel_arr,
-         passive_list, this->bfield_method_, step_index,
+         passive_list, this->bfield_method_, stage_index,
          cur_dt, stale_depth, cell_widths_xyz);
 
       // NOTE: stale_depth gets updated within compute_update_step
 
-      if ((step_index == 1) && store_fluxes_for_corrections_) {
+      if ((stage_index == 1) && store_fluxes_for_corrections_) {
         // Dual Energy Formalism Note:
         // - the interface velocities on the edge of the blocks will be
         //   different if using SMR/AMR. This means that the internal energy

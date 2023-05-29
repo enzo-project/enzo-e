@@ -24,7 +24,7 @@ EnzoMHDVlctIntegrator::~EnzoMHDVlctIntegrator()
 
 //----------------------------------------------------------------------
 
-void EnzoMHDVlctIntegrator::compute_update_step
+void EnzoMHDVlctIntegrator::compute_update_stage
 (EnzoEFltArrayMap external_integration_map,
  EnzoEFltArrayMap temp_integration_map,
  EnzoEFltArrayMap primitive_map,
@@ -35,7 +35,7 @@ void EnzoMHDVlctIntegrator::compute_update_step
  EFlt3DArray interface_vel_arr,
  const str_vec_t& passive_list,
  EnzoBfieldMethod* bfield_method_,
- unsigned short step_index,
+ unsigned short stage_index,
  double cur_dt,
  int& stale_depth, // to do: come up with a way to more directly communicate
                    // changes in stale_depth
@@ -43,17 +43,17 @@ void EnzoMHDVlctIntegrator::compute_update_step
  )
 {
   ASSERT("EnzoMHDVlctIntegrator::compute_step",
-         "step_index must satisfy 0 <= step_index < 2", step_index < 2);
+         "stage_index must satisfy 0 <= stage_index < 2", stage_index < 2);
 
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
 
   EnzoEFltArrayMap& cur_integration_map =
-    (step_index == 0) ? external_integration_map : temp_integration_map;
+    (stage_index == 0) ? external_integration_map : temp_integration_map;
   EnzoEFltArrayMap& out_integration_map =
-    (step_index == 0) ? temp_integration_map     : external_integration_map;
+    (stage_index == 0) ? temp_integration_map     : external_integration_map;
 
   EnzoReconstructor *reconstructor =
-    (step_index == 0) ? half_dt_recon_ : full_dt_recon_;
+    (stage_index == 0) ? half_dt_recon_ : full_dt_recon_;
 
   // set all elements of the arrays in dUcons_map to 0 (throughout the rest
   // of the current loop, flux divergence and source terms will be
@@ -110,7 +110,7 @@ void EnzoMHDVlctIntegrator::compute_update_step
   stale_depth+=reconstructor->immediate_staling_rate();
 
   // Compute the source terms (use them to update dUcons_group)
-  compute_source_terms_(cur_dt, (step_index == 1), external_integration_map,
+  compute_source_terms_(cur_dt, (stage_index == 1), external_integration_map,
                         primitive_map, accel_map, dUcons_map, stale_depth);
 
   // Update Bfields
