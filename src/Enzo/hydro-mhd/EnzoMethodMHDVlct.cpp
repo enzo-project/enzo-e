@@ -10,6 +10,8 @@
 #include "charm_enzo.hpp"
 #include <algorithm>    // std::copy
 
+#include "EnzoMHDVlctIntegrator.hpp"
+
 //----------------------------------------------------------------------
 
 static void check_field_l_(std::vector<std::string> &field_l)
@@ -71,7 +73,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   // Determine whether magnetic fields are to be used
   mhd_choice_ = parse_bfield_choice_(mhd_choice);
 
-  riemann_solver_ = EnzoRiemann::construct_riemann
+  EnzoRiemann* riemann_solver_ = EnzoRiemann::construct_riemann
     ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
       de_config.any_enabled()});
 
@@ -80,13 +82,17 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   primitive_field_list_ = riemann_solver_->primitive_quantity_keys();
 
   // Initialize the remaining component objects
-  half_dt_recon_ = EnzoReconstructor::construct_reconstructor
+  EnzoReconstructor* half_dt_recon_ = EnzoReconstructor::construct_reconstructor
     (primitive_field_list_, half_recon_name, (enzo_float)theta_limiter);
-  full_dt_recon_ = EnzoReconstructor::construct_reconstructor
+  EnzoReconstructor* full_dt_recon_ = EnzoReconstructor::construct_reconstructor
     (primitive_field_list_, full_recon_name, (enzo_float)theta_limiter);
 
-  integration_quan_updater_ =
+  EnzoIntegrationQuanUpdate* integration_quan_updater_ =
     new EnzoIntegrationQuanUpdate(integration_field_list_, true);
+
+  integrator_ = new EnzoMHDVlctIntegrator(riemann_solver_,
+                                          half_dt_recon_, full_dt_recon_,
+                                          integration_quan_updater_);
 
   // Determine the lists of fields that are required to hold the integration
   // quantities and primitives and ensure that they are defined
@@ -162,10 +168,6 @@ EnzoMethodMHDVlct::bfield_choice EnzoMethodMHDVlct::parse_bfield_choice_
 
 EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
 {
-  delete half_dt_recon_;
-  delete full_dt_recon_;
-  delete riemann_solver_;
-  delete integration_quan_updater_;
   if (scratch_space_ != nullptr){
     delete scratch_space_;
   }
@@ -184,10 +186,15 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p|half_dt_recon_;
-  p|full_dt_recon_;
-  p|riemann_solver_;
-  p|integration_quan_updater_;
+  if (p.isUnpacking()) {
+    integrator_ = new EnzoMHDVlctIntegrator(nullptr, nullptr,
+                                            nullptr, nullptr);
+  }
+
+  p|integrator_->half_dt_recon_;
+  p|integrator_->full_dt_recon_;
+  p|integrator_->riemann_solver_;
+  p|integrator_->integration_quan_updater_;
   // skip scratch_space_. This will be freshly constructed the first time that
   // the compute method is called.
   p|mhd_choice_;
@@ -241,7 +248,7 @@ EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
   if (scratch_space_ == nullptr){
     scratch_space_ = new EnzoVlctScratchSpace
       (field_shape, integration_field_list_, primitive_field_list_,
-       integration_quan_updater_->integration_keys(), passive_list,
+       (integrator_->integration_quan_updater_)->integration_keys(), passive_list,
        enzo::fluid_props()->dual_energy_config().any_enabled());
   }
   return scratch_space_;
@@ -441,15 +448,15 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       EnzoReconstructor *reconstructor;
 
       if (i == 0){
-        reconstructor = half_dt_recon_;
+        reconstructor = integrator_->half_dt_recon_;
       } else {
-        reconstructor = full_dt_recon_;
+        reconstructor = integrator_->full_dt_recon_;
       }
 
       // set all elements of the arrays in dUcons_map to 0 (throughout the rest
       // of the current loop, flux divergence and source terms will be
       // accumulated in these arrays)
-      integration_quan_updater_->clear_dUcons_map(dUcons_map, 0., passive_list);
+      (integrator_->integration_quan_updater_)->clear_dUcons_map(dUcons_map, 0., passive_list);
 
       // Compute the primitive quantities from the integration quantites
       // This basically copies all quantities that are both and an integration
@@ -536,7 +543,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // cell-centered B-field so that the pressure floor can be applied to the
       // total energy (and if necessary the total energy can be synchronized
       // with the internal energy)
-      integration_quan_updater_->update_quantities
+      (integrator_->integration_quan_updater_)->update_quantities
         (external_integration_map, dUcons_map, out_integration_map,
          stale_depth, passive_list);
 
@@ -614,7 +621,7 @@ void EnzoMethodMHDVlct::compute_flux_
   }
 
   // Next, compute the fluxes
-  riemann_solver_->solve(priml_map, primr_map, flux_map, dim,
+  (integrator_->riemann_solver_)->solve(priml_map, primr_map, flux_map, dim,
                          cur_stale_depth, passive_list,
                          interface_velocity_arr_ptr);
 
@@ -622,7 +629,7 @@ void EnzoMethodMHDVlct::compute_flux_
   // from the fluxes and use these values to update dUcons_map (which is used
   // to accumulate the total change in these quantities over the current
   // [partial] timestep)
-  integration_quan_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
+  (integrator_->integration_quan_updater_)->accumulate_flux_component(dim, cur_dt, cell_width,
                                                        flux_map, dUcons_map,
                                                        cur_stale_depth,
                                                        passive_list);

@@ -77,6 +77,9 @@
 
 struct EnzoVlctScratchSpace; // defined at the end of this header file
 
+class EnzoMHDVlctIntegrator; // the header declaring this class will be
+                             // included in the source file
+
 class EnzoMethodMHDVlct : public Method {
 
   /// @class    EnzoMethodMHDVlct
@@ -113,11 +116,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
-      half_dt_recon_(nullptr),
-      full_dt_recon_(nullptr),
-      rsolver_name_(""),
-      riemann_solver_(nullptr),
-      integration_quan_updater_(nullptr),
+      integrator_(nullptr),
       scratch_space_(nullptr),
       mhd_choice_(bfield_choice::no_bfield),
       bfield_method_(nullptr),
@@ -299,18 +298,9 @@ protected: // methods
 
 protected: // attributes
 
-  /// Pointer to the reconstructor used to reconstruct the fluid during the
-  /// first half time-step (usually nearest-neighbor)
-  EnzoReconstructor *half_dt_recon_;
-  /// Pointer to the reconstructor used to reconstruct the fluid during the
-  /// full time-step
-  EnzoReconstructor *full_dt_recon_;
-  /// Name of the Riemann solver
-  std::string rsolver_name_;
-  /// Pointer to the Riemann solver
-  EnzoRiemann *riemann_solver_;
-  /// Pointer to the integration quantity updater
-  EnzoIntegrationQuanUpdate *integration_quan_updater_;
+  /// Holds most of the mhd machinery
+  EnzoMHDVlctIntegrator *integrator_;
+
   /// Pointer to lazily initialized struct holding scratch-space
   EnzoVlctScratchSpace *scratch_space_;
 
