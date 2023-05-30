@@ -276,8 +276,8 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, std::vector<EnzoObjectFeedbackSp
   enzo_float * PopIII_SNe_metal_density = (enzo_float *) field.values("PopIII_SNe_metal_density");
   enzo_float * PopIII_HNe_metal_density = (enzo_float *) field.values("PopIII_HNe_metal_density");
   enzo_float * PopIII_PISNe_metal_density = (enzo_float *) field.values("PopIII_PISNe_metal_density");
- 
 
+  CkPrintf("FBNet::update_mesh Nspheres = %d\n", (*sphere_list).size());
   for (auto sphere : *sphere_list) {
     double metal_mass_tot = sphere.metal_mass_SNe() + sphere.metal_mass_HNe() + sphere.metal_mass_PISNe();
     if (metal_mass_tot == 0.0) { // do nothing if no yield

@@ -233,3 +233,4 @@ const Factory * EnzoSimulation::factory() const throw()
 
 //======================================================================
 
+std::vector<EnzoObjectFeedbackSphere> EnzoSimulation::feedback_sphere_list;

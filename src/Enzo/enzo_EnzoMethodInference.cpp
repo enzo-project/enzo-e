@@ -1232,26 +1232,17 @@ void EnzoLevelArray::apply_inference()
 
   //    put a sphere object there and add it to a list sphere_list
   EnzoObjectFeedbackSphere sphere(center, sphere_r, yield_SNe, yield_HNe, yield_PISNe);
+  EnzoSimulation::update_feedback_sphere_list(sphere);
+ 
   std::vector<EnzoObjectFeedbackSphere> sphere_list;
   sphere_list.push_back(sphere);
-
-#ifdef TRACE_INFER
-  for (auto sphere : sphere_list) {
-    char buffer[80];
-    sprintf (buffer,"TRACE_INFER %d",cello::simulation()->cycle());
-    sphere.print(buffer);
-  }
-#endif
-
-  //    pack sphere list into a buffer to send to blocks
-
-  //    allocate buffer
+   //    allocate buffer
   int n = 0;
-  SIZE_VECTOR_TYPE(n,EnzoObjectFeedbackSphere,sphere_list);
+  SIZE_VECTOR_TYPE(n,ObjectSphere,sphere_list);
   //    initialize buffer
   char * buffer = new char [n];
   char *pc = buffer;
-  SAVE_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
+  SAVE_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
 
   //    Send data to leaf blocks via base-level block
   Index index_block = get_block_index_();
@@ -1283,21 +1274,24 @@ void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[
 {
   // Unpack buffer into sphere_list
 
-  std::vector<EnzoObjectFeedbackSphere> sphere_list;
-  char *pc = buffer;
-  LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
+  //std::vector<EnzoObjectFeedbackSphere> sphere_list;
+  //char *pc = buffer;
+  //LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
 
   Index index_block = block->index();
   const int level = block->level();
 
   if (block->is_leaf()) {
 
-    // if inference_method == "starnet"
-    FBNet::update_mesh(enzo::block(block), &sphere_list);
-
     // if leaf block, we're done, tell level array element
     Index3 index3(il3[0],il3[1],il3[2]);
 
+    // if inference_type == "starnet"
+    //int n = 0;
+    //SIZE_VECTOR_TYPE(n,EnzoObjectFeedbackSphere,sphere_list);
+    // contribute(sizeof(n, sphere_list, callback)
+
+    // else {}
     proxy_level_array[index3].p_done (index_block);
 
   } else {
@@ -1661,7 +1655,15 @@ int EnzoMethodInference::count_arrays_ (Block * block) const
 
 void EnzoBlock::p_method_infer_exit()
 {
-  compute_done();
+   // if inference_method == "starnet"
+   std::vector<EnzoObjectFeedbackSphere> * sphere_list = 
+   EnzoSimulation::get_feedback_sphere_list();
+ 
+   FBNet::update_mesh(this, sphere_list);
+
+   EnzoSimulation::clear_feedback_sphere_list();
+
+   compute_done();
 }
 
 //======================================================================

@@ -95,6 +95,23 @@ public: // functions
   void p_restart_next_level();
   void p_restart_level_created();
 
+  /// add to EnzoObjectFeedbackSphere list 
+  // (needed for EnzoMethod Inference when inference_method = "starnet")
+  static void update_feedback_sphere_list(EnzoObjectFeedbackSphere sphere)
+  { feedback_sphere_list.push_back(sphere); }
+
+  static std::vector<EnzoObjectFeedbackSphere> * get_feedback_sphere_list()
+  { return &feedback_sphere_list; }
+
+  static void clear_feedback_sphere_list() 
+  { feedback_sphere_list.clear(); }
+
+  // global sphere list for EnzoMethodInference (inference_method = "starnet")
+  // TODO: Create custom class for handling sphere list? Only instantiate 
+  //       FeedbackSphereContainer object if using starnet. 
+  //       That way we don't have to hang this off of the simulation object
+  static std::vector<EnzoObjectFeedbackSphere> feedback_sphere_list;
+
 public: // virtual functions
 
   /// Initialize the Enzo Simulation
@@ -135,6 +152,7 @@ private: // attributes
 #ifdef BYPASS_CHARM_MEM_LEAK
   std::map<Index,EnzoMsgCheck *> msg_check_map_;
 #endif
+
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */
