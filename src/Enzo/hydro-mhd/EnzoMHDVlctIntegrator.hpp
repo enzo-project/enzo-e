@@ -215,6 +215,15 @@ public:
     return reconstructors_[stage_index]->total_staling_rate();
   }
 
+  /// Compute the timestep
+  ///
+  /// @note
+  /// Multiplication by the courant factor is handled by the Method object
+  double timestep(EnzoEFltArrayMap integration_map,
+                  CelloView<const enzo_float, 3> pressure,
+                  const double dx, const double dy, const double dz)
+    const noexcept;
+
 protected:
 
   /// returns the bfield_choice enum that matches the input string
