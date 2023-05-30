@@ -8,6 +8,29 @@
 #ifndef ENZO_ENZO_MHD_VLCT_INTEGRATOR_HPP
 #define ENZO_ENZO_MHD_VLCT_INTEGRATOR_HPP
 
+struct EnzoMHDVlctArgPack {
+  /// @class    EnzoMHDVlctArgPack
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Arguments for configuring EnzoMHDVlctIntegrator
+  ///
+  /// This is intended to be easily PUPed
+
+  std::string rsolver;
+  std::string half_recon_name;
+  std::string full_recon_name;
+  double theta_limiter;
+  std::string mhd_choice;
+
+  void pup(PUP::er &p) {
+    p | rsolver;
+    p | half_recon_name;
+    p | full_recon_name;
+    p | theta_limiter;
+    p | mhd_choice;
+  }
+};
+
+
 class EnzoMHDVlctIntegrator {
 
   /// @class    EnzoMHDVlctIntegrator
@@ -81,15 +104,11 @@ public:
 
 public:
 
-  EnzoMHDVlctIntegrator(std::string rsolver,
-                        std::string half_recon_name,
-                        std::string full_recon_name,
-                        double theta_limiter,
-                        std::string mhd_choice)
+  EnzoMHDVlctIntegrator(const EnzoMHDVlctArgPack& args)
     : riemann_solver_(nullptr),
       reconstructors_(),
       integration_quan_updater_(nullptr),
-      mhd_choice_(EnzoMHDVlctIntegrator::parse_bfield_choice_(mhd_choice))
+      mhd_choice_(EnzoMHDVlctIntegrator::parse_bfield_choice_(args.mhd_choice))
   {
     // check compatability with EnzoPhysicsFluidProps
     EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
@@ -109,7 +128,7 @@ public:
 
     // Initialize the Riemann Solver
     riemann_solver_ = EnzoRiemann::construct_riemann
-      ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
+      ({args.rsolver, mhd_choice_ != bfield_choice::no_bfield,
         de_config.any_enabled()});
 
     // determine integration and primitive field list
@@ -121,12 +140,12 @@ public:
     // Initialize the remaining component objects
     std::unique_ptr<EnzoReconstructor> half_dt
       (EnzoReconstructor::construct_reconstructor(primitive_field_list,
-                                                  half_recon_name,
-                                                  (enzo_float)theta_limiter));
+                                                  args.half_recon_name,
+                                                  (enzo_float)args.theta_limiter));
     std::unique_ptr<EnzoReconstructor> full_dt
       (EnzoReconstructor::construct_reconstructor(primitive_field_list,
-                                                  full_recon_name,
-                                                  (enzo_float)theta_limiter));
+                                                  args.full_recon_name,
+                                                  (enzo_float)args.theta_limiter));
     reconstructors_.push_back(std::move(half_dt));
     reconstructors_.push_back(std::move(full_dt));
 

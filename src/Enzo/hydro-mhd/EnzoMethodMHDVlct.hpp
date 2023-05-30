@@ -79,6 +79,8 @@ struct EnzoVlctScratchSpace; // defined at the end of this header file
 
 class EnzoMHDVlctIntegrator; // the header declaring this class will be
                              // included in the source file
+struct EnzoMHDVlctArgPack; // declared alongside EnzoMHDVlctIntegrator
+
 
 class EnzoMethodMHDVlct : public Method {
 
@@ -180,6 +182,10 @@ protected: // methods
     noexcept;
 
 protected: // attributes
+
+  /// Holds arguments used to initialize the integrator_ attribute (this is
+  /// more easy to pup than the integrator_ machinery)
+  EnzoMHDVlctArgPack *integrator_arg_pack_;
 
   /// Holds most of the mhd machinery
   EnzoMHDVlctIntegrator *integrator_;

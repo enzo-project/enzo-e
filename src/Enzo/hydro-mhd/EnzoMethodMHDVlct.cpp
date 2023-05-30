@@ -54,15 +54,18 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   }
 #endif /* CONFIG_USE_GRACKLE */
 
-  integrator_ = new EnzoMHDVlctIntegrator(rsolver, half_recon_name,
-                                          full_recon_name, theta_limiter,
-                                          mhd_choice);
+  // initialize the integrator
+  integrator_arg_pack_ = new EnzoMHDVlctArgPack {rsolver, half_recon_name,
+                                                 full_recon_name,
+                                                 theta_limiter, mhd_choice};
 
-  integration_field_list_ = integrator_->integration_quantity_keys();
-  primitive_field_list_ = integrator_->primitive_quantity_keys();
+  integrator_ = new EnzoMHDVlctIntegrator(*integrator_arg_pack_);
 
   // Determine the lists of fields that are required to hold the integration
   // quantities and primitives and ensure that they are defined
+  integration_field_list_ = integrator_->integration_quantity_keys();
+  primitive_field_list_ = integrator_->primitive_quantity_keys();
+
   check_field_l_(integration_field_list_);
   check_field_l_(primitive_field_list_);
 
@@ -106,6 +109,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
 EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
 {
+  delete integrator_arg_pack_;
+  delete integrator_;
   if (scratch_space_ != nullptr){
     delete scratch_space_;
   }
@@ -124,22 +129,17 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   Method::pup(p);
 
-  /*
+  if (p.isUnpacking()) { integrator_arg_pack_ = new EnzoMHDVlctArgPack; }
+  p | *integrator_arg_pack_;
   if (p.isUnpacking()) {
-    integrator_ = new EnzoMHDVlctIntegrator(nullptr, nullptr,
-                                            nullptr, nullptr);
+    integrator_ = new EnzoMHDVlctIntegrator(*integrator_arg_pack_);
+    bfield_method_ = integrator_->construct_bfield_method(2);
   }
 
-  p|integrator_->reconstructors_;
-  p|integrator_->riemann_solver_;
-  p|integrator_->integration_quan_updater_; */
-  ERROR("EnzoMethodMHDVlct::pup",
-        "This needs to be updated so that EnzoMHDVlctIntegrator gets PUPed "
-        "correctly");
 
   // skip scratch_space_. This will be freshly constructed the first time that
   // the compute method is called.
-  p|bfield_method_;
+
   p|integration_field_list_;
   p|primitive_field_list_;
   p|lazy_passive_list_;
