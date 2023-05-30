@@ -9,6 +9,9 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
+#include <algorithm> // std::transform
+#include <cctype> // tolower
+
 // place this after #include "enzo.hpp"
 #include "EnzoMHDVlctIntegrator.hpp"
 
@@ -18,6 +21,31 @@ EnzoMHDVlctIntegrator::~EnzoMHDVlctIntegrator()
 {
   delete riemann_solver_;
   delete integration_quan_updater_;
+}
+
+//----------------------------------------------------------------------
+
+EnzoMHDVlctIntegrator::bfield_choice EnzoMHDVlctIntegrator::parse_bfield_choice_
+(std::string choice) noexcept
+{
+  std::string formatted(choice.size(), ' ');
+  std::transform(choice.begin(), choice.end(), formatted.begin(),
+		 ::tolower);
+  if (formatted == std::string("no_bfield")){
+    return bfield_choice::no_bfield;
+  } else if (formatted == std::string("unsafe_constant_uniform")){
+    ERROR("EnzoMethodMHDVlct::parse_bfield_choice_",
+          "constant_uniform is primarilly for debugging purposes. DON'T use "
+          "for science runs (things can break).");
+    return bfield_choice::unsafe_const_uniform;
+  } else if (formatted == std::string("constrained_transport")){
+    return bfield_choice::constrained_transport;
+  } else {
+    ERROR("EnzoMethodMHDVlct::parse_bfield_choice_",
+          "Unrecognized choice. Known options include \"no_bfield\" and "
+          "\"constrained_transport\"");
+    return bfield_choice::no_bfield;
+  }
 }
 
 //----------------------------------------------------------------------

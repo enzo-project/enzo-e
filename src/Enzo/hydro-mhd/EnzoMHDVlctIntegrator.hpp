@@ -66,24 +66,93 @@ class EnzoMHDVlctIntegrator {
   /// internal components as a full class hierarchy.
 
 public:
+  /// This is defined within the scope of EnzoMethodMHDVlct to avoid polluting
+  /// the global namespace.
+  ///
+  /// @note
+  /// This must be public so that it can be passed to helper methods by value
+  enum bfield_choice {
+    no_bfield = 0,         // pure hydrodynamics
+    unsafe_const_uniform,  // an unsafe mode where bfields are assumed to be
+                           // const (no interface bfields or CT). This is
+                           // provided primarily for debugging)
+    constrained_transport  // constrained transport (include interface bfields)
+  };
 
-  EnzoMHDVlctIntegrator
-  (EnzoRiemann* riemann_solver,
-   EnzoReconstructor* half_dt_recon,
-   EnzoReconstructor* full_dt_recon,
-   EnzoIntegrationQuanUpdate *integration_quan_updater)
-    : riemann_solver_(riemann_solver),
+public:
+
+  EnzoMHDVlctIntegrator(std::string rsolver,
+                        std::string half_recon_name,
+                        std::string full_recon_name,
+                        double theta_limiter,
+                        std::string mhd_choice)
+    : riemann_solver_(nullptr),
       reconstructors_(),
-      integration_quan_updater_(integration_quan_updater)
+      integration_quan_updater_(nullptr),
+      mhd_choice_(EnzoMHDVlctIntegrator::parse_bfield_choice_(mhd_choice))
   {
-    std::unique_ptr<EnzoReconstructor> half_dt(half_dt_recon);
-    std::unique_ptr<EnzoReconstructor> full_dt(full_dt_recon);
+    // check compatability with EnzoPhysicsFluidProps
+    EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+           "can't currently handle the case with a non-ideal EOS",
+           fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>());
+    const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+           "selected formulation of dual energy formalism is incompatible",
+           de_config.is_disabled() || de_config.modern_formulation());
+    const EnzoFluidFloorConfig& fluid_floor_config
+      = fluid_props->fluid_floor_config();
+    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+           "density and pressure floors must be defined",
+           fluid_floor_config.has_density_floor() &
+           fluid_floor_config.has_pressure_floor());
+
+    // Initialize the Riemann Solver
+    riemann_solver_ = EnzoRiemann::construct_riemann
+      ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
+        de_config.any_enabled()});
+
+    // determine integration and primitive field list
+    str_vec_t integration_field_list
+      = riemann_solver_->integration_quantity_keys();
+    str_vec_t primitive_field_list
+      = riemann_solver_->primitive_quantity_keys();
+
+    // Initialize the remaining component objects
+    std::unique_ptr<EnzoReconstructor> half_dt
+      (EnzoReconstructor::construct_reconstructor(primitive_field_list,
+                                                  half_recon_name,
+                                                  (enzo_float)theta_limiter));
+    std::unique_ptr<EnzoReconstructor> full_dt
+      (EnzoReconstructor::construct_reconstructor(primitive_field_list,
+                                                  full_recon_name,
+                                                  (enzo_float)theta_limiter));
     reconstructors_.push_back(std::move(half_dt));
     reconstructors_.push_back(std::move(full_dt));
+
+    integration_quan_updater_ =
+      new EnzoIntegrationQuanUpdate(integration_field_list, true);
   }
 
   /// Delete EnzoMHDVlctIntegrator object
   ~EnzoMHDVlctIntegrator();
+
+  EnzoBfieldMethod* construct_bfield_method(int nstages) const noexcept
+  {
+    if (mhd_choice_ == bfield_choice::constrained_transport) {
+      return new EnzoBfieldMethodCT(nstages);
+    }
+    return nullptr;
+  }
+
+  str_vec_t integration_quantity_keys() const noexcept
+  { return riemann_solver_->integration_quantity_keys(); }
+
+  str_vec_t primitive_quantity_keys() const noexcept
+  { return riemann_solver_->primitive_quantity_keys(); }
+
+  bool is_pure_hydro() const noexcept
+  { return mhd_choice_ == bfield_choice::no_bfield; }
 
   void compute_update_stage
   (EnzoEFltArrayMap tstep_begin_integration_map,
@@ -114,6 +183,9 @@ public:
   }
 
 protected:
+
+  /// returns the bfield_choice enum that matches the input string
+  static bfield_choice parse_bfield_choice_(std::string choice) noexcept;
 
   void check_valid_stage_index_(int stage_index) const noexcept {
     int max_size = static_cast<int>(reconstructors_.size());
@@ -233,6 +305,9 @@ public:
 
   /// Pointer to the integration quantity updater
   EnzoIntegrationQuanUpdate *integration_quan_updater_;
+
+  /// Indicates how magnetic fields are handled
+  bfield_choice mhd_choice_;
 
 };
 

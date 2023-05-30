@@ -43,22 +43,6 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      bool store_fluxes_for_corrections)
   : Method()
 {
-  // check compatability with EnzoPhysicsFluidProps
-  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
-  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-         "can't currently handle the case with a non-ideal EOS",
-         fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>());
-  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
-  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-         "selected formulation of dual energy formalism is incompatible",
-         de_config.is_disabled() || de_config.modern_formulation());
-  const EnzoFluidFloorConfig& fluid_floor_config
-    = fluid_props->fluid_floor_config();
-  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-         "density and pressure floors must be defined",
-         fluid_floor_config.has_density_floor() &
-         fluid_floor_config.has_pressure_floor());
-
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
     // we can remove the following once EnzoMethodGrackle no longer requires
@@ -66,33 +50,16 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     ASSERT("EnzoMethodMHDVlct::determine_quantities_",
            ("Grackle cannot currently be used alongside this integrator "
             "unless the dual-energy formalism is in use"),
-           de_config.any_enabled());
+           enzo::fluid_props()->dual_energy_config().any_enabled());
   }
 #endif /* CONFIG_USE_GRACKLE */
 
-  // Determine whether magnetic fields are to be used
-  mhd_choice_ = parse_bfield_choice_(mhd_choice);
+  integrator_ = new EnzoMHDVlctIntegrator(rsolver, half_recon_name,
+                                          full_recon_name, theta_limiter,
+                                          mhd_choice);
 
-  EnzoRiemann* riemann_solver_ = EnzoRiemann::construct_riemann
-    ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
-      de_config.any_enabled()});
-
-  // determine integration and primitive field list
-  integration_field_list_ = riemann_solver_->integration_quantity_keys();
-  primitive_field_list_ = riemann_solver_->primitive_quantity_keys();
-
-  // Initialize the remaining component objects
-  EnzoReconstructor* half_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (primitive_field_list_, half_recon_name, (enzo_float)theta_limiter);
-  EnzoReconstructor* full_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (primitive_field_list_, full_recon_name, (enzo_float)theta_limiter);
-
-  EnzoIntegrationQuanUpdate* integration_quan_updater_ =
-    new EnzoIntegrationQuanUpdate(integration_field_list_, true);
-
-  integrator_ = new EnzoMHDVlctIntegrator(riemann_solver_,
-                                          half_dt_recon_, full_dt_recon_,
-                                          integration_quan_updater_);
+  integration_field_list_ = integrator_->integration_quantity_keys();
+  primitive_field_list_ = integrator_->primitive_quantity_keys();
 
   // Determine the lists of fields that are required to hold the integration
   // quantities and primitives and ensure that they are defined
@@ -104,19 +71,15 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   ASSERT("EnzoMethodMHDVlct", "\"pressure\" must be a permanent field",
 	 field_descr->is_field("pressure"));
 
-  if (mhd_choice_ == bfield_choice::constrained_transport) {
-    bfield_method_ = new EnzoBfieldMethodCT(2);
-    bfield_method_->check_required_fields();
-  } else {
-    bfield_method_ = nullptr;
-  }
+  bfield_method_ = integrator_->construct_bfield_method(2);
+  if (bfield_method_ != nullptr) { bfield_method_->check_required_fields(); }
 
   // Check that the (cell-centered) ghost depth is large enough
   // Face-centered ghost depth could in principle be 1 smaller
   int gx,gy,gz;
   field_descr->ghost_depth(field_descr->field_id("density"), &gx, &gy, &gz);
-  int min_gdepth_req = (half_dt_recon_->total_staling_rate() +
-                        full_dt_recon_->total_staling_rate());
+  int min_gdepth_req = (integrator_->staling_from_stage(0) +
+                        integrator_->staling_from_stage(1));
   ASSERT1("EnzoMethodMHDVlct::compute", "ghost depth must be at least %d.",
 	  min_gdepth_req, std::min(gx, std::min(gy, gz)) >= min_gdepth_req);
 
@@ -125,7 +88,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   if (store_fluxes_for_corrections){
     ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
            "Flux corrections are currently only supported in hydro-mode",
-           mhd_choice_ == bfield_choice::no_bfield);
+           integrator_->is_pure_hydro());
   }
 
   scratch_space_ = nullptr;
@@ -137,31 +100,6 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   // scalars won't necessarily be known until after all Methods have been
   // constructed and all intializers have been executed
   refresh->add_all_fields();
-}
-
-//----------------------------------------------------------------------
-
-EnzoMethodMHDVlct::bfield_choice EnzoMethodMHDVlct::parse_bfield_choice_
-(std::string choice) const noexcept
-{
-  std::string formatted(choice.size(), ' ');
-  std::transform(choice.begin(), choice.end(), formatted.begin(),
-		 ::tolower);
-  if (formatted == std::string("no_bfield")){
-    return bfield_choice::no_bfield;
-  } else if (formatted == std::string("unsafe_constant_uniform")){
-    ERROR("EnzoMethodMHDVlct::parse_bfield_choice_",
-          "constant_uniform is primarilly for debugging purposes. DON'T use "
-          "for science runs (things can break).");
-    return bfield_choice::unsafe_const_uniform;
-  } else if (formatted == std::string("constrained_transport")){
-    return bfield_choice::constrained_transport;
-  } else {
-    ERROR("EnzoMethodMHDVlct::parse_bfield_choice_",
-          "Unrecognized choice. Known options include \"no_bfield\" and "
-          "\"constrained_transport\"");
-    return bfield_choice::no_bfield;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -186,6 +124,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   Method::pup(p);
 
+  /*
   if (p.isUnpacking()) {
     integrator_ = new EnzoMHDVlctIntegrator(nullptr, nullptr,
                                             nullptr, nullptr);
@@ -193,10 +132,13 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   p|integrator_->reconstructors_;
   p|integrator_->riemann_solver_;
-  p|integrator_->integration_quan_updater_;
+  p|integrator_->integration_quan_updater_; */
+  ERROR("EnzoMethodMHDVlct::pup",
+        "This needs to be updated so that EnzoMHDVlctIntegrator gets PUPed "
+        "correctly");
+
   // skip scratch_space_. This will be freshly constructed the first time that
   // the compute method is called.
-  p|mhd_choice_;
   p|bfield_method_;
   p|integration_field_list_;
   p|primitive_field_list_;
@@ -573,7 +515,7 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   // initialize returned value
   double dtBaryons = std::numeric_limits<double>::max();
 
-  if (mhd_choice_ == bfield_choice::no_bfield) {
+  if (integrator_->is_pure_hydro()) {
     auto loop_body = [=, &dtBaryons](int iz, int iy, int ix)
       {
         double cs = (double) eos.sound_speed(density(iz,iy,ix),

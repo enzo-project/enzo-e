@@ -86,19 +86,6 @@ class EnzoMethodMHDVlct : public Method {
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate VL + CT MHD method
 
-public:
-  /// This is defined within the scope of EnzoMethodMHDVlct to avoid polluting
-  /// the global namespace.
-  ///
-  /// @note
-  /// This must be public so that it can be passed to helper methods by value
-  enum bfield_choice {
-    no_bfield = 0,         // pure hydrodynamics
-    unsafe_const_uniform,  // an unsafe mode where bfields are assumed to be
-                           // const (no interface bfields or CT). This is
-                           // provided primarily for debugging)
-    constrained_transport  // constrained transport (include interface bfields)
-  };
 
 public: // interface
 
@@ -118,7 +105,6 @@ public: // interface
     : Method (m),
       integrator_(nullptr),
       scratch_space_(nullptr),
-      mhd_choice_(bfield_choice::no_bfield),
       bfield_method_(nullptr),
       integration_field_list_(),
       primitive_field_list_(),
@@ -142,9 +128,6 @@ public: // interface
   virtual double timestep ( Block * block) throw();
 
 protected: // methods
-
-  /// returns the bfield_choice enum that matches the input string
-  bfield_choice parse_bfield_choice_(std::string choice) const noexcept;
 
   /// Completes a handful of sanity-checks that are to be performed after the
   /// simulation is entirely initialized.
@@ -203,9 +186,6 @@ protected: // attributes
 
   /// Pointer to lazily initialized struct holding scratch-space
   EnzoVlctScratchSpace *scratch_space_;
-
-  /// Indicates how magnetic fields are handled
-  bfield_choice mhd_choice_;
 
   /// Pointer to the BfieldMethod handler
   EnzoBfieldMethod *bfield_method_;
