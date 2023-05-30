@@ -16,15 +16,13 @@ struct EnzoMHDVlctArgPack {
   /// This is intended to be easily PUPed
 
   std::string rsolver;
-  std::string half_recon_name;
-  std::string full_recon_name;
+  std::vector<std::string> recon_names;
   double theta_limiter;
   std::string mhd_choice;
 
   void pup(PUP::er &p) {
     p | rsolver;
-    p | half_recon_name;
-    p | full_recon_name;
+    p | recon_names;
     p | theta_limiter;
     p | mhd_choice;
   }
@@ -138,16 +136,12 @@ public:
       = riemann_solver_->primitive_quantity_keys();
 
     // Initialize the remaining component objects
-    std::unique_ptr<EnzoReconstructor> half_dt
-      (EnzoReconstructor::construct_reconstructor(primitive_field_list,
-                                                  args.half_recon_name,
-                                                  (enzo_float)args.theta_limiter));
-    std::unique_ptr<EnzoReconstructor> full_dt
-      (EnzoReconstructor::construct_reconstructor(primitive_field_list,
-                                                  args.full_recon_name,
-                                                  (enzo_float)args.theta_limiter));
-    reconstructors_.push_back(std::move(half_dt));
-    reconstructors_.push_back(std::move(full_dt));
+    for (const std::string& name : args.recon_names) {
+      std::unique_ptr<EnzoReconstructor> temp
+        (EnzoReconstructor::construct_reconstructor(primitive_field_list, name,
+                                                    (enzo_float)args.theta_limiter));
+      reconstructors_.push_back(std::move(temp));
+    }
 
     integration_quan_updater_ =
       new EnzoIntegrationQuanUpdate(integration_field_list, true);

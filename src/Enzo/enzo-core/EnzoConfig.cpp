@@ -329,8 +329,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_pm_update_max_dt(std::numeric_limits<double>::max()),
   /// EnzoMethodMHDVlct
   method_vlct_riemann_solver(""),
-  method_vlct_half_dt_reconstruct_method(""),
-  method_vlct_full_dt_reconstruct_method(""),
+  method_vlct_time_scheme(""),
+  method_vlct_reconstruct_method(""),
   method_vlct_theta_limiter(0.0),
   method_vlct_mhd_choice(""),
   /// EnzoMethodMergeSinks
@@ -730,8 +730,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_pm_update_max_dt;
 
   p | method_vlct_riemann_solver;
-  p | method_vlct_half_dt_reconstruct_method;
-  p | method_vlct_full_dt_reconstruct_method;
+  p | method_vlct_time_scheme;
+  p | method_vlct_reconstruct_method;
   p | method_vlct_theta_limiter;
   p | method_vlct_mhd_choice;
 
@@ -1865,23 +1865,69 @@ void EnzoConfig::read_method_vlct_(Parameters * p)
 {
   method_vlct_riemann_solver = p->value_string
     ("Method:mhd_vlct:riemann_solver","hlld");
-  method_vlct_half_dt_reconstruct_method = p->value_string
-    ("Method:mhd_vlct:half_dt_reconstruct_method","nn");
-  method_vlct_full_dt_reconstruct_method = p->value_string
-    ("Method:mhd_vlct:full_dt_reconstruct_method","plm");
   method_vlct_theta_limiter = p->value_float
     ("Method:mhd_vlct:theta_limiter", 1.5);
 
-  // we should raise an error if mhd_choice is not specified
+  // determine whether we're actually using vl+ct (for error-checking and
+  // handling backwards compatability)
   bool uses_vlct = false;
   for (size_t i=0; i<method_list.size(); i++) {
     if (method_list[i] == "mhd_vlct") uses_vlct=true;
   }
+
+  // raise an error if mhd_choice is not specified
   method_vlct_mhd_choice = p->value_string
     ("Method:mhd_vlct:mhd_choice", "");
-  if (uses_vlct && (method_vlct_mhd_choice == "")){
-    ERROR("EnzoConfig::read", "Method:mhd_vlct:mhd_choice was not specified");
+  if (uses_vlct && (p->param("Method:mhd_vlct:mhd_choice") == nullptr)) {
+    ERROR("EnzoConfig::read_method_vlct_",
+          "Method:mhd_vlct:mhd_choice was not specified");
   }
+
+  // these parameters affect backwards compatability
+  std::string pname_time_scheme = "Method:mhd_vlct:time_scheme";
+  std::string pname_reconstruct = "Method:mhd_vlct:reconstruct_method";
+
+  method_vlct_time_scheme = p->value_string(pname_time_scheme, "vl");
+  method_vlct_reconstruct_method = p->value_string(pname_reconstruct, "plm");
+
+  // backwards compatibilty: deprecated half/full_dt_reconstruct_method params
+  std::string pname_half_recon = "Method:mhd_vlct:half_dt_reconstruct_method";
+  std::string pname_full_recon = "Method:mhd_vlct:full_dt_reconstruct_method";
+  bool specified_half_dt_recon = (p->param(pname_half_recon) != nullptr);
+  bool specified_full_dt_recon = (p->param(pname_full_recon) != nullptr);
+  if (uses_vlct && (specified_half_dt_recon || specified_full_dt_recon)) {
+
+    if ((p->param(pname_time_scheme) != nullptr) ||
+        (p->param(pname_reconstruct) != nullptr)) {
+      ERROR4("EnzoConfig::read_method_vlct_",
+             "The deprecated parameters, \"%s\" and \"%s\", can't be "
+             "specified when \"%s\" or \"%s\" is specified.",
+             pname_half_recon.c_str(), pname_full_recon.c_str(),
+             pname_time_scheme.c_str(), pname_reconstruct.c_str());
+    }
+
+    if (p->value_string(pname_half_recon, "nn") != "nn") {
+      // it never made ANY sense to allow the half timestep of the VL+CT
+      // algorithm to use anything other than the "nn" choice. (The only reason
+      // it was ever an option was due to a misunderstanding early on)
+      ERROR1("EnzoConfig::read_method_vlct_",
+             "The deprecated parameter, \"%s\", can't have any value other "
+             "than \"nn\"",
+             pname_half_recon.c_str());
+    }
+
+    if (specified_full_dt_recon) {
+      method_vlct_reconstruct_method = p->value_string(pname_full_recon,"plm");
+    }
+
+    WARNING3("EnzoConfig::read_method_vlct_",
+             "\"%s\" and \"%s\" are deprecated and they will be removed in "
+             "the future. The former can't have any value other than \"nn\"; "
+             "it won't be replaced. Use \"%s\" instead of the latter.",
+             pname_half_recon.c_str(), pname_full_recon.c_str(),
+             pname_reconstruct.c_str());
+  }
+
 }
 
 //----------------------------------------------------------------------

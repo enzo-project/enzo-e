@@ -93,8 +93,8 @@ public: // interface
 
   /// Create a new EnzoMethodMHDVlct object
   EnzoMethodMHDVlct(std::string rsolver,
-		    std::string half_recon_name,
-		    std::string full_recon_name,
+		    std::string time_scheme,
+		    std::string recon_name,
 		    double theta_limiter,
 		    std::string mhd_choice,
 		    bool store_fluxes_for_corrections);

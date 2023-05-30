@@ -36,8 +36,8 @@ static str_vec_t concat_str_vec_(const str_vec_t& vec1, const str_vec_t& vec2){
 //----------------------------------------------------------------------
 
 EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
-				      std::string half_recon_name,
-				      std::string full_recon_name,
+				      std::string time_scheme,
+                                      std::string recon_name,
 				      double theta_limiter,
 				      std::string mhd_choice,
 				      bool store_fluxes_for_corrections)
@@ -54,9 +54,11 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   }
 #endif /* CONFIG_USE_GRACKLE */
 
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "time_scheme must be \"vl\"", time_scheme == "vl");
+
   // initialize the integrator
-  integrator_arg_pack_ = new EnzoMHDVlctArgPack {rsolver, half_recon_name,
-                                                 full_recon_name,
+  integrator_arg_pack_ = new EnzoMHDVlctArgPack {rsolver, {"nn", recon_name},
                                                  theta_limiter, mhd_choice};
 
   integrator_ = new EnzoMHDVlctIntegrator(*integrator_arg_pack_);
