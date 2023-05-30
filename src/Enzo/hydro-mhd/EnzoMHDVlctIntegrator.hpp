@@ -22,32 +22,56 @@ public:
    EnzoReconstructor* full_dt_recon,
    EnzoIntegrationQuanUpdate *integration_quan_updater)
     : riemann_solver_(riemann_solver),
-      half_dt_recon_(half_dt_recon),
-      full_dt_recon_(full_dt_recon),
+      reconstructors_(),
       integration_quan_updater_(integration_quan_updater)
-  { }
+  {
+    std::unique_ptr<EnzoReconstructor> half_dt(half_dt_recon);
+    std::unique_ptr<EnzoReconstructor> full_dt(full_dt_recon);
+    reconstructors_.push_back(std::move(half_dt));
+    reconstructors_.push_back(std::move(full_dt));
+  }
 
   /// Delete EnzoMHDVlctIntegrator object
   ~EnzoMHDVlctIntegrator();
 
-  void compute_update_stage(EnzoEFltArrayMap tstep_begin_integration_map,
-                            EnzoEFltArrayMap cur_stage_integration_map,
-                            EnzoEFltArrayMap out_integration_map,
-                            EnzoEFltArrayMap primitive_map,
-                            EnzoEFltArrayMap priml_map,
-                            EnzoEFltArrayMap primr_map,
-                            std::array<EnzoEFltArrayMap, 3> flux_maps_xyz,
-                            EnzoEFltArrayMap dUcons_map,
-                            const EnzoEFltArrayMap accel_map,
-                            EFlt3DArray interface_vel_arr,
-                            const str_vec_t& passive_list,
-                            EnzoBfieldMethod* bfield_method_,
-                            unsigned short step_index,
-                            double cur_dt,
-                            int& stale_depth,
-                            const std::array<enzo_float,3> cell_widths_xyz);
+  void compute_update_stage
+  (EnzoEFltArrayMap tstep_begin_integration_map,
+   EnzoEFltArrayMap cur_stage_integration_map,
+   EnzoEFltArrayMap out_integration_map,
+   EnzoEFltArrayMap primitive_map,
+   EnzoEFltArrayMap priml_map,
+   EnzoEFltArrayMap primr_map,
+   std::array<EnzoEFltArrayMap, 3> flux_maps_xyz,
+   EnzoEFltArrayMap dUcons_map,
+   const EnzoEFltArrayMap accel_map,
+   EFlt3DArray interface_vel_arr,
+   const str_vec_t& passive_list,
+   EnzoBfieldMethod* bfield_method_,
+   unsigned short step_index,
+   double cur_dt,
+   int stale_depth,
+   const std::array<enzo_float,3> cell_widths_xyz) const noexcept;
+
+  /// return the amount that stale_depth increases during a given stage
+  ///
+  /// @note
+  /// Currently, we just consider contributions from reconstruction, but we
+  /// could plausibly encounter other sources in the future
+  int staling_from_stage(int stage_index) const noexcept {
+    check_valid_stage_index_(stage_index);
+    return reconstructors_[stage_index]->total_staling_rate();
+  }
 
 protected:
+
+  void check_valid_stage_index_(int stage_index) const noexcept {
+    int max_size = static_cast<int>(reconstructors_.size());
+
+    ASSERT1("EnzoMHDVlctIntegrator::staling_from_stage",
+            "stage_index must satisfy 0 <= stage_index < %d\n",
+            max_size, (stage_index >= 0) && (stage_index < max_size));
+  }
+
   /// Computes the fluxes along a given dimension, `dim`, and accumulate the
   /// changes to the integration quantities in `dUcons_map`
   ///
@@ -151,12 +175,11 @@ protected:
 public:
   /// Pointer to the Riemann solver
   EnzoRiemann *riemann_solver_;
-  /// Pointer to the reconstructor used to reconstruct the fluid during the
-  /// first half time-step (usually nearest-neighbor)
-  EnzoReconstructor *half_dt_recon_;
-  /// Pointer to the reconstructor used to reconstruct the fluid during the
-  /// full time-step
-  EnzoReconstructor *full_dt_recon_;
+
+  // vector of pointers to reconstructors (the different choices correspond to
+  // different stages)
+  std::vector<std::unique_ptr<EnzoReconstructor>> reconstructors_;
+
   /// Pointer to the integration quantity updater
   EnzoIntegrationQuanUpdate *integration_quan_updater_;
 

@@ -191,8 +191,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
                                             nullptr, nullptr);
   }
 
-  p|integrator_->half_dt_recon_;
-  p|integrator_->full_dt_recon_;
+  p|integrator_->reconstructors_;
   p|integrator_->riemann_solver_;
   p|integrator_->integration_quan_updater_;
   // skip scratch_space_. This will be freshly constructed the first time that
@@ -464,7 +463,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
          passive_list, this->bfield_method_, stage_index,
          cur_dt, stale_depth, cell_widths_xyz);
 
-      // NOTE: stale_depth gets updated within compute_update_step
+      // update the stale_depth from the current stage
+      stale_depth += integrator_->staling_from_stage((int)stage_index);
 
       if (is_final_stage && store_fluxes_for_corrections_) {
         // Dual Energy Formalism Note:
@@ -472,12 +472,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         //   different if using SMR/AMR. This means that the internal energy
         //   source terms won't be fully self-consistent along the edges. This
         //   same effect is also present in the Ppm Solver
-        save_fluxes_for_corrections_(block, flux_maps_xyz[0], 0,
-                                     cell_widths_xyz[0], cur_dt);
-        save_fluxes_for_corrections_(block, flux_maps_xyz[1], 1,
-                                     cell_widths_xyz[1], cur_dt);
-        save_fluxes_for_corrections_(block, flux_maps_xyz[2], 2,
-                                     cell_widths_xyz[2], cur_dt);
+        for (int i = 0; i < 3; i++) {
+          save_fluxes_for_corrections_(block, flux_maps_xyz[i], i,
+                                       cell_widths_xyz[i], cur_dt);
+        }
       }
 
     }

@@ -16,8 +16,6 @@
 
 EnzoMHDVlctIntegrator::~EnzoMHDVlctIntegrator()
 {
-  delete half_dt_recon_;
-  delete full_dt_recon_;
   delete riemann_solver_;
   delete integration_quan_updater_;
 }
@@ -38,18 +36,15 @@ void EnzoMHDVlctIntegrator::compute_update_stage
  EnzoBfieldMethod* bfield_method_,
  unsigned short stage_index,
  double cur_dt,
- int& stale_depth, // to do: come up with a way to more directly communicate
-                   // changes in stale_depth
+ int stale_depth,
  const std::array<enzo_float,3> cell_widths_xyz
- )
+ ) const noexcept
 {
-  ASSERT("EnzoMHDVlctIntegrator::compute_update_stage",
-         "stage_index must satisfy 0 <= stage_index < 2", stage_index < 2);
+  check_valid_stage_index_(static_cast<int>(stage_index));
 
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
 
-  EnzoReconstructor *reconstructor =
-    (stage_index == 0) ? half_dt_recon_ : full_dt_recon_;
+  EnzoReconstructor *reconstructor = reconstructors_[stage_index].get();
 
   // set all elements of the arrays in dUcons_map to 0 (throughout the rest
   // of the current loop, flux divergence and source terms will be
@@ -129,10 +124,6 @@ void EnzoMHDVlctIntegrator::compute_update_stage
   integration_quan_updater_->update_quantities
     (tstep_begin_integration_map, dUcons_map, out_integration_map,
      stale_depth, passive_list);
-
-  // increment stale_depth since the inner values have been updated
-  // but the outer values have not
-  stale_depth+=reconstructor->delayed_staling_rate();
 }
 
 //----------------------------------------------------------------------
