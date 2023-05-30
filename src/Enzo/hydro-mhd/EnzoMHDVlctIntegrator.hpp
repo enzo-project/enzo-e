@@ -13,6 +13,57 @@ class EnzoMHDVlctIntegrator {
   /// @class    EnzoMHDVlctIntegrator
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Solve equations used in for VL + CT MHD method
+  ///
+  /// This class is intended to encapsulate all algorithmic details about the
+  /// the Hydro/MHD solver, other than time-integration details.
+  ///
+  /// A given Hydro/MHD solver updates hydro-quantites over a single timestep
+  /// in one or more stages. The number of stages is determined by the
+  /// time-integration choice. For example:
+  /// - a simple forward Euler method involves a single stage.
+  /// - the van Leer, predictor-corrector method, (which was the original
+  ///   choice of solver involves 2 stage).
+  /// - Runge-Kutta methods typically involve 2 or more stages.
+  ///
+  /// The precise details of how such stages are linked together are left to
+  /// the disgression of the Method object that drives the integrator. The
+  /// Method object is also responsible for taking the Enzo-E fields and
+  /// putting them into the correct format for the integrator.
+  ///
+  /// This class is responsible for tying together all of the algorithmic steps
+  /// to update the fluid quantities over an individual stage. It should
+  /// basically know nothing about the time integration strategy. There are 2
+  /// exceptions to this rule are:
+  ///    - it needs to which reconstruction algorithm to use during a given
+  ///      stage
+  ///    - it may need to know which source terms to skip/compute during a
+  ///      given stage.
+  /// This class can also provides queryable methods to determine requirements/
+  /// assumptions (e.g. one might use them to determine which fields need to be
+  /// defined)
+  ///
+  /// A couple of other design principles for this class include:
+  ///    - the internals of this class should be immutable (once an instance is
+  ///      constructed, it can't be mutated. In other words, this object
+  ///      doesn't carry any mutatable state.
+  ///    - this class and its components should know as little as possible
+  ///      about the rest of Enzo-E (e.g. it shouldn't directly know anything
+  ///      about other Methods, the Block class, the Field class, etc.). The
+  ///      main exception is that is allowed to interface with physics objects.
+  ///
+  /// @note
+  /// Currently, the main blemish in the design is that the BfieldMethod class
+  /// hierarchy carries a lot of state (it's effectively a state machiner) and
+  /// it requires knowledge about the Enzo-E Block class. For that reason,
+  /// instances of the BfieldMethod class hierarchy are not currently stored
+  /// internally. As a short-term solution, this class provides a method for
+  /// constructing the appropriate instance of that class and it must be
+  /// explicitly passed an instance of that class for certain operations. A
+  /// longer term solution is being developed.
+  ///
+  /// @note
+  /// Going forward, it probably makes sense to move away from implementing the
+  /// internal components as a full class hierarchy.
 
 public:
 
