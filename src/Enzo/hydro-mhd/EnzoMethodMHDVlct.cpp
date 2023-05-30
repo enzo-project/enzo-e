@@ -189,7 +189,7 @@ EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
   if (scratch_space_ == nullptr){
     scratch_space_ = new EnzoVlctScratchSpace
       (field_shape, integration_field_list_, primitive_field_list_,
-       (integrator_->integration_quan_updater_)->integration_keys(), passive_list,
+       integrator_->dUcons_map_keys(), passive_list,
        enzo::fluid_props()->dual_energy_config().any_enabled());
   }
   return scratch_space_;
@@ -418,6 +418,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
           save_fluxes_for_corrections_(block, flux_maps_xyz[i], i,
                                        cell_widths_xyz[i], cur_dt);
         }
+      }
+
+      if (bfield_method_ != nullptr) {
+        bfield_method_->increment_partial_timestep();
       }
 
     }

@@ -141,7 +141,6 @@ void EnzoMHDVlctIntegrator::compute_update_stage
                                                  out_integration_map,
                                                  cur_dt,
                                                  stale_depth);
-    bfield_method_->increment_partial_timestep();
   }
 
   // Update the integration quantities (includes flux divergence and source

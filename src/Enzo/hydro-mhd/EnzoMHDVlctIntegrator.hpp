@@ -164,12 +164,26 @@ public:
     return nullptr;
   }
 
+  /// gives the list of expected keys (for actively advected quantities) held
+  /// in the different integration_map arguments passed to compute_update_stage
+  /// and each of the flux_maps. The order of keys in the flux_maps MUST match
+  /// the order of keys in the list.
   str_vec_t integration_quantity_keys() const noexcept
   { return riemann_solver_->integration_quantity_keys(); }
 
+  /// gives the list of expected keys (for actively advected quantities) held
+  /// in `primitive_map`, `priml_map`, and `primr_map`. The order of keys in
+  /// the latter 2 cases MUST match the order of keys in the list
   str_vec_t primitive_quantity_keys() const noexcept
   { return riemann_solver_->primitive_quantity_keys(); }
 
+  /// gives the list of expected keys (for actively advected quantities) held
+  /// in `dUcons_map`. This ALWAYS matches the list returned by
+  /// integration_quantity_keys, or is a subset of that list.
+  str_vec_t dUcons_map_keys() const noexcept
+  { return integration_quan_updater_->integration_keys(); }
+
+  /// query whether the integrator is configured for pure hydrodynamics
   bool is_pure_hydro() const noexcept
   { return mhd_choice_ == bfield_choice::no_bfield; }
 
@@ -314,16 +328,16 @@ protected:
    const EnzoEFltArrayMap &accel_map,
    EnzoEFltArrayMap &dU_cons, const int stale_depth) const noexcept;
 
-public:
+private:
   /// Pointer to the Riemann solver
-  EnzoRiemann *riemann_solver_;
+  const EnzoRiemann *riemann_solver_;
 
   // vector of pointers to reconstructors (the different choices correspond to
   // different stages)
   std::vector<std::unique_ptr<EnzoReconstructor>> reconstructors_;
 
   /// Pointer to the integration quantity updater
-  EnzoIntegrationQuanUpdate *integration_quan_updater_;
+  const EnzoIntegrationQuanUpdate *integration_quan_updater_;
 
   /// Indicates how magnetic fields are handled
   bfield_choice mhd_choice_;
