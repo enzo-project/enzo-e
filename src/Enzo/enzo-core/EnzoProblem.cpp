@@ -634,7 +634,10 @@ Method * EnzoProblem::create_method_
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
-      (enzo_config->physics_cosmology_initial_redshift,
+      (enzo_config->method_grackle_chemistry,
+       enzo_config->method_grackle_use_cooling_timestep,
+       enzo_config->method_grackle_radiation_redshift,
+       enzo_config->physics_cosmology_initial_redshift,
        enzo::simulation()->time());
 
 #endif /* CONFIG_USE_GRACKLE */

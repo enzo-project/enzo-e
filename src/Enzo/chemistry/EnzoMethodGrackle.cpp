@@ -14,18 +14,29 @@
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
+ GrackleChemistryData my_chemistry,
+ bool use_cooling_timestep,
+ const double radiation_redshift,
  const double physics_cosmology_initial_redshift,
  const double time
 )
   : Method()
 #ifdef CONFIG_USE_GRACKLE
     ,
+    my_chemistry_(std::move(my_chemistry)),
     grackle_units_(),
     grackle_rates_(),
-    time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED)
+    time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED),
+    radiation_redshift_(radiation_redshift),
+    use_cooling_timestep_(use_cooling_timestep)
 #endif
 {
 #ifdef CONFIG_USE_GRACKLE
+  // sanity check:
+  if ((radiation_redshift >= 0) && (enzo::cosmology() != nullptr)){
+    ERROR("EnzoMethodGrackle::EnzoMethodGrackle",
+          "radiation redshift should not be specified in cosmological sims");
+  }
 
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
@@ -48,7 +59,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
 #ifdef CONFIG_USE_GRACKLE
  
-void EnzoMethodGrackle::define_required_grackle_fields()
+void EnzoMethodGrackle::define_required_grackle_fields
+()
 {
   // Gather list of fields that MUST be defined for this method and
   // check that they are permanent. If not, define them.
@@ -57,15 +69,12 @@ void EnzoMethodGrackle::define_required_grackle_fields()
   // are initialized first and need knowledge of these fields at initialization
   // (e.g. to set up a refresh object), can ensure that the fields are defined
 
-  if (!enzo::config()->method_grackle_use_grackle) {return;}
+  if (my_chemistry_.get<int>("use_grackle") == 0) {return;}
 
   // special container for ensuring color fields are properly grouped
 
   std::vector<std::string> fields_to_define;
   std::vector<std::string> color_fields;
-
-  chemistry_data * grackle_chemistry =
-    enzo::config()->method_grackle_chemistry;
 
   const int rank = cello::rank();
 
@@ -79,11 +88,14 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 
   // Get Grackle parameters defining fields to define
 
-  const int metal_cooling      = grackle_chemistry->metal_cooling;
-  const int chemistry_level    = grackle_chemistry->primordial_chemistry;
-  const int specific_heating   = grackle_chemistry->use_specific_heating_rate;
-  const int volumetric_heating = grackle_chemistry->use_volumetric_heating_rate;
-  const int radiative_transfer = grackle_chemistry->use_radiative_transfer;
+  const int metal_cooling = my_chemistry_.get<int>("metal_cooling");
+  const int chemistry_level = my_chemistry_.get<int>("primordial_chemistry");
+  const int specific_heating
+    = my_chemistry_.get<int>("use_specific_heating_rate");
+  const int volumetric_heating
+    = my_chemistry_.get<int>("use_volumetric_heating_rate");
+  const int radiative_transfer
+      = my_chemistry_.get<int>("use_radiative_transfer");
 
   // Metal cooling fields
 
@@ -187,8 +199,6 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data
   // Initialize grackle units and data
   TRACE("Calling initialize_chemistry_data from EnzoMethodGrackle::EnzoMethodGrackle() or EnzoMethodGrackle::pup(PUP::er &p)");
 
-  const EnzoConfig * enzo_config = enzo::config();
-
   if (!preinitialized_units){
     // initialize grackle_units
     setup_grackle_units (current_time, &grackle_units_);
@@ -197,7 +207,7 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data
   // Initialize grackle units and data
   TRACE("Calling initialize_chemistry_data from EnzoMethodGrackle::EnzoMethodGrackle()");
 
-  if (_initialize_chemistry_data(enzo_config->method_grackle_chemistry,
+  if (_initialize_chemistry_data(my_chemistry_.get_ptr(),
 				 &grackle_rates_, &grackle_units_)
       == ENZO_FAIL) {
     ERROR("EnzoMethodGrackle::initialize_grackle_chemistry_data",
@@ -217,7 +227,7 @@ void EnzoMethodGrackle::initialize_grackle_chemistry_data
 
 void EnzoMethodGrackle::setup_grackle_units (double current_time,
                                              code_units * grackle_units
-                                             ) throw()
+                                             ) const throw()
 {
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
@@ -253,9 +263,8 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
     grackle_units->a_value = cosmo_a;
 
-  } else if (enzo_config->method_grackle_radiation_redshift > -1){
-    grackle_units->a_value = 1.0 /
-                         (1.0 + enzo_config->method_grackle_radiation_redshift);
+  } else if (radiation_redshift_ >= 0){
+    grackle_units->a_value = 1.0 / (1.0 + radiation_redshift_);
   }
 
   return;
@@ -269,7 +278,7 @@ void EnzoMethodGrackle::setup_grackle_units (double current_time,
 
 void EnzoMethodGrackle::setup_grackle_units (const EnzoFieldAdaptor& fadaptor,
                                              code_units * grackle_units
-                                             ) throw()
+                                             ) const throw()
 {
   const EnzoConfig * config = enzo::config();
     double current_time =
@@ -417,39 +426,41 @@ void EnzoMethodGrackle::update_grackle_density_fields(
   const enzo_float metal_factor = fluid_floors.has_metal_mass_frac_floor()
     ? fluid_floors.metal_mass_frac() : (enzo_float)tiny_number;
 
-  const EnzoConfig * enzo_config = enzo::config();
-  chemistry_data * grackle_chemistry =
-    enzo::config()->method_grackle_chemistry;
-  double metallicity_floor_ =
-    enzo::fluid_props()->fluid_floor_config().metal_mass_frac();
+  const int primordial_chemistry
+    = my_chemistry_.get<int>("primordial_chemistry");
+  const int metal_cooling  = my_chemistry_.get<int>("metal_cooling");
+  const double HydrogenFractionByMass
+    = my_chemistry_.get<double>("HydrogenFractionByMass");
+  const double DeuteriumToHydrogenRatio
+    = my_chemistry_.get<double>("DeuteriumToHydrogenRatio");
 
   for (int iz = 0; iz<ngz; iz++){
     for (int iy=0; iy<ngy; iy++){
       for (int ix=0; ix<ngx; ix++){
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
-        if(grackle_chemistry->primordial_chemistry > 0){
-          grackle_fields->HI_density[i]    = grackle_fields->density[i] * grackle_chemistry->HydrogenFractionByMass;
+        if(primordial_chemistry > 0){
+          grackle_fields->HI_density[i]   = grackle_fields->density[i] * HydrogenFractionByMass;
           grackle_fields->HII_density[i]   = grackle_fields->density[i] * tiny_number;
-          grackle_fields->HeI_density[i]   = grackle_fields->density[i] * (1.0 - grackle_chemistry->HydrogenFractionByMass);
+          grackle_fields->HeI_density[i]   = grackle_fields->density[i] * (1.0 - HydrogenFractionByMass);
           grackle_fields->HeII_density[i]  = grackle_fields->density[i] * tiny_number;
           grackle_fields->HeIII_density[i] = grackle_fields->density[i] * tiny_number;
           grackle_fields->e_density[i]     = grackle_fields->density[i] * tiny_number;
         }
 
-        if (grackle_chemistry->primordial_chemistry > 1){
+        if (primordial_chemistry > 1){
           grackle_fields->HM_density[i]    = grackle_fields->density[i] * tiny_number;
           grackle_fields->H2I_density[i]   = grackle_fields->density[i] * tiny_number;
           grackle_fields->H2II_density[i]  = grackle_fields->density[i] * tiny_number;
         }
 
-        if (grackle_chemistry->primordial_chemistry > 2){
-          grackle_fields->DI_density[i]    = grackle_fields->density[i] * grackle_chemistry->DeuteriumToHydrogenRatio;
+        if (primordial_chemistry > 2){
+          grackle_fields->DI_density[i]    = grackle_fields->density[i] * DeuteriumToHydrogenRatio;
           grackle_fields->DII_density[i]   = grackle_fields->density[i] * tiny_number;
           grackle_fields->HDI_density[i]   = grackle_fields->density[i] * tiny_number;
         }
 
-       if (grackle_chemistry->metal_cooling == 1){
+       if (metal_cooling == 1){
           grackle_fields->metal_density[i] = grackle_fields->density[i] * metal_factor;
        }
 
@@ -506,12 +517,9 @@ void EnzoMethodGrackle::compute_ ( Block * block) throw()
   setup_grackle_units(fadaptor, &this->grackle_units_);
   setup_grackle_fields(fadaptor, &grackle_fields);
 
-  chemistry_data * grackle_chemistry =
-    enzo::config()->method_grackle_chemistry;
-
   // Solve chemistry
   double dt = block->dt();
-  if (local_solve_chemistry(grackle_chemistry, &grackle_rates_,
+  if (local_solve_chemistry(my_chemistry_.get_ptr(), &grackle_rates_,
 			    &grackle_units_, &grackle_fields, dt)
       == ENZO_FAIL) {
     ERROR("EnzoMethodGrackle::compute()",
@@ -562,12 +570,10 @@ void EnzoMethodGrackle::compute_ ( Block * block) throw()
 
 double EnzoMethodGrackle::timestep ( Block * block ) throw()
 {
-  const EnzoConfig * config = enzo::config();
-
   double dt = std::numeric_limits<double>::max();;
 
 #ifdef CONFIG_USE_GRACKLE
-  if (config->method_grackle_use_cooling_timestep){
+  if (use_cooling_timestep_){
     Field field = block->data()->field();
 
     enzo_float * cooling_time = field.is_field("cooling_time") ?
@@ -670,11 +676,8 @@ void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
    const EnzoConfig * enzo_config = enzo::config();
    EnzoUnits * enzo_units = enzo::units();
 
-   chemistry_data * grackle_chemistry =
-    enzo::config()->method_grackle_chemistry;
-
    /* Only need to do this if tracking chemistry */
-   if (grackle_chemistry->primordial_chemistry < 1)
+   if (my_chemistry_.get<int>("primordial_chemistry") < 1)
      return;
 
    Field field = block->data()->field();
@@ -698,7 +701,7 @@ void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
    enzo_float * DII_density   = (enzo_float *) field.values("DII_density");
    enzo_float * HDI_density   = (enzo_float *) field.values("HDI_density");
 
-   // JB: NOTE note metal_density field accessed
+
    enzo_float * metal_density = (enzo_float*) field.values("metal_density");
 
    // Field size
@@ -723,6 +726,14 @@ void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
       enzo_config->initial_grackle_test_minimum_temperature) / double(ny);
 
    const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
+   const int primordial_chemistry
+     = my_chemistry_.get<int>("primordial_chemistry");
+
+   if (primordial_chemistry == 0){
+     ERROR("EnzoMethodGrackle::ResetEnergies",
+           "This function is not currently equipped to handle the case with "
+           "primordial_chemistry == 0");
+   }
 
    for (int iz=gz; iz<nz+gz; iz++){ // Metallicity
      for (int iy=gy; iy<ny+gy; iy++) { // Temperature
@@ -732,12 +743,16 @@ void EnzoMethodGrackle::ResetEnergies ( Block * block) throw()
          enzo_float mu = e_density[i] + HI_density[i] + HII_density[i] +
             (HeI_density[i] + HeII_density[i] + HeIII_density[i])*0.25;
 
-         if (grackle_chemistry->primordial_chemistry > 1){
+         if (primordial_chemistry > 1){
            mu += HM_density[i] + 0.5 * (H2I_density[i] + H2II_density[i]);
          }
 
-         if (grackle_chemistry->primordial_chemistry > 2){
+         if (primordial_chemistry > 2){
            mu += (DI_density[i] + DII_density[i])*0.5 + HDI_density[i]/3.0;
+         }
+
+         if (metal_density != nullptr){
+           mu += metal_density[i] / 16.0;
          }
 
          mu = density[i] / mu;
@@ -763,7 +778,6 @@ void EnzoMethodGrackle::compute_local_property_
  code_units* grackle_units, grackle_field_data* grackle_fields,
  grackle_local_property_func func, std::string func_name) const throw()
 {
-  const EnzoConfig * enzo_config = enzo::config();
 
   code_units cur_grackle_units_;
   grackle_field_data cur_grackle_fields;
@@ -802,14 +816,16 @@ void EnzoMethodGrackle::compute_local_property_
            (ax_start == 0) & ((ax_end+1) == ax_dim));
   }
 
-  // because this function is const-qualified, grackle_rates_ currently has
-  // the type: const chemistry_data_storage *
-  // we need to drop the `const` to be able to pass to to func (this is okay
-  // because func will not actually modify the value).
+  // because this function is const-qualified, my_chemistry_.get_ptr() and
+  // grackle_rates_ are currently pointers to constants
+  // we need to drop the `const` to be able to pass to these values to func
+  // (this is okay because func will not actually modify the value).
+  chemistry_data * chemistry_data_ptr
+    = const_cast<chemistry_data *>(my_chemistry_.get_ptr());
   chemistry_data_storage * grackle_rates_ptr
     = const_cast<chemistry_data_storage *>(&grackle_rates_);
 
-  if ((*func)(enzo_config->method_grackle_chemistry, grackle_rates_ptr,
+  if ((*func)(chemistry_data_ptr, grackle_rates_ptr,
 	      grackle_units, grackle_fields, values) == ENZO_FAIL){
     ERROR1("EnzoMethodGrackle::compute_local_property_()",
 	   "Error in call to Grackles's %s routine", func_name.c_str());
@@ -826,11 +842,7 @@ void EnzoMethodGrackle::compute_local_property_
 
 void EnzoMethodGrackle::deallocate_grackle_rates_() throw()
 {
-  const EnzoConfig * enzo_config = enzo::config();
-  // sanity check:
-  ASSERT("EnzoMethod::deallocate_grackle_rates_",
-	 "enzo::config() must not return NULL",
-	 enzo_config != NULL);
+
 #ifdef CONFIG_USE_GRACKLE
   if (time_grackle_data_initialized_ == ENZO_FLOAT_UNDEFINED){
     ERROR("EnzoMethodGrackle::deallocate_grackle_rates_",
@@ -839,8 +851,8 @@ void EnzoMethodGrackle::deallocate_grackle_rates_() throw()
 
   // deallocate previously the allocated allocated grackle_rates_ (doesn't
   // actually affect the chemistry_data pointer)
-  _free_chemistry_data(enzo_config->method_grackle_chemistry, &grackle_rates_);
-  // signal that grackle_data_ is not initialized
+  _free_chemistry_data(my_chemistry_.get_ptr(), &grackle_rates_);
+  // signal that grackle_rates_ is not initialized
   time_grackle_data_initialized_ = ENZO_FLOAT_UNDEFINED;
 #endif //CONFIG_USE_GRACKLE
 }
