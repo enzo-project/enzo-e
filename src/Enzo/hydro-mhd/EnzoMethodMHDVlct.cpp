@@ -96,7 +96,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   // Check that the (cell-centered) ghost depth is large enough
   // Face-centered ghost depth could in principle be 1 smaller
   int min_gdepth_req = 0;
-  for (int stage_index = 0; stage_index < 2; stage_index++) {
+  for (int stage_index = 0; stage_index < nstages; stage_index++) {
     min_gdepth_req += integrator_->staling_from_stage(stage_index);
   }
   int gx,gy,gz;
