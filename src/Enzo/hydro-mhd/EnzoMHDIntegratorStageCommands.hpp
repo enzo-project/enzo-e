@@ -1,17 +1,17 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     EnzoMHDVlctIntegrator.hpp
+/// @file     EnzoMHDIntegratorStageCommands.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Sun May 28 2023
-/// @brief    [\ref Enzo] Declaration of EnzoMHDVlctIntegrator
+/// @brief    [\ref Enzo] Declaration of EnzoMHDIntegratorStageCommands
 
-#ifndef ENZO_ENZO_MHD_VLCT_INTEGRATOR_HPP
-#define ENZO_ENZO_MHD_VLCT_INTEGRATOR_HPP
+#ifndef ENZO_MHD_INTEGRATOR_STAGE_COMMANDS_HPP
+#define ENZO_MHD_INTEGRATOR_STAGE_COMMANDS_HPP
 
-struct EnzoMHDVlctArgPack {
-  /// @class    EnzoMHDVlctArgPack
+struct EnzoMHDIntegratorStageArgPack {
+  /// @class    EnzoMHDIntegratorStageArgPack
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Arguments for configuring EnzoMHDVlctIntegrator
+  /// @brief    [\ref Enzo] Args for configuring EnzoMHDIntegratorStageCommands
   ///
   /// This is intended to be easily PUPed
 
@@ -29,39 +29,34 @@ struct EnzoMHDVlctArgPack {
 };
 
 
-class EnzoMHDVlctIntegrator {
+class EnzoMHDIntegratorStageCommands {
 
-  /// @class    EnzoMHDVlctIntegrator
+  /// @class    EnzoMHDIntegratorStageCommands
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Solve equations used in for VL + CT MHD method
+  /// @brief    [\ref Enzo] Provides commands to evolve Hydro/MHD quantities
+  ///    over individual stages in a multi-stage Hydro/MHD integrator
   ///
-  /// This class is intended to encapsulate all algorithmic details about the
-  /// the Hydro/MHD solver, other than time-integration details.
-  ///
-  /// A given Hydro/MHD solver updates hydro-quantites over a single timestep
-  /// in one or more stages. The number of stages is determined by the
-  /// time-integration choice. For example:
+  /// Based on the choice of time integrator, a given hydro/mhd integrator
+  /// updates the hydro/mhd quantities over 1 or more stages. For example:
   /// - a simple forward Euler method involves a single stage.
-  /// - the van Leer, predictor-corrector method, (which was the original
-  ///   choice of solver involves 2 stage).
+  /// - the van Leer, predictor-corrector method (the preferred variant)
+  ///   involves 2 stage.
   /// - Runge-Kutta methods typically involve 2 or more stages.
   ///
-  /// The precise details of how such stages are linked together are left to
-  /// the disgression of the Method object that drives the integrator. The
-  /// Method object is also responsible for taking the Enzo-E fields and
-  /// putting them into the correct format for the integrator.
+  /// This class is responsible for providing the command(s) to evolve the
+  /// Hydro/MHD quantities over individual stages (it ties together all of the
+  /// algorithmic steps to do that).
   ///
-  /// This class is responsible for tying together all of the algorithmic steps
-  /// to update the fluid quantities over an individual stage. It should
-  /// basically know nothing about the time integration strategy. There are 2
-  /// exceptions to this rule are:
-  ///    - it needs to which reconstruction algorithm to use during a given
-  ///      stage
-  ///    - it may need to know which source terms to skip/compute during a
-  ///      given stage.
-  /// This class can also provides queryable methods to determine requirements/
-  /// assumptions (e.g. one might use them to determine which fields need to be
-  /// defined)
+  /// Because differences in logic between separate stages are minimal, an
+  /// instance of this class provides the logic that is used for all stages in
+  /// a given integrator. The main stage-dependent logic includes:
+  ///  - which reconstruction algorithm to use
+  ///  - which source terms to skip (if any)
+  ///
+  /// However, the precise details about how the stages are linked together are
+  /// left to the Method object that drives the integration. That Method object
+  /// is also responsible for taking the Enzo-E fields and putting them into
+  /// the correct format to be passed to the commands provided by this object.
   ///
   /// A couple of other design principles for this class include:
   ///    - the internals of this class should be immutable (once an instance is
@@ -78,9 +73,9 @@ class EnzoMHDVlctIntegrator {
   /// it requires knowledge about the Enzo-E Block class. For that reason,
   /// instances of the BfieldMethod class hierarchy are not currently stored
   /// internally. As a short-term solution, this class provides a method for
-  /// constructing the appropriate instance of that class and it must be
-  /// explicitly passed an instance of that class for certain operations. A
-  /// longer term solution is being developed.
+  /// constructing an instance of the appropriate subclass of BfieldMethod and
+  /// that instance must explicitly be passed as an argument to certain methods
+  /// provided by this class. A longer term solution is being developed.
   ///
   /// @note
   /// Going forward, it probably makes sense to move away from implementing the
@@ -102,11 +97,11 @@ public:
 
 public:
 
-  EnzoMHDVlctIntegrator(const EnzoMHDVlctArgPack& args)
+  EnzoMHDIntegratorStageCommands(const EnzoMHDIntegratorStageArgPack& args)
     : riemann_solver_(nullptr),
       reconstructors_(),
       integration_quan_updater_(nullptr),
-      mhd_choice_(EnzoMHDVlctIntegrator::parse_bfield_choice_(args.mhd_choice))
+      mhd_choice_(EnzoMHDIntegratorStageCommands::parse_bfield_choice_(args.mhd_choice))
   {
     // check compatability with EnzoPhysicsFluidProps
     EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
@@ -147,8 +142,8 @@ public:
       new EnzoIntegrationQuanUpdate(integration_field_list, true);
   }
 
-  /// Delete EnzoMHDVlctIntegrator object
-  ~EnzoMHDVlctIntegrator();
+  /// Delete EnzoMHDIntegratorStageCommands object
+  ~EnzoMHDIntegratorStageCommands();
 
   EnzoBfieldMethod* construct_bfield_method(int nstages) const noexcept
   {
@@ -226,7 +221,7 @@ protected:
   void check_valid_stage_index_(int stage_index) const noexcept {
     int max_size = static_cast<int>(reconstructors_.size());
 
-    ASSERT1("EnzoMHDVlctIntegrator::staling_from_stage",
+    ASSERT1("EnzoMHDIntegratorStageCommands::staling_from_stage",
             "stage_index must satisfy 0 <= stage_index < %d\n",
             max_size, (stage_index >= 0) && (stage_index < max_size));
   }
@@ -347,8 +342,4 @@ private:
 
 };
 
-
-
-
-
-#endif /* ENZO_ENZO_MHD_VLCT_INTEGRATOR_HPP */
+#endif /* ENZO_MHD_INTEGRATOR_STAGE_COMMANDS_HPP */

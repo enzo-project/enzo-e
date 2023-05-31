@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     EnzoMHDVlctIntegrator.cpp
+/// @file     EnzoMHDIntegratorStageCommands.cpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Sun May 28 2023
-/// @brief    [\ref Enzo] Implementation of EnzoMHDVlctIntegrator
+/// @brief    [\ref Enzo] Implementation of EnzoMHDIntegratorStageCommands
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -13,11 +13,11 @@
 #include <cctype> // tolower
 
 // place this after #include "enzo.hpp"
-#include "EnzoMHDVlctIntegrator.hpp"
+#include "EnzoMHDIntegratorStageCommands.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoMHDVlctIntegrator::~EnzoMHDVlctIntegrator()
+EnzoMHDIntegratorStageCommands::~EnzoMHDIntegratorStageCommands()
 {
   delete riemann_solver_;
   delete integration_quan_updater_;
@@ -25,7 +25,8 @@ EnzoMHDVlctIntegrator::~EnzoMHDVlctIntegrator()
 
 //----------------------------------------------------------------------
 
-EnzoMHDVlctIntegrator::bfield_choice EnzoMHDVlctIntegrator::parse_bfield_choice_
+EnzoMHDIntegratorStageCommands::bfield_choice
+EnzoMHDIntegratorStageCommands::parse_bfield_choice_
 (std::string choice) noexcept
 {
   std::string formatted(choice.size(), ' ');
@@ -34,14 +35,14 @@ EnzoMHDVlctIntegrator::bfield_choice EnzoMHDVlctIntegrator::parse_bfield_choice_
   if (formatted == std::string("no_bfield")){
     return bfield_choice::no_bfield;
   } else if (formatted == std::string("unsafe_constant_uniform")){
-    ERROR("EnzoMethodMHDVlct::parse_bfield_choice_",
+    ERROR("EnzoMHDIntegratorStageCommands::parse_bfield_choice_",
           "constant_uniform is primarilly for debugging purposes. DON'T use "
           "for science runs (things can break).");
     return bfield_choice::unsafe_const_uniform;
   } else if (formatted == std::string("constrained_transport")){
     return bfield_choice::constrained_transport;
   } else {
-    ERROR("EnzoMethodMHDVlct::parse_bfield_choice_",
+    ERROR("EnzoMHDIntegratorStageCommands::parse_bfield_choice_",
           "Unrecognized choice. Known options include \"no_bfield\" and "
           "\"constrained_transport\"");
     return bfield_choice::no_bfield;
@@ -50,7 +51,7 @@ EnzoMHDVlctIntegrator::bfield_choice EnzoMHDVlctIntegrator::parse_bfield_choice_
 
 //----------------------------------------------------------------------
 
-void EnzoMHDVlctIntegrator::compute_update_stage
+void EnzoMHDIntegratorStageCommands::compute_update_stage
 (EnzoEFltArrayMap tstep_begin_integration_map,
  EnzoEFltArrayMap cur_stage_integration_map,
  EnzoEFltArrayMap out_integration_map,
@@ -155,7 +156,7 @@ void EnzoMHDVlctIntegrator::compute_update_stage
 
 //----------------------------------------------------------------------
 
-void EnzoMHDVlctIntegrator::compute_flux_
+void EnzoMHDIntegratorStageCommands::compute_flux_
 (const int dim, const double cur_dt, const enzo_float cell_width,
  EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
@@ -213,7 +214,7 @@ void EnzoMHDVlctIntegrator::compute_flux_
 
 //----------------------------------------------------------------------
 
-void EnzoMHDVlctIntegrator::compute_source_terms_
+void EnzoMHDIntegratorStageCommands::compute_source_terms_
 (const double cur_dt, const bool full_timestep,
  const EnzoEFltArrayMap &orig_integration_map,
  const EnzoEFltArrayMap &primitive_map,
@@ -247,7 +248,7 @@ void EnzoMHDVlctIntegrator::compute_source_terms_
 
 //----------------------------------------------------------------------
 
-double EnzoMHDVlctIntegrator::timestep
+double EnzoMHDIntegratorStageCommands::timestep
 (EnzoEFltArrayMap integration_map,
  CelloView<const enzo_float, 3> pressure,
  const double dx, const double dy, const double dz) const noexcept

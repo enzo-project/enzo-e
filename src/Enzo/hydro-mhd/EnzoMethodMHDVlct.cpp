@@ -10,7 +10,7 @@
 #include "charm_enzo.hpp"
 #include <algorithm>    // std::copy
 
-#include "EnzoMHDVlctIntegrator.hpp"
+#include "EnzoMHDIntegratorStageCommands.hpp"
 
 //----------------------------------------------------------------------
 
@@ -73,9 +73,9 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   int nstages = static_cast<int>(recon_names.size());
 
   // initialize the integrator
-  integrator_arg_pack_ = new EnzoMHDVlctArgPack {rsolver, recon_names,
+  integrator_arg_pack_ = new EnzoMHDIntegratorStageArgPack {rsolver, recon_names,
                                                  theta_limiter, mhd_choice};
-  integrator_ = new EnzoMHDVlctIntegrator(*integrator_arg_pack_);
+  integrator_ = new EnzoMHDIntegratorStageCommands(*integrator_arg_pack_);
 
   // Determine the lists of fields that are required to hold the integration
   // quantities and primitives and ensure that they are defined
@@ -149,10 +149,12 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   p | time_scheme_;
 
-  if (p.isUnpacking()) { integrator_arg_pack_ = new EnzoMHDVlctArgPack; }
+  if (p.isUnpacking()) {
+    integrator_arg_pack_ = new EnzoMHDIntegratorStageArgPack;
+  }
   p | *integrator_arg_pack_;
   if (p.isUnpacking()) {
-    integrator_ = new EnzoMHDVlctIntegrator(*integrator_arg_pack_);
+    integrator_ = new EnzoMHDIntegratorStageCommands(*integrator_arg_pack_);
     bfield_method_ = integrator_->construct_bfield_method(2);
   }
 
@@ -411,7 +413,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     //      between the integration map (OR we may be able to use Cello's field
     //      history capacity)
     //   2. we need to tweak the signature of
-    //      EnzoMHDVlctIntegrator::compute_update_stage
+    //      EnzoMHDIntegratorStageCommands::compute_update_stage
     //   3. to EnzoIntegrationQuanUpdate needs a few minor tweaks
     //   4. Adding MHD support requires some extra steps
     unsigned short nstages;
