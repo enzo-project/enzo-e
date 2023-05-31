@@ -54,13 +54,27 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   }
 #endif /* CONFIG_USE_GRACKLE */
 
-  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-         "time_scheme must be \"vl\"", time_scheme == "vl");
+  time_scheme_ = time_scheme;
+
+  std::vector<std::string> recon_names;
+  if (time_scheme == "euler") {
+    recon_names = {recon_name};
+    WARNING("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+            "\"euler\" temporal integration exists for debugging purposes. It "
+            "has not been rigorously tested. USE WITH CAUTION");
+  } else if (time_scheme == "vl") {
+    // ALWAYS use nearest-neighbor reconstruction for partial timestep!
+    recon_names = {"nn", recon_name};
+  } else {
+    ERROR("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+          "time_scheme must be \"vl\" or \"euler\"");
+  }
+
+  int nstages = static_cast<int>(recon_names.size());
 
   // initialize the integrator
-  integrator_arg_pack_ = new EnzoMHDVlctArgPack {rsolver, {"nn", recon_name},
+  integrator_arg_pack_ = new EnzoMHDVlctArgPack {rsolver, recon_names,
                                                  theta_limiter, mhd_choice};
-
   integrator_ = new EnzoMHDVlctIntegrator(*integrator_arg_pack_);
 
   // Determine the lists of fields that are required to hold the integration
@@ -76,15 +90,17 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   ASSERT("EnzoMethodMHDVlct", "\"pressure\" must be a permanent field",
 	 field_descr->is_field("pressure"));
 
-  bfield_method_ = integrator_->construct_bfield_method(2);
+  bfield_method_ = integrator_->construct_bfield_method(nstages);
   if (bfield_method_ != nullptr) { bfield_method_->check_required_fields(); }
 
   // Check that the (cell-centered) ghost depth is large enough
   // Face-centered ghost depth could in principle be 1 smaller
+  int min_gdepth_req = 0;
+  for (int stage_index = 0; stage_index < 2; stage_index++) {
+    min_gdepth_req += integrator_->staling_from_stage(stage_index);
+  }
   int gx,gy,gz;
   field_descr->ghost_depth(field_descr->field_id("density"), &gx, &gy, &gz);
-  int min_gdepth_req = (integrator_->staling_from_stage(0) +
-                        integrator_->staling_from_stage(1));
   ASSERT1("EnzoMethodMHDVlct::compute", "ghost depth must be at least %d.",
 	  min_gdepth_req, std::min(gx, std::min(gy, gz)) >= min_gdepth_req);
 
@@ -130,6 +146,8 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
+
+  p | time_scheme_;
 
   if (p.isUnpacking()) { integrator_arg_pack_ = new EnzoMHDVlctArgPack; }
   p | *integrator_arg_pack_;
@@ -385,14 +403,31 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // refreshed) extends over.
     int stale_depth = 0;
 
-    const unsigned short nstages = 2;
+    // NOTE: it would take minimal effort to extend this code to support
+    // Runge-Kutta integration (e.g. 2nd order or 3rd order). We just need to
+    // adopt the 2 register method discussed in the Athena++ method paper.
+    // That change boils down to 4 parts (for unigrid):
+    //   1. we probably need to introduce a memory copy method to copy data
+    //      between the integration map (OR we may be able to use Cello's field
+    //      history capacity)
+    //   2. we need to tweak the signature of
+    //      EnzoMHDVlctIntegrator::compute_update_stage
+    //   3. to EnzoIntegrationQuanUpdate needs a few minor tweaks
+    //   4. Adding MHD support requires some extra steps
+    unsigned short nstages;
+    if (time_scheme_ == "euler") {
+      nstages = 1;
+    } else if (time_scheme_ == "vl") {
+      nstages = 2;
+    } else {
+      ERROR("EnzoMethodMHDVlct::compute", "unrecognized time_scheme_");
+    }
 
     // repeat the following loop twice (for half time-step and full time-step)
     for (unsigned short stage_index = 0; stage_index < nstages; stage_index++){
-      double cur_dt = (stage_index == 0) ? dt/2. : dt;
 
       const bool is_final_stage = (stage_index + 1) == nstages;
-
+      const double cur_dt = (!is_final_stage) ? dt/2. : dt;
       EnzoEFltArrayMap cur_stage_integration_map =
         (stage_index == 0) ? external_integration_map : temp_integration_map;
       EnzoEFltArrayMap out_integration_map =

@@ -105,6 +105,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
+      time_scheme_(""),
       integrator_(nullptr),
       scratch_space_(nullptr),
       bfield_method_(nullptr),
@@ -182,6 +183,9 @@ protected: // methods
     noexcept;
 
 protected: // attributes
+
+  /// Specifies the time_integration approach
+  std::string time_scheme_;
 
   /// Holds arguments used to initialize the integrator_ attribute (this is
   /// more easy to pup than the integrator_ machinery)
