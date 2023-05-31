@@ -97,50 +97,8 @@ public:
 
 public:
 
-  EnzoMHDIntegratorStageCommands(const EnzoMHDIntegratorStageArgPack& args)
-    : riemann_solver_(nullptr),
-      reconstructors_(),
-      integration_quan_updater_(nullptr),
-      mhd_choice_(EnzoMHDIntegratorStageCommands::parse_bfield_choice_(args.mhd_choice))
-  {
-    // check compatability with EnzoPhysicsFluidProps
-    EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
-    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-           "can't currently handle the case with a non-ideal EOS",
-           fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>());
-    const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
-    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-           "selected formulation of dual energy formalism is incompatible",
-           de_config.is_disabled() || de_config.modern_formulation());
-    const EnzoFluidFloorConfig& fluid_floor_config
-      = fluid_props->fluid_floor_config();
-    ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-           "density and pressure floors must be defined",
-           fluid_floor_config.has_density_floor() &
-           fluid_floor_config.has_pressure_floor());
-
-    // Initialize the Riemann Solver
-    riemann_solver_ = EnzoRiemann::construct_riemann
-      ({args.rsolver, mhd_choice_ != bfield_choice::no_bfield,
-        de_config.any_enabled()});
-
-    // determine integration and primitive field list
-    str_vec_t integration_field_list
-      = riemann_solver_->integration_quantity_keys();
-    str_vec_t primitive_field_list
-      = riemann_solver_->primitive_quantity_keys();
-
-    // Initialize the remaining component objects
-    for (const std::string& name : args.recon_names) {
-      std::unique_ptr<EnzoReconstructor> temp
-        (EnzoReconstructor::construct_reconstructor(primitive_field_list, name,
-                                                    (enzo_float)args.theta_limiter));
-      reconstructors_.push_back(std::move(temp));
-    }
-
-    integration_quan_updater_ =
-      new EnzoIntegrationQuanUpdate(integration_field_list, true);
-  }
+  /// Create a new EnzoMHDIntegratorStageCommands object
+  EnzoMHDIntegratorStageCommands(const EnzoMHDIntegratorStageArgPack& args);
 
   /// Delete EnzoMHDIntegratorStageCommands object
   ~EnzoMHDIntegratorStageCommands();
@@ -176,6 +134,78 @@ public:
   bool is_pure_hydro() const noexcept
   { return mhd_choice_ == bfield_choice::no_bfield; }
 
+  /// main workhorse: actually execute a single stage of the MHD integrator.
+  ///
+  /// Except where otherwise noted, all instances of EnzoEFltArrayMap passed as
+  /// arguments should hold cell centered quantities with a shape {mz, my, mx}
+  /// and they should not alias the same data.
+  ///
+  /// Most maps that are passed to this method as arguments are expected to
+  /// have keys that fall into 3 categories:
+  ///     1. "integration keys": keys are given by
+  ///        `concat(this->integration_quantity_keys(), passive_list)`
+  ///     2. "primitive keys":   keys are given by
+  ///        `concat(this->primitive_quantity_keys(), passive_list)`
+  ///     3. "dUcons keys":      keys are given by
+  ///        `concat(this->dUcons_map_keys(), passive_list)`
+  ///
+  /// where `passive_list` is an argument of this method and `concat`
+  /// represents an imaginary function that returns the concatenated vector,
+  /// with entries from the first arg followed by entries of the second arg.
+  /// Except where otherwise noted, the order of keys in the maps do not
+  /// matter.
+  ///
+  /// @param[in]     tstep_begin_integration_map Map holding integration
+  ///     quantities from the start of the timestep (before any stage has been
+  ///     executed). This has keys from the "integration keys" category.
+  /// @param[in]     cur_stage_integration_map Map holding integration
+  ///     quantities from which fluxes are computed in the current stage. It
+  ///     has keys from the "integration keys" category and is allowed to alias
+  ///     the same data as the `tstep_begin_integration_map` argument.
+  /// @param[out]    out_integration_map Map that will hold the updated
+  ///     integration quantites at the end of the stage. It has keys from the
+  ///     "integration keys" category and is allowed to alias the same data as
+  ///     the `tstep_begin_integration_map` or `cur_stage_integration_map`
+  ///     arguments (all 3 are allowed to be aliases).
+  /// @param[in]     primitive_map Scratch-space map that holds arrays where
+  ///     the computed primitive data is stored before reconstruction. It has
+  ///     keys from the "primitive keys" category.
+  /// @param[in]     priml_map,primr_map Scratch-space maps that are used to
+  ///     hold the left/right reconstructed face-centered primitives. It has
+  ///     keys from the "primitive keys" category (KEY-ORDER MATTERS!!!)
+  /// @param[in,out] flux_maps_xyz Array of 3 maps where the calculated fluxes
+  ///     for the integration quantities will be stored for the x, y, and z
+  ///     directions, respectively. Each map has keys from the
+  ///     "integration keys" category (KEY-ORDER MATTERS!!!). The Views in the
+  ///     respective maps have shapes `{mz, my, mx-1}`, `{mz, my-1, mx}`, and
+  ///     `{mz-1, my, mx}`.
+  /// @param[in]     dUcons_map Scratch-space map used to accumulate changes
+  ///     in the relevant integration quantities from fluxes/source terms
+  ///     (after all changes are accumulated, they are applied all at once).
+  ///     It has keys from the "integration keys" category.
+  /// @param[in]     accel_map Map that optionally holds arrays corresponding
+  ///     to thr components of the acceleration vector field. This should
+  ///     either hold no entries or 3 entries associated with the keys:
+  ///     `"acceleration_x"`, `"acceleration_y"`, and `"acceleration_z"`
+  /// @param[in]     interface_vel_arr Scratch-space CelloView that is required
+  ///     while using the dual-energy formalism to accumulate data needed in
+  ///     in a source term.
+  /// @param[in]     passive_list A list of keys for passive scalars.
+  /// @param[in,out]     bfield_method The pointer returned by
+  ///     `this->construct_bfield_method`. If this is not a ``nullptr``, the
+  ///     caller is responsible calling `register_target_block` at the start of
+  ///     the timestep and calling `increment_partial_timestep` between stages.
+  /// @param[in]     stage_index Specify the index of the current stage. This
+  ///     can only affects the choice of reconstructor and whether some source
+  ///     terms are skipped.
+  /// @param[in]     cur_dt Size of the timestep used in the current stage
+  /// @param[in]     stale_depth indicates the current stale_depth.
+  /// @param[in]     cell_widths_xyz holds the cell widths along the x, y, and
+  ///      dimensions, respectively.
+  ///
+  /// @note This function expects that calling the `contiguous_arrays()`
+  /// instance method for `prim_map_l`, `prim_map_r`, and any map contained
+  /// in `flux_map` will return `true`.
   void compute_update_stage
   (EnzoEFltArrayMap tstep_begin_integration_map,
    EnzoEFltArrayMap cur_stage_integration_map,
@@ -188,8 +218,8 @@ public:
    const EnzoEFltArrayMap accel_map,
    EFlt3DArray interface_vel_arr,
    const str_vec_t& passive_list,
-   EnzoBfieldMethod* bfield_method_,
-   unsigned short step_index,
+   EnzoBfieldMethod* bfield_method,
+   unsigned short stage_index,
    double cur_dt,
    int stale_depth,
    const std::array<enzo_float,3> cell_widths_xyz) const noexcept;

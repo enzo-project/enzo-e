@@ -17,6 +17,56 @@
 
 //----------------------------------------------------------------------
 
+EnzoMHDIntegratorStageCommands::EnzoMHDIntegratorStageCommands
+(const EnzoMHDIntegratorStageArgPack& args)
+  : riemann_solver_(nullptr),
+    reconstructors_(),
+    integration_quan_updater_(nullptr),
+    mhd_choice_(EnzoMHDIntegratorStageCommands::parse_bfield_choice_
+                (args.mhd_choice))
+{
+  // check compatability with EnzoPhysicsFluidProps
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "can't currently handle the case with a non-ideal EOS",
+         fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>());
+  const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "selected formulation of dual energy formalism is incompatible",
+         de_config.is_disabled() || de_config.modern_formulation());
+  const EnzoFluidFloorConfig& fluid_floor_config
+    = fluid_props->fluid_floor_config();
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "density and pressure floors must be defined",
+         fluid_floor_config.has_density_floor() &
+         fluid_floor_config.has_pressure_floor());
+
+  // Initialize the Riemann Solver
+  riemann_solver_ = EnzoRiemann::construct_riemann
+    ({args.rsolver, mhd_choice_ != bfield_choice::no_bfield,
+      de_config.any_enabled()});
+
+  // determine integration and primitive field list
+  str_vec_t integration_field_list
+    = riemann_solver_->integration_quantity_keys();
+  str_vec_t primitive_field_list
+    = riemann_solver_->primitive_quantity_keys();
+
+  // Initialize the remaining component objects
+  const enzo_float theta_limiter = static_cast<enzo_float>(args.theta_limiter);
+  for (const std::string& name : args.recon_names) {
+    std::unique_ptr<EnzoReconstructor> temp
+      (EnzoReconstructor::construct_reconstructor(primitive_field_list, name,
+                                                  theta_limiter));
+    reconstructors_.push_back(std::move(temp));
+  }
+
+  integration_quan_updater_ =
+    new EnzoIntegrationQuanUpdate(integration_field_list, true);
+}
+
+//----------------------------------------------------------------------
+
 EnzoMHDIntegratorStageCommands::~EnzoMHDIntegratorStageCommands()
 {
   delete riemann_solver_;
