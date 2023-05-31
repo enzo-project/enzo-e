@@ -34,7 +34,7 @@
 #include "_performance.hpp"
 #include "_problem.hpp"
 #include "_mesh.hpp"
-#include "_array.hpp"
+#include "_view.hpp"
 #include "_data.hpp"
 #include "_simulation.hpp"
 #include "_disk.hpp"

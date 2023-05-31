@@ -1330,7 +1330,7 @@ namespace{
 //----------------------------------------------------------------------
 
 template<class T>
-CelloArray<T, 3> FieldData::make_view_
+CelloView<T, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history,  bool coarse) throw()
@@ -1391,21 +1391,21 @@ CelloArray<T, 3> FieldData::make_view_
   if (ptr == nullptr){
     const char* field_type = (coarse) ? "coarse field" : "field";
     ERROR2("data_view_", "There is no %s with id %d", field_type, id_field);
-    // alternatively, we could just return CelloArray<T,3>()
+    // alternatively, we could just return CelloView<T,3>()
   }
 
-  return CelloArray<T, 3>(reinterpret_cast<T*>(ptr), mz, my, mx);
+  return CelloView<T, 3>(reinterpret_cast<T*>(ptr), mz, my, mx);
 }
 
-template CelloArray<float, 3> FieldData::make_view_
+template CelloView<float, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
-template CelloArray<double, 3> FieldData::make_view_
+template CelloView<double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
-template CelloArray<long double, 3> FieldData::make_view_
+template CelloView<long double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
