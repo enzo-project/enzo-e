@@ -1131,10 +1131,10 @@ void EnzoLevelArray::apply_inference()
  
       CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
 
-    //ASSERT("EnzoMethodInference::apply_inference()",
-    //       "pstar+pnostar != 1.0", pstar+pnostar == 1.0);
+      //ASSERT("EnzoMethodInference::apply_inference()",
+      //       "pstar+pnostar != 1.0", pstar+pnostar == 1.0);
         
-    star_in_block = (pstar > pnostar);
+      star_in_block = (pstar > pnostar);
     }
 
     bool SF_confirmed = false; // flag for if S2 network identified star-forming regions
@@ -1217,7 +1217,8 @@ void EnzoLevelArray::apply_inference()
         }
       
         // calculate radius of evolved remnant
-        sphere_r = fbnet_->get_radius( &masses, &creationtimes );
+        sphere_r = (yield_SNe+yield_PISNe+yield_HNe > 0) ? 
+                 fbnet_->get_radius( &masses, &creationtimes ) : 0.0;
         CkPrintf("EnzoMethodInference::FBNet predicts a region with radius %1.2e kpc and metal yields (%1.2e, %1.2e, %1.2e) Msun\n", sphere_r, yield_SNe, yield_HNe, yield_PISNe);
     }
    
@@ -1230,19 +1231,18 @@ void EnzoLevelArray::apply_inference()
   //    center of sphere
   double center[3] = {sphere_x, sphere_y, sphere_z};
 
+  std::vector<EnzoObjectFeedbackSphere> sphere_list;
   //    put a sphere object there and add it to a list sphere_list
   EnzoObjectFeedbackSphere sphere(center, sphere_r, yield_SNe, yield_HNe, yield_PISNe);
-  EnzoSimulation::update_feedback_sphere_list(sphere);
- 
-  std::vector<EnzoObjectFeedbackSphere> sphere_list;
   sphere_list.push_back(sphere);
-   //    allocate buffer
+ 
+  //    allocate buffer
   int n = 0;
-  SIZE_VECTOR_TYPE(n,ObjectSphere,sphere_list);
+  SIZE_VECTOR_TYPE(n,EnzoObjectFeedbackSphere,sphere_list);
   //    initialize buffer
   char * buffer = new char [n];
-  char *pc = buffer;
-  SAVE_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
+  char * pc = buffer;
+  SAVE_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
 
   //    Send data to leaf blocks via base-level block
   Index index_block = get_block_index_();
@@ -1264,34 +1264,63 @@ void EnzoBlock::p_method_infer_update(int n, char * buffer, int il3[3])
   EnzoMethodInference * method =
     static_cast<EnzoMethodInference*> (this->method());
 
+  // Do global reduction to give each block the full list of 
+  // spheres. Necessary because spheres could potentially
+  // be larger than the size of the inference arrays  
+  method->concatenate_sphere_lists(this, n, buffer);
+
   // Return control back to EnzoMethodInference
-  method->update(this,n, buffer, il3);
+  method->update(this, il3);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[3])
+void EnzoMethodInference::concatenate_sphere_lists(EnzoBlock * enzo_block, int n, char * buffer)
 {
   // Unpack buffer into sphere_list
+  std::vector<EnzoObjectFeedbackSphere> sphere_list;
+  char *pc = buffer;
+  LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
 
-  //std::vector<EnzoObjectFeedbackSphere> sphere_list;
-  //char *pc = buffer;
-  //LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
+  CkCallback callback (CkIndex_EnzoBlock::p_method_infer_update_mesh(NULL),
+                       enzo_block->proxy_array());
 
+  // contribute to sphere_list. The callback function will be called for all blocks.
+  enzo_block->contribute(n, pc, r_method_infer_concatenate_sphere_list_type, callback);
+}
+
+//----------------------------------------------------------------------
+void EnzoBlock::p_method_infer_update_mesh(CkReductionMsg * msg) 
+{
+  // put spheres down on the mesh (if inference_method == "starnet")
+  if (this->is_leaf()) {
+    std::vector<EnzoObjectFeedbackSphere> sphere_list;
+    // unpack data
+    char *pc = (char *) msg->getData();
+    LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
+
+    FBNet::update_mesh(this, &sphere_list);
+  }
+  else {
+    p_method_infer_exit();
+  }
+}
+//----------------------------------------------------------------------
+
+void EnzoMethodInference::update ( Block * block, int il3[3])
+{
   Index index_block = block->index();
   const int level = block->level();
 
-  if (block->is_leaf()) {
+  Index3 index3(il3[0],il3[1],il3[2]);
 
+  proxy_level_array[index3].p_done (index_block);
+ 
+/* 
+  if (block->is_leaf()) {
     // if leaf block, we're done, tell level array element
     Index3 index3(il3[0],il3[1],il3[2]);
 
-    // if inference_type == "starnet"
-    //int n = 0;
-    //SIZE_VECTOR_TYPE(n,EnzoObjectFeedbackSphere,sphere_list);
-    // contribute(sizeof(n, sphere_list, callback)
-
-    // else {}
     proxy_level_array[index3].p_done (index_block);
 
   } else {
@@ -1306,6 +1335,7 @@ void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[
       }
     }
   }
+*/
 }
 
 //----------------------------------------------------------------------
@@ -1655,14 +1685,6 @@ int EnzoMethodInference::count_arrays_ (Block * block) const
 
 void EnzoBlock::p_method_infer_exit()
 {
-   // if inference_method == "starnet"
-   std::vector<EnzoObjectFeedbackSphere> * sphere_list = 
-   EnzoSimulation::get_feedback_sphere_list();
- 
-   FBNet::update_mesh(this, sphere_list);
-
-   EnzoSimulation::clear_feedback_sphere_list();
-
    compute_done();
 }
 
@@ -1724,4 +1746,44 @@ bool EnzoMethodInference::block_intersects_array_(Index index, int ia3[3])
   int lz = (ib3[2] <= ia3[2] && ia3[2] < ib3[2]+r);
   bool intersects = lx && ly && lz;
   return intersects;
+}
+
+//================================================================
+
+CkReduction::reducerType r_method_infer_concatenate_sphere_list_type;
+
+void register_method_infer_concatenate_sphere_list(void)
+{ r_method_infer_concatenate_sphere_list_type = 
+       CkReduction::addReducer(r_method_infer_concatenate_sphere_list); }
+
+CkReductionMsg * r_method_infer_concatenate_sphere_list(int n, CkReductionMsg ** msgs) 
+{
+  std::vector<EnzoObjectFeedbackSphere> sphere_list_concatenated;
+  // loop through all sphere_lists
+  for (int i=0; i<n; i++){
+    std::vector<EnzoObjectFeedbackSphere> sphere_list_this;
+    char * pc = (char *) msgs[i]->getData(); // buffer
+    LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list_this);
+  CkPrintf("CkReduction:: 1771 len(sphere_list_this) = %d\n", sphere_list_this.size());
+    int j=0;
+    for (auto sphere : sphere_list_this) {
+  CkPrintf("CkReduction:: 1773 j=%d r = %1.2e \n", j, sphere.r());
+      if (sphere.r() > 0.0) {
+        sphere_list_concatenated.push_back(sphere);
+      }
+      j += 1;
+    } 
+  }
+  CkPrintf("CkReduction:: 1776\n");
+  // allocate buffer
+  int nc = 0;
+  SIZE_VECTOR_TYPE(nc,EnzoObjectFeedbackSphere,sphere_list_concatenated);
+  CkPrintf("CkReduction:: 1780\n");
+  char * buffer = new char [nc];
+  char * pc = buffer; // new buffer for concatenated list
+
+  CkPrintf("CkReduction:: buffer size %d\n", nc);
+
+  SAVE_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list_concatenated);
+  return CkReductionMsg::buildNew(nc, pc);
 }

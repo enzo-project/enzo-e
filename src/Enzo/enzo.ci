@@ -7,6 +7,7 @@
 
 module enzo {
 
+  initnode void register_method_infer_concatenate_sphere_list(void);
   initnode void register_method_turbulence(void);
   initnode void mutex_init();
   initnode void mutex_init_bcg_iter();
@@ -237,6 +238,8 @@ module enzo {
     entry void p_method_infer_request_data (int il3[3]);
     entry void p_method_infer_update (int n, char buffer[n], int il3[3]);
     entry void p_method_infer_exit();
+
+    entry void p_method_infer_update_mesh(CkReductionMsg * msg);
 
     // checkpoint
     entry void p_check_write_first

@@ -89,7 +89,9 @@ public: // methods
   /// block
   void request_data (Block * block, int ia3[3]);
 
-  void update (Block *, int n, char * buffer, int ia3[3]);
+  void update (Block *, int ia3[3]);
+
+  void concatenate_sphere_lists(EnzoBlock * enzo_block, int n, char * buffer); 
 
 protected: // methods
 

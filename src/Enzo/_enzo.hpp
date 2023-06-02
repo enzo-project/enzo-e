@@ -177,6 +177,8 @@ extern "C" {
 
 #include "enzo_EnzoFactory.hpp"
 
+#include "enzo_EnzoObjectFeedbackSphere.hpp"
+
 #include "enzo_EnzoSimulation.hpp"
 
 #include "enzo_EnzoProblem.hpp"
@@ -269,6 +271,7 @@ extern "C" {
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodHydro.hpp"
+
 #include "enzo_EnzoMethodInference.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
