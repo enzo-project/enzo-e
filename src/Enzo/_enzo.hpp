@@ -160,8 +160,15 @@ extern "C" {
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
+#include "utils/EnzoEFltArrayMap.hpp"
+#include "utils/utils.hpp"
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
+
+// [order dependencies:]
+#include "fluid-props/EnzoEOSIdeal.hpp"
+#include "fluid-props/EnzoEOSIsothermal.hpp"
+#include "fluid-props/EnzoEOSVariant.hpp"
 
 #include "fluid-props/EnzoDualEnergyConfig.hpp"
 #include "fluid-props/EnzoFluidFloorConfig.hpp"
@@ -220,11 +227,6 @@ extern "C" {
 #include "particle/formation/EnzoSinkParticle.hpp"
 #include "particle/formation/EnzoBondiHoyleSinkParticle.hpp"
 #include "particle/formation/EnzoFluxSinkParticle.hpp"
-
-// [order dependencies:]
-#include "utils/EnzoEFltArrayMap.hpp"
-#include "fluid-props/EnzoEquationOfState.hpp"
-#include "fluid-props/EnzoEOSIdeal.hpp"
 
 #include "utils/EnzoCenteredFieldRegistry.hpp"
 #include "utils/EnzoFieldAdaptor.hpp"
