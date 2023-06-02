@@ -58,7 +58,7 @@ public:
 
   // update mesh with metal yields
   static void update_mesh(EnzoBlock * enzo_block, 
-                             std::vector<EnzoObjectFeedbackSphere> * sphere_list) throw();
+                             EnzoObjectFeedbackSphere sphere) throw();
 private:
   void read_file(std::string file, std::vector<std::vector<double>*> * vars) throw();
 

@@ -1231,18 +1231,18 @@ void EnzoLevelArray::apply_inference()
   //    center of sphere
   double center[3] = {sphere_x, sphere_y, sphere_z};
 
-  std::vector<EnzoObjectFeedbackSphere> sphere_list;
+  //std::vector<EnzoObjectFeedbackSphere> sphere_list;
   //    put a sphere object there and add it to a list sphere_list
   EnzoObjectFeedbackSphere sphere(center, sphere_r, yield_SNe, yield_HNe, yield_PISNe);
-  sphere_list.push_back(sphere);
+  //sphere_list.push_back(sphere);
  
   //    allocate buffer
   int n = 0;
-  SIZE_VECTOR_TYPE(n,EnzoObjectFeedbackSphere,sphere_list);
+  SIZE_SCALAR_TYPE(n,EnzoObjectFeedbackSphere,sphere);
   //    initialize buffer
   char * buffer = new char [n];
   char * pc = buffer;
-  SAVE_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
+  SAVE_SCALAR_TYPE(pc,EnzoObjectFeedbackSphere,sphere);
 
   //    Send data to leaf blocks via base-level block
   Index index_block = get_block_index_();
@@ -1267,9 +1267,11 @@ void EnzoBlock::p_method_infer_update(int n, char * buffer, int il3[3])
   // Do global reduction to give each block the full list of 
   // spheres. Necessary because spheres could potentially
   // be larger than the size of the inference arrays  
+  CkPrintf("Calling EnzoMethodInference::concatenate_sphere_lists()\n");
   method->concatenate_sphere_lists(this, n, buffer);
 
-  // Return control back to EnzoMethodInference
+  // Delete the level array
+  CkPrintf("Calling EnzoMethodInference::update()\n");
   method->update(this, il3);
 }
 
@@ -1278,15 +1280,25 @@ void EnzoBlock::p_method_infer_update(int n, char * buffer, int il3[3])
 void EnzoMethodInference::concatenate_sphere_lists(EnzoBlock * enzo_block, int n, char * buffer)
 {
   // Unpack buffer into sphere_list
-  std::vector<EnzoObjectFeedbackSphere> sphere_list;
+  EnzoObjectFeedbackSphere sphere;
   char *pc = buffer;
-  LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
+  LOAD_SCALAR_TYPE(pc,EnzoObjectFeedbackSphere,sphere);
 
   CkCallback callback (CkIndex_EnzoBlock::p_method_infer_update_mesh(NULL),
                        enzo_block->proxy_array());
 
+  // works with arrays, should also work if I use pointers since vector elements are contiguous in memory
+  //EnzoObjectFeedbackSphere sphere_list_[1] = {sphere_list[0]};
+
   // contribute to sphere_list. The callback function will be called for all blocks.
-  enzo_block->contribute(n, pc, r_method_infer_concatenate_sphere_list_type, callback);
+//  enzo_block->contribute(n, pc, r_method_infer_concatenate_sphere_list_type, callback);
+
+  EnzoObjectFeedbackSphere sphere_[1] = {sphere};
+  n = 0;
+  SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_, 1);
+  CkPrintf("size = %d \n", n);
+  enzo_block->contribute(n, sphere_, CkReduction::set, callback);
+
 }
 
 //----------------------------------------------------------------------
@@ -1294,16 +1306,30 @@ void EnzoBlock::p_method_infer_update_mesh(CkReductionMsg * msg)
 {
   // put spheres down on the mesh (if inference_method == "starnet")
   if (this->is_leaf()) {
+  /*
     std::vector<EnzoObjectFeedbackSphere> sphere_list;
     // unpack data
     char *pc = (char *) msg->getData();
     LOAD_VECTOR_TYPE(pc,EnzoObjectFeedbackSphere,sphere_list);
 
     FBNet::update_mesh(this, &sphere_list);
+  */
+    CkPrintf("EnzoBlock::p_method_infer_update_mesh() global reduction successful!\n");
+    CkReduction::setElement *current = (CkReduction::setElement*) msg->getData();
+    CkPrintf("EnzoBlock::p_method_infer_update_mesh() setElement datasize = %d", current->dataSize);
+    int i=0;
+    while(current != NULL) {
+      EnzoObjectFeedbackSphere * sphere = (EnzoObjectFeedbackSphere *) &current->data;
+      CkPrintf("infer_update_mesh: i=%d; r=%f; SNe=%f\n", i, sphere->r(), sphere->metal_mass_SNe());
+      FBNet::update_mesh(this, *sphere);
+      i += 1;
+      current = current->next();
+    }
+
+  CkPrintf("FINISHED LOOP!");
   }
-  else {
-    p_method_infer_exit();
-  }
+  // exit the method
+  p_method_infer_exit();
 }
 //----------------------------------------------------------------------
 
@@ -1370,7 +1396,7 @@ void EnzoSimulation::p_infer_done()
     // ... delete chare array,
     proxy_level_array.ckDestroy();
     // ... and exit method
-    enzo::block_array().p_method_infer_exit();
+    //enzo::block_array().p_method_infer_exit();
   }
 }
 

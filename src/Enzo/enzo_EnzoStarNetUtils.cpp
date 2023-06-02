@@ -250,7 +250,7 @@ double FBNet::get_radius(std::vector<double> * masses, std::vector<double> * cre
 
 //---------------------------------------------------------
 
-void FBNet::update_mesh(EnzoBlock * enzo_block, std::vector<EnzoObjectFeedbackSphere> * sphere_list) throw()
+void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
@@ -277,11 +277,12 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, std::vector<EnzoObjectFeedbackSp
   enzo_float * PopIII_HNe_metal_density = (enzo_float *) field.values("PopIII_HNe_metal_density");
   enzo_float * PopIII_PISNe_metal_density = (enzo_float *) field.values("PopIII_PISNe_metal_density");
 
-  CkPrintf("FBNet::update_mesh Nspheres = %d\n", (*sphere_list).size());
-  for (auto sphere : *sphere_list) {
+  //CkPrintf("FBNet::update_mesh Nspheres = %d\n", (*sphere_list).size());
+  //for (auto sphere : *sphere_list) {
     double metal_mass_tot = sphere.metal_mass_SNe() + sphere.metal_mass_HNe() + sphere.metal_mass_PISNe();
+    CkPrintf("FBNet::update_mesh Metal mass = %1.2e \n", metal_mass_tot);
     if (metal_mass_tot == 0.0) { // do nothing if no yield
-      continue;
+      return;//continue;
     }
 
     double x = sphere.pos(0), y = sphere.pos(1), z = sphere.pos(2);
@@ -342,5 +343,5 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, std::vector<EnzoObjectFeedbackSp
     }
       
     CkPrintf("EnzoMethodInference::update -- FB sphere pos = (%.2f, %.2f, %.2f);  radius: %1.2e; yields = (%1.2e, %1.2e, %1.2e)\n", sphere.pos(0), sphere.pos(1), sphere.pos(2), sphere.r(), sphere.metal_mass_SNe(), sphere.metal_mass_HNe(), sphere.metal_mass_PISNe() );    
-    }
+   // }
 }
