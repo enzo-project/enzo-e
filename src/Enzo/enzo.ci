@@ -240,6 +240,7 @@ module enzo {
     entry void p_method_infer_exit();
 
     entry void p_method_infer_update_mesh(CkReductionMsg * msg);
+    entry void p_method_infer_call_update(int il3[3]);
 
     // checkpoint
     entry void p_check_write_first
