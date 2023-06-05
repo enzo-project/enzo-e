@@ -13,6 +13,26 @@
 
 //-------------------------------------------------------------------
 
+EnzoMethodSinkMaker* EnzoMethodSinkMaker::from_parameters(ParameterAccessor& p)
+  noexcept
+{
+  int offset_seed_shift_input = p.value_integer("offset_seed_shift",0);
+  ASSERT("EnzoMethodSinkMaker::from_parameters",
+         "Method:sink_maker:offset_seed_shift must be >=0",
+	 offset_seed_shift_input >= 0);
+
+  return new EnzoMethodSinkMaker
+    (p.value_float("jeans_length_resolution_cells", 4.0),
+     p.value_float("physical_density_threshold_cgs",1.0e-24),
+     p.value_logical("check_density_maximum",true),
+     p.value_float("max_mass_fraction", 0.25),
+     p.value_float("min_sink_mass_solar",0.0),
+     p.value_float("max_offset_cell_fraction",0.0),
+     static_cast<uint64_t>(offset_seed_shift_input));
+}
+
+//-------------------------------------------------------------------
+
 EnzoMethodSinkMaker::EnzoMethodSinkMaker
 (double   jeans_length_resolution_cells,
  double   physical_density_threshold_cgs,

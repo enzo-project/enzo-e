@@ -575,7 +575,7 @@ Method * EnzoProblem::create_method_
 {
   Method * method = 0;
 
-  // move creation of p_access up the call stack?
+  // move creation of p_accessor up the call stack?
   ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
   Parameters* parameters = cello::simulation()->parameters();
   const std::string root_path =
@@ -803,15 +803,8 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = new EnzoMethodSinkMaker(
-			enzo_config->method_sink_maker_jeans_length_resolution_cells,
-			enzo_config->method_sink_maker_physical_density_threshold_cgs,
-			enzo_config->method_sink_maker_check_density_maximum,
-			enzo_config->method_sink_maker_max_mass_fraction,
-			enzo_config->method_sink_maker_min_sink_mass_solar,
-			enzo_config->method_sink_maker_max_offset_cell_fraction,
-			enzo_config->method_sink_maker_offset_seed_shift
-				     );
+    method = EnzoMethodSinkMaker::from_parameters(p_accessor);
+
   } else {
 
     // Fallback to Cello method's

@@ -378,14 +378,6 @@ public: // interface
       method_accretion_flavor(""),
       method_accretion_physical_density_threshold_cgs(0.0),
       method_accretion_max_mass_fraction(0.0),
-      // EnzoMethodSinkMaker
-      method_sink_maker_jeans_length_resolution_cells(0.0),
-      method_sink_maker_physical_density_threshold_cgs(0.0),
-      method_sink_maker_check_density_maximum(false),
-      method_sink_maker_max_mass_fraction(0.0),
-      method_sink_maker_min_sink_mass_solar(0.0),
-      method_sink_maker_max_offset_cell_fraction(0.0),
-      method_sink_maker_offset_seed_shift(0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -475,7 +467,6 @@ protected: // methods
   void read_method_heat_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_ppm_(Parameters *);
-  void read_method_sink_maker_(Parameters *);
   void read_method_star_maker_(Parameters *);
   void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
@@ -898,15 +889,6 @@ public: // attributes
   std::string                method_accretion_flavor;
   double                     method_accretion_physical_density_threshold_cgs;
   double                     method_accretion_max_mass_fraction;
-
-  /// EnzoMethodSinkMaker
-  double                     method_sink_maker_jeans_length_resolution_cells;
-  double                     method_sink_maker_physical_density_threshold_cgs;
-  bool                       method_sink_maker_check_density_maximum;
-  double                     method_sink_maker_max_mass_fraction;
-  double                     method_sink_maker_min_sink_mass_solar;
-  double                     method_sink_maker_max_offset_cell_fraction;
-  uint64_t                   method_sink_maker_offset_seed_shift;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

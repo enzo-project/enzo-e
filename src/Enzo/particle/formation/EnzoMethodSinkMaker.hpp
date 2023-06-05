@@ -20,6 +20,9 @@ class EnzoMethodSinkMaker : public Method {
 
 public:
 
+  // factory method
+  static EnzoMethodSinkMaker* from_parameters(ParameterAccessor& p) noexcept;
+
   // Constructor
   EnzoMethodSinkMaker
   (double   jeans_length_resolution_cells,

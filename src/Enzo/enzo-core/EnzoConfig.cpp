@@ -336,14 +336,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_accretion_flavor(""),
   method_accretion_physical_density_threshold_cgs(0.0),
   method_accretion_max_mass_fraction(0.0),
-  /// EnzoMethodSinkMaker
-  method_sink_maker_jeans_length_resolution_cells(0.0),
-  method_sink_maker_physical_density_threshold_cgs(0.0),
-  method_sink_maker_check_density_maximum(false),
-  method_sink_maker_max_mass_fraction(0.0),
-  method_sink_maker_min_sink_mass_solar(0.0),
-  method_sink_maker_max_offset_cell_fraction(0.0),
-  method_sink_maker_offset_seed_shift(0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -735,14 +727,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_accretion_physical_density_threshold_cgs;
   p | method_accretion_max_mass_fraction;
 
-  p | method_sink_maker_jeans_length_resolution_cells,
-  p | method_sink_maker_physical_density_threshold_cgs,
-  p | method_sink_maker_check_density_maximum,
-  p | method_sink_maker_max_mass_fraction,
-  p | method_sink_maker_min_sink_mass_solar,
-  p | method_sink_maker_max_offset_cell_fraction,
-  p | method_sink_maker_offset_seed_shift,
-
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
   p | prolong_enzo_use_linear;
@@ -830,7 +814,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_merge_sinks_(p);
   read_method_ppm_(p);
   read_method_m1_closure_(p);
-  read_method_sink_maker_(p);
   read_method_star_maker_(p);
   read_method_turbulence_(p);
   read_method_vlct_(p);
@@ -1953,29 +1936,6 @@ void EnzoConfig::read_method_accretion_(Parameters * p)
   method_accretion_max_mass_fraction = p->value_float
     ("Method:accretion:max_mass_fraction",0.25);
 
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_sink_maker_(Parameters * p)
-{
-  method_sink_maker_jeans_length_resolution_cells = p->value_float
-    ("Method:sink_maker:jeans_length_resolution_cells",4.0);
-  method_sink_maker_physical_density_threshold_cgs = p->value_float
-    ("Method:sink_maker:physical_density_threshold_cgs",1.0e-24);
-  method_sink_maker_check_density_maximum = p->value_logical
-    ("Method:sink_maker:check_density_maximum",true);
-  method_sink_maker_max_mass_fraction = p->value_float
-    ("Method:sink_maker:max_mass_fraction",0.25);
-  method_sink_maker_min_sink_mass_solar = p->value_float
-    ("Method:sink_maker:min_sink_mass_solar",0.0);
-  method_sink_maker_max_offset_cell_fraction = p->value_float
-    ("Method:sink_maker:max_offset_cell_fraction",0.0);
-  int method_sink_maker_offset_seed_shift_input = p->value_integer
-    ("Method:sink_maker:offset_seed_shift",0);
-  ASSERT("EnzoConfig::read()", "Method:sink_maker:offset_seed_shift must be >=0",
-	 method_sink_maker_offset_seed_shift_input >= 0);
-  method_sink_maker_offset_seed_shift = (uint64_t) method_sink_maker_offset_seed_shift_input;
 }
 
 //----------------------------------------------------------------------
