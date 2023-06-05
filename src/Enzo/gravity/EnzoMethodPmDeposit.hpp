@@ -17,7 +17,7 @@ class EnzoMethodPmDeposit : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmDeposit object
-  EnzoMethodPmDeposit(double alpha = 0.5);
+  EnzoMethodPmDeposit(ParameterAccessor& p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmDeposit);

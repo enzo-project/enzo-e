@@ -365,10 +365,6 @@ public: // interface
       method_background_acceleration_stellar_scale_height_r(0.0),
       method_background_acceleration_stellar_scale_height_z(0.0),
       method_background_acceleration_apply_acceleration(true),
-      // EnzoMethodPmDeposit
-      method_pm_deposit_alpha(0.5),
-      // EnzoMethodPmUpdate
-      method_pm_update_max_dt(0.0),
       // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
       method_vlct_half_dt_reconstruct_method(""),
@@ -478,8 +474,6 @@ protected: // methods
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
-  void read_method_pm_deposit_(Parameters *);
-  void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_sink_maker_(Parameters *);
   void read_method_star_maker_(Parameters *);
@@ -888,15 +882,6 @@ public: // attributes
   double                     method_background_acceleration_center[3];
   double                     method_background_acceleration_angular_momentum[3];
   bool                       method_background_acceleration_apply_acceleration;
-
-
-  /// EnzoMethodPmDeposit
-
-  double                     method_pm_deposit_alpha;
-
-  /// EnzoMethodPmUpdate
-
-  double                     method_pm_update_max_dt;
 
   /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;

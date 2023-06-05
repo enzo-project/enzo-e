@@ -323,10 +323,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_background_acceleration_stellar_scale_height_r(1.0E-10),
   method_background_acceleration_stellar_scale_height_z(1.0E-10),
   method_background_acceleration_apply_acceleration(true), // for debugging
-  /// EnzoMethodPmDeposit
-  method_pm_deposit_alpha(0.5),
-  /// EnzoMethodPmUpdate
-  method_pm_update_max_dt(std::numeric_limits<double>::max()),
   /// EnzoMethodMHDVlct
   method_vlct_riemann_solver(""),
   method_vlct_half_dt_reconstruct_method(""),
@@ -726,9 +722,6 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p,method_background_acceleration_angular_momentum,3);
   PUParray(p,method_background_acceleration_center,3);
 
-  p | method_pm_deposit_alpha;
-  p | method_pm_update_max_dt;
-
   p | method_vlct_riemann_solver;
   p | method_vlct_half_dt_reconstruct_method;
   p | method_vlct_full_dt_reconstruct_method;
@@ -835,8 +828,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_gravity_(p);
   read_method_heat_(p);
   read_method_merge_sinks_(p);
-  read_method_pm_deposit_(p);
-  read_method_pm_update_(p);
   read_method_ppm_(p);
   read_method_m1_closure_(p);
   read_method_sink_maker_(p);
@@ -1985,21 +1976,6 @@ void EnzoConfig::read_method_sink_maker_(Parameters * p)
   ASSERT("EnzoConfig::read()", "Method:sink_maker:offset_seed_shift must be >=0",
 	 method_sink_maker_offset_seed_shift_input >= 0);
   method_sink_maker_offset_seed_shift = (uint64_t) method_sink_maker_offset_seed_shift_input;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_pm_deposit_(Parameters * p)
-{
-  method_pm_deposit_alpha = p->value_float ("Method:pm_deposit:alpha",0.5);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_pm_update_(Parameters * p)
-{
-  method_pm_update_max_dt = p->value_float
-    ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 }
 
 //----------------------------------------------------------------------

@@ -32,9 +32,10 @@ extern "C" void  FORTRAN_NAME(dep_grid_cic)
 
 //----------------------------------------------------------------------
 
-EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
+EnzoMethodPmDeposit::EnzoMethodPmDeposit (ParameterAccessor& p)
   : Method(),
-    alpha_(alpha)
+    // read value from "Method:pm_deposit:alpha"
+    alpha_(p.value_float ("alpha",0.5))
 {
   // Check if particle types in "is_gravitating" group have either a constant
   // or an attribute called "mass" (but not both).

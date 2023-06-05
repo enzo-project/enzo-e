@@ -575,6 +575,13 @@ Method * EnzoProblem::create_method_
 {
   Method * method = 0;
 
+  // move creation of p_access up the call stack?
+  ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
+  Parameters* parameters = cello::simulation()->parameters();
+  const std::string root_path =
+    ("Method:" + parameters->list_value_string(index_method, "Method:list"));
+  ParameterAccessor p_accessor(*parameters, root_path);
+
   const EnzoConfig * enzo_config = enzo::config();
 
   // The following 2 lines may need to be updated in the future
@@ -616,12 +623,11 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
+    method = new EnzoMethodPmDeposit (p_accessor);
 
   } else if (name == "pm_update") {
 
-    method = new EnzoMethodPmUpdate
-      (enzo_config->method_pm_update_max_dt);
+    method = new EnzoMethodPmUpdate(p_accessor);
 
   } else if (name == "heat") {
 
