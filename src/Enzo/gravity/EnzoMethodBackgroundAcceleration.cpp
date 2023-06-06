@@ -19,14 +19,70 @@
 
 //---------------------------------------------------------------------
 
+namespace { // stuff inside anonymous namespace are local to this source file
+
+struct BlockInfo {
+  // In the future, we can make use of data::field_cells instead of this helper
+  // struct (this helper struct only exists to avoid introducing changes to
+  // test answers right now)
+
+
+  // attributes:
+  std::array<int, 3> dimensions;    // include ghost zones
+  std::array<int, 3> ghost_depth;
+  std::array<double, 3> cell_width;
+  std::array<double, 3> lower_edge;
+
+  BlockInfo(Block * block){
+    Field field = block->data()->field();
+
+    field.dimensions (0,&(dimensions[0]),&(dimensions[1]),&(dimensions[2]));
+    field.ghost_depth(0,&(ghost_depth[0]),&(ghost_depth[1]),&(ghost_depth[2]));
+    block->data()->lower(&(lower_edge[0]),&(lower_edge[1]),&(lower_edge[2]));
+    double xp, yp, zp;
+    block->data()->upper(&xp,&yp,&zp);
+    field.cell_width(lower_edge[0],xp,&(cell_width[0]),
+                     lower_edge[1],yp,&(cell_width[1]),
+                     lower_edge[2],zp,&(cell_width[2]));
+  }
+
+  inline double x_val(int ix) const noexcept
+  { return lower_edge[0] + (ix - ghost_depth[0] + 0.5) * cell_width[0]; }
+
+  inline double y_val(int iy) const noexcept
+  { return lower_edge[1] + (iy - ghost_depth[1] + 0.5) * cell_width[1]; }
+
+  inline double z_val(int iz) const noexcept
+  { return lower_edge[2] + (iz - ghost_depth[2] + 0.5) * cell_width[2]; }
+
+};
+
+//---------------------------------------------------------------------
+
+// forward declare some helper functions:
+
+void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
+                 double G_code, Particle * particle,
+                 const BlockInfo block_info, const int rank,
+                 const enzo_float cosmo_a,
+                 const EnzoConfig * enzo_config,
+                 const EnzoUnits * enzo_units, const double dt) throw();
+
+void PointMass(enzo_float * ax, enzo_float * ay, enzo_float * az,
+               double G_code, Particle * particle,
+               const BlockInfo block_info, const int rank,
+               const enzo_float cosmo_a,
+               const EnzoConfig * enzo_config,
+               const EnzoUnits * enzo_units, const double dt) throw();
+
+} // close anonymous namespace
+
+//---------------------------------------------------------------------
+
 EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
 (bool zero_acceleration) // do need
  : Method(),
-   zero_acceleration_(zero_acceleration),
-   mx_(0), my_(0), mz_(0),
-   gx_(0), gy_(0), gz_(0),
-   xm_(0), ym_(0), zm_(0),
-   hx_(0), hy_(0), hz_(0)
+   zero_acceleration_(zero_acceleration)
 {
 
   this->G_four_pi_ = 4.0 * cello::pi * enzo_constants::grav_constant;
@@ -59,6 +115,7 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
 } // EnzoMethodBackgroundAcceleration
 
 //-------------------------------------------------------------------
+
 void EnzoMethodBackgroundAcceleration::compute ( Block * block) throw()
 {
   if (block->is_leaf()){
@@ -69,6 +126,8 @@ void EnzoMethodBackgroundAcceleration::compute ( Block * block) throw()
   block->compute_done();
   return;
 }
+
+//---------------------------------------------------------------------
 
 void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 {
@@ -83,14 +142,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   Field field = block->data()->field();
 
-  // Obtain grid sizes and ghost sizes
-
-  field.dimensions (0,&mx_,&my_,&mz_);
-  field.ghost_depth(0,&gx_,&gy_,&gz_);
-  double xp, yp, zp;
-  block->data()->lower(&xm_,&ym_,&zm_);
-  block->data()->upper(&xp,&yp,&zp);
-  field.cell_width(xm_,xp,&hx_,ym_,yp,&hy_,zm_,zp,&hz_);
+  BlockInfo block_info(block);
 
   // We will probably never be in the situation of constant acceleration
   // and cosmology, but just in case.....
@@ -104,9 +156,9 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
     double dt    = block->dt();
     double time  = block->time();
     cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,time+0.5*dt);
-    if (rank >= 1) hx_ *= cosmo_a;
-    if (rank >= 2) hy_ *= cosmo_a;
-    if (rank >= 3) hz_ *= cosmo_a;
+    if (rank >= 1) block_info.cell_width[0] *= cosmo_a;
+    if (rank >= 2) block_info.cell_width[1] *= cosmo_a;
+    if (rank >= 3) block_info.cell_width[2] *= cosmo_a;
   }
 
 
@@ -114,7 +166,8 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
   enzo_float * az = (enzo_float*) field.values ("acceleration_z");
 
-  int m = mx_ * my_ * mz_;
+  int m = (block_info.dimensions[0] * block_info.dimensions[1] *
+           block_info.dimensions[2]);
   if (zero_acceleration_){
     if (ax){ for(int i = 0; i < m; i ++){ ax[i] = 0.0;}}
     if (ay){ for(int i = 0; i < m; i ++){ ay[i] = 0.0;}}
@@ -123,14 +176,21 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   Particle particle = enzo_block->data()->particle();
 
+  // unclear why the gravitational constant is different in each branch!
+
   if (enzo_config->method_background_acceleration_flavor == "GalaxyModel"){
 
-    this->GalaxyModel(ax, ay, az, &particle, rank,
-                      cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+    double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
+
+    GalaxyModel(ax, ay, az, G_code, &particle, block_info, rank,
+                cosmo_a, enzo_config, enzo_units, enzo_block->dt);
 
   } else if (enzo_config->method_background_acceleration_flavor == "PointMass"){
-    this->PointMass(ax, ay, az, &particle, rank,
-                    cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+
+    double G_code = this->G_four_pi_ *
+            enzo_units->density() * enzo_units->time() * enzo_units->time();
+    PointMass(ax, ay, az, G_code, &particle, block_info, rank,
+              cosmo_a, enzo_config, enzo_units, enzo_block->dt);
   } else {
 
     ERROR("EnzoMethodBackgroundAcceleration::compute_()",
@@ -143,45 +203,48 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
 } // compute
 
-void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
-                                                 enzo_float * ay,
-                                                 enzo_float * az,
-                                                 Particle * particle,
-                                                 const int rank,
-                                                 const enzo_float cosmo_a,
-                                                 const EnzoConfig * enzo_config,
-                                                 const EnzoUnits * enzo_units,
-                                                 const double dt)
-                                                 throw() {
+//---------------------------------------------------------------------
 
+// define the main helper functions:
+namespace { // stuff inside anonymous namespace are local to this source file
+
+void PointMass(enzo_float * ax, enzo_float * ay, enzo_float * az,
+               double G_code, Particle * particle,
+               const BlockInfo block_info, const int rank,
+               const enzo_float cosmo_a, const EnzoConfig * enzo_config,
+               const EnzoUnits * enzo_units, const double dt) throw()
+{
   // just need to define position of each cell
 
   double mass = enzo_config->method_background_acceleration_mass *
                 enzo_constants::mass_solar / enzo_units->mass();
-  double rcore = std::max(0.1*hx_,
+  double rcore = std::max(0.1*block_info.cell_width[0],
                      enzo_config->method_background_acceleration_core_radius/enzo_units->length());
-  double G = this->G_four_pi_ *
-            enzo_units->density() * enzo_units->time() * enzo_units->time();
-
-  double x = 0.0, y = 0.0, z = 0.0;
 
   const double min_accel = mass / ((rcore*rcore*rcore)*cosmo_a);
 
-  for (int iz=0; iz<mz_; iz++){
-    if (rank >= 3) z = zm_ + (iz - gz_ + 0.5)*hz_ - enzo_config->method_background_acceleration_center[2];
+  const int mx = block_info.dimensions[0];
+  const int my = block_info.dimensions[1];
+  const int mz = block_info.dimensions[2];
 
-    for (int iy=0; iy<my_; iy++){
-      if (rank >= 2) y = ym_ + (iy - gy_ + 0.5)*hy_ - enzo_config->method_background_acceleration_center[1];
+  const double* accel_center
+    = enzo_config->method_background_acceleration_center;
 
-      for (int ix=0; ix<mx_; ix++){
-        x = xm_ + (ix - gx_ + 0.5)*hx_ - enzo_config->method_background_acceleration_center[0];
+  for (int iz=0; iz<mz; iz++){
+    double z = (rank >= 3) ? block_info.z_val(iz) - accel_center[2] : 0.0;
+
+    for (int iy=0; iy<my; iy++){
+      double y = (rank >= 2) ? block_info.y_val(iy) - accel_center[1] : 0.0;
+
+      for (int ix=0; ix<mx; ix++){
+        double x = block_info.x_val(ix) - accel_center[0];
 
         double rsqr  = x*x + y*y + z*z;
         double r     = sqrt(rsqr);
 
-        double accel = G * std::min(mass / ((rsqr)*r*cosmo_a), min_accel);
+        double accel = G_code * std::min(mass / ((rsqr)*r*cosmo_a), min_accel);
 
-        int i = INDEX(ix,iy,iz,mx_,my_);
+        int i = INDEX(ix,iy,iz,mx,my);
 
         if (ax) ax[i] -= accel * x;
         if (ay) ay[i] -= accel * y;
@@ -198,17 +261,15 @@ void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
   return;
 }
 
-void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
-                                                   enzo_float * ay,
-                                                   enzo_float * az,
-                                                   Particle * particle,
-                                                   const int rank,
-                                                   const enzo_float cosmo_a,
-                                                   const EnzoConfig * enzo_config,
-                                                   const EnzoUnits * enzo_units,
-                                                   const double dt)
-                                                   throw() {
+//---------------------------------------------------------------------
 
+void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
+                 double G_code, Particle * particle,
+                 const BlockInfo block_info, const int rank,
+                 const enzo_float cosmo_a,
+                 const EnzoConfig * enzo_config,
+                 const EnzoUnits * enzo_units, const double dt) throw()
+{
   double DM_mass     = enzo_config->method_background_acceleration_DM_mass *
                          enzo_constants::mass_solar / enzo_units->mass();
   double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius *
@@ -225,10 +286,6 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
                         enzo_constants::kpc_cm / enzo_units->length();
   const double * amom = enzo_config->method_background_acceleration_angular_momentum;
 
-//  double G = this->G_four_pi_ *
-//             enzo_units->density() * enzo_units->time() * enzo_units->time();
-  double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
-
   double rcore = enzo_config->method_background_acceleration_core_radius *
                  enzo_constants::kpc_cm / enzo_units->length();
 
@@ -239,18 +296,23 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
   // compute the density constant for an NFW halo (rho_o)
   double DM_density = (DM_mass / (4.0 * cello::pi * std::pow(rcore,3))) / (std::log(1.0+xtemp)-xtemp/(1.0+xtemp));
 
-  double x = 0.0, y = 0.0, z = 0.0;
-
   double accel_sph, accel_R, accel_z;
 
-  for (int iz=0; iz<mz_; iz++){
-     if (rank >= 3) z = zm_ + (iz - gz_ + 0.5)*hz_ - enzo_config->method_background_acceleration_center[2];
+  const int mx = block_info.dimensions[0];
+  const int my = block_info.dimensions[1];
+  const int mz = block_info.dimensions[2];
 
-     for (int iy=0; iy<my_; iy++){
-       if (rank >= 2) y = ym_ + (iy - gy_ + 0.5)*hy_ - enzo_config->method_background_acceleration_center[1];
+  const double* accel_center
+    = enzo_config->method_background_acceleration_center;
 
-       for (int ix=0; ix<mx_; ix++){
-         x = xm_ + (ix - gx_ + 0.5)*hx_ - enzo_config->method_background_acceleration_center[0];
+  for (int iz=0; iz<mz; iz++){
+     double z = (rank >= 3) ? block_info.z_val(iz) - accel_center[2] : 0.0;
+
+     for (int iy=0; iy<my; iy++){
+       double y = (rank >= 2) ? block_info.y_val(iy) - accel_center[1] : 0.0;
+
+       for (int ix=0; ix<mx; ix++){
+         double x = block_info.x_val(ix) - accel_center[0];
 
          // double rsqr  = x*x + y*y + z*z;
          // double r     = sqrt(rsqr);
@@ -290,7 +352,7 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
          accel_R = 0.0; accel_z = 0.0;
          // now apply accelerations in cartesian (grid) coordinates
-         int i = INDEX(ix,iy,iz,mx_,my_);
+         int i = INDEX(ix,iy,iz,mx,my);
          if (ax) ax[i] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
          if (ay) ay[i] -= (accel_sph * y + accel_R*yplane + accel_z*amom[1]);
          if (az) az[i] -= (accel_sph * z + accel_R*zplane + accel_z*amom[2]);
@@ -343,9 +405,9 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
           int ipdp = ip*dp;
           int ipda = ip*da;
 
-          x = px[ipdp] - enzo_config->method_background_acceleration_center[0];
-          y = py[ipdp] - enzo_config->method_background_acceleration_center[1];
-          z = pz[ipdp] - enzo_config->method_background_acceleration_center[2];
+          const double x = px[ipdp] - accel_center[0];
+          const double y = py[ipdp] - accel_center[1];
+          const double z = pz[ipdp] - accel_center[2];
 
           double zheight = amom[0]*x + amom[1]*y + amom[2]*z; // height above disk
 
@@ -396,6 +458,10 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
   return;
 }
+
+} // close anonymous namespace
+
+//---------------------------------------------------------------------
 
 double EnzoMethodBackgroundAcceleration::timestep (Block * block) throw()
 {
