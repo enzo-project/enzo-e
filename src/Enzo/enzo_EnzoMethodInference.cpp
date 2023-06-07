@@ -1273,6 +1273,8 @@ void EnzoBlock::p_method_infer_update(int n, char * buffer, int il3[3])
   // Delete the level array
   CkPrintf("Calling EnzoMethodInference::update()\n");
   p_method_infer_call_update(il3);
+  
+  //proxy_enzo_simulation[0].p_infer_done();
 }
 
 //----------------------------------------------------------------------
@@ -1297,12 +1299,12 @@ void EnzoMethodInference::concatenate_sphere_lists(EnzoBlock * enzo_block, int n
   n = 0;
   SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_, 1);
   enzo_block->contribute(n, sphere_, CkReduction::set, callback);
-
 }
 
 //----------------------------------------------------------------------
 void EnzoBlock::p_method_infer_update_mesh(CkReductionMsg * msg) 
 {
+
   // put spheres down on the mesh (if inference_method == "starnet")
   if (this->is_leaf()) {
     CkPrintf("EnzoBlock::p_method_infer_update_mesh() global reduction successful!\n");
@@ -1318,6 +1320,7 @@ void EnzoBlock::p_method_infer_update_mesh(CkReductionMsg * msg)
     }
 
   }
+  //p_method_infer_exit();
 }
 //----------------------------------------------------------------------
 
@@ -1326,11 +1329,6 @@ void EnzoMethodInference::update ( Block * block, int il3[3])
   Index index_block = block->index();
   const int level = block->level();
 
-  Index3 index3(il3[0],il3[1],il3[2]);
-
-  proxy_level_array[index3].p_done (index_block);
- 
- 
   if (block->is_leaf()) {
     // if leaf block, we're done, tell level array element
     Index3 index3(il3[0],il3[1],il3[2]);
@@ -1395,7 +1393,6 @@ void EnzoSimulation::p_infer_done()
     enzo::block_array().p_method_infer_exit();
   }
 }
-
 //----------------------------------------------------------------------
 
 std::tuple<int,int,int,int,int,int>

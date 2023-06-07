@@ -27,7 +27,8 @@ public: // interface
   };
 
   ObjectSphere() throw()
-    : Object()
+    : Object(),
+      radius_(0)
   { };
 
   /// Charm++ PUP::able declarations
@@ -123,8 +124,8 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  double center_[3];
-  double radius_;
+  double center_[3] = {};
+  double radius_ = 0.0;
 
 };
 
