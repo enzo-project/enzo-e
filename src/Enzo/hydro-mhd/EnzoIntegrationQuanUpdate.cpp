@@ -181,16 +181,16 @@ EnzoIntegrationQuanUpdate::load_integration_quan_(const EnzoEFltArrayMap &map,
 void EnzoIntegrationQuanUpdate::update_quantities
 (EnzoEFltArrayMap &initial_integration_map, const EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_integration_map,
- EnzoEquationOfState *eos, const int stale_depth,
- const str_vec_t &passive_list) const
+ const int stale_depth, const str_vec_t &passive_list) const
 {
 
   // Update passive scalars, it doesn't currently support renormalizing to 1
   update_passive_scalars_(initial_integration_map, dUcons_map,
                           out_integration_map, stale_depth, passive_list);
 
-  // For now, not having density floor affect momentum or total energy density
-  enzo_float density_floor = eos->get_density_floor();
+  // For now, density floor doesn't affect momentum or total energy density
+  const enzo_float density_floor =
+    enzo::fluid_props()->fluid_floor_config().density();
 
   const std::vector<EFlt3DArray> cur_prim = load_integration_quan_
     (initial_integration_map, stale_depth);
@@ -214,7 +214,7 @@ void EnzoIntegrationQuanUpdate::update_quantities
 
 	// possibly place a floor on the updated density.
 	enzo_float new_rho = out_prim[density_index_](iz,iy,ix);
-	new_rho = EnzoEquationOfState::apply_floor(new_rho, density_floor);
+	new_rho = enzo_utils::apply_floor(new_rho, density_floor);
 	out_prim[density_index_](iz,iy,ix) = new_rho;
 
 	// update the specific integration primitives
@@ -230,7 +230,9 @@ void EnzoIntegrationQuanUpdate::update_quantities
 
   // apply floor to energy and sync the internal energy with total energy
   // (the latter only occurs if the dual energy formalism is in use)
-  eos->apply_floor_to_energy_and_sync(out_integration_map, stale_depth + 1);
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  fluid_props->apply_floor_to_energy_and_sync(out_integration_map,
+                                              stale_depth + 1);
 }
 
 //----------------------------------------------------------------------

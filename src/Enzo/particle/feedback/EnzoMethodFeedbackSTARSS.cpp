@@ -969,13 +969,17 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, 1);
   this->transformComovingWithStar(d_shell,vx_dep_tot,vy_dep_tot,vz_dep_tot,up,vp,wp,mx,my,mz, 1);
 
+  const GrackleChemistryData * grackle_chem = enzo::grackle_chemistry();
+  const int primordial_chemistry = (grackle_chem == nullptr) ?
+    0 : grackle_chem->get<int>("primordial_chemistry");
+
   /* 
      Use averaged quantities across multiple cells so that deposition is stable.
      vmean is used to determine whether the supernova shell calculation should proceed:
      M_shell > 0 iff v_shell > v_gas 
   */ 
   double Z_mean=0, d_mean=0, n_mean=0, v_mean=0, mu_mean=0;
-  double mu = static_cast<double>(enzo::fluid_props()->mol_weight());
+  const double dflt_mu = static_cast<double>(enzo::fluid_props()->mol_weight());
 
   for (int ix_ = ix-1; ix_ < ix+2; ix_++) {
     for (int iy_ = iy-1; iy_ < iy+2; iy_++) {
@@ -984,20 +988,22 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         Z_mean += mf[ind] / d[ind];
         // TODO: make EnzoComputeMolecularWeight, and access mu_field here?
 
-        #ifdef CONFIG_USE_GRACKLE
-          int primordial_chemistry = (enzo::config()->method_grackle_chemistry)->primordial_chemistry;
-          if (primordial_chemistry > 0) {
-            mu = d_el[ind] + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
+        double mu;
+        if (primordial_chemistry > 0) {
+          mu = d_el[ind] + dHI[ind] + dHII[ind] + 0.25*(dHeI[ind]+dHeII[ind]+dHeIII[ind]);
 
-            if (primordial_chemistry > 1) {
-              mu += dHM[ind] + 0.5*(dH2I[ind]+dH2II[ind]);
-            }
-            if (primordial_chemistry > 2) {
-              mu += 0.5*(dDI[ind] + dDII[ind]) + dHDI[ind]/3.0;
-            }
+          if (primordial_chemistry > 1) {
+            mu += dHM[ind] + 0.5*(dH2I[ind]+dH2II[ind]);
           }
-          mu /= d[ind]; 
-        #endif
+          if (primordial_chemistry > 2) {
+            mu += 0.5*(dDI[ind] + dDII[ind]) + dHDI[ind]/3.0;
+          }
+          mu /= d[ind];
+        } else {
+          mu = dflt_mu;
+          // in an older version, mu = dflt_mu/d[ind], but I think that was a
+          // typo
+        }
 
         mu_mean += mu;
         d_mean += d[ind];

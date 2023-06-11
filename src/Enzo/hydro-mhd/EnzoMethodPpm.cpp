@@ -47,6 +47,14 @@ EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
          "selected formulation of dual energy formalism is incompatible",
          de_config.is_disabled() || de_config.bryan95_formulation());
 
+  // technically, the PPM solver doesn't directly use any of the functionality
+  // implemented by EnzoEOSIdeal, (it implements the required functionality in
+  // fortran), but this check is here to ensure that the EOS is handled
+  // consistently by different Methods in a given Enzo-E simulation
+  ASSERT("EnzoMethodPpm::EnzoMethodPpm",
+         "PPM solver is currently incompatible with a non-ideal EOS",
+         fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>());
+
   const int rank = cello::rank();
 
   cello::define_field("density");
