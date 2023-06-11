@@ -199,3 +199,8 @@ def create_symlinks(dst_dir, src_l):
         dst = os.path.join(abs_dst_dir, os.path.basename(src))
         assert not os.path.exists(dst)
         os.symlink(src, dst)
+
+def create_enzoe_driver_from_args():
+    pass
+
+
