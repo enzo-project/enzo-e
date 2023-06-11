@@ -59,6 +59,7 @@ src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 input_dir = "input"
 
 _grackle_tagged_tests = set()
+_has_grackle = cached_opts().enzoe_driver.query_has_grackle()
 
 def uses_grackle(cls):
     """
@@ -69,9 +70,14 @@ def uses_grackle(cls):
     """
     _grackle_tagged_tests.add(cls.__name__)
 
+    has_grackle_inputs = cached_opts().grackle_input_data_dir is not None
+
+    skip_reason = "Enzo-E is not built with Grackle"
+    if _has_grackle and (not has_grackle_inputs):
+        skip_reason = "the grackle input data dir was not specified"
+
     wrapper_factory = pytest.mark.skipif(
-        cached_opts().grackle_input_data_dir is None,
-        reason = "GRACKLE_INPUT_DATA_DIR is not defined"
+        (not _has_grackle) or (not has_grackle_inputs), reason = skip_reason
     )
     return wrapper_factory(cls)
 

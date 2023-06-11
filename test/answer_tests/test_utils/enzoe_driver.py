@@ -133,7 +133,6 @@ class EnzoEDriver:
                 extra_options = extra_options)
 
         # build the enzo-e part of the command
-        # TODO: add support for extra options
         enzoe_command = f"{self.enzoe_path} {parameter_fname}"
 
         if self.charmrun_path is None:
@@ -157,7 +156,7 @@ class EnzoEDriver:
             if buffer_outputs_on_disk:
                 _log_prefix = '%s/log.' % ('.' if cwd is None else cwd)
                 f_err, f_out = [
-                    stack.enter_context(open(_log_prefix + suffix, 'w'))
+                    stack.enter_context(open(_log_prefix + suffix, 'w+'))
                     for suffix in ('err', 'out')]
             else:
                 f_err, f_out = None, None
@@ -178,13 +177,38 @@ class EnzoEDriver:
             elapsed = time.time() - stime
 
             if proc.returncode != 0:
-                print("Dumping logs:")
+                if buffer_outputs_on_disk:
+                    print("Dumpting stdout:")
+                    for line in f_out.seek(0):
+                        print(line, end = '')
+                    print("Dumpting stderr:")
+                    for line in f_err.seek(0):
+                        print(line, end = '')
 
-                
                 raise RuntimeError(
                     f"{sim_name} exited with nonzero return code "
                     f"{proc.returncode}.")
         return elapsed
+
+    def query_precision(self):
+        # we need to pass ++quiet to prevent charm++'s diagnostic messages from
+        # clogging things up
+        if self.charmrun_path is None:
+            command = f"{self.enzoe_path} ++quiet -precision"
+        else:
+            command = (f"{self.charmrun_path} ++local +p1 ++quiet " +
+                       f"{self.enzoe_path} -precision")
+        return subprocess.run(command, shell = True,
+                              capture_output=True).stdout
+
+    def query_has_grackle(self):
+        if self.charmrun_path is None:
+            command = f"{self.enzoe_path} -grackle-version"
+        else:
+            command = (f"{self.charmrun_path} ++local +p1 {self.enzoe_path} " +
+                       "-grackle-version")
+        return subprocess.run(command, shell = True).returncode == 0
+
 
 def create_symlinks(dst_dir, src_l):
     """
