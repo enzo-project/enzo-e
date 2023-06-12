@@ -1,5 +1,6 @@
 import os
 import os.path
+import sys
 
 import pytest
 
@@ -61,6 +62,8 @@ def _to_abs_path(path):
 
 # this hook gets executed after pytest finishes parsing all of the config opts
 def pytest_configure(config):
+    if "--help" in sys.argv[1:]:
+        return
 
     # first, collect values from the command line
     vals = {}
@@ -72,7 +75,7 @@ def pytest_configure(config):
                 raise RuntimeError(f"{arg_flag} or {env_var} must be set")
             else:
                 val = fallback
-        else:
+        elif val is None:
             val = os.environ.get(env_var)
         vals[arg_name] = val
 
@@ -91,6 +94,7 @@ def pytest_configure(config):
 
     set_cached_opts(
         enzoe_driver = enzoe_driver,
+        uses_double_prec = enzoe_driver.query_uses_double_precision(),
         generate_results = vals['answer_store'],
         test_results_dir = _to_abs_path(vals['local_dir']),
         grackle_input_data_dir = _to_abs_path(vals['grackle_input_data_dir'])

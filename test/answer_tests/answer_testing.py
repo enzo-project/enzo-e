@@ -20,6 +20,7 @@ _base_file = os.path.basename(__file__)
 @dataclass(frozen = True)
 class TestOptions:
     enzoe_driver: EnzoEDriver
+    uses_double_prec: bool
     generate_results: bool
     test_results_dir: str
     grackle_input_data_dir : Optional[str]
@@ -49,6 +50,9 @@ def set_cached_opts(**kwargs):
             "grackle input data dir not found: "
             f"{_CACHED_OPTS.grackle_input_data_dir}")
 
+    yt.mylog.info(
+        f"{_base_file}: use_double = {_CACHED_OPTS.uses_double_prec}")
+
 def cached_opts():
     if _CACHED_OPTS is None:
         raise RuntimeError("set_cached_opts was never called")
@@ -59,7 +63,6 @@ src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 input_dir = "input"
 
 _grackle_tagged_tests = set()
-_has_grackle = cached_opts().enzoe_driver.query_has_grackle()
 
 def uses_grackle(cls):
     """
@@ -70,14 +73,15 @@ def uses_grackle(cls):
     """
     _grackle_tagged_tests.add(cls.__name__)
 
+    has_grackle = cached_opts().enzoe_driver.query_has_grackle()
     has_grackle_inputs = cached_opts().grackle_input_data_dir is not None
 
     skip_reason = "Enzo-E is not built with Grackle"
-    if _has_grackle and (not has_grackle_inputs):
+    if has_grackle and (not has_grackle_inputs):
         skip_reason = "the grackle input data dir was not specified"
 
     wrapper_factory = pytest.mark.skipif(
-        (not _has_grackle) or (not has_grackle_inputs), reason = skip_reason
+        (not has_grackle) or (not has_grackle_inputs), reason = skip_reason
     )
     return wrapper_factory(cls)
 

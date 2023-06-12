@@ -190,7 +190,7 @@ class EnzoEDriver:
                     f"{proc.returncode}.")
         return elapsed
 
-    def query_precision(self):
+    def query_uses_double_precision(self):
         # we need to pass ++quiet to prevent charm++'s diagnostic messages from
         # clogging things up
         if self.charmrun_path is None:
@@ -198,8 +198,15 @@ class EnzoEDriver:
         else:
             command = (f"{self.charmrun_path} ++local +p1 ++quiet " +
                        f"{self.enzoe_path} -precision")
-        return subprocess.run(command, shell = True,
-                              capture_output=True).stdout
+
+        rslt = subprocess.run(command, shell = True,
+                              capture_output=True).stdout.rstrip()
+        if rslt == b'double':
+            return True
+        elif rslt == b'single':
+            return False
+        else:
+            raise RuntimeError(f"Something went horribly wrong: {rslt}")
 
     def query_has_grackle(self):
         if self.charmrun_path is None:
