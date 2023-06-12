@@ -1,3 +1,4 @@
+from collections import namedtuple
 import os
 import os.path
 import sys
@@ -7,53 +8,75 @@ import pytest
 from answer_testing import set_cached_opts
 from test_utils.enzoe_driver import EnzoEDriver
 
-# each entry in this list is a tuple with the following format:
-# (name or flags -- to be passed to argparse.add_arguments,
-#  kwargs to pass to argparse.add_arguments,
-#  fallback-env-variable,
-#  fallback_value -- when neither the flag nor env-var is provided)
+_root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+
+# each entry in the following list specifies a command-line options that
+# fall-back to an environment variable.
+_ConfigParam = namedtuple(
+    "_ConfigParam", ["flag", "env_var", "default", "help",
+                     "other_argparse_kwargs"])
 _CONFIG_OPTIONS = [
-    ('--enzoe',
-     dict(action = "store", default = None,
-          help = "path to the enzo-e binary that will be tested."),
-     "ENZO_PATH", "build/bin/enzo-e"),
-
-    ("--charm",
-     dict(action="store", default = None,
-          help = ("path to charmrun binary that is used to execute enzo-e or "
-                  "to the directory holding that binary.")),
-     "CHARM_PATH", None),
-
-    ("--local-dir",
-     dict(action="store", default = None,
-          help = "Path to directory where answers are/will be stored."),
-     "TEST_RESULTS_DIR", "~/enzoe_test_results"),
-
-    ("--grackle-input-data-dir",
-     dict(action="store", default = None,
-          help = "Path to directory of grackle input data files."),
-     "GRACKLE_INPUT_DATA_DIR", None),
+    _ConfigParam(
+        flag = "--charm", env_var = "CHARM_PATH",
+        default = None,
+        help = ("path to charmrun binary that is used to execute enzo-e or "
+                  "to the directory holding that binary."),
+        other_argparse_kwargs = dict(action = "store")
+    ),
+    _ConfigParam(
+        flag = "--local-dir", env_var = "TEST_RESULTS_DIR",
+        default = "~/enzoe_test_results",
+        help = "Path to directory where answers are/will be stored.",
+        other_argparse_kwargs = dict(action = "store")
+    ),
+    _ConfigParam(
+        flag = "--grackle-input-data-dir", env_var = "GRACKLE_INPUT_DATA_DIR",
+        default = "~/enzoe_test_results",
+        help = "Path to directory of grackle input data files.",
+        other_argparse_kwargs = dict(action = "store")
+    )
 ]
 
 
-# this hook is used to add more tests to the pytest launcher
+# this hook is used to add more command line flags to the pytest launcher
 def pytest_addoption(parser):
 
-    def _fallback_help_clause(env_var):
-        return ("If not specified, the program tries to use the value set by "
-                f"the {env_var} environment variable (if specified)")
+    # add ordinary flags (NOT backed by an environment variable)
 
-    for arg_flag, kwargs, env_var, _ in _CONFIG_OPTIONS:
-        tmp = kwargs.copy()
-        tmp["help"] += " " + _fallback_help_clause(env_var)
-        parser.addoption(arg_flag, **tmp)
+    # in the past, this could be set by the ENZO_PATH environment variable,
+    # but this wasn't used by CI
+    parser.addoption("--enzoe", action = 'store',
+                     default = os.path.join(_root_dir, "build/bin/enzo-e"),
+                     help = ("path to the enzo-e binary that will be tested. "
+                             "Default is <ROOT_DIR>/build/bin/enzo-e"))
+
+
+    # introduce flags that fall back to values specified in an env variable
+    # -> the main reason these flags exist is for backwards compatability
+    def _argparse_kwargs(other_kw, help, env_var):
+        _ERR_PREFIX = ()
+        if other_kw.get('action', 'store') in ['store_true', 'store_false']:
+            raise RuntimeError(
+                "for a flag backed by an environment variable, the argparse "
+                "kwargs can't set 'action' to 'store_true' or 'store_false'. "
+                "These flags must default to None")
+
+        kwargs = other_kw.copy() # don't mutate the original
+        kwargs["help"] = (f"{help} If not specified, the program tries to "
+                          f"use the value set by {env_var}")
+        kwargs["default"] = None
+        return kwargs
+
+    for param in _CONFIG_OPTIONS:
+        parser.addoption(param.flag,
+                         **_argparse_kwargs(param.other_argparse_kwargs,
+                                            param.help, param.env_var))
 
     parser.addoption(
-        "--answer-store", action="store_const",
-        default = None, const = True,
-        help = ("Indicates whether to generate test results. " +
-                _fallback_help_clause("GENERATE_TEST_RESULTS"))
-    )
+        "--answer-store",
+        **_argparse_kwargs({'action' : "store_const", 'const' : True},
+                           help="Indicates whether to generate test results.",
+                           env_var = "GENERATE_TEST_RESULTS"))
 
 
 def _to_abs_path(path):
@@ -66,17 +89,19 @@ def pytest_configure(config):
         return
 
     # first, collect values from the command line
-    vals = {}
-    for arg_flag, _, env_var, fallback in _CONFIG_OPTIONS:
-        arg_name = arg_flag.lstrip('-').replace('-', '_')
+    vals = {'enzoe' : config.getoption('--enzoe')}
+
+    for par in _CONFIG_OPTIONS: 
+        arg_name = par.flag.lstrip('-').replace('-', '_')
         val = config.getoption(arg_name)
-        if (val is None) and (os.environ.get(env_var, None) is None):
-            if fallback is None:
-                raise RuntimeError(f"{arg_flag} or {env_var} must be set")
+        if (val is None) and (os.environ.get(par.env_var, None) is None):
+            if par.default is None:
+                raise RuntimeError(
+                    f"{par.arg_flag} or {par.env_var} must be set")
             else:
-                val = fallback
+                val = par.default
         elif val is None:
-            val = os.environ.get(env_var)
+            val = os.environ.get(par.env_var)
         vals[arg_name] = val
 
     if config.getoption('answer_store') is None:
