@@ -6,7 +6,7 @@ import subprocess
 import numpy as np
 import h5py
 
-from enzoe_driver import create_symlinks
+from .enzoe_driver import create_symlinks
 
 def ckpt_block_file_map(filelist_path):
     """

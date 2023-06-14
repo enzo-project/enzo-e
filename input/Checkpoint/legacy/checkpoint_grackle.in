@@ -168,7 +168,7 @@
      # set to false and Grackle crashes due to max iteration limit - this is
      # not needed generally in a real simulation as hydro timestep will
      # be small (usually)
-     null { dt = 100.0; }
+     null { dt = 5.0; }
 
  }
 
@@ -211,7 +211,4 @@
 
  }
 
- Stopping {
-    time = 1000.0;
- }
 

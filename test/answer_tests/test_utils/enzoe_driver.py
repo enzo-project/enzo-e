@@ -217,16 +217,24 @@ class EnzoEDriver:
         return subprocess.run(command, shell = True).returncode == 0
 
 
-def create_symlinks(dst_dir, src_l):
+def create_symlinks(dst_dir, target_iterable):
     """
-    Create a symlink for each item in src_l
+    Create a symlink to each path each element of targets_iter within dst_dir
+
+    Parameter
+    ---------
+    dst_dir: str
+        The path to the directory where the symlinks will be made
+    target_iterable: iterable of str
+        Contains strings that each hold the path to a file or directory for
+        which a symlink will be produced.
 
     Notes
     -----
     This is commonly used when setting up an Enzo-E simulation
     """
     abs_dst_dir = os.path.abspath(dst_dir)
-    for src in map(lambda e: os.path.abspath(src), src_l):
+    for src in map(lambda e: os.path.abspath(e), target_iterable):
         dst = os.path.join(abs_dst_dir, os.path.basename(src))
         assert not os.path.exists(dst)
         os.symlink(src, dst)

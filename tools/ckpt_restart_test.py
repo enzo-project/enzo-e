@@ -7,12 +7,12 @@ import shutil
 import sys
 
 _test_utils_path = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), "../test/answer_tests/test_utils"
+    os.path.dirname(__file__), "../test/answer_tests"
 ))
 sys.path.append(_test_utils_path)
 
-from enzoe_driver import EnzoEDriver
-from ckpt_restart_testing import run_ckpt_restart_test
+from test_utils.enzoe_driver import EnzoEDriver
+from test_utils.ckpt_restart_testing import run_ckpt_restart_test
 
 def main(args):
     

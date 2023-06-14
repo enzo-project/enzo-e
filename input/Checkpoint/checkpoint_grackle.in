@@ -1,0 +1,55 @@
+# intended to be used for automated tests of new-style Checkpoint-Restart
+#
+# an important requirement for these tests is that all executed produce
+# bitwise-reproducible, deterministic results
+
+include "input/Checkpoint/legacy/checkpoint_grackle.in"
+
+   Adapt {
+      max_initial_level = 0;
+      min_level = -1;
+      max_level = 0;
+   }
+
+   Mesh {
+     #   This test problem varies density, temperature,
+     #   and metallicity over x, y, and z dimensions 
+     #   respectively. For smaller problems you can 
+     #   run in 1 or 2 dimensions by changing the below
+     #   accordingly and setting the min/max values in
+     #   initialization to be the same. Currently cannot
+     #   pick which value goes in which dimension,
+     #   so 2D can only be density and temperature,
+     #   1D can only vary density.
+
+     root_blocks = [2, 2, 2];
+     root_rank = 3;
+     root_size = [16, 16, 16];
+
+   }
+
+   Method {
+      list = ["order_morton", "check", "grackle", "null"];
+
+      order_morton {
+          schedule {
+             list = [2, 4];
+             var = "cycle";
+          };
+      };
+
+      check {
+          dir = [ "Check-%02d", "cycle" ];
+          num_files = 2;
+          ordering = "order_morton";
+          include_ghosts = false; # the program encounters an error on restart
+                                  # when this is true
+          schedule {
+             list = [2, 4];
+             var = "cycle";
+          };
+      };
+
+   }
+
+   Output { list = []; }
