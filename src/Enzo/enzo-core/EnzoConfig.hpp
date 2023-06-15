@@ -262,13 +262,7 @@ public: // interface
       method_feedback_ejecta_mass(0.0),
       method_feedback_ejecta_metal_fraction(0.0),
       method_feedback_flavor(""),
-      method_feedback_ke_fraction(0.0),
-      method_feedback_radius(-1.0),
-      method_feedback_shift_cell_center(true),
-      method_feedback_stencil(3),
       method_feedback_supernova_energy(1.0),
-      method_feedback_time_first_sn(-1.0), // in Myr
-      method_feedback_use_ionization_feedback(false),
       /// EnzoMethodFeedbackSTARSS
       method_feedback_supernovae(true),
       method_feedback_unrestricted_sn(true),
@@ -770,13 +764,6 @@ public: // attributes
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
-  double                    method_feedback_ke_fraction;
-  double                    method_feedback_time_first_sn;
-  int                       method_feedback_stencil;
-  double                    method_feedback_radius;
-  bool                      method_feedback_shift_cell_center;
-  bool                      method_feedback_use_ionization_feedback;
-
   
   /// EnzoMethodFeedbackSTARSS
   

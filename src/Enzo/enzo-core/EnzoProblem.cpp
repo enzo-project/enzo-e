@@ -739,7 +739,7 @@ Method * EnzoProblem::create_method_
 
     // need a similar type swtich as in star maker
     if (enzo_config->method_feedback_flavor == "distributed"){
-      method = new EnzoMethodDistributedFeedback();
+      method = new EnzoMethodDistributedFeedback(p_accessor);
     } else if (enzo_config->method_feedback_flavor == "STARSS" ||
                enzo_config->method_feedback_flavor == "starss") {
       method = new EnzoMethodFeedbackSTARSS();

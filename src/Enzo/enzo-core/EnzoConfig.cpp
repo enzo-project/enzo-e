@@ -237,12 +237,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ejecta_mass(0.0),
   method_feedback_supernova_energy(1.0),
   method_feedback_ejecta_metal_fraction(0.0),
-  method_feedback_stencil(3),
-  method_feedback_radius(-1),
-  method_feedback_shift_cell_center(true),
-  method_feedback_ke_fraction(0.0),
-  method_feedback_use_ionization_feedback(false),
-  method_feedback_time_first_sn(-1), // in Myr
   // EnzoMethodFeedbackSTARSS,
   method_feedback_supernovae(true),
   method_feedback_unrestricted_sn(true),
@@ -629,12 +623,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_ejecta_mass;
   p | method_feedback_supernova_energy;
   p | method_feedback_ejecta_metal_fraction;
-  p | method_feedback_stencil;
-  p | method_feedback_radius;
-  p | method_feedback_shift_cell_center;
-  p | method_feedback_ke_fraction;
-  p | method_feedback_use_ionization_feedback;
-  p | method_feedback_time_first_sn;
 
   p | method_feedback_supernovae;
   p | method_feedback_unrestricted_sn;
@@ -1572,24 +1560,6 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
   method_feedback_ejecta_metal_fraction = p->value_float
     ("Method:feedback:ejecta_metal_fraction",0.1);
-
-  method_feedback_stencil = p->value_integer
-    ("Method:feedback:stencil",3);
-
-  method_feedback_radius = p->value_float
-    ("Method:feedback:radius",-1.0);
-
-  method_feedback_shift_cell_center = p->value_logical
-    ("Method:feedback:shift_cell_center", true);
-
-  method_feedback_ke_fraction = p->value_float
-    ("Method:feedback:ke_fraction", 0.0);
-
-  method_feedback_time_first_sn = p->value_float
-    ("Method:feedback:time_first_sn", -1.0);
-
-  method_feedback_use_ionization_feedback = p->value_logical
-    ("Method:feedback:use_ionization_feedback", false);
 
   // MethodFeedbackSTARSS parameters
   method_feedback_supernovae = p->value_logical

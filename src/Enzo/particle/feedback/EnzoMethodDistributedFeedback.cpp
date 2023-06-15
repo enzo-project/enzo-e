@@ -298,7 +298,7 @@ double s99_sn_metallicity(const double & t){
 //
 
 EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
-()
+(ParameterAccessor& p)
   : Method()
 {
   cello::particle_descr()->check_particle_attribute("star","mass");
@@ -336,24 +336,26 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 
 
   // Fraction of total energy to deposit as kinetic rather than thermal energy
-  kinetic_fraction_    = enzo_config->method_feedback_ke_fraction;
+  kinetic_fraction_    = p.value_float("ke_fraction", 0.0);;
 
   // Values related to CIC cell deposit. Stencil is the number of cells across
   // in the stencil. stencil_rad  is the number of cells off-from-center
+
   //
-  stencil_                   = enzo_config->method_feedback_stencil;
+  stencil_                   = p.value_integer("stencil",3);
   stencil_rad_               = ( (int) ((stencil_ - 1) / 2.0));
   number_of_feedback_cells_  = stencil_ * stencil_ * stencil_;
 
   // Flag to turn on / off particle kicking from boundaries
-  shift_cell_center_         = enzo_config->method_feedback_shift_cell_center;
+  shift_cell_center_         = p.value_logical("shift_cell_center", true);
 
   // Flag to turn on / off single-zone ionization routine
-  use_ionization_feedback_   = enzo_config->method_feedback_use_ionization_feedback;
+  use_ionization_feedback_   = p.value_logical("use_ionization_feedback",
+                                               false);
 
   // Time of first SN (input in Myr, stored in yr)
   //     Forces a fixed delay time for all SNe
-  time_first_sn_ = enzo_config->method_feedback_time_first_sn * 1.0E6;
+  time_first_sn_ = p.value_float("time_first_sn", -1.0) * 1.0E6;
 
 
 
@@ -749,7 +751,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 // -----
 
         this->inject_feedback(block, xpos, ypos, zpos,
-                              m_eject, (energy/1.0E51), enzo_config->method_feedback_ke_fraction,
+                              m_eject, (energy/1.0E51),
+                              this->kinetic_fraction_,
                               metal_fraction,
                               pvx[ipdv], pvy[ipdv], pvz[ipdv]);
         // remove mass - error checking on the std::max is handled above with warning
