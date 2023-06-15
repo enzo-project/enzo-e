@@ -16,7 +16,7 @@ class EnzoMethodFeedback : public Method {
 
 public:
 
-  EnzoMethodFeedback();
+  EnzoMethodFeedback(ParameterAccessor &p);
 
   /// Destructor
   virtual ~EnzoMethodFeedback() throw() {};

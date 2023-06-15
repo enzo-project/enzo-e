@@ -232,11 +232,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_reconstruct_conservative(0),
   method_hydro_reconstruct_positive(0),
   method_hydro_riemann_solver(""),
-  // EnzoMethodFeedback,
-  method_feedback_flavor(""),
-  method_feedback_ejecta_mass(0.0),
-  method_feedback_supernova_energy(1.0),
-  method_feedback_ejecta_metal_fraction(0.0),
   // EnzoMethodM1Closure
   method_m1_closure(false),
   method_m1_closure_N_groups(1), // # of frequency bins
@@ -610,11 +605,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_reconstruct_positive;
   p | method_hydro_riemann_solver;
 
-  p | method_feedback_flavor;
-  p | method_feedback_ejecta_mass;
-  p | method_feedback_supernova_energy;
-  p | method_feedback_ejecta_metal_fraction;
-
   p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
   p | method_star_maker_use_density_threshold;
@@ -777,7 +767,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_accretion_(p);
   read_method_background_acceleration_(p);
   read_method_check_(p);
-  read_method_feedback_(p);
   read_method_grackle_(p);
   read_method_gravity_(p);
   read_method_heat_(p);
@@ -1525,23 +1514,6 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     // on an Enzo-E parameter for turning RT on / off:
     //method_grackle_chemistry.set<int>("use_radiative_transfer", ENZO_E_PARAMETER_NAME);
   }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_feedback_(Parameters * p)
-{
-  method_feedback_flavor = p->value_string
-    ("Method:feedback:flavor","distributed");
-
-  method_feedback_ejecta_mass = p->value_float
-    ("Method:feedback:ejecta_mass",0.0);
-
-  method_feedback_supernova_energy = p->value_float
-    ("Method:feedback:supernova_energy",1.0);
-
-  method_feedback_ejecta_metal_fraction = p->value_float
-    ("Method:feedback:ejecta_metal_fraction",0.1);
 }
 
 //----------------------------------------------------------------------

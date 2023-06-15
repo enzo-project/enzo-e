@@ -258,11 +258,6 @@ public: // interface
       method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
-      /// EnzoMethodFeedback
-      method_feedback_ejecta_mass(0.0),
-      method_feedback_ejecta_metal_fraction(0.0),
-      method_feedback_flavor(""),
-      method_feedback_supernova_energy(1.0),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
 
@@ -446,7 +441,6 @@ protected: // methods
   void read_method_accretion_(Parameters *);
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
-  void read_method_feedback_(Parameters *);
   void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
@@ -748,13 +742,6 @@ public: // attributes
   bool                       method_hydro_reconstruct_conservative;
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
-
-  /// EnzoMethodFeedback
-
-  std::string               method_feedback_flavor;
-  double                    method_feedback_ejecta_mass;
-  double                    method_feedback_supernova_energy;
-  double                    method_feedback_ejecta_metal_fraction;
  
   /// EnzoMethodStarMaker
 

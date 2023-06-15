@@ -737,14 +737,18 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "feedback") {
 
-    // need a similar type swtich as in star maker
-    if (enzo_config->method_feedback_flavor == "distributed"){
+    // TODO: maybe make a factory method, EnzoMethodFeedback::from_parameters,
+    // that parses the feedback flavor and creates the appropriate subclass.
+
+    // we are reading Method:feedback:flavor
+    std::string flavor = p_accessor.value_string("flavor", "distributed");
+
+    if (flavor == "distributed"){
       method = new EnzoMethodDistributedFeedback(p_accessor);
-    } else if (enzo_config->method_feedback_flavor == "STARSS" ||
-               enzo_config->method_feedback_flavor == "starss") {
+    } else if (flavor == "STARSS" || flavor == "starss") {
       method = new EnzoMethodFeedbackSTARSS(p_accessor);
     }  else { // does not do anything
-      method = new EnzoMethodFeedback();
+      method = new EnzoMethodFeedback(p_accessor);
     }
 
   } else if (name == "m1_closure") {
