@@ -273,6 +273,7 @@ extern "C" {
 #include "enzo_EnzoMethodHydro.hpp"
 
 #include "enzo_EnzoMethodInference.hpp"
+#include "enzo_EnzoMethodFBNetDeposit.hpp"
 #include "enzo_EnzoMethodMergeSinks.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"

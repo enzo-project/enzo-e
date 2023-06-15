@@ -217,10 +217,8 @@ public: /// entry methods
   /// Exit EnzoMethodInference
   void p_method_infer_exit();
 
-  /// concatenate sphere lists and update blocks with inference results
-  void p_method_infer_update_mesh(CkReductionMsg * msg);
+  void p_method_fbnet_update_mesh(CkReductionMsg * msg); 
 
-  void p_method_infer_call_update( int il3[3] );
   /// reduction method for concatenating sphere lists
   CkReductionMsg * r_method_infer_concatenate_sphere_list(int n, CkReductionMsg ** msgs);
   //--------------------------------------------------

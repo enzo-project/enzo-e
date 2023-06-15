@@ -16,7 +16,7 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
         metal_yield_SNe_(0),
         metal_yield_HNe_(0),
         metal_yield_PISNe_(0)
-    {     CkPrintf("default constructor for EnzoObjectFeedbackSphere; metal_yields = (%1.2e, %1.2e, %1.2e)\n", metal_yield_SNe_, metal_yield_HNe_, metal_yield_PISNe_); };
+    { };
 
     /// Charm++ PUP::able declarations
     PUPable_decl(EnzoObjectFeedbackSphere);

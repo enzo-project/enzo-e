@@ -263,7 +263,7 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
   int gx,gy,gz;
   field.ghost_depth(0,&gx, &gy, &gz);
-   
+
   double xm,ym,zm;
   double xp,yp,zp;
   double hx,hy,hz;
@@ -277,71 +277,66 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   enzo_float * PopIII_HNe_metal_density = (enzo_float *) field.values("PopIII_HNe_metal_density");
   enzo_float * PopIII_PISNe_metal_density = (enzo_float *) field.values("PopIII_PISNe_metal_density");
 
-  //CkPrintf("FBNet::update_mesh Nspheres = %d\n", (*sphere_list).size());
-  //for (auto sphere : *sphere_list) {
-    double metal_mass_tot = sphere.metal_mass_SNe() + sphere.metal_mass_HNe() + sphere.metal_mass_PISNe();
-    CkPrintf("FBNet::update_mesh Metal mass = %1.2e \n", metal_mass_tot);
-    if (metal_mass_tot == 0.0) { // do nothing if no yield
-      return;//continue;
-    }
+  double metal_mass_tot = sphere.metal_mass_SNe() + sphere.metal_mass_HNe() + sphere.metal_mass_PISNe();
+    //CkPrintf("FBNet::update_mesh Metal mass = %1.2e \n", metal_mass_tot);
+  if (metal_mass_tot == 0.0) { // do nothing if no yield
+    return;//continue;
+  }
 
-    double x = sphere.pos(0), y = sphere.pos(1), z = sphere.pos(2);
+  double x = sphere.pos(0), y = sphere.pos(1), z = sphere.pos(2);
 
-    // get 3D grid index for sphere center - account for ghost zones!!
-    double ix = (int) std::floor((x - xm) / hx) + gx;
-    double iy = (int) std::floor((y - ym) / hy) + gy;
-    double iz = (int) std::floor((z - zm) / hz) + gz;
+  // get 3D grid index for sphere center - account for ghost zones!!
+  int ix = (int) std::floor((x - xm) / hx) + gx;
+  int iy = (int) std::floor((y - ym) / hy) + gy;
+  int iz = (int) std::floor((z - zm) / hz) + gz;
 
-    double r_code = sphere.r() * enzo_constants::kpc_cm / lunit;
-    double inv_vol = 3 / (4*cello::pi * r_code*r_code*r_code);
+  double r_code = sphere.r();
+  double inv_vol = 3 / (4*cello::pi * r_code*r_code*r_code);
 
-    // compute average density for deposited metals
-    double drho_SNe   = sphere.metal_mass_SNe()  *enzo_constants::mass_solar/munit * inv_vol;
-    double drho_HNe   = sphere.metal_mass_HNe()  *enzo_constants::mass_solar/munit * inv_vol;
-    double drho_PISNe = sphere.metal_mass_PISNe()*enzo_constants::mass_solar/munit * inv_vol;
-    double drho = drho_SNe + drho_HNe + drho_PISNe;
+  // compute average density for deposited metals
+  double drho_SNe   = sphere.metal_mass_SNe()  * inv_vol;
+  double drho_HNe   = sphere.metal_mass_HNe()  * inv_vol;
+  double drho_PISNe = sphere.metal_mass_PISNe()* inv_vol;
+  double drho = drho_SNe + drho_HNe + drho_PISNe;
 
-    CkPrintf("FBNet::update_mesh -- rho = %1.2e, rho_SNe = %1.2e, rho_HNe = %1.2e, rho_PISNe = %1.2e\n", drho, drho_SNe, drho_HNe, drho_PISNe);
+  //CkPrintf("FBNet::update_mesh -- rho = %1.2e, rho_SNe = %1.2e, rho_HNe = %1.2e, rho_PISNe = %1.2e\n", drho, drho_SNe, drho_HNe, drho_PISNe);
 
-    int r_hx = std::ceil(r_code/hx), r_hy = std::ceil(r_code/hy), r_hz = std::ceil(r_code/hz);
-    // CiC deposit with cloud radius of r_code
-    // Feedback spheres may intersect neighboring blocks in such a way that
-    // the volume of the sphere will extend past the available ghost zones.
-    // Account for this by looping through ALL identified feedback spheres in the domain,
-    // and depositing portions of external spheres that intersect the block.
-    // Since spheres have uniform density, this is as simple as adding a check in the 
-    // CiC routine that the current cell being indexed actually lies within the block.
-    double wx, wy, wz;
-    for (int iz_ = iz-r_hz; iz_ <= iz+r_hz; iz_++) {
+  int r_hx = std::ceil(r_code/hx), r_hy = std::ceil(r_code/hy), r_hz = std::ceil(r_code/hz);
+  // CiC deposit with cloud radius of r_code
+  // Feedback spheres may intersect neighboring blocks in such a way that
+  // the volume of the sphere will extend past the available ghost zones.
+  // Account for this by looping through ALL identified feedback spheres in the domain,
+  // and depositing portions of external spheres that intersect the block.
+  // Since spheres have uniform density, this is as simple as adding a check in the 
+  // CiC routine that the current cell being indexed actually lies within the block.
 
-      double zcell = zm + (iz_+0.5 - gz)*hz;
-      wz = ((gz <= iz_) || (iz_ < mz-gz)) ? 
-              std::max(1.0 - std::abs(z - zcell) / r_code, 0.0) : 0.0;
+  for (int iz_ = iz-r_hz; iz_ <= iz+r_hz; iz_++) {
+    // if out of bounds, go to next iteration
+    if ((iz_ < 0) || (mz < iz_)) continue;
 
-      for (int iy_ = iy-r_hy; iy_ <= iy+r_hy; iy_++) {
+    for (int iy_ = iy-r_hy; iy_ <= iy+r_hy; iy_++) {
+      if ((iy_ < 0) || (my < iy_)) continue;
 
-        double ycell = ym + (iy_+0.5 - gy)*hy;
-        wy = ((gy <= iy_) || (iy_ < my-gy)) ? 
-                std::max(1.0 - std::abs(y - ycell) / r_code, 0.0) : 0.0;
+      for (int ix_ = ix-r_hx; ix_ <= ix+r_hx; ix_++) {
+        if ((ix_ < 0) || (mx < ix_)) continue;
 
-        for (int ix_ = ix-r_hx; ix_ <= ix+r_hx; ix_++) {
+        int i_ = INDEX(ix_,iy_,iz_,mx,my);
 
-          double xcell = xm + (ix_+0.5 - gx)*hx;
-          wx = ((gx <= ix_) || (ix_ < mx-gx)) ? 
-                  std::max(1.0 - std::abs(x - xcell) / r_code, 0.0) : 0.0;
-
-          int i_ = INDEX(ix_,iy_,iz_,mx,my);
-          //CkPrintf("(%d,%d,%d)\n", ix_,iy_,iz_);
-          double w = wx*wy*wz;
-          metal_density[i_]              += w*drho;
-          PopIII_metal_density[i_]       += w*drho;
-          PopIII_SNe_metal_density[i_]   += w*drho_SNe;
-          PopIII_HNe_metal_density[i_]   += w*drho_HNe;
-          PopIII_PISNe_metal_density[i_] += w*drho_PISNe;
+        // if cell is within the deposition radius
+        bool contained = ( (iz-iz_)*(iz-iz_) + (iy-iy_)*(iy-iy_) + (ix-ix_)*(ix-ix_) <= r_hx*r_hx );
+        metal_density[i_]              += contained*drho;
+        PopIII_metal_density[i_]       += contained*drho;
+        PopIII_SNe_metal_density[i_]   += contained*drho_SNe;
+        PopIII_HNe_metal_density[i_]   += contained*drho_HNe;
+        PopIII_PISNe_metal_density[i_] += contained*drho_PISNe;
+  
+        if (contained) {    
+          CkPrintf("FBNet::update_mesh -- metal mass = %1.2e Msun; radius = %1.2e kpc\n", metal_mass_tot * munit / enzo_constants::mass_solar, r_code * lunit/enzo_constants::kpc_cm);
         }
+
+
       }
     }
-      
-    CkPrintf("EnzoMethodInference::update -- FB sphere pos = (%.2f, %.2f, %.2f);  radius: %1.2e; yields = (%1.2e, %1.2e, %1.2e)\n", sphere.pos(0), sphere.pos(1), sphere.pos(2), sphere.r(), sphere.metal_mass_SNe(), sphere.metal_mass_HNe(), sphere.metal_mass_PISNe() );    
-   // }
+  }
+
 }
