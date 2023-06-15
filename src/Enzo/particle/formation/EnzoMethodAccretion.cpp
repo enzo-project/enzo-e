@@ -231,12 +231,15 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 
     // Check if merging radius is at least twice that of the accretion
     // radius
+    enzo_float merging_radius_cells = static_cast<const EnzoMethodMergeSinks*>
+      (enzo::problem()->method("merge_sinks")
+       )->merging_radius_cells();
+
     ASSERT("EnzoMethodAccretion",
 	   "Merging radius (Method:merge_sinks:merging_radius_cells "
 	   "must be at least twice the accretion radius "
 	   "(Method:accretion_compute:accretion_radius).",
-	   enzo::config()->method_merge_sinks_merging_radius_cells >=
-	   2.0 * accretion_radius_cells_);
+	   merging_radius_cells >= 2.0 * accretion_radius_cells_);
 
     // Check if either PPM or VL+CT method is being used.
     ASSERT("EnzoMethodAccretion",

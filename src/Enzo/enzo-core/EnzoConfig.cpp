@@ -309,8 +309,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_full_dt_reconstruct_method(""),
   method_vlct_theta_limiter(0.0),
   method_vlct_mhd_choice(""),
-  /// EnzoMethodMergeSinks
-  method_merge_sinks_merging_radius_cells(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -675,8 +673,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_theta_limiter;
   p | method_vlct_mhd_choice;
 
-  p | method_merge_sinks_merging_radius_cells;
-
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
   p | prolong_enzo_use_linear;
@@ -759,7 +755,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_grackle_(p);
   read_method_gravity_(p);
   read_method_heat_(p);
-  read_method_merge_sinks_(p);
   read_method_ppm_(p);
   read_method_m1_closure_(p);
   read_method_star_maker_(p);
@@ -1801,14 +1796,6 @@ void EnzoConfig::read_method_heat_(Parameters * p)
 {
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_merge_sinks_(Parameters * p)
-{
-  method_merge_sinks_merging_radius_cells = p->value_float
-    ("Method:merge_sinks:merging_radius_cells",8.0);
 }
 
 //----------------------------------------------------------------------

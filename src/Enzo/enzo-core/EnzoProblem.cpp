@@ -766,8 +766,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "merge_sinks") {
 
-    method = new EnzoMethodMergeSinks
-      (enzo_config->method_merge_sinks_merging_radius_cells);
+    method = new EnzoMethodMergeSinks(p_accessor);
 
   } else if (name == "accretion") {
 

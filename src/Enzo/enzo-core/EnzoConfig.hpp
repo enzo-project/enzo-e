@@ -351,8 +351,6 @@ public: // interface
       method_vlct_full_dt_reconstruct_method(""),
       method_vlct_theta_limiter(0.0),
       method_vlct_mhd_choice(""),
-      // EnzoMethodMergeSinks
-      method_merge_sinks_merging_radius_cells(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -438,7 +436,6 @@ protected: // methods
   void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
-  void read_method_merge_sinks_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_star_maker_(Parameters *);
   void read_method_m1_closure_(Parameters *);
@@ -828,9 +825,6 @@ public: // attributes
   std::string                method_vlct_full_dt_reconstruct_method;
   double                     method_vlct_theta_limiter;
   std::string                method_vlct_mhd_choice;
-
-  /// EnzoMethodMergeSinks
-  double                     method_merge_sinks_merging_radius_cells;
 
 
   std::string                prolong_enzo_type;

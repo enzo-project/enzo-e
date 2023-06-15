@@ -20,9 +20,9 @@
 //#define DEBUG_MERGESINKS
 
 
-EnzoMethodMergeSinks::EnzoMethodMergeSinks(double merging_radius_cells)
+EnzoMethodMergeSinks::EnzoMethodMergeSinks(ParameterAccessor &p)
   : Method(),
-    merging_radius_cells_(merging_radius_cells)
+    merging_radius_cells_(p.value_float("merging_radius_cells",8.0))
 {
   // This method requires three dimensions.
   ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
