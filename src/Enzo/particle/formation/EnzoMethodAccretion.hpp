@@ -24,9 +24,7 @@ class EnzoMethodAccretion : public Method {
 public:
 
   // Constructor
-  EnzoMethodAccretion(double accretion_radius_cells,
-		      double physical_density_threshold_cgs,
-		      double max_mass_fraction);
+  EnzoMethodAccretion(ParameterAccessor &p);
 
   /// Destructor
   virtual ~EnzoMethodAccretion() throw() {};

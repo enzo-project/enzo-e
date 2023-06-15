@@ -16,9 +16,7 @@ class EnzoMethodBondiHoyleAccretion : public EnzoMethodAccretion {
 public:
   
   // Constructor
-  EnzoMethodBondiHoyleAccretion(double accretion_radius_cells,
-				double density_threshold,
-				double max_mass_fraction);
+  EnzoMethodBondiHoyleAccretion(ParameterAccessor &p);
 
   // Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodBondiHoyleAccretion);

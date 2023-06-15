@@ -311,11 +311,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_mhd_choice(""),
   /// EnzoMethodMergeSinks
   method_merge_sinks_merging_radius_cells(0.0),
-  /// EnzoMethodAccretion
-  method_accretion_accretion_radius_cells(0.0),
-  method_accretion_flavor(""),
-  method_accretion_physical_density_threshold_cgs(0.0),
-  method_accretion_max_mass_fraction(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -682,11 +677,6 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_merge_sinks_merging_radius_cells;
 
-  p | method_accretion_accretion_radius_cells;
-  p | method_accretion_flavor;
-  p | method_accretion_physical_density_threshold_cgs;
-  p | method_accretion_max_mass_fraction;
-
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
   p | prolong_enzo_use_linear;
@@ -764,7 +754,6 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Method [sorted]
 
-  read_method_accretion_(p);
   read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_grackle_(p);
@@ -1820,21 +1809,6 @@ void EnzoConfig::read_method_merge_sinks_(Parameters * p)
 {
   method_merge_sinks_merging_radius_cells = p->value_float
     ("Method:merge_sinks:merging_radius_cells",8.0);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_accretion_(Parameters * p)
-{
-  method_accretion_accretion_radius_cells = p->value_float
-    ("Method:accretion:accretion_radius_cells",4.0);
-  method_accretion_flavor = p->value_string
-    ("Method:accretion:flavor","");
-  method_accretion_physical_density_threshold_cgs = p->value_float
-    ("Method:accretion:physical_density_threshold_cgs",1.0e-24);
-  method_accretion_max_mass_fraction = p->value_float
-    ("Method:accretion:max_mass_fraction",0.25);
-
 }
 
 //----------------------------------------------------------------------

@@ -353,11 +353,6 @@ public: // interface
       method_vlct_mhd_choice(""),
       // EnzoMethodMergeSinks
       method_merge_sinks_merging_radius_cells(0.0),
-      // EnzoMethodAccretion
-      method_accretion_accretion_radius_cells(0.0),
-      method_accretion_flavor(""),
-      method_accretion_physical_density_threshold_cgs(0.0),
-      method_accretion_max_mass_fraction(0.0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -438,7 +433,6 @@ protected: // methods
   //--------------------
   // read_method [sorted]
   //--------------------
-  void read_method_accretion_(Parameters *);
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
   void read_method_grackle_(Parameters *);
@@ -838,12 +832,7 @@ public: // attributes
   /// EnzoMethodMergeSinks
   double                     method_merge_sinks_merging_radius_cells;
 
-  /// EnzoMethodAccretion
-  double                     method_accretion_accretion_radius_cells;
-  std::string                method_accretion_flavor;
-  double                     method_accretion_physical_density_threshold_cgs;
-  double                     method_accretion_max_mass_fraction;
-  
+
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
   bool                       prolong_enzo_use_linear;

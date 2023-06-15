@@ -771,39 +771,25 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "accretion") {
 
-    if (enzo_config->method_accretion_flavor == "threshold") {
-      method = new EnzoMethodThresholdAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
-    } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
-      method = new EnzoMethodBondiHoyleAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
-    } else if (enzo_config->method_accretion_flavor == "flux") {
-      method = new EnzoMethodFluxAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
-    } else if (enzo_config->method_accretion_flavor == "dummy"){
-      method = new EnzoMethodAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
+    // TODO: maybe make a factory method, EnzoMethodAccretion::from_parameters,
+    // that parses the feedback flavor and creates the appropriate subclass.
+
+    // we are reading Method:accretion:flavor
+    std::string flavor = p_accessor.value_string("flavor", "flavor");
+
+    if (flavor == "threshold") {
+      method = new EnzoMethodThresholdAccretion(p_accessor);
+    } else if (flavor == "bondi_hoyle") {
+      method = new EnzoMethodBondiHoyleAccretion(p_accessor);
+    } else if (flavor == "flux") {
+      method = new EnzoMethodFluxAccretion(p_accessor);
+    } else if (flavor == "dummy"){
+      method = new EnzoMethodAccretion(p_accessor);
     } else {
       ERROR1("EnzoProblem::create_method_",
              "\"accretion\" method has flavor \"%s\", which is not one of the possible options: "
 	     "\"threshold\", \"bondi_hoyle\", \"flux\", or \"dummy\"",
-	     enzo_config->method_accretion_flavor.c_str());
+	     flavor.c_str());
     }
   } else if (name == "sink_maker") {
 
