@@ -21,7 +21,7 @@ class EnzoMethodFeedbackSTARSS : public Method {
 
 public:
 
-  EnzoMethodFeedbackSTARSS();
+  EnzoMethodFeedbackSTARSS(ParameterAccessor &p);
 
   /// Destructor
   virtual ~EnzoMethodFeedbackSTARSS() throw() {};

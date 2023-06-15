@@ -742,7 +742,7 @@ Method * EnzoProblem::create_method_
       method = new EnzoMethodDistributedFeedback(p_accessor);
     } else if (enzo_config->method_feedback_flavor == "STARSS" ||
                enzo_config->method_feedback_flavor == "starss") {
-      method = new EnzoMethodFeedbackSTARSS();
+      method = new EnzoMethodFeedbackSTARSS(p_accessor);
     }  else { // does not do anything
       method = new EnzoMethodFeedback();
     }

@@ -41,7 +41,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
     *nSNII = 0;
     *nSNIA = 0;
     double RII=0, RIA=0, PII=0, PIA=0, random = 0;
-    if (enzo_config->method_feedback_supernovae && NEvents < 0)
+    if (this->supernovae_ && NEvents < 0)
     {
         /* age-dependent rates */
         if (age_Myr < 3.401)
@@ -98,7 +98,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
 
             if (PIA > 1.0)
             {
-                if (enzo_config->method_feedback_unrestricted_sn) {
+                if (this->unrestricted_sn_) {
                     int round = int(PIA);
                     *nSNIA = round; // number of Type Ia SNe that will definitely go off
                     PIA -= round; // probability for setting off one more supernova
@@ -109,7 +109,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
                 }
             }
             
-            if (!enzo_config->method_feedback_unrestricted_sn && *nSNII > 0) {
+            if (!this->unrestricted_sn_ && *nSNII > 0) {
                 // for unrestricted_sn = false, only set off a Type IA supernova
                 // if nSNII == 0
                 *nSNIA = 0;
@@ -240,7 +240,7 @@ extern "C" void FORTRAN_NAME(cic_deposit)
 // =============================================================================
 
 EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
-()
+(ParameterAccessor &p)
   : Method()
   , ir_feedback_(-1)
 {
@@ -272,17 +272,19 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   
   sf_minimum_level_ = enzo_config->method_star_maker_min_level;
 
+  // previously a parameter was parsed called "Method:feedback:min_level",
+  // but that never got used!
 
-  supernovae_              = enzo_config->method_feedback_supernovae;
-  unrestricted_sn_         = enzo_config->method_feedback_unrestricted_sn;
-  stellar_winds_           = enzo_config->method_feedback_stellar_winds;
-  radiation_               = enzo_config->method_feedback_radiation;
-  analytic_SNR_shell_mass_ = enzo_config->method_feedback_analytic_SNR_shell_mass;
-  fade_SNR_                = enzo_config->method_feedback_fade_SNR;
+  supernovae_              = p.value_logical("supernovae",true);
+  unrestricted_sn_         = p.value_logical("unrestricted_sn",true);
+  stellar_winds_           = p.value_logical("stellar_winds",true);
+  radiation_               = p.value_logical("radiation",true);
+  analytic_SNR_shell_mass_ = p.value_logical("analytic_SNR_shell_mass",true);
+  fade_SNR_                = p.value_logical("fade_SNR",true);
 
   // initialize NEvents parameter (mainly for testing). Sets off 'NEvents'
   // supernovae, with at most one supernova per star particle per cycle.
-  NEvents                  = enzo_config->method_feedback_NEvents;
+  NEvents                  = p.value_integer("NEvents",-1);
 
   // Initialize temporary fields
   i_d_dep  = cello::field_descr()->insert_temporary();

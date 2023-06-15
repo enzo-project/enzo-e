@@ -237,15 +237,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ejecta_mass(0.0),
   method_feedback_supernova_energy(1.0),
   method_feedback_ejecta_metal_fraction(0.0),
-  // EnzoMethodFeedbackSTARSS,
-  method_feedback_supernovae(true),
-  method_feedback_unrestricted_sn(true),
-  method_feedback_stellar_winds(true),
-  method_feedback_min_level(0),
-  method_feedback_analytic_SNR_shell_mass(true),
-  method_feedback_fade_SNR(true),
-  method_feedback_NEvents(-1),
-  method_feedback_radiation(true),
   // EnzoMethodM1Closure
   method_m1_closure(false),
   method_m1_closure_N_groups(1), // # of frequency bins
@@ -623,15 +614,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_ejecta_mass;
   p | method_feedback_supernova_energy;
   p | method_feedback_ejecta_metal_fraction;
-
-  p | method_feedback_supernovae;
-  p | method_feedback_unrestricted_sn;
-  p | method_feedback_stellar_winds;
-  p | method_feedback_min_level;
-  p | method_feedback_analytic_SNR_shell_mass;
-  p | method_feedback_fade_SNR;
-  p | method_feedback_NEvents;
-  p | method_feedback_radiation;
 
   p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
@@ -1560,31 +1542,6 @@ void EnzoConfig::read_method_feedback_(Parameters * p)
 
   method_feedback_ejecta_metal_fraction = p->value_float
     ("Method:feedback:ejecta_metal_fraction",0.1);
-
-  // MethodFeedbackSTARSS parameters
-  method_feedback_supernovae = p->value_logical
-    ("Method:feedback:supernovae",true);
-
-  method_feedback_unrestricted_sn = p->value_logical
-    ("Method:feedback:unrestricted_sn",true);
-
-  method_feedback_stellar_winds = p->value_logical
-    ("Method:feedback:stellar_winds",true);
-
-  method_feedback_min_level = p->value_integer
-    ("Method:feedback:min_level",0);
-
-  method_feedback_analytic_SNR_shell_mass = p->value_logical
-    ("Method:feedback:analytic_SNR_shell_mass",true);
-
-  method_feedback_fade_SNR = p->value_logical
-    ("Method:feedback:fade_SNR",true);
-
-  method_feedback_NEvents = p->value_integer
-    ("Method:feedback:NEvents",-1);
-
-  method_feedback_radiation = p->value_logical
-    ("Method:feedback:radiation", true);
 }
 
 //----------------------------------------------------------------------

@@ -263,15 +263,6 @@ public: // interface
       method_feedback_ejecta_metal_fraction(0.0),
       method_feedback_flavor(""),
       method_feedback_supernova_energy(1.0),
-      /// EnzoMethodFeedbackSTARSS
-      method_feedback_supernovae(true),
-      method_feedback_unrestricted_sn(true),
-      method_feedback_stellar_winds(true),
-      method_feedback_radiation(true),
-      method_feedback_min_level(0),
-      method_feedback_analytic_SNR_shell_mass(true),
-      method_feedback_fade_SNR(true),
-      method_feedback_NEvents(-1),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
 
@@ -764,17 +755,6 @@ public: // attributes
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
-  
-  /// EnzoMethodFeedbackSTARSS
-  
-  bool                       method_feedback_supernovae;
-  bool                       method_feedback_unrestricted_sn;
-  bool                       method_feedback_stellar_winds;
-  bool                       method_feedback_radiation;
-  int                        method_feedback_min_level;
-  bool                       method_feedback_analytic_SNR_shell_mass;
-  bool                       method_feedback_fade_SNR;
-  int                        method_feedback_NEvents;
  
   /// EnzoMethodStarMaker
 
