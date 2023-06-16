@@ -18,11 +18,11 @@
 #ifdef TRACE_METHOD_CHECK
 #   undef TRACE_METHOD_CHECK
 #   define TRACE_CHECK(MSG)                                           \
-  CkPrintf ("%d TRACE_CHECK %s\n",CkMyPe(),std::string(MSG).c_str()); \
+  CkPrintf ("%d TRACE_CHECK %s msg_check %lld\n",CkMyPe(),std::string(MSG).c_str(),EnzoMsgCheck::counter[cello::index_static()]); \
   fflush(stdout);
 #   define TRACE_CHECK_BLOCK(MSG,BLOCK)                               \
-  CkPrintf ("%d TRACE_CHECK %s %s\n",CkMyPe(),BLOCK->name().c_str(),  \
-            std::string(MSG).c_str());                          \
+  CkPrintf ("%d TRACE_CHECK %s %s msg_check %lld\n",CkMyPe(),BLOCK->name().c_str(),  \
+            std::string(MSG).c_str(),EnzoMsgCheck::counter[cello::index_static()]);                                 \
   fflush(stdout);
 #else
 #   define TRACE_CHECK(MSG)  /* ... */
@@ -182,6 +182,8 @@ void EnzoBlock::p_check_write_first
 
   if (is_first) {
     proxy_io_enzo_writer[index_file].p_write (msg_check);
+  } else {
+    delete msg_check;
   }
 }
 
@@ -246,6 +248,8 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
 
   // Write Block to HDF5
   file_write_block_(msg_check);
+
+  delete msg_check;
 
   if (is_last) {
     // close block list
@@ -491,7 +495,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   file_->group_write_meta
     (msg_check->adapt_buffer_,"adapt_buffer",type_int,ADAPT_BUFFER_SIZE);
 
-  // // Create new data object to hold EnzoMsgCheck/DataMsg fields and particles
+  // Create new data object to hold EnzoMsgCheck/DataMsg fields and particles
 
   Data * data;
   bool data_allocated (true);

@@ -47,12 +47,10 @@ EnzoMsgCheck::EnzoMsgCheck()
 EnzoMsgCheck::~EnzoMsgCheck()
 {
   --counter[cello::index_static()];
-  // if (!is_local_) {
   delete data_msg_;
   data_msg_ = nullptr;
   delete io_block_;
   io_block_ = nullptr;
-  // }
   CkFreeMsg (buffer_);
   buffer_=nullptr;
 }

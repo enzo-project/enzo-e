@@ -348,7 +348,7 @@ public: /// entry methods
 
 protected: // methods
 
-  /// Create EnzoMsgCheck, returning file file index
+  /// Create EnzoMsgCheck, returning file index
   int create_msg_check_
   ( EnzoMsgCheck ** msg_check, int num_files, std::string ordering,
     std::string name_dir = "", bool * is_first = nullptr);
