@@ -45,8 +45,6 @@ public: // interface
 
 protected: // methods
 
-  void call_compute_done( EnzoBlock * block ) throw();
-
 protected: // attributes
 
 };

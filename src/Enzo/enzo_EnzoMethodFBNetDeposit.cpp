@@ -120,7 +120,7 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
         int ipdm_SNe = ip*dm_SNe;
         int ipdm_HNe = ip*dm_HNe;
         int ipdm_PISNe = ip*dm_PISNe;
-        int ipdt = it*dt;
+        int ipdt = ip*dt;
 
 
         CkPrintf("EnzoMethodFBDeposit:: creation_time = %f; block time = %f; block_cycle = %d\n", pform[ipdt], block->time(), block->cycle());
@@ -152,7 +152,6 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
   int n = 0;
   SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_, 1);
 
-  //CkPrintf("Concatenating spheres!\n");
   enzo_block->contribute(n, sphere_, CkReduction::set, callback);
 }
 
@@ -163,9 +162,7 @@ void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg)
 
   // put spheres down on the mesh (if inference_method == "starnet")
   if (this->is_leaf()) {
-    //CkPrintf("EnzoBlock::p_method_fbnet_update_mesh() global reduction successful!\n");
     CkReduction::setElement *current = (CkReduction::setElement*) msg->getData();
-    //CkPrintf("EnzoBlock::p_method_fbnet_update_mesh() setElement datasize = %d\n", current->dataSize);
     int i=0;
     while(current != NULL) {
       EnzoObjectFeedbackSphere * sphere = (EnzoObjectFeedbackSphere *) &current->data;

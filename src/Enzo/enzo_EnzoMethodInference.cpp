@@ -1045,7 +1045,6 @@ void EnzoLevelArray::apply_inference()
 
           velocity_divergence[i] = divVx + divVy + divVz;
 
-     //     metallicity[i] = metal_density[i] / density[i];
         } // ix
       } // iy
     } // iz
@@ -1084,7 +1083,6 @@ void EnzoLevelArray::apply_inference()
     // i_f_ = iterator for fields going into model
     int i_f_ = 0; 
     for (int i_f=0; i_f < num_fields_; i_f++) {
-      //CkPrintf("field %d\n", i_f);
 
       enzo_float * array;
       if (i_f == 2) {
@@ -1442,6 +1440,7 @@ void EnzoMethodInference::spawn_remnant_particle ( Block * block,
   pvy[io] = vy;
   pvz[io] = vz;
 
+  CkPrintf("Spawning remnant particle!!! creation_time = %f \n", block->time());
   pform[io] = block->time();
 }
 
