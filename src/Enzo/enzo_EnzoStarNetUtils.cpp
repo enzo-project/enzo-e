@@ -271,6 +271,7 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   enzo_block->data()->upper(&xp,&yp,&zp);
   field.cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
 
+  enzo_float * density = (enzo_float *) field.values("density");
   enzo_float * metal_density = (enzo_float *) field.values("metal_density");
   enzo_float * PopIII_metal_density  = (enzo_float *) field.values("PopIII_metal_density");
   enzo_float * PopIII_SNe_metal_density = (enzo_float *) field.values("PopIII_SNe_metal_density");
@@ -278,9 +279,9 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   enzo_float * PopIII_PISNe_metal_density = (enzo_float *) field.values("PopIII_PISNe_metal_density");
 
   double metal_mass_tot = sphere.metal_mass_SNe() + sphere.metal_mass_HNe() + sphere.metal_mass_PISNe();
-    //CkPrintf("FBNet::update_mesh Metal mass = %1.2e \n", metal_mass_tot);
-  if (metal_mass_tot == 0.0) { // do nothing if no yield
-    return;//continue;
+  if (metal_mass_tot == 0.0) { 
+    // do nothing if no yield
+    return;
   }
 
   double x = sphere.pos(0), y = sphere.pos(1), z = sphere.pos(2);
@@ -324,15 +325,16 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
 
         // if cell is within the deposition radius
         bool contained = ( (iz-iz_)*(iz-iz_) + (iy-iy_)*(iy-iy_) + (ix-ix_)*(ix-ix_) <= r_hx*r_hx );
+        density[i_]                    += contained*drho;
         metal_density[i_]              += contained*drho;
         PopIII_metal_density[i_]       += contained*drho;
         PopIII_SNe_metal_density[i_]   += contained*drho_SNe;
         PopIII_HNe_metal_density[i_]   += contained*drho_HNe;
         PopIII_PISNe_metal_density[i_] += contained*drho_PISNe;
   
-        if (contained) {    
-          CkPrintf("FBNet::update_mesh -- metal mass = %1.2e Msun; radius = %1.2e kpc\n", metal_mass_tot * munit / enzo_constants::mass_solar, r_code * lunit/enzo_constants::kpc_cm);
-        }
+        //if (contained) {    
+        //  CkPrintf("FBNet::update_mesh -- metal density = %1.2e; radius = %1.2e kpc\n", drho, r_code * lunit/enzo_constants::kpc_cm);
+        //}
 
 
       }

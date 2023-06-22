@@ -95,6 +95,9 @@ public: // functions
   void p_restart_next_level();
   void p_restart_level_created();
 
+  void method_fbnet_clear_sphere_list()
+  { method_fbnet_sphere_list.clear(); }
+
 public: // virtual functions
 
   /// Initialize the Enzo Simulation
@@ -102,6 +105,10 @@ public: // virtual functions
 
   /// Return an EnzoFactory object, creating it if needed
   virtual const Factory * factory() const throw();
+
+public: // attributes
+
+  std::vector<EnzoObjectFeedbackSphere> method_fbnet_sphere_list;
 
 private: // functions
 

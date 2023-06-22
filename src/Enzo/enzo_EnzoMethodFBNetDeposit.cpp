@@ -14,7 +14,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodFBNetDeposit::EnzoMethodFBNetDeposit ()
-  : Method()
+  : Method(),
 {
   // Initialize default Refresh object
 
@@ -29,6 +29,10 @@ EnzoMethodFBNetDeposit::EnzoMethodFBNetDeposit ()
   refresh->add_field("PopIII_PISNe_metal_density");
 
   refresh->add_particle(cello::particle_descr()->type_index("popIIIremnant"));
+
+  // initialize sync counter
+  is_sync_block_ = cello::scalar_descr_sync()->new_value
+    ("method_fbnet_deposit_sync_block");
 }
 
 //----------------------------------------------------------------------
@@ -41,17 +45,27 @@ void EnzoMethodFBNetDeposit::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
+  p | is_sync_block_;
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
 {
+  // make sure all blocks on this PE finish before 
+  // going to next step
+  int nb = cello::num_blocks_process();
+  Sync * sync_block = psync_block_(block);
+
+  //sync_block->reset();
+  sync_block->set_stop(nb);
+
   EnzoBlock * enzo_block = enzo::block(block);
   
   double sphere_x = 0.0, sphere_y = 0.0, sphere_z = 0.0;
   double sphere_r = 0.0;
   double sphere_mSNe = 0.0, sphere_mHNe = 0.0, sphere_mPISNe = 0.0;
+  bool contribute_sphere = false;
   if (block->is_leaf()) {
 
     Field field = enzo_block->data()->field();
@@ -122,7 +136,6 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
         int ipdm_PISNe = ip*dm_PISNe;
         int ipdt = ip*dt;
 
-
         CkPrintf("EnzoMethodFBDeposit:: creation_time = %f; block time = %f; block_cycle = %d\n", pform[ipdt], block->time(), block->cycle());
         if (pform[ipdt] == block->time()) {
           sphere_x = px[ipdp]; 
@@ -131,28 +144,42 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
           sphere_r = pr[ipdp];
           sphere_mSNe = pmSNe[ipdm_SNe];
           sphere_mHNe = pmHNe[ipdm_HNe];
-          sphere_mPISNe = pmPISNe[ipdm_PISNe]; 
+          sphere_mPISNe = pmPISNe[ipdm_PISNe];
+          contribute_sphere = true; 
         }
       }
     }
 
   }
-
+/*
   CkCallback callback (CkIndex_EnzoBlock::p_method_fbnet_update_mesh(NULL),
                        enzo::block(block)->proxy_array());
 
   // note that StarNet will spawn at most one sphere per inference block
   // in a timestep
 
-  double center[3] = {sphere_x, sphere_y, sphere_z};
-
-  EnzoObjectFeedbackSphere sphere(center, sphere_r, sphere_mSNe, sphere_mHNe, sphere_mPISNe);
-  EnzoObjectFeedbackSphere sphere_[1] = {sphere};
-
   int n = 0;
   SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_, 1);
 
   enzo_block->contribute(n, sphere_, CkReduction::set, callback);
+*/
+  if (contribute_sphere) {
+    double center[3] = {sphere_x, sphere_y, sphere_z};
+
+    EnzoObjectFeedbackSphere sphere(center, sphere_r, sphere_mSNe, sphere_mHNe, sphere_mPISNe);
+
+    (enzo::simulation()->method_fbnet_sphere_list).push_back(sphere);
+  }
+  //sync_block->advance();
+  //while(! sync_block->is_done() ) {} // shitty barrier
+
+
+  if (sync_block->next()) {
+    CkPrintf("MethodFBNetDeposit::compute() -- all blocks synchronized! Nspheres = %d \n", (enzo::simulation()->method_fbnet_sphere_list).size());
+    // contribute over simulation objects
+    block->compute_done();
+  }
+
 }
 
 //------------------------------------
@@ -175,6 +202,13 @@ void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg)
   compute_done();
 }
 
+//-----------------------------------
+Sync * EnzoMethodFBNetDeposit::psync_block_(Block * block)
+{
+  Scalar<Sync> scalar(cello::scalar_descr_sync(),
+                      block->data()->scalar_data_sync());
+  return scalar.value(is_sync_block_);
+}
 //-----------------------------------
 
 double EnzoMethodFBNetDeposit::timestep( Block * block ) throw()

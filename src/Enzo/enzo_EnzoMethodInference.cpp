@@ -992,6 +992,11 @@ void EnzoLevelArray::apply_inference()
 
 // if inference_method == "starnet"
 // TUTORIAL: https://github.com/prabhuomkar/pytorch-cpp/blob/master/tutorials/basics/pytorch_basics/main.cpp
+    
+  double sphere_x=0.0, sphere_y=0.0, sphere_z=0.0;
+  double sphere_r=0.0;
+  double yield_SNe=0.0, yield_HNe=0.0, yield_PISNe=0.0;
+
   #ifdef CONFIG_USE_TORCH
     // StarFind:
     // ----------------------
@@ -1136,9 +1141,6 @@ void EnzoLevelArray::apply_inference()
 
     bool SF_confirmed = false; // flag for if S2 network identified star-forming regions
 
-    double sphere_x=0.0, sphere_y=0.0, sphere_z=0.0;
-    double sphere_r=0.0;
-    double yield_SNe=0.0, yield_HNe=0.0, yield_PISNe=0.0;
     if (star_in_block && enzo_config->method_inference_starnet_S2) {
 
       CkPrintf("EnzoMethodInference::Calling S2 inception U-net...\n");
