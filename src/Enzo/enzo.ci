@@ -195,6 +195,9 @@ module enzo {
     entry void p_restart_level_created();
     // enzo_level_array
     entry void p_set_level_array(CProxy_EnzoLevelArray proxy);
+
+   // FBNet
+   entry void p_fbnet_concatenate_sphere_lists();
   };
 
   //----------------------------------------------------------------------

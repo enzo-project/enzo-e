@@ -14,7 +14,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodFBNetDeposit::EnzoMethodFBNetDeposit ()
-  : Method(),
+  : Method()
 {
   // Initialize default Refresh object
 
@@ -30,9 +30,8 @@ EnzoMethodFBNetDeposit::EnzoMethodFBNetDeposit ()
 
   refresh->add_particle(cello::particle_descr()->type_index("popIIIremnant"));
 
-  // initialize sync counter
-  is_sync_block_ = cello::scalar_descr_sync()->new_value
-    ("method_fbnet_deposit_sync_block");
+  int nb = cello::num_blocks_process();
+  enzo::simulation()->set_sync_fbnet_count(nb);
 }
 
 //----------------------------------------------------------------------
@@ -45,7 +44,6 @@ void EnzoMethodFBNetDeposit::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
-  p | is_sync_block_;
 }
 
 //----------------------------------------------------------------------
@@ -54,11 +52,11 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
 {
   // make sure all blocks on this PE finish before 
   // going to next step
-  int nb = cello::num_blocks_process();
-  Sync * sync_block = psync_block_(block);
+  //int nb = cello::num_blocks_process();
+  //Sync * sync_block = psync_block_(block);
 
   //sync_block->reset();
-  sync_block->set_stop(nb);
+  //sync_block->set_stop(nb);
 
   EnzoBlock * enzo_block = enzo::block(block);
   
@@ -151,18 +149,8 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
     }
 
   }
-/*
-  CkCallback callback (CkIndex_EnzoBlock::p_method_fbnet_update_mesh(NULL),
-                       enzo::block(block)->proxy_array());
 
-  // note that StarNet will spawn at most one sphere per inference block
-  // in a timestep
 
-  int n = 0;
-  SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_, 1);
-
-  enzo_block->contribute(n, sphere_, CkReduction::set, callback);
-*/
   if (contribute_sphere) {
     double center[3] = {sphere_x, sphere_y, sphere_z};
 
@@ -170,45 +158,72 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
 
     (enzo::simulation()->method_fbnet_sphere_list).push_back(sphere);
   }
-  //sync_block->advance();
-  //while(! sync_block->is_done() ) {} // shitty barrier
 
+  enzo::simulation()->p_fbnet_concatenate_sphere_lists();
 
-  if (sync_block->next()) {
-    CkPrintf("MethodFBNetDeposit::compute() -- all blocks synchronized! Nspheres = %d \n", (enzo::simulation()->method_fbnet_sphere_list).size());
+}
+//------------------------------------
+
+void EnzoSimulation::p_fbnet_concatenate_sphere_lists()
+{
+  int nb = cello::num_blocks_process();
+  sync_fbnet_count_.set_stop(nb);
+
+  //CkPrintf("counter value = %d, stopping value = %d\n", sync_fbnet_count_.value(), sync_fbnet_count_.stop());
+  if (sync_fbnet_count_.next()) {
+    CkPrintf("EnzoSimulation::p_fbnet_concatenate_sphere_lists() -- all blocks synchronized! Nspheres on this object = %d \n", method_fbnet_sphere_list.size());
     // contribute over simulation objects
-    block->compute_done();
-  }
+    CkCallback callback (CkIndex_EnzoBlock::p_method_fbnet_update_mesh(NULL),
+                    enzo::block_array());
+    // note that StarNet will spawn at most one sphere per inference block
+    // in a timestep
 
+    int n = 0;
+    int nspheres = method_fbnet_sphere_list.size();
+
+    if (nspheres == 0) {
+      double center_dummy[3] = {0.0,0.0,0.0};
+      EnzoObjectFeedbackSphere dummy_sphere(center_dummy,0.0,0.0,0.0,0.0);
+      EnzoObjectFeedbackSphere sphere_arr[1] = {dummy_sphere};
+      SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_arr, 1);
+
+      contribute(n, sphere_arr, CkReduction::set, callback);
+    }
+    else {
+      EnzoObjectFeedbackSphere sphere_arr[nspheres];
+      for (int i=0; i<nspheres; i++) {
+        sphere_arr[i] = method_fbnet_sphere_list[i];
+      } 
+        SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_arr, 1);
+        contribute(n, sphere_arr, CkReduction::set, callback);
+    }
+
+    sync_fbnet_count_.reset();
+  } // if sync
 }
 
 //------------------------------------
 
 void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg) 
 {
-
   // put spheres down on the mesh (if inference_method == "starnet")
   if (this->is_leaf()) {
     CkReduction::setElement *current = (CkReduction::setElement*) msg->getData();
-    int i=0;
     while(current != NULL) {
       EnzoObjectFeedbackSphere * sphere = (EnzoObjectFeedbackSphere *) &current->data;
+
       FBNet::update_mesh(this, *sphere);
-      i += 1;
       current = current->next();
     }
   }
 
+  // TODO: Add another sync counter here?
+  // clear sphere list attached to simulation object
+  enzo::simulation()->method_fbnet_clear_sphere_list();
+
   compute_done();
 }
 
-//-----------------------------------
-Sync * EnzoMethodFBNetDeposit::psync_block_(Block * block)
-{
-  Scalar<Sync> scalar(cello::scalar_descr_sync(),
-                      block->data()->scalar_data_sync());
-  return scalar.value(is_sync_block_);
-}
 //-----------------------------------
 
 double EnzoMethodFBNetDeposit::timestep( Block * block ) throw()

@@ -43,16 +43,9 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) throw();
 
-private:
-  Sync * psync_block_(Block * block);
-
 protected: // methods
-  //Sync & sync_block_(Block * block)
-  //{ return *block->data()->scalar_sync().value(is_sync_block_); }
 
 protected: // attributes
-  /// Block counter index for synchronization
-  int is_sync_block_;
 
 };
 

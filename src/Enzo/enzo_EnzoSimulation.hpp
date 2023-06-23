@@ -80,6 +80,9 @@ public: // functions
   void set_sync_infer_done(int count)
   { sync_infer_done_.set_stop(count); }
 
+  void set_sync_fbnet_count(int count)
+  { sync_fbnet_count_.set_stop(count); }
+
   void p_io_reader_created();
 
   /// EnzoMethodInference
@@ -89,6 +92,9 @@ public: // functions
   void p_infer_array_created();
   /// Synchronize after inference has been applied
   void p_infer_done();
+
+  /// EnzoMethodFBNetDeposit
+  void p_fbnet_concatenate_sphere_lists();
 
   /// Read in and initialize the next refinement level from a checkpoint;
   /// or exit if done
@@ -134,6 +140,8 @@ private: // attributes
   int                      check_num_files_;
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;
+  /// Count total blocks on process before reduction in EnzoMethodFBNetDeposit
+  Sync                     sync_fbnet_count_;
 
   /// Balance Method synchronization
   Sync sync_method_balance_;
