@@ -96,8 +96,8 @@ public: // interface
   
   EnzoBlock ( process_type ip_source, MsgType msg_type );
   /// Initialize EnzoBlock using MsgRefine returned by creating process
-  virtual void p_set_msg_refine(MsgRefine * msg);
-  virtual void p_set_msg_check(EnzoMsgCheck * msg);
+  void set_msg_refine(MsgRefine * msg);
+  void set_msg_check(EnzoMsgCheck * msg);
 
 #else
   /// Initialize the EnzoBlock chare array
@@ -222,8 +222,8 @@ public: /// entry methods
   void p_restart_set_data(EnzoMsgCheck * );
 
   /// Refine to create the specified child in this block
-  void p_restart_refine (int ic3[3], int io_reader);
-  
+  void p_restart_refine (int ic3[3], int io_reader, int ip);
+
   /// Exit restart
   void p_restart_done();
 

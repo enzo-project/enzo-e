@@ -67,14 +67,9 @@ public: // interface
   //----------------------------------------------------------------------
 
 #ifdef BYPASS_CHARM_MEM_LEAK
-  /// Request by newly created Block to get its MsgRefine object
-  virtual void p_get_msg_refine(Index index);
-
-  /// Set MsgRefine * for a newly created Block
-  void set_msg_refine (Index index, MsgRefine *);
-
-  /// Return MsgRefine * for a newly created Block and remove from list
-  MsgRefine * get_msg_refine (Index index);
+  /// Create a new block on receiving process
+  virtual void p_refine_create_block (MsgRefine *);
+  void refine_create_block (MsgRefine *);
 #endif
 
   //----------------------------------------------------------------------
@@ -135,6 +130,8 @@ public: // interface
 
   void set_cycle(int cycle) throw()
   { cycle_ = cycle; }
+  void set_initial_cycle(int cycle) throw()
+  { cycle_initial_ = cycle; }
   void set_time(double time) throw()
   { time_ = time; }
   void set_dt(double dt) throw()
@@ -155,6 +152,10 @@ public: // interface
   /// Return the current cycle number
   int cycle() const throw() 
   { return cycle_; };
+
+  /// Return the initial cycle number
+  int initial_cycle() const throw() 
+  { return cycle_initial_; };
 
   /// Return the current time
   double time() const throw() 
@@ -204,7 +205,7 @@ public: // virtual functions
   /// stopping criteria
   virtual void update_state(int cycle, double time, double dt, double stop) ;
 
-  void p_update_state(MsgState *);
+  void p_initialize_state(MsgState *);
 
   /// initialize the Simulation given a parameter file
   virtual void initialize() throw();
@@ -488,6 +489,9 @@ protected: // attributes
 
   /// Cycle at last start of performance monitoring
   int cycle_watch_;
+
+  /// Initial cycle
+  int cycle_initial_;
 
   /// Current time
   double time_;

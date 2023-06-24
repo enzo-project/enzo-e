@@ -127,8 +127,8 @@ public: // interface
   void set_name_dir (std::string name_dir)
   { name_dir_ = name_dir; }
 
-  void set_io_block(IoBlock * io_block) { io_block_ = io_block; }
-  IoBlock * io_block() { return io_block_; }
+  void set_io_block(IoEnzoBlock * io_block) { io_block_ = io_block; }
+  IoEnzoBlock * io_block() { return io_block_; }
 
 public: // static methods
 
@@ -170,6 +170,9 @@ protected: // methods
     std::copy_n ( enzo_msg_check.adapt_buffer_, ADAPT_BUFFER_SIZE,
                   adapt_buffer_);
     index_file_  = enzo_msg_check.index_file_;
+
+    index_order_ = enzo_msg_check.index_order_;
+    count_order_ = enzo_msg_check.count_order_;
   }
 
 protected: // attributes
@@ -190,7 +193,7 @@ protected: // attributes
   char tag_[TAG_LEN+1];
 
   /// Data for the Block
-  IoBlock * io_block_;
+  IoEnzoBlock * io_block_;
 
   /// Block meta-data
   std::string block_name_;
@@ -221,6 +224,9 @@ protected: // attributes
   /// Index for io_reader for restart
   int index_file_;
 
+  /// index/count for load balancing
+  long long index_order_;
+  long long count_order_;
 };
 
 #endif /* CHARM_ENZO_MSG_CHECK_HPP */

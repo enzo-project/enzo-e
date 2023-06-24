@@ -335,6 +335,17 @@ public: // interface
   /// Return the currently-active Solver
   Solver * solver () throw();
 
+  /// Accessor functions for block ordering index and count 
+  void set_order (long long index, long long count)
+  {
+    index_order_ = index;
+    count_order_ = count;
+  }
+  void get_order (long long * index, long long * count) const
+  { *index = index_order_;
+    *count = count_order_;
+  }
+  
 protected: // methods
 
   Index neighbor_ (const int if3[3], Index * ind = 0) const;
@@ -1016,6 +1027,9 @@ protected: // attributes
   std::vector < Sync > refresh_sync_list_;
   std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
 
+  /// Index and total count used for ordering blocks, e.g. for dynamic load balancing
+  long long index_order_;
+  long long count_order_;
 };
 
 #endif /* COMM_BLOCK_HPP */

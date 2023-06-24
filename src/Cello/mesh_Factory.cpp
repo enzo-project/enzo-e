@@ -116,9 +116,9 @@ void Factory::create_block_array
 	   num_face_level, face_level, nullptr);
 
 	msg->set_data_msg(data_msg);
+
 #ifdef BYPASS_CHARM_MEM_LEAK
-	cello::simulation()->set_msg_refine (index,msg);
-	proxy_block[index].insert (process_type(CkMyPe()), MsgType::msg_refine);
+        cello::simulation()->p_refine_create_block (msg);
 #else
 	proxy_block[index].insert (msg);
 #endif
@@ -194,8 +194,7 @@ void Factory::create_subblock_array
 	  msg->set_data_msg(data_msg);
 
 #ifdef BYPASS_CHARM_MEM_LEAK
-          cello::simulation()->set_msg_refine (index,msg);
-          block_array[index].insert (process_type(CkMyPe()),MsgType::msg_refine);
+          cello::simulation()->p_refine_create_block (msg);
 #else
           block_array[index].insert (msg);
 #endif
@@ -223,7 +222,8 @@ void Factory::create_block
  int * face_level,
  Adapt * adapt,
  Simulation * simulation,
- int io_reader
+ int io_reader, 
+ int ip
  ) const throw()
 {
 
@@ -251,11 +251,12 @@ void Factory::create_block
 
   msg->set_data_msg (data_msg);
 
+  if (ip == -1) ip = CkMyPe();
+
 #ifdef BYPASS_CHARM_MEM_LEAK
-  cello::simulation()->set_msg_refine (index,msg);
-  block_array[index].insert (process_type(CkMyPe()),MsgType::msg_refine);
+  proxy_simulation[ip].p_refine_create_block (msg);
 #else
-  block_array[index].insert (msg);
+  block_array[index].insert (msg,ip);
 #endif
 }
 

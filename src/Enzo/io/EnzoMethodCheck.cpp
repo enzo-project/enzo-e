@@ -93,9 +93,16 @@ void EnzoMethodCheck::pup (PUP::er &p)
 void EnzoMethodCheck::compute ( Block * block) throw()
 {
   TRACE_CHECK_BLOCK("[2] EnzoMethodCheck::compute()",block);
-  CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
-                      proxy_enzo_simulation);
-  block->contribute(callback);
+
+  const bool is_first_cycle = (cello::simulation()->cycle() ==
+                               cello::simulation()->initial_cycle());
+  if (!is_first_cycle) {
+    CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
+                        proxy_enzo_simulation);
+    block->contribute(callback);
+  } else { // Don't checkpoint if it's the initial cycle
+    block->compute_done();
+  }
 }
 
 //----------------------------------------------------------------------

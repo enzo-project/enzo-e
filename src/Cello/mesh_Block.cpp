@@ -84,10 +84,6 @@ Block::Block ( process_type ip_source, MsgType msg_type )
 
   thisIndex.array(array_,array_+1,array_+2);
 
-  if (msg_type == MsgType::msg_refine) {
-    proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -412,6 +408,8 @@ void Block::pup(PUP::er &p)
     for (int i=0; i<len; i++) refresh_msg_list_[i].clear();
   }
 
+  p | index_order_;
+  p | count_order_;
 }
 
 //----------------------------------------------------------------------

@@ -170,16 +170,19 @@ EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
 
   CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip) msg_type %d\n",
             CkMyPe(),(void *)this,name(thisIndex).c_str(),int(msg_type));
+  fflush(stdout);
 #endif
 
   if (msg_type == MsgType::msg_check) {
-    proxy_enzo_simulation[ip_source].p_get_msg_check(thisIndex);
+    set_msg_check(enzo::simulation()->get_msg_check(thisIndex));
+  } else if (msg_type == MsgType::msg_refine) {
+    set_msg_refine(enzo::simulation()->get_msg_refine(thisIndex));
   }
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
+void EnzoBlock::set_msg_check(EnzoMsgCheck * msg)
 {
   performance_start_(perf_block);
 
@@ -191,7 +194,7 @@ void EnzoBlock::p_set_msg_check(EnzoMsgCheck * msg)
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
+void EnzoBlock::set_msg_refine(MsgRefine * msg)
 {
 #ifdef TRACE_BLOCK
   CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock p_set_msg_refine()\n",
@@ -264,8 +267,8 @@ EnzoBlock::EnzoBlock ( EnzoMsgCheck * msg )
             CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
   fflush(stdout);
 #endif
+
   restart_set_data_(msg);
-  delete msg;
 }
 
 //======================================================================

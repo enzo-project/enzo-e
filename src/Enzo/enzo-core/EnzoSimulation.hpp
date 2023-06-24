@@ -44,12 +44,16 @@ public: // functions
   void pup (PUP::er &p);
 
 #ifdef BYPASS_CHARM_MEM_LEAK
-  /// Request by newly created EnzoBlock to get its MsgRefine object
-  virtual void p_get_msg_refine(Index index);
 
-  virtual void p_get_msg_check(Index index);
+  virtual void p_refine_create_block(MsgRefine*);
+  void refine_create_block(MsgRefine*);
+
   void set_msg_check (Index index, EnzoMsgCheck *);
-  EnzoMsgCheck * get_msg_check (Index index);
+
+  /// Request by newly created EnzoBlock to get its MsgRefine object
+  MsgRefine * get_msg_refine(Index index);
+  EnzoMsgCheck * get_msg_check(Index index);
+
 #endif
 
   /// Barrier after constructor to ensure all EnzoSimulation objects created

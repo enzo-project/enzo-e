@@ -35,7 +35,9 @@ EnzoMsgCheck::EnzoMsgCheck()
     is_first_(),
     is_last_(),
     name_dir_(),
-    index_file_(-1)
+    index_file_(-1),
+    index_order_(-1),
+    count_order_(-1)
 {
   ++counter[cello::index_static()];
   cello::hex_string(tag_,TAG_LEN);
@@ -151,6 +153,8 @@ int EnzoMsgCheck::size_()
   SIZE_STRING_TYPE(size,name_dir_);
   SIZE_SCALAR_TYPE(size,int,index_file_);
   SIZE_ARRAY_TYPE (size,int,adapt_buffer_,ADAPT_BUFFER_SIZE);
+  SIZE_SCALAR_TYPE(size,int,index_order_);
+  SIZE_SCALAR_TYPE(size,int,count_order_);
   return size;
 }
 
@@ -177,6 +181,8 @@ char * EnzoMsgCheck::save_(char * pc)
   SAVE_STRING_TYPE(pc,name_dir_);
   SAVE_SCALAR_TYPE(pc,int,index_file_);
   SAVE_ARRAY_TYPE (pc,int,adapt_buffer_,ADAPT_BUFFER_SIZE);
+  SAVE_SCALAR_TYPE(pc,int,index_order_);
+  SAVE_SCALAR_TYPE(pc,int,count_order_);
   return pc;
 }
 
@@ -203,6 +209,8 @@ char * EnzoMsgCheck::load_(char * pc)
   LOAD_STRING_TYPE(pc,name_dir_);
   LOAD_SCALAR_TYPE(pc,int,index_file_);
   LOAD_ARRAY_TYPE (pc,int,adapt_buffer_,ADAPT_BUFFER_SIZE);
+  LOAD_SCALAR_TYPE(pc,int,index_order_);
+  LOAD_SCALAR_TYPE(pc,int,count_order_);
   return pc;
 }
 //----------------------------------------------------------------------
@@ -250,8 +258,11 @@ void EnzoMsgCheck::set_block (Block * block)
   block->data()->upper(block_upper_,block_upper_+1,block_upper_+2);
   block->data()->field().size(block_size_,block_size_+1,block_size_+2);
 
-  io_block_ = enzo::factory()->create_io_block();
+  io_block_ = (IoEnzoBlock *)enzo::factory()->create_io_block();
   io_block_->set_block(block);
+  Scalar<long long> scalar(cello::scalar_descr_long_long(),
+                           block->data()->scalar_data_long_long());
+  block->get_order(&index_order_, &count_order_);
 }
 
 //----------------------------------------------------------------------
@@ -288,5 +299,4 @@ void EnzoMsgCheck::print (const char * msg)
     io_block_->print(msg);
   }
   fflush(stdout);
-    
 }

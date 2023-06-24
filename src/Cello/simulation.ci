@@ -19,7 +19,7 @@ module simulation {
     entry Simulation (const char filename[n], int n); // [S0]
 
 #ifdef BYPASS_CHARM_MEM_LEAK
-    entry void p_get_msg_refine (Index);
+    entry void p_refine_create_block (MsgRefine *);
 #endif
 
     entry void r_initialize_block_array (CkReductionMsg * msg);    // [SC2]
@@ -40,7 +40,7 @@ module simulation {
 
     entry void p_set_block_array (CProxy_Block block_array);
 
-    entry void p_update_state(MsgState *);
+    entry void p_initialize_state(MsgState *);
   };
 
   /// Initial mapping of array elements
