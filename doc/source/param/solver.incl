@@ -1,51 +1,56 @@
-:Parameter:  :p:`Solver` : :g:`solver` : :p:`iter_max`
-:Summary: :s:`Iteration limit for the CG solver`
-:Type:    :t:`int`
-:Default: :d:`100`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Solver:solver:iter_max
 
-:e:`Maximum number of CG iterations to take.`
+   :Summary: :s:`Iteration limit for the CG solver`
+   :Type:    :par:typefmt:`int`
+   :Default: :d:`100`
+   :Scope:     :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Solver` : :g:`solver` : :p:`res_tol`
-:Summary: :s:`Residual norm reduction tolerance for the CG solver`
-:Type:    :t:`float`
-:Default: :d:`1e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. CG is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
+   :e:`Maximum number of CG iterations to take.`
 
 ----
 
-:Parameter:  :p:`Solver` : :g:`solver` : :p:`grav_const`
-:Summary: :s:`Gravitational constant`
-:Type:    :t:`float`
-:Default: :d:`6.67384e-8`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Solver:solver:res_tol
 
-:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
+   :Summary: :s:`Residual norm reduction tolerance for the CG solver`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1e-6`
+   :Scope:     :z:`Enzo`
 
+   :e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. CG is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
 
 ----
 
-:Parameter:  :p:`Solver` : :g:`solver` : :p:`diag_precon`
-:Summary: :s:`Whether to apply diagonal preconditioning`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Solver:solver:grav_const
 
-:e:`Whether to diagonally precondition the linear system A*X = B in EnzoSolverGravityCg by 1.0 / (h^2).`
+   :Summary: :s:`Gravitational constant`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`6.67384e-8`
+   :Scope:     :z:`Enzo`
+
+   :e:`Gravitational constant used in place of G.  The default is G in cgs units.`
 
 
 ----
 
-:Parameter:  :p:`Solver` : :g:`solver` : :p:`monitor_iter`
-:Summary: :s:`How often to display progress`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
+.. par:parameter:: Solver:solver:diag_precon
 
-:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
+   :Summary: :s:`Whether to apply diagonal preconditioning`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`Whether to diagonally precondition the linear system A*X = B in EnzoSolverGravityCg by 1.0 / (h^2).`
+
+
+----
+
+.. par:parameter:: Solver:solver:monitor_iter
+
+   :Summary: :s:`How often to display progress`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`1`
+   :Scope:     :z:`Enzo`
+
+   :e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
 
 

@@ -105,10 +105,10 @@ There are 2 approaches for accessing Cello Field block arrays.
   1. The traditional approach is to directly manipulate the raw pointers managed by Cello.
      These can be accessed with the ``Field::values`` method.
 
-  2. The preferred approach is to use the ``CelloArray`` multidimensional array templates that wrap the raw pointers managed by Cello.
-     Using ``CelloArray``\s improve code clarity and safety at the cost of very marginal losses in performance (according to benchmarks).
+  2. The preferred approach is to use the ``CelloView`` multidimensional array templates that wrap the raw pointers managed by Cello.
+     Using ``CelloView``\s improve code clarity and safety at the cost of very marginal losses in performance (according to benchmarks).
      ``Field::view`` is used to help facillitate this approach.
-     For more details about ``CelloArray``\s, see :ref:`using-CelloArray`
+     For more details about ``CelloView``\s, see :ref:`using-CelloView`
 
 Below, we provide a table that summarizes the suggested names for Field-related variables used to access the array elements.
 We additionally provide brief descriptions of relevant ``Field`` methods.
@@ -151,11 +151,11 @@ The preferred approach for accessing fields relies upon:
 .. code-block:: c++
 
    template<class T>
-   CelloArray<T,3> Field::view (int id_field,
+   CelloView<T,3> Field::view (int id_field,
                                 ghost_choice choice = ghost_choice::include,
                                 int index_history=0) throw ();
 
-This returns a `CelloArray` that acts as a view of the specified field.
+This returns a `CelloView` that acts as a view of the specified field.
 The meaning of the ``id_field`` and ``index_history`` arguments are unchanged from ``Field::values``.
 Unlike ``Field::values``, when an invalid ``id_field`` is specified, the program will abort with an error.
 
@@ -163,7 +163,7 @@ The template parameter ``T`` specifies the expected datatype of the field.
 If the field does not have the expected datatype, the program will abort with an explanatory error message.
 While implementing a ``Method`` object in the ``Enzo`` layer, this parameter is frequently ``enzo_float``.
 
-By default, the returned ``CelloArray`` **always** include ghost zones.
+By default, the returned ``CelloView`` **always** include ghost zones.
 This behavior is controlled by the ``choice`` argument, which can be passed the following values:
 
   * ``ghost_choice::include``: the returned view always includes ghost zones (the program aborts with an error message if ghost zones aren't allocated). This is the default value.
@@ -212,7 +212,7 @@ A shorter version of the following snippet is also possible where we pass ``ghos
    int gx, gy, gz;
    field.ghost_depth(id, &gx, &gy, &gz);
 
-   CelloArray<enzo_float,3> d = field.view<enzo_float>(id);
+   CelloView<enzo_float,3> d = field.view<enzo_float>(id);
 
    // we can get the array shape directly from the array (a minor design quirk
    // may make the arguments for the shape method seem a little unintuitive)

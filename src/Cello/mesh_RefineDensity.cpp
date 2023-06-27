@@ -86,7 +86,7 @@ int RefineDensity::apply_
       for (int ix=gx; ix<mx-gx; ix++) {
 	int i = ix + mx*(iy + my*iz);
 	if (array[i] > min_refine_)  any_refine  = true;
-	if (array[i] < max_coarsen_) all_coarsen = false;
+	if (array[i] > max_coarsen_) all_coarsen = false;
       }
     }
   }

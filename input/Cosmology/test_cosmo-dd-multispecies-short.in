@@ -1,0 +1,28 @@
+# this file is used for a simple multi-species cosmology answer test
+#
+# To run this simulation outside of the answer testing framework, you should
+# copy the data file, specified by method:grackle:data_file to the root of the
+# repository and execute the simulation from there.
+
+include "input/test_cosmo-dd-multispecies.in"
+
+
+# we need to overwrite the data_file location to get it to play nicely with the
+# answer testing framework
+Method { grackle { data_file = "CloudyData_UVB=HM2012.h5"; } }
+
+# We cut off this simulation slightly earlier than the original input file to
+# save time. However, we make sure to stop at least a few cycles after the
+# first refinement, which seems to occur at cycle 109.
+Stopping { cycle = 115; }
+
+Output {
+   list = ["hdf5"];
+   hdf5 {
+      dir = ["Dir_COSMO_MULTI_%04d","cycle"];
+      schedule {
+         list = [115];
+         var = "cycle";
+      };
+   }
+}

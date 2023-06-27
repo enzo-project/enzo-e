@@ -1,69 +1,107 @@
+.. par:parameter:: Initial:list
+
+   :Summary: :s:`Sequence of initializers to apply.`
+   :Type:    :par:typefmt:`list ( string )`
+   :Default: :d:`none`
+   :Scope:     :c:`Cello`
+
+   :e:`This parameter specifies the list of initializers to apply.
+   Each initializer in the list is applied in the order specified.
+   Not all initializers are meant to be used alongside other initializers.
+   Possible initializers include:`
+
+   * :t:`"accretion_test"` :e:`Setup a test problem with a sink particle.`
+   * :t:`"bb_test"` :e:`Initialize a “BB Test” problem, following the setup described in Federrath et al 2010, ApJ, 713, 269.`
+   * :t:`"cloud"` :e:`Initialize a spherical cloud embedded in a hot wind.`
+   * :t:`"collapse"` :e:`Initialize a spherical collapse test.`
+   * :t:`"grackle_test"` :e:`Initialize a grackle chemistry and cooling test.`
+   * :t:`"implosion_2d"` :e:`Initialize an “implosion” test problem.`
+   * :t:`"inclined_wave"` :e:`Initialize an inclined wave test problem.`
+   * :t:`"merge_sinks_test"` :e:`Initialise sink particles with masses, positions, and velocities read from a text file specified in the parameter file.`
+   * :t:`"pm"` :e:`Initialize "dark" matter particles in either a regular uniform array with one particle per cell, or randomly following the "density" field distribution.`
+   * :t:`"ppml_test"` :e:`Initialize fields for the PPML solver for a high-pressure sphere in an anisotropic magnetic field.`
+   * :t:`"sedov"` :e:`Sets up sedov blast problems.`
+   * :t:`"shock_tube"` :e:`Initialize an axis-aligned shock tube test problem`
+   * :t:`"shu_collapse"` :e:`Initialize a Shu Collapse problem, following the setup described in Federrath et al 2010, ApJ, 713, 269.`
+   * :t:`"soup"` :e:`Similar to the "sedov" problem, but with letters instead of spheres.`
+   * :t:`"trace"` :e:`Initialize "trace" tracer particles in either a regular uniform array with one particle per cell, or randomly following the "density" field distribution.`
+   * :t:`"turbulence"` :e:`Initialize fields for driving turbulence, including "driving_[xyz]" fields.`
+   * :t:`"value"` :e:`Initialize fields using expressions directly from the parameter file.`
+   * :t:`"vlct_bfield"` :e:`Initialize the cell-centered magnetic fields for use by the VL + CT method. For more details, see` :ref:`vlct_bfield_init`
+
+Parameters specific to individual initializers are specified in subgroups.
+
 ----
 
-:Parameter:  :p:`Initial` : :p:`cycle`
-:Summary: :s:`Initial cycle number`
-:Type:    :t:`list` ( :t:`integer` )
-:Default: :d:`0`
-:Scope:     :c:`Cello`
+.. par:parameter:: Initial:cycle
 
-:e:`Initial value for the cycle number.`
+   :Summary: :s:`Initial cycle number`
+   :Type:    :par:typefmt:`list ( integer )`
+   :Default: :d:`0`
+   :Scope:     :c:`Cello`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`time`
-:Summary: :s:`Initial time`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:     :c:`Cello`
-
-:e:`Initial time in code units.`
+   :e:`Initial value for the cycle number.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`restart`
-:Summary: :s:`Set to true to restart from a checkpoint directory created by the "check" method`
-:Type:    :t:`bool`
-:Default: :d:`false`
-:Scope:     :c:`Cello`
+.. par:parameter:: Initial:time
 
-:e:`Restart the simulation to continue a previous run from a saved checkpoint. If true, the restart directory must be specified using the "restart_dir" parameter.`
+   :Summary: :s:`Initial time`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:     :c:`Cello`
+
+   :e:`Initial time in code units.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`restart_dir`
-:Summary: :s:`Directory containing restart files from a checkpoint created using the "check" method`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:     :c:`Cello`
+.. par:parameter:: Initial:restart
 
-:e:`When restarting a simulation from a "check" checkpoint directory, this parameter must specify the path to that directory.`
+   :Summary: :s:`Set to true to restart from a checkpoint directory created by the "check" method`
+   :Type:    :par:typefmt:`bool`
+   :Default: :d:`false`
+   :Scope:     :c:`Cello`
+
+   :e:`Restart the simulation to continue a previous run from a saved checkpoint. If true, the restart directory must be specified using the "restart_dir" parameter.`
+
+----
+
+.. par:parameter:: Initial:restart_dir
+
+   :Summary: :s:`Directory containing restart files from a checkpoint created using the "check" method`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:     :c:`Cello`
+
+   :e:`When restarting a simulation from a "check" checkpoint directory, this parameter must specify the path to that directory.`
 
 ----
 
 value
 -----
 
-:Parameter:  :p:`Initial` : :p:`value` : :p:`<field>` :
-:Summary: :s:`Initialize field values`
-:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
-:Default: :d:`[]`
-:Scope:     Cello
+.. par:parameter:: Initial:value:<field>
 
-:e:`This initialization approach allows initializing field values directly.  The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  For example:`
+   :Summary: :s:`Initialize field values`
+   :Type:    :par:typefmt:`list ( float-expr, [ logical-expr, float-expr, [ ... ] ] )`
+   :Default: :d:`[]`
+   :Scope:     Cello
 
-::
+   :e:`This initialization approach allows initializing field values directly.  The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  For example:`
 
-   Initial {
+   ::
 
-      list = ["value"];
+      Initial {
 
-      value {
-         density = [ sin ( x + y ), x - y < 0.0, 1.0 ];
+         list = ["value"];
+
+         value {
+            density = [ sin ( x + y ), x - y < 0.0, 1.0 ];
+         }
       }
-   }
-     
-	       
-:e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
+
+
+   :e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
 
 accretion_test
 --------------
@@ -81,65 +119,71 @@ This initializer requires periodic boundary conditions, and three spatial dimens
 Note: sink particles must have a ``"mass"`` attribute if this initializer is
 used.
 
-:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_mass`
-:Summary: :s:`The initial mass of the sink particle.`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:accretion:sink_mass
 
-:e:`The initial mass of the sink particle`
+   :Summary: :s:`The initial mass of the sink particle.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_position`
-:Summary: :s:`The initial position of the sink particle.`
-:Type:    :t:`list` ( :t:`float` )
-:Default: :d:`[0.0,0.0,0.0]`
-:Scope:   Enzo
-
-:e:`The initial (3D) position of the sink particle`
+   :e:`The initial mass of the sink particle`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`accretion` : :p:`sink_velocity`
-:Summary: :s:`The initial velocity of the sink particle.`
-:Type:    :t:`list` ( :t:`float` )
-:Default: :d:`[0.0,0.0,0.0]`
-:Scope:   Enzo
+.. par:parameter:: Initial:accretion:sink_position
 
-:e:`The initial (3D) velocity of the sink particle`
+   :Summary: :s:`The initial position of the sink particle.`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`[0.0,0.0,0.0]`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_density`
-:Summary: :s:`The initial uniform density of the gas.`
-:Type:    :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:   Enzo
-
-:e:`The initial uniform density of the gas.`
+   :e:`The initial (3D) position of the sink particle`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_pressure`
-:Summary: :s:`The initial uniform pressure of the gas.`
-:Type:    :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:   Enzo
+.. par:parameter:: Initial:accretion:sink_velocity
 
-:e:`The initial uniform pressure of the gas.`
+   :Summary: :s:`The initial velocity of the sink particle.`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`[0.0,0.0,0.0]`
+   :Scope:   Enzo
+
+   :e:`The initial (3D) velocity of the sink particle`
+
+----
+
+.. par:parameter:: Initial:accretion:gas_density
+
+   :Summary: :s:`The initial uniform density of the gas.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:   Enzo
+
+   :e:`The initial uniform density of the gas.`
+
+----
+
+.. par:parameter:: Initial:accretion:gas_pressure
+
+   :Summary: :s:`The initial uniform pressure of the gas.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:   Enzo
+
+   :e:`The initial uniform pressure of the gas.`
 
 ----
 
 
-:Parameter:  :p:`Initial` : :p:`accretion` : :p:`gas_radial_velocity`
-:Summary: :s:`The (inwards) radial velocity of the gas, with respect to the initial sink particle
-              position.`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:accretion:gas_radial_velocity
 
-:e:`The gas velocity in every cell with have magnitude equal to the value of this parameter, directed towards the initial sink particle position.`
+   :Summary: :s:`The (inwards) radial velocity of the gas, with respect to the initial sink particle
+                 position.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
+
+   :e:`The gas velocity in every cell with have magnitude equal to the value of this parameter, directed towards the initial sink particle position.`
 
 ----
 
@@ -182,92 +226,100 @@ except for ``"is_copy"``, which should be of type ``"int64"``.
 
 Sink particles must be in the ``"is_gravitating"`` particle group.
 
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`center`
-:Summary: :s:`The coordinates of the center of the sphere.`
-:Type:    :t:`list` (:t:`float`)
-:Default: :d:`[0.0,0.0,0.0]`
-:Scope:   Enzo
+.. par:parameter:: Initial:bb_test:center
 
-:e:`The coordinates of the center of the sphere.`
+   :Summary: :s:`The coordinates of the center of the sphere.`
+   :Type:    :par:typefmt:`list (float)`
+   :Default: :d:`[0.0,0.0,0.0]`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`drift_velocity`
-:Summary: :s:`The initial additional uniform velocity of the gas.`
-:Type:    :t:`list` (:t:`float`)
-:Default: :d:`[0.0,0.0,0.0]`
-:Scope:   Enzo
-
-:e:`The initial additional uniform velocity of the gas. Inside the truncation radius,
-the initial gas velocity will be determined by solid body rotation, plus this additional
-velocity. Outside the truncation radius, the gas velocity is just this velocity.`
+   :e:`The coordinates of the center of the sphere.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`truncation_radius`
-:Summary: :s:`The truncation radius of the sphere.`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:bb_test:drift_velocity
 
-:e:`The truncation radius of the isothermal sphere. Within this radius, the gas density is
-determined by the azimuthal angle; outside of this radius, it is equal to "external_density".`
+   :Summary: :s:`The initial additional uniform velocity of the gas.`
+   :Type:    :par:typefmt:`list (float)`
+   :Default: :d:`[0.0,0.0,0.0]`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`nominal_sound_speed`
-:Summary: :s:`The nominal uniform sound speed of the gas.`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:   Enzo
-
-:e:`Nominal uniform sound speed of the gas used to initialise the total specific energy. In practice the actual sound speed will be different since the adiabatic index is not exactly 1.`
+   :e:`The initial additional uniform velocity of the gas. Inside the truncation radius,
+   the initial gas velocity will be determined by solid body rotation, plus this additional
+   velocity. Outside the truncation radius, the gas velocity is just this velocity.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`fluctuation_amplitude`
-:Summary: :s:`The amplitude of the density fluctuation which determines the initial gas density.`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:bb_test:truncation_radius
 
-Within the truncation radius, the gas density has the following form:
+   :Summary: :s:`The truncation radius of the sphere.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:   Enzo
 
-:math:`\rho(\phi) = \rho_0 (1 + A \cos(2 \phi)),`
-
-where :math:`\rho` is the gas density, :math:`\phi` is the azimuthal angle in the spherical polar
-coordinate system, :math:`\rho_0` is the mean density and :math:`A` is the fluctuation amplitude.
+   :e:`The truncation radius of the isothermal sphere. Within this radius, the gas density is
+   determined by the azimuthal angle; outside of this radius, it is equal to "external_density".`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`external_density`
-:Summary: :s:`The gas density outside of the truncation radius.`
-:Type:    :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:   Enzo
+.. par:parameter:: Initial:bb_test:nominal_sound_speed
 
-:e:`The gas density outside of the truncation radius. Should be set to something much smaller
-than the mean gas density inside the truncation radius.`
+   :Summary: :s:`The nominal uniform sound speed of the gas.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`mean_density`
-:Summary: :s:`The mean gas density inside the truncation radius.`
-:Type:    :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:   Enzo
-
-:e:`The mean gas density inside the truncation radius.`
+   :e:`Nominal uniform sound speed of the gas used to initialise the total specific energy. In practice the actual sound speed will be different since the adiabatic index is not exactly 1.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`bb_test` : :p:`angular_rotation_velocity`
-:Summary: :s:`The angular rotation velocity of gas inside the truncation radius in radians per second.`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:bb_test:fluctuation_amplitude
 
-:e:`Inside the truncation radius, the gas rotates as a solid body around the z-axis. This parameter determines the angular rotation velocity in units of radians per second.`
+   :Summary: :s:`The amplitude of the density fluctuation which determines the initial gas density.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
+
+   Within the truncation radius, the gas density has the following form:
+
+   :math:`\rho(\phi) = \rho_0 (1 + A \cos(2 \phi)),`
+
+   where :math:`\rho` is the gas density, :math:`\phi` is the azimuthal angle in the spherical polar
+   coordinate system, :math:`\rho_0` is the mean density and :math:`A` is the fluctuation amplitude.
+
+----
+
+.. par:parameter:: Initial:bb_test:external_density
+
+   :Summary: :s:`The gas density outside of the truncation radius.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:   Enzo
+
+   :e:`The gas density outside of the truncation radius. Should be set to something much smaller
+   than the mean gas density inside the truncation radius.`
+
+----
+
+.. par:parameter:: Initial:bb_test:mean_density
+
+   :Summary: :s:`The mean gas density inside the truncation radius.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:   Enzo
+
+   :e:`The mean gas density inside the truncation radius.`
+
+----
+
+.. par:parameter:: Initial:bb_test:angular_rotation_velocity
+
+   :Summary: :s:`The angular rotation velocity of gas inside the truncation radius in radians per second.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
+
+   :e:`Inside the truncation radius, the gas rotates as a solid body around the z-axis. This parameter determines the angular rotation velocity in units of radians per second.`
 
 ----
 
@@ -284,15 +336,18 @@ fields. Presently, only uniform magnetic fields are supported if they are
 constant across the entire domain. The values of the magnetic fields are
 specified in one of 2 ways:
 
-1. If the :p:`uniform_bfield` parameter is passed a list of 3 floats, the
-   first, second, and third entries are used to initilize the x, y, and z
-   componentents of a uniform magnetic field. If the "bfieldi_x",
-   "bfieldi_y", and "bfieldi_z" face-centered fields are defined, then they
-   will be correctly initialized for use with the VL+CT integrator.
-2. (Deprecated) If the :p:`uniform_bfield` parameter is not specified (or is
-   passed a list containing 0 entries), then the cell-centered magnetic
-   fields are assumed to have been initialized by another Initial subgroup
-   (e.g. value) prior to the call of this subgroup.
+1. If the :par:param:`~Initial:cloud:uniform_bfield` parameter is
+   passed a list of 3 floats, the first, second, and third entries are
+   used to initilize the x, y, and z components of a uniform magnetic
+   field. If the "bfieldi_x", "bfieldi_y", and "bfieldi_z"
+   face-centered fields are defined, then they will be correctly
+   initialized for use with the VL+CT integrator.
+
+2. (Deprecated) If the :par:param:`~Initial:cloud:uniform_bfield`
+   parameter is not specified (or is passed a list containing 0
+   entries), then the cell-centered magnetic fields are assumed to
+   have been initialized by another Initial subgroup (e.g. value)
+   prior to the call of this subgroup.
 
 The initial density of a cell (from a uniform-resolution mesh) is
 initialized to
@@ -305,192 +360,208 @@ distribution. When this machinery is used, :math:`\delta` is
 randomly drawn from a truncated Gaussian with :math:`\mu=1`.
 Pressure equilibria is maintained when this machinery is used.
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`subsample_n`
-:Summary: :s:`Determines the subsampling resolution`
-:Type:    :t:`integer`
-:Default: :d:`0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:subsample_n
 
-:e:`Subsampling is used to initialize the fields in regions of overlap
-between the cloud and the wind. For cells in this region, the fraction
-of the volume enclosed by the cloud is estimated by subdividing a cell
-into` :math:`2^n` :e:`subcells along each axis (a value of 0,
-corresponds to no subsampling. The average density of the cells in
-this region are volume weighted and the average velocities are mass
-weighted. The total energy in a cell is currently computed by assuming
-constant internal energy density throughout the grid and using the
-average velocities and densities (and, if applicable, the magnetic
-fields).`
+   :Summary: :s:`Determines the subsampling resolution`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`0`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_radius`
-:Summary: :s:`Initial radius of the spherical cloud`
-:Type:    :t:`float`
-:Default: :d:`none`
-:Scope:   Enzo
-
-:e:`This must be a positive value.`
+   :e:`Subsampling is used to initialize the fields in regions of overlap
+   between the cloud and the wind. For cells in this region, the fraction
+   of the volume enclosed by the cloud is estimated by subdividing a cell
+   into` :math:`2^n` :e:`subcells along each axis (a value of 0,
+   corresponds to no subsampling. The average density of the cells in
+   this region are volume weighted and the average velocities are mass
+   weighted. The total energy in a cell is currently computed by assuming
+   constant internal energy density throughout the grid and using the
+   average velocities and densities (and, if applicable, the magnetic
+   fields).`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_x`
-:Summary: :s:`x coordinate of the cloud center`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:cloud_radius
+
+   :Summary: :s:`Initial radius of the spherical cloud`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
+
+   :e:`This must be a positive value.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_y`
-:Summary: :s:`y coordinate of the cloud center`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:cloud_center_x
+
+   :Summary: :s:`x coordinate of the cloud center`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_z`
-:Summary: :s:`z coordinate of the cloud center`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:cloud_center_y
+
+   :Summary: :s:`y coordinate of the cloud center`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_density`
-:Summary: :s:`initial mass density of the cloud`
-:Type:    :t:`float`
-:Default: :d:`none`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:cloud_center_z
 
-:e:`This must be a positive value.`
-
-----
-
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`metal_mass_frac`
-:Summary: :s:`initial fraction of the mass density contributed by metals`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
-
-:e:`If the ` ``"metal_density_frac"`` :e:`field exists and is
-registered as a member of the ` ``"colour"`` :e:`group, then the field
-is initialized by multiplying this value by the` ``"density"``
-:e:`field (this is done everywhere, regardless of proximity to the
-cloud center). Under these circumstances, this must have a positive
-value.`
+   :Summary: :s:`z coordinate of the cloud center`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`uniform_bfield`
-:Summary: :s:`initial uniform magnetic field values`
-:Type:    :t:`list` ( :t:`float` )
-:Default: :d:`[ ]`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:cloud:cloud_density
 
-:e:`If specified, provides the values of the components of the initial magnetic field that are uniform throughout the entire domain. When employed this MUST have 3 entries. This will also initialize the face-centered fields magnetic fields (in addition to the cell-centered fields) if the appropriate fields have been defined. When this is not specified (i.e., when this has a list of 0 entries), the magnetic fields are assumed to have been pre-initialized by a separate problem initializer prior to the execution of the cloud initializer.`
+   :Summary: :s:`initial mass density of the cloud`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_density`
-:Summary: :s:`initial mass density of the wind`
-:Type:    :t:`float`
-:Default: :d:`none`
-:Scope:   Enzo
-
-:e:`This must be a positive value.`
+   :e:`This must be a positive value.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_velocity`
-:Summary: :s:`initial velocity of the wind along the x-axis`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:metal_mass_frac
+
+   :Summary: :s:`initial fraction of the mass density contributed by metals`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
+
+   :e:`If the ` ``"metal_density_frac"`` :e:`field exists and is
+   registered as a member of the ` ``"colour"`` :e:`group, then the field
+   is initialized by multiplying this value by the` ``"density"``
+   :e:`field (this is done everywhere, regardless of proximity to the
+   cloud center). Under these circumstances, this must have a positive
+   value.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_total_energy`
-:Summary: :s:`initial specific total energy of the wind`
-:Type:    :t:`float`
-:Default: :d:`none`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:uniform_bfield
 
-:e:`This must be a positive value.`
+   :Summary: :s:`initial uniform magnetic field values`
+   :Type:    :par:typefmt:`list ( float )`
+   :Default: :d:`[ ]`
+   :Scope:   :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_internal_energy`
-:Summary: :s:`initial specific internal energy of the wind`
-:Type:    :t:`float`
-:Default: :d:`0`
-:Scope:   Enzo
-
-:e:`If the` ``"internal_energy"`` :e:`field is defined, then this must
-be a positive value. In this case, the value is also used to help
-initialize the` ``"total_energy"`` :e:`field for cells that overlap
-with the cloud.  However, if the` ``"internal_energy"`` :e:`field is
-not defined, then this must not have a specified value (i.e. it must
-have a value of 0).`
+   :e:`If specified, provides the values of the components of the initial magnetic field that are uniform throughout the entire domain. When employed this MUST have 3 entries. This will also initialize the face-centered fields magnetic fields (in addition to the cell-centered fields) if the appropriate fields have been defined. When this is not specified (i.e., when this has a list of 0 entries), the magnetic fields are assumed to have been pre-initialized by a separate problem initializer prior to the execution of the cloud initializer.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_standard_deviation`
-:Summary: :s:`standard deviation used for perturbations`
-:Type:    :t:`float`
-:Default: :d:`0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:wind_density
 
-:e:`This must be either 0 or a positive value. In the former case, the
-perturbation machinery is not used. In the latter case, it gives the
-standard deviation of the truncated gaussian for truncation (technically,
-it's the standard deviation of the gaussian before truncation).`
+   :Summary: :s:`initial mass density of the wind`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
+
+   :e:`This must be a positive value.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_truncation_deviation`
-:Summary: :s:`number of deviation where perturbation gaussian is truncated`
-:Type:    :t:`float`
-:Default: :d:`0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:wind_velocity
 
-:e:`Meaningless unless Initial:cloud:perturb_standard_deviation is
-positive. This must be either 0 or a positive value. In the former
-case, the gaussian is not truncated (nominally allowing the
-possibility of negative values). In the latter case, this determines
-the number of standard deviations from the mean at which the gaussian
-should be truncated.`
+   :Summary: :s:`initial velocity of the wind along the x-axis`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`perturb_seed`
-:Summary: :s:`Seeds the perturbations to cloud density`
-:Type:    :t:`integer`
-:Default: :d:`0`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:wind_total_energy
 
-:e:`This must be a zero or larger. Meaningless unless
-Initial:cloud:perturb_standard_deviation is positive.`
+   :Summary: :s:`initial specific total energy of the wind`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
 
-   .. warning::
-
-      Due to reliance on ``std::normal_distribution`` the perturbations are
-      not currently guaranteed to be the same (when the seed is the same) for
-      different compilers or versions of the c++ standard library.
-
-      Changes in the grid resolution, domain size, way that mesh is divided
-      across root blocks, or ghost depth will also affect the perturbations.
+   :e:`This must be a positive value.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_total_energy`
-:Summary: :s:`initial specific total energy of the wind`
-:Type:    :t:`float`
-:Default: :d:`none`
-:Scope:   Enzo
+.. par:parameter:: Initial:cloud:wind_internal_energy
 
-:e:`This must be a positive value.`
+   :Summary: :s:`initial specific internal energy of the wind`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0`
+   :Scope:   Enzo
+
+   :e:`If the` ``"internal_energy"`` :e:`field is defined, then this must
+   be a positive value. In this case, the value is also used to help
+   initialize the` ``"total_energy"`` :e:`field for cells that overlap
+   with the cloud.  However, if the` ``"internal_energy"`` :e:`field is
+   not defined, then this must not have a specified value (i.e. it must
+   have a value of 0).`
+
+----
+
+.. par:parameter:: Initial:cloud:perturb_standard_deviation
+
+   :Summary: :s:`standard deviation used for perturbations`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0`
+   :Scope:   Enzo
+
+   :e:`This must be either 0 or a positive value. In the former case, the
+   perturbation machinery is not used. In the latter case, it gives the
+   standard deviation of the truncated gaussian for truncation (technically,
+   it's the standard deviation of the gaussian before truncation).`
+
+----
+
+.. par:parameter:: Initial:cloud:perturb_truncation_deviation
+
+   :Summary: :s:`number of deviation where perturbation gaussian is truncated`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0`
+   :Scope:   Enzo
+
+   :e:`Meaningless unless Initial:cloud:perturb_standard_deviation is
+   positive. This must be either 0 or a positive value. In the former
+   case, the gaussian is not truncated (nominally allowing the
+   possibility of negative values). In the latter case, this determines
+   the number of standard deviations from the mean at which the gaussian
+   should be truncated.`
+
+----
+
+.. par:parameter:: Initial:cloud:perturb_seed
+
+   :Summary: :s:`Seeds the perturbations to cloud density`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`0`
+   :Scope:   Enzo
+
+   :e:`This must be a zero or larger. Meaningless unless
+   Initial:cloud:perturb_standard_deviation is positive.`
+
+      .. warning::
+
+         Due to reliance on ``std::normal_distribution`` the perturbations are
+         not currently guaranteed to be the same (when the seed is the same) for
+         different compilers or versions of the c++ standard library.
+
+         Changes in the grid resolution, domain size, way that mesh is divided
+         across root blocks, or ghost depth will also affect the perturbations.
+
+----
+
+.. par:parameter:: Initial:cloud:wind_total_energy
+
+   :Summary: :s:`initial specific total energy of the wind`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
+
+   :e:`This must be a positive value.`
 
 inclined_wave
 -------------
@@ -500,12 +571,14 @@ or Jeans wave at an angle inclined to the simulation domain for testing
 HD/MHD integrators. If applicable, magnetic fields fields are set
 to zero when a HD wave is initialized.
 
-The initialization procedure was adopted from
-`Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
-Specifically, a coordinate system "x0", "x1", "x2" is defined and the
-wave is initialized to travel along "x0". The transformation between
-"x", "y", "z" and "x0", "x1", "x2", is determined by the values of the
-:p:`alpha` and :p:`beta` parameters. They are explicitly related by
+The initialization procedure was adopted from `Gardiner & Stone (2008)
+<http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .  Specifically,
+a coordinate system "x0", "x1", "x2" is defined and the wave is
+initialized to travel along "x0". The transformation between "x", "y",
+"z" and "x0", "x1", "x2", is determined by the values of the
+:par:param:`~Initial:inclined_wave:alpha` and
+:par:param:`~Initial:inclined_wave:beta` parameters. They are
+explicitly related by
 
 .. math::
 
@@ -516,150 +589,157 @@ wave is initialized to travel along "x0". The transformation between
 As in that paper, non-zero magnetic fields are initialized using the
 vector potential to ensure that they are divergence-free.
 
-:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`alpha`
-:Summary: :s:`Angle used to help determine wave inclination`
-:Type:    :t:`float`
-:Default: :d:`0`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:inclined_wave:alpha
 
-:e:`The angle is assumed to have units of radians.`
+   :Summary: :s:`Angle used to help determine wave inclination`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0`
+   :Scope:   :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`beta`
-:Summary: :s:`Angle used to help determine wave inclination`
-:Type:    :t:`float`
-:Default: :d:`0`
-:Scope:   :z:`Enzo`
-
-:e:`The angle is assumed to have units of radians.`
+   :e:`The angle is assumed to have units of radians.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`wave_type`
-:Summary: :s:`Specifies the type of wave to initialize.`
-:Type:    :t:`string`
-:Default: :d:`alfven`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:inclined_wave:beta
 
-:e:`This value specifies the type of wave to initialize. We have
-provided more details about each option down below. Note, when using an MHD
-solver with a non-MHD wave, the mangetic fields are uniformly initialized
-to zero.`
+   :Summary: :s:`Angle used to help determine wave inclination`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0`
+   :Scope:   :z:`Enzo`
 
-Hydro Waves
-~~~~~~~~~~~
-:e:`The values used to initialize hydrodynamical linear waves are taken from
-the columns of the matrix given in equation B3 of`
-`Stone et al. (2008) <https://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
-:e:`. Valid hydrodynamical waves include:`
-
-  * ``"sound"`` :e:`A linear sound wave.`
-
-  * ``"hd_entropy"`` :e:`A linear HD entropy wave with perturbations
-    in v0 (velocity along the "x0"-axis).`
-
-  * ``"hd_transv_entropy_v1"`` :e:`A linear HD entropy wave with
-    perturbations in velocity component v1 (transverse to the direction
-    of bulk motion).`
-
-  * ``"hd_transv_entropy_v2"`` :e:`A linear HD entropy wave with
-    perturbations in velocity component v2 (transverse to the direction of
-    bulk motion).`
-
-MHD Waves
-~~~~~~~~~
-:e:`Each of the valid MHD waves are described in` `Gardiner & Stone
-(2008) <https://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`__
-:e:`. Valid MHD wave types include:`
-
-  * ``"alfven"`` :e:`A linear Alfven wave with perturbations to the
-    magnetic field along the "x2"-axis.`
-  * ``"circ_alfven"`` :e:`A traveling circularly polarized Alfven
-    wave.`
-  * ``"mhd_entropy"`` :e:`A linear MHD entropy wave.`
-  * ``"fast"`` :e:`A linear fast magnetosonic wave.`
-  * ``"slow"`` :e:`A linear slow magnetosonic wave.`
-
-Jeans Wave
-~~~~~~~~~~
-
-:e:`To initialize a Jeans wave, set this parameter to` ``"jeans"``.
-:e:`We use equations consistent with what Athena and (earlier
-versions of) Athena++ use. In detail, we use:`
-
-.. math::
-   \rho     &= \rho_{\rm bkg}
-          \left( 1 + A \sin\left(\frac{2\pi}{\lambda} x_0 \right) \right) \\
-   \rho v_0 &= \rho_{\rm bkg} \frac{\sqrt{|\omega^2|}}{2\pi / \lambda} A
-          \begin{cases}
-                0                       & \omega^2 > 0 \\
-                \cos\left(\frac{2\pi}{\lambda} x_0 \right) & \omega^2 < 0 \\
-          \end{cases} \\
-   v_1      &= 0 \\
-   v_2      &= 0 \\
-   \rho E   &= \frac{P_{\rm bkg}}{\gamma - 1} + \gamma A \sin\left(\frac{2\pi}{\lambda} x_0\right) \\
-
-:e:`in which:`
-
-  * :math:`E` :e:`specifies the specific internal energy`
-  * :math:`\gamma` :e:`is the adiabatic index.`
-  * :math:`A` :e:`is the amplitude, specified by
-    Initial:inclined_wave:amplitude and` :math:`\lambda` :e:`is the
-    wavelength, specified by Initial:inclined_wave:lambda`
-  * :math:`\rho_{\rm bkg}=1` :e:`and` :math:`P_{\rm bkg}=1/\gamma`
-    :e:`in the appropriate code units`
-  * :math:`\omega^2=(2\pi c_{s,{\rm bkg}}/ \lambda)^2 (1 -
-    (\lambda/\lambda_J)^2)` :e:`is the dispersion relation. In this
-    equation,` :math:`c_{s,{\rm bkg}}^2=\gamma P_{\rm bkg}/\rho_{\rm
-    bkg}` :e:`and` :math:`\lambda_J = c_{s,{\rm bkg}} \sqrt{\pi / (G
-    \rho_{\rm bkg})}`. :e:`Note that the value of` :math:`G` :e:`is
-    directly set by Method:gravity:grav_const`.
+   :e:`The angle is assumed to have units of radians.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`amplitude`
-:Summary: :s:`Sets the amplitudes of the waves.`
-:Type:    :t:`float`
-:Default: :d:`1.e-6`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:inclined_wave:wave_type
 
-:e:`This must be a positive value. This has no effect for the circularly
-polarized Alfven wave (for that case, amplitude is fixed at 0.1).`
+   :Summary: :s:`Specifies the type of wave to initialize.`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`alfven`
+   :Scope:   :z:`Enzo`
+
+   :e:`This value specifies the type of wave to initialize. We have
+   provided more details about each option down below. Note, when using an MHD
+   solver with a non-MHD wave, the mangetic fields are uniformly initialized
+   to zero.`
+
+   Hydro Waves
+   ~~~~~~~~~~~
+   :e:`The values used to initialize hydrodynamical linear waves are taken from
+   the columns of the matrix given in equation B3 of`
+   `Stone et al. (2008) <https://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_
+   :e:`. Valid hydrodynamical waves include:`
+
+     * ``"sound"`` :e:`A linear sound wave.`
+
+     * ``"hd_entropy"`` :e:`A linear HD entropy wave with perturbations
+       in v0 (velocity along the "x0"-axis).`
+
+     * ``"hd_transv_entropy_v1"`` :e:`A linear HD entropy wave with
+       perturbations in velocity component v1 (transverse to the direction
+       of bulk motion).`
+
+     * ``"hd_transv_entropy_v2"`` :e:`A linear HD entropy wave with
+       perturbations in velocity component v2 (transverse to the direction of
+       bulk motion).`
+
+   MHD Waves
+   ~~~~~~~~~
+   :e:`Each of the valid MHD waves are described in` `Gardiner & Stone
+   (2008) <https://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`__
+   :e:`. Valid MHD wave types include:`
+
+     * ``"alfven"`` :e:`A linear Alfven wave with perturbations to the
+       magnetic field along the "x2"-axis.`
+     * ``"circ_alfven"`` :e:`A traveling circularly polarized Alfven
+       wave.`
+     * ``"mhd_entropy"`` :e:`A linear MHD entropy wave.`
+     * ``"fast"`` :e:`A linear fast magnetosonic wave.`
+     * ``"slow"`` :e:`A linear slow magnetosonic wave.`
+
+   Jeans Wave
+   ~~~~~~~~~~
+
+   :e:`To initialize a Jeans wave, set this parameter to` ``"jeans"``.
+   :e:`We use equations consistent with what Athena and (earlier
+   versions of) Athena++ use. In detail, we use:`
+
+   .. math::
+      \rho     &= \rho_{\rm bkg}
+             \left( 1 + A \sin\left(\frac{2\pi}{\lambda} x_0 \right) \right) \\
+      \rho v_0 &= \rho_{\rm bkg} \frac{\sqrt{|\omega^2|}}{2\pi / \lambda} A
+             \begin{cases}
+                   0                       & \omega^2 > 0 \\
+                   \cos\left(\frac{2\pi}{\lambda} x_0 \right) & \omega^2 < 0 \\
+             \end{cases} \\
+      v_1      &= 0 \\
+      v_2      &= 0 \\
+      \rho E   &= \frac{P_{\rm bkg}}{\gamma - 1} + \gamma A \sin\left(\frac{2\pi}{\lambda} x_0\right) \\
+
+   :e:`in which:`
+
+     * :math:`E` :e:`specifies the specific internal energy`
+     * :math:`\gamma` :e:`is the adiabatic index.`
+     * :math:`A` :e:`is the amplitude, specified by
+       Initial:inclined_wave:amplitude and` :math:`\lambda` :e:`is the
+       wavelength, specified by Initial:inclined_wave:lambda`
+     * :math:`\rho_{\rm bkg}=1` :e:`and` :math:`P_{\rm bkg}=1/\gamma`
+       :e:`in the appropriate code units`
+     * :math:`\omega^2=(2\pi c_{s,{\rm bkg}}/ \lambda)^2 (1 -
+       (\lambda/\lambda_J)^2)` :e:`is the dispersion relation. In this
+       equation,` :math:`c_{s,{\rm bkg}}^2=\gamma P_{\rm bkg}/\rho_{\rm
+       bkg}` :e:`and` :math:`\lambda_J = c_{s,{\rm bkg}} \sqrt{\pi / (G
+       \rho_{\rm bkg})}`. :e:`Note that the value of` :math:`G` :e:`is
+       directly set by Method:gravity:grav_const`.
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`lambda`
-:Summary: :s:`The wavelength of the wave.`
-:Type:    :t:`float`
-:Default: :d:`1.`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:inclined_wave:amplitude
 
-:e:`This must be a positive value.`
+   :Summary: :s:`Sets the amplitudes of the waves.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.e-6`
+   :Scope:   :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`positive_vel`
-:Summary: :s:`Sets the sign of the wave speed.`
-:Type:    :t:`logical`
-:Default: :d:`true`
-:Scope:   :z:`Enzo`
-
-:e:`Do not specify this parameter when initializing a circularly
-polarized Alfven wave or a Jeans wave. This is ignored for linear HD
-entropy waves when Initial:inclined_wave:parallel_vel is specified.`
+   :e:`This must be a positive value. This has no effect for the circularly
+   polarized Alfven wave (for that case, amplitude is fixed at 0.1).`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`parallel_vel`
-:Summary: :s:`optionally sets the background velocity for HD waves`
-:Type:    :t:`float`
-:Default: :d:`none`
-:Scope:   Enzo
+.. par:parameter:: Initial:inclined_wave:lambda
 
-:e:`This can be used to specify a background velocity along v0 for HD
-linear waves. At present, this parameter should only be specified for
-the hydrodynamic waves.`
+   :Summary: :s:`The wavelength of the wave.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.`
+   :Scope:   :z:`Enzo`
+
+   :e:`This must be a positive value.`
+
+----
+
+.. par:parameter:: Initial:inclined_wave:positive_vel
+
+   :Summary: :s:`Sets the sign of the wave speed.`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`true`
+   :Scope:   :z:`Enzo`
+
+   :e:`Do not specify this parameter when initializing a circularly
+   polarized Alfven wave or a Jeans wave. This is ignored for linear HD
+   entropy waves when Initial:inclined_wave:parallel_vel is specified.`
+
+----
+
+.. par:parameter:: Initial:inclined_wave:parallel_vel
+
+   :Summary: :s:`optionally sets the background velocity for HD waves`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
+
+   :e:`This can be used to specify a background velocity along v0 for HD
+   linear waves. At present, this parameter should only be specified for
+   the hydrodynamic waves.`
 
 merge_sinks_test
 ----------------
@@ -675,26 +755,29 @@ corresponds to one sink particle.
 Note: sink particles must have a ``"mass"`` attribute if this initializer is
 used.
 
-:Parameter:  :p:`Initial` : :p:`merge_sinks_test` : :p:`particle_data_filename`
-:Summary: :s:`Name of the file to read from.`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:merge_sinks_test:particle_data_filename
 
-:e:`Must point to a valid text file, with data arranged in seven columns seperated by blank space`
+   :Summary: :s:`Name of the file to read from.`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
+
+   :e:`Must point to a valid text file, with data arranged in seven columns seperated by blank space`
 
 
 music
 -----
 
-The :p:`music` Initial subgroup is used to read block data from HDF5
-files generated by MUSIC initial conditions generator.  Parameters are
-used to specify the HDF5 files to read from, the names of the HDF5
-datasets, what type of data the datasets contain (``"field"`` or
-``"particle"``), field or particle names, and particle attributes.
-Additionally, a :p:`coords` parameter is used to specify the axis
-ordering used.  The :p:`music` group has its own :p:`list` parameter,
-one for each field or particle type and attribute.
+The :par:paramfmt:`music` Initial subgroup is used to read block data
+from HDF5 files generated by MUSIC initial conditions generator.
+Parameters are used to specify the HDF5 files to read from, the names
+of the HDF5 datasets, what type of data the datasets contain
+(``"field"`` or ``"particle"``), field or particle names, and particle
+attributes.  Additionally, a :par:param:`~Initial:music:<file>:coords`
+parameter is used to specify the axis ordering used.  The
+:par:paramfmt:`music` group has its own
+:par:param:`~Initial:music:list` parameter, one for each field or
+particle type and attribute.
 
 The following example reads the ``"density"`` field from ``"GridDensity"``
 file, and the ``"dark"`` particle ``"position_x"`` attributes from the
@@ -725,122 +808,134 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 	  }
        }
      }
-  
-:Parameter:  :p:`Initial` : :p:`music` : :p:`list`
-:Summary: :s:`Name of the HDF5 to read from`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
 
-:e:`List of file identifiers, one for each field or particle type+attribute.`
+.. par:parameter:: Initial:music:list
 
-----
+   :Summary: :s:`Name of the HDF5 to read from`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
 
-:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`type`
-:Summary: :s:`Type of data to read in`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
-
-:e:`Type of data to read in, either "field" or "particle".`
+   :e:`List of file identifiers, one for each field or particle type+attribute.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`file`
-:Summary: :s:`Name of the HDF5 file to read from`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:music:<file>:type
 
-:e:`Name of the HDF5 file to read from.`
+   :Summary: :s:`Type of data to read in`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`dataset`
-:Summary: :s:`Name of the dataset to read from the the HDF5 file`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
-
-:e:`Name of the dataset to read from the the HDF5 file.`
+   :e:`Type of data to read in, either "field" or "particle".`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`name`
-:Summary: :s:`Name of the field or particle type`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:music:<file>:file
 
-:e:`Name of the field or particle type.`
+   :Summary: :s:`Name of the HDF5 file to read from`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`attribute`
-:Summary: :s:`Name of the particle attribute to initialize`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
-
-:e:`Name of the particle attribute to initialize..`
+   :e:`Name of the HDF5 file to read from.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`coords`
-:Summary: :s:`Ordering of axes in the HDF5 file`
-:Type:    :t:`string`
-:Default: :d:`"zyx"`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:music:<file>:dataset
 
-:e:`String defining the axis ordering of 'x', 'y', and 'z' in the HDF5 file.  For MUSIC initial conditions, which may have 4D datasets, "tzyx" can be used,  where "t" is ignored and can be any character other than 'x', 'y', or 'z'.`
+   :Summary: :s:`Name of the dataset to read from the the HDF5 file`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
+
+   :e:`Name of the dataset to read from the the HDF5 file.`
+
+----
+
+.. par:parameter:: Initial:music:<file>:name
+
+   :Summary: :s:`Name of the field or particle type`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
+
+   :e:`Name of the field or particle type.`
+
+----
+
+.. par:parameter:: Initial:music:<file>:attribute
+
+   :Summary: :s:`Name of the particle attribute to initialize`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
+
+   :e:`Name of the particle attribute to initialize..`
+
+----
+
+.. par:parameter:: Initial:music:<file>:coords
+
+   :Summary: :s:`Ordering of axes in the HDF5 file`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"zyx"`
+   :Scope:   :z:`Enzo`
+
+   :e:`String defining the axis ordering of 'x', 'y', and 'z' in the HDF5 file.  For MUSIC initial conditions, which may have 4D datasets, "tzyx" can be used,  where "t" is ignored and can be any character other than 'x', 'y', or 'z'.`
 
 
 sedov
 -----
 
-:Parameter:  :p:`Initial` : :p:`sedov` : :p:`array`
-:Summary: :s:`Size of array of Sedov blasts`
-:Type:    :t:`list` ( :t:`integer` )
-:Default: :d:`[ 1, 1, 1 ]`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:sedov:array
 
-:e:`This parameter defines the size of the array of Sedov blast waves.  The default is a single blast.`
+   :Summary: :s:`Size of array of Sedov blasts`
+   :Type:    :par:typefmt:`list ( integer )`
+   :Default: :d:`[ 1, 1, 1 ]`
+   :Scope:   :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`sedov` : :p:`radius_relative`
-:Summary: :s:`Initial radius of the Sedov blast`
-:Type:    :t:`float`
-:Default: :d:`0.1`
-:Scope:   Enzo  
-:Todo:    :o:`write`
+   :e:`This parameter defines the size of the array of Sedov blast waves.  The default is a single blast.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`sedov` : :p:`pressure_in`
-:Summary: :s:`Pressure inside the Sedov blast`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     Enzo  
-:Todo:    :o:`write`
+.. par:parameter:: Initial:sedov:radius_relative
+
+   :Summary: :s:`Initial radius of the Sedov blast`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.1`
+   :Scope:   Enzo  
+   :Todo:    :o:`write`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`sedov` : :p:`pressure_out`
-:Summary: :s:`Pressure outside the Sedov blast`
-:Type:    :t:`float`
-:Default: :d:`1.0e-5`
-:Scope:     Enzo  
-:Todo:    :o:`write`
+.. par:parameter:: Initial:sedov:pressure_in
+
+   :Summary: :s:`Pressure inside the Sedov blast`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     Enzo  
+   :Todo:    :o:`write`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`sedov` : :p:`density`
-:Summary: :s:`Density for the Sedov blast array problem`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     Enzo  
-:Todo:    :o:`write`
+.. par:parameter:: Initial:sedov:pressure_out
+
+   :Summary: :s:`Pressure outside the Sedov blast`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0e-5`
+   :Scope:     Enzo  
+   :Todo:    :o:`write`
+
+----
+
+.. par:parameter:: Initial:sedov:density
+
+   :Summary: :s:`Density for the Sedov blast array problem`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     Enzo  
+   :Todo:    :o:`write`
 
 shock_tube
 ----------
@@ -848,70 +943,76 @@ shock_tube
 The :p:`shock_tube` Initial subgroup is used to setup axis-aligned
 shock tube test problems.
 
-Generically, a shock tube get's set up to evolve along an axis given by
-the value of :p:`aligned_ax`. The discontinuity is always placed at
-0.5 along that axis (typically the domain should extend from 0.0 to 1.0).
+Generically, a shock tube get's set up to evolve along an axis given
+by the value of :par:param:`~Initial:shock_tube:aligned_ax`. The
+discontinuity is always placed at 0.5 along that axis (typically the
+domain should extend from 0.0 to 1.0).
 
-:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`setup_name`
-:Summary: :s:`Specifies the name of the shock tube problem to setup.`
-:Type:    :t:`string`
-:Default: :d:`none`
-:Scope:   :z:`Enzo`
+.. par:parameter:: Initial:shock_tube:setup_name
 
-:e:`Valid shock tube problems include:`
+   :Summary: :s:`Specifies the name of the shock tube problem to setup.`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`none`
+   :Scope:   :z:`Enzo`
 
-  * ``"rj2a"`` :e:`An MHD shock tube problem illustrated in Figure 2a of`
-    `Ryu & Jones (1995) <http://adsabs.harvard.edu/abs/1995ApJ...442..228R>`_
-    :e:`. The initialization assumes that the adiabatic index is 5/3.`
-  * ``"sod"`` :e:`The hydrodynamical Sod shock tube test problem. The
-    canonical adiabatic is 1.4 (although this is not required).`
+   :e:`Valid shock tube problems include:`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`aligned_ax`
-:Summary: :s:`Specify the axis along which the shock tube evolves along.`
-:Type:    :t:`string`
-:Default: :d:`x`
-:Scope:   :z:`Enzo`
-
-:e:`Allowed values are` ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`.`
+     * ``"rj2a"`` :e:`An MHD shock tube problem illustrated in Figure 2a of`
+       `Ryu & Jones (1995) <http://adsabs.harvard.edu/abs/1995ApJ...442..228R>`_
+       :e:`. The initialization assumes that the adiabatic index is 5/3.`
+     * ``"sod"`` :e:`The hydrodynamical Sod shock tube test problem. The
+       canonical adiabatic is 1.4 (although this is not required).`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`axis_velocity`
-:Summary: :s:`Value to add to velocity component along aligned_ax`
-:Type:    :t:`float`
-:Default: :d:`0.`
-:Scope:   Enzo
+.. par:parameter:: Initial:shock_tube:aligned_ax
 
-:e:`This value is added throughout the entire domain.`
+   :Summary: :s:`Specify the axis along which the shock tube evolves along.`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`x`
+   :Scope:   :z:`Enzo`
 
-----
-
-:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`transverse_velocity`
-:Summary: :s:`Value to add to a velocity component perpendicular to aligned_ax`
-:Type:    :t:`float`
-:Default: :d:`0.`
-:Scope:   Enzo
-
-:e:`This value is added throughout the entire domain. If aligned_ax is`
-``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`, then this value is added to
-the` ``"velocity_y"`` :e:`,`  ``"velocity_z"`` :e:`, or` ``"velocity_z"``
-:e:`field.`
+   :e:`Allowed values are` ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`flip_initialize`
-:Summary: :s:`Whether to mirror the initial condition across the discontinuity`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:   Enzo
+.. par:parameter:: Initial:shock_tube:axis_velocity
 
-:e:`When this is` ``"true"`` :e:`the entire setup is mirrored across
-the discontinuity. Basically the left and right states are swapped AND
-all components of the magnetic field and velocity (including
-contributions from axis_velocity and transverse_velocity) are
-multiplied by -1.`
+   :Summary: :s:`Value to add to velocity component along aligned_ax`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.`
+   :Scope:   Enzo
+
+   :e:`This value is added throughout the entire domain.`
+
+----
+
+.. par:parameter:: Initial:shock_tube:transverse_velocity
+
+   :Summary: :s:`Value to add to a velocity component perpendicular to aligned_ax`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.`
+   :Scope:   Enzo
+
+   :e:`This value is added throughout the entire domain. If aligned_ax is`
+   ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`, then this value is added to
+   the` ``"velocity_y"`` :e:`,`  ``"velocity_z"`` :e:`, or` ``"velocity_z"``
+   :e:`field.`
+
+----
+
+.. par:parameter:: Initial:shock_tube:flip_initialize
+
+   :Summary: :s:`Whether to mirror the initial condition across the discontinuity`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:   Enzo
+
+   :e:`When this is` ``"true"`` :e:`the entire setup is mirrored across
+   the discontinuity. Basically the left and right states are swapped AND
+   all components of the magnetic field and velocity (including
+   contributions from axis_velocity and transverse_velocity) are
+   multiplied by -1.`
 
 shu_collapse
 ------------
@@ -944,126 +1045,139 @@ except for ``"is_copy"``, which should be of type ``"int64"``.
 
 Sink particles must be in the ``"is_gravitating"`` particle group.
 
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`center`
-:Summary: :s:`The coordinates of the center of the collapse.`
-:Type:    :t:`list` (:t:`float`)
-:Default: :d:`[0.0,0.0,0.0]`
-:Scope:   Enzo
+.. par:parameter:: Initial:shu_collapse:center
 
-:e:`The coordinates of the center of the sphere.`
+   :Summary: :s:`The coordinates of the center of the collapse.`
+   :Type:    :par:typefmt:`list (float)`
+   :Default: :d:`[0.0,0.0,0.0]`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`drift_velocity`
-:Summary: :s:`The initial uniform velocity of the gas.`
-:Type:    :t:`list` (:t:`float`)
-:Default: :d:`[0.0,0.0,0.0]`
-:Scope:   Enzo
-
-:e:`The initial uniform velocity of the gas.`
+   :e:`The coordinates of the center of the sphere.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`truncation_radius`
-:Summary: :s:`The truncation radius of the isothermal sphere.`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:shu_collapse:drift_velocity
 
-:e:`The truncation radius of the isothermal sphere. Within this radius, the gas has an inverse
-square density profile; outside of this radius, the gas density is determined by
-"external_density". Value must be at most a quarter of the domain width.`.
+   :Summary: :s:`The initial uniform velocity of the gas.`
+   :Type:    :par:typefmt:`list (float)`
+   :Default: :d:`[0.0,0.0,0.0]`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`nominal_sound_speed`
-:Summary: :s:`The nominal uniform sound speed of the gas.`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:   Enzo
-
-:e:`Nominal uniform sound speed of the gas used to initialise the total specific energy. In practice the actual sound speed will be different since the adiabatic index is not exactly 1.`
+   :e:`The initial uniform velocity of the gas.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`instability_parameter`
-:Summary: :s:`The instability parameter which determines the gas density profile.`
-:Type:    :t:`float`
-:Default: :d:`2.1`
-:Scope:   Enzo
+.. par:parameter:: Initial:shu_collapse:truncation_radius
 
-Instability parameter - sphere is gravitationally unstable if this is greater than 2.0.
-Determines density profile according to :math:`\rho(r) = \frac{A c_s^2}{4 \pi G r^2}`,
-where :math:`rho` is the gas density, `r` is the distance from the center of the sphere,
-:math:`A` is the instability parameter, :math:`c_s` is the nominal sound speed, and :math:`G`
-is the gravitational constant.
+   :Summary: :s:`The truncation radius of the isothermal sphere.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:   Enzo
 
-----
-
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`external_density`
-:Summary: :s:`The gas density outside of the truncation radius.`
-:Type:    :t:`float`
-:Default: :d:`1.0e-6`
-:Scope:   Enzo
-
-:e:`The gas density outside of the truncation radius. Should be set to something much smaller
-than the gas density just inside the truncation radius.`
+   :e:`The truncation radius of the isothermal sphere. Within this radius, the gas has an inverse
+   square density profile; outside of this radius, the gas density is determined by
+   "external_density". Value must be at most a quarter of the domain width.`.
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`central_sink_exists`
-:Summary: :s:`Controls whether a sink particle is placed at the center in the initial conditions.`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:   Enzo
+.. par:parameter:: Initial:shu_collapse:nominal_sound_speed
 
-:e:`If true, a sink particle is initialised with position at the center of the sphere, and
-velocity equal to "drift_velocity". Its mass is determined by "central_sink_mass".`
+   :Summary: :s:`The nominal uniform sound speed of the gas.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:   Enzo
+
+   :e:`Nominal uniform sound speed of the gas used to initialise the total specific energy. In practice the actual sound speed will be different since the adiabatic index is not exactly 1.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`shu_collapse` : :p:`central_sink_mass`
-:Summary: :s:`The mass of the central sink particle, if it exists.`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:   Enzo
+.. par:parameter:: Initial:shu_collapse:instability_parameter
 
-:e:`If "central_sink_exists" is true, this determines the mass of the central sink particle. If
-false, this parameter is ignored.`
+   :Summary: :s:`The instability parameter which determines the gas density profile.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`2.1`
+   :Scope:   Enzo
+
+   Instability parameter - sphere is gravitationally unstable if this is greater than 2.0.
+   Determines density profile according to :math:`\rho(r) = \frac{A c_s^2}{4 \pi G r^2}`,
+   where :math:`rho` is the gas density, `r` is the distance from the center of the sphere,
+   :math:`A` is the instability parameter, :math:`c_s` is the nominal sound speed, and :math:`G`
+   is the gravitational constant.
+
+----
+
+.. par:parameter:: Initial:shu_collapse:external_density
+
+   :Summary: :s:`The gas density outside of the truncation radius.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0e-6`
+   :Scope:   Enzo
+
+   :e:`The gas density outside of the truncation radius. Should be set to something much smaller
+   than the gas density just inside the truncation radius.`
+
+----
+
+.. par:parameter:: Initial:shu_collapse:central_sink_exists
+
+   :Summary: :s:`Controls whether a sink particle is placed at the center in the initial conditions.`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:   Enzo
+
+   :e:`If true, a sink particle is initialised with position at the center of the sphere, and
+   velocity equal to "drift_velocity". Its mass is determined by "central_sink_mass".`
+
+----
+
+.. par:parameter:: Initial:shu_collapse:central_sink_mass
+
+   :Summary: :s:`The mass of the central sink particle, if it exists.`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
+
+   :e:`If "central_sink_exists" is true, this determines the mass of the central sink particle. If
+   false, this parameter is ignored.`
 
 ----
 
 turbulence
 ----------
 
-:Parameter:  :p:`Initial` : :p:`turbulence` : :p:`density`
-:Summary: :s:`Initial density for turbulence initialization and method`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     Enzo  
+.. par:parameter:: Initial:turbulence:density
 
-:e:`Initial density for initializing the turbulence problem.`
+   :Summary: :s:`Initial density for turbulence initialization and method`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     Enzo  
 
-----
-
-:Parameter:  :p:`Initial` : :p:`turbulence` : :p:`pressure`
-
-:Summary: :s:`Initial pressure for turbulence initialization and method`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:     Enzo  
-
-:e:`Initial pressure for initializing the turbulence problem.  Default is 0.0, meaning it is not used.  Either` `pressure` :e:`or` `temperature` :e:`should be defined, but not both.`
+   :e:`Initial density for initializing the turbulence problem.`
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`turbulence` : :p:`temperature`
-:Summary: :s:`Initial temperature for turbulence initialization and method`
-:Type:    :t:`float`
-:Default: :d:`0.0`
-:Scope:     Enzo  
+.. par:parameter:: Initial:turbulence:pressure
 
-:e:`Initial temperature for initializing the turbulence problem.  Default is 0.0, meaning it is not used.  Either` `pressure` :e:`or` `temperature` :e:`should be defined, but not both.`
+
+   :Summary: :s:`Initial pressure for turbulence initialization and method`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:     Enzo  
+
+   :e:`Initial pressure for initializing the turbulence problem.  Default is 0.0, meaning it is not used.  Either` `pressure` :e:`or` `temperature` :e:`should be defined, but not both.`
+
+----
+
+.. par:parameter:: Initial:turbulence:temperature
+
+   :Summary: :s:`Initial temperature for turbulence initialization and method`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:     Enzo  
+
+   :e:`Initial temperature for initializing the turbulence problem.  Default is 0.0, meaning it is not used.  Either` `pressure` :e:`or` `temperature` :e:`should be defined, but not both.`
+
+.. _vlct_bfield_init:
 
 vlct_bfield
 -----------
@@ -1074,24 +1188,23 @@ CT MHD method. This initializer can be utilized in 2 ways:
   1. Components of the vector potential (``"Ax"``, ``"Ay"``, ``"Az"``)
      can be specified as parameters of the subgroup (functions can be
      specified for each component in the same way as functions are
-     specified for the :p:`value` subgroup. The initializer operates
-     in this mode as long as the values for one of the components of
-     the vector potential is specified (any unspecified components are
-     assumed to be zero everywhere). In this mode, both the
-     cell-centered and face-centered magnetic field values get
+     specified for the :par:paramfmt:`value` subgroup. The initializer
+     operates in this mode as long as the values for one of the
+     components of the vector potential is specified (any unspecified
+     components are assumed to be zero everywhere). In this mode, both
+     the cell-centered and face-centered magnetic field values get
      specified.
 
   2. Initialize the cell-centered values of the magnetic fields after
-     after another Initial subgroup (e.g. the :p:`value` subgroup) has
-     already to specified the face-centered magnetic fields
-     (``"bfieldi_x"``, ``"bfieldi_y"``, ``"bfieldi_z"``). The
+     after another Initial subgroup (e.g. the :par:paramfmt:`value`
+     subgroup) has already to specified the face-centered magnetic
+     fields (``"bfieldi_x"``, ``"bfieldi_y"``, ``"bfieldi_z"``). The
      cell-centered value is just the average of the corresponding
      face-centered component. The initializer operates in this mode if
      none of the components of the vector potential have specified
-     values. (To properly specify use this mode, specify
-     ``"vlct_bfield"`` in the Initial:list parameter list following
-     the name of the Initial subgroup used to setup the face-centered
-     values.
+     values. (To properly use this mode, specify ``"vlct_bfield"`` in
+     :par:param:`Initial:list` **after** the name of the initializer
+     that sets up the face-centered values.
 
 In both modes, the option to update partially initialized
 ``"total_energy"`` fields with the specific magnetic energy computed
@@ -1102,54 +1215,58 @@ from the newly computed cell-centered bfields and pre-initialized
 to initialize cell-centered B-fields from vector potentials for MHD
 integrators that don't require face-centered B-fields*
 
-:Parameter:  :p:`Initial` : :p:`value` : :p:`update_etot` :
-:Summary: :s:`update total energy with the initialized magnetic fields`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:     Enzo
+.. par:parameter:: Initial:vlct_bfield:update_etot
 
-:e:`If true, then the calculated cell-centered magnetic fields are
-used to update the specific total energy. This requires that the`
-``"total_energy"`` :e:`field has already been partially initialized
-(it just doesn't include the specific magnetic energy), and that the`
-``"density"`` :e:`field has been initialized.`
+   :Summary: :s:`update total energy with the initialized magnetic fields`
+   :Type:    :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     Enzo
+
+   :e:`If true, then the calculated cell-centered magnetic fields are
+   used to update the specific total energy. This requires that the`
+   ``"total_energy"`` :e:`field has already been partially initialized
+   (it just doesn't include the specific magnetic energy), and that the`
+   ``"density"`` :e:`field has been initialized.`
 
 
-:Parameter:  :p:`Initial` : :p:`value` : :p:`Ax` :
-:Summary: :s:`Expression for the x-component of the magnetic vector potential`
-:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
-:Default: :d:`[]`
-:Scope:     Enzo
+.. par:parameter:: Initial:vlct_bfield:Ax
 
-:e:`This parameter allows for the direct specification of the x-component of
-the magnetic vector potential (which will be used to compute magnetic fields).
-The arguements for this parameter follow the same sets of rules as the
-parameters of Initial:value. If this parameter is not specified, but the
-values of the other components of the magnetic vector potential are, then
-this component is assumed to be zero everywhere.`
+   :Summary: :s:`Expression for the x-component of the magnetic vector potential`
+   :Type:    :par:typefmt:`list ( float-expr, [ logical-expr, float-expr, [ ... ] ] )`
+   :Default: :d:`[]`
+   :Scope:     Enzo
 
-:Parameter:  :p:`Initial` : :p:`value` : :p:`Ay` :
-:Summary: :s:`Expression for the y-component of the magnetic vector potential`
-:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
-:Default: :d:`[]`
-:Scope:     Enzo
+   :e:`This parameter allows for the direct specification of the x-component of
+   the magnetic vector potential (which will be used to compute magnetic fields).
+   The arguements for this parameter follow the same sets of rules as the
+   parameters of Initial:value. If this parameter is not specified, but the
+   values of the other components of the magnetic vector potential are, then
+   this component is assumed to be zero everywhere.`
 
-:e:`This parameter allows for the direct specification of the y-component of
-the magnetic vector potential (which will be used to compute magnetic fields).
-The arguements for this parameter follow the same sets of rules as the
-parameters of Initial:value. If this parameter is not specified, but the
-values of the other components of the magnetic vector potential are, then
-this component is assumed to be zero everywhere.`
+.. par:parameter:: Initial:vlct_bfield:Ay
 
-:Parameter:  :p:`Initial` : :p:`value` : :p:`Az` :
-:Summary: :s:`Expression for the z-component of the magnetic vector potential`
-:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
-:Default: :d:`[]`
-:Scope:     Enzo
+   :Summary: :s:`Expression for the y-component of the magnetic vector potential`
+   :Type:    :par:typefmt:`list ( float-expr, [ logical-expr, float-expr, [ ... ] ] )`
+   :Default: :d:`[]`
+   :Scope:     Enzo
 
-:e:`This parameter allows for the direct specification of the z-component of
-the magnetic vector potential (which will be used to compute magnetic fields).
-The arguements for this parameter follow the same sets of rules as the
-parameters of Initial:value. If this parameter is not specified, but the
-values of the other components of the magnetic vector potential are, then
-this component is assumed to be zero everywhere.`
+   :e:`This parameter allows for the direct specification of the y-component of
+   the magnetic vector potential (which will be used to compute magnetic fields).
+   The arguements for this parameter follow the same sets of rules as the
+   parameters of Initial:value. If this parameter is not specified, but the
+   values of the other components of the magnetic vector potential are, then
+   this component is assumed to be zero everywhere.`
+
+.. par:parameter:: Initial:vlct_bfield:Az
+
+   :Summary: :s:`Expression for the z-component of the magnetic vector potential`
+   :Type:    :par:typefmt:`list ( float-expr, [ logical-expr, float-expr, [ ... ] ] )`
+   :Default: :d:`[]`
+   :Scope:     Enzo
+
+   :e:`This parameter allows for the direct specification of the z-component of
+   the magnetic vector potential (which will be used to compute magnetic fields).
+   The arguements for this parameter follow the same sets of rules as the
+   parameters of Initial:value. If this parameter is not specified, but the
+   values of the other components of the magnetic vector potential are, then
+   this component is assumed to be zero everywhere.`

@@ -1,3 +1,5 @@
+.. _HydroMHDInfrastructure-page:
+
 ****************************
 Hydro/MHD C++ Infrastructure
 ****************************
@@ -105,7 +107,7 @@ The introduction of this formalism has 2 key benefits:
 
   1. Simplifies calculation of the required ghost depth.
 
-  2. When used alongside ``CelloArray``, it drastically simplifies the
+  2. When used alongside ``CelloView``, it drastically simplifies the
      determination of which indices to iterate over. The
      ``EnzoFieldArrayFactory`` can take the stale depth as an argument
      in its constructor and then all arrays that an instance builds
@@ -243,7 +245,7 @@ The basic unit that get's operated on by these operation classes are
 instances of the ``EnzoEFltArrayMap`` class. As the name may suggest,
 these classes serve as a map/dictionary of instances of
 ``EFlt3DArray`` (or equivalently, instances of
-``CelloArray<enzo_float,3>``). For more details about how to use
+``CelloView<enzo_float,3>``). For more details about how to use
 ``EnzoEFltArrayMap``, see :ref:`EnzoEFltArrayMap-Description`
 
 In the context of this toolkit, the keys of an ``EnzoEFltArrayMap``
@@ -334,118 +336,7 @@ array in the primitive map).
 Equation Of State
 =================
 
-All of the operations related to the equation of state are handled by
-subclasses of the abstract base class, ``EnzoEquationOfState``. The
-class has a number of responsibilities. Currently the only concrete
-subclass of ``EnzoEquationOfState`` is the ``EnzoEOSIdeal`` class
-which encapsulates the properties of an ideal, adiabatic gas. This
-class can optionally support use of the dual-energy formalism (For
-details about the currently expected implementation of the
-dual-energy formalism see the ``"modern"`` section of
-:ref:`using-fluid_props-de` ).
-
-The ``EnzoEquationOfState`` has the following interface:
-
-.. code-block:: c++
-
-   bool is_barotropic();
-
-Returns whether the equation of state is barotropic or not.
-
-*Currently, no barotropic equations of state have been implemented and
-none of the wavespeed calculations for the Riemann solvers currently
-support barotropic equations of state.*
-
-.. code-block:: c++
-
-   bool uses_dual_energy_formalism();
-
-Returns whether the dual energy formalism is in use.
-
-.. code-block:: c++
-
-   enzo_float get_gamma();
-
-Returns the ratio of the specific heats. This is only required to
-yield a reasonable value if the gas is not barotropic.
-
-.. code-block:: c++
-
-   enzo_float get_isothermal_sound_speed();
-
-Returns the isothermal sound speed. This is only required to yield a
-reasonable value for barotropic equations of state.
-
-.. code-block:: c++
-
-   enzo_float get_density_floor();
-
-Returns the density floor.
-
-.. code-block:: c++
-
-   enzo_float get_pressure_floor();
-
-Returns the thermal pressure floor.
-
-.. code-block:: c++
-
-   apply_floor_to_energy_and_sync(EnzoEFltArrayMap &integration_map,
-                                  int stale_depth);
-
-This method applies the applies the pressure floor to the total_energy
-array specified in ``integration_map``. If using the dual-energy formalism
-the floor is also applied to the internal energy (also specified in 
-``integration_map``) and synchronizes the internal energy with the total
-energy. If the equation of state is barotropic, this should do nothing.
-
-.. code-block:: c++
-
-   void pressure_from_integration(const EnzoEFltArrayMap &integration_map,
-                                  const CelloArray<enzo_float, 3> &pressure,
-                                  int stale_depth,
-                                  bool ignore_grackle = false);
-
-This method computes the pressure from the integration quantities
-(stored in ``integration_map``) and stores the result in ``pressure``.
-This wraps the ``EnzoComputePressure`` object whose default behavior
-is to use the Grackle-supplied routine for computing pressure when the
-simulation is configured to use ``EnzoMethodGrackle``. The
-``ignore_grackle`` parameter can be used to avoid using that routine (the
-parameter is meaningless if the Grackle routine would not otherwise
-get used). This parameter's primary purpose is to provide the option
-to suppress the effects of molecular hydrogen on the adiabatic index
-(when Grackle is configured with ``primordial_chemistry > 1``).
-
-.. code-block:: c++
-
-   void primitive_from_integration
-     (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
-      int stale_depth, const std::vector<std::string> &passive_list,
-      bool ignore_grackle = false);
-
-This method is responsible for computing the primitive quantities (to
-be held in ``primitive_map``) from the integration quantities (stored
-in ``integration_map``).  Non-passive scalar quantities appearing in
-both ``integration_map`` and ``primitive_map`` are simply deepcopied
-and passive scalar quantities are converted from conserved-form to
-specific form. For a non-barotropic EOS, this also computes pressure
-(by calling ``EnzoEquationOfState::pressure_from_integration``).
-
-*In the future, it might be worth considering making this into a subclass
-of Cello's ``Physics`` class. If that is done, it may be advisable to
-allow for switching between different dual-energy formalism
-implementations.*
-
-
-How to extend
--------------
-
-New equations of state can be added by subclassing and providing the
-subclass with implementations for the pure virtual functions
-``EnzoEquationOfState``. *Once a second concrete subclass of*
-``EnzoEquationOfState`` *is provided, it may be worthwhile to introduce
-a factory method.*
+All equation of state functionality is described :ref:`here <EOS-Developer-Guide>`.
 
 =============
 Reconstructor
@@ -481,8 +372,8 @@ The main interface function provided by this class is:
 
     void reconstruct_interface
       (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
-       EnzoEFltArrayMap &primr_map, int dim, EnzoEquationOfState *eos,
-       int stale_depth, const std::vector<std::string>& passive_list);
+       EnzoEFltArrayMap &primr_map, int dim, int stale_depth,
+       const std::vector<std::string>& passive_list);
 
 This function takes the cell-centered primtive quantities (specified
 by the contents of ``prim_map``) and computes the left and right
@@ -615,9 +506,9 @@ The main interface function of ``EnzoRiemann`` is:
 
    void solve(const EnzoEFltArrayMap &prim_map_l,
               const EnzoEFltArrayMap &prim_map_r,
-              EnzoEFltArrayMap &flux_map, int dim, EnzoEquationOfState *eos,
+              EnzoEFltArrayMap &flux_map, int dim,
               int stale_depth, const str_vec_t &passive_list,
-              const CelloArray<enzo_float,3> * const interface_velocity) const;
+              const CelloView<enzo_float,3> * const interface_velocity) const;
 
 In this function, the ``prim_map_l`` and ``prim_map_r`` arguments are
 references to the ``EnzoEFltArrayMap`` objects holding the arrays of
@@ -672,9 +563,10 @@ short each kernel:
     unique array indices). See :ref:`EnzoRiemannLUT-section` for
     more details.
 
-  * Specifies the expected equation of state, by specifying the expected
-    type of EOS Struct objects. See :ref:`EOSStructObject-section` for
-    more details about EOS Struct objects.
+  * Specifies the expected type of the equation of state by specifying
+    the expected corresponding EOS class. Follow
+    :ref:`this link <EOSClassDescription-section>` for more details
+    about EOS Struct objects.
 
   * are configured by an instance of ``KernelConfig<EOSStructT>`` (see
     :ref:`KernelConfig-section` for more details).
@@ -841,43 +733,7 @@ density at a single location for an arbitrary lookup table:
      return 0.5(v2*prim[LUT::density] + b2);
    }
 
-
-.. _EOSStructObject-section:
-
-EOSStruct Objects
-~~~~~~~~~~~~~~~~~~
-
-These objects are supposed to be lightweight struct/classes that
-encapsulate an equation of state.  It's also important that these
-objects are cheap to copy. It's our intention to keep these
-independent of the other Riemann Solver tooling (particularly
-``EnzoRiemannLUT``).
-
-Our only concrete example at this time is ``EOSStructIdeal``. But
-this very much expresses the basic idea. The struct provides methods
-that just require density and pressure values to compute:
-
-  * specific internal energy
-  * internal energy density
-  * sound speed
-  * fast magnetosonic speed (this requires magnetic field values to
-    also be specified)
-
-In the future, we may need to slightly revisit the expected signature
-if/when we add support for an isothermal fluid.
-
-.. note::
-
-   At this time, ``EOSStructIdeal`` is completely independent of the
-   ``EnzoEOSIdeal`` subclass of ``EnzoEquationOfState``.
-
-   In the immediate future, there are plans to unify these
-   implementations (the ``EnzoEquationOfState`` machinery will be
-   refactored to make use of these ``EOSStruct`` objects). When that
-   comes to pass, we will flesh out this section in greater detail.
-
-
-    .. _KernelConfig-section:
+.. _KernelConfig-section:
 
 ``KernelConfig<EOSStructT>``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -893,7 +749,7 @@ this class as lightweight as possible to encourage the compiler to
 make similar optimizations. The declaration of ``KernelConfig`` is
 reproduced below:
 
-.. literalinclude:: ../../../src/Enzo/EnzoRiemann/EnzoRiemannImpl.hpp
+.. literalinclude:: ../../../src/Enzo/hydro-mhd/riemann/EnzoRiemannImpl.hpp
    :language: c++
    :start-after: SPHINX-SNIPPET-KERNELCONFIG-START-INCLUDE
    :end-before: SPHINX-SNIPPET-KERNELCONFIG-END-INCLUDE
@@ -1154,7 +1010,7 @@ integration quantities from the start of the timestep (specificed by
       const EnzoEFltArrayMap &dUcons_map,
       EnzoEFltArrayMap &out_integration_map,
       EnzoEFltArrayMap &out_conserved_passive_scalar,
-      EnzoEquationOfState *eos, int stale_depth,
+      int stale_depth,
       const std::vector<std::string> &passive_list) const;
 
 The fields included in ``dUcons_map`` should include contributions
