@@ -39,14 +39,7 @@ CProxy_Block EnzoFactory::new_block_proxy
 {
   CProxy_EnzoBlock enzo_block_array;
 
-  //  CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
-  CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
-
-
-  CkArrayOptions opts;
-  opts.setMap(array_map);
-
-  enzo_block_array = CProxy_EnzoBlock::ckNew(opts);
+  enzo_block_array = CProxy_EnzoBlock::ckNew();
 
   return enzo_block_array;
   

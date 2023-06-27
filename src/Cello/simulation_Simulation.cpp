@@ -12,9 +12,8 @@
 #include "simulation.hpp"
 #include "charm_simulation.hpp"
 
-
 // Write curr/high/highest memory statistics for all processes each cycle
-#define TRACE_PROCESS_MEMORY
+// #define TRACE_PROCESS_MEMORY
 
 // #define DEBUG_SIMULATION
 // #define DEBUG_MSG_REFINE
