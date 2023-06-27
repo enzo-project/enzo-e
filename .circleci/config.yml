@@ -67,7 +67,7 @@ commands:
       - run:
           name: "Install grackle."
           command: |
-            git clone -b master https://github.com/grackle-project/grackle $HOME/grackle
+            git clone -b main https://github.com/grackle-project/grackle $HOME/grackle
             cd $HOME/grackle
             ./configure
             cd src/clib
@@ -134,19 +134,11 @@ commands:
             # remove build directory in case we've already compiled before
             rm -rf build
 
-            # this is used for tests involving Grackle
-            if [[ $USE_GRACKLE == 1 ]]; then
-              GRACKLE_INPUT_DATA_DIR="$HOME/grackle/grackle_data_files/input/"
-            else
-              GRACKLE_INPUT_DATA_DIR=""
-            fi
-
             if [ ! -f << parameters.skipfile >> ]; then
               cmake -DEnzo-E_CONFIG=linux_gcc \
                     -GNinja \
                     -DUSE_DOUBLE_PREC=<< parameters.usedouble >> \
                     -DUSE_GRACKLE=<< parameters.usegrackle >> \
-                    -DGRACKLE_INPUT_DATA_DIR="$GRACKLE_INPUT_DATA_DIR" \
                     -Bbuild \
                     -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" \
                     -DPython3_FIND_VIRTUALENV=ONLY
@@ -206,6 +198,9 @@ commands:
       usedouble:
         type: boolean
         default: false
+      usegrackle:
+        type: boolean
+        default: false
       generate:
         type: boolean
         default: false
@@ -215,6 +210,14 @@ commands:
           command: |
             source $BASH_ENV
             source $HOME/venv/bin/activate
+
+            # do a little setup based on the value of usegrackle:
+            # 1. convert the parameter to an env var storing 0 or 1
+            # 2. if that variable holds true, export GRACKLE_INPUT_DATA_DIR
+            USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
+            if [[ $USE_GRACKLE == 1 ]]; then
+              export GRACKLE_INPUT_DATA_DIR="$HOME/grackle/grackle_data_files/input/"
+            fi
 
             export USE_DOUBLE=<< parameters.usedouble >>
             export GENERATE_TEST_RESULTS=<< parameters.generate >>
@@ -315,12 +318,13 @@ jobs:
 
       - compile-enzoe:
           usedouble: << parameters.usedouble >>
-          tag: gold-standard-001
+          tag: gold-standard-004
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
 
       - run-answer-tests:
           usedouble: << parameters.usedouble >>
+          usegrackle: << parameters.usegrackle >>
           generate: true
 
       - compile-enzoe:
@@ -331,6 +335,7 @@ jobs:
 
       - run-answer-tests:
           usedouble: << parameters.usedouble >>
+          usegrackle: << parameters.usegrackle >>
           generate: false
 
   docs-build:

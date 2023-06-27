@@ -19,6 +19,10 @@ endif()
 #Define project and languages
 project(Enzo-E VERSION 1.0.0 LANGUAGES C CXX Fortran)
 
+# We need C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Don't allow in-source builds
@@ -50,15 +54,13 @@ find_package(Charm REQUIRED)
 # Link executables with the charmc wrapper
 STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
        CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
-# for book-keeping purposes create a library representing the external
-# Charm-library. We are going to make this an interface library (a header-only)
-# library since the charmc wrapper makes sure we link to the correct library
-add_library(CHARM_EXTERNAL INTERFACE)
-target_include_directories(CHARM_EXTERNAL INTERFACE ${CHARM_INCLUDE_DIRS})
 
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
 option(USE_GRACKLE "Use Grackle Chemistry" ON)
+# don't bother advertising the following option (but users can
+# overwrite it if they really want to - e.g. to reduce binary size)
+option(GRACKLE_USE_STATIC_LIBS  "sets Grackle's lib-type if USE_GRACKLE=ON" ON)
 if (USE_GRACKLE)
   find_package(Grackle)
   if (Grackle_FOUND)
@@ -292,10 +294,13 @@ if (use_papi)
   endif()
 endif()
 
-option(USE_SIMD "Use OpenMP SIMD directives. Also enables value-unsafe floating-point optimizations which may already be enable on some compilers (like icc)." OFF)
-include("cmake/EnableOMPSIMD.cmake")
-if (USE_SIMD)
-  enableOMPSIMD()
+option(OPTIMIZE_FP "Enables value-unsafe floating-point optimizations (this may already be enabled on some compilers like icc)." OFF)
+option(USE_SIMD "Use OpenMP SIMD directives. This may already be enabled on some compilers (like icc)." OFF)
+include("cmake/EnableFPOptimizations.cmake")
+if (OPTIMIZE_FP)
+  enableFPOptimizations(USE_SIMD)
+elseif (USE_SIMD)
+  message(FATAL_ERROR "Can only use `USE_SIMD=ON` when `OPTIMIZE_FP=ON`.")
 endif()
 
 # Include machine file second time (if used initially) to set additional options that may depend

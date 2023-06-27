@@ -23,7 +23,7 @@
 #include "_io.hpp"
 #include "_compute.hpp"
 #include "_simulation.hpp"
-#include "_array.hpp"
+#include "_view.hpp"
 
 #include "_data.hpp"
 

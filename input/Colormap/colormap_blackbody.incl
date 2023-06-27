@@ -1,9 +1,4 @@
 # File:    colormap_blackbody.incl
 
- colormap = [
-              0.0, 0.0, 0.0,
-              1.0, 0.0, 0.0,
-              1.0, 1.0, 0.0,
-	      1.0, 1.0, 1.0
-            ];
+ colormap = [ "black", "red", "yellow", "white" ];
 

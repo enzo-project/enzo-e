@@ -17,6 +17,8 @@ Enzo-E methods.
 
 Specifies cosmological parameters
 
+.. _user-fluid_props:
+
 ``"fluid_props"``
 =================
 
@@ -60,19 +62,19 @@ The relevant parameters are listed below:
      - Type
      - Default
      - Description
-   * - ``"type"``
+   * - :par:param:`~Physics:fluid_props:dual_energy:type`
      - `string`
      - ``"disabled"``
      - choice of formalism: ``"disabled"``, ``"bryan95"``, ``"modern"``
-   * - ``"eta"``
+   * - :par:param:`~Physics:fluid_props:dual_energy:eta`
      - `list(float)`
      - `-`
-     - Interpretation (and defaults) depend on value of ``"type"``
+     - Interpretation (and defaults) depend on value of :par:param:`~Physics:fluid_props:dual_energy:type`
 
-When ``type`` is ``disabled``, the simulation runs without the dual-energy formalism
-This is the default configuration and in this case, the ``eta`` parameter should **NOT** be specified.
+When :par:param:`~Physics:fluid_props:dual_energy:type` is ``"disabled"``, the simulation runs without the dual-energy formalism
+This is the default configuration and in this case, the :par:param:`~Physics:fluid_props:dual_energy:eta` parameter should **NOT** be specified.
 
-The other two choices for ``type`` refer to two variants of the dual-energy formalism that we describe below.
+The other two choices for :par:param:`~Physics:fluid_props:dual_energy:type` refer to two variants of the dual-energy formalism that we describe below.
 
 ``"bryan95"`` variant
 ~~~~~~~~~~~~~~~~~~~~~
@@ -81,13 +83,13 @@ This is the original formulation of the dual-energy formalism described in
 <https://ui.adsabs.harvard.edu/abs/1995CoPhC..89..149B>`_.
 It is used by the ``"ppm"`` solver and it is parameterized by two values: :math:`\eta_1\, \&\, \eta_2`.
 
-``fluid_props:dual_energy:eta`` expects a list of 2 entries: :math:`[\eta_1, \eta_2]` (users are **NOT** permitted to provide a single entry).
+:par:param:`Physics:fluid_props:dual_energy:eta` expects a list of 2 entries: :math:`[\eta_1, \eta_2]` (users are **NOT** permitted to provide a single entry).
 When this parameter isn't specified, it defaults to ``[0.001, 0.1]``.
 
 ``"modern"`` variant
 ~~~~~~~~~~~~~~~~~~~~
 This implementation is used by the ``"mhd_vlct"`` solver and it more closely resembles the implementation employed in Enzo's Runge–Kutta integrator than the  ``"bryan95"`` variant.
-This variant is parameterized by a single value: :math:`eta`, and thus ``fluid_props:dual_energy:eta`` should only provide a single entry.
+This variant is parameterized by a single value: :math:`\eta`, and thus :par:param:`Physics:fluid_props:dual_energy:eta` should only provide a single entry.
 
 There are 3 primary differences from the ``"bryan95"`` variant:
 
@@ -138,15 +140,15 @@ In the future, further EOS customization will be supported in this section
      - Type
      - Default
      - Description
-   * - ``"gamma"``
+   * - :par:param:`~Physics:fluid_props:eos:gamma`
      - `float`
      - ``5.0/3.0``
      - Adiabatic index (a.k.a. the ratio of specific heats)
 
 See :ref:`using-grackle-gamma-with-HD` for further discussion about
 how the equation of state is handled when
-``Method:grackle:primordial_chemistry > 1`` (under these conditions
-Grackle models a spatially varying adiabatic index).
+:par:param:`Method:grackle:primordial_chemistry` exceeds ``1`` (under
+these conditions Grackle models a spatially varying adiabatic index).
 
 .. _using-fluid_props-floors:
 
@@ -163,25 +165,25 @@ The ``"fluid_props:floors"`` subsection is used for specifying the floors of dif
      - Type
      - Default
      - Description
-   * - ``"density"``
+   * - :par:param:`~Physics:fluid_props:floors:density`
      - `float`
      - `-`
      - The floor to apply to the ``"density"`` field.
-   * - ``"pressure"``
+   * - :par:param:`~Physics:fluid_props:floors:pressure`
      - `float`
      - `-`
      - The floor to apply to the ``"pressure"`` field.
-   * - ``"temperature"``
+   * - :par:param:`~Physics:fluid_props:floors:temperature`
      - `float`
      - `-`
      - The floor to apply to the ``"temperature"`` field.
-   * - ``"metallicity"``
+   * - :par:param:`~Physics:fluid_props:floors:metallicity`
      - `float`
      - `-`
      - This multiplied by the ``"density"`` field and ``enzo_constants::metallicity_solar`` gives the floor for the ``"metal_density"`` field.
 
 See :ref:`using-methods` for discussions of the floors that are actually used by a given method.
-Be mindful that unlike the other parameters, the ``"metallicity"`` doesn't directly specify the floor for a fluid field (the actual floor depends on other quantities).
+Be mindful that unlike the other parameters, the :par:param:`~Physics:fluid_props:floors:metallicity` parameter doesn't directly specify the floor for a fluid field (the actual floor depends on other quantities).
 
 .. note::
 

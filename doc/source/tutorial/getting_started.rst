@@ -135,6 +135,8 @@ This can be done with the following commands:
 
 This is **NOT** a requirement for building and running Enzo-E, but it is used in some tests.
 
+.. _how-to_configure_build:
+
 Configuring/Building
 ====================
 
@@ -160,6 +162,7 @@ See the following subsection for more configuration options.
         -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
   make -j4 # -j4 tells make to execute up to 4 commands in parallel
 
+To build on a Mac, you should only need to replace ``linux_gcc`` with ``darwin_clang``.
 
 Note, if ``ninja`` is installed, the ``ninja`` build system can be used for faster build times.
 This is done by adding ``-GNinja`` to the ``cmake`` command (before the ``..``) and calling ``ninja`` afterwards instead of ``make``.
@@ -169,40 +172,181 @@ The Enzo-E executable is built within ``bin/``.
 Configuration options
 ---------------------
 
-Current ``cmake`` options are the following (default value at the end of the line):
+Current ``cmake`` options are listed in the following subsubsections.
+Skip ahead to :ref:`how_to_specify_the_configuration` for details about how to specify the configuration.
 
-* ``USE_GRACKLE`` "Use Grackle Chemistry" ON
-* ``USE_DOUBLE_PREC`` "Use double precision. Turn off for single precision." ON
-* ``new_output`` "Temporary setting for using new Output implementation" OFF
-* ``node_size`` "Maximum number of procesess per shared-memory node (can be larger than needed)" 64
-* ``trace`` "Print out detailed messages with the TRACE() series of statements" OFF
-* ``verbose`` "Trace main phases" OFF
-* ``trace_charm`` "Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements" OFF
-* ``debug`` "Whether to enable displaying messages with the DEBUG() series of
-  statements. Also writes messages to out.debug.<P> where P is the
-  (physical) process rank. Still requires the \"DEBUG\" group to be
-  enabled in Monitor (that is Monitor::is_active(\"DEBUG\") must be true for any output) OFF
-* ``debug_field`` "" OFF
-* ``debug_field_face`` "" OFF
-* ``check`` "Do extra run-time checking.  Useful for debugging, but can potentially slow calculations down" OFF
-* ``debug_verbose`` "Print periodically all field values.  See src/Field/field_FieldBlock.cpp" OFF
-* ``memory`` "Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override new [] () / delete [] ()" OFF
-* ``balance`` "Enable charm++ dynamic load balancing" ON`
-* ``balancer_included`` "Charm++ load balancer included" "CommonLBs"
-* ``balancer_default`` "Charm++ load balancer to use by default" "TreeLB"
-* ``use_gprof`` "Compile with -pg to use gprof for performance profiling" OFF
-* ``use_performance`` "Use Cello Performance class for collecting performance
-  data (currently requires global reductions, and may not be fully
-  functional) (basic time data on root processor is still output)" ON
-* ``use_projections`` "Compile the CHARM++ version for use with the Projections performance tool." OFF
-* ``use_jemalloc`` "Use the jemalloc library for memory allocation" OFF
-* ``smp`` "Use Charm++ in SMP mode." OFF
-* ``use_papi`` "Use the PAPI performance API" OFF
-* ``PARALLEL_LAUNCHER`` "Launcher to use for parallel tests" `charmrun`
-* ``PARALLEL_LAUNCHER_NPROC_ARG`` "Argument to set number of processing elements for parallel launcher" ``+p`` (for use with ``charmrun``)
-* ``PARALLEL_LAUNCHER_NPROC`` "Number of processors to run parallel unit tests" 4
+General Configuration
+^^^^^^^^^^^^^^^^^^^^^
 
-All variables can be set either on the commad line by ``-D<variable>=<value>`` or
+These options are related to Enzo-E's general configuration.
+
+.. list-table:: General Configuration
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_DOUBLE_PREC``
+     - Use double precision. Turn off for single precision.
+     - ON
+   * - ``new_output``
+     - Temporary setting for using new Output implementation
+     - OFF
+   * - ``node_size``
+     - Maximum number of procesess per shared-memory node (can be larger than needed)
+     - 64
+   * - ``smp``
+     - Use Charm++ in SMP mode (Charm++ must have been compiled to support SMP mode).
+     - OFF
+   * - ``balance``
+     - Enable charm++ dynamic load balancing
+     - ON
+   * - ``balancer_included``
+     - Charm++ load balancer included
+     - "CommonLBs"
+   * - ``balancer_default``
+     - Charm++ load balancer to use by default
+     - "TreeLB"
+
+Configuring Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The parameters in the following table control whether ``Enzo-E / Cello`` should make use of certain external dependencies.
+These options all assume that ``cmake`` is succesfully able to find the location of these dependencies.
+In some cases, you may need to provide additional hints about the location of the dependencies (see :ref:`how_to_specify_the_configuration` for more details)
+
+.. list-table:: External Dependencies
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_GRACKLE``
+     - Use Grackle Chemistry
+     - ON
+   * - ``use_jemalloc``
+     - Use the jemalloc library for memory allocation
+     - OFF
+   * - ``use_papi``
+     - Use the PAPI performance API
+     - OFF
+
+Floating-Point Optimization Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Generally, ``Enzo-E / Cello`` will not be compiled with value-unsafe floating point optimizations unless they are explicitly enabled.
+This default behavior was chosen to support automated tests that check symmetry preservation in certain components of the code (mostly related to hydro/MHD).
+While this feature is not essential for all applications, it is very useful when debugging new features.
+
+Note that the Intel compilers deviate from this behavior. By default, they enable more aggressive floating point optimizations by default (consequently the tests checking symmetry may fail). This is a large part of the reason that the Intel compilers have a reputation for producing faster code (in practice, this is not always the case).
+
+.. list-table:: Floating point optimizations
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``OPTIMIZE_FP``
+     - Enable value-unsafe floating point optimizations (for some compilers, this enables ``-ffast-math``).
+     - OFF
+   * - ``USE_SIMD``
+     - Enables compiler support for OpenMP SIMD directives (for ``gcc``, ``icc``, and ``clang`` compilers this will NOT enable other OpenMP directives and should not link the openmp runtime library). Enabling this requires that ``OPTIMIZE_FP=ON``.
+     - OFF
+
+
+Profiling Options
+^^^^^^^^^^^^^^^^^
+These options control compilation choices that can be used to facillitate profiling in ``Enzo-E / Cello``
+
+.. list-table:: Profile-Related Configuration
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``memory``
+     - Track dynamic memory statistics.  Can be useful, but can cause problems on some systems that also override ``new [] ()`` / ``delete [] ()``
+     - OFF
+   * - ``use_gprof``
+     - Compile with -pg to use gprof for performance profiling
+     - OFF
+   * - ``use_performance``
+     - Use Cello Performance class for collecting performance data (currently requires global reductions, and may not be fully functional) (basic time data on root processor is still output)
+     - ON
+   * - ``use_projections``
+     - Compile the CHARM++ version for use with the Projections performance tool.
+     - OFF
+
+Testing Options
+^^^^^^^^^^^^^^^
+
+These options configure properties of parallel automated tests.
+
+.. list-table:: Testing-Related Configuration
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``PARALLEL_LAUNCHER``
+     - Launcher to use for parallel tests
+     - charmrun
+   * - ``PARALLEL_LAUNCHER_NPROC_ARG``
+     - Argument to set number of processing elements for parallel launcher (for use with ``charmrun``)
+     - +p
+   * - ``PARALLEL_LAUNCHER_NPROC``
+     - Number of processors to run parallel unit tests
+     - 4
+
+Debugging Options
+^^^^^^^^^^^^^^^^^
+
+The following options are useful for debugging.
+       
+.. list-table:: Debug Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``check``
+     - Do extra run-time checking.  Useful for debugging, but can potentially slow calculations down
+     - OFF
+   * - ``debug``
+     - Whether to enable displaying messages with the DEBUG() series of statements. Also writes messages to out.debug.<P> where P is the (physical) process rank. Still requires the "DEBUG" group to be enabled in ``Monitor`` (that is ``Monitor::is_active("DEBUG")`` must be true for any output)
+     - OFF
+   * - ``debug_field``
+     -
+     - OFF
+   * - ``debug_field_face``
+     -
+     - OFF
+
+   * - ``debug_verbose``
+     - Print periodically all field values.  See ``src/Field/field_FieldBlock.cpp``
+     - OFF
+   * - ``trace``
+     - Print out detailed messages with the TRACE() series of statements
+     - OFF
+   * - ``trace_charm``
+     - Print out messages with the TRACE_CHARM() and TRACEPUP() series of statements
+     - OFF
+   * - ``verbose``
+     - Trace main phases
+     - OFF
+
+.. _how_to_specify_the_configuration:
+
+Specifying Configuration Options
+--------------------------------
+
+All variables can be set either on the command line by ``-D<variable>=<value>`` or
 in a machine config, see below.
 For example, a configure line may look like
 
@@ -227,15 +371,15 @@ Note:
 
 The last option is a machine specific configuration file (see below).
 
-In addition, the general `cmake` option to set basic optimization flags via
-``CMAKE_BUILD_TYPE`` with values of
+In addition, the general `cmake` option is available to set basic optimization flags via ``CMAKE_BUILD_TYPE`` with values of:
 
-* ``Release`` (typically ``-O3``),
-* ``RelWithDebInfo`` (typically ``-O2 -g``), and
+* ``Release`` (typically ``-O3``)
+* ``RelWithDebInfo`` (typically ``-O2 -g``)
 * ``Debug`` (typically ``-O0 -g``)
 
-are available.
+The first choice is generally fastest, while the second is a sensible choice during development (the compiler performs most optimizations and includes debugging information in the executable)
 
+Note that setting ``-DOPTIMIZE_FP=ON`` will modify each of these build types to include value-unsafe floating point optimizations.
 
 
 Machine files
@@ -291,7 +435,7 @@ If errors like
     Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password,hostbased).
     Charmrun> Error 255 returned from remote shell (localhost:0)
 
-are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by add ``++local`` to ``charmrun``, e.g.:
+are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by adding ``++local`` to ``charmrun``, e.g.:
 
      ``~/Charm/bin/charmrun ++local +p4 bin/enzo-e input/HelloWorld/Hi.in``
 
