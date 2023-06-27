@@ -57,53 +57,33 @@ void Block::stopping_begin_()
 
   if (stopping_reduce || dt_==0.0) {
 
-    // Compute local dt
+    // Compute dt_ik for block i and method k
 
     Problem * problem = simulation->problem();
 
-    int index = 0;
-    Method * method;
-    double dt_block = std::numeric_limits<double>::max();
-    while ((method = problem->method(index++))) {
-      dt_block = std::min(dt_block,method->timestep(this));
-    }
-
-    // Reduce timestep to coincide with scheduled output if needed
-
-    int index_output=0;
-    while (Output * output = problem->output(index_output++)) {
-      Schedule * schedule = output->schedule();
-      dt_block = schedule->update_timestep(time_,dt_block);
-    }
-
-    // Reduce timestep to not overshoot final time from stopping criteria
-
-    Stopping * stopping = problem->stopping();
-
-    double time_stop = stopping->stop_time();
-    double time_curr = time_;
-
-    dt_block = MIN (dt_block, (time_stop - time_curr));
+    //    allocate reduction vector for stopping criteria plus method dt
+    const int n = 1 + problem->num_methods();
+    std::vector<double> min_reduce(n);
 
     // Evaluate local stopping criteria
 
-    int stop_block = stopping->complete(cycle_,time_);
+    Stopping * stopping = problem->stopping();
+    const int stop_block = stopping->complete(cycle_,time_);
+    min_reduce[0] = stop_block ? 1.0 : 0.0;
 
-    // Reduce to find Block array minimum dt and stopping criteria
-
-    double min_reduce[2];
-
-    min_reduce[0] = dt_block;
-    min_reduce[1] = stop_block ? 1.0 : 0.0;
+    // Evaluate dt for each method k
+    for (int k=0; k<problem->num_methods(); k++) {
+      min_reduce[k+1] = problem->method(k)->timestep(this);
+    }
 
     CkCallback callback (CkIndex_Block::r_stopping_compute_timestep(NULL),
 			 thisProxy);
 
-#ifdef TRACE_CONTRIBUTE    
+#ifdef TRACE_CONTRIBUTE
     CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
 	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
-#endif    
-    contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
+#endif
+    contribute(n*sizeof(double), &min_reduce[0], CkReduction::min_double, callback);
 
   } else {
 
@@ -118,22 +98,44 @@ void Block::stopping_begin_()
 void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
   performance_start_(perf_stopping);
-  
   TRACE_STOPPING("Block::r_stopping_compute_timestep");
-  
   ++age_;
 
   double * min_reduce = (double * )msg->getData();
 
+  stop_ = min_reduce[0] == 1.0 ? true : false;
+
   dt_   = min_reduce[0];
-  stop_ = min_reduce[1] == 1.0 ? true : false;
+  Simulation * simulation = cello::simulation();
+  Problem * problem = simulation->problem();
+  std::vector<double> dt_method(problem->num_methods());
+  dt_ = std::numeric_limits<double>::max();
+  for (int k=0; k<problem->num_methods(); k++) {
+    dt_method[k] = min_reduce[k+1];
+    dt_ = std::min(dt_,dt_method[k]);
+    CkPrintf ("TRACE_DT method %d dt %g\n",k,dt_method[k]);
+  }
 
   delete msg;
 
-  Simulation * simulation = cello::simulation();
-
   dt_ *= Method::courant_global;
-  
+
+  // adjust dt_ to align with any scheduled output times
+  int index_output=0;
+  while (Output * output = problem->output(index_output++)) {
+    Schedule * schedule = output->schedule();
+    dt_ = schedule->update_timestep(time_,dt_);
+  }
+
+  // Reduce timestep to not overshoot final time from stopping criteria
+
+  Stopping * stopping = problem->stopping();
+
+  double time_stop = stopping->stop_time();
+  double time_curr = time_;
+
+  dt_ = std::min (dt_, (time_stop - time_curr));
+
   set_dt   (dt_);
   set_stop (stop_);
 
