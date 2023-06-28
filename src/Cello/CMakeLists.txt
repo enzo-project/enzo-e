@@ -151,6 +151,7 @@ add_library(cello_component ${CELLO_COMP_SRC_FILES})
 setupCelloLibHelper(cello_component)
 target_link_libraries (cello_component
   PUBLIC CHARM::CHARM_HEADERS # charm++.h included in public header
+  PRIVATE Boost::filesystem
   PRIVATE charm_component error simulation # these private dependencies arise
                                            # from source files
 )
@@ -210,8 +211,8 @@ target_link_libraries(error
 
 addCelloLib(io "")
 target_link_libraries(io
-  PUBLIC Boost::filesystem pngwriter # with minimal refactoring, we could make
-                                     # these into private dependencies
+  PUBLIC pngwriter # with minimal refactoring, we could convert this into a
+                   # private dependency
   PUBLIC cello_component charm_component parallel monitor performance error
          parameters disk problem compute mesh view data simulation
 )

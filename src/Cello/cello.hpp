@@ -804,8 +804,16 @@ namespace cello {
   (const std::vector <std::string> * file_name,
    int counter, int cycle, double time);
 
-  /// Return the path for this file group output.  Creates
-  /// the subdirectories if they don't exist
+  /// Create a directory if it doesn't already exist (returns whether it
+  /// already existed)
+  bool ensure_directory_exists(const std::string& dir_name);
+
+  /// Return the path to the subdirectory specified by the given format and
+  /// arguments this file group output and creates the subdirectory if it
+  /// doesn't already exist.
+  ///
+  /// In the event that path_name doesn't specify a path, the path to the
+  /// current directory, ".", is returned
   std::string create_directory
   (const std::vector <std::string> * path_name,
    int counter, int cycle, double time, bool & already_exists);
