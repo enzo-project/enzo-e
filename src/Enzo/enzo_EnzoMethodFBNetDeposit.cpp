@@ -32,6 +32,7 @@ EnzoMethodFBNetDeposit::EnzoMethodFBNetDeposit ()
 
   int nb = cello::num_blocks_process();
   enzo::simulation()->set_sync_fbnet_count(nb);
+  enzo::simulation()->set_sync_fbnet_update(nb);
 }
 
 //----------------------------------------------------------------------
@@ -50,13 +51,10 @@ void EnzoMethodFBNetDeposit::pup (PUP::er &p)
 
 void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
 {
-  // make sure all blocks on this PE finish before 
-  // going to next step
-  //int nb = cello::num_blocks_process();
-  //Sync * sync_block = psync_block_(block);
+  int nb = cello::num_blocks_process();
 
-  //sync_block->reset();
-  //sync_block->set_stop(nb);
+  enzo::simulation()->set_sync_fbnet_count(nb);
+  enzo::simulation()->set_sync_fbnet_update(nb);
 
   EnzoBlock * enzo_block = enzo::block(block);
   
@@ -198,7 +196,6 @@ void EnzoSimulation::p_fbnet_concatenate_sphere_lists()
         contribute(n, sphere_arr, CkReduction::set, callback);
     }
 
-    sync_fbnet_count_.reset();
   } // if sync
 }
 
@@ -218,10 +215,17 @@ void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg)
   }
 
   // TODO: Add another sync counter here?
+  //if (enzo::simulation()->sync_fbnet_update_next()) {
+
   // clear sphere list attached to simulation object
   enzo::simulation()->method_fbnet_clear_sphere_list();
+  // reset synchronization counters
+  enzo::simulation()->reset_sync_fbnet_count();
+  enzo::simulation()->reset_sync_fbnet_update();
 
   compute_done();
+
+  //}
 }
 
 //-----------------------------------

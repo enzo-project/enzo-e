@@ -82,6 +82,15 @@ public: // functions
 
   void set_sync_fbnet_count(int count)
   { sync_fbnet_count_.set_stop(count); }
+  void reset_sync_fbnet_count()
+  { sync_fbnet_count_.reset(); }
+
+  void set_sync_fbnet_update(int count)
+  { sync_fbnet_update_.set_stop(count); }
+  void reset_sync_fbnet_update()
+  { sync_fbnet_update_.reset(); }
+  bool sync_fbnet_update_next()
+  { CkPrintf("update counter = %d\n", sync_fbnet_update_.value()); return sync_fbnet_update_.next(); }
 
   void p_io_reader_created();
 
@@ -142,6 +151,7 @@ private: // attributes
   std::vector<std::string> check_directory_;
   /// Count total blocks on process before reduction in EnzoMethodFBNetDeposit
   Sync                     sync_fbnet_count_;
+  Sync                     sync_fbnet_update_;
 
   /// Balance Method synchronization
   Sync sync_method_balance_;

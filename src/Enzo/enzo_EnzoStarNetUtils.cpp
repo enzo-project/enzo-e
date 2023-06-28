@@ -49,7 +49,7 @@ FBNet::FBNet ()
   Nstar_mean_ = 1.311; // log-mean number of stars per population (used for tokenization)
   Nstar_std_ = 0.352;
   
-std::string weights_file = "/home1/07320/whick002/enzo-e_inference/input/FBNet_inputs/regression_weights_" + std::to_string(model_time_) + ".txt";
+  std::string weights_file = "/home1/07320/whick002/enzo-e_inference/input/FBNet_inputs/regression_weights_" + std::to_string(model_time_) + ".txt";
   std::vector<std::vector<double>*> regression_vars = {&M0_, &M1_, &M2_, &M3_};
   read_file(weights_file, &regression_vars);
 
