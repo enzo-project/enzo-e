@@ -1007,7 +1007,7 @@ Output * Problem::create_output_
                                   config->output_image_size[index][1] };
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
-    std::string image_mesh_order  = config->output_image_mesh_order[index];
+    std::string image_mesh_scalar = config->output_image_mesh_scalar[index];
     std::string image_color_particle_attribute =
       config->output_image_color_particle_attribute[index];
     double      image_min = config->output_image_min[index];
@@ -1038,7 +1038,7 @@ Output * Problem::create_output_
 			      image_size,
 			      image_reduce_type,
 			      image_mesh_color,
-			      image_mesh_order,
+			      image_mesh_scalar,
 			      image_color_particle_attribute,
 			      image_lower, image_upper,
 			      image_face_rank,

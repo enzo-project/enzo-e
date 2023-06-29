@@ -37,6 +37,7 @@ MethodOrderMorton::MethodOrderMorton(int min_level) throw ()
   const int n = cello::num_children();
   is_index_        = cello::scalar_descr_long_long()->new_value(name() + ":index");
   is_count_        = cello::scalar_descr_long_long()->new_value(name() + ":count");
+  is_ratio_         = cello::scalar_descr_double()->new_value(name() + ":ratio");
   is_next_         = cello::scalar_descr_index()->new_value(name() + ":next");
   is_weight_       = cello::scalar_descr_long_long()->new_value(name() + ":weight");
   is_weight_child_ = cello::scalar_descr_long_long()->new_value(name() + ":weight_child",n);
@@ -224,6 +225,12 @@ void Block::r_method_order_morton_complete(CkReductionMsg * msg)
 
 void MethodOrderMorton::compute_complete(Block * block)
 {
+  long long index = *pindex_(block);
+  long long count = *pcount_(block);
+  double & ratio = *pratio_(block);
+
+  ratio = (count != 0) ? index/count : -1;
+
   block->compute_done();
 }
 
@@ -233,7 +240,7 @@ void MethodOrderMorton::compute_complete(Block * block)
 long long * MethodOrderMorton::pindex_(Block * block)
 {
   Scalar<long long> scalar(cello::scalar_descr_long_long(),
-                     block->data()->scalar_data_long_long());
+                    block->data()->scalar_data_long_long());
   return scalar.value(is_index_);
 }
 
@@ -242,8 +249,17 @@ long long * MethodOrderMorton::pindex_(Block * block)
 long long * MethodOrderMorton::pcount_(Block * block)
 {
   Scalar<long long> scalar(cello::scalar_descr_long_long(),
-                     block->data()->scalar_data_long_long());
+                    block->data()->scalar_data_long_long());
   return scalar.value(is_count_);
+}
+
+//----------------------------------------------------------------------
+
+double * MethodOrderMorton::pratio_(Block * block)
+{
+  Scalar<double> scalar(cello::scalar_descr_double(),
+                 block->data()->scalar_data_double());
+  return scalar.value(is_ratio_);
 }
 
 //----------------------------------------------------------------------

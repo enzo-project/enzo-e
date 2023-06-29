@@ -34,6 +34,7 @@ public: // interface
     Method::pup(p);
     p | is_index_;
     p | is_count_;
+    p | is_ratio_;
     p | is_next_;
     p | is_weight_;
     p | is_weight_child_;
@@ -65,6 +66,9 @@ private: // methods
   /// Return the pointer to the number of Block indices
   long long * pcount_(Block * block);
 
+  /// Return the ratio of index to count
+  double * pratio_(Block * block);
+  
   /// Return the pointer to the Index of the "next" block
   Index * pnext_(Block * block);
 
@@ -91,6 +95,8 @@ private: // attributes
   int is_index_;
   /// Block Scalar<int> count
   int is_count_;
+  /// Block Scalar<double> ratio
+  int is_ratio_;
   /// Block Scalar<Index> next
   int is_next_;
   /// Block Scalar<int> weight (#decendent blocks + self)

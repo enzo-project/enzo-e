@@ -23,6 +23,8 @@
 
 // #define DEBUG_STOPPING
 
+#define TRACE_DT
+
 #ifdef DEBUG_STOPPING
 #   define TRACE_STOPPING(A)					\
   CkPrintf ("%d %s:%d %s TRACE %s\n",					\
@@ -113,12 +115,37 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   for (int k=0; k<problem->num_methods(); k++) {
     dt_method[k] = min_reduce[k+1];
     dt_ = std::min(dt_,dt_method[k]);
-    CkPrintf ("TRACE_DT method %d dt %g\n",k,dt_method[k]);
+#ifdef TRACE_DT
+    if (index().is_root() && dt_method[k] < std::numeric_limits<double>::max()) {
+      CkPrintf ("TRACE_DT method %d %s %g\n",
+                k,problem->method(k)->name().c_str(),dt_method[k]);
+#endif
+    }
   }
 
   delete msg;
 
+#ifdef TRACE_DT
+  if (index().is_root()) CkPrintf ("TRACE_DT base dt %g\n",dt_);
+#endif
+
   dt_ *= Method::courant_global;
+
+#ifdef TRACE_DT
+  if (index().is_root()) CkPrintf ("TRACE_DT final dt %g\n",dt_);
+#endif
+
+  // Quantize timestep: find largest k st 2**k <= dt_
+  if (index().is_root()) {
+    double dt = dt_;
+    int k=0;
+    while (dt < 1) { dt*=2; --k; }
+    while (dt >=2) { dt/=2; ++k; }
+#ifdef TRACE_DT
+    CkPrintf ("TRACE_DT final bits %d\n",k);
+#endif
+  }
+
 
   // adjust dt_ to align with any scheduled output times
   int index_output=0;

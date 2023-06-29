@@ -121,7 +121,8 @@ public: // interface
     output_image_log(),
     output_image_abs(),
     output_image_mesh_color(),
-    output_image_mesh_order(),
+    output_image_mesh_scalar(),
+    output_image_mesh_scalar_index(),
     output_image_color_particle_attribute(),
     output_image_size(),
     output_image_reduce_type(),
@@ -296,7 +297,8 @@ public: // interface
       output_image_log(),
       output_image_abs(),
       output_image_mesh_color(),
-      output_image_mesh_order(),
+      output_image_mesh_scalar(),
+      output_image_mesh_scalar_index(),
       output_image_color_particle_attribute(),
       output_image_size(),
       output_image_reduce_type(),
@@ -534,7 +536,8 @@ public: // attributes
   std::vector < char >        output_image_log;
   std::vector < char >        output_image_abs;
   std::vector < std::string > output_image_mesh_color;
-  std::vector < std::string > output_image_mesh_order;
+  std::vector < std::string > output_image_mesh_scalar;
+  std::vector < int >         output_image_mesh_scalar_index;
   std::vector < std::string > output_image_color_particle_attribute;
   std::vector < std::vector <int> > output_image_size;
   std::vector < std::string>  output_image_reduce_type;
