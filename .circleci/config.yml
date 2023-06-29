@@ -152,18 +152,12 @@ commands:
       skipfile:
         type: string
         default: notafile
-      skiptest:
-        type: boolean
-        default: false
     steps:
       - run:
           name: "Run the unit tests with ctest."
           command: |
             source $BASH_ENV
             source $HOME/venv/bin/activate
-
-            # convert boolean parameter to an env var storing 0 or 1
-            SKIP_TEST=$(( 0 <<# parameters.skiptest >> + 1 <</ parameters.skiptest >> ))
 
             if [ ! -f << parameters.skipfile >> ]; then
               source $HOME/venv/bin/activate
@@ -234,17 +228,20 @@ commands:
             python -m sphinx -M html "." "_build" -W
 
 jobs:
-  ctest-suite:
+  test-suite:
     parameters:
       usedouble:
         type: boolean
       usegrackle:
         type: boolean
-      skiptest:
-        type: boolean
+      testframework:
+        default: "neither"
+        type: enum
+        description: Specifies which sets of tests to run. Must be one of "neither", "ctest", "pytest".
+        enum: ["neither", "ctest", "pytest"]
 
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.10
 
     resource_class: large
 
@@ -272,71 +269,43 @@ jobs:
             - install-grackle:
                 usedouble: << parameters.usedouble >>
 
+      - when:
+          condition:
+            equal: [ pytest, << parameters.testframework >> ]
+          steps:
+            - run: echo "starting steps for pytest answer generation"
+            - compile-enzoe:
+                usedouble: << parameters.usedouble >>
+                tag: gold-standard-004
+                skipfile: notafile
+                usegrackle: << parameters.usegrackle >>
+            - run-answer-tests:
+                usedouble: << parameters.usedouble >>
+                usegrackle: << parameters.usegrackle >>
+                generate: true
+            - run: echo "Completed steps for pytest answer generation"
+
       - compile-enzoe:
           usedouble: << parameters.usedouble >>
           tag: tip
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
-
-      - run-ctests:
-          skipfile: notafile
-          skiptest: << parameters.skiptest >>
-
-  answer-test-suite:
-    parameters:
-      usedouble:
-        type: boolean
-      usegrackle:
-        type: boolean
-
-    docker:
-      - image: cimg/python:3.10
-
-    working_directory: ~/enzo-e
-
-    steps:
-      - checkout
-      - set-env
-
-      - restore_cache:
-          name: "Restore dependencies cache."
-          key: dependencies-v3
-
-      - install-dependencies
-
-      - save_cache:
-          name: "Save dependencies cache"
-          key: dependencies-v3
-          paths:
-            - ~/local
 
       - when:
-          condition: << parameters.usegrackle >>
+          condition:
+            equal: [ pytest, << parameters.testframework >> ]
           steps:
-            - install-grackle:
+            - run-answer-tests:
                 usedouble: << parameters.usedouble >>
+                usegrackle: << parameters.usegrackle >>
+                generate: false
 
-      - compile-enzoe:
-          usedouble: << parameters.usedouble >>
-          tag: gold-standard-004
-          skipfile: notafile
-          usegrackle: << parameters.usegrackle >>
-
-      - run-answer-tests:
-          usedouble: << parameters.usedouble >>
-          usegrackle: << parameters.usegrackle >>
-          generate: true
-
-      - compile-enzoe:
-          usedouble: << parameters.usedouble >>
-          tag: tip
-          skipfile: notafile
-          usegrackle: << parameters.usegrackle >>
-
-      - run-answer-tests:
-          usedouble: << parameters.usedouble >>
-          usegrackle: << parameters.usegrackle >>
-          generate: false
+      - when:
+         condition:
+            equal: [ ctest, << parameters.testframework >> ]
+         steps:
+            - run-ctests:
+                skipfile: notafile
 
   docs-build:
     docker:
@@ -352,27 +321,30 @@ jobs:
 workflows:
    tests:
      jobs:
-       - ctest-suite:
+       - test-suite:
            name: ctest-suite_single-prec
            usedouble: false
            usegrackle: true
-           skiptest: false
-       - ctest-suite:
+           testframework: "ctest"
+       - test-suite:
            name: ctest-suite_double-prec
            usedouble: true
            usegrackle: true
-           skiptest: false
-       - docs-build
-       - ctest-suite:
-           name: build-no-grackle
-           usedouble: true
-           usegrackle: false
-           skiptest: true
-       - answer-test-suite:
+           testframework: "ctest"
+       - test-suite:
            name: answer-tests_single
            usedouble: false
            usegrackle: true
-       - answer-test-suite:
+           testframework: "pytest"
+       - test-suite:
            name: answer-tests_double
            usedouble: true
            usegrackle: true
+           testframework: "pytest"
+       - docs-build
+       - test-suite:
+           name: build-no-grackle
+           usedouble: true
+           usegrackle: false
+           testframework: "neither"
+
