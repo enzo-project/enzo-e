@@ -9,7 +9,7 @@
 
 #include "charm_enzo.hpp"
 
-/ #define TRACE_FACTORY
+// #define TRACE_FACTORY
 
 //----------------------------------------------------------------------
 
