@@ -112,6 +112,9 @@ commands:
       usegrackle:
         type: boolean
         default: true
+      useprecompiledheaders:
+        type: boolean
+        default: true
     steps:
       - run:
           name: "Checkout target tag from enzo-e repository."
@@ -139,6 +142,7 @@ commands:
                     -GNinja \
                     -DUSE_DOUBLE_PREC=<< parameters.usedouble >> \
                     -DUSE_GRACKLE=<< parameters.usegrackle >> \
+                    -DUSE_PRECOMPILED_HEADERS=<< parameters.useprecompiledheaders >> \
                     -Bbuild \
                     -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" \
                     -DPython3_FIND_VIRTUALENV=ONLY
@@ -307,6 +311,58 @@ jobs:
             - run-ctests:
                 skipfile: notafile
 
+# the following case considers a few IMPORTANT compilation configurations
+# 1. no-grackle
+# 2. no-precompiled-headers
+  extra-compile-tests:
+    parameters:
+      usedouble:
+        type: boolean
+
+    docker:
+      - image: cimg/python:3.10
+
+    resource_class: large
+
+    working_directory: ~/enzo-e
+
+    steps:
+      - checkout
+      - set-env
+
+      - restore_cache:
+          name: "Restore dependencies cache."
+          key: dependencies-v3
+
+      - install-dependencies
+
+      - save_cache:
+          name: "Save dependencies cache"
+          key: dependencies-v3
+          paths:
+            - ~/local
+
+      - run: echo "About to test compilation without grackle!"
+
+      - compile-enzoe:
+          usedouble: << parameters.usedouble >>
+          tag: tip
+          skipfile: notafile
+          usegrackle: false
+          useprecompiledheaders: true
+
+      - run: echo "About to test compilation without precompiled headers"
+
+      - install-grackle:
+          usedouble: true
+
+      - compile-enzoe:
+          usedouble: << parameters.usedouble >>
+          tag: tip
+          skipfile: notafile
+          usegrackle: false
+          useprecompiledheaders: false
+
   docs-build:
     docker:
       - image: cimg/python:3.10
@@ -342,9 +398,6 @@ workflows:
            usegrackle: true
            testframework: "pytest"
        - docs-build
-       - test-suite:
-           name: build-no-grackle
+       - extra-compile-tests:
            usedouble: true
-           usegrackle: false
-           testframework: "neither"
 
