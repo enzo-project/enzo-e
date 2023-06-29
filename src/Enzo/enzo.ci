@@ -163,9 +163,7 @@ module enzo {
 
     entry void r_startup_begun (CkReductionMsg *);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
     entry void p_refine_create_block (MsgRefine *);
-#endif
 
     //EnzoMethodBalance
     entry void r_method_balance_count(CkReductionMsg * msg);
@@ -186,12 +184,8 @@ module enzo {
   //----------------------------------------------------------------------
   array[Index] EnzoBlock : Block {
 
-#ifdef BYPASS_CHARM_MEM_LEAK
     entry EnzoBlock (process_type ip_source, MsgType msg_type);
-#else
-    entry EnzoBlock (MsgRefine    * msg);
-    entry EnzoBlock (EnzoMsgCheck * msg);
-#endif
+
     entry EnzoBlock();
 
     // EnzoMethodFeedbackSTARSS synchronization entry methods

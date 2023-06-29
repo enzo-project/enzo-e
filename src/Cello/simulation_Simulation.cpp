@@ -308,14 +308,12 @@ void Simulation::pup (PUP::er &p)
 
   PUParray(p,dir_checkpoint_,256);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   ASSERT1("Simulation::pup()",
 	  "msg_refine_map_ is assumed to be empty but has size %lu",
 	  msg_refine_map_.size(),
 	  (msg_refine_map_.size() == 0));
 
   //  p | msg_refine_map_;
-#endif
   p | index_output_;
   p | num_solver_iter_;
   p | max_solver_iter_;
@@ -334,10 +332,6 @@ void Simulation::finalize() throw()
   performance_->end();
 
 }
-
-//----------------------------------------------------------------------
-
-#ifdef BYPASS_CHARM_MEM_LEAK
 
 //----------------------------------------------------------------------
 
@@ -361,7 +355,6 @@ void Simulation::refine_create_block(MsgRefine * msg)
   cello::block_array()[index].insert(process_type(CkMyPe()),MsgType::msg_refine);
 }
 
-#endif
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -777,28 +770,25 @@ void Simulation::initialize_balance_() throw()
 
 void Simulation::initialize_block_array_() throw()
 {
-  bool allocate_blocks = (CkMyPe() == 0);
+  // Create the root-level blocks for level = 0
+  hierarchy_->create_block_array ();
 
-  // Don't allocate blocks if reading data from files
-
-  //  bool allocate_data = ! ( config_->initial_type == "file" || 
-  //			   config_->initial_type == "checkpoint" );
-  bool allocate_data = true;
-
-  if (allocate_blocks) {
-
-    // Create the root-level blocks for level = 0
-    hierarchy_->create_block_array (allocate_data);
-
-    // Create the "sub-root" blocks if mesh_min_level < 0
-    if (hierarchy_->min_level() < 0) {
-      hierarchy_->create_subblock_array	(allocate_data);
-    }
-
-    hierarchy_->block_array().doneInserting();
+  // Create the "sub-root" blocks if mesh_min_level < 0
+  if (hierarchy_->min_level() < 0) {
+    hierarchy_->create_subblock_array ();
   }
+
+  contribute (CkCallback (CkIndex_Simulation::r_initialize_root_blocks_created(nullptr),
+                          thisProxy));
 }
 
+//----------------------------------------------------------------------
+
+void Simulation::r_initialize_root_blocks_created(CkReductionMsg * msg)
+{
+  delete msg;
+  hierarchy_->block_array().doneInserting();
+}
 //----------------------------------------------------------------------
 
 void Simulation::p_set_block_array(CProxy_Block block_array)

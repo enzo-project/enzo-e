@@ -100,29 +100,26 @@ void Factory::create_block_array
 #ifdef DEBUG_ADAPT
   CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
 #endif
+
   for (int ix=0; ix<nbx; ix++) {
     for (int iy=0; iy<nby; iy++) {
       for (int iz=0; iz<nbz; iz++) {
 
-	Index index(ix,iy,iz);
+        Index index(ix,iy,iz);
 
-	MsgRefine * msg = new MsgRefine
-	  (index,
-	   nx,ny,nz,
-	   num_field_data,
-	   count_adapt = 0,
-	   cycle,time,dt,
-	   refresh_same,
-	   num_face_level, face_level, nullptr);
+        MsgRefine * msg = new MsgRefine
+          (index,
+           nx,ny,nz,
+           num_field_data,
+           count_adapt = 0,
+           cycle,time,dt,
+           refresh_same,
+           num_face_level, face_level, nullptr);
 
-	msg->set_data_msg(data_msg);
+        msg->set_data_msg(data_msg);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
         cello::simulation()->p_refine_create_block (msg);
-#else
-	proxy_block[index].insert (msg);
-#endif
-	// --------------------------------------------------
+        // --------------------------------------------------
 
       }
     }
@@ -193,11 +190,7 @@ void Factory::create_subblock_array
 
 	  msg->set_data_msg(data_msg);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
           cello::simulation()->p_refine_create_block (msg);
-#else
-          block_array[index].insert (msg);
-#endif
 	  // --------------------------------------------------
 
 	}
@@ -253,10 +246,6 @@ void Factory::create_block
 
   if (ip == -1) ip = CkMyPe();
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   proxy_simulation[ip].p_refine_create_block (msg);
-#else
-  block_array[index].insert (msg,ip);
-#endif
 }
 

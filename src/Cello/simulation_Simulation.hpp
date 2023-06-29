@@ -66,11 +66,9 @@ public: // interface
   // BLOCK INITIALIZATION WITH MsgRefine
   //----------------------------------------------------------------------
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   /// Create a new block on receiving process
   virtual void p_refine_create_block (MsgRefine *);
   void refine_create_block (MsgRefine *);
-#endif
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -243,6 +241,10 @@ public: // virtual functions
 
   /// Wait for all Hierarchy to be initialized before creating any Blocks
   void r_initialize_block_array(CkReductionMsg * msg);
+
+  /// Wait for all simulation objects to create blocks in levels <=0
+  /// before calling doneInserting
+  void r_initialize_root_blocks_created(CkReductionMsg * msg);
 
   /// Send Config and Parameters from ip==0 to all other processes
 
@@ -569,9 +571,7 @@ protected: // attributes
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   std::map<Index,MsgRefine *> msg_refine_map_;
-#endif
 
   /// Currently active output object
   int index_output_;

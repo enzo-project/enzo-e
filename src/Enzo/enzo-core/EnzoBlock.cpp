@@ -157,10 +157,6 @@ EnzoBlock::EnzoBlock (CkMigrateMessage *m)
   proxy_enzo_simulation[0].p_method_balance_check();
 }
 
-//======================================================================
-#ifdef BYPASS_CHARM_MEM_LEAK
-//======================================================================
-
 EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
   : CBase_EnzoBlock (ip_source, msg_type),
     redshift(0.0)
@@ -211,68 +207,6 @@ void EnzoBlock::set_msg_refine(MsgRefine * msg)
   }
 }
 
-//======================================================================
-#else /* not BYPASS_CHARM_MEM_LEAK */
-//======================================================================
-
-EnzoBlock::EnzoBlock ( MsgRefine * msg )
-  : CBase_EnzoBlock ( msg ),
-    redshift(0.0)
-
-{
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(msg)\n",
-            CkMyPe(),(void *)this,name(thisIndex).c_str());
-#endif
-
-  int io_reader = msg->restart_io_reader_;
-  initialize();
-  Block::initialize();
-  // If refined block and restarting, notify file reader block is created
-  if ((cello::config()->initial_restart) && (index_.level() > 0)) {
-    proxy_io_enzo_reader[io_reader].p_block_created();
-  }
-  delete msg;
-}
-
-//----------------------------------------------------------------------
-
-EnzoBlock::EnzoBlock ( EnzoMsgCheck * msg )
-  : CBase_EnzoBlock (),
-    redshift(0.0)
-{
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(msg)\n",
-            CkMyPe(),(void *)this,name(thisIndex).c_str());
-#endif
-
-  init_refresh_();
-  // init_refine_ (msg->index_,
-  //       msg->nx_, msg->ny_, msg->nz_,
-  //       msg->num_field_blocks_,
-  //       msg->num_adapt_steps_,
-  //       msg->cycle_, msg->time_,  msg->dt_,
-  //       0, NULL, msg->refresh_type_,
-  //       msg->num_face_level_, msg->face_level_,
-  //       msg->adapt_parent_);
-
-  // init_adapt_(msg->adapt_parent_);
-
-  // apply_initial_(msg);
-
-  initialize();
-  Block::initialize();
-#ifdef TRACE_BLOCK
-  CkPrintf ("%d %p :%d TRACE_BLOCK %s EnzoBlock restart_set_data_\n",
-            CkMyPe(),(void *)this,__LINE__,name(thisIndex).c_str());
-  fflush(stdout);
-#endif
-
-  restart_set_data_(msg);
-}
-
-//======================================================================
-#endif
 //======================================================================
 
 EnzoBlock::~EnzoBlock()

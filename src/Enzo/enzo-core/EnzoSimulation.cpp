@@ -94,8 +94,6 @@ void EnzoSimulation::pup (PUP::er &p)
 }
 
 //----------------------------------------------------------------------
-#ifdef BYPASS_CHARM_MEM_LEAK
-
 void EnzoSimulation::p_refine_create_block(MsgRefine * msg)
 { refine_create_block(msg); }
 
@@ -171,9 +169,6 @@ MsgRefine * EnzoSimulation::get_msg_refine(Index index)
   msg_refine_map_.erase(index);
   return msg;
 }
-
-#endif
-
 //----------------------------------------------------------------------
 
 void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)

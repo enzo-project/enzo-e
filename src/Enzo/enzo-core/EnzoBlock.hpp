@@ -91,19 +91,12 @@ public:
 
 public: // interface
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   /// Initialize the EnzoBlock chare array
-  
+
   EnzoBlock ( process_type ip_source, MsgType msg_type );
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   void set_msg_refine(MsgRefine * msg);
   void set_msg_check(EnzoMsgCheck * msg);
-
-#else
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock ( MsgRefine * msg );
-  EnzoBlock ( EnzoMsgCheck * msg );
-#endif
 
   /// Initialize an empty EnzoBlock
   EnzoBlock()

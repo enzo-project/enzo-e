@@ -37,16 +37,10 @@ class Block : public CBase_Block
 
 public: // interface
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   /// create a Block whose MsgRefine is on the creating process
   Block ( process_type ip_source, MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-#else
-  /// create a Block with the given block count, lower extent, block
-  /// size, and number of field blocks
-  Block ( MsgRefine * msg );
-#endif
 
   /// Destructor
   virtual ~Block();
