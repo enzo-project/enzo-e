@@ -299,7 +299,10 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   double drho_PISNe = sphere.metal_mass_PISNe()* inv_vol;
   double drho = drho_SNe + drho_HNe + drho_PISNe;
 
-  CkPrintf("FBNet::update_mesh -- rho = %1.2e, rho_SNe = %1.2e, rho_HNe = %1.2e, rho_PISNe = %1.2e\n", drho, drho_SNe, drho_HNe, drho_PISNe);
+
+  #ifdef DEBUG_METHOD_FBNET
+    CkPrintf("[%d] FBNet::update_mesh -- rho = %1.2e, rho_SNe = %1.2e, rho_HNe = %1.2e, rho_PISNe = %1.2e\n", CkMyPe(), drho, drho_SNe, drho_HNe, drho_PISNe);
+  #endif
 
   int r_hx = std::ceil(r_code/hx), r_hy = std::ceil(r_code/hy), r_hz = std::ceil(r_code/hz);
   // CiC deposit with cloud radius of r_code
@@ -312,13 +315,13 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
 
   for (int iz_ = iz-r_hz; iz_ <= iz+r_hz; iz_++) {
     // if out of bounds, go to next iteration
-    if ((iz_ < 0) || (mz < iz_)) continue;
+    if ((iz_ < 0) || (mz <= iz_)) continue;
 
     for (int iy_ = iy-r_hy; iy_ <= iy+r_hy; iy_++) {
-      if ((iy_ < 0) || (my < iy_)) continue;
+      if ((iy_ < 0) || (my <= iy_)) continue;
 
       for (int ix_ = ix-r_hx; ix_ <= ix+r_hx; ix_++) {
-        if ((ix_ < 0) || (mx < ix_)) continue;
+        if ((ix_ < 0) || (mx <= ix_)) continue;
 
         int i_ = INDEX(ix_,iy_,iz_,mx,my);
 

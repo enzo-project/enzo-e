@@ -11,6 +11,7 @@
 
 #include "enzo.hpp"
 
+//#define DEBUG_METHOD_FBNET
 //----------------------------------------------------------------------
 
 EnzoMethodFBNetDeposit::EnzoMethodFBNetDeposit ()
@@ -131,8 +132,9 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
         int ipdm_HNe = ip*dm_HNe;
         int ipdm_PISNe = ip*dm_PISNe;
         int ipdt = ip*dt;
-
-        CkPrintf("EnzoMethodFBDeposit:: creation_time = %f; block time = %f; block_cycle = %d\n", pform[ipdt], block->time(), block->cycle());
+        #ifdef DEBUG_METHOD_FBNET
+          CkPrintf("EnzoMethodFBDeposit:: creation_time = %f; block time = %f; block_cycle = %d\n", pform[ipdt], block->time(), block->cycle());
+        #endif
         if (pform[ipdt] == block->time()) {
           sphere_x = px[ipdp]; 
           sphere_y = py[ipdp]; 
@@ -153,7 +155,9 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
     double center[3] = {sphere_x, sphere_y, sphere_z};
 
     EnzoObjectFeedbackSphere sphere(center, sphere_r, sphere_mSNe, sphere_mHNe, sphere_mPISNe);
-
+    #ifdef DEBUG_METHOD_FBNET
+      CkPrintf("[%d] pushing back sphere_list\n", CkMyPe());
+    #endif
     (enzo::simulation()->method_fbnet_sphere_list).push_back(sphere);
   }
 
@@ -169,12 +173,10 @@ void EnzoSimulation::p_fbnet_concatenate_sphere_lists()
 
   //CkPrintf("counter value = %d, stopping value = %d\n", sync_fbnet_count_.value(), sync_fbnet_count_.stop());
   if (sync_fbnet_count_.next()) {
-    CkPrintf("EnzoSimulation::p_fbnet_concatenate_sphere_lists() -- all blocks synchronized! Nspheres on this object = %d \n", method_fbnet_sphere_list.size());
+    CkPrintf("[%d] EnzoSimulation::p_fbnet_concatenate_sphere_lists() -- all blocks synchronized! Nspheres on this object = %d, Nblocks = %d\n", CkMyPe(), method_fbnet_sphere_list.size(), nb);
     // contribute over simulation objects
     CkCallback callback (CkIndex_EnzoBlock::p_method_fbnet_update_mesh(NULL),
                     enzo::block_array());
-    // note that StarNet will spawn at most one sphere per inference block
-    // in a timestep
 
     int n = 0;
     int nspheres = method_fbnet_sphere_list.size();
@@ -192,7 +194,7 @@ void EnzoSimulation::p_fbnet_concatenate_sphere_lists()
       for (int i=0; i<nspheres; i++) {
         sphere_arr[i] = method_fbnet_sphere_list[i];
       } 
-        SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_arr, 1);
+        SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_arr, nspheres);
         contribute(n, sphere_arr, CkReduction::set, callback);
     }
 
@@ -208,26 +210,49 @@ void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg)
     CkReduction::setElement *current = (CkReduction::setElement*) msg->getData();
     while(current != NULL) {
       EnzoObjectFeedbackSphere * sphere = (EnzoObjectFeedbackSphere *) &current->data;
-
+      
       FBNet::update_mesh(this, *sphere);
       current = current->next();
     }
   }
 
   // TODO: Add another sync counter here?
-  //if (enzo::simulation()->sync_fbnet_update_next()) {
+  if (enzo::simulation()->sync_fbnet_update_next()) {
+    //CkPrintf("[%d] clearing sync!!\n", CkMyPe());
+    
+    enzo::simulation()->p_fbnet_done();
+ /*   // clear sphere list attached to simulation object
+    enzo::simulation()->method_fbnet_clear_sphere_list();
+    // reset synchronization counters
+    enzo::simulation()->reset_sync_fbnet_count();
+    enzo::simulation()->reset_sync_fbnet_update();
 
-  // clear sphere list attached to simulation object
-  enzo::simulation()->method_fbnet_clear_sphere_list();
-  // reset synchronization counters
-  enzo::simulation()->reset_sync_fbnet_count();
-  enzo::simulation()->reset_sync_fbnet_update();
-
-  compute_done();
-
-  //}
+    compute_done();
+*/
+  }
+  #ifdef DEBUG_METHOD_FBNET
+    CkPrintf("[%d] compute_done() called\n", CkMyPe());
+  #endif
+  this->compute_done();
 }
 
+//-----------------------------------
+
+void EnzoSimulation::p_fbnet_done()
+{
+  method_fbnet_clear_sphere_list();
+  reset_sync_fbnet_count();
+  reset_sync_fbnet_update();
+
+  //enzo::block_array().p_method_fbnet_exit(); 
+}
+
+//----------------------------------
+
+void EnzoBlock::p_method_fbnet_exit()
+{
+  this->compute_done();
+}
 //-----------------------------------
 
 double EnzoMethodFBNetDeposit::timestep( Block * block ) throw()

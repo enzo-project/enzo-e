@@ -198,6 +198,7 @@ module enzo {
 
    // FBNet
    entry void p_fbnet_concatenate_sphere_lists();
+   entry void p_fbnet_done();
   };
 
   //----------------------------------------------------------------------
@@ -243,6 +244,7 @@ module enzo {
     entry void p_method_infer_exit();
 
     entry void p_method_fbnet_update_mesh(CkReductionMsg * msg);
+    entry void p_method_fbnet_exit();
 
     // checkpoint
     entry void p_check_write_first
