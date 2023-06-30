@@ -23,6 +23,10 @@ commands:
   install-dependencies:
     description: "Install dependencies."
     steps:
+      - restore_cache:
+          name: "Restore dependencies cache."
+          key: dependencies-v3
+
       - run:
           name: "Install dependencies."
           command: |
@@ -56,6 +60,12 @@ commands:
             cd $HOME/yt
             export MAX_BUILD_CORES=2
             pip install -e .
+
+      - save_cache:
+          name: "Save dependencies cache"
+          key: dependencies-v3
+          paths:
+            - ~/local
 
   install-grackle:
     description: "Install grackle."
@@ -254,18 +264,7 @@ jobs:
     steps:
       - checkout
       - set-env
-
-      - restore_cache:
-          name: "Restore dependencies cache."
-          key: dependencies-v3
-
-      - install-dependencies
-
-      - save_cache:
-          name: "Save dependencies cache"
-          key: dependencies-v3
-          paths:
-            - ~/local
+      - install-dependencies # (handles caching of dependencies too)
 
       - when:
           condition: << parameters.usegrackle >>
@@ -329,18 +328,7 @@ jobs:
     steps:
       - checkout
       - set-env
-
-      - restore_cache:
-          name: "Restore dependencies cache."
-          key: dependencies-v3
-
-      - install-dependencies
-
-      - save_cache:
-          name: "Save dependencies cache"
-          key: dependencies-v3
-          paths:
-            - ~/local
+      - install-dependencies # (handles caching of dependencies too)
 
       - run: echo "About to test compilation without grackle!"
 
