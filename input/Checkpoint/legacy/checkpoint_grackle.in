@@ -30,9 +30,13 @@
     length  = 3.086E16;       # 1 pc in cm - does not actually matter
  }
 
+ Physics {
+      list = ["fluid_props"];
+      fluid_props { eos { gamma = 1.400; } }
+ }
+
  Field {
      alignment = 8;
-     gamma = 1.400;
      ghost_depth = 3;
      list = [ "density", 
               "internal_energy",
@@ -168,47 +172,50 @@
      # set to false and Grackle crashes due to max iteration limit - this is
      # not needed generally in a real simulation as hydro timestep will
      # be small (usually)
-     null { dt = 5.0; }
+     null { dt = 0.5; }
 
  }
 
- Output {
-     list = ["data"];
 
-     data {
-         field_list = [ "density",
-              "internal_energy",
-              "total_energy",
-              "velocity_x",
-              "velocity_y",
-              "velocity_z",
-              "HI_density",
-              "HII_density",
-              "HM_density",
-              "HeI_density",
-              "HeII_density",
-              "HeIII_density",
-              "H2I_density",
-              "H2II_density",
-              "DI_density",
-              "DII_density",
-              "HDI_density",
-              "e_density",
-              "metal_density",
-              "cooling_time",
-              "temperature",
-              "pressure"];
-
-         dir   = ["GRACKLE_TEST_%03d","cycle"];
-         name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
-         schedule {
-             var = "time";
-             step = 1000.0;
-             start = 0.0;
-         }
-         type = "data";
-     }
-
- }
+# The following needs to be commented out so that this file is compatible with
+# the checkpoint-restart machinery
+# Output {
+#     list = ["data"];
+#
+#     data {
+#         field_list = [ "density",
+#              "internal_energy",
+#              "total_energy",
+#              "velocity_x",
+#              "velocity_y",
+#              "velocity_z",
+#              "HI_density",
+#              "HII_density",
+#              "HM_density",
+#              "HeI_density",
+#              "HeII_density",
+#              "HeIII_density",
+#              "H2I_density",
+#              "H2II_density",
+#              "DI_density",
+#              "DII_density",
+#              "HDI_density",
+#              "e_density",
+#              "metal_density",
+#              "cooling_time",
+#              "temperature",
+#              "pressure"];
+#
+#         dir   = ["GRACKLE_TEST_%03d","cycle"];
+#         name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
+#         schedule {
+#             var = "time";
+#             step = 1000.0;
+#             start = 0.0;
+#         }
+#         type = "data";
+#     }
+#
+# }
 
 

@@ -11,7 +11,7 @@ _test_utils_path = os.path.abspath(os.path.join(
 ))
 sys.path.append(_test_utils_path)
 
-from test_utils.enzoe_driver import EnzoEDriver
+from test_utils.enzoe_driver import EnzoEDriver, grackle_symlink_targets
 from test_utils.ckpt_restart_testing import run_ckpt_restart_test
 
 def main(args):
@@ -23,14 +23,16 @@ def main(args):
     enzoe_driver = EnzoEDriver(enzoe_path = os.path.abspath(args.enzoe),
                                charmrun_path = _charmpath)
 
-    # determine the directory where we will run the tests & cleanup policy
+    # determine the directory where we will run the tests & retain-policy
     if args.test_dir is None:
         from tempfile import mkdtemp
         work_dir = mkdtemp(prefix = 'ckpt-restart-scratch-', dir = './')
-        cleanup_policy = 'always' if (args.cleanup is None) else args.cleanup
+        retain_policy = 'never' if (args.retain is None) else args.retain
     else:
         work_dir = args.test_dir
-        cleanup_policy = 'never' if (args.cleanup is None) else args.cleanup
+        if not os.path.isdir(work_dir):
+            os.mkdir(work_dir)
+        retain_policy = 'retain' if (args.retain is None) else args.retain
 
     # check that work_dir exists & is empty
     try:
@@ -45,20 +47,39 @@ def main(args):
         else:
             shutil.rmtree(path)
 
+    # setup legacy_output_dir_fmt
+    legacy_output_dir_fmt = "h5data_dump_%02d" if args.legacy_outputs else None
+
+    # ensure legacy_output_dir_fmt is used for charm-based restarts
+    if args.charm_restart and not args.legacy_outputs:
+        raise ValueError("Currently, --legacy-outputs is requred when "
+                         "--charm-restart is specified")
+
+    # setup the symlink_srcs (a symlink will be created for each file in this
+    # list in the directories where Enzo-E will be executed)
+    assert isinstance(args.symlinks, list) # sanity check!
+    symlink_srcs = [path for path in args.symlinks]
+    if args.grackle_input_data_dir is not None:
+        for path in grackle_symlink_targets(args.grackle_input_data_dir):
+            symlink_srcs.append(path)
+
     # now, run the test:
     test_complete = False
     try:
         run_ckpt_restart_test(nominal_input = args.input,
                               working_dir = work_dir,
-                              enzoe_driver = enzoe_driver, nproc = 1,
+                              enzoe_driver = enzoe_driver,
+                              use_charm_restart = args.charm_restart,
+                              nproc = 1,
                               ckpt_cycle = args.restart_cycle,
                               stop_cycle = args.stop_cycle,
-                              symlink_srcs = args.symlinks,
+                              symlink_srcs = symlink_srcs,
+                              legacy_output_dir_fmt = legacy_output_dir_fmt,
                               sim_name_prefix = None)
         test_complete = True
     finally:
-        perform_cleanup = ( (cleanup_policy == 'always') or
-                            (test_complete and (cleanup_policy == 'success')) )
+        perform_cleanup = ( (retain_policy == 'never') or
+                            (test_complete and (retain_policy == 'fail')) )
 
         print(f"Test {['failed', 'passed'][test_complete]}: " +
               ["NOT cleaning up", "cleaning up"][perform_cleanup])
@@ -105,6 +126,20 @@ parser.add_argument('-r','--restart_cycle', type = int, default = 2,
 parser.add_argument('-s','--stop_cycle', type = int, default = 4,
                     help = ('The cycle at which data outputs are compared. '
                             'Default is 4.'))
+parser.add_argument('--grackle-input-data-dir', default = None,
+                    help = ('When present, a symlink will be created for each '
+                            'file in this directory to ckpt_run and '
+                            'restart_run directories'))
+parser.add_argument('--legacy-outputs', default = False,
+                    action = 'store_true',
+                    help = ('When present, legacy output files will be '
+                            'written and compared. The saved fields are '
+                            'determined by the Field:list parameter'))
+parser.add_argument('--charm-restart', default = False,
+                    action = 'store_true',
+                    help = ('When present, restarts are tested that make use '
+                            'of the checkpoint-restart functionality built '
+                            'into charmrun'))
 parser.add_argument('--enzoe', required = True, help = 'path to enzo-e binary')
 parser.add_argument('--charm', default = None,
                     help = ('the path to charmrun. If not specified, the '
@@ -118,11 +153,11 @@ parser.add_argument('--clobber', action = 'store_true', dest = 'clobber',
                             'specified), before doing anything else. By '
                             'default, the program fails if TEST_DIR isn\'t '
                             'empty.'))
-parser.add_argument('--cleanup', choices = ['always', 'never', 'success'],
+parser.add_argument('--retain', choices = ['always', 'never', 'fail'],
                     default = None,
-                    help = ('Specifies when to delete TEST_DIR. When the user '
-                            'specifies TEST_DIR, the default is "never". '
-                            'Otherwise default is "always".'))
+                    help = ('Specifies when to retain TEST_DIR. When the user '
+                            'specifies TEST_DIR, the default is "always". '
+                            'Otherwise default is "never".'))
 
 if __name__ == '__main__':
     main(parser.parse_args())

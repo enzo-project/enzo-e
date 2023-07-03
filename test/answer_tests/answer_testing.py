@@ -13,7 +13,8 @@ from unittest import TestCase
 from yt.funcs import ensure_dir
 from yt.testing import assert_rel_equal
 
-from test_utils.enzoe_driver import EnzoEDriver, create_symlinks
+from test_utils.enzoe_driver import \
+    EnzoEDriver, create_symlinks, grackle_symlink_targets
 
 _base_file = os.path.basename(__file__)
 
@@ -91,11 +92,8 @@ def get_symlink_targets(grackle_files = False):
     yield os.path.join(src_path, input_dir)
 
     if grackle_files:
-        with os.scandir(cached_opts().grackle_input_data_dir) as it:
-            for entry in it:
-                if not entry.is_file():
-                    continue
-                yield entry.path
+        for e in grackle_symlink_targets(cached_opts().grackle_input_data_dir):
+            yield e
 
 class EnzoETest(TestCase):
     parameter_file = None

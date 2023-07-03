@@ -2,7 +2,9 @@ import os
 import os.path
 import shutil
 import subprocess
+import tempfile
 
+import libconf
 import numpy as np
 import h5py
 
@@ -54,7 +56,7 @@ def legacy_output_block_file_map(blocklist_path):
         def block_h5fname_pair(line): # line fmt: "<block_name> <h5basename>\n"
             block, h5_basename = line.rstrip().split(' ')
             return (block, os.path.join(dirname, h5_basename))
-        return dict(block_h5_fname_pair(line) for line in f) 
+        return dict(block_h5fname_pair(line) for line in f)
 
 def _compare_block_outputs(block_name, f1, f2):
     # we choose to use h5diff instead of writing custom python code, because
@@ -164,9 +166,132 @@ def assert_equal_distributed_h5(actual_h5obj_map, desired_h5obj_map):
                 f"the {actual_fname} and {desired_fname}"
             )
 
-def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver, nproc = 1,
+def enforce_assumptions_and_query(enzoe_driver, parameter_fname, scratch_dir,
+                                  disallow_output_section = False,
+                                  use_charm_restart = False):
+    """
+    This function parses the parameter files and checks some assumptions and
+    queries some basic information.
+
+    Note: to actually query this information, we need to actually a dryrun of
+    Enzo-E in a directory where all of the symlinks are properly set up. This
+    is intended to be done in a scratch directory (to avoid overwriting
+    something important in the future if the default behavior of Enzo-E 
+    accidentally changes).
+
+    While tools/cello_parse.py could be used for this, that tools doesn't
+    handle a few edge cases (this approach should be a little more robust).
+
+    Returns
+    -------
+    method_list:
+        list of methods in the parameter file. This is returned with the
+        intention of letting us modify the order of Methods, if necessary.
+    field_list:
+        list of fields
+    """
+
+    # convert to libconf-format, parse the libconf file, and delete temp files
+    enzoe_driver.aggregate_params_in_file(parameter_fname, cwd = scratch_dir)
+    with open(os.path.join(scratch_dir, 'parameters.libconfig')) as f:
+        config = libconf.load(f)
+
+    # Check our 3 assumptions
+    if any(k != 'cycle' for k in config.get('Stopping', {}).keys()):
+        raise ValueError(
+            "There must not be any Stopping criterion. OR there can be a "
+            "cycle-based stopping criterion."
+        )
+
+    method_list = config.get('Method', {}).get('list', [])
+    if use_charm_restart and ("check" in method_list):
+        raise ValueError(
+            '"check" can\'t be in Method:list for charm-based restarts')
+    elif (not use_charm_restart) and (("order_morton" in method_list) or
+                                      ("check" in method_list)):
+        if ( (len(method_list) < 3) or (method_list[0] != "order_morton") or
+             (method_list[1] != "check") ):
+            raise ValueError(
+                'If either "order_morton" and "check" is present in '
+                'Method:list, we require them to be The first and second '
+                'elements respectively'
+            )
+
+        for name in ["order_morton", "check"]:
+            schedule = config["Method"][name].get("schedule", {})
+            if (any(k not in ['var', 'list'] for k in schedule.keys()) or
+                (schedule.get('var', 'cycle') != 'cycle')):
+                raise ValueError(
+                    f'The "{name}" method can only be configured with a '
+                    'schedule that uses a list of cycles. Alternatively, it '
+                    'shouldn\'t be configured with any schedule')
+    elif (not use_charm_restart):
+        # we can hopefully relax this requirement in the future!
+        raise ValueError(
+            'currently "order_morton" and "check" must both be in Method:list '
+            'to run new-style checkpoint-restart tests')
+
+    if disallow_output_section and (len(config.get('Output', {})) > 0):
+        raise ValueError("Ouput section not allowed to contain any params")
+
+    field_list = config.get('Field', {}).get('list', [])
+    if len(field_list) == 0 and use_charm_restart:
+        raise ValueError("Field:list should contain at least 1 element when "
+                         "testing charm-based checkpoints")
+    return method_list, field_list
+
+def _list_to_paramstr(l):
+    """Convert a list to a string that can be parsed in parameter file"""
+    def _tostr(arg):
+        if isinstance(arg,str):
+            return f'"{arg}"'
+        else:
+            return f'{arg}'
+    return "[" + ", ".join(_tostr(e) for e in l) + "]"
+
+def fetch_extra_ckpt_run_opts(checkpoint_dir_fmt, checkpoint_outputs,
+                              stop_cycle = 4, field_list = [],
+                              legacy_output_dir_fmt = None,
+                              use_charm_restart = False):
+
+    shared_extra = ()
+    if (legacy_output_dir_fmt is not None) and (len(field_list) > 0):
+        shared_extra = (
+            'Output:h5dump:type="data"',
+            f'Output:h5dump:field_list={_list_to_paramstr(field_list)}',
+            f'Output:h5dump:schedule:list=[{stop_cycle - 1}]',
+            'Output:h5dump:schedule:var="cycle"',
+            f'Output:h5dump:dir=["{legacy_output_dir_fmt}", "cycle"]',
+            'Output:h5dump:name=["data-%d.h5", "cycle"]',
+            'Output:list=["h5dump"]'
+        )
+
+    if use_charm_restart:
+        assert (len(shared_extra) > 0) and (len(checkpoint_outputs) == 1)
+        return shared_extra + (
+            'Output:list=["checkpoint","h5dump"]',
+            'Output:checkpoint:type="checkpoint"',
+            f'Output:checkpoint:schedule:list=[{checkpoint_outputs[0]}]',
+            'Output:checkpoint:schedule:var="cycle"',
+            f'Output:checkpoint:dir=["{checkpoint_dir_fmt}", "cycle"]',
+            f'Stopping:cycle={stop_cycle}',
+        )
+    else:
+        _sched_list_str = _list_to_paramstr(checkpoint_outputs)
+        return shared_extra + (
+            f'Method:order_morton:schedule:list={_sched_list_str}',
+            'Method:order_morton:schedule:var="cycle"',
+            f'Method:check:schedule:list={_sched_list_str}',
+            'Method:check:schedule:var="cycle"',
+            f'Method:check:dir=["{checkpoint_dir_fmt}", "cycle"]',
+            f'Stopping:cycle={stop_cycle}'
+        )
+
+def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver,
+                          use_charm_restart = False, nproc = 1,
                           ckpt_cycle = 2, stop_cycle = 4, symlink_srcs = [],
                           sim_name_prefix = None,
+                          legacy_output_dir_fmt = None,
                           buffer_outputs_on_disk = False):
     """
     Runs the checkpoint-restart test.
@@ -177,6 +302,11 @@ def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver, nproc = 1,
         2. Execute the "restart-run": execute enzo-e in
            `{working_dir}/restart_run` using one of the checkpoint file
         3. Compare the outputs
+           - When legacy_output_dir_fmt is not `None`, data dumps written with
+             the legacy output machinery (during both the the checkpoint and
+             restart runs) will also be compared
+           - When use_charm_restart is `False`, the contents of the checkpoint
+             files are also compared
 
     Parameters
     ----------
@@ -186,6 +316,8 @@ def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver, nproc = 1,
         Path to the directory where we will execute the test
     enzoe_driver: `EnzoE`
         `EnzoE` instance used to drive the test
+    use_charm_restart: bool, default: False
+        When true, use the checkpoint-restart functionality built into charm++
     nproc: int or tuple of ints
         The number of processors to use to drive the simulations. When this is
         a tuple, the first (second) element specifies how many processors to
@@ -199,9 +331,14 @@ def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver, nproc = 1,
     sim_name_prefix: str, default: None
         Optional simulation name. This is only used when logging and reporting
         errors.
+    legacy_output_dir_fmt: str, default None
+        When specified, this should be a string used to specify the directory
+        name where outputs are written using the legacy-Output machinery. When
+        specified the string be printf-style formatting string that expects a
+        single integer (they cycle number)
     buffer_outputs_on_disk: bool, default: False
-        When True, the simulations' stdout and stderr are piped to 
-        {working_dir}/{run_dir}/log.out and {working_dir}/{run_dir}/log.err, 
+        When True, the simulations' stdout and stderr are piped to
+        {working_dir}/{run_dir}/log.out and {working_dir}/{run_dir}/log.err,
         respectively, where {run_dir} is replaced by ckpt_run and restart_run,
         based on which replaced simulations are run. If the tests fail, these
         are forwarded to stdout and stderr. When False, the simulations' stdout
@@ -218,7 +355,13 @@ def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver, nproc = 1,
 
     assert 0 < ckpt_cycle
     assert ckpt_cycle+2 <= stop_cycle
-    checkpoint_outputs = [ckpt_cycle, ckpt_cycle+1]
+
+    # with the new-style restarts, we write 2 checkpoint files since we
+    # actually compare the contents of the files
+    if use_charm_restart:
+        checkpoint_outputs = [ckpt_cycle]
+    else:
+        checkpoint_outputs = [ckpt_cycle, ckpt_cycle+1]
 
     if sim_name_prefix is None:
         sim_name_ckpt, sim_name_restart = 'ckpt_run', 'restart_run'
@@ -226,72 +369,99 @@ def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver, nproc = 1,
         sim_name_ckpt = f'{sim_name_prefix}_ckpt_run'
         sim_name_restart = f'{sim_name_prefix}_restart_run'
 
-    # TODO: check internal assumptions about the parameter file!
-    # - assume that there is no Stopping condition (or if there is one, it only
-    #   specifies a cycle)
-    # - assume that "order_morton" is the first Method and "check" is the
-    #   second method
-    # - assume that "order_morton" & "check" don't have schedules or if they
-    #   do, that they are configured with list and var = "cycle"
+    # Step 1. setup the directories where we will execute Enzo-E
+    # ==========================================================
+    def _prep_dir(basedirname):
+        dir_path = os.path.join(working_dir, basedirname)
+        os.mkdir(dir_path)
+        create_symlinks(dir_path, symlink_srcs)
+        return dir_path
+    ckpt_run_dir = _prep_dir('ckpt_run')
+    restart_run_dir = _prep_dir('restart_run')
 
+    # aside: query info about nominal configuration and enforce assumptions
+    query_param_dir = _prep_dir('query_dir')
+    in_method_list, in_field_list = enforce_assumptions_and_query(
+        enzoe_driver, nominal_input,
+        scratch_dir = query_param_dir,
+        disallow_output_section = legacy_output_dir_fmt is not None,
+        use_charm_restart = use_charm_restart,
+    )
 
-    # Step 1. setup the directories where we will execute the code
-    # ============================================================
-    ckpt_run_dir, restart_run_dir = [os.path.join(working_dir,f'{e}_run')
-                                     for e in ('ckpt', 'restart')]
-    os.mkdir(ckpt_run_dir)
-    create_symlinks(ckpt_run_dir, symlink_srcs)
-    os.mkdir(restart_run_dir)
-    create_symlinks(restart_run_dir, symlink_srcs)
-
-    # Step 2. Run the checkpoint run!
-    # ===============================
+    # Step 2. Execute the checkpoint run!
+    # ===================================
     print(f"Executing checkpoint run, in {ckpt_run_dir}")
     _checkpoint_dir_fmt = "Check-%02d" # the argument is cycle
-    _sched_list_str = f'[{checkpoint_outputs[0]}, {checkpoint_outputs[1]}]'
-    shared_extra_opts = (
-        f'Method:order_morton:schedule:list={_sched_list_str}',
-        'Method:order_morton:schedule:var="cycle"',
-        f'Method:check:schedule:list={_sched_list_str}',
-        'Method:check:schedule:var="cycle"',
-        f'Method:check:dir=["{_checkpoint_dir_fmt}", "cycle"]',
-        f'Stopping:cycle={stop_cycle}'
-    )
+    ckpt_run_extra_opts = fetch_extra_ckpt_run_opts(
+        checkpoint_dir_fmt = _checkpoint_dir_fmt,
+        checkpoint_outputs = checkpoint_outputs,
+        stop_cycle = stop_cycle, field_list = in_field_list,
+        legacy_output_dir_fmt = legacy_output_dir_fmt,
+        use_charm_restart = use_charm_restart)
     enzoe_driver.run(
         parameter_fname = nominal_input, max_runtime = np.inf,
         ncpus = nproc_ckpt, sim_name = sim_name_ckpt, cwd = ckpt_run_dir,
-        extra_options = shared_extra_opts,
+        extra_options = ckpt_run_extra_opts,
         buffer_outputs_on_disk = buffer_outputs_on_disk)
 
-    # Step 3. Run the restart run!
-    # ============================
+    # Step 3. Execute the restart run!
+    # ================================
     print(f"Executing checkpoint run, in {restart_run_dir}")
     _restart_from = os.path.abspath(os.path.join(
         ckpt_run_dir, _checkpoint_dir_fmt % ckpt_cycle))
-    restart_extra_opts = ('Initial:list=[]', 'Initial:restart=true',
-                          f'Initial:restart_dir="{_restart_from}"')
-    enzoe_driver.run(
-        parameter_fname = nominal_input, max_runtime = np.inf,
-        ncpus = nproc_restart, sim_name = sim_name_restart,
-        cwd = restart_run_dir,
-        extra_options = shared_extra_opts + restart_extra_opts,
-        buffer_outputs_on_disk = buffer_outputs_on_disk)
-
+    if use_charm_restart:
+        enzoe_driver.run_charmrun_restart(
+            ckpt_path = _restart_from, ncpus = nproc_restart,
+            max_runtime = np.inf, sim_name = sim_name_restart,
+            cwd = restart_run_dir,
+            buffer_outputs_on_disk = buffer_outputs_on_disk)
+    else:
+        restart_extra_opts = ('Initial:list=[]', 'Initial:restart=true',
+                              f'Initial:restart_dir="{_restart_from}"')
+        enzoe_driver.run(
+            parameter_fname = nominal_input, max_runtime = np.inf,
+            ncpus = nproc_restart, sim_name = sim_name_restart,
+            cwd = restart_run_dir,
+            extra_options = ckpt_run_extra_opts + restart_extra_opts,
+            buffer_outputs_on_disk = buffer_outputs_on_disk)
 
     # Step 4: compare the outputs
     # ===========================
-    # do NOT compare the root level parameters.out or parameters.libconf files
-    # - we know for a fact that there will be differences in the Initial
-    #   section (we could do careful comparisons in the future)
-    # Right now, we're just going to compare the restart files
-    # - in the future, it would take minimal work to compare old-style output
-    #   files as well as new-style output files (all of the necessary machinery
-    #   is in place). We just need to figure out what we're comparing)
-    print("Comparing outputs:")
-    for dir_basename in [_checkpoint_dir_fmt % e for e in checkpoint_outputs]:
-        print(f"-> {dir_basename}")
-        ckpt_h5obj_map = ckpt_block_file_map(
-            f'{ckpt_run_dir}/{dir_basename}/check.file_list')
-        restart_h5obj_map = ckpt_block_file_map(
-            f'{restart_run_dir}/{dir_basename}/check.file_list')
-        assert_equal_distributed_h5(ckpt_h5obj_map, restart_h5obj_map)
+    if use_charm_restart:
+        # there is nothing to compare since we restart from a different
+        # directory
+        #
+        # NOTE: Actually, https://github.com/enzo-project/enzo-e/issues/5
+        # and https://github.com/enzo-project/enzo-e/pull/45 suggest that
+        # Enzo-E may actually write new parameters.{out|libconf} files
+        # following a charm-based restart. But, I guess it may overwrite the
+        # original version of the file
+        #
+        # We may want to address this in the future!
+        pass
+    else:
+        # do NOT compare the root-level parameters.out or parameters.libconf
+        # files -> we know for a fact that there will be differences in the
+        # Initial section (we could do careful comparisons in the future)
+
+        # Compare the restart files
+        print("Comparing outputs from the \"check\" method:")
+        for dir_basename in [_checkpoint_dir_fmt % e
+                             for e in checkpoint_outputs]:
+            print(f"-> {dir_basename}")
+            ckpt_h5obj_map = ckpt_block_file_map(
+                f'{ckpt_run_dir}/{dir_basename}/check.file_list')
+            restart_h5obj_map = ckpt_block_file_map(
+                f'{restart_run_dir}/{dir_basename}/check.file_list')
+            assert_equal_distributed_h5(ckpt_h5obj_map, restart_h5obj_map)
+
+
+    if legacy_output_dir_fmt is not None:
+        print("Comparing files written by legacy output machinery:")
+        for dir_basename in [legacy_output_dir_fmt % (stop_cycle - 1)]:
+            print(f"-> {dir_basename}")
+            ckpt_h5obj_map = legacy_output_block_file_map(
+                f'{ckpt_run_dir}/{dir_basename}/{dir_basename}.block_list')
+            restart_h5obj_map = legacy_output_block_file_map(
+                f'{restart_run_dir}/{dir_basename}/{dir_basename}.block_list')
+            assert_equal_distributed_h5(ckpt_h5obj_map, restart_h5obj_map)

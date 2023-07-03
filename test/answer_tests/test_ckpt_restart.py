@@ -1,6 +1,6 @@
 # all tests in this file are intended to test Checkpoint-Restart functionallity
-# - at the moment, we are only testing the new-style, scalable machinery
-# - however, it would also be good to test the legacy charm++-based machinery
+# - at the moment, we are testing both the new-style AND the old-style
+#   Checkpoint-Restart functionallity
 #
 # The tests in this file are different from most other tests in this directory
 # because:
@@ -25,12 +25,14 @@ _input_dir = os.path.abspath(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../../input"))
 )
 
-# This is the test for the new-style, scalable checkpoint-restart test
-# -
+# This is the parameterized test for the old-style checkpoint-restart tests
+# - these use parameter files from input/Checkpoint directory (it should not
+#   consider stuff from the legacy subdirectory)
 
 @pytest.mark.parametrize("nominal_input,uses_grackle",
-                         [('checkpoint_ppm.in', False),
-                          ('checkpoint_grackle.in', True)])
+                         [('checkpoint_boundary.in', False),
+                          ('checkpoint_grackle.in', True),
+                          ('checkpoint_ppm.in', False)])
 def test_ckpt_restart(nominal_input, uses_grackle):
     nominal_input = os.path.abspath(f'{_input_dir}/Checkpoint/{nominal_input}')
 
@@ -59,4 +61,30 @@ def test_ckpt_restart(nominal_input, uses_grackle):
                               nproc = 1, ckpt_cycle = 2, stop_cycle = 4,
                               symlink_srcs = symlink_srcs,
                               sim_name_prefix = None,
+                              buffer_outputs_on_disk = False)
+
+
+# This is the parameterized test for the old-style checkpoint-restart tests
+# - these use parameter files from input/Checkpoint/legacy directory
+
+@pytest.mark.parametrize("nominal_input,uses_grackle",
+                         [('checkpoint_boundary.in', False),
+                          ('checkpoint_grackle.in', True),
+                          ('checkpoint_ppm.in', False),
+                          ('checkpoint_vlct.in', False)])
+def test_charm_ckpt_restart(nominal_input, uses_grackle):
+    nominal_input = os.path.abspath(
+        f'{_input_dir}/Checkpoint/legacy/{nominal_input}')
+
+    symlink_srcs = list(get_symlink_targets(grackle_files = uses_grackle))
+    with tempfile.TemporaryDirectory() as working_dir:
+
+        run_ckpt_restart_test(os.path.join(_input_dir, nominal_input),
+                              working_dir = working_dir,
+                              enzoe_driver = cached_opts().enzoe_driver,
+                              nproc = 1, ckpt_cycle = 2, stop_cycle = 4,
+                              symlink_srcs = symlink_srcs,
+                              sim_name_prefix = None,
+                              use_charm_restart = True,
+                              legacy_output_dir_fmt = "h5data_dump_%02d",
                               buffer_outputs_on_disk = False)

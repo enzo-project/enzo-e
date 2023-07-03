@@ -27,9 +27,22 @@
          half_dt_reconstruct_method = "nn";
          full_dt_reconstruct_method = "plm";
          theta_limiter = 2.;
-         density_floor = 1.e-30;
-         pressure_floor = 1.e-30;
          };
+   }
+
+   Physics {
+
+      list = ["fluid_props"];
+
+      fluid_props {
+
+         eos { gamma = 1.6666666666666667; }
+
+         floors {
+            density  = 1.0e-30;
+            pressure = 1.0e-30;
+         }
+      }
    }
 
    Field {
@@ -39,8 +52,6 @@
               "bfield_x", "bfield_y", "bfield_z",
               "pressure"];
 
-      gamma = 1.6666666666666667;
-      
       ghost_depth = 3;
       padding = 0;
       alignment = 8;
