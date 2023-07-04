@@ -167,7 +167,7 @@ def assert_equal_distributed_h5(actual_h5obj_map, desired_h5obj_map):
             )
 
 def enforce_assumptions_and_query(enzoe_driver, parameter_fname, scratch_dir,
-                                  disallow_output_section = False,
+                                  disallowed_output_subsections = [],
                                   use_charm_restart = False):
     """
     This function parses the parameter files and checks some assumptions and
@@ -199,8 +199,8 @@ def enforce_assumptions_and_query(enzoe_driver, parameter_fname, scratch_dir,
     # Check our 3 assumptions
     if any(k != 'cycle' for k in config.get('Stopping', {}).keys()):
         raise ValueError(
-            "There must not be any Stopping criterion. OR there can be a "
-            "cycle-based stopping criterion."
+            "There must not be any Stopping criterion, OR if it exists, it "
+            "by cycled-based (so that it can be overwritten)."
         )
 
     method_list = config.get('Method', {}).get('list', [])
@@ -231,8 +231,13 @@ def enforce_assumptions_and_query(enzoe_driver, parameter_fname, scratch_dir,
             'currently "order_morton" and "check" must both be in Method:list '
             'to run new-style checkpoint-restart tests')
 
-    if disallow_output_section and (len(config.get('Output', {})) > 0):
-        raise ValueError("Ouput section not allowed to contain any params")
+    output_section = config.get('Output', {})
+    if output_section.get('list',[]):
+        raise ValueError("Ouput:list must be unset or be empty")
+    for subsection in disallowed_output_subsections:
+        if len(output_section.get(subsection, [])) > 0:
+            raise ValueError("No parameters are allowed to be set within "
+                             f"the Output:{subsection} parameter group")
 
     field_list = config.get('Field', {}).get('list', [])
     if len(field_list) == 0 and use_charm_restart:
@@ -379,12 +384,17 @@ def run_ckpt_restart_test(nominal_input, working_dir, enzoe_driver,
     ckpt_run_dir = _prep_dir('ckpt_run')
     restart_run_dir = _prep_dir('restart_run')
 
-    # aside: query info about nominal configuration and enforce assumptions
+    # ASIDE: query info about nominal configuration and enforce assumptions
     query_param_dir = _prep_dir('query_dir')
+    disallowed_output_subsections = []
+    if legacy_output_dir_fmt is not None:
+        disallowed_output_subsections.append('h5dump')
+    if use_charm_restart:
+        disallowed_output_subsections.append('checkpoint')
     in_method_list, in_field_list = enforce_assumptions_and_query(
         enzoe_driver, nominal_input,
         scratch_dir = query_param_dir,
-        disallow_output_section = legacy_output_dir_fmt is not None,
+        disallowed_output_subsections = disallowed_output_subsections,
         use_charm_restart = use_charm_restart,
     )
 

@@ -1,7 +1,18 @@
-# Template for running the automated checkpoint-restart tests on VL+CT (we may
-# want to tweak this to look at a MHD wave in the future)
+# Problem: Legacy-Checkpoint-Restart VL+CT (Hydro-ONLY)
+# Author: Matthew Abruzzo
 #
-# The testing tool automatically provides Stopping and Output sections
+# This is an input file for testing the legacy checkpoint-restart machinery
+# that is based on the charm++ machinery.
+#
+# In more detail, this mostly acts like a template-file that is used by the
+# testing tool. In practice, the testing tool will:
+# - provide a Stopping section and an Output section.
+# - use the contents of Field:list to determine which fields to compare before
+#   and after a restart
+# Details are provided on the website documentation about how you can see the
+# full parameter files that are generated in this test.
+#
+# NOTE: we may want to tweak this to look at a MHD wave in the future
 
    Domain {
       lower = [0.0, 0.0, 0.0];

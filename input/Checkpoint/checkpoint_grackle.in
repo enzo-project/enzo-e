@@ -1,7 +1,16 @@
-# intended to be used for automated tests of new-style Checkpoint-Restart
+# Problem: Checkpoint-Restart Grackle
+# Author: Matthew Abruzzo
 #
-# an important requirement for these tests is that all executed produce
-# bitwise-reproducible, deterministic results
+# This is an input file for testing the new-style checkpoint-restart machinery
+#
+# In more detail, this mostly acts like a template-file that is used by the
+# testing tool. In practice, the testing tool will:
+# - provide a Stopping section and an Output section.
+# - use the contents of Field:list to determine which fields to compare before
+#   and after a restart (for new-style checkpoint-restart, the test can be
+#   configured to skip this)
+# Details are provided on the website documentation about how you can see the
+# full parameter files that are generated in this test.
 
 include "input/Checkpoint/legacy/checkpoint_grackle.in"
 
@@ -12,19 +21,10 @@ include "input/Checkpoint/legacy/checkpoint_grackle.in"
    }
 
    Mesh {
-     #   This test problem varies density, temperature,
-     #   and metallicity over x, y, and z dimensions 
-     #   respectively. For smaller problems you can 
-     #   run in 1 or 2 dimensions by changing the below
-     #   accordingly and setting the min/max values in
-     #   initialization to be the same. Currently cannot
-     #   pick which value goes in which dimension,
-     #   so 2D can only be density and temperature,
-     #   1D can only vary density.
 
      root_blocks = [2, 2, 2];
      root_rank = 3;
-     root_size = [16, 16, 16];
+     root_size = [8, 8, 8];
 
    }
 
