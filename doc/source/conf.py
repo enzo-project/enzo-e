@@ -25,8 +25,7 @@ sys.path.insert(0, os.path.abspath('./_ext'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.intersphinx',
-              'sphinx.ext.todo',
+extensions = ['sphinx.ext.todo',
               'breathe',
               'par']
 todo_include_todos=True
@@ -270,9 +269,6 @@ epub_copyright = u'2022, Enzo Development Community'
 
 # Allow duplicate toc entries.
 #epub_tocdup = True
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
 
 # -- Set Breathe parameters and Execute Doxygen -------------------------------
 

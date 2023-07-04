@@ -9,13 +9,13 @@
 #include "test.hpp"
 
 #include "mesh.hpp"
-#include "array.hpp"
+#include "view.hpp"
 #include "data.hpp"
 
 /// helper function that actually checks consistency between the view and the
 /// field data
 template<class T, class FieldT>
-bool check_view_props_(CelloArray<T,3> view, FieldT& field, int id,
+bool check_view_props_(CelloView<T,3> view, FieldT& field, int id,
                        bool coarse, bool include_ghosts,
                        int history = 0){
   int nx, ny, nz;
@@ -66,12 +66,12 @@ void test_view_(Field& field, int id, std::string name = "",
            "require history==0 and name==\"\" for coarse fields",
            (history == 0) && (name == ""));
     { // first, handle non-const Field stuff
-      CelloArray<T, 3> view = field.coarse_view<T>(id);
+      CelloView<T, 3> view = field.coarse_view<T>(id);
       passed &= check_view_props_(view, field, id, true, true, history);
     }
     { // now handle const Field stuff
       const Field& const_field = field;
-      CelloArray<const T, 3> view = const_field.coarse_view<T>(id);
+      CelloView<const T, 3> view = const_field.coarse_view<T>(id);
       passed &= check_view_props_(view, const_field, id, true, true, history);
     }
 
@@ -82,13 +82,13 @@ void test_view_(Field& field, int id, std::string name = "",
         // first handle non-const Field stuff
         // load from id
         {
-          CelloArray<T, 3> view = field.view<T>(id, gchoice, history);
+          CelloView<T, 3> view = field.view<T>(id, gchoice, history);
           passed &= check_view_props_(view, field, id, false, includes_ghost,
                                       history);
         }
         // load from field name (if it was provided)
         if (name != ""){
-          CelloArray<T, 3> view = field.view<T>(name, gchoice, history);
+          CelloView<T, 3> view = field.view<T>(name, gchoice, history);
           passed &= check_view_props_(view, field, id, false, includes_ghost,
                                       history);
         }
@@ -96,7 +96,7 @@ void test_view_(Field& field, int id, std::string name = "",
         // now, handle const Field
         {
           const Field& const_field = field;
-          CelloArray<const T, 3> view =
+          CelloView<const T, 3> view =
             const_field.view<T>(id, gchoice, history);
           passed &= check_view_props_(view, const_field, id, false,
                                       includes_ghost, history);

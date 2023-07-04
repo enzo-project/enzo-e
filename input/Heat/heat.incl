@@ -59,7 +59,7 @@ Adapt {
  Output {
      list = [ "temp", "mesh" ];
      temp {
-         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
+         colormap = [ "black", "red", "yellow", "white" ];
          field_list = [ "temperature" ];
          name = [ "method_heat-8-%06d.png", "cycle" ];
          schedule {
