@@ -1065,10 +1065,10 @@ void EnzoLevelArray::apply_inference()
     // All values are in CGS units except for total_energy
     std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
                 -793.0158410664843/vunit, 
-                2.656904298376402e-07/rhounit, 96878457078.45897}; ///(vunit*vunit)};
+                96878457078.45897, 2.3778995827734495e-08, 2.419114340099057e-07}; ///(vunit*vunit)};
     std::vector <double> stds  = {4.858201188227477e-26/rhounit, 7.886306542228033e-29/rhounit, 
                 8358.282154906454/vunit,
-                6.23778749095905e-13/rhounit, 531795315558.7779}; ///(vunit*vunit)};
+                531795315558.7779, 2.5806363586099314e-06, 2.9415985082639072e-05}; ///(vunit*vunit)};
 
 #ifdef PRINT_FIELD_VALUES
   for (int i_f = 0; i_f < num_fields_; i_f++) {
@@ -1087,13 +1087,17 @@ void EnzoLevelArray::apply_inference()
     // i_f = iterator for fields in "inference" group
     // i_f_ = iterator for fields going into model
     int i_f_ = 0; 
-    for (int i_f=0; i_f < num_fields_; i_f++) {
+    for (int i_f=0; i_f < num_fields_-2; i_f++) { 
+      // num_fields-2 because PopIII_metal_density is only used for scaling the metal field -- it 
+      // doesn't actually get passed into the model directly. Will handle this case separately
 
       enzo_float * array;
       if (i_f == 2) {
         array = velocity_divergence; // vx, vy, and vz are all included in this, so skip i=2-4
-        i_f = 4; // metal_density
-      } else {
+        i_f = 4; // i_f = 6 is metal_density
+      } 
+
+      else {
           array = field_values_[i_f].data();
       }
 
@@ -1110,6 +1114,33 @@ void EnzoLevelArray::apply_inference()
       } // iz
       i_f_ += 1;
     } // i_field
+
+    // Now deal with metal fields
+    enzo_float * array_tot    = field_values_[6].data(); // metal_density
+    enzo_float * array_popIII = field_values_[7].data(); // PopIII_metal_density
+    double mean_popII  = means[4], std_popII  = stds[4];
+    double mean_popIII = means[5], std_popIII = stds[5];
+    for (int iz=0; iz<niz_; iz++){
+      for (int iy=0; iy<niy_; iy++){
+        for (int ix=0; ix<nix_; ix++){
+          int i = ix + nix_*(iy + niy_*iz);
+          double rho_popIII = std::min(array_popIII[i], array_tot[i]); // rho_popIII <= rho_total always
+          double rho_popII  = array_tot[i] - array_popIII[i];
+
+          double val = 0.0;
+          // see StarNetRuntime/StarNetDataLoader.py
+          val  = (rho_popIII-mean_popIII)*std_popII;
+          //val -= mean_popIII*std_popII;
+          val += (rho_popII-mean_popII)*std_popIII;
+          val /= std_popIII*std_popII;
+
+          //CkPrintf("scaled metal density: %1.2e; metal_density: %1.2e; rho_popIII: %1.2e\n", val, array_tot[i], rho_popIII);
+
+          // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
+          field_data.index_put_( {0,4,ix,iy,iz}, val );
+        }
+      }
+    }
 
     delete [] velocity_divergence;
 
@@ -1150,15 +1181,19 @@ void EnzoLevelArray::apply_inference()
 
       at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
 
-      int N_edge = 0; // number of edge layers to ignore for evaluating S2 predictions
+      int N_edge = 1; // number of edge layers to consider when evaluating S2 predictions
       double pstar_i, pnostar_i, num_0_i, num_1_i;
       double rho_x = 0.0, rho_y = 0.0, rho_z = 0.0, rho = 0.0; // for calculating mean position
 
       enzo_float * density = field_values_[0].data();
+      enzo_float * metal_density = field_values_[6].data();
 
-      for (int iz=N_edge; iz<niz_ - N_edge; iz++){
-       for (int iy=N_edge; iy<niy_ - N_edge; iy++){
-         for (int ix=N_edge; ix<nix_ - N_edge; ix++){
+      bool is_valid = true;
+      double zcrit = 3.1e-6; // TODO: Make this a parameter!!!!!
+
+      for (int iz=0; iz<niz_; iz++){
+       for (int iy=0; iy<niy_; iy++){
+         for (int ix=0; ix<nix_; ix++){
            int i = INDEX(ix,iy,iz,nix_,niy_);
 
            num_0_i = std::exp(prediction_s2.index({0,0,ix,iy,iz}).item<double>());
@@ -1173,15 +1208,27 @@ void EnzoLevelArray::apply_inference()
              double y_i = lower[1]+(iy+0.5)*hy;
              double z_i = lower[2]+(iz+0.5)*hz;
 
-            CkPrintf("EnzoMethodInference::Starfind predicts Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", x_i, y_i, z_i, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
+             // contribute to the mean predicted position
+             double rho_i = density[i];
+             rho += rho_i;
+             rho_x += rho_i * x_i;
+             rho_y += rho_i * y_i;
+             rho_z += rho_i * z_i;
 
-            // contribute to the mean predicted position
-            double rho_i = density[i];
-            rho += rho_i;
-            rho_x += rho_i * x_i;
-            rho_y += rho_i * y_i;
-            rho_z += rho_i * z_i;
+             if (metal_density[i]/rho_i / enzo_constants::metallicity_solar > zcrit) {
+               // if a flagged cell is above the critical metallicity separating PopII from PopIII SF,
+               // this identified region is invalid. Don't do anything in this case
+               is_valid = false;
+             } 
 
+             // if a flagged cell is within N_edge of the border of this inference block,
+             // this identified region is also invalid.
+             
+             is_valid *= (N_edge <= iz) && (iz < niz_-N_edge);
+             is_valid *= (N_edge <= iy) && (iy < niy_-N_edge);
+             is_valid *= (N_edge <= ix) && (ix < nix_-N_edge);
+
+             CkPrintf("EnzoMethodInference::Starfind predicts potential Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f)\n", x_i, y_i, z_i, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]);
            } 
          } // ix
        } // iy
@@ -1189,7 +1236,7 @@ void EnzoLevelArray::apply_inference()
 
       bool method_inference_starnet_feedback = true; // TODO: Make this a parameter
       // only do FB if S2 network identifies star-forming regions
-      if (SF_confirmed && method_inference_starnet_feedback) {
+      if ( (SF_confirmed*is_valid) && method_inference_starnet_feedback) {
         // center of FB sphere is (xmean, ymean, zmean)
         double rho_inv = 1.0 / rho;
         sphere_x = rho_x * rho_inv;
@@ -1214,10 +1261,19 @@ void EnzoLevelArray::apply_inference()
           masses.push_back(mass);
           creationtimes.push_back(fbnet_->get_creationtime());
         }
-      
+ 
+        // The evolved remnant radii in the Phoenix simulations were determined
+        // by expanding a sphere until the average metallicity within
+        // drops below Z_crit. Since the evolved remnants won't be perfectly
+        // spherical in general, and since metallicities could in principle
+        // be much larger than Z_crit, the radii returned by the model
+        // will be too big. Correct for this by introducing a "radius_modifier" factor.
+        // This is introduced in FBNet.py (apply_spherical_feedback). Azton's final
+        // simulation that is comparable to the Phoenix simulations used a value of 0.2
+        double radius_modifier = 0.2; // TODO: Make this a parameter!
         // calculate radius of evolved remnant
         sphere_r = (yield_SNe+yield_PISNe+yield_HNe > 0) ? 
-                 fbnet_->get_radius( &masses, &creationtimes ) : 0.0;
+                 radius_modifier*fbnet_->get_radius( &masses, &creationtimes ) : 0.0;
         CkPrintf("EnzoMethodInference::FBNet predicts a region with radius %1.2e kpc and metal yields (%1.2e, %1.2e, %1.2e) Msun\n", sphere_r, yield_SNe, yield_HNe, yield_PISNe);
         // put everything into code units
         EnzoUnits * enzo_units = enzo::units();

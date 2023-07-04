@@ -231,7 +231,7 @@ double FBNet::get_radius(std::vector<double> * masses, std::vector<double> * cre
   else if ( (N2 <= Nstars) && (Nstars < N3) ) {
     M = &M2_;
   }
-  else { // N3 < Nstars
+  else { // N3 <= Nstars
     M = &M3_;
   }
  

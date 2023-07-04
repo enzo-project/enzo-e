@@ -92,7 +92,7 @@ public: // functions
   void reset_sync_fbnet_update()
   { sync_fbnet_update_.reset(); }
   bool sync_fbnet_update_next()
-  { CkPrintf("[%d] update counter = %d; stop = %d\n", CkMyPe(),sync_fbnet_update_.value(), sync_fbnet_update_.stop()); return sync_fbnet_update_.next(); }
+  { return sync_fbnet_update_.next(); }
 
   void p_io_reader_created();
 

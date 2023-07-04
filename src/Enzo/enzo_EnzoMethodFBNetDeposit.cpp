@@ -173,7 +173,9 @@ void EnzoSimulation::p_fbnet_concatenate_sphere_lists()
 
   //CkPrintf("counter value = %d, stopping value = %d\n", sync_fbnet_count_.value(), sync_fbnet_count_.stop());
   if (sync_fbnet_count_.next()) {
-    CkPrintf("[%d] EnzoSimulation::p_fbnet_concatenate_sphere_lists() -- all blocks synchronized! Nspheres on this object = %d, Nblocks = %d\n", CkMyPe(), method_fbnet_sphere_list.size(), nb);
+    #ifdef DEBUG_METHOD_FBNET
+      CkPrintf("[%d] EnzoSimulation::p_fbnet_concatenate_sphere_lists() -- all blocks synchronized! Nspheres on this object = %d, Nblocks = %d\n", CkMyPe(), method_fbnet_sphere_list.size(), nb);
+    #endif
     // contribute over simulation objects
     CkCallback callback (CkIndex_EnzoBlock::p_method_fbnet_update_mesh(NULL),
                     enzo::block_array());
