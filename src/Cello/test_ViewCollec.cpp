@@ -9,6 +9,8 @@
 #include "test.hpp"
 #include "view.hpp"
 
+#include "test_ViewTestRoutines.hpp"
+
 #include <array>
 #include <utility> // for std::pair
 #include <vector>
@@ -16,32 +18,6 @@
 //----------------------------------------------------------------------
 
 namespace {
-
-  template<typename T>
-  void assign_range_3Darray(const CelloView<T,3>& arr, T start, T step) {
-    int count = 0;
-
-    const int mz = arr.shape(0);
-    const int my = arr.shape(1);
-    const int mx = arr.shape(2);
-
-    for (int iz = 0; iz < mz; iz++){
-      for (int iy = 0; iy < my; iy++){
-        for (int ix = 0; ix < mx; ix++){
-          arr(iz,iy,ix) = start + static_cast<T>(count)*step;
-          count++;
-        }
-      }
-    }
-
-  }
-
-  template<typename T>
-  CelloView<T,3> range_3Darray(int mz, int my, int mx, T start, T step) {
-    CelloView<T,3> out(mz,my,mx);
-    assign_range_3Darray(out, start, step);
-    return out;
-  }
 
   template<typename T>
   class ViewCollecFactory {
@@ -86,30 +62,6 @@ namespace {
   private:
     bool single_array_;
   };
-
-  template<typename T>
-  void assert_allequal3D(const CelloView<T,3>& a, const CelloView<T,3>& b) {
-    ASSERT("assert_allequal3D",
-           "The arrays don't have the same shape",
-           (a.shape(0) == b.shape(0)) &&
-           (a.shape(1) == b.shape(1)) &&
-           (a.shape(2) == b.shape(2)));
-
-    const int mz = a.shape(0);
-    const int my = a.shape(1);
-    const int mx = a.shape(2);
-
-    bool all_equal = true;
-    for (int iz = 0; iz < mz; iz++){
-      for (int iy = 0; iy < my; iy++){
-        for (int ix = 0; ix < mx; ix++){
-          all_equal &= (a(iz,iy,ix) == b(iz,iy,ix));
-        }
-      }
-    }
-    ASSERT("assert_allequal3D", "The elements are not all equal", all_equal);
-  }
-
 
   // the contents of a and b don't need to be aliases to pass this assertion
   template<typename T>
@@ -248,8 +200,8 @@ private:
     ViewCollec<double>* collec_ptr = nullptr; // initialize for later use
 
     // initialize the reference values
-    CelloView<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
-    CelloView<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
+    CelloView<double, 3> ref0 = range_3Darray<double>(5, 4, 3,  1.0, 1.0);
+    CelloView<double, 3> ref1 = range_3Darray<double>(5, 4, 3, -1.0,-1.0);
     auto check_array_elem_values = [&ref0, &ref1](ViewCollec<double>& collec)
       {
         assert_allequal3D(collec[0], ref0);

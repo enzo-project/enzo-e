@@ -404,11 +404,12 @@ if (use_papi)
 endif()
 
 # tests of the view component
-addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
 addUnitTestBinary(test_cello_view "test_CelloView.cpp" view tester_default)
 addUnitTestBinary(
   test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" view tester_default
 )
+addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
+addUnitTestBinary(test_view_map "test_ViewMap.cpp" view tester_default)
 
 # the following test is broken (an API change is not reflected in the test)
 #addUnitTestBinary(test_index "test_Index.cpp" mesh tester_mesh)
