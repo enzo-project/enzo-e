@@ -48,7 +48,13 @@ class ViewMap {
   ///
   /// This was originally a concrete type called EnzoEFltArrayMap
 
-  public: // interface
+public: // interface
+
+  typedef T value_type;
+  typedef typename std::add_const<T>::type const_value_type;
+  typedef typename std::remove_const<T>::type nonconst_value_type;
+
+  friend class ViewMap<const_value_type>;
 
   ViewMap(std::string name)
     : name_(name)
@@ -78,26 +84,44 @@ class ViewMap {
     : ViewMap("", keys, arrays)
   { }
 
+  /// conversion constructor that facilitates implicit casts from
+  /// ViewMap<nonconst_value_type> to ViewMap<const_value_type>
+  ///
+  /// @note
+  /// This is only defined for instances of ViewMap for which T is const-
+  /// qualified. If it were defined in cases where T is not const-qualified,
+  /// then it would duplicate the copy-constructor.
+  template<class = std::enable_if<std::is_same<T, const_value_type>::value>>
+  ViewMap(const ViewMap<nonconst_value_type> &other)
+    : name_(other.name_),
+      str_index_map_(other.str_index_map_),
+      arrays_(other.arrays_)
+  { }
+
   /// Returns a reference to the mapped array associated with the specified
   /// index/key
   ///
   /// Unlike the analogous ``std::map::operator[]`` method, this cannot be used
   /// to insert a new value. This behaves similarly to ``std::map::at``
-  CelloView<const T, 3> operator[] (const std::string& key) const
-    noexcept { return at_(key); }
-  CelloView<T, 3> operator[] (const std::string& key) noexcept
+  ///
+  /// @note
+  /// We explicitly return by value to prevent users from overwriting the
+  /// CelloView instance stored internally (in other words the pointer to
+  /// data). Such an operation would not work for one of the backends.
+  ///
+  /// @note
+  /// Alternatively, we could return a constant reference, but that's like
+  /// returning a constant reference to a pointer. In reality, that might be
+  /// more advantageous here since a CelloView is larger than a generic ptr.
+  CelloView<T, 3> operator[] (const std::string& key) const noexcept
   { return at_(key); }
-  CelloView<const T, 3> operator[] (std::size_t index) const
-    noexcept { return at_(index); }
-  CelloView<T, 3> operator[] (std::size_t index) noexcept
+  CelloView<T, 3> operator[] (std::size_t index) const noexcept
   { return at_(index); }
 
   /// Returns a reference to the mapped array associated with the specified
   /// index/key
-  CelloView<const T, 3> at(const std::string& key) const
-    noexcept { return at_(key); }
-  CelloView<T, 3> at(const std::string& key) noexcept
-    { return at_(key); }
+  CelloView<T, 3> at(const std::string& key) const noexcept
+  { return at_(key); }
 
   /// Checks whether the container holds the specified key
   bool contains(const std::string& key) const noexcept
@@ -108,10 +132,8 @@ class ViewMap {
   ///
   /// @note
   /// This is deprecated
-  CelloView<T, 3> get(const std::string& key, int stale_depth = 0) noexcept
-  { return get_(key, stale_depth); }
-  CelloView<const T, 3> get(const std::string& key,
-                            int stale_depth = 0) const noexcept
+  CelloView<T, 3> get(const std::string& key,
+                      int stale_depth = 0) const noexcept
   { return get_(key, stale_depth); }
 
   /// Provided to help debug
@@ -140,11 +162,7 @@ class ViewMap {
   ViewMap<T> subarray_map(const CSlice &slc_z,
                           const CSlice &slc_y,
                           const CSlice &slc_x,
-                          const std::string& name = "");
-  const ViewMap<T> subarray_map(const CSlice &slc_z,
-                                const CSlice &slc_y,
-                                const CSlice &slc_x,
-                                const std::string& name = "") const;
+                          const std::string& name = "") const;
 
   /// Utility method offered for debugging purposes to check whether the
   /// key-order matches expectations.
@@ -171,9 +189,7 @@ class ViewMap {
   /// @note
   /// The program will abort if this method is called on an object for which
   /// the `contiguous_arrays()` method returns `false`.
-  CelloView<T, 4> get_backing_array() noexcept
-  { return arrays_.get_backing_array(); }
-  CelloView<const T, 4> get_backing_array() const noexcept
+  CelloView<T, 4> get_backing_array() const noexcept
   { return arrays_.get_backing_array(); }
 
 private: // helper methods
@@ -353,17 +369,7 @@ template<typename T>
 ViewMap<T> ViewMap<T>::subarray_map(const CSlice &slc_z,
                                     const CSlice &slc_y,
                                     const CSlice &slc_x,
-                                    const std::string& name)
-{
-  return ViewMap<T>(name, str_index_map_,
-                    arrays_.subarray_collec(slc_z, slc_y, slc_x));
-}
-
-template<typename T>
-const ViewMap<T> ViewMap<T>::subarray_map(const CSlice &slc_z,
-                                          const CSlice &slc_y,
-                                          const CSlice &slc_x,
-                                          const std::string& name) const
+                                    const std::string& name) const
 {
   return ViewMap<T>(name, str_index_map_,
                     arrays_.subarray_collec(slc_z, slc_y, slc_x));

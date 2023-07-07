@@ -169,6 +169,13 @@ namespace detail {
       return out;
     }
 
+
+    /// This is primarily intended to help implement casts from ViewCollec<T>
+    /// to ViewCollec<const T>
+    SingleAddressViewCollec_(CelloView<T, 4> backing_array)
+      : backing_array_(backing_array)
+    { }
+
   private:
     /// this holds the individual array elements
     CelloView<T, 4> backing_array_;
@@ -195,6 +202,14 @@ class ViewCollec{
   /// we probably want to consider using boost::variant/a backport of
   /// std::variant or take advantage of the fact that we can represent the
   /// contents of a SingleAddressViewCollec_ with a ArrOfPtrsViewCollec_
+
+public: // interface
+
+  typedef T value_type;
+  typedef typename std::add_const<T>::type const_value_type;
+  typedef typename std::remove_const<T>::type nonconst_value_type;
+
+  friend class ViewCollec<const_value_type>;
 
 private:
   // tags how the arrays are stored (whether they're stored in a single
@@ -282,6 +297,55 @@ public: /// public interface
   ViewCollec& operator=(ViewCollec&& other) noexcept {
     swap(*this, other);
     return *this;
+  }
+
+  /// conversion constructor that facilitates implicit casts from
+  /// ViewCollec<nonconst_value_type> to ViewCollec<const_value_type>
+  ///
+  /// @note
+  /// This is only defined for instances of ViewCollec for which T is const-
+  /// qualified. If it were defined in cases where T is not const-qualified,
+  /// then it would duplicate the copy-constructor.
+  template<class = std::enable_if<std::is_same<T, const_value_type>::value>>
+  ViewCollec(const ViewCollec<nonconst_value_type> &other) {
+
+    switch (other.tag_){
+      case ViewCollec<nonconst_value_type>::Tag::CONTIG: {
+        activate_member_(Tag::CONTIG, false);
+        CelloView<const_value_type,4> tmp = other.get_backing_array();
+        single_arr_ = detail::SingleAddressViewCollec_<const_value_type>(tmp);
+        break;
+      }
+      case ViewCollec<nonconst_value_type>::Tag::ARR_OF_PTR: {
+        // this performs heap-allocations (which is a little horrendous in the
+        // context of an implicit cast!)
+        //
+        // There currently isn't a great portable way to do this without
+        // somehow refactoring SharedBuffer_ and getting extremely clever with
+        // casting... (and maybe directly managing internals of CelloView)
+        // -> this would probably make life very difficult when it comes time
+        //    to start using Kokkos
+        //
+        // When we eventually bump the minimum required C++ version to C++17,
+        // (PR # 325), we can refactor this class to directly store,
+        // std::variant<SharedBuffer_<const_value_type>,
+        //              SharedBuffer_<nonconst_value_type>,
+        //              CelloView<T,4>>
+        // (since we are already branching, since we are already branching
+        // between backends, I highly doubt that this translates to a
+        // performance hit)
+        activate_member_(Tag::ARR_OF_PTR, false);
+        std::vector<CelloView<const_value_type,3>> tmp;
+        const std::size_t size = other.size();
+        tmp.reserve(size);
+        for (std::size_t i = 0; i < other.size(); i++) {
+          tmp.push_back(other[i]);
+        }
+        arr_of_ptr_ = detail::ArrOfPtrsViewCollec_<T>(tmp);
+        break;
+      }
+
+    }
   }
 
   /// Destructor

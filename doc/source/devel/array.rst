@@ -863,7 +863,7 @@ key. (naturally, you can still change elements within the retrieved
 
 ``ViewMap`` also supports index-access to it's contents.
 ``scratch_view_map[i]`` and ``other_view_map[i]`` respectively access
-the ``CelloView`` associated with the ``i``th key (using the order
+the ``CelloView`` associated with the ``i``\th key (using the order
 specified during construction). These expressions are respectively
 equivalent to ``scratch_view_map[key_l[i]]`` and
 ``other_view_map[other_key_l[i]]``, in the context of the preceding
@@ -880,12 +880,67 @@ example, each element in a copy of a ``std::vector<CelloView<T,D>>``
 would be a shallow copy of the corresponding element in the orginal
 vector.
 
-A ``const CelloView`` is effectively read-only. For reference,
-element-access of an ``CelloView<T>`` instance yields a
-``CelloView<T,3>`` instance (whose elements can be modified).
-In comparison, element-access of a ``const ViewMap<T>`` yields a
-``CelloView<const T,3>`` which prevents direct modification of
-view elements.
+A ``const ViewMap`` holds very little meaning. If you declare and
+assign a variable, ``var``, as
+``const ViewMap<double> var = /*... */;``,
+then the fact that you used ``const ViewMap`` effectively tells the
+compiler to forbid you from performing ``var = other_view_map;`` in a
+subsequent statement.  You are still free to mutate the elements held
+of any contained CelloView.
+
+If you want to denote that a ``ViewMap`` is read-only, you should
+declare declare the type as ``ViewMap<const double>`` instead. Note
+that a ``ViewMap<float>`` can be implicitly converted to a
+``ViewMap<const float, N>`` (e.g. you can pass the former to a
+function that expecting the latter). It’s analogous to an implicit
+conversion from ``float*`` to a ``const float*``.
+
+The following snippet shows an example where we might want to use this
+property. Imagine we are writing a function that computes pressure
+from the contents of a ``ViewMap`` and stores it in a freshly
+allocated ``CelloView``. Suppose that during the calculation it
+applies a density floor (but it doesn't actually mutate the input
+``ViewMap``. In that case, we might declare the following function
+signature:
+
+.. code-block:: c++
+
+    CelloView<enzo_float,3> calculate_pressure(ViewMap<const enzo_float> arg,
+                                               double density_floor);
+
+This function signature makes a very clear promise to other developers
+that ``arg`` is not mutated inside of the function. In fact the
+compiler will not compile any implementation of the function where the
+contents of arg are mutated (this can be a very useful reminder to any
+future developer that alters the implementation of
+``calculate_pressure`` - they are of course able to change the
+function signature, but it's a a good reminder to make sure that they
+aren't breaking other areas of the code). For reference, the primary
+alternative to the above signature is identical, except that ``arg``
+is associated with the ``ViewMap<enzo_float>`` type. It's important to
+note that both function signatures are equally easy to call.
+
+.. note::
+
+    At the time of writing, be aware that ``ViewMap``\s that internally
+    store their contents like an array of pointers will currently
+    perform a heap allocation during the implicit conversion from
+    ``ViewMap<T>`` to ``ViewMap<const T>``.
+
+    The main purpose of this comment, is to serve as a reminder to fix
+    this after `GitHub PR #325
+    <https://github.com/enzo-project/enzo-e/pull/325>`_ is merged. A
+    description of how to fix this is provided as a comment within
+    `Cello/view_ViewCollec.hpp`.  Please **don't** let this influence
+    whether you use ``ViewMap<const T>`` in your code. This will be
+    fixed very soon.
+
+.. note::
+
+    Historically, we tried to implement the ``EnzoEFltArrayMap`` with
+    different const-semantics. Essentially, we tried to treat a
+    ``const EnzoEFltArrayMap`` as read-only. However, there were
+    soundness problems with this approach.
 
 
 Other Utilities

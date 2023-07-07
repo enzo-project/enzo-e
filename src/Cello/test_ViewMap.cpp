@@ -657,6 +657,77 @@ public:
 
 //----------------------------------------------------------------------
 
+class ImplicitCastTests{
+  // test implicit casts from ViewMap<T> to ViewMap<const T>
+
+private:
+
+  void test_cast_helper_(ViewMap<const int> dest_view_map,
+                         ViewMap<int>& src_view_map,
+                         const std::vector<std::string>& src_keys) {
+
+    // perform a check related to map-methods
+    unit_assert(consistent_key_order_(src_keys, dest_view_map));
+
+    // now let's perform some checks to ensure that the shallow copy operations
+    // work as expected
+    assign_range_3Darray(src_view_map.at("A"), ValRange<int>(17, -1));
+
+    // getting the signatures on the template functions correct so that they
+    // can be used to compare the template functions is challenging! So we just
+    // do it manually!
+    bool all_equal = true;
+    for (const std::string& key: src_keys) {
+      CelloView<const int,3> dest_view = dest_view_map.at(key);
+      CelloView<const int,3> src_view = src_view_map.at(key);
+
+      const int mz = dest_view.shape(0);
+      const int my = src_view.shape(1);
+      const int mx = dest_view.shape(2);
+
+      for (int iz = 0; iz < mz; iz++){
+        for (int iy = 0; iy < my; iy++){
+          for (int ix = 0; ix < mx; ix++){
+            all_equal &= (src_view(iz,iy,ix) == dest_view(iz,iy,ix));
+          }
+        }
+      }
+    }
+    unit_assert(all_equal);
+  }
+
+public:
+
+  template<bool Contiguous>
+  void test_cast(bool explicit_cast) {
+    Unit::instance()->set_func("ViewMap<const T>",
+                               "ViewMap(const ViewMap<T>&)");
+
+    // setup the src (that will be assigned)
+    const std::vector<std::string> src_keys = {"A", "B", "C"};
+    const std::array<int,3> src_shape = {4, 6, 8};
+    ManagedViewMap<int, Contiguous> src_manager(src_keys, src_shape);
+
+    ViewMap<int>& src_view_map = src_manager.get();
+
+    // execute the copy Constructor
+    if (explicit_cast) {
+      ViewMap<const int> dest_view_map(src_manager.get());
+      test_cast_helper_(dest_view_map, src_view_map, src_keys);
+    } else {
+      test_cast_helper_(src_view_map, src_view_map, src_keys);
+    }
+  }
+
+  void run_tests()
+  {
+    test_cast<true>(true);
+    test_cast<true>(false);
+    test_cast<false>(true);
+    test_cast<false>(false);
+  }
+};
+
 PARALLEL_MAIN_BEGIN
 {
   PARALLEL_INIT;
@@ -682,6 +753,9 @@ PARALLEL_MAIN_BEGIN
 
   // At this point, we are largely missing tests of subarray_map
   // (which is probably not worth the effor at this moment in time)
+
+  ImplicitCastTests cast_tests;
+  cast_tests.run_tests();
 
   unit_finalize();
 
