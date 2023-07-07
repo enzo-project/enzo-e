@@ -15,8 +15,8 @@
 ///    here.
 ///
 /// All insertions occur in the constructor, and the properties of the
-/// contained arrays can't be mutated. This choice:
-///   - facillitates enforcement that all contained arrays have a fixed shape
+/// contained views can't be mutated. This choice:
+///   - facillitates enforcement that all contained views have a fixed shape
 ///   - makes it easier to order the entries in an arbitrary order. This
 ///     facilitates optimizations in the Riemann Solver when the values are
 ///     initialized in the order expected by the Riemann Solver
@@ -31,7 +31,7 @@
 ///      there are never more than ~128 entries, it would probably be optimal
 ///      to store the strings in-place (improving cache locallity).
 ///    - It would also be worth considering whether linear search is faster
-///      (since the arrays are small)
+///      (since the views are small)
 
 #ifndef VIEW_VIEW_MAP_HPP
 #define VIEW_VIEW_MAP_HPP
@@ -75,13 +75,13 @@ public: // interface
 
   /// Constructs a map that wraps existing data.
   ///
-  /// Each array must have the same shape.
+  /// Each view must have the same shape.
   ViewMap(std::string name, const std::vector<std::string> &keys,
-          const std::vector<CelloView<T,3>> &arrays);
+          const std::vector<CelloView<T,3>> &views);
 
   ViewMap(const std::vector<std::string> &keys,
-          const std::vector<CelloView<T,3>> &arrays)
-    : ViewMap("", keys, arrays)
+          const std::vector<CelloView<T,3>> &views)
+    : ViewMap("", keys, views)
   { }
 
   /// conversion constructor that facilitates implicit casts from
@@ -95,10 +95,10 @@ public: // interface
   ViewMap(const ViewMap<nonconst_value_type> &other)
     : name_(other.name_),
       str_index_map_(other.str_index_map_),
-      arrays_(other.arrays_)
+      views_(other.views_)
   { }
 
-  /// Returns a reference to the mapped array associated with the specified
+  /// Returns a reference to the mapped view associated with the specified
   /// index/key
   ///
   /// Unlike the analogous ``std::map::operator[]`` method, this cannot be used
@@ -118,7 +118,7 @@ public: // interface
   CelloView<T, 3> operator[] (std::size_t index) const noexcept
   { return at_(index); }
 
-  /// Returns a reference to the mapped array associated with the specified
+  /// Returns a reference to the mapped view associated with the specified
   /// index/key
   CelloView<T, 3> at(const std::string& key) const noexcept
   { return at_(key); }
@@ -127,7 +127,7 @@ public: // interface
   bool contains(const std::string& key) const noexcept
   { return str_index_map_.contains(key); }
 
-  /// Similar to `at`, but a slice of the array ommitting staled values is
+  /// Similar to `at`, but a slice of the view ommitting staled values is
   /// returned by value
   ///
   /// @note
@@ -144,7 +144,7 @@ public: // interface
   /// Return the name of the instance (if it has one)
   const std::string& name() const noexcept {return name_;}
 
-  /// Returns the length along a given dimension of each contained array
+  /// Returns the length along a given dimension of each contained view
   ///
   /// @param dim Indicates the dimension for which we want the shape. This
   ///    should be 0, 1, or 2
@@ -152,13 +152,15 @@ public: // interface
   /// @note
   /// The program will fail if this method is invoked and the map holds zero
   /// elements.
+  /// @note
+  /// Consider changing the name to view_shape in the future
   int array_shape(unsigned int dim) const noexcept
-  { return arrays_.array_shape(dim); }
+  { return views_.array_shape(dim); }
 
-  /// Return a new map holding subsections of each array held by the map
+  /// Return a new map holding subsections of each view held by the map
   ///
   /// @param slc_z, slc_y, slc_x Instance of CSlice that specify that are
-  ///    passed to the `subarray` method of each contained array.
+  ///    passed to the `subarray` method of each contained view.
   ViewMap<T> subarray_map(const CSlice &slc_z,
                           const CSlice &slc_y,
                           const CSlice &slc_x,
@@ -177,30 +179,30 @@ public: // interface
 			  bool raise_err, bool allow_smaller_ref = false)
     const noexcept;
 
-  /// Indicates if the contained arrays are stored in a single 4D array
+  /// Indicates if the contained views are stored in a single 4D view
   /// (Alternatively they can be stored as an array of pointers)
-  bool contiguous_arrays() const noexcept { return arrays_.contiguous_items(); }
+  bool contiguous_arrays() const noexcept { return views_.contiguous_items(); }
 
-  /// Returns a shallow copy of the 4D array holding each contained array.
+  /// Returns a shallow copy of the 4D view holding each contained view.
   ///
-  /// The `n`th 3D subarray of `arrmap.get_backing_array()` is always a perfect
+  /// The `n`th 3D subview of `arrmap.get_backing_array()` is always a perfect
   /// alias of `arrmap[n]` (for any non-negative `n` less than `arrmap.size()`)
   ///
   /// @note
   /// The program will abort if this method is called on an object for which
   /// the `contiguous_arrays()` method returns `false`.
   CelloView<T, 4> get_backing_array() const noexcept
-  { return arrays_.get_backing_array(); }
+  { return views_.get_backing_array(); }
 
 private: // helper methods
 
   /// This private constructor is used by subarray_map. It can skip some
   /// unnecessary work relating to initialization
   ViewMap(std::string name, const StringIndRdOnlyMap& str_index_map,
-          ViewCollec<T>&& arrays)
+          ViewCollec<T>&& views)
     : name_(name),
       str_index_map_(str_index_map),
-      arrays_(arrays)
+      views_(views)
   { validate_invariants_(); }
 
   void validate_invariants_() const noexcept;
@@ -217,8 +219,8 @@ private: // attributes
 
   // str_index_map_ maps the keys to the index
   StringIndRdOnlyMap str_index_map_;
-  // arrays_ is the ordered collection of arrays_
-  ViewCollec<T> arrays_;
+  // views_ is the ordered collection of contained Views
+  ViewCollec<T> views_;
 };
 
 //----------------------------------------------------------------------
@@ -228,22 +230,22 @@ ViewMap<T>::ViewMap(std::string name, const std::vector<std::string> &keys,
                     const std::array<int,3>& shape)
   : name_(name),
     str_index_map_(keys),
-    arrays_(keys.size(), shape)
+    views_(keys.size(), shape)
 { }
 
 //----------------------------------------------------------------------
 
 template<typename T>
 ViewMap<T>::ViewMap(std::string name, const std::vector<std::string> &keys,
-                    const std::vector<CelloView<T,3>> &arrays)
+                    const std::vector<CelloView<T,3>> &views)
   : name_(name),
     str_index_map_(keys),
-    arrays_(arrays)
+    views_(views)
 {
   ASSERT2("ViewMap::ViewMap",
-          "keys and arrays have lengths %zu and %zu. They should be the same",
-          (std::size_t)keys.size(), (std::size_t)arrays.size(),
-          keys.size() == arrays.size());
+          "keys and views have lengths %zu and %zu. They should be the same",
+          (std::size_t)keys.size(), (std::size_t)views.size(),
+          keys.size() == views.size());
 }
 
 //----------------------------------------------------------------------
@@ -289,7 +291,7 @@ bool ViewMap<T>::validate_key_order(const std::vector<std::string> &ref,
 
 template<typename T>
 CelloView<T, 3> ViewMap<T>::at_(const std::string& key) const noexcept
-{ return arrays_[str_index_map_.at(key)]; }
+{ return views_[str_index_map_.at(key)]; }
 
 //----------------------------------------------------------------------
 
@@ -299,7 +301,7 @@ CelloView<T, 3> ViewMap<T>::at_(const std::size_t index) const noexcept
   ASSERT("ViewMap::at_",
          "index must be less than or equal to the length of the ViewMap.",
          index < size());
-  return arrays_[index];
+  return views_[index];
 }
 
 //----------------------------------------------------------------------
@@ -355,9 +357,9 @@ void ViewMap<T>::print_summary() const noexcept
       CkPrintf(",\n ");
     }
 
-    CelloView<T,3> array = arrays_[i];
+    CelloView<T,3> view = views_[i];
     std::string key = str_index_map_.key(i);
-    CkPrintf("\"%s\" : CelloView<T,3>(%p)", key.c_str(), (void*)array.data());
+    CkPrintf("\"%s\" : CelloView<T,3>(%p)", key.c_str(), (void*)view.data());
   }
   CkPrintf("}\n");
   fflush(stdout);
@@ -372,7 +374,7 @@ ViewMap<T> ViewMap<T>::subarray_map(const CSlice &slc_z,
                                     const std::string& name) const
 {
   return ViewMap<T>(name, str_index_map_,
-                    arrays_.subarray_collec(slc_z, slc_y, slc_x));
+                    views_.subarray_collec(slc_z, slc_y, slc_x));
 }
 
 //----------------------------------------------------------------------
@@ -384,10 +386,10 @@ void ViewMap<T>::validate_invariants_() const noexcept
   // - StringIndRdOnlyMap implicitly enforces that there aren't any duplicate
   //   keys, and that a unique key is associated with each integer index from 0
   //   through (str_index_map_.size() - 1)
-  // - ViewCollec enforces that all arrays have the same shape
+  // - ViewCollec enforces that all views have the same shape
   ASSERT("ViewMap::validate_invariants_",
-         "str_index_map_ and arrays_ don't have the same length",
-         arrays_.size() == str_index_map_.size());
+         "str_index_map_ and views_ don't have the same length",
+         views_.size() == str_index_map_.size());
 }
 
 #endif /* VIEW_VIEW_MAP_HPP */
