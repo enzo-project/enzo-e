@@ -36,8 +36,8 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_final_redshift(0.0),
   // FluidProps
   physics_fluid_props_de_config(),
+  physics_fluid_props_eos_variant(),
   physics_fluid_props_fluid_floor_config(),
-  physics_fluid_props_gamma(0.0),
   physics_fluid_props_mol_weight(0.0),
   // Gravity
   physics_gravity(false),
@@ -423,8 +423,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_final_redshift;
 
   p | physics_fluid_props_de_config;
+  ::pup(p, physics_fluid_props_eos_variant);
   p | physics_fluid_props_fluid_floor_config;
-  p | physics_fluid_props_gamma;
   p | physics_fluid_props_mol_weight;
 
   p | physics_gravity;
@@ -1500,6 +1500,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
 
   // Defaults alert PUP::er() to ignore
   if (method_grackle_use_grackle) {
+
     method_grackle_use_cooling_timestep = p->value_logical
       ("Method:grackle:use_cooling_timestep", false);
 
@@ -1567,7 +1568,14 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
                                       method_grackle_use_grackle);
 
     // 3. Copy over parameters from Enzo-E to Grackle
-    method_grackle_chemistry.set<double>("Gamma", physics_fluid_props_gamma);
+    if (physics_fluid_props_eos_variant.holds_alternative<EnzoEOSIdeal>()) {
+      method_grackle_chemistry.set<double>
+        ("Gamma", physics_fluid_props_eos_variant.get<EnzoEOSIdeal>().gamma);
+    } else {
+      ERROR("EnzoConfig::read_method_grackle_",
+            "Grackle currently can't be used when Enzo-E is configured to use "
+            "an equation of state other than the ideal gas law");
+    }
 
     // In the future, we may want to manually set use_radiative_transfer based
     // on an Enzo-E parameter for turning RT on / off:
@@ -2177,7 +2185,7 @@ namespace{
 
     // look for dual energy parameters specified within the hydro solver (for
     // backwards compatibility)
-    if (hydro_type != ""){
+    if ((hydro_type != "") && (hydro_type != "ppml")) {
       std::string legacy_de_param = "Method:" + hydro_type + ":dual_energy";
       bool legacy_param_exists = p->param(legacy_de_param) != nullptr;
 
@@ -2203,6 +2211,136 @@ namespace{
       }
     }
     return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  EnzoEOSVariant parse_eos_choice_(Parameters * p,
+                                   const std::string& hydro_type)
+  {
+    // Prior to the creation of the EnzoEOSVariant class, Enzo-E effectively
+    // assumed at a global level that an ideal EOS was in use and stored gamma
+    // at a global level.
+    //
+    // - gamma's value was originally parsed from "Field:gamma" and later from
+    //   "Physics:fluid_props:eos:gamma". As an aside, while it was always the
+    //   plan to have the ``EnzoPhysicsFluidProps`` class track the EOS type,
+    //   the ability to track EOS type was added a while after the fact (in the
+    //   same PR that introduced ``EnzoEOSVariant``).
+    // - gamma's default value has always been 5/3.
+    // - when the Ppml solver was used, it simply ignored the value of gamma
+    //   and internally used an Isothermal EOS.
+    // - technically, extension points were put into place within the vl+ct
+    //   solver to support other types of solvers, but those were never used.
+
+
+    // get the name of EnzoEOSIdeal (useful since it's the default eos type)
+    const std::string ideal_name = EnzoEOSIdeal::name();
+
+    // check whether the legacy parameter was specified
+    const bool legacy_gamma_specified = p->param("Field:gamma") != nullptr;
+
+    // fetch names of parameters in Physics:fluid_props:eos
+    p->group_set(0, "Physics");
+    p->group_set(1, "fluid_props");
+    p->group_set(2, "eos");
+    std::vector<std::string> names = p->leaf_parameter_names();
+
+    const bool missing_eos_config = names.size() == 0;
+
+    if (legacy_gamma_specified && !missing_eos_config) {
+      ERROR("parse_eos_choice_",
+            "\"Field:gamma\" isn't valid since parameters are specified "
+            "within the \"Physics:fluid_props:eos\" parameter group");
+
+    } else if (!missing_eos_config) {
+      // this branch does the main work of the function
+
+      // STEP 1: define some useful variables
+      const std::string prefix = "Physics:fluid_props:eos:";
+      const bool is_type_specified = p->param(prefix + "type") != nullptr;
+      // following variable is used for maintaining backwards compatability
+      const bool is_gamma_specified = p->param(prefix + "gamma") != nullptr;
+
+      // STEP 2: determine the eos-type
+      std::string type;
+      if (is_type_specified) {
+        type = p->value(prefix + "type","");
+      } else if (is_gamma_specified) {
+        WARNING1("parse_eos_choice_",
+                 "Going forward, \"Physics:fluid_props:eos:type\" must be set "
+                 "when there are other parameters in the subgroup. For "
+                 "backwards compatability, this is being set to \"%s\" since "
+                 "the only other parameter in that group is \"gamma\"",
+                 ideal_name.c_str());
+        type = ideal_name;
+      } else {
+        ERROR("parse_eos_choice_",
+              "\"Physics:fluid_props:eos:type\" must be set when there are "
+              "other parameters in the subgroup.");
+      }
+
+      // STEP 3: actually build the EOS object and return it
+      if (type == ideal_name) { // EnzoEOSIdeal
+
+        // this case is a little funky, since we allow type to not actually be
+        // a parameter (for backwards compatability purposes).
+        std::size_t num_params = (1 + (std::size_t)(is_type_specified));
+        ASSERT1("parse_eos_choice_",
+                "the only allowed parameters are \"type\" and \"gamma\" in "
+                "the \"Physics:fluid_props:eos\" parameter group when making "
+                "an \"%s\" eos", type.c_str(),
+                (num_params == names.size()) && is_gamma_specified);
+        double gamma = p->value_float(prefix+"gamma", -1.0);
+        return EnzoEOSVariant(EnzoEOSIdeal::construct(gamma));
+
+      } else if ( type == EnzoEOSIsothermal::name() ){
+
+        ASSERT1("parse_eos_choice_",
+                "when building an \"%s\" eos, \"type\" is the only parameter "
+                "allowed in the \"Physics:fluid_props:eos\" parameter group ",
+                type.c_str(), (names.size() == 1) && is_type_specified);
+        return EnzoEOSVariant(EnzoEOSIsothermal());
+
+      } else {
+        ERROR1("parse_eos_choice_",
+               "there is currently no support for building of type \"%s\".",
+               type.c_str());
+      }
+    }
+
+
+    if (legacy_gamma_specified) {
+      WARNING1("parse_eos_choice_",
+               "\"Field:gamma\" is a legacy parameter that will be removed. "
+               "It is being used to configure an \"%s\" EOS. Going forward, "
+               "set parameters in the \"Physics:fluid_props:eos\" parameter "
+               "group instead.",
+               ideal_name.c_str());
+      double gamma = p->value_float("Field:gamma", -1.0);
+      return EnzoEOSVariant(EnzoEOSIdeal::construct(gamma));
+
+    } else if (hydro_type == "ppml") {
+      std::string type = EnzoEOSIsothermal::name();
+      WARNING1("parse_eos_choice_",
+               "Defaulting to \"%s\" EOS since for backwards compatability "
+               "since the PPML solver is in use and no parameters were set "
+               "in the \"Physics:fluid_props:eos\" parameter group. In the "
+               "future, this behavior will be dropped.",
+               type.c_str());
+      return EnzoEOSVariant(EnzoEOSIsothermal());
+
+    } else {
+      const double default_gamma = 5.0/3.0;
+      WARNING2("parse_eos_choice_",
+               "No parameters specified in the \"Physics:fluid_props:eos\" "
+               "parameter group. Defaulting to an \"%s\" eos with gamma = "
+               "%#.16g.",
+               ideal_name.c_str(), default_gamma);
+      return EnzoEOSVariant(EnzoEOSIdeal::construct(default_gamma));
+
+    }
+
   }
 
   //----------------------------------------------------------------------
@@ -2289,6 +2427,7 @@ namespace{
     return {density_floor, pressure_floor, temperature_floor,
             metal_mass_frac_floor};
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -2299,14 +2438,18 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
   // look for.
   const std::vector<std::string>& mlist = this->method_list;
   bool has_ppm = std::find(mlist.begin(), mlist.end(), "ppm") != mlist.end();
+  bool has_ppml = std::find(mlist.begin(), mlist.end(), "ppml") != mlist.end();
   bool has_vlct = std::find(mlist.begin(), mlist.end(),
                             "mhd_vlct") != mlist.end();
   std::string hydro_type = "";
-  if (has_ppm & has_vlct){
+  if ((int(has_ppm) + int(has_ppml) + int(has_vlct)) > 1){
     ERROR("EnzoConfig::read_physics_fluid_props_",
-          "a simulation can't use ppm and vlct solvers at once");
+          "a given simulation can only use up to 1 of the following solvers: "
+          "{\"ppm\", \"ppml\", \"mhd_vlct\"}");
   } else if (has_ppm){
     hydro_type = "ppm";
+  } else if (has_ppml){
+    hydro_type = "ppml";
   } else if (has_vlct){
     hydro_type = "mhd_vlct";
   }
@@ -2320,25 +2463,9 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
   physics_fluid_props_fluid_floor_config =
     parse_fluid_floor_config_(p, hydro_type, has_grackle);
 
-  // determine adiabatic index (in the future, this logic will be revisited)
-  {
-    double default_val = 5.0/3.0;
-    double legacy_value = p->value_float("Field:gamma", -1);
-    double actual_value = p->value_float("Physics:fluid_props:eos:gamma", -1);
-
-    if (legacy_value == -1) {
-      if (actual_value == -1) { actual_value = default_val; }
-      physics_fluid_props_gamma = actual_value;
-    } else if (actual_value == -1) {
-      WARNING("EnzoConfig::read_physics_fluid_props_",
-              "\"Field:gamma\" is a legacy parameter that will be removed.");
-      physics_fluid_props_gamma = legacy_value;
-    } else {
-      ERROR("EnzoConfig::read_physics_fluid_props_",
-            "\"Field:gamma\" isn't valid since "
-            "\"Physics:fluid_props:eos:gamma\" is specified.");
-    }
-  }
+  // determine the nominal choice of the EOS (the EOS is currently independent
+  // of the molecular weight)
+  physics_fluid_props_eos_variant = parse_eos_choice_(p, hydro_type);
 
   // determine molecular weight
   {

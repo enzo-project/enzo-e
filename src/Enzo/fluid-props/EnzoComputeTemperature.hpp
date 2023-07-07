@@ -35,6 +35,12 @@ public: // interface
            "does not accept a nullptr", fluid_props != nullptr);
     const EnzoFluidFloorConfig& floor_conf = fluid_props->fluid_floor_config();
 
+    if (!fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>()){
+      ERROR("EnzoComputeTemperature::EnzoComputeTemperature",
+            "Currently unsure how to compute the temperature for the current "
+            "type of EOS.");
+    }
+
     density_floor_ = floor_conf.has_density_floor() ?
       (double)floor_conf.density() : 0.0;
     temperature_floor_ = floor_conf.has_temperature_floor() ?

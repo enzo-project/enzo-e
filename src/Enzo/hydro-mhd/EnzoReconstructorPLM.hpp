@@ -165,8 +165,8 @@ public: // interface
 
   void reconstruct_interface
   (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
-   EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
-   const int stale_depth, const str_vec_t& passive_list);
+   EnzoEFltArrayMap &primr_map, const int dim, const int stale_depth,
+   const str_vec_t& passive_list);
 
   int total_staling_rate()
   { return 2; }
@@ -184,8 +184,8 @@ private:
 template <class Limiter>
 void EnzoReconstructorPLM<Limiter>::reconstruct_interface
 (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
- EnzoEFltArrayMap &primr_map, const int dim, const EnzoEquationOfState *eos,
- const int stale_depth, const str_vec_t& passive_list)
+ EnzoEFltArrayMap &primr_map, const int dim,  const int stale_depth,
+ const str_vec_t& passive_list)
 {
   EnzoPermutedCoordinates coord(dim);
   Limiter limiter_func = Limiter();
@@ -234,10 +234,8 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
             enzo_float left_val, right_val;
 
             if (use_floor) {
-              right_val = EnzoEquationOfState::apply_floor(val - half_dv,
-                                                           prim_floor);
-              left_val  = EnzoEquationOfState::apply_floor(val + half_dv,
-                                                           prim_floor);
+              right_val = enzo_utils::apply_floor(val - half_dv, prim_floor);
+              left_val  = enzo_utils::apply_floor(val + half_dv, prim_floor);
             } else {
               right_val = val - half_dv;
               left_val  = val + half_dv;
@@ -255,10 +253,10 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
     enzo_float prim_floor = 0;
     bool use_floor = false;
     if (key == "density"){
-      prim_floor = eos->get_density_floor();
+      prim_floor = enzo::fluid_props()->fluid_floor_config().density();
       use_floor=true;
     } else if (key == "pressure"){
-      prim_floor = eos->get_pressure_floor();
+      prim_floor = enzo::fluid_props()->fluid_floor_config().pressure();
       use_floor=true;
     }
     fn(key, use_floor, prim_floor);
@@ -271,24 +269,6 @@ void EnzoReconstructorPLM<Limiter>::reconstruct_interface
 
 // implements sign function https://stackoverflow.com/questions/1903954
 inline enzo_float sign(enzo_float val) { return (0.0 < val) - (val < 0.0); }
-
-//----------------------------------------------------------------------
-
-// taken from Enzo's ReconstructionRoutines.h
-inline enzo_float Min(enzo_float a, enzo_float b, enzo_float c)
-{
-  if (a<b) {
-    if (c<a)
-      return c;
-    else 
-      return a;
-  } else {
-    if (c<b)
-      return c;
-    else 
-      return b;
-  }
-}
 
 //----------------------------------------------------------------------
 
@@ -334,8 +314,9 @@ struct PLM_EnzoRKLimiter
     //   +1   if (dv_l>0 & dv_r>0)
     //   -1   if (dv_l<0 & dv_r<0)
     //    0   if ((dv_l<0 & dv_r>0) || (dv_l<0 & dv_r>0))
-    // the Min function evaluates to 0 if (dv_l == 0 || dv_r == 0)
-    return (0.5*(sign(dv_l)+sign(dv_r)))*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c));
+    // the min function evaluates to 0 if (dv_l == 0 || dv_r == 0)
+    return (0.5*(sign(dv_l)+sign(dv_r))) *
+      enzo_utils::min<enzo_float>(fabs(dv_l),fabs(dv_r),fabs(dv_c));
   }
 };
 

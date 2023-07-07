@@ -8,7 +8,6 @@
 ///
 /// This class relies on the following component classses
 ///
-///    EnzoEquationOfState:       Equation of State for Gas
 ///    EnzoReconstructor:         Reconstructs primitive variables
 ///    EnzoRiemann:               Solves the Riemann Problem
 ///    EnzoIntegrationQuanUpdate: Handles updates to integration quantites
@@ -114,7 +113,6 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
-      eos_(nullptr),
       half_dt_recon_(nullptr),
       full_dt_recon_(nullptr),
       rsolver_name_(""),
@@ -301,8 +299,6 @@ protected: // methods
 
 protected: // attributes
 
-  /// Pointer to the equation of state of the fluid
-  EnzoEquationOfState *eos_;
   /// Pointer to the reconstructor used to reconstruct the fluid during the
   /// first half time-step (usually nearest-neighbor)
   EnzoReconstructor *half_dt_recon_;
