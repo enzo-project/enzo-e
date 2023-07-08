@@ -58,6 +58,9 @@ STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
 option(USE_GRACKLE "Use Grackle Chemistry" ON)
+# don't bother advertising the following option (but users can
+# overwrite it if they really want to - e.g. to reduce binary size)
+option(GRACKLE_USE_STATIC_LIBS  "sets Grackle's lib-type if USE_GRACKLE=ON" ON)
 if (USE_GRACKLE)
   find_package(Grackle)
   if (Grackle_FOUND)

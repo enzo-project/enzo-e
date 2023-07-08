@@ -71,6 +71,13 @@ function(addCelloLib LIBNAME EXTRASRCS)
   # Add static library based on glob for the library name and including
   # (potentially) excessive dependencies.
 
+  # Get the list of source files
+  # - we do this using GLOB patterns. This approach is not recommended by the
+  #   authors of CMake (their recommendation is to explicitly list all files
+  #   that must be compiled).
+  # - Some of the disadvantages of this approach are mitigated by inclusion of
+  #   the CONFIGURE_DEPENDS flag.
+  # - See the CMake Primer section of the documentation for more details
   file(GLOB SRC_FILES ${LIBNAME}*.cpp *{LIBNAME}*.hpp)
   add_library(${LIBNAME} STATIC ${SRC_FILES} ${EXTRASRCS})
   setupCelloLibHelper(${LIBNAME})
@@ -95,15 +102,14 @@ message("link options: ${Cello_TARGET_LINK_OPTIONS}")
 # components anyway for explicitness and in case we ever reorganize or
 # transform these libraries so that they are no-longer header-only
 
-add_library(array INTERFACE)
-target_link_libraries(array INTERFACE error monitor)
-
-
 add_library(parallel INTERFACE)
 target_link_libraries(parallel
   INTERFACE cello_component charm_component error
   INTERFACE CHARM::CHARM_HEADERS # charm++.hpp included in a public header file
 )
+
+add_library(view INTERFACE)
+target_link_libraries(view INTERFACE error monitor)
 
 #===============================================
 # Defining Cello-Component Targets step 2 (of 3)
@@ -126,18 +132,18 @@ target_link_libraries(parallel
 #     file of the target (and not one of the target's headers), we can then
 #     declare the dependency to be PRIVATE
 #
-# Note: Some components seem include the headers of some unnecessary dependent
-# targets (e.g. does the compute component NEED to directly depend on the disk
-# component?) We could definitely remove some of these dependencies (and rely
-# upon on CMake's ability to handle such transitive dependencies for us). This
-# might help speed up incremental re-compilation
+# Note: Some components seem to include the headers of some unnecessary
+# dependent targets (e.g. does the compute component NEED to directly depend on
+# the disk component?). We could definitely remove some of these dependencies
+# (and rely upon on CMake's ability to handle such transitive dependencies for
+# us). This might help speed up incremental re-compilation
 
 # first, we define 2 targets that have "special names"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # These names were chosen to minimize confusion (we have other targets that
 # share similar names)
 
-# note: in the near future, we may a separate target called something like
+# note: in the near future, we may make a separate target called something like
 # CELLO_COMBINED to represent the complete library that is composed of the
 # components in this directory
 file(GLOB CELLO_COMP_SRC_FILES cello*.cpp *cello*.hpp)
@@ -171,7 +177,7 @@ target_include_directories (charm_component
 addCelloLib(compute "")
 target_link_libraries(compute
   PUBLIC cello_component charm_component error performance monitor memory
-         parallel disk io parameters problem mesh array data simulation
+         parallel disk io parameters problem mesh view data simulation
 )
 
 
@@ -186,7 +192,7 @@ target_link_libraries(control
 addCelloLib(data  "field_face_store.F")
 target_link_libraries(data
   PUBLIC cello_component charm_component error memory performance monitor
-         parallel disk problem mesh parameters io compute simulation array
+         parallel disk problem mesh parameters io compute simulation view
 )
 
 
@@ -194,10 +200,10 @@ addCelloLib(disk "")
 # with minimal refactoring, we could make HDF5_C a privately linked library
 target_link_libraries(disk PUBLIC error HDF5_C)
 # the disk_utils functions requires that all linked libraries are all "linked"
-# against the array library (the disk library itself does not need to link
-# to the array library because none of the symbols defined in that library are
+# against the view library (the disk library itself does not need to link
+# to the view library because none of the symbols defined in that library are
 # used within the disk library's source files)
-target_link_libraries(disk INTERFACE array)
+target_link_libraries(disk INTERFACE view)
 
 
 addCelloLib(error "")
@@ -212,7 +218,7 @@ target_link_libraries(io
   PUBLIC Boost::filesystem pngwriter # with minimal refactoring, we could make
                                      # these into private dependencies
   PUBLIC cello_component charm_component parallel monitor performance error
-         parameters disk problem compute mesh array data simulation
+         parameters disk problem compute mesh view data simulation
 )
 
 
@@ -223,7 +229,7 @@ target_link_libraries(memory PUBLIC error parallel monitor)
 addCelloLib(mesh "")
 target_link_libraries(mesh
   PUBLIC cello_component charm_component performance monitor parallel disk
-         parameters control io problem compute simulation array data
+         parameters control io problem compute simulation view data
 )
 
 
@@ -256,14 +262,14 @@ endif()
 addCelloLib(problem "")
 target_link_libraries(problem
   PUBLIC cello_component charm_component error performance monitor memory
-         parallel disk io parameters compute control mesh array data simulation
+         parallel disk io parameters compute control mesh view data simulation
 )
 
 addCelloLib(simulation "")
 # somehow the main component needs to be a private dependency
 target_link_libraries(simulation
   PUBLIC cello_component charm_component error memory performance monitor
-         parallel disk problem mesh array data parameters io compute
+         parallel disk problem mesh view data parameters io compute
 )
 
 
@@ -342,15 +348,6 @@ function(addUnitTestBinary BINNAME SRCS LIB TESTER)
   target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 endfunction(addUnitTestBinary)
 
-
-
-# tests of the array component
-addUnitTestBinary(test_carr_collec "test_CArrCollec.cpp" array tester_default)
-addUnitTestBinary(test_cello_array "test_CelloArray.cpp" array tester_default)
-addUnitTestBinary(
-  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" array tester_default
-)
-
 # tests of the cello-component
 addUnitTestBinary(test_type "test_Type.cpp" cello_component tester_default)
 
@@ -411,6 +408,13 @@ addUnitTestBinary(test_timer "test_Timer.cpp" performance tester_default)
 if (use_papi)
   addUnitTestBinary(test_papi "test_Papi.cpp" performance tester_default)
 endif()
+
+# tests of the view component
+addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
+addUnitTestBinary(test_cello_view "test_CelloView.cpp" view tester_default)
+addUnitTestBinary(
+  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" view tester_default
+)
 
 # the following test is broken (an API change is not reflected in the test)
 #addUnitTestBinary(test_index "test_Index.cpp" mesh tester_mesh)

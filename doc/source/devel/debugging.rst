@@ -48,6 +48,6 @@ For certain classes of problems, it can be useful to dump data (like field data)
 
 We provide 2 functions for doing this:
 
-.. doxygenfunction:: disk_utils::dump_array_to_hdf5
+.. doxygenfunction:: disk_utils::dump_view_to_hdf5
 
-.. doxygenfunction:: disk_utils::dump_arrays_to_hdf5
+.. doxygenfunction:: disk_utils::dump_views_to_hdf5
