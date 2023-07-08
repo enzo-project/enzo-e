@@ -32,8 +32,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
-#include <type_traits> // std::remove_cv
-#include <typeinfo> // std::type_info
+#include <type_traits> // std::remove_cv, std::is_same_v
 #include <vector>
 
 #include <charm++.h>
@@ -821,24 +820,64 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  /// helper function of get_type_enum
-  int get_type_enum_(const std::type_info &tinfo,
-                     bool unknown_on_fail = false) noexcept;
+  // this is a common workaround used to raise a compile-time error in the
+  // elsebranch of a constexpr-if statement (as is down directly below
+  template<class> inline constexpr bool dummy_false_v_ = false;
 
-  /// returns the type_enum associated with the template type argument ``T``
+  /// returns the type_enum associated with the template type argument ``T``.
   ///
-  /// this automatically sheds ``const`` or ``volatile`` qualifiers from ``T``
-  ///
-  /// @param unknown_on_fail When ``true``, the this returns ``type_unknown``
-  ///     when ``T`` isn't recognized. Otherwise, the program aborts with an
-  ///     error. Default is ``false``.
+  /// @tparam T The type for which the enum value is returned. Any ``const`` or
+  //     ``volatile`` qualifiers are automatically shed from it.
+  /// @tparam unknown_on_fail When ``true``, the this returns ``type_unknown``
+  ///     when ``T`` isn't recognized. Otherwise, the program fails to compile
+  ///     (with a compile-time error), when ``T`` isn't recognized.
   ///
   /// @note
   /// This will not return type_default
-  template <class T>
-  int get_type_enum(bool unknown_on_fail = false) noexcept{
-    using nonconst_T = typename std::remove_cv<T>::type;
-    return get_type_enum_(typeid(nonconst_T));
+  template<typename T, bool unknown_on_fail = false>
+  constexpr int get_type_enum() noexcept {
+    using T_ = typename std::remove_cv_t<T>;
+
+    if constexpr (std::is_same_v<T_,float>) {
+      return type_single;
+    } else if constexpr (std::is_same_v<T_, double>) {
+      return type_double;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==10)) {
+      return type_extended80;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==12)) {
+      return type_extended96;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==16)) {
+      return type_quadruple;
+    } else if constexpr (std::is_same_v<T_, char>) {
+      return type_char;
+    } else if constexpr (std::is_same_v<T_, short>) {
+      return type_short;
+    } else if constexpr (std::is_same_v<T_, int>) {
+      return type_int;
+    } else if constexpr (std::is_same_v<T_, long long>) {
+      return type_long_long;
+#if 0
+    // it's unclear to me at this time if the following is worth including.
+    // - On the one hand, fixed-width integer types are not guaranteed to be
+    //   defined on all systems.
+    // - On the other hand, we could probably provide custom definitions. In
+    //   the case where the smallest integer types can't be defined (b/c a
+    //   machine's definition of a byte exceeds 8 bits), we will encounter
+    //   other problems anyways...
+    } else if constexpr (std::is_same_v<T_, std::int8_t>){
+      return type_char;
+    } else if constexpr (std::is_same_v<T_, std::int16_t>){
+      return type_short;
+    } else if constexpr (std::is_same_v<T_, std::int32_t>){
+      return type_int;
+    } else if constexpr (std::is_same_v<T_, std::int64_t>){
+      return type_long_long;
+#endif
+    } else if constexpr (unknown_on_fail) {
+      return type_unknown;
+    } else {
+      static_assert(dummy_false_v_<T_>, "can't convert type!");
+    }
   }
 
   //----------------------------------------------------------------------
