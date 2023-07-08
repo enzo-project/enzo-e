@@ -502,14 +502,16 @@ void Block::print (FILE * fp_in) const
   fprintf (fp,"%d %s PRINT_BLOCK index_initial_ = %d\n",CkMyPe(),name_.c_str(),index_initial_);
   fprintf (fp,"%d %s PRINT_BLOCK children_.size() = %lu\n",CkMyPe(),name_.c_str(),children_.size());
   fprintf (fp,"%d %s PRINT_BLOCK child_face_level_curr_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_curr_.size());
-  for (int i=0; i<child_face_level_curr_.size(); i++) {fprintf (fp,"%d ",child_face_level_curr_[i]);} fprintf (fp,"\n");
+  for (std::size_t i=0; i<child_face_level_curr_.size(); i++) {fprintf (fp,"%d ",child_face_level_curr_[i]);} fprintf (fp,"\n");
   sync_coarsen_.print("PRINT_BLOCK",fp);
-  fprintf (fp,"%d %s PRINT_BLOCK sync_count_ %d: ",sync_count_.size());
-  for (int i=0; i<sync_count_.size(); i++) {fprintf (fp,"%d ",sync_count_[i]);} fprintf (fp,"\n");
-  fprintf (fp,"%d %s PRINT_BLOCK sync_max_ %d: ",sync_max_.size());
-  for (int i=0; i<sync_max_.size(); i++) {fprintf (fp,"%d ",sync_max_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK sync_count_ %d: ",
+           CkMyPe(), name_.c_str(), (int)sync_count_.size());
+  for (std::size_t i=0; i<sync_count_.size(); i++) {fprintf (fp,"%d ",sync_count_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK sync_max_ %d: ",
+           CkMyPe(), name_.c_str(), (int)sync_max_.size());
+  for (std::size_t i=0; i<sync_max_.size(); i++) {fprintf (fp,"%d ",sync_max_[i]);} fprintf (fp,"\n");
   fprintf (fp,"%d %s PRINT_BLOCK child_face_level_next_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_next_.size());
-  for (int i=0; i<child_face_level_next_.size(); i++) {fprintf (fp,"%d ",child_face_level_next_[i]);} fprintf (fp,"\n");
+  for (std::size_t i=0; i<child_face_level_next_.size(); i++) {fprintf (fp,"%d ",child_face_level_next_[i]);} fprintf (fp,"\n");
 
   fprintf (fp,"%d %s PRINT_BLOCK count_coarsen_ = %d\n",CkMyPe(),name_.c_str(),count_coarsen_);
   fprintf (fp,"%d %s PRINT_BLOCK adapt_step_ = %d\n",CkMyPe(),name_.c_str(),adapt_step_);
@@ -526,7 +528,7 @@ void Block::print (FILE * fp_in) const
   fprintf (fp,"%d %s PRINT_BLOCK index_solver_.size() = %lu\n",CkMyPe(),name_.c_str(),index_solver_.size());
   adapt_.print(std::string("Adapt-")+name_,this,fp);
 
-  for (int i=0; i<refresh_.size(); i++) { refresh_[i]->print(fp); }
+  for (std::size_t i=0; i<refresh_.size(); i++) { refresh_[i]->print(fp); }
 
   if (fp_in == nullptr) {
     fclose (fp);
