@@ -229,16 +229,23 @@ private: // helper methods:
   // used in destructor and to help switch the active member of the enum
   // need to explicitly call destructor because we use placement new
   void dealloc_active_member_() noexcept{
-    // note, we need to use the full qualified names of destructors to avoid
-    // errors with the nvidia compiler
+    // Note: we need to use the full qualified names of destructors to avoid
+    //       errors with the nvidia compiler
+    // Note: Subsequently, we ran into problems with how clang 10.0 requires us
+    //       to specify the destructor. I had to mutate this again to get it to
+    //       work with clang and g++. I'm not sure if I broke compatability
+    //       with nvcc (I suspect that it may still work).
+    // Going forward, the most obvious solution for getting this to work is to
+    // use C++17's std::variant
+
     switch (tag_){
       case Tag::CONTIG: {
-        single_arr_.detail::SingleAddressViewCollec_<T>::~SingleAddressViewCollec_();
-        break;
+        using ContigCollec = typename detail::SingleAddressViewCollec_<T>;
+        single_arr_.~ContigCollec(); break;
       }
       case Tag::ARR_OF_PTR: {
-        arr_of_ptr_.detail::ArrOfPtrsViewCollec_<T>::~ArrOfPtrsViewCollec_();
-        break;
+        using ArrOfPtr = typename detail::ArrOfPtrsViewCollec_<T>;
+        arr_of_ptr_.~ArrOfPtr(); break;
       }
     }
   }
