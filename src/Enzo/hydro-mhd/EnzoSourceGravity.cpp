@@ -16,30 +16,30 @@
 void EnzoSourceGravity::calculate_source
 (const double dt, const EnzoEFltArrayMap &prim_map,
  EnzoEFltArrayMap &dUcons_map, const EnzoEFltArrayMap &accel_map,
- const EnzoEquationOfState *eos, const int stale_depth) const noexcept
+ const int stale_depth) const noexcept
 {
   // SANITY CHECK:
   ASSERT("EnzoSourceInternalEnergy::calculate_source",
 	 "Barotropic equations of state are not currently supported.",
-	 !(eos->is_barotropic()) );
+	 !(enzo::fluid_props()->has_barotropic_eos()) );
 
   // load primitives
-  const CelloArray<const enzo_float,3> density = prim_map.at("density");
-  const CelloArray<const enzo_float,3> velocity_x = prim_map.at("velocity_x");
-  const CelloArray<const enzo_float,3> velocity_y = prim_map.at("velocity_y");
-  const CelloArray<const enzo_float,3> velocity_z = prim_map.at("velocity_z");
+  const CelloView<const enzo_float,3> density = prim_map.at("density");
+  const CelloView<const enzo_float,3> velocity_x = prim_map.at("velocity_x");
+  const CelloView<const enzo_float,3> velocity_y = prim_map.at("velocity_y");
+  const CelloView<const enzo_float,3> velocity_z = prim_map.at("velocity_z");
 
   // load acceleration fields
-  const CelloArray<const enzo_float,3> accel_x = accel_map.at("acceleration_x");
-  const CelloArray<const enzo_float,3> accel_y = accel_map.at("acceleration_y");
-  const CelloArray<const enzo_float,3> accel_z = accel_map.at("acceleration_z");
+  const CelloView<const enzo_float,3> accel_x = accel_map.at("acceleration_x");
+  const CelloView<const enzo_float,3> accel_y = accel_map.at("acceleration_y");
+  const CelloView<const enzo_float,3> accel_z = accel_map.at("acceleration_z");
 
   // load accumulation arrays (reminder: these correspond to the conserved
   // forms of the integration quantities)
-  const CelloArray<enzo_float,3> dmom_x = dUcons_map.at("velocity_x");
-  const CelloArray<enzo_float,3> dmom_y = dUcons_map.at("velocity_y");
-  const CelloArray<enzo_float,3> dmom_z = dUcons_map.at("velocity_z");
-  const CelloArray<enzo_float,3> dE_dens = dUcons_map.at("total_energy");
+  const CelloView<enzo_float,3> dmom_x = dUcons_map.at("velocity_x");
+  const CelloView<enzo_float,3> dmom_y = dUcons_map.at("velocity_y");
+  const CelloView<enzo_float,3> dmom_z = dUcons_map.at("velocity_z");
+  const CelloView<enzo_float,3> dE_dens = dUcons_map.at("total_energy");
 
   const int mz = density.shape(0);
   const int my = density.shape(1);

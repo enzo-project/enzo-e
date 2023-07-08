@@ -113,7 +113,7 @@ namespace { // define local helper functions in anonymous namespace
   ///     dimension of an array (including ghost cells)
   /// @param[in]      gx,gy,gz Specifies the number of cells in the ghost zone
   ///     for each dimensions
-  void deposit_particles_(const CelloArray<enzo_float,3>& density_particle_arr,
+  void deposit_particles_(const CelloView<enzo_float,3>& density_particle_arr,
                           Block* block, double dt_div_cosmoa, double inv_vol,
                           int mx, int my, int mz,
                           int gx, int gy, int gz)
@@ -442,7 +442,7 @@ namespace { // define local helper functions in anonymous namespace
   ///     dimension of an array (including ghost cells)
   /// @param[in]      gx,gy,gz Specifies the number of cells in the ghost zone
   ///     for each dimensions
-  void deposit_gas_(const CelloArray<enzo_float, 3>& density_tot_arr,
+  void deposit_gas_(const CelloView<enzo_float, 3>& density_tot_arr,
                     Field& field, enzo_float dt_div_cosmoa,
                     enzo_float hx_prop, enzo_float hy_prop, enzo_float hz_prop,
                     int mx, int my, int mz,
@@ -511,7 +511,7 @@ namespace { // define local helper functions in anonymous namespace
                                &refine_factor, &refine_factor, &refine_factor);
 
     // construct a subarray density_tot that just includes the active zone
-    CelloArray<enzo_float,3> density_tot_active_zone = density_tot_arr.subarray
+    CelloView<enzo_float,3> density_tot_active_zone = density_tot_arr.subarray
       (CSlice(gz, mz - gz), CSlice(gy, my - gy), CSlice(gx, mx - gx));
 
     for (int iz=0; iz<nz; iz++) {
@@ -545,11 +545,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     Field    field    (block->data()->field());
 
-    CelloArray<enzo_float,3> density_tot_arr =
+    CelloView<enzo_float,3> density_tot_arr =
       field.view<enzo_float>("density_total");
-    CelloArray<enzo_float,3> density_particle_arr =
+    CelloView<enzo_float,3> density_particle_arr =
       field.view<enzo_float>("density_particle");
-    CelloArray<enzo_float,3> density_particle_accum_arr =
+    CelloView<enzo_float,3> density_particle_accum_arr =
       field.view<enzo_float>("density_particle_accumulate");
 
     int mx,my,mz;

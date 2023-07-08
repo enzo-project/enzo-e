@@ -102,15 +102,14 @@ message("link options: ${Cello_TARGET_LINK_OPTIONS}")
 # components anyway for explicitness and in case we ever reorganize or
 # transform these libraries so that they are no-longer header-only
 
-add_library(array INTERFACE)
-target_link_libraries(array INTERFACE error monitor)
-
-
 add_library(parallel INTERFACE)
 target_link_libraries(parallel
   INTERFACE cello_component charm_component error
   INTERFACE CHARM::CHARM_HEADERS # charm++.hpp included in a public header file
 )
+
+add_library(view INTERFACE)
+target_link_libraries(view INTERFACE error monitor)
 
 #===============================================
 # Defining Cello-Component Targets step 2 (of 3)
@@ -178,7 +177,7 @@ target_include_directories (charm_component
 addCelloLib(compute "")
 target_link_libraries(compute
   PUBLIC cello_component charm_component error performance monitor memory
-         parallel disk io parameters problem mesh array data simulation
+         parallel disk io parameters problem mesh view data simulation
 )
 
 
@@ -193,7 +192,7 @@ target_link_libraries(control
 addCelloLib(data  "field_face_store.F")
 target_link_libraries(data
   PUBLIC cello_component charm_component error memory performance monitor
-         parallel disk problem mesh parameters io compute simulation array
+         parallel disk problem mesh parameters io compute simulation view
 )
 
 
@@ -214,7 +213,7 @@ target_link_libraries(io
   PUBLIC Boost::filesystem pngwriter # with minimal refactoring, we could make
                                      # these into private dependencies
   PUBLIC cello_component charm_component parallel monitor performance error
-         parameters disk problem compute mesh array data simulation
+         parameters disk problem compute mesh view data simulation
 )
 
 
@@ -225,7 +224,7 @@ target_link_libraries(memory PUBLIC error parallel monitor)
 addCelloLib(mesh "")
 target_link_libraries(mesh
   PUBLIC cello_component charm_component performance monitor parallel disk
-         parameters control io problem compute simulation array data
+         parameters control io problem compute simulation view data
 )
 
 
@@ -258,14 +257,14 @@ endif()
 addCelloLib(problem "")
 target_link_libraries(problem
   PUBLIC cello_component charm_component error performance monitor memory
-         parallel disk io parameters compute control mesh array data simulation
+         parallel disk io parameters compute control mesh view data simulation
 )
 
 addCelloLib(simulation "")
 # somehow the main component needs to be a private dependency
 target_link_libraries(simulation
   PUBLIC cello_component charm_component error memory performance monitor
-         parallel disk problem mesh array data parameters io compute
+         parallel disk problem mesh view data parameters io compute
 )
 
 
@@ -344,20 +343,11 @@ function(addUnitTestBinary BINNAME SRCS LIB TESTER)
   target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 endfunction(addUnitTestBinary)
 
-
-
-# tests of the array component
-addUnitTestBinary(test_carr_collec "test_CArrCollec.cpp" array tester_default)
-addUnitTestBinary(test_cello_array "test_CelloArray.cpp" array tester_default)
-addUnitTestBinary(
-  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" array tester_default
-)
-
 # tests of the cello-component
 addUnitTestBinary(test_type "test_Type.cpp" cello_component tester_default)
 
 # tests of the disk component
-addUnitTestBinary(test_file_hdf5 "test_CArrCollec.cpp" disk tester_default)
+addUnitTestBinary(test_file_hdf5 "test_FileHdf5.cpp" disk tester_default)
 
 # tests of the error component
 addUnitTestBinary(test_error "test_Error.cpp" error tester_default)
@@ -412,6 +402,13 @@ addUnitTestBinary(test_timer "test_Timer.cpp" performance tester_default)
 if (use_papi)
   addUnitTestBinary(test_papi "test_Papi.cpp" performance tester_default)
 endif()
+
+# tests of the view component
+addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
+addUnitTestBinary(test_cello_view "test_CelloView.cpp" view tester_default)
+addUnitTestBinary(
+  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" view tester_default
+)
 
 # the following test is broken (an API change is not reflected in the test)
 #addUnitTestBinary(test_index "test_Index.cpp" mesh tester_mesh)

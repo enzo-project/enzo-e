@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     array_StringIndRdOnlyMap.hpp
+/// @file     view_StringIndRdOnlyMap.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 30 2019
 /// @brief    Declaration and implementation of the StringIndRdOnlyMap class
@@ -12,8 +12,8 @@
 #include <string>
 #include <vector>
 
-#ifndef ARRAY_STRING_IND_RD_ONLY_MAP_HPP
-#define ARRAY_STRING_IND_RD_ONLY_MAP_HPP
+#ifndef VIEW_STRING_IND_RD_ONLY_MAP_HPP
+#define VIEW_STRING_IND_RD_ONLY_MAP_HPP
 
 //----------------------------------------------------------------------
 
@@ -31,8 +31,8 @@
 class StringIndRdOnlyMap{
 
   /// @class    StringIndRdOnlyMap
-  /// @ingroup  Array
-  /// @brief    [\ref Array] The primary purpose of this is to associate string
+  /// @ingroup  View
+  /// @brief    [\ref View] The primary purpose of this is to associate string
   ///           keys with indices. If you have `n` keys, then they will be
   ///           associated with an ordered set values from `0` to `n-1`.
   ///
@@ -221,4 +221,4 @@ inline StringIndRdOnlyMap::StringIndRdOnlyMap
 }
 
 
-#endif /* ARRAY_STRING_IND_RD_ONLY_MAP_HPP */
+#endif /* VIEW_STRING_IND_RD_ONLY_MAP_HPP */

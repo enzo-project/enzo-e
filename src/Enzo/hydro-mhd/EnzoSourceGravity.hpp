@@ -51,7 +51,6 @@ public:
   ///     components. The expected keys are "acceleration_x", "acceleration_y",
   ///     and "acceleration_z". These arrays should have the same dimensions as
   ///     the arrays stored in prim_map/dUcons_map.
-  /// @param[in]  eos Instance of the fluid's EnzoEquationOfState object
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities. The update using the
   ///     reconstructor's delayed_staling_rate should be applied at some
@@ -60,7 +59,6 @@ public:
                         const EnzoEFltArrayMap &prim_map,
                         EnzoEFltArrayMap &dUcons_map,
                         const EnzoEFltArrayMap &accel_map,
-                        const EnzoEquationOfState *eos,
 			const int stale_depth) const noexcept;
 };
 

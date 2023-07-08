@@ -634,7 +634,10 @@ Method * EnzoProblem::create_method_
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
-      (enzo_config->physics_cosmology_initial_redshift,
+      (enzo_config->method_grackle_chemistry,
+       enzo_config->method_grackle_use_cooling_timestep,
+       enzo_config->method_grackle_radiation_redshift,
+       enzo_config->physics_cosmology_initial_redshift,
        enzo::simulation()->time());
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -882,7 +885,7 @@ Physics * EnzoProblem::create_physics_
       (
        enzo_config->physics_fluid_props_de_config,
        enzo_config->physics_fluid_props_fluid_floor_config,
-       enzo_config->physics_fluid_props_gamma,
+       enzo_config->physics_fluid_props_eos_variant,
        enzo_config->physics_fluid_props_mol_weight
        );
 

@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_CelloArray.cpp
+/// @file     test_CelloView.cpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     2020-06-09
-/// @brief    Test program for the CelloArray class template
+/// @brief    Test program for the CelloView class template
 ///
 /// The main testing strategy here is to test some of the core functionallity
-/// of CelloArray with:
+/// of CelloView with:
 ///    - SimpleInitializationTests
 ///    - SimpleAssignmentTests
 ///    - SizeShapeTests
@@ -19,26 +19,26 @@
 
 #include "main.hpp"
 #include "test.hpp"
-#include "array.hpp"
+#include "view.hpp"
 
 //----------------------------------------------------------------------
 
 template<typename T, std::size_t D>
 class MemManagedArrayBuilder{
   // This template class is used to build and a manage the lifetime of a
-  // CelloArray that manages its own memory
+  // CelloView that manages its own memory
   //
   // In the future it might be a good idea to have this and
   // PtrWrapArrayBuilder have a shared base class
 public:
   template<typename... Args>
   MemManagedArrayBuilder(Args... args) : arr_(args...) {}
-  CelloArray<T,D>* get_arr() { return &arr_; }
+  CelloView<T,D>* get_arr() { return &arr_; }
   T* get_wrapped_ptr() { return NULL; }
   static std::string name() { return "MemManagedArrayBuilder"; }
 
 private:
-  CelloArray<T,D> arr_;
+  CelloView<T,D> arr_;
 };
 
 //----------------------------------------------------------------------
@@ -46,7 +46,7 @@ private:
 template<typename T, std::size_t D>
 class PtrWrapArrayBuilder{
   // This template class is used to build and a manage the lifetime of a
-  // CelloArray wraps an existing pointer. This template class also manages the
+  // CelloView wraps an existing pointer. This template class also manages the
   // lifetime of the underlying pointer.
   //
   // In the future it might be a good idea to have this and
@@ -59,9 +59,9 @@ public:
       ptr_(nullptr)
   {
     // we are sort of cheating here to compute the required size
-    CelloArray<T,D> temp(args...);
+    CelloView<T,D> temp(args...);
     ptr_ = new T [temp.size()]{};
-    arr_ptr_ = new CelloArray<T,D>(ptr_,args...);
+    arr_ptr_ = new CelloView<T,D>(ptr_,args...);
   }
 
   ~PtrWrapArrayBuilder() {
@@ -69,12 +69,12 @@ public:
     delete[] ptr_;
   }
 
-  CelloArray<T,D>* get_arr() {return arr_ptr_;}
+  CelloView<T,D>* get_arr() {return arr_ptr_;}
   T* get_wrapped_ptr() { return ptr_; }
   static std::string name() { return "PtrWrapArrayBuilder"; }
 
 private:
-  CelloArray<T,D>* arr_ptr_;
+  CelloView<T,D>* arr_ptr_;
   T* ptr_;
 };
 
@@ -99,7 +99,7 @@ void pointer_compare_(double vals[], std::vector<double> ref,
 
 //----------------------------------------------------------------------
 
-void compare_against_arr_(CelloArray<double, 2> &arr2d,
+void compare_against_arr_(CelloView<double, 2> &arr2d,
                           std::vector<double> ref,
                           std::string func_name,
                           const char* file, int line){
@@ -129,7 +129,7 @@ void compare_against_arr_(CelloArray<double, 2> &arr2d,
 
 //----------------------------------------------------------------------
 
-void compare_against_arr_(CelloArray<double, 1> &arr,
+void compare_against_arr_(CelloView<double, 1> &arr,
                           std::vector<double> ref,
                           std::string func_name,
                           const char* file, int line){
@@ -181,7 +181,7 @@ void compare_builder_arr_(Builder &builder, std::vector<double> ref,
 
 class SimpleInitializationTests{
   // This class holds tests used to check the simple initialization of
-  // CelloArray. Unfortunately, it is not really possible to completely
+  // CelloView. Unfortunately, it is not really possible to completely
   // disentangle the following set of features and test them completely
   // independently of each other:
   // 1. direct initialization of an instance that wraps an existing pointer
@@ -194,18 +194,18 @@ public:
     // all values are assumed to be zero-initialized
     std::string template_message_str =
       ("There is an issue in either the constructor for instance of %dD "
-       "CelloArrays that manage own memory, or in CelloArray::operator()");
+       "CelloViews that manage own memory, or in CelloView::operator()");
 
     const char *template_message = template_message_str.c_str();
     
-    CelloArray<double, 1> arr1D(8);
+    CelloView<double, 1> arr1D(8);
     for (int i = 0; i<8; i++){
       ASSERT1("IrreducibleTests::test_managed_memory", template_message,
               1, arr1D(i) == 0);
     }
 
 
-    CelloArray<double, 2> arr2D(2,4);
+    CelloView<double, 2> arr2D(2,4);
     for (int i = 0; i<2; i++){
       for (int j = 0; j<4; j++){
         ASSERT1("IrreducibleTests::test_managed_memory", template_message,
@@ -213,7 +213,7 @@ public:
       }
     }
 
-    CelloArray<double, 3> arr3D(2,3,4);
+    CelloView<double, 3> arr3D(2,3,4);
     for (int i = 0; i<2; i++){
       for (int j = 0; j<3; j++){
         for (int k = 0; k<4; k++){
@@ -223,7 +223,7 @@ public:
       }
     }
 
-    CelloArray<double, 4> arr4D(2,3,4,5);
+    CelloView<double, 4> arr4D(2,3,4,5);
     for (int i = 0; i<2; i++){
       for (int j = 0; j<3; j++){
         for (int k = 0; k<4; k++){
@@ -240,21 +240,21 @@ public:
     // all values are assumed to be zero-initialized
     std::string template_message_str =
       ("There is an issue in either the constructor for instance of %dD "
-       "CelloArrays that wraps a pointer, or in CelloArray::operator()");
+       "CelloViews that wraps a pointer, or in CelloView::operator()");
 
     const char *template_message = template_message_str.c_str();
 
     double zero_values[120] = { };
     double* ptr = &(zero_values[0]);
     
-    CelloArray<double, 1> arr1D(ptr, 8);
+    CelloView<double, 1> arr1D(ptr, 8);
     for (int i = 0; i<8; i++){
       ASSERT1("IrreducibleTests::test_managed_memory", template_message,
               1, arr1D(i) == 0);
     }
 
 
-    CelloArray<double, 2> arr2D(ptr,2,4);
+    CelloView<double, 2> arr2D(ptr,2,4);
     for (int i = 0; i<2; i++){
       for (int j = 0; j<4; j++){
         ASSERT1("IrreducibleTests::test_managed_memory", template_message,
@@ -262,7 +262,7 @@ public:
       }
     }
 
-    CelloArray<double, 3> arr3D(ptr,2,3,4);
+    CelloView<double, 3> arr3D(ptr,2,3,4);
     for (int i = 0; i<2; i++){
       for (int j = 0; j<3; j++){
         for (int k = 0; k<4; k++){
@@ -273,7 +273,7 @@ public:
     }
 
 
-    CelloArray<double, 4> arr4D(ptr,2,3,4,5);
+    CelloView<double, 4> arr4D(ptr,2,3,4,5);
     for (int i = 0; i<2; i++){
       for (int j = 0; j<3; j++){
         for (int k = 0; k<4; k++){
@@ -290,7 +290,7 @@ public:
 
     std::string template_message_str =
       ("There is an issue in either the constructor for instance of %dD "
-       "CelloArrays that wraps a pointer, or in CelloArray::operator()");
+       "CelloViews that wraps a pointer, or in CelloView::operator()");
     const char *template_message = template_message_str.c_str();
 
     double arr_vals[24] = { 0.,  1.,  2.,  3.,  4.,  5.,
@@ -299,14 +299,14 @@ public:
                            18., 19., 20., 21., 22., 23.};
     double* ptr = &(arr_vals[0]);
 
-    CelloArray<double, 1> arr1D(ptr, 13);
+    CelloView<double, 1> arr1D(ptr, 13);
     for (int i = 0; i<13; i++){
       ASSERT1("IrreducibleTests::test_managed_memory", template_message,
               1, arr1D(i) == arr_vals[i]);
     }
 
 
-    CelloArray<double, 2> arr2D(ptr,3,5);
+    CelloView<double, 2> arr2D(ptr,3,5);
     for (int i = 0; i<3; i++){
       for (int j = 0; j<5; j++){
         ASSERT1("IrreducibleTests::test_managed_memory", template_message,
@@ -314,7 +314,7 @@ public:
       }
     }
 
-    CelloArray<double, 3> arr3D(ptr,2,3,4);
+    CelloView<double, 3> arr3D(ptr,2,3,4);
     for (int i = 0; i<2; i++){
       for (int j = 0; j<3; j++){
         for (int k = 0; k<4; k++){
@@ -344,18 +344,18 @@ private:
     std::string template_message_str;
     if (wrapped_pointer){
       template_message_str =
-        ("There is an issue with operator() for instances of %dD CelloArrays "
+        ("There is an issue with operator() for instances of %dD CelloViews "
          "that own their own memory");
     } else {
       template_message_str =
-        ("There is an issue with operator() for instances of %dD CelloArrays "
+        ("There is an issue with operator() for instances of %dD CelloViews "
          "that wrap existing pointers");
     }
     return template_message_str;
   }
 
   void test_assignment_1D_(unsigned int seed, double *wrapped_pointer,
-                           CelloArray<double, 1> &arr1D, int length)
+                           CelloView<double, 1> &arr1D, int length)
   {
     std::string template_message_str =
       get_assignment_template_msg_(wrapped_pointer != NULL);
@@ -376,7 +376,7 @@ private:
                   template_message, 1, arr1D(i) == val);
         } else {
           ASSERT1("IrreducibleTests::test_assignment_managed_memory",
-                  "The wrapped pointer of a 1D CelloArray is not updated",
+                  "The wrapped pointer of a 1D CelloView is not updated",
                   1, wrapped_pointer[i] == val);
         }
       }
@@ -384,7 +384,7 @@ private:
   }
 
   void test_assignment_3D_(unsigned int seed, double *wrapped_pointer,
-                           CelloArray<double, 3> &arr3D, int mz, int my,
+                           CelloView<double, 3> &arr3D, int mz, int my,
                            int mx)
   {
     std::string template_message_str =
@@ -408,7 +408,7 @@ private:
                       template_message, 3, arr3D(iz,iy,ix) == val);
             } else {
               ASSERT("IrreducibleTests::test_assignment_3D_",
-                     "The wrapped pointer of a 3D CelloArray has not been "
+                     "The wrapped pointer of a 3D CelloView has not been "
                      "appropriately updated",
                      wrapped_pointer[ix+mx*(iy+my*iz)] == val);
             }
@@ -419,7 +419,7 @@ private:
   }
 
   void test_assignment_4D_(unsigned int seed, double *wrapped_pointer,
-                           CelloArray<double, 4> &arr4D, int mz, int my,
+                           CelloView<double, 4> &arr4D, int mz, int my,
                            int mx, int mw)
   {
     std::string template_message_str =
@@ -444,7 +444,7 @@ private:
                         template_message, 4, arr4D(iz,iy,ix,iw) == val);
               } else {
                 ASSERT("IrreducibleTests::test_assignment_4D_",
-                       "The wrapped pointer of a 4D CelloArray has not been "
+                       "The wrapped pointer of a 4D CelloView has not been "
                        "appropriately updated",
                        wrapped_pointer[iw+mw*(ix+mx*(iy+my*iz))] == val);
               }
@@ -458,13 +458,13 @@ private:
   void test_assignment_managed_memory(){
 
     unsigned int seed = 5342342;
-    CelloArray<double, 1> arr1D(8);
+    CelloView<double, 1> arr1D(8);
     test_assignment_1D_(seed, NULL, arr1D, 8);
 
-    CelloArray<double, 3> arr3D(2,3,4);
+    CelloView<double, 3> arr3D(2,3,4);
     test_assignment_3D_(seed, NULL, arr3D, 2,3,4);
 
-    CelloArray<double, 4> arr4D(2,3,4,5);
+    CelloView<double, 4> arr4D(2,3,4,5);
     test_assignment_4D_(seed, NULL, arr4D, 2,3,4,5);
   }
 
@@ -475,17 +475,17 @@ private:
 
     double temp_arr1[120] = {};
     ptr = &(temp_arr1[0]);
-    CelloArray<double, 1> arr1D(ptr,8);
+    CelloView<double, 1> arr1D(ptr,8);
     test_assignment_1D_(seed, ptr, arr1D, 8);
 
     double temp_arr3[120] = {};
     ptr = &(temp_arr3[0]);
-    CelloArray<double, 3> arr3D(ptr,2,3,4);
+    CelloView<double, 3> arr3D(ptr,2,3,4);
     test_assignment_3D_(seed, ptr, arr3D, 2,3,4);
 
     double temp_arr4[120] = {};
     ptr = &(temp_arr4[0]);
-    CelloArray<double, 4> arr4D(ptr,2,3,4,5);
+    CelloView<double, 4> arr4D(ptr,2,3,4,5);
     test_assignment_4D_(seed, ptr, arr4D, 2,3,4,5);
   }
 
@@ -499,11 +499,11 @@ public:
 //----------------------------------------------------------------------
 
 class SizeShapeTests{
-  // Used to test the size and shape methods of CelloArray
+  // Used to test the size and shape methods of CelloView
 private:
 
   template<std::size_t D>
-  void check_expected_size_shape_(CelloArray<double, D> &arr,
+  void check_expected_size_shape_(CelloView<double, D> &arr,
                                   std::initializer_list<int> expect_shape){
     static_assert(D>0, "D must always be positive.");
     ASSERT("SizeShapeTests::check_expected_size_shape_",
@@ -531,50 +531,50 @@ private:
 
   void test_size_shape_1D_(double* ptr, int length){
     if (ptr != NULL){
-      CelloArray<double, 1> arr(ptr,length);
+      CelloView<double, 1> arr(ptr,length);
       check_expected_size_shape_(arr,{length});
     } else {
-      CelloArray<double, 1> arr(length);
+      CelloView<double, 1> arr(length);
       check_expected_size_shape_(arr,{length});
     }
   }
 
   void test_size_shape_2D_(double* ptr, int my, int mx){
     if (ptr != NULL){
-      CelloArray<double, 2> arr(ptr,my,mx);
+      CelloView<double, 2> arr(ptr,my,mx);
       check_expected_size_shape_(arr,{my,mx});
     } else {
-      CelloArray<double, 2> arr(my,mx);
+      CelloView<double, 2> arr(my,mx);
       check_expected_size_shape_(arr,{my,mx});
     }
   }
 
   void test_size_shape_3D_(double* ptr, int mz, int my, int mx){
     if (ptr != NULL){
-      CelloArray<double, 3> arr(ptr,mz,my,mx);
+      CelloView<double, 3> arr(ptr,mz,my,mx);
       check_expected_size_shape_(arr,{mz,my,mx});
     } else {
-      CelloArray<double, 3> arr(mz,my,mx);
+      CelloView<double, 3> arr(mz,my,mx);
       check_expected_size_shape_(arr,{mz,my,mx});
     }
   }
 
   void test_size_shape_4D_(double* ptr, int mz, int my, int mx, int mw){
     if (ptr != NULL){
-      CelloArray<double, 4> arr(ptr,mz,my,mx,mw);
+      CelloView<double, 4> arr(ptr,mz,my,mx,mw);
       check_expected_size_shape_(arr,{mz,my,mx,mw});
     } else {
-      CelloArray<double, 4> arr(mz,my,mx,mw);
+      CelloView<double, 4> arr(mz,my,mx,mw);
       check_expected_size_shape_(arr,{mz,my,mx,mw});
     }
   }
 
   void test_size_shape_5D_(double* ptr, int mz, int my, int mx, int mw, int mv){
     if (ptr != NULL){
-      CelloArray<double, 5> arr(ptr,mz,my,mx,mw,mv);
+      CelloView<double, 5> arr(ptr,mz,my,mx,mw,mv);
       check_expected_size_shape_(arr,{mz,my,mx,mw,mv});
     } else {
-      CelloArray<double, 5> arr(mz,my,mx,mw,mv);
+      CelloView<double, 5> arr(mz,my,mx,mw,mv);
       check_expected_size_shape_(arr,{mz,my,mx,mw,mv});
     }
   }
@@ -627,10 +627,10 @@ class VariableAssignmentTests{
     // construct vectors that hold pointers to shared copies of the tested
     // array to simplify the code required to makes sure that all of the
     // instances reflect the fact that they are shared copies
-    std::vector<CelloArray<double, 2>*> array_ptr_vec;
+    std::vector<CelloView<double, 2>*> array_ptr_vec;
 
     // vectors holding pointers to c-style arrays that at one time or another
-    // were wrapped by a CelloArray
+    // were wrapped by a CelloView
     std::vector<double*> wrapped_ptr_vec;
     // holds pointers to vectors containing the expected values that should be
     // held by each pointer that was wrapped at one time or another
@@ -641,7 +641,7 @@ class VariableAssignmentTests{
     auto check_shared_copy_ = [&expected, &array_ptr_vec,
                                &wrapped_ptr_vec, &expected_wrapped_ptr_vals]()
       {
-        for (CelloArray<double,2>* cur_arr_ptr : array_ptr_vec){
+        for (CelloView<double,2>* cur_arr_ptr : array_ptr_vec){
           check_arr_vals(*cur_arr_ptr, expected,
                          "VariableAssignmentTests::test_assignment_");
         }
@@ -652,9 +652,9 @@ class VariableAssignmentTests{
         }
       };
 
-    // now let's set up the initial instance of CelloArray and initialize it
+    // now let's set up the initial instance of CelloView and initialize it
     Builder<double, 2> builder(2,3);
-    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+    CelloView<double, 2> *arr_ptr = builder.get_arr();
     (*arr_ptr)(0,2) = 97.25;
     expected.assign({0, 0, 97.25,
                      0, 0,     0});
@@ -670,13 +670,13 @@ class VariableAssignmentTests{
     check_shared_copy_();
 
     // Basically, this test consists of defining a collection of variables
-    // holding CelloArrays that are each defined in a different way. The
+    // holding CelloViews that are each defined in a different way. The
     // variable is then assigned a shallow copy of the original array
     // Then the contents of the underlying values are modified and the contents
     // of all shallow copies are checked to make sure they are accurate
 
     // First, consider an initially default-initialized variable
-    CelloArray<double, 2> second_var; // this is default constructed
+    CelloView<double, 2> second_var; // this is default constructed
     // assign the array pointed to by arr_ptr to second_var
     second_var = *arr_ptr;
     array_ptr_vec.push_back(&second_var);
@@ -693,7 +693,7 @@ class VariableAssignmentTests{
 
 
     // Next, consider an initially defined array with the same shape
-    CelloArray<double,2> third_var(2,3);
+    CelloView<double,2> third_var(2,3);
     third_var(1,2) = 42657.5;
     // now actually assign the value
     third_var = second_var;
@@ -708,7 +708,7 @@ class VariableAssignmentTests{
     check_shared_copy_();
 
     // Next, consider an initially defined array with a different shape
-    CelloArray<double,2> fourth_var(100,53);
+    CelloView<double,2> fourth_var(100,53);
     fourth_var = third_var;
     array_ptr_vec.push_back(&fourth_var);
     check_shared_copy_();
@@ -724,7 +724,7 @@ class VariableAssignmentTests{
     std::vector<double> expected_dummy_carray_vals(dummy_wrapped_ptr,
                                                    dummy_wrapped_ptr + 6);
     // sanity check
-    CelloArray<double,2> fifth_var(dummy_wrapped_ptr, 2,3);
+    CelloView<double,2> fifth_var(dummy_wrapped_ptr, 2,3);
     array_ptr_vec.push_back(&fifth_var);
     wrapped_ptr_vec.push_back(dummy_wrapped_ptr);
     expected_wrapped_ptr_vals.push_back(&expected_dummy_carray_vals);
@@ -764,11 +764,11 @@ class VariableAssignmentTests{
        Builder2<double, 2>::name() + ">");
       
     Builder1<double, 2> builder_a(2,3);
-    CelloArray<double, 2> *arr_ptr_a = builder_a.get_arr();
+    CelloView<double, 2> *arr_ptr_a = builder_a.get_arr();
     (*arr_ptr_a)(0,2) = 97.25;
 
     Builder2<double, 2> builder_b(4,4);
-    CelloArray<double, 2> *arr_ptr_b = builder_b.get_arr();
+    CelloView<double, 2> *arr_ptr_b = builder_b.get_arr();
     (*arr_ptr_b)(1,1) = 15;
 
     *arr_ptr_a = arr_ptr_b->deepcopy();
@@ -808,7 +808,7 @@ public:
 //----------------------------------------------------------------------
 
 class ElementwiseCopyTest{
-  // this tests `CelloArray.copy_to`
+  // this tests `CelloView.copy_to`
 
 public:
   
@@ -822,13 +822,13 @@ public:
        Builder2<double, 2>::name() + ">");
     
     Builder1<double, 2> builder_1(2,3);
-    CelloArray<double, 2> *arr_ptr_a = builder_1.get_arr();
+    CelloView<double, 2> *arr_ptr_a = builder_1.get_arr();
     (*arr_ptr_a)(0,2) = 97.25;
 
     Builder2<double, 2> builder_2a(2,3);
-    CelloArray<double, 2> *arr_ptr_2a = builder_2a.get_arr();
+    CelloView<double, 2> *arr_ptr_2a = builder_2a.get_arr();
     Builder2<double, 2> builder_2b(2,3);
-    CelloArray<double, 2> *arr_ptr_2b = builder_2b.get_arr();
+    CelloView<double, 2> *arr_ptr_2b = builder_2b.get_arr();
     double val_2a = 0;
     double val_2b = -1;
     for (int iy = 0; iy<2; iy++){
@@ -880,9 +880,9 @@ public:
        Builder1<double, 2>::name() + "," +
        Builder2<double, 2>::name() + ">");
     Builder1<double, 2> builder_1(4,4);
-    CelloArray<double, 2> *arr_ptr_a = builder_1.get_arr();
+    CelloView<double, 2> *arr_ptr_a = builder_1.get_arr();
     (*arr_ptr_a)(2,2) = 97.25;
-    CelloArray<double, 2> subarray_1 = arr_ptr_a->subarray(CSlice(1,3),
+    CelloView<double, 2> subarray_1 = arr_ptr_a->subarray(CSlice(1,3),
                                                            CSlice(1,3));
     subarray_1(0,1) = 5;
 
@@ -896,8 +896,8 @@ public:
                       func_name);
 
     Builder2<double, 2> builder_2(4,5);
-    CelloArray<double, 2> *arr_ptr_2 = builder_2.get_arr();
-    CelloArray<double, 2> subarray_2 = arr_ptr_2->subarray(CSlice(1,3),
+    CelloView<double, 2> *arr_ptr_2 = builder_2.get_arr();
+    CelloView<double, 2> subarray_2 = arr_ptr_2->subarray(CSlice(1,3),
                                                            CSlice(1,4));
     double val_2 = 0;
     for (int iy = 0; iy<4; iy++){
@@ -981,7 +981,7 @@ class PassByValueTests{
 private:
 
   // an array of 0 should be passed to this function
-  void pass_by_val(CelloArray<double,2> arr,std::string func_name){
+  void pass_by_val(CelloView<double,2> arr,std::string func_name){
     // sanity check:
     check_arr_vals(arr, std::vector<double>({ 0, 0, 0,
                                               0, 0, 0}), func_name.c_str());
@@ -994,7 +994,7 @@ public:
   template<template<typename, std::size_t> class Builder>
   void test_pass_by_val_(){
     Builder<double, 2> builder(2,3);
-    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+    CelloView<double, 2> *arr_ptr = builder.get_arr();
 
     pass_by_val(*arr_ptr, "PassByValueTests::test_pass_by_val");
     check_builder_arr(builder, std::vector<double>({ 0, 1, 0,
@@ -1013,24 +1013,24 @@ public:
 //----------------------------------------------------------------------
 
 class ImplicitCastingTests{
-  // these are tests that check that CelloArray<T,D> can be implicitly casted
-  // to CelloArray<const T,D>.
+  // these are tests that check that CelloView<T,D> can be implicitly casted
+  // to CelloView<const T,D>.
 
 private:
   template<template<typename, std::size_t> class Builder>
   void test_cast_(){
 
     Builder<double, 2> builder(2,3);
-    CelloArray<double, 2> *arr_ptr_a = builder.get_arr();
+    CelloView<double, 2> *arr_ptr_a = builder.get_arr();
     (*arr_ptr_a)(0,2) = 97.25;
 
-    CelloArray<const double, 2> alias_1 = *arr_ptr_a;
+    CelloView<const double, 2> alias_1 = *arr_ptr_a;
     check_expected_values_(*arr_ptr_a);
     // it's not obvious that this last check is strictly necessary
     check_subarray_values_(arr_ptr_a->subarray(CSlice(0,1),CSlice(1,3)));
   }
 
-  void check_expected_values_(const CelloArray<const double, 2> &arr){
+  void check_expected_values_(const CelloView<const double, 2> &arr){
     double expected[2][3] = {{0.0, 0.0, 97.25},
                              {0.0, 0.0,  0.0 }};
 
@@ -1043,7 +1043,7 @@ private:
     }
   }
 
-  void check_subarray_values_(CelloArray<const double, 2> arr){
+  void check_subarray_values_(CelloView<const double, 2> arr){
     double expected[1][2] = {{0.0, 97.25}};
 
     for (int i = 0; i < 2; i++){
@@ -1069,24 +1069,24 @@ public:
 
   void test_is_alias_independent_ptr_wrapping_(){
     PtrWrapArrayBuilder<double, 2> builder(2,3);
-    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+    CelloView<double, 2> *arr_ptr = builder.get_arr();
 
     double *ptr = builder.get_wrapped_ptr();
 
-    CelloArray<double, 2> array_2(ptr + 3, 1, 3);
+    CelloView<double, 2> array_2(ptr + 3, 1, 3);
 
     ASSERT("IsAliasTests::test_is_alias_independent_ptr_wrapping_",
            "The arrays aren't aliases because they only partially overlap.",
            !arr_ptr->is_alias(array_2));
 
-    CelloArray<double, 2> subarray = arr_ptr->subarray(CSlice(1,2),
+    CelloView<double, 2> subarray = arr_ptr->subarray(CSlice(1,2),
                                                        CSlice(0,3));
     ASSERT("IsAliasTests::test_is_alias_independent_ptr_wrapping_",
            ("The arrays are aliases even though they were constructed "
             "independently from each other"),
            subarray.is_alias(array_2));
 
-    CelloArray<double, 1> array_3(ptr + 3, 3);
+    CelloView<double, 1> array_3(ptr + 3, 3);
     ASSERT("IsAliasTests::test_is_alias_independent_ptr_wrapping_",
            ("The arrays are not perfect aliases because they have different "
             "numbers of dimensions."), !subarray.is_alias(array_3));
@@ -1095,22 +1095,22 @@ public:
   template<template<typename, std::size_t> class Builder>
   void test_is_alias_(){
     Builder<double, 2> builder(2,3);
-    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+    CelloView<double, 2> *arr_ptr = builder.get_arr();
 
     double data[6] = {0, 0, 0, 0, 0, 0};
-    CelloArray<double, 2> array_2(data, 2, 3);
+    CelloView<double, 2> array_2(data, 2, 3);
 
     ASSERT("IsAliasTests::test_is_alias_", "The arrays aren't aliases.",
            !arr_ptr->is_alias(array_2));
 
-    CelloArray<double, 2> array_3(2, 3);
+    CelloView<double, 2> array_3(2, 3);
 
     ASSERT("IsAliasTests::test_is_alias_", "The arrays aren't aliases.",
            !arr_ptr->is_alias(array_3));
 
-    CelloArray<double, 2> subarray1 = arr_ptr->subarray(CSlice(0,2),
+    CelloView<double, 2> subarray1 = arr_ptr->subarray(CSlice(0,2),
                                                         CSlice(1,3));
-    CelloArray<double, 2> subarray2 = arr_ptr->subarray(CSlice(0,2),
+    CelloView<double, 2> subarray2 = arr_ptr->subarray(CSlice(0,2),
                                                         CSlice(0,2));
     ASSERT("IsAliasTests::test_is_alias_",
            "The arrays have partial but are not aliases.",
@@ -1119,9 +1119,9 @@ public:
            "The arrays have partial but are not aliases.",
            !arr_ptr->is_alias(subarray2));
 
-    CelloArray<double, 2> subarray1a = subarray1.subarray(CSlice(0,2),
+    CelloView<double, 2> subarray1a = subarray1.subarray(CSlice(0,2),
                                                           CSlice(0,1));
-    CelloArray<double, 2> subarray2a = subarray2.subarray(CSlice(0,2),
+    CelloView<double, 2> subarray2a = subarray2.subarray(CSlice(0,2),
                                                           CSlice(1,2));
     ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
            subarray1a.is_alias(subarray2a));
@@ -1132,8 +1132,8 @@ public:
 
     // Lastly, let's make sure that is_alias works if one argument is casted to
     // be an array of constants
-    CelloArray<const double, 2> subarray1a_alias = subarray1a;
-    CelloArray<const double, 2> subarray2a_alias = subarray2a;
+    CelloView<const double, 2> subarray1a_alias = subarray1a;
+    CelloView<const double, 2> subarray2a_alias = subarray2a;
     ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
            subarray1a_alias.is_alias(subarray2a));
     ASSERT("IsAliasTests::test_is_alias_", "The arrays are aliases.",
@@ -1159,7 +1159,7 @@ class SubarrayTests{
 private:
 
   // an array of 0 should be passed to this function
-  void pass_by_val(CelloArray<double,2> arr,std::string func_name){
+  void pass_by_val(CelloView<double,2> arr,std::string func_name){
     // sanity check:
     check_arr_vals(arr, std::vector<double>({ 0, 0, 0,
                                               0, 0, 0}), func_name.c_str());
@@ -1172,7 +1172,7 @@ public:
   template<template<typename, std::size_t> class Builder>
   void test_reduced_rank_subarray_(){
     Builder<double, 2> builder(2,3);
-    CelloArray<double, 2> *arr_ptr = builder.get_arr();
+    CelloView<double, 2> *arr_ptr = builder.get_arr();
 
     double val = 0;
     for (int iy = 0; iy<2; iy++){
@@ -1187,8 +1187,8 @@ public:
                                                    3, 4, 5}),
                    "test_reduced_rank_subarray_");
 
-    CelloArray<double, 1> sub0 = arr_ptr->subarray(0);
-    CelloArray<double, 1> sub1 = arr_ptr->subarray(1);
+    CelloView<double, 1> sub0 = arr_ptr->subarray(0);
+    CelloView<double, 1> sub1 = arr_ptr->subarray(1);
 
     check_arr_vals(sub0, std::vector<double>({ 0, 1, 2}),
                    "test_reduced_rank_subarray_");
@@ -1239,7 +1239,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  unit_class("CelloArray");
+  unit_class("CelloView");
   
   SimpleInitializationTests init_tests;
   init_tests.run_tests();

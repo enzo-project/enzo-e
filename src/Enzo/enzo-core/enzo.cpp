@@ -38,9 +38,15 @@ namespace enzo {
 
   const EnzoMethodGrackle * grackle_method()
   {
-    if (!enzo::config()->method_grackle_use_grackle) {return NULL;}
-    
+    // previously, this explicitly checked the value of
+    // enzo::config()->method_grackle_use_grackle, but this was redundant
     return (const EnzoMethodGrackle *) problem()->method("grackle");
+  }
+
+  const GrackleChemistryData * grackle_chemistry()
+  {
+    const EnzoMethodGrackle* ptr = grackle_method();
+    return (ptr != nullptr) ? ptr->try_get_chemistry() : nullptr;
   }
 
   EnzoUnits * units()

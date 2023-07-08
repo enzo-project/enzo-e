@@ -48,7 +48,9 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(
+  EnzoMethodGrackle(GrackleChemistryData my_chemistry,
+                    bool use_cooling_timestep,
+                    const double radiation_redshift,
                     const double physics_cosmology_initial_redshift,
                     const double time);
 
@@ -62,9 +64,12 @@ public: // interface
   EnzoMethodGrackle (CkMigrateMessage *m)
     : Method (m)
 #ifdef CONFIG_USE_GRACKLE
+      , my_chemistry_()
       , grackle_units_()
       , grackle_rates_()
       , time_grackle_data_initialized_(ENZO_FLOAT_UNDEFINED)
+      , radiation_redshift_(-1.0)
+      , use_cooling_timestep_(false)
 #endif
     {  }
 
@@ -79,10 +84,12 @@ public: // interface
     TRACEPUP;
 
     Method::pup(p);
-
+    p | my_chemistry_;
     p | grackle_units_;
     double last_init_time = time_grackle_data_initialized_;
     p | last_init_time;
+    p | radiation_redshift_;
+    p | use_cooling_timestep_;
     if (p.isUnpacking()) {
       ASSERT("EnzoMethodGrackle::pup",
              "grackle_chemistry_data must have previously been initialized",
@@ -108,6 +115,17 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) throw();
 
+  /// returns the stored instance of GrackleChemistryData, if the simulation is
+  /// configured to actually use grackle
+  const GrackleChemistryData* try_get_chemistry() const throw() {
+#ifndef CONFIG_USE_GRACKLE
+    return nullptr;
+#else
+    return (my_chemistry_.get<int>("use_grackle") == 1) ?
+      &my_chemistry_ : nullptr;
+#endif
+  }
+
 #ifdef CONFIG_USE_GRACKLE
 
   void define_required_grackle_fields();
@@ -122,11 +140,17 @@ public: // interface
   ///     the program will abort if the current time is needed (i.e. because
   ///     this is a cosmological simulation)
   /// @param[out] grackle_units The object pointed to by this pointer is set up
-  static void setup_grackle_units (double current_time,
-                                   code_units * grackle_units) throw();
+  ///
+  /// @note
+  /// This used to be a global method, but there isn't much need for any other
+  /// object to use this method. Some of the Compute object still nominally
+  /// allow code_units to be passed as an option, but that really isn't used
+  /// anywhere (we plan to drop that in the near future).
+  void setup_grackle_units (double current_time,
+                            code_units * grackle_units) const throw();
 
-  static void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
-                                  code_units * grackle_units) throw();
+  void setup_grackle_units(const EnzoFieldAdaptor& fadaptor,
+                           code_units * grackle_units) const throw();
 
   void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
                             grackle_field_data * grackle_fields,
@@ -243,11 +267,21 @@ protected: // methods
 
   void ResetEnergies ( Block * block) throw();
 
-// protected: // attributes
+#endif
 
+protected: // attributes
+#ifdef CONFIG_USE_GRACKLE
+
+  GrackleChemistryData my_chemistry_;
   code_units grackle_units_;
   chemistry_data_storage grackle_rates_;
   double time_grackle_data_initialized_;
+
+  /// the following parameter is only used in non-cosmological simulations. It
+  /// specifies the redshift of the UV background
+  double radiation_redshift_;
+
+  bool use_cooling_timestep_;
 
 #endif
 

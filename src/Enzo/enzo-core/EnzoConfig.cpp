@@ -36,8 +36,8 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_final_redshift(0.0),
   // FluidProps
   physics_fluid_props_de_config(),
+  physics_fluid_props_eos_variant(),
   physics_fluid_props_fluid_floor_config(),
-  physics_fluid_props_gamma(0.0),
   physics_fluid_props_mol_weight(0.0),
   // Gravity
   physics_gravity(false),
@@ -90,7 +90,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_feedback_test_metal_fraction(0.01),
   initial_feedback_test_luminosity(),
   // EnzoInitialGrackleTest
-#ifdef CONFIG_USE_GRACKLE
   initial_grackle_test_maximum_H_number_density(1000.0),
   initial_grackle_test_maximum_metallicity(1.0),
   initial_grackle_test_maximum_temperature(1.0E8),
@@ -98,7 +97,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_minimum_metallicity(1.0E-4),
   initial_grackle_test_minimum_temperature(10.0),
   initial_grackle_test_reset_energies(0),
-#endif /* CONFIG_USE_GRACKLE */
   // EnzoInitialHdf5
   initial_hdf5_max_level(),
   initial_hdf5_format(),
@@ -304,11 +302,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
   method_grackle_use_grackle(false),
-#ifdef CONFIG_USE_GRACKLE
   method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
-#endif
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
   method_gravity_solver(""),
@@ -387,24 +383,12 @@ EnzoConfig::EnzoConfig() throw ()
   }
 
   method_background_acceleration_angular_momentum[2] = 1;
-
-#ifdef CONFIG_USE_GRACKLE
-    method_grackle_chemistry = NULL;
-#endif
-
 }
 
 //----------------------------------------------------------------------
 
 EnzoConfig::~EnzoConfig() throw ()
-{
-#ifdef CONFIG_USE_GRACKLE
-  if (method_grackle_chemistry){
-    delete[] method_grackle_chemistry->grackle_data_file;
-    delete method_grackle_chemistry;
-  }
-#endif // CONFIG_USE_GRACKLE
-}
+{ }
 
 //----------------------------------------------------------------------
 
@@ -439,8 +423,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_final_redshift;
 
   p | physics_fluid_props_de_config;
+  ::pup(p, physics_fluid_props_eos_variant);
   p | physics_fluid_props_fluid_floor_config;
-  p | physics_fluid_props_gamma;
   p | physics_fluid_props_mol_weight;
 
   p | physics_gravity;
@@ -473,7 +457,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_collapse_mass;
   p | initial_collapse_temperature;
 
-#ifdef CONFIG_USE_GRACKLE
   p | initial_grackle_test_minimum_H_number_density;
   p | initial_grackle_test_maximum_H_number_density;
   p | initial_grackle_test_minimum_temperature;
@@ -481,8 +464,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
   p | initial_grackle_test_reset_energies;
-
-#endif /* CONFIG_USE_GRACKLE */
 
   p | initial_inclinedwave_alpha;
   p | initial_inclinedwave_beta;
@@ -793,16 +774,11 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_grackle_use_grackle;
 
-#ifdef CONFIG_USE_GRACKLE
   if (method_grackle_use_grackle) {
     p  | method_grackle_use_cooling_timestep;
     p  | method_grackle_radiation_redshift;
-    if (p.isUnpacking()) { method_grackle_chemistry = new chemistry_data; }
-    p | *method_grackle_chemistry;
-  } else {
-    method_grackle_chemistry = nullptr;
+    p  | method_grackle_chemistry;
   }
-#endif /* CONFIG_USE_GRACKLE */
 
 }
 
@@ -940,7 +916,6 @@ void EnzoConfig::read_initial_cosmology_(Parameters * p)
 void EnzoConfig::read_initial_grackle_(Parameters * p)
 {
   // Grackle test initialization
-#ifdef CONFIG_USE_GRACKLE
   initial_grackle_test_minimum_H_number_density =
     p->value_float("Initial:grackle_test:minimum_H_number_density",0.1);
   initial_grackle_test_maximum_H_number_density =
@@ -955,7 +930,6 @@ void EnzoConfig::read_initial_grackle_(Parameters * p)
     p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
   initial_grackle_test_reset_energies =
     p->value_integer("Initial:grackle_test:reset_energies",0);
-#endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
@@ -1518,8 +1492,6 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
 {
   method_grackle_use_grackle = false;
 
-#ifdef CONFIG_USE_GRACKLE
-
   /// Grackle parameters
 
   for (size_t i=0; i<method_list.size(); i++) {
@@ -1529,17 +1501,6 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
   // Defaults alert PUP::er() to ignore
   if (method_grackle_use_grackle) {
 
-    method_grackle_chemistry = new chemistry_data;
-    set_default_chemistry_parameters(method_grackle_chemistry);
-    //    *method_grackle_chemistry = _set_default_chemistry_parameters();
-
-    /* this must be set AFTER default values are set */
-    method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
-
-    // Copy over parameters from Enzo-E to Grackle
-    method_grackle_chemistry->Gamma = physics_fluid_props_gamma;
-
-    //
     method_grackle_use_cooling_timestep = p->value_logical
       ("Method:grackle:use_cooling_timestep", false);
 
@@ -1547,139 +1508,79 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
     method_grackle_radiation_redshift = p->value_float
       ("Method:grackle:radiation_redshift", -1.0);
 
-    // Set Grackle parameters from parameter file
-    method_grackle_chemistry->with_radiative_cooling = p->value_integer
-      ("Method:grackle:with_radiative_cooling",
-       method_grackle_chemistry->with_radiative_cooling);
+    // Now, we will initialize method_grackle_chemistry
+    // - we do this with a factory method that directly examines the parameter
+    //   values within the "Method:grackle:*" group.
+    // - Because Grackle has so many parameter values, it's very easy to make a
+    //   small mistake when specifying the name of a parameter value and not
+    //   notice until much later. For that reason, the factory method
+    //   aggressively reports unexpected parameters as errors.
+    // - to help this method, we provide 2 sets of parameter names
 
-    method_grackle_chemistry->primordial_chemistry = p->value_integer
-      ("Method:grackle:primordial_chemistry",
-       method_grackle_chemistry->primordial_chemistry);
+    //   1. specify all of the Grackle parameters that we will manually setup
+    //      based on the values passed for other Enzo-E parameters. Errors will
+    //      be reported if any of these are encountered
+    const std::unordered_set<std::string> forbid_leaf_names = {"use_grackle",
+                                                               "Gamma"};
 
-    method_grackle_chemistry->metal_cooling = p->value_integer
-      ("Method:grackle:metal_cooling",
-       method_grackle_chemistry->metal_cooling);
+    //   2. specify all parameters that MAY occur within the "Method:grackle:*"
+    //      group that should be ignored by the factory method. (This needs to
+    //      be updated if we introduce additional parameters for configuring
+    //      EnzoMethodGrackle)
+    const std::unordered_set<std::string> ignore_leaf_names =
+      {"use_cooling_timestep", "radiation_redshift",
+       // the next option is deprecated and is only listed in the short-term
+       // for backwards compatability (it should now be replaced by
+       // "Physics:fluid_props:floors:metallicity")
+       "metallicity_floor",
+       // for backwards compatability, we manually use "data_file" to
+       // initialize "grackle_data_file" parameter (in the future, we may want
+       // to change this)
+       "data_file", "grackle_data_file",
+       // the final two parameters auto-parsed by other Cello machinery
+       "type", "courant"};
 
-    method_grackle_chemistry->h2_on_dust = p->value_integer
-      ("Method:grackle:h2_on_dust",
-       method_grackle_chemistry->h2_on_dust);
+    method_grackle_chemistry = GrackleChemistryData::from_parameters
+      (*p, "Method:grackle", forbid_leaf_names, ignore_leaf_names);
 
-    method_grackle_chemistry->three_body_rate = p->value_integer
-      ("Method:grackle:three_body_rate",
-       method_grackle_chemistry->three_body_rate);
+    // now let's manually initialize the handful of remaining runtime
+    // parameters that are stored within method_grackle_chemistry
 
-    method_grackle_chemistry->cmb_temperature_floor = p->value_integer
-      ("Method:grackle:cmb_temperature_floor",
-       method_grackle_chemistry->cmb_temperature_floor);
+    // 1. use "Method:grackle:data_file" to initialize "grackle_data_file" 
+    if (p->param("Method:grackle:grackle_data_file") != nullptr){
+      ERROR("EnzoConfig::read_method_grackle_",
+            "for backwards compatability, the user can't specify "
+            "\"Method:grackle:grackle_data_file\". Instead, they must specify "
+            "\"Method:grackle:data_file\".");
+    } else if (p->param("Method:grackle:data_file") != nullptr) {
+      std::string fname = p->value_string("Method:grackle:data_file", "");
+      ASSERT("EnzoConfig::read_method_grackle_",
+             "\"Method:grackle:data_file\" can't be an empty string",
+             fname.length() > 0); // sanity check!
+      method_grackle_chemistry.set<std::string>("grackle_data_file", fname);
+    } else {
+      ERROR("EnzoConfig::read_method_grackle_",
+            "\"Method:grackle:data_file\" is required when using grackle");
+    }
 
-    method_grackle_chemistry->h2_charge_exchange_rate = p->value_integer
-      ("Method:grackle:h2_charge_exchange_rate",
-       method_grackle_chemistry->h2_charge_exchange_rate);
+    // 2. update the value of use_grackle
+    method_grackle_chemistry.set<int>("use_grackle",
+                                      method_grackle_use_grackle);
 
-    method_grackle_chemistry->h2_h_cooling_rate = p->value_integer
-      ("Method:grackle:h2_h_cooling_rate",
-       method_grackle_chemistry->h2_h_cooling_rate);
+    // 3. Copy over parameters from Enzo-E to Grackle
+    if (physics_fluid_props_eos_variant.holds_alternative<EnzoEOSIdeal>()) {
+      method_grackle_chemistry.set<double>
+        ("Gamma", physics_fluid_props_eos_variant.get<EnzoEOSIdeal>().gamma);
+    } else {
+      ERROR("EnzoConfig::read_method_grackle_",
+            "Grackle currently can't be used when Enzo-E is configured to use "
+            "an equation of state other than the ideal gas law");
+    }
 
-    std::string grackle_data_file_ = p->value_string
-      ("Method:grackle:data_file", "");
-    ASSERT("EnzoConfig::read",
-	   "no value specified for \"Method:grackle:data_file\"",
-	   grackle_data_file_.length() > 0);
-
-    char* tmp_var = new char[grackle_data_file_.length() + 1];
-
-    strcpy(tmp_var, grackle_data_file_.c_str());
-    method_grackle_chemistry->grackle_data_file = tmp_var;
-
-    method_grackle_chemistry->cie_cooling = p->value_integer
-      ("Method:grackle:cie_cooling",
-       method_grackle_chemistry->cie_cooling);
-
-    method_grackle_chemistry->h2_optical_depth_approximation = p->value_integer
-      ("Method:grackle:h2_optical_depth_approximation",
-       method_grackle_chemistry->h2_optical_depth_approximation);
-
-    method_grackle_chemistry->h2_charge_exchange_rate = p->value_integer
-      ("Method:grackle:h2_charge_exchange_rate",
-       method_grackle_chemistry->h2_charge_exchange_rate);
-
-    method_grackle_chemistry->photoelectric_heating = p->value_integer
-      ("Method:grackle:photoelectric_heating",
-       method_grackle_chemistry->photoelectric_heating);
-
-    method_grackle_chemistry->photoelectric_heating_rate = p->value_float
-      ("Method:grackle:photoelectric_heating_rate",
-       method_grackle_chemistry->photoelectric_heating_rate);
-
-    method_grackle_chemistry->CaseBRecombination = p->value_integer
-      ("Method:grackle:CaseBRecombination",
-       method_grackle_chemistry->CaseBRecombination);
-
-    method_grackle_chemistry->UVbackground = p->value_integer
-      ("Method:grackle:UVbackground",
-       method_grackle_chemistry->UVbackground);
-
-    method_grackle_chemistry->use_volumetric_heating_rate = p->value_integer
-      ("Method:grackle:use_volumetric_heating_rate",
-       method_grackle_chemistry->use_volumetric_heating_rate);
-
-    method_grackle_chemistry->use_specific_heating_rate = p->value_integer
-      ("Method:grackle:use_specific_heating_rate",
-       method_grackle_chemistry->use_specific_heating_rate);
-
-    method_grackle_chemistry->self_shielding_method = p->value_integer
-      ("Method:grackle:self_shielding_method",
-       method_grackle_chemistry->self_shielding_method);
-
-    method_grackle_chemistry->H2_self_shielding = p->value_integer
-      ("Method:grackle:H2_self_shielding",
-       method_grackle_chemistry->H2_self_shielding);
-
-    method_grackle_chemistry->HydrogenFractionByMass = p->value_float
-      ("Method:grackle:HydrogenFractionByMass",
-       method_grackle_chemistry->HydrogenFractionByMass);
-
-    method_grackle_chemistry->DeuteriumToHydrogenRatio = p->value_float
-      ("Method:grackle:DeuteriumToHydrogenRatio",
-       method_grackle_chemistry->DeuteriumToHydrogenRatio);
-
-    method_grackle_chemistry->SolarMetalFractionByMass = p->value_float
-      ("Method:grackle:SolarMetalFractionByMass",
-       method_grackle_chemistry->SolarMetalFractionByMass);
-
-    method_grackle_chemistry->Compton_xray_heating = p->value_integer
-      ("Method:grackle:Compton_xray_heating",
-       method_grackle_chemistry->Compton_xray_heating);
-
-    method_grackle_chemistry->LWbackground_sawtooth_suppression = p->value_integer
-      ("Method:grackle:LWbackground_sawtooth_suppression",
-       method_grackle_chemistry->LWbackground_sawtooth_suppression);
-
-    method_grackle_chemistry->LWbackground_intensity = p->value_float
-      ("Method:grackle:LWbackground_intensity",
-       method_grackle_chemistry->LWbackground_intensity);
-
-    method_grackle_chemistry->UVbackground_redshift_on = p->value_float
-      ("Method:grackle:UVbackground_redshift_on",
-       method_grackle_chemistry->UVbackground_redshift_on);
-
-    method_grackle_chemistry->UVbackground_redshift_off = p->value_float
-      ("Method:grackle:UVbackground_redshift_off",
-       method_grackle_chemistry->UVbackground_redshift_off);
-
-    method_grackle_chemistry->UVbackground_redshift_fullon = p->value_float
-      ("Method:grackle:UVbackground_redshift_fullon",
-       method_grackle_chemistry->UVbackground_redshift_fullon);
-
-    method_grackle_chemistry->UVbackground_redshift_drop = p->value_float
-      ("Method:grackle:UVbackground_redshift_drop",
-       method_grackle_chemistry->UVbackground_redshift_drop);
-
-    method_grackle_chemistry->use_radiative_transfer = p->value_integer
-      ("Method:grackle:use_radiative_transfer", 0);
-
+    // In the future, we may want to manually set use_radiative_transfer based
+    // on an Enzo-E parameter for turning RT on / off:
+    //method_grackle_chemistry.set<int>("use_radiative_transfer", ENZO_E_PARAMETER_NAME);
   }
-#endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
@@ -2284,7 +2185,7 @@ namespace{
 
     // look for dual energy parameters specified within the hydro solver (for
     // backwards compatibility)
-    if (hydro_type != ""){
+    if ((hydro_type != "") && (hydro_type != "ppml")) {
       std::string legacy_de_param = "Method:" + hydro_type + ":dual_energy";
       bool legacy_param_exists = p->param(legacy_de_param) != nullptr;
 
@@ -2310,6 +2211,136 @@ namespace{
       }
     }
     return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  EnzoEOSVariant parse_eos_choice_(Parameters * p,
+                                   const std::string& hydro_type)
+  {
+    // Prior to the creation of the EnzoEOSVariant class, Enzo-E effectively
+    // assumed at a global level that an ideal EOS was in use and stored gamma
+    // at a global level.
+    //
+    // - gamma's value was originally parsed from "Field:gamma" and later from
+    //   "Physics:fluid_props:eos:gamma". As an aside, while it was always the
+    //   plan to have the ``EnzoPhysicsFluidProps`` class track the EOS type,
+    //   the ability to track EOS type was added a while after the fact (in the
+    //   same PR that introduced ``EnzoEOSVariant``).
+    // - gamma's default value has always been 5/3.
+    // - when the Ppml solver was used, it simply ignored the value of gamma
+    //   and internally used an Isothermal EOS.
+    // - technically, extension points were put into place within the vl+ct
+    //   solver to support other types of solvers, but those were never used.
+
+
+    // get the name of EnzoEOSIdeal (useful since it's the default eos type)
+    const std::string ideal_name = EnzoEOSIdeal::name();
+
+    // check whether the legacy parameter was specified
+    const bool legacy_gamma_specified = p->param("Field:gamma") != nullptr;
+
+    // fetch names of parameters in Physics:fluid_props:eos
+    p->group_set(0, "Physics");
+    p->group_set(1, "fluid_props");
+    p->group_set(2, "eos");
+    std::vector<std::string> names = p->leaf_parameter_names();
+
+    const bool missing_eos_config = names.size() == 0;
+
+    if (legacy_gamma_specified && !missing_eos_config) {
+      ERROR("parse_eos_choice_",
+            "\"Field:gamma\" isn't valid since parameters are specified "
+            "within the \"Physics:fluid_props:eos\" parameter group");
+
+    } else if (!missing_eos_config) {
+      // this branch does the main work of the function
+
+      // STEP 1: define some useful variables
+      const std::string prefix = "Physics:fluid_props:eos:";
+      const bool is_type_specified = p->param(prefix + "type") != nullptr;
+      // following variable is used for maintaining backwards compatability
+      const bool is_gamma_specified = p->param(prefix + "gamma") != nullptr;
+
+      // STEP 2: determine the eos-type
+      std::string type;
+      if (is_type_specified) {
+        type = p->value(prefix + "type","");
+      } else if (is_gamma_specified) {
+        WARNING1("parse_eos_choice_",
+                 "Going forward, \"Physics:fluid_props:eos:type\" must be set "
+                 "when there are other parameters in the subgroup. For "
+                 "backwards compatability, this is being set to \"%s\" since "
+                 "the only other parameter in that group is \"gamma\"",
+                 ideal_name.c_str());
+        type = ideal_name;
+      } else {
+        ERROR("parse_eos_choice_",
+              "\"Physics:fluid_props:eos:type\" must be set when there are "
+              "other parameters in the subgroup.");
+      }
+
+      // STEP 3: actually build the EOS object and return it
+      if (type == ideal_name) { // EnzoEOSIdeal
+
+        // this case is a little funky, since we allow type to not actually be
+        // a parameter (for backwards compatability purposes).
+        std::size_t num_params = (1 + (std::size_t)(is_type_specified));
+        ASSERT1("parse_eos_choice_",
+                "the only allowed parameters are \"type\" and \"gamma\" in "
+                "the \"Physics:fluid_props:eos\" parameter group when making "
+                "an \"%s\" eos", type.c_str(),
+                (num_params == names.size()) && is_gamma_specified);
+        double gamma = p->value_float(prefix+"gamma", -1.0);
+        return EnzoEOSVariant(EnzoEOSIdeal::construct(gamma));
+
+      } else if ( type == EnzoEOSIsothermal::name() ){
+
+        ASSERT1("parse_eos_choice_",
+                "when building an \"%s\" eos, \"type\" is the only parameter "
+                "allowed in the \"Physics:fluid_props:eos\" parameter group ",
+                type.c_str(), (names.size() == 1) && is_type_specified);
+        return EnzoEOSVariant(EnzoEOSIsothermal());
+
+      } else {
+        ERROR1("parse_eos_choice_",
+               "there is currently no support for building of type \"%s\".",
+               type.c_str());
+      }
+    }
+
+
+    if (legacy_gamma_specified) {
+      WARNING1("parse_eos_choice_",
+               "\"Field:gamma\" is a legacy parameter that will be removed. "
+               "It is being used to configure an \"%s\" EOS. Going forward, "
+               "set parameters in the \"Physics:fluid_props:eos\" parameter "
+               "group instead.",
+               ideal_name.c_str());
+      double gamma = p->value_float("Field:gamma", -1.0);
+      return EnzoEOSVariant(EnzoEOSIdeal::construct(gamma));
+
+    } else if (hydro_type == "ppml") {
+      std::string type = EnzoEOSIsothermal::name();
+      WARNING1("parse_eos_choice_",
+               "Defaulting to \"%s\" EOS since for backwards compatability "
+               "since the PPML solver is in use and no parameters were set "
+               "in the \"Physics:fluid_props:eos\" parameter group. In the "
+               "future, this behavior will be dropped.",
+               type.c_str());
+      return EnzoEOSVariant(EnzoEOSIsothermal());
+
+    } else {
+      const double default_gamma = 5.0/3.0;
+      WARNING2("parse_eos_choice_",
+               "No parameters specified in the \"Physics:fluid_props:eos\" "
+               "parameter group. Defaulting to an \"%s\" eos with gamma = "
+               "%#.16g.",
+               ideal_name.c_str(), default_gamma);
+      return EnzoEOSVariant(EnzoEOSIdeal::construct(default_gamma));
+
+    }
+
   }
 
   //----------------------------------------------------------------------
@@ -2396,6 +2427,7 @@ namespace{
     return {density_floor, pressure_floor, temperature_floor,
             metal_mass_frac_floor};
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -2406,14 +2438,18 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
   // look for.
   const std::vector<std::string>& mlist = this->method_list;
   bool has_ppm = std::find(mlist.begin(), mlist.end(), "ppm") != mlist.end();
+  bool has_ppml = std::find(mlist.begin(), mlist.end(), "ppml") != mlist.end();
   bool has_vlct = std::find(mlist.begin(), mlist.end(),
                             "mhd_vlct") != mlist.end();
   std::string hydro_type = "";
-  if (has_ppm & has_vlct){
+  if ((int(has_ppm) + int(has_ppml) + int(has_vlct)) > 1){
     ERROR("EnzoConfig::read_physics_fluid_props_",
-          "a simulation can't use ppm and vlct solvers at once");
+          "a given simulation can only use up to 1 of the following solvers: "
+          "{\"ppm\", \"ppml\", \"mhd_vlct\"}");
   } else if (has_ppm){
     hydro_type = "ppm";
+  } else if (has_ppml){
+    hydro_type = "ppml";
   } else if (has_vlct){
     hydro_type = "mhd_vlct";
   }
@@ -2427,25 +2463,9 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
   physics_fluid_props_fluid_floor_config =
     parse_fluid_floor_config_(p, hydro_type, has_grackle);
 
-  // determine adiabatic index (in the future, this logic will be revisited)
-  {
-    double default_val = 5.0/3.0;
-    double legacy_value = p->value_float("Field:gamma", -1);
-    double actual_value = p->value_float("Physics:fluid_props:eos:gamma", -1);
-
-    if (legacy_value == -1) {
-      if (actual_value == -1) { actual_value = default_val; }
-      physics_fluid_props_gamma = actual_value;
-    } else if (actual_value == -1) {
-      WARNING("EnzoConfig::read_physics_fluid_props_",
-              "\"Field:gamma\" is a legacy parameter that will be removed.");
-      physics_fluid_props_gamma = legacy_value;
-    } else {
-      ERROR("EnzoConfig::read_physics_fluid_props_",
-            "\"Field:gamma\" isn't valid since "
-            "\"Physics:fluid_props:eos:gamma\" is specified.");
-    }
-  }
+  // determine the nominal choice of the EOS (the EOS is currently independent
+  // of the molecular weight)
+  physics_fluid_props_eos_variant = parse_eos_choice_(p, hydro_type);
 
   // determine molecular weight
   {

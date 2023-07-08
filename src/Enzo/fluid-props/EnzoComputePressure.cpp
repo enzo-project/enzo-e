@@ -74,13 +74,13 @@ void EnzoComputePressure::compute_(Block * block,
 #endif
                                    )
 {
-  // make a CelloArray that wraps p
+  // make a CelloView that wraps p
   Field field = block->data()->field();
   int gx,gy,gz;
   field.ghost_depth (field.field_id("density"),&gx,&gy,&gz);
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);
-  CelloArray<enzo_float,3> p_arr(p, nz + 2*gz, ny + 2*gy, nx + 2*gx);
+  CelloView<enzo_float,3> p_arr(p, nz + 2*gz, ny + 2*gy, nx + 2*gx);
 
   EnzoFieldAdaptor f_adaptor(block, i_hist_);
 
@@ -93,44 +93,9 @@ void EnzoComputePressure::compute_(Block * block,
 
 //----------------------------------------------------------------------
 
-namespace { // local function
-
-  template<class K>
-  void exec_loop_(int mz, int my, int mx, int stale_depth, K& kernel){
-
-    const int rank = cello::rank();
-
-    const int ix_start = stale_depth;
-    const int ix_stop = mx - stale_depth;
-
-    const int iy_start = (rank > 1) ? stale_depth : 0;
-    const int iy_stop  = (rank > 1) ? my - stale_depth : my;
-
-    const int iz_start = (rank > 2) ? stale_depth : 0;
-    const int iz_stop  = (rank > 2) ? mz - stale_depth : mz;
-
-    if ((ix_start >= ix_stop) | (iy_start >= iy_stop) | (iz_start >= iz_stop)){
-      ERROR("exec_loop_", "stale_depth is too large");
-    } else if (stale_depth < 0){
-      ERROR("exec_loop_", "stale_depth is negative");
-    }
-
-    for (int iz = iz_start; iz < iz_stop; iz++){
-      for (int iy = iy_start; iy < iy_stop; iy++){
-        for (int ix = ix_start; ix < ix_stop; ix++){
-          kernel(iz, iy, ix);
-        }
-      }
-    }
-  }
-
-}
-
-//----------------------------------------------------------------------
-
 void EnzoComputePressure::compute_pressure
 (const EnzoFieldAdaptor& fadaptor,
- const CelloArray<enzo_float, 3>& p,
+ const CelloView<enzo_float, 3>& p,
  bool mhd,
  bool dual_energy,
  double gamma,
@@ -168,7 +133,7 @@ void EnzoComputePressure::compute_pressure
 #endif
   } else {
 
-    using RdOnlyEFltArr = CelloArray<const enzo_float, 3>;
+    using RdOnlyEFltArr = CelloView<const enzo_float, 3>;
 
     const RdOnlyEFltArr d = fadaptor.view("density");
 
@@ -188,7 +153,7 @@ void EnzoComputePressure::compute_pressure
 
       auto loop_body = [=](int iz, int iy, int ix)
         { p(iz,iy,ix) = gm1 * d(iz,iy,ix) * ie(iz,iy,ix); };
-      exec_loop_(mz, my, mx, stale_depth, loop_body);
+      enzo_utils::exec_loop(mz, my, mx, stale_depth, loop_body);
 
     } else { // not using dual energy formalism
 
@@ -218,7 +183,7 @@ void EnzoComputePressure::compute_pressure
             enzo_float me_den = mhd ? 0.5*(bx(iz,iy,ix) * bx(iz,iy,ix)) : 0.;
             p(iz,iy,ix) = gm1 * (d(iz,iy,ix) * (te(iz,iy,ix) - ke) - me_den);
           };
-        exec_loop_(mz, my, mx, stale_depth, loop_body);
+        enzo_utils::exec_loop(mz, my, mx, stale_depth, loop_body);
 
       } else if (rank == 2) {
 
@@ -230,7 +195,7 @@ void EnzoComputePressure::compute_pressure
                                            by(iz,iy,ix) * by(iz,iy,ix)) : 0.;
             p(iz,iy,ix) = gm1 * (d(iz,iy,ix) * (te(iz,iy,ix) - ke) - me_den);
           };
-        exec_loop_(mz, my, mx, stale_depth, loop_body);
+        enzo_utils::exec_loop(mz, my, mx, stale_depth, loop_body);
 
       } else if (rank == 3) {
 
@@ -244,7 +209,7 @@ void EnzoComputePressure::compute_pressure
                                            bz(iz,iy,ix) * bz(iz,iy,ix)) : 0.;
             p(iz,iy,ix) = gm1 * (d(iz,iy,ix) * (te(iz,iy,ix) - ke) - me_den);
           };
-        exec_loop_(mz, my, mx, stale_depth, loop_body);
+        enzo_utils::exec_loop(mz, my, mx, stale_depth, loop_body);
 
       }
     }
