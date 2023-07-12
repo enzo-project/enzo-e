@@ -18,6 +18,14 @@ target_link_libraries(main_enzoCharmModule INTERFACE enzoCharmModule)
 # General setup
 #==============
 
+# the variable holds the commonly used root-include directory that lets files
+# include headers by calling:
+#    #include "Enzo/header/path.hpp"
+#    #include "Cello/header/path.hpp"
+# A target, called <MY-TARGET> uses of this variable in a call like:
+#    target_include_directories(<MY-TARGET> PUBLIC ${ROOT_INCLUDE_DIR})
+set(ROOT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
+
 # Get the list of source files
 # - we do this using GLOB patterns. This approach is not recommended by the
 #   authors of CMake (their recommendation is to explicitly list all files that
