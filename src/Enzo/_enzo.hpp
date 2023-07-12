@@ -194,15 +194,11 @@ extern "C" {
 
 #include "enzo-core/EnzoBoundary.hpp"
 
-#include "tests/EnzoInitialFeedbackTest.hpp"
-#include "tests/EnzoInitialGrackleTest.hpp"
+
 #include "io/EnzoInitialHdf5.hpp"
 #include "io/EnzoInitialMusic.hpp"
 #include "obsolete/EnzoInitialPm.hpp"
-#include "tests/EnzoInitialPpmlTest.hpp"
-#include "tests/EnzoInitialMergeSinksTest.hpp"
-#include "tests/EnzoInitialAccretionTest.hpp"
-#include "tests/EnzoInitialBBTest.hpp"
+
 
 // [order dependencies:]
 #include "particle/formation/EnzoSinkParticle.hpp"

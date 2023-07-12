@@ -29,6 +29,7 @@
 #include "Enzo/enzo.hpp"
 #include "Enzo/initial/initial.hpp"
 #include "Enzo/mesh/mesh.hpp"
+#include "Enzo/tests/tests.hpp"
 
 // next, make sure to include "charm_enzo.hpp" (which includes enzo.decl.h)
 #include "Enzo/charm_enzo.hpp"
