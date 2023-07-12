@@ -219,10 +219,6 @@ extern "C" {
 #include "initial/EnzoInitialShuCollapse.hpp"
 #include "tests/EnzoInitialBBTest.hpp"
 
-#include "mesh/EnzoRefineShock.hpp"
-#include "mesh/EnzoRefineParticleMass.hpp"
-#include "mesh/EnzoRefineMass.hpp"
-
 // [order dependencies:]
 #include "particle/formation/EnzoSinkParticle.hpp"
 #include "particle/formation/EnzoBondiHoyleSinkParticle.hpp"
@@ -302,10 +298,5 @@ extern "C" {
 #include "gravity/solvers/EnzoSolverMg0.hpp"
 
 #include "enzo-core/EnzoStopping.hpp"
-
-#include "mesh/EnzoProlong.hpp"
-#include "mesh/EnzoProlongMC1.hpp"
-#include "mesh/EnzoProlongPoisson.hpp"
-#include "mesh/EnzoRestrict.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */

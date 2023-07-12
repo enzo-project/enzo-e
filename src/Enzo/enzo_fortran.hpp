@@ -1,13 +1,6 @@
 #ifndef ENZO_FORTRAN_HPP
 #define ENZO_FORTRAN_HPP
 
-extern "C" void FORTRAN_NAME(interpolate)
-  (int *rank, enzo_float *pfield, int pdim[],
-   int pis[], int pie[], int r[],
-   enzo_float *field, int dim[], int is[], enzo_float *work,
-   int *imethod, int *posflag,
-   int *ierror);
-
 extern "C" void FORTRAN_NAME(interp3d)
   (enzo_float * parent, enzo_float * work, 
    int *dim1, int *dim2, int *dim3, 

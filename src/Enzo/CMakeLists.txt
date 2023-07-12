@@ -86,6 +86,9 @@ add_subdirectory(enzo-core)
 # add files in hydro-mhd to enzo target and define the riemann library
 add_subdirectory(hydro-mhd)
 
+# define the Enzo::mesh library
+add_subdirectory(mesh)
+
 # add source files from other subdirectories to the enzo target
 add_subdirectory(assorted)
 add_subdirectory(chemistry)
@@ -94,7 +97,6 @@ add_subdirectory(fluid-props)
 add_subdirectory(gravity)
 add_subdirectory(initial)
 add_subdirectory(io)
-add_subdirectory(mesh)
 add_subdirectory(obsolete)
 add_subdirectory(particle)
 add_subdirectory(tests)
@@ -105,7 +107,7 @@ add_subdirectory(utils)
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
+  PUBLIC riemann Enzo::mesh ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
 target_include_directories(enzo

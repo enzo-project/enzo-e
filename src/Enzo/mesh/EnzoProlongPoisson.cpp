@@ -24,7 +24,8 @@
 ///      zones.  At receiving end quadratic interpolation is used to
 ///      find the ghost value as in the 1D case.
 
-#include "enzo.hpp"
+#include "Enzo/mesh/mesh.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------
 

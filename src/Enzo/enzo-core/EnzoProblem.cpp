@@ -8,6 +8,7 @@
 ///
 
 #include "enzo.hpp"
+#include "Enzo/mesh/mesh.hpp" // EnzoProlong, EnzoRefine*, EnzoRestrict*
 
 //----------------------------------------------------------------------
 
