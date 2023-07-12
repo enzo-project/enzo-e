@@ -31,11 +31,8 @@
 // in the future, the following 2 headers should be removed from this header
 // file (there's no NEED for it to be a transitive dependency for anything that
 // depends on the hydro-mhd dependency)
-#include "Enzo/hydro-mhd/toolkit/toolkit.hpp"
 
-// Currently, the following needs to be included after the headers defining
-// EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEOSVariant
-// - TODO: make the Riemann Header Self-contained
+#include "Enzo/hydro-mhd/toolkit/toolkit.hpp"
 #include "Enzo/hydro-mhd/riemann/EnzoRiemann.hpp"
 
 //----------------------------------------------------------------------
