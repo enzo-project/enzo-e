@@ -28,6 +28,7 @@
 
 #include "Enzo/enzo.hpp"
 #include "Enzo/hydro-mhd/hydro-mhd.hpp"
+#include "Enzo/hydro-mhd/toolkit/toolkit.hpp"
 
 // next, make sure to include "charm_enzo.hpp" (which includes enzo.decl.h)
 #include "Enzo/charm_enzo.hpp"

@@ -28,31 +28,19 @@
 
 #include "Enzo/enzo.hpp" // enzo_float, EnzoConfig, EFltArrayMap
 
-// in the future, the following should be removed from this header file
-// (there's no NEED for it to be a transitive dependency for anything that
-//  depends on the hydro-mhd dependency)
-// - currently, it needs to be included after the headers defining
-//   EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEOSVariant
+// in the future, the following 2 headers should be removed from this header
+// file (there's no NEED for it to be a transitive dependency for anything that
+// depends on the hydro-mhd dependency)
+#include "Enzo/hydro-mhd/toolkit/toolkit.hpp"
+
+// Currently, the following needs to be included after the headers defining
+// EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEOSVariant
 // - TODO: make the Riemann Header Self-contained
 #include "Enzo/hydro-mhd/riemann/EnzoRiemann.hpp"
 
 //----------------------------------------------------------------------
 // Component Headers
 //----------------------------------------------------------------------
-
-#include "Enzo/hydro-mhd/toolkit/EnzoIntegrationQuanUpdate.hpp"
-#include "Enzo/hydro-mhd/toolkit/EnzoLazyPassiveScalarFieldList.hpp"
-#include "Enzo/hydro-mhd/toolkit/EnzoSourceGravity.hpp"
-#include "Enzo/hydro-mhd/toolkit/EnzoSourceInternalEnergy.hpp"
-
-// [order dependencies:]
-#include "Enzo/hydro-mhd/toolkit/EnzoReconstructor.hpp"
-#include "Enzo/hydro-mhd/toolkit/EnzoReconstructorNN.hpp"
-#include "Enzo/hydro-mhd/toolkit/EnzoReconstructorPLM.hpp"
-
-// [order dependencies:]
-#include "Enzo/hydro-mhd/toolkit/EnzoBfieldMethod.hpp"
-#include "Enzo/hydro-mhd/toolkit/EnzoBfieldMethodCT.hpp"
 
 #include "Enzo/hydro-mhd/EnzoMethodMHDVlct.hpp"
 #include "Enzo/hydro-mhd/EnzoMethodPpm.hpp"

@@ -6,6 +6,7 @@
 add_subdirectory(ppm_fortran)  # define Enzo::ppm_fortran
 add_subdirectory(ppml_fortran) # define Enzo::ppml_fortran
 add_subdirectory(riemann)
+add_subdirectory(toolkit) # define Enzo::hydro-mhd_toolkit
 
 # STEP 2: define the Enzo::hydro-mhd target
 #
@@ -19,7 +20,6 @@ add_subdirectory(riemann)
 # We explicitly list files (rather than use glob) since that makes CMake better
 # at rebuilds (especially after changing branches)
 add_library(Enzo_hydro-mhd
-
   hydro-mhd.hpp
   EnzoMethodMHDVlct.cpp EnzoMethodMHDVlct.hpp
   EnzoMethodPpml.cpp EnzoMethodPpml.hpp
@@ -27,23 +27,14 @@ add_library(Enzo_hydro-mhd
   SolveMHDEquations.cpp
   SolveHydroEquations.cpp
   EnzoMethodPpm.cpp EnzoMethodPpm.hpp
-
-  toolkit/EnzoSourceInternalEnergy.cpp toolkit/EnzoSourceInternalEnergy.hpp
-  toolkit/EnzoSourceGravity.cpp toolkit/EnzoSourceGravity.hpp
-  toolkit/EnzoLazyPassiveScalarFieldList.cpp toolkit/EnzoLazyPassiveScalarFieldList.hpp
-  toolkit/EnzoBfieldMethod.cpp toolkit/EnzoBfieldMethod.hpp
-  toolkit/EnzoBfieldMethodCT.cpp toolkit/EnzoBfieldMethodCT.hpp
-  toolkit/EnzoIntegrationQuanUpdate.cpp
-  toolkit/EnzoReconstructor.cpp toolkit/EnzoReconstructor.hpp
-  toolkit/EnzoReconstructorNN.cpp toolkit/EnzoReconstructorNN.hpp
-  toolkit/EnzoReconstructorPLM.hpp
 )
 add_library(Enzo::hydro-mhd ALIAS Enzo_hydro-mhd)
 
 # the following can be improved
 target_link_libraries(Enzo_hydro-mhd
   PUBLIC enzo ${CELLO_LIBS}
-  PRIVATE Enzo::ppm_fortran Enzo::ppml_fortran Enzo::riemann
+  PRIVATE Enzo::hydro-mhd_toolkit Enzo::ppm_fortran Enzo::ppml_fortran
+          Enzo::riemann
 )
 target_include_directories(Enzo_hydro-mhd PUBLIC ${ROOT_INCLUDE_DIR})
 target_link_options(Enzo_hydro-mhd PRIVATE ${Cello_TARGET_LINK_OPTIONS})
