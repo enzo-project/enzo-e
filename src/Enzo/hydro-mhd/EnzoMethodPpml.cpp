@@ -11,6 +11,8 @@
 #include "Enzo/enzo.hpp"
 #include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
+#include "Enzo/hydro-mhd/ppml_fortran/ppml_fortran.hpp" // FORTRAN_NAME(calc_dt_ppml)
+
 //----------------------------------------------------------------------
 
 EnzoMethodPpml::EnzoMethodPpml() 

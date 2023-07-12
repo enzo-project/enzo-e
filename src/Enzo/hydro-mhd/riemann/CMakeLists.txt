@@ -18,7 +18,8 @@ file(GLOB RIEMANN_SRC_FILES CONFIGURE_DEPENDS
   ./EnzoRiemann*.cpp ./EnzoRiemann*.hpp
 )
 
-add_library(riemann STATIC ${RIEMANN_SRC_FILES})
+add_library(Enzo_riemann STATIC ${RIEMANN_SRC_FILES})
+add_library(Enzo::riemann ALIAS Enzo_riemann)
 
 # the following line is *ONLY* required because the source file includes
 # "cello.hpp" and "enzo.hpp".
@@ -27,11 +28,11 @@ add_library(riemann STATIC ${RIEMANN_SRC_FILES})
 #   or "enzo.hpp") are properly inherited.
 # - in the future, it might be nice to only depend on subcomponents of the
 #   Cello or Enzo layer (to reduce how often this library gets recompiled)
-target_link_libraries(riemann PRIVATE enzo ${Cello_LIBS})
+target_link_libraries(Enzo_riemann PRIVATE enzo ${Cello_LIBS})
 
 # the include_directory is public to inform dependents where to search for the
 # public header file, "EnzoRiemann.hpp".
 # (It's also used during compilation of the library since it also specifies the
 # directory holding the private header files)
-target_include_directories (riemann PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_options(riemann PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+target_include_directories (Enzo_riemann PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_options(Enzo_riemann PRIVATE ${Cello_TARGET_LINK_OPTIONS})

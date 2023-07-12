@@ -11,6 +11,8 @@
 #include "Enzo/enzo.hpp"
 #include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
+#include "Enzo/hydro-mhd/ppm_fortran/ppm_fortran.hpp" // FORTRAN_NAME(ppm_de)
+
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
 #define EXIT_ON_ERROR
