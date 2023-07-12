@@ -54,15 +54,15 @@ public:
 
   double metal_yield_PISNe(double mass) throw();
 
-  double get_radius(std::vector<double> * masses, std::vector<double> * creationtimes) throw(); 
+  double get_radius(std::vector<double> masses, std::vector<double> creationtimes) throw(); 
 
   // update mesh with metal yields
   static void update_mesh(EnzoBlock * enzo_block, 
                              EnzoObjectFeedbackSphere sphere) throw();
 private:
-  void read_file(std::string file, std::vector<std::vector<double>*> * vars) throw();
+  void read_file(std::string file, std::vector<std::vector<double>*> vars) throw();
 
-  int get_binindex(double val, std::vector<double> * bins) throw();
+  int get_binindex(double val, std::vector<double> bins) throw();
 
   int model_time_, model_dt_;
   double Nstar_mean_, Nstar_std_;

@@ -221,6 +221,10 @@ void EnzoMethodInference::apply_criteria_ (Block * block)
     if (block->level() >= level_array_ + 1) {
       // Set mask according to local overdensity
       compute_overdensity_(block,mask,mx,my,mz);
+
+      //TODO: Add parameter to toggle inference mesh creation criteria
+      // Set mask by checking if mean overdensity > overdensity_threshold
+      //compute_mean_overdensity_(block,mask,mx,my,mz);
     }
   }
 }
@@ -297,6 +301,52 @@ void EnzoMethodInference::compute_overdensity_
     }
   }
 }
+
+//----------------------------------------------------------------------
+
+void EnzoMethodInference::compute_mean_overdensity_
+(Block * block, char * mask, int nx, int ny, int nz)
+{
+  Field field = block->data()->field();
+  const int index_field = field.field_id("density");
+
+  enzo_float * de = (enzo_float *) field.values(index_field);
+  int mx,my,mz;
+  int gx,gy,gz;
+  field.dimensions (index_field,&mx,&my,&mz);
+  field.ghost_depth(index_field,&gx,&gy,&gz);
+
+  // Compute average block-local density de_avg
+  int count = 0;
+  enzo_float de_sum = 0.0;
+  for (int iz=gz; iz<mz-gz; iz++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
+        int i=ix+mx*(iy + my*iz);
+        ++count;
+        de_sum += de[i];
+      }
+    }
+  }
+  const enzo_float de_avg = de_sum/count;
+
+  if (de_avg > overdensity_threshold_) {
+    // Set mask = 1 everywhere if above threshold
+    for (int iz=gz; iz<mz-gz; iz++) {
+      int kz=((iz-gz)*nz)/(mz-2*gz);
+      for (int iy=gy; iy<my-gy; iy++) {
+        int ky=((iy-gy)*ny)/(my-2*gy);
+        for (int ix=gx; ix<mx-gx; ix++) {
+          int kx=((ix-gx)*nx)/(mx-2*gx);
+          int k=kx + nx*(ky + ny*kz);
+          mask[k] = 1;
+        }
+      } 
+    }
+  }
+
+}
+
 
 //----------------------------------------------------------------------
 
@@ -1065,10 +1115,10 @@ void EnzoLevelArray::apply_inference()
     // All values are in CGS units except for total_energy
     std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
                 -793.0158410664843/vunit, 
-                96878457078.45897, 2.3778995827734495e-08, 2.419114340099057e-07}; ///(vunit*vunit)};
+                96878457078.45897, 2.3778995827734495e-08, 2.419114340099057e-07};
     std::vector <double> stds  = {4.858201188227477e-26/rhounit, 7.886306542228033e-29/rhounit, 
                 8358.282154906454/vunit,
-                531795315558.7779, 2.5806363586099314e-06, 2.9415985082639072e-05}; ///(vunit*vunit)};
+                531795315558.7779, 2.5806363586099314e-06, 2.9415985082639072e-05};
 
 #ifdef PRINT_FIELD_VALUES
   for (int i_f = 0; i_f < num_fields_; i_f++) {
@@ -1181,7 +1231,7 @@ void EnzoLevelArray::apply_inference()
 
       at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
 
-      int N_edge = 1; // number of edge layers to consider when evaluating S2 predictions
+      int N_edge = 0; // number of edge layers to consider when evaluating S2 predictions
       double pstar_i, pnostar_i, num_0_i, num_1_i;
       double rho_x = 0.0, rho_y = 0.0, rho_z = 0.0, rho = 0.0; // for calculating mean position
 
@@ -1273,7 +1323,7 @@ void EnzoLevelArray::apply_inference()
         double radius_modifier = 0.2; // TODO: Make this a parameter!
         // calculate radius of evolved remnant
         sphere_r = (yield_SNe+yield_PISNe+yield_HNe > 0) ? 
-                 radius_modifier*fbnet_->get_radius( &masses, &creationtimes ) : 0.0;
+                 radius_modifier*fbnet_->get_radius( masses, creationtimes ) : 0.0;
         CkPrintf("EnzoMethodInference::FBNet predicts a region with radius %1.2e kpc and metal yields (%1.2e, %1.2e, %1.2e) Msun\n", sphere_r, yield_SNe, yield_HNe, yield_PISNe);
         // put everything into code units
         EnzoUnits * enzo_units = enzo::units();

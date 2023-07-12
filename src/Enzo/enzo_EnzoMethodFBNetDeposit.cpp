@@ -219,7 +219,7 @@ void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg)
   }
 
   // TODO: Add another sync counter here?
-  if (enzo::simulation()->sync_fbnet_update_next()) {
+//  if (enzo::simulation()->sync_fbnet_update_next()) {
     //CkPrintf("[%d] clearing sync!!\n", CkMyPe());
     
     enzo::simulation()->p_fbnet_done();
@@ -231,7 +231,7 @@ void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg)
 
     compute_done();
 */
-  }
+//  }
   #ifdef DEBUG_METHOD_FBNET
     CkPrintf("[%d] compute_done() called\n", CkMyPe());
   #endif

@@ -27,15 +27,15 @@ FBNet::FBNet ()
 
   std::string mass_CDF_file = "/home1/07320/whick002/enzo-e_inference/input/FBNet_inputs/CDF_mass.txt";
   std::vector<std::vector<double>*> mass_vars = {&mass_CDF_, &mass_CDF_bins_};
-  read_file(mass_CDF_file, &mass_vars);
+  read_file(mass_CDF_file, mass_vars);
 
   std::string Nstar_CDF_file = "/home1/07320/whick002/enzo-e_inference/input/FBNet_inputs/CDF_Nstar.txt";
   std::vector<std::vector<double>*> Nstar_vars = {&Nstar_CDF_, &Nstar_CDF_bins_};
-  read_file(Nstar_CDF_file, &Nstar_vars );
+  read_file(Nstar_CDF_file, Nstar_vars );
 
   std::string creationtime_CDF_file = "/home1/07320/whick002/enzo-e_inference/input/FBNet_inputs/CDF_creationtime.txt";
   std::vector<std::vector<double>*> creationtime_vars = {&creationtime_CDF_, &creationtime_CDF_bins_};
-  read_file(creationtime_CDF_file, &creationtime_vars );
+  read_file(creationtime_CDF_file, creationtime_vars );
 
 
   // Only load in one regression weights file. Which one to load is an input parameter
@@ -51,13 +51,15 @@ FBNet::FBNet ()
   
   std::string weights_file = "/home1/07320/whick002/enzo-e_inference/input/FBNet_inputs/regression_weights_" + std::to_string(model_time_) + ".txt";
   std::vector<std::vector<double>*> regression_vars = {&M0_, &M1_, &M2_, &M3_};
-  read_file(weights_file, &regression_vars);
+  read_file(weights_file, regression_vars);
 
+  // seed random number generator
+  srand(time(NULL));
 }
 
 //---------------------------
 
-void FBNet::read_file(std::string file, std::vector< std::vector<double> * > * vars) throw()
+void FBNet::read_file(std::string file, std::vector< std::vector<double> * > vars) throw()
 {
   // reads in text file and stores each row in a separate array
   std::ifstream inFile;
@@ -69,7 +71,7 @@ void FBNet::read_file(std::string file, std::vector< std::vector<double> * > * v
   for (std::string line; std::getline(inFile, line, '\n'); ) {
     std::stringstream s(line);
     for (std::string val; std::getline(s, val, ' '); ) {
-      (*((*vars)[line_counter])).push_back(std::stod(val));
+      (*(vars[line_counter])).push_back(std::stod(val));
     }
     line_counter++;
   }
@@ -79,7 +81,6 @@ void FBNet::read_file(std::string file, std::vector< std::vector<double> * > * v
 
 int FBNet::get_Nstars() throw() 
 {
-  srand(time(NULL));
   double random = (double) rand()/RAND_MAX;
   
   int Nstars = 0;
@@ -96,7 +97,6 @@ int FBNet::get_Nstars() throw()
 
 double FBNet::get_mass() throw() 
 {
-  srand(time(NULL));
   double random = (double) rand()/RAND_MAX;
   
   double Mstar = 0;
@@ -113,7 +113,6 @@ double FBNet::get_mass() throw()
 
 double FBNet::get_creationtime() throw() 
 {
-  srand(time(NULL));
   double random = (double) rand()/RAND_MAX;
   
   int creationtime = 0;
@@ -174,10 +173,10 @@ double FBNet::metal_yield_PISNe(double mass) throw()
 
 //-----------------------
 
-int FBNet::get_binindex(double val, std::vector<double> * bins) throw()
+int FBNet::get_binindex(double val, std::vector<double> bins) throw()
 {
-  for (int i=0; i < (*bins).size()-1; i++) {
-    if ( ((*bins)[i] <= val) && (val < (*bins)[i+1]) ) {
+  for (int i=0; i < bins.size()-1; i++) {
+    if ( (bins[i] <= val) && (val < bins[i+1]) ) {
       return i;
     }
   }
@@ -187,7 +186,7 @@ int FBNet::get_binindex(double val, std::vector<double> * bins) throw()
 
 //--------------------
 
-double FBNet::get_radius(std::vector<double> * masses, std::vector<double> * creationtimes) throw()
+double FBNet::get_radius(std::vector<double> masses, std::vector<double> creationtimes) throw()
 {
   // Start by tokenizing sample
 
@@ -207,11 +206,12 @@ double FBNet::get_radius(std::vector<double> * masses, std::vector<double> * cre
   std::fill(time_bincounts.begin(), time_bincounts.end(), 0);
 
   // get bincounts
-  int Nstars = (*masses).size();
+  int Nstars = masses.size();
   for (int i=0; i < Nstars; i++) {
-    mass_bincounts[get_binindex( (*masses)[i], &massbins )] += 1;
-    time_bincounts[get_binindex( (*creationtimes)[i], &timebins )] += 1;
+    mass_bincounts[get_binindex( masses[i], massbins )] += 1;
+    time_bincounts[get_binindex( creationtimes[i], timebins )] += 1;
   }
+
   int Nbins_mass = mass_bincounts.size();
   int Nbins_time = time_bincounts.size();
   int Nbins = Nbins_mass + Nbins_time;
@@ -238,14 +238,21 @@ double FBNet::get_radius(std::vector<double> * masses, std::vector<double> * cre
   ASSERT("FBNet::get_radius()", "Nbins != M.size()", 
           Nbins == (*M).size());
 
+  ASSERT("FBNet::get_radius()", "&M is NULL pointer!",
+          M != NULL);
+
   double radius = 0.0;
-  for (int i=0; i < Nbins; i++) {
-    radius += ((i<Nbins_mass) ? mass_bincounts[i] : time_bincounts[i]) * (*M)[i];
+  for (int i=0; i < Nbins_mass; i++) {
+    radius += mass_bincounts[i] * (*M)[i];
   }
+  for (int i=0; i < Nbins_time; i++) {
+    radius += time_bincounts[i] * (*M)[Nbins_mass + i];
+  }
+
   // NOTE: this matrix multiplication gives us log(r) in kpc
-  radius = std::max(radius, std::log10(0.25));
+  radius = std::pow(10, std::max(radius, std::log10(0.25)));
  
-  return std::pow(10,radius);
+  return radius;
 }
 
 //---------------------------------------------------------

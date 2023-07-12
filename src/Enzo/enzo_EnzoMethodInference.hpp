@@ -112,6 +112,10 @@ protected: // methods
   void compute_overdensity_
   (Block * block, char * mask, int nx, int ny, int nz);
 
+  /// Compute mean overdensity, tagging mask array accordingly
+  void compute_mean_overdensity_
+  (Block * block, char * mask, int nx, int ny, int nz);
+
   /// Compute offsets ox,oy,oz and sizes nx,ny,nz into field
   /// data, taking into account one ghost zone layer, field
   /// ghost zone depth, restriction count, block size relative
