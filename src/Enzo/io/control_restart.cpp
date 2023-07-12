@@ -17,91 +17,25 @@
 #include "charm_mesh.hpp"
 #include "main.hpp"
 
-//  #define DEBUG_RESTART
-// #define TRACE_BLOCK
-// #define PRINT_FIELD_RESTART
-//  #define TRACE_SYNC
+#define TRACE_RESTART
 
 //--------------------------------------------------
-#ifdef TRACE_SYNC
-#   undef TRACE_SYNC
-#   define TRACE_SYNC(SYNC,MSG)                                         \
-  CkPrintf ("TRACE_SYNC %p %s %d/%d\n", \
-            (void *)(&SYNC), std::string(MSG).c_str(),SYNC.value(),SYNC.stop()); \
-  fflush(stdout);
-#else
-#   define TRACE_SYNC(SYNC,MSG) /* ... */
-#endif
-//--------------------------------------------------
-#ifdef PRINT_FIELD_RESTART
-#   undef PRINT_FIELD_RESTART
-
-#   define PRINT_FIELD_RESTART(MSG,FIELD,DATA)                                  \
-  {                                                                     \
-    Field field = DATA->field();                                        \
-    int mx,my,mz;                                                       \
-    int gx,gy,gz;                                                       \
-    int index_field = field.field_id(FIELD);                            \
-    field.dimensions(index_field,&mx,&my,&mz);                          \
-    field.ghost_depth(index_field,&gx,&gy,&gz);                         \
-    enzo_float * value = (enzo_float *)field.values(FIELD);             \
-    enzo_float min=1e30;                                                \
-    enzo_float max=-1e30;                                               \
-    enzo_float sum=0;                                                   \
-    for (int iz=gz; iz<mz-gz; iz++) {                                   \
-      for (int iy=gy; iy<my-gy; iy++) {                                 \
-        for (int ix=gx; ix<mx-gx; ix++) {                               \
-          const int i=ix+mx*(iy+my*iz);                                 \
-          min=std::min(min,value[i]);                                   \
-          max=std::max(max,value[i]);                                   \
-          sum+=value[i];                                                \
-        }                                                               \
-      }                                                                 \
-    }                                                                   \
-    CkPrintf ("PRINT_FIELD_RESTART %s %s  %g %g %g\n",MSG,FIELD,min,max,sum/((mx-2*gx)*(my-2*gy)*(mz-2*gz))); \
-    fflush(stdout);                                                     \
-  }
-#else
-#   define PRINT_FIELD_RESTART(MSG,FIELD,DATA) /* ... */
-#endif
-//--------------------------------------------------
-#ifdef TRACE_BLOCK
-#   undef TRACE_BLOCK
+#ifdef TRACE_RESTART
 #   define TRACE_BLOCK(MSG,BLOCK)                                       \
   {                                                                     \
     Memory * memory = Memory::instance();                               \
-    CkPrintf ("%d :%d TRACE_RESTART BLOCK %s %s  %lld %lld %lld  %lld\n", \
-              CkMyPe(),__LINE__,                                        \
-              BLOCK->name().c_str(),                                    \
+    long long index_order, count_order;                                 \
+    BLOCK->get_order(&index_order, &count_order);                       \
+    CkPrintf ("%d TRACE_RESTART %lld %s  %g %lld\n",                    \
+              CkMyPe(),                                                 \
+              index_order,                                              \
               std::string(MSG).c_str(),                                 \
-              memory->bytes(),memory->bytes_high(), memory->bytes_highest(), \
-              EnzoMsgCheck::counter[cello::index_static()]);            \
-    fflush(stdout);                                                     \
-  }
-#   define TRACE_READER(MSG,READER)                                     \
-  {                                                                     \
-    Memory * memory = Memory::instance();                               \
-    CkPrintf ("%d :%d TRACE_RESTART READER %s %d  %lld %lld %lld  %lld\n", \
-              CkMyPe(),__LINE__,                                        \
-              std::string(MSG).c_str(),READER->thisIndex,               \
-              memory->bytes(),memory->bytes_high(), memory->bytes_highest(), \
-              EnzoMsgCheck::counter[cello::index_static()]);            \
-    fflush(stdout);                                                     \
-  }
-#   define TRACE_SIMULATION(MSG,SIMULATION)                             \
-  {                                                                     \
-    Memory * memory = Memory::instance();                               \
-    CkPrintf ("%d :%d TRACE_RESTART SIMULATION %s %d  %lld %lld %lld  %lld\n", \
-              CkMyPe(),__LINE__,                                        \
-              std::string(MSG).c_str(),SIMULATION->thisIndex,           \
-              memory->bytes(),memory->bytes_high(), memory->bytes_highest(), \
+              cello::simulation()->timer(),                             \
               EnzoMsgCheck::counter[cello::index_static()]);            \
     fflush(stdout);                                                     \
   }
 #else
 #   define TRACE_BLOCK(MSG,BLOCK) /* ... */
-#   define TRACE_READER(MSG,READER)  /* ... */
-#   define TRACE_SIMULATION(MSG,READER)  /* ... */
 #endif
 
 //----------------------------------------------------------------------
@@ -121,7 +55,6 @@ void Block::restart_enter_()
 
 void Simulation::p_restart_enter (std::string name_dir)
 {
-  TRACE_SIMULATION("p_restart_enter_",this);
   // [ Called on root process only ]
 
   restart_directory_ = name_dir;
@@ -131,9 +64,7 @@ void Simulation::p_restart_enter (std::string name_dir)
   restart_stream_file_list_ >> restart_num_files_;
 
   // set synchronization
-  TRACE_SYNC(sync_restart_created_,"sync_restart_created_ set_stop()");
   sync_restart_created_.set_stop(restart_num_files_);
-  TRACE_SYNC(sync_restart_next_,"sync_restart_next_ set_stop()");
   sync_restart_next_.set_stop(restart_num_files_);
 
   // Create new empty IoEnzoReader chare array and distribute to other processing elements
@@ -168,9 +99,7 @@ IoEnzoReader::IoEnzoReader()
 
 void EnzoSimulation::p_io_reader_created()
 {
-  TRACE_SIMULATION("p_io_reader_created",this);
   // Wait for all io_readers to be created
-  TRACE_SYNC(sync_restart_created_,"sync_restart_created_ next()");
   if (sync_restart_created_.next()) {
     // distribute array proxy to other simulation objects
     proxy_enzo_simulation.p_set_io_reader(proxy_io_enzo_reader);
@@ -181,7 +110,6 @@ void EnzoSimulation::p_io_reader_created()
 
 void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 {
-  TRACE_SIMULATION("EnzoSimulation::p_set_io_reader()",this);
   proxy_io_enzo_reader = io_enzo_reader;
   CkCallback callback(CkIndex_Simulation::r_restart_start(NULL),0,
                       proxy_simulation);
@@ -192,7 +120,6 @@ void EnzoSimulation::p_set_io_reader(CProxy_IoEnzoReader io_enzo_reader)
 
 void Simulation::r_restart_start (CkReductionMsg * msg)
 {
-  TRACE_SIMULATION("EnzoSimulation::r_restart_start()",this);
   delete msg;
   // [ Called on root process only ]
 
@@ -214,7 +141,6 @@ void Simulation::r_restart_start (CkReductionMsg * msg)
 void IoEnzoReader::p_init_root
 (std::string name_dir, std::string name_file, int max_level)
 {
-  TRACE_READER("p_init_root()",this);
   // save initialization parameters
   name_dir_  = name_dir;
   name_file_ = name_file;
@@ -226,7 +152,6 @@ void IoEnzoReader::p_init_root
   file_open_block_list_(name_dir,name_file);
 
   sync_blocks_.reset();
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset()");
 
   // Read global attributes
   file_read_hierarchy_();
@@ -246,7 +171,6 @@ void IoEnzoReader::p_init_root
       // count root-level blocks for synchronization
       // (including negative level blocks)
       ++ sync_blocks_;
-      TRACE_SYNC(sync_blocks_,"sync_blocks_ inc_stop(1)");
     } else {
       // count blocks per refined level for array allocation below
       ++blocks_in_level_[block_level];
@@ -304,10 +228,6 @@ void IoEnzoReader::p_init_root
     if (block_level <= 0) {
 
       // Block exists--send its data
-#ifdef DEBUG_RESTART
-      msg_check->print("send");
-      msg_check->data_msg_->print("send");
-#endif
       enzo::block_array()[index].p_restart_set_data(msg_check);
 
     }
@@ -322,10 +242,6 @@ void IoEnzoReader::p_init_root
 
 void EnzoBlock::p_restart_set_data(EnzoMsgCheck * msg_check)
 {
-#ifdef DEBUG_RESTART
-  msg_check->print("recv");
-  msg_check->data_msg_->print("read");
-#endif
   restart_set_data_ (msg_check);
 }
 
@@ -336,7 +252,6 @@ void EnzoBlock::restart_set_data_(EnzoMsgCheck * msg_check)
   msg_check->update(this);
   msg_check->get_adapt(adapt_);
 
-  PRINT_FIELD_RESTART("recv","density",data());
   delete msg_check;
   proxy_io_enzo_reader[index_file].p_block_ready();
 }
@@ -348,8 +263,6 @@ void IoEnzoReader::p_block_ready()
 
 void IoEnzoReader::block_ready_()
 {
-  TRACE_READER("[p_]block_ready()",this);
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ next()");
   // Wait for all of the reader's blocks in the current level to be
   // ready
   if (sync_blocks_.next()) {
@@ -362,8 +275,6 @@ void IoEnzoReader::block_ready_()
 void EnzoSimulation::p_restart_next_level()
 {
   // [ Called on root process only ]
-  TRACE_SIMULATION("EnzoSimulation::p_restart_next_level()",this);
-  TRACE_SYNC(sync_restart_next_,"sync_restart_next_ next()");
   if (sync_restart_next_.next()) {
     const int max_level = cello::config()->mesh_max_level;
     if (++restart_level_ <= max_level) {
@@ -382,7 +293,6 @@ void EnzoSimulation::p_restart_next_level()
 void IoEnzoReader::p_create_level (int level)
 {
   level_ = level;
-  TRACE_READER("p_create_level()",this);
   const int num_blocks_level = io_msg_check_[level].size();
   sync_blocks_.reset();
   sync_blocks_.set_stop(num_blocks_level+1);
@@ -489,8 +399,6 @@ void IoEnzoReader::p_block_created()
 
 void IoEnzoReader::block_created_()
 {
-  TRACE_READER("p_block_created()",this);
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ next()");
   if (sync_blocks_.next()) {
     proxy_enzo_simulation[0].p_restart_level_created();
   }
@@ -500,8 +408,6 @@ void IoEnzoReader::block_created_()
 
 void EnzoSimulation::p_restart_level_created()
 {
-  TRACE_SIMULATION("EnzoSimulation::p_restart_level_created()",this);
-  TRACE_SYNC(sync_restart_created_,"sync_restart_created_ next()");
   if (sync_restart_created_.next()) {
     proxy_io_enzo_reader.p_init_level(restart_level_);
   }
@@ -511,11 +417,8 @@ void EnzoSimulation::p_restart_level_created()
 
 void IoEnzoReader::p_init_level (int level)
 {
-  TRACE_READER("p_init_level()",this);
   const int num_blocks_level = io_msg_check_[level].size();
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ reset()");
   sync_blocks_.reset();
-  TRACE_SYNC(sync_blocks_,"sync_blocks_ set_stop()");
   sync_blocks_.set_stop(num_blocks_level+1);
   // Loop through blocks in the given level
   int i=0;
@@ -531,10 +434,6 @@ void IoEnzoReader::p_init_level (int level)
     index.set_values(i3);
 
     msg_check->index_file_ = thisIndex;
-#ifdef DEBUG_RESTART
-    msg_check->print("send");
-    msg_check->data_msg_->print("send");
-#endif
     enzo::block_array()[index].p_restart_set_data(msg_check);
     i++;
   }
@@ -748,10 +647,6 @@ void IoEnzoReader::file_read_block_particles_ (DataMsg * data_msg)
       const int np = m4[0];
 
       // allocate particles at start once count is known
-#ifdef DEBUG_RESTART
-      CkPrintf ("DEBUG_RESTART num_particles %s %d:%d %d\n",
-                name_block.c_str(),it,ia,np);
-#endif
       if (ia==0) {
         particle_data->insert_particles(particle_descr,it,np);
       }
