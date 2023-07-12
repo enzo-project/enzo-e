@@ -207,7 +207,7 @@ forward the results to the intersecting leaf blocks. This is done
 using the same communication pattern as in the **populate** phase with
 ``p_request_data()``, in which data is sent to the unique
 ``level_base`` block and forwarded to the child leaf blocks via
-intersecting child blocks.``p_request_data()`` in the populate step.
+intersecting child blocks.
 
 For the method to end, all Blocks must call ``compute_done()``. To
 ensure this is called only after all Blocks have been updated with
