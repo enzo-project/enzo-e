@@ -7,9 +7,9 @@
 
 //----------------------------------------------------------------------
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 //----------------------------------------------------------------------
 

@@ -8,8 +8,9 @@
 /// This is adapted from a snippet of hydro_rk/Grid_SourceTerms.C in the
 /// original Enzo codebase
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 //----------------------------------------------------------------------
 

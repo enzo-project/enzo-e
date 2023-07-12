@@ -5,9 +5,11 @@
 /// @date      November, 1994
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
-#include "cello.hpp"
-#include "enzo.hpp"
 #include <stdio.h>
+
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM

@@ -5,8 +5,9 @@
 /// @date     Wed May 1 2019
 /// @brief    [\ref Enzo] Implements the EnzoReconstructorNN class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 //----------------------------------------------------------------------
 

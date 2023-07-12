@@ -6,6 +6,9 @@
 
 #include "enzo.hpp"
 
+// do not put the following into the public header
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoBfieldMethodCT
+
 //======================================================================
 
 EnzoInitialBCenter::EnzoInitialBCenter

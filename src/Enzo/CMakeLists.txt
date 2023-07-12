@@ -100,12 +100,16 @@ add_subdirectory(particle)
 add_subdirectory(tests)
 add_subdirectory(utils)
 
+# define the Enzo::hydro-mhd library
+add_subdirectory(hydro-mhd)
+
 # Step 4: specify additional information about the Enzo library
 # (dependencies are only PUBLIC because of the way that all headers are
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
+  PUBLIC Enzo::hydro-mhd
+  PUBLIC ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
 target_include_directories(enzo

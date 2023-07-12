@@ -162,6 +162,7 @@ extern "C" {
 #include "enzo_constants.hpp"
 #include "utils/EnzoEFltArrayMap.hpp"
 #include "utils/utils.hpp"
+#include "utils/EnzoPermutedCoordinates.hpp"
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
 
@@ -230,25 +231,8 @@ extern "C" {
 
 #include "utils/EnzoCenteredFieldRegistry.hpp"
 #include "utils/EnzoFieldAdaptor.hpp"
-#include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
-#include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
-#include "hydro-mhd/EnzoPermutedCoordinates.hpp"
-#include "hydro-mhd/EnzoSourceGravity.hpp"
-#include "hydro-mhd/EnzoSourceInternalEnergy.hpp"
 
-#include "hydro-mhd/EnzoReconstructor.hpp"
-#include "hydro-mhd/EnzoReconstructorNN.hpp"
-#include "hydro-mhd/EnzoReconstructorPLM.hpp"
 
-// public header for the EnzoRiemann sub-library. This needs to be included
-// after the headers for:
-//     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
-// but before the header for EnzoMethodMHDVlct EnzoBfieldMethod and EnzoBfieldMethodCT
-#include "hydro-mhd/riemann/EnzoRiemann.hpp"
-
-// [order dependencies:]
-#include "hydro-mhd/EnzoBfieldMethod.hpp"
-#include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
 #include "particle/formation/EnzoMethodAccretion.hpp"
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
@@ -266,12 +250,9 @@ extern "C" {
 #include "assorted/EnzoMethodHeat.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
 #include "particle/formation/EnzoMethodMergeSinks.hpp"
-#include "hydro-mhd/EnzoMethodMHDVlct.hpp"
 #include "assorted/EnzoMethodM1Closure.hpp"
 #include "gravity/EnzoMethodPmDeposit.hpp"
 #include "particle/EnzoMethodPmUpdate.hpp"
-#include "hydro-mhd/EnzoMethodPpm.hpp"
-#include "hydro-mhd/EnzoMethodPpml.hpp"
 #include "particle/formation/EnzoMethodSinkMaker.hpp"
 #include "particle/formation/EnzoMethodStarMaker.hpp"
 #include "particle/formation/EnzoMethodStarMakerSTARSS.hpp"
