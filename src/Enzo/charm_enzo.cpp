@@ -30,6 +30,7 @@
 
 // next, make sure to include "charm_enzo.hpp" (which includes enzo.decl.h)
 #include "Enzo/charm_enzo.hpp"
+#include "Enzo/io/io.hpp"
 
 // finally, move on to include enzo.def.h
 

@@ -188,10 +188,6 @@ extern "C" {
 
 #include "enzo-core/EnzoBlock.hpp"
 
-#include "io/IoEnzoBlock.hpp"
-#include "io/IoEnzoReader.hpp"
-#include "io/IoEnzoWriter.hpp"
-
 #include "enzo-core/EnzoBoundary.hpp"
 
 #include "initial/EnzoInitialBCenter.hpp"
@@ -200,10 +196,8 @@ extern "C" {
 #include "initial/EnzoInitialCosmology.hpp"
 #include "tests/EnzoInitialFeedbackTest.hpp"
 #include "tests/EnzoInitialGrackleTest.hpp"
-#include "io/EnzoInitialHdf5.hpp"
 #include "initial/EnzoInitialImplosion2.hpp"
 #include "initial/EnzoInitialInclinedWave.hpp"
-#include "io/EnzoInitialMusic.hpp"
 #include "obsolete/EnzoInitialPm.hpp"
 #include "tests/EnzoInitialPpmlTest.hpp"
 #include "initial/EnzoInitialSedovArray2.hpp"
@@ -254,7 +248,6 @@ extern "C" {
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "particle/formation/EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo-core/EnzoMethodBalance.hpp"
-#include "io/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
 #include "particle/feedback/EnzoMethodDistributedFeedback.hpp"

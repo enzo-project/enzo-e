@@ -8,6 +8,7 @@
 ///
 
 #include "enzo.hpp"
+#include "Enzo/io/io.hpp" // EnzoMethodCheck, EnzoInitial{Hdf5,Music}
 
 //----------------------------------------------------------------------
 
