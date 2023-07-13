@@ -8,6 +8,7 @@
 ///
 
 #include "enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 //----------------------------------------------------------------------
 

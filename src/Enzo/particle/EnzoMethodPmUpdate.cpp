@@ -6,8 +6,8 @@
 /// @brief    Implements the EnzoMethodPmUpdate class
 
 
-#include "charm_simulation.hpp"
-#include "enzo.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 // #define DEBUG_UPDATE
 

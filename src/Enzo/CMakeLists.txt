@@ -96,16 +96,18 @@ add_subdirectory(initial)
 add_subdirectory(io)
 add_subdirectory(mesh)
 add_subdirectory(obsolete)
-add_subdirectory(particle)
 add_subdirectory(tests)
 add_subdirectory(utils)
+
+# define the Enzo::particle
+add_subdirectory(particle)
 
 # Step 4: specify additional information about the Enzo library
 # (dependencies are only PUBLIC because of the way that all headers are
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
+  PUBLIC Enzo::particle riemann ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
 target_include_directories(enzo

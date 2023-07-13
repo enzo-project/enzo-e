@@ -10,8 +10,10 @@
 ///     adapted from the algorithm described in Hopkins et al. 
 ///     (2018, MNRAS, 480, 800)
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
 #include <time.h>
 
 // #define DEBUG_SF_CRITERIA
