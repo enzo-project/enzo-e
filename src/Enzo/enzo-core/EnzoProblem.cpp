@@ -8,6 +8,10 @@
 ///
 
 #include "enzo.hpp"
+#include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
+                                    // EnzoMethodBackgroundAcceleration
+                                    // EnzoComputeAcceleration
+                                    // EnzoSolver* EnzoMatrix*
 
 //----------------------------------------------------------------------
 

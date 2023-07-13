@@ -105,7 +105,7 @@ add_subdirectory(utils)
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
+  PUBLIC Enzo::gravity riemann ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
 target_include_directories(enzo

@@ -27,6 +27,7 @@
 //   each other
 
 #include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // next, make sure to include "charm_enzo.hpp" (which includes enzo.decl.h)
 #include "Enzo/charm_enzo.hpp"

@@ -101,9 +101,9 @@
 ///
 ///======================================================================
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "enzo.decl.h"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_SOLVER_CONTROL
 

@@ -251,7 +251,6 @@ extern "C" {
 #include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
 #include "particle/formation/EnzoMethodAccretion.hpp"
-#include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "particle/formation/EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "io/EnzoMethodCheck.hpp"
@@ -262,13 +261,11 @@ extern "C" {
 #include "particle/feedback/EnzoMethodFeedbackSTARSS.hpp"
 #include "particle/formation/EnzoMethodFluxAccretion.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
-#include "gravity/EnzoMethodGravity.hpp"
 #include "assorted/EnzoMethodHeat.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
 #include "particle/formation/EnzoMethodMergeSinks.hpp"
 #include "hydro-mhd/EnzoMethodMHDVlct.hpp"
 #include "assorted/EnzoMethodM1Closure.hpp"
-#include "gravity/EnzoMethodPmDeposit.hpp"
 #include "particle/EnzoMethodPmUpdate.hpp"
 #include "hydro-mhd/EnzoMethodPpm.hpp"
 #include "hydro-mhd/EnzoMethodPpml.hpp"
@@ -279,13 +276,9 @@ extern "C" {
 #include "particle/formation/EnzoMethodThresholdAccretion.hpp"
 #include "assorted/EnzoMethodTurbulence.hpp"
 
-#include "gravity/matrix/EnzoMatrixDiagonal.hpp"
-#include "gravity/matrix/EnzoMatrixIdentity.hpp"
-#include "gravity/matrix/EnzoMatrixLaplace.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 
-#include "gravity/EnzoComputeAcceleration.hpp"
 #include "utils/EnzoComputeCicInterp.hpp"
 #include "fluid-props/EnzoComputePressure.hpp"
 #include "fluid-props/EnzoComputeTemperature.hpp"
@@ -293,13 +286,6 @@ extern "C" {
 #ifdef CONFIG_USE_GRACKLE
   #include "chemistry/EnzoComputeCoolingTime.hpp"
 #endif
-
-#include "gravity/solvers/EnzoSolverBiCgStab.hpp"
-#include "gravity/solvers/EnzoSolverCg.hpp"
-#include "gravity/solvers/EnzoSolverDd.hpp"
-#include "gravity/solvers/EnzoSolverDiagonal.hpp"
-#include "gravity/solvers/EnzoSolverJacobi.hpp"
-#include "gravity/solvers/EnzoSolverMg0.hpp"
 
 #include "enzo-core/EnzoStopping.hpp"
 
