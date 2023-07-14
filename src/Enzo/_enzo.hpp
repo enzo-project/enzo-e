@@ -176,14 +176,10 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
 
-// [order dependencies:]
-#include "fluid-props/EnzoEOSIdeal.hpp"
-#include "fluid-props/EnzoEOSIsothermal.hpp"
-#include "fluid-props/EnzoEOSVariant.hpp"
+#include "utils/EnzoFieldAdaptor.hpp"
 
-#include "fluid-props/EnzoDualEnergyConfig.hpp"
-#include "fluid-props/EnzoFluidFloorConfig.hpp"
-#include "fluid-props/EnzoPhysicsFluidProps.hpp"
+// TODO: remove this after factoring out other subcomponents
+#include "Enzo/fluid-props/fluid-props.hpp"
 
 #include "enzo-core/EnzoUnits.hpp"
 

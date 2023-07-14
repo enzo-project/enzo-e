@@ -87,11 +87,13 @@ add_subdirectory(enzo-core)
 # add source files from other subdirectories to the enzo target
 add_subdirectory(chemistry)
 add_subdirectory(cosmology)
-add_subdirectory(fluid-props)
 add_subdirectory(obsolete)
 
 # define the Enzo::assorted target
 add_subdirectory(assorted)
+
+# define the Enzo::fluid-props target
+add_subdirectory(fluid-props)
 
 # define the Enzo::gravity target
 add_subdirectory(gravity)
@@ -126,8 +128,9 @@ add_subdirectory(utils)
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC Enzo::assorted Enzo::gravity Enzo::hydro-mhd Enzo::initial Enzo::io
-  PUBLIC Enzo::mesh Enzo::particle Enzo::tests Enzo::utils
+  PUBLIC Enzo::assorted Enzo::fluid-props Enzo::gravity Enzo::hydro-mhd
+  PUBLIC Enzo::initial Enzo::io Enzo::mesh Enzo::particle Enzo::tests
+  PUBLIC Enzo::utils
   PUBLIC ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
