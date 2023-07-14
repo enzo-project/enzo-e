@@ -8,7 +8,9 @@
 ///
 
 #include "enzo.hpp"
+
 #include "Enzo/assorted/assorted.hpp" // misc. Method classes
+#include "Enzo/chemistry/chemistry.hpp" // EnzoComputeCoolingTime, EnzoMethodGrackle
 #include "Enzo/fluid-props/fluid-props.hpp" // EnzoPhysicsFluidProps, EnzoCompute{Temperature,Pressure}
 #include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
                                     // EnzoMethodBackgroundAcceleration

@@ -16,12 +16,17 @@
 #ifndef ENZO_GRACKLE_CHEMISTRY_DATA_HPP
 #define ENZO_GRACKLE_CHEMISTRY_DATA_HPP
 
-// in the future, when the grackle header isn't included in the global header,
-// we should always forward declare the chemistry data struct
-#ifndef CONFIG_USE_GRACKLE
+// this header is intended to be fairly self-contained
+
+#include <memory> // std::unique_ptr
+#include <string>
+#include <type_traits> // std::is_same
+#include <unordered_set>
+#include <utility> // std::pair
+#include <vector>
+
 // unclear how necessary `extern "C"` is here
 extern "C" { struct chemistry_data; };
-#endif
 
 class GrackleChemistryData {
 

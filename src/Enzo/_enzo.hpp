@@ -178,16 +178,11 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "utils/EnzoFieldAdaptor.hpp"
 
-// TODO: remove this after factoring out other subcomponents
+// TODO: remove the following 2 after factoring out other subcomponents
+#include "Enzo/chemistry/chemistry.hpp"
 #include "Enzo/fluid-props/fluid-props.hpp"
 
 #include "enzo-core/EnzoUnits.hpp"
-
-// [order dependencies:]
-#include "utils/EnzoEFltArrayMap.hpp"
-#include "utils/EnzoFieldAdaptor.hpp"
-#include "chemistry/GrackleChemistryData.hpp"
-#include "chemistry/GrackleFacade.hpp"
 
 #include "enzo-core/EnzoFactory.hpp"
 
@@ -206,14 +201,9 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
-#include "chemistry/EnzoMethodGrackle.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
-
-#include "fluid-props/EnzoComputePressure.hpp"
-#include "fluid-props/EnzoComputeTemperature.hpp"
-#include "chemistry/EnzoComputeCoolingTime.hpp"
 
 #include "enzo-core/EnzoStopping.hpp"
 
