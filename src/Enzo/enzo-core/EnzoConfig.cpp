@@ -223,15 +223,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_bb_test_nominal_sound_speed(0.0),
   initial_bb_test_angular_rotation_velocity(0.0),
   initial_bb_test_external_density(0.0),
-  // EnzoMethodHydro
-  method_hydro_method(""),
-  method_hydro_dual_energy(false),
-  method_hydro_dual_energy_eta_1(0.0),
-  method_hydro_dual_energy_eta_2(0.0),
-  method_hydro_reconstruct_method(""),
-  method_hydro_reconstruct_conservative(0),
-  method_hydro_reconstruct_positive(0),
-  method_hydro_riemann_solver(""),
   // EnzoMethodFeedback,
   method_feedback_flavor(""),
   method_feedback_ejecta_mass(0.0),
@@ -614,15 +605,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_bb_test_nominal_sound_speed;
   p | initial_bb_test_angular_rotation_velocity;
   p | initial_bb_test_external_density;
-
-  p | method_hydro_method;
-  p | method_hydro_dual_energy;
-  p | method_hydro_dual_energy_eta_1;
-  p | method_hydro_dual_energy_eta_2;
-  p | method_hydro_reconstruct_method;
-  p | method_hydro_reconstruct_conservative;
-  p | method_hydro_reconstruct_positive;
-  p | method_hydro_riemann_solver;
 
   p | method_feedback_flavor;
   p | method_feedback_ejecta_mass;
