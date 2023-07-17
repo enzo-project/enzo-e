@@ -8,6 +8,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+#include "Enzo/utils/utils.hpp"
+
 //----------------------------------------------------------------------
 
 void EnzoSourceInternalEnergy::calculate_source

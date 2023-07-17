@@ -92,26 +92,28 @@ add_subdirectory(gravity)
 add_subdirectory(io)
 add_subdirectory(obsolete)
 add_subdirectory(particle)
-add_subdirectory(utils)
 
 # add files in hydro-mhd to enzo target and define the riemann library
 add_subdirectory(hydro-mhd)
 
-# define the Enzo::initial library
+# define the Enzo::initial target
 add_subdirectory(initial)
 
-# define the Enzo::mesh library
+# define the Enzo::mesh target
 add_subdirectory(mesh)
 
-# define the Enzo::tests library
+# define the Enzo::tests target
 add_subdirectory(tests)
+
+# define the Enzo::utils target
+add_subdirectory(utils)
 
 # Step 4: specify additional information about the Enzo library
 # (dependencies are only PUBLIC because of the way that all headers are
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC Enzo::assorted Enzo::initial Enzo::mesh Enzo::tests
+  PUBLIC Enzo::assorted Enzo::initial Enzo::mesh Enzo::tests Enzo::utils
   PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )

@@ -12,6 +12,7 @@
 #include "Enzo/initial/initial.hpp" // lots of initializers
 #include "Enzo/mesh/mesh.hpp" // EnzoProlong, EnzoRefine*, EnzoRestrict*
 #include "Enzo/tests/tests.hpp" // EnzoInitial*Test
+#include "Enzo/utils/utils.hpp" // EnzoComputeCicInterp
 
 //----------------------------------------------------------------------
 

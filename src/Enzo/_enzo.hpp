@@ -160,7 +160,10 @@ extern "C" {
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
-#include "utils/EnzoEFltArrayMap.hpp"
+
+// TODO: remove this after factoring out other subcomponents OR after
+//       EnzoEFltArrayMap becomes an alias for a class template defined in the
+//       Cello-layer (GH PR #326)
 #include "utils/utils.hpp"
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
@@ -205,8 +208,6 @@ extern "C" {
 #include "particle/formation/EnzoBondiHoyleSinkParticle.hpp"
 #include "particle/formation/EnzoFluxSinkParticle.hpp"
 
-#include "utils/EnzoCenteredFieldRegistry.hpp"
-#include "utils/EnzoFieldAdaptor.hpp"
 #include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
 #include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
 #include "hydro-mhd/EnzoPermutedCoordinates.hpp"
@@ -260,7 +261,6 @@ extern "C" {
 #include "enzo-core/EnzoMsgCheck.hpp"
 
 #include "gravity/EnzoComputeAcceleration.hpp"
-#include "utils/EnzoComputeCicInterp.hpp"
 #include "fluid-props/EnzoComputePressure.hpp"
 #include "fluid-props/EnzoComputeTemperature.hpp"
 
