@@ -176,6 +176,9 @@ void EnzoMethodInference::compute ( Block * block) throw()
 
   const int level = block->level();
 
+  // set random seed for models with stochastic elements
+  srand( time(NULL)*(CkMyPe()+1) ); 
+
   if (block->is_leaf()) {
 
     // Apply inference array creation criteria
@@ -1335,6 +1338,9 @@ void EnzoLevelArray::apply_inference()
          } // ix
        } // iy
       } // iz
+
+      // REMOVE THIS LINE!!!!!! JUST FOR DEBUGGING
+      //is_valid = true;
 
       bool method_inference_starnet_feedback = true; // TODO: Make this a parameter
       // only do FB if S2 network identifies star-forming regions

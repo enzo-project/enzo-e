@@ -53,8 +53,6 @@ FBNet::FBNet ()
   std::vector<std::vector<double>*> regression_vars = {&M0_, &M1_, &M2_, &M3_};
   read_file(weights_file, regression_vars);
 
-  // seed random number generator
-  srand(time(NULL));
 }
 
 //---------------------------
@@ -92,7 +90,7 @@ int FBNet::get_Nstars() throw()
     }
   }
 
-  return Nstars;
+  return std::max(Nstars, 1); // always return at least 1 star
 }
 
 double FBNet::get_mass() throw() 
@@ -108,7 +106,7 @@ double FBNet::get_mass() throw()
     }
   }
 
-  return Mstar;
+  return std::max(Mstar, 1.0); // always return at least 1 Msun
 }
 
 double FBNet::get_creationtime() throw() 
@@ -204,14 +202,13 @@ double FBNet::get_radius(std::vector<double> masses, std::vector<double> creatio
   std::vector<double> time_bincounts;
   time_bincounts.resize(timebins.size()-1);
   std::fill(time_bincounts.begin(), time_bincounts.end(), 0);
-
+  
   // get bincounts
   int Nstars = masses.size();
   for (int i=0; i < Nstars; i++) {
     mass_bincounts[get_binindex( masses[i], massbins )] += 1;
     time_bincounts[get_binindex( creationtimes[i], timebins )] += 1;
   }
-
   int Nbins_mass = mass_bincounts.size();
   int Nbins_time = time_bincounts.size();
   int Nbins = Nbins_mass + Nbins_time;
@@ -234,7 +231,7 @@ double FBNet::get_radius(std::vector<double> masses, std::vector<double> creatio
   else { // N3 <= Nstars
     M = &M3_;
   }
- 
+
   ASSERT("FBNet::get_radius()", "Nbins != M.size()", 
           Nbins == (*M).size());
 
@@ -242,13 +239,15 @@ double FBNet::get_radius(std::vector<double> masses, std::vector<double> creatio
           M != NULL);
 
   double radius = 0.0;
+  bool include_timebins = true; // TODO: Make this a parameter!
   for (int i=0; i < Nbins_mass; i++) {
     radius += mass_bincounts[i] * (*M)[i];
   }
-  for (int i=0; i < Nbins_time; i++) {
-    radius += time_bincounts[i] * (*M)[Nbins_mass + i];
+  if (include_timebins) {
+    for (int i=0; i < Nbins_time; i++) {
+      radius += time_bincounts[i] * (*M)[Nbins_mass + i];
+    }
   }
-
   // NOTE: this matrix multiplication gives us log(r) in kpc
   radius = std::pow(10, std::max(radius, std::log10(0.25)));
  
