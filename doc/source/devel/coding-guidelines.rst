@@ -232,6 +232,51 @@ We recommend some of the following coding practices:
   * You are passing in an array of data (as a pointer)
   * You explicitly want to allow the argument to be a ``nullptr``.
 
+* When declaring enumerations, prefer to use a `scoped enum <https://en.cppreference.com/w/cpp/language/enum>`_.
+  The concept of a scoped enums was introduced in C++11. 
+  An example of a scoped enum from the codebase is the :cpp:enum:`!ghost_choice` enumeration.
+  The declaration of this type looks something like the following snippet:
+
+  .. code-block:: c++
+
+     enum class ghost_choice {exclude, include, permit};
+
+  In the above snippet, if the ``class`` keyword is replaced by the ``struct`` keyword, the result is completely equivalent.
+  If neither the ``class`` nor ``struct`` keyword were present, then ``ghost_choice`` would be an unscoped enum (or a C-style enum).
+
+  There are three main differences to be aware of when using a scoped enum:
+
+    1. The enumerators must be specified as :cpp:enumerator:`!ghost_choice::exclude`, :cpp:enumerator:`!ghost_choice::include`, and :cpp:enumerator:`!ghost_choice::permit`.
+       This is much more explicit (and consequently better) than the alternative.
+       If :cpp:enum:`!ghost_choice` were instead defined as an unscoped enum, :cpp:enumerator:`!exclude`, :cpp:enumerator:`!include`, and :cpp:enumerator:`!permit` would be introduced as symbols in the global namespace. [#f2]_
+
+    2. Because :cpp:enum:`!ghost_choice` is a scoped enum, ``ghost_choice`` is directly recognized as a type of a variable. If it were an unscoped enum, you must 
+       If it were an unscoped enum, you could instead declare a variable of type ``enum ghost_choice``.
+
+    3. Perhaps most importantly, scoped enums have better type safety.
+       Specifically, integer values cannot be implicitly converted to an enum.
+       Any conversions from an integer value requires an explicit cast.
+       This generally leads to more explicit code.
+       Furthermore, it lets the compiler identify cases where the order of an integer argument and a scoped enum argument are accidentally permuted.
+
+* **ERROR REPORTING:** We don't use C++ exceptions in the codebase. In general, when an error arises, we generally abort the program with an informative error message. You can signal that an error occured by using the ``ERROR`` family of macros or you can use the ``ASSERT`` family of macros to have the program conditionally abort if some condition is not satisfied.
+
+  * When you are implementing new functionality, you are encouraged to liberally use the :c:macro:`!ERROR` and :c:macro:`!ASSERT` families of macros to ensure that Enzo-E loudly fails and aborts when the functionality is used in unexpected ways.
+    When running a really expensive simulation, a user should generally prefer that a simulation loudly fails.
+    The extreme alternative case is for the simulation to run to completion while silently having problems, which likely invalidates the results (and these problems may not be detected until MUCH later).
+    Furthermore, it's easy enough for a user to comment out an error message that they wish to ignore.
+
+  * We briefly describe the arguments of :c:macro:`!ERROR`, :c:macro:`!ERROR1`, :c:macro:`!ERROR2`, ..., :c:macro:`!ERROR8`, :c:macro:`!ASSERT`, :c:macro:`!ASSERT1`, :c:macro:`!ASSERT2`, ..., :c:macro:`!ASSERT8` down below:
+
+    * The first argument is always the name of the function where the macro is being invoked (to assist debugging in the future).
+
+    * The second argument is a c-string that provides the error message.
+      Printf formatting specifiers can be used within the error message, but the number of specifiers must match the integer at the end of the macro (e.g. :c:macro:`!ERROR2` or :c:macro:`!ASSERT2` expects 2 printf specifiers while :c:macro:`!ERROR` or :c:macro:`!ASSERT2` expects none).
+
+    * The next arguments specifiy the variables used by the formatting specifier (if there are any).
+
+    * The :c:macro:`!ASSERT` macro-family expects 1 last argument: the boolean condition dictating whether the program aborts.
+
 ====================
 Accessing Field data
 ====================
@@ -396,3 +441,5 @@ existing list of defintions alredy stored in the ``CHARM_PREPROC_DEFS`` variable
          all allowed types as part of the tagged union. In
          contrast, inheritance lets you freely introduce new types in
          other sections of the code.
+
+.. [#f2] You can mimic the scoping behavior to some degree with an unscoped enum if you place the definition of the unscoped inside of a class or struct.
