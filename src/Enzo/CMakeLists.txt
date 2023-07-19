@@ -83,9 +83,6 @@ target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 # add files in enzo-core to enzo target (and define a unit test)
 add_subdirectory(enzo-core)
 
-# add files in hydro-mhd to enzo target and define the riemann library
-add_subdirectory(hydro-mhd)
-
 # add source files from other subdirectories to the enzo target
 add_subdirectory(assorted)
 add_subdirectory(chemistry)
