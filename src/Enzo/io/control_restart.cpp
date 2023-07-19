@@ -669,6 +669,8 @@ void IoEnzoReader::file_read_block_particles_ (DataMsg * data_msg)
       int nz=m4[2];
       file_read_dataset_(buffer, type_data, nx,ny,nz,m4);
 
+      file_->data_close();
+
       // ...then copy to particle batches
 
       if (type_data == type_single) {
@@ -798,6 +800,7 @@ void IoEnzoReader::file_read_dataset_
   }
 
   file_->data_read (buffer);
+  file_->data_close();
 }
 //----------------------------------------------------------------------
 
