@@ -11,7 +11,7 @@
 
 #ifndef ENZO_ENZO_INTEGRATION_QUAN_UPDATE_HPP
 #define ENZO_ENZO_INTEGRATION_QUAN_UPDATE_HPP
-class EnzoIntegrationQuanUpdate : public PUP::able
+class EnzoIntegrationQuanUpdate
 {
   /// @class    EnzoIntegrationQuanUpdate
   /// @ingroup  Enzo
@@ -28,23 +28,6 @@ public: // interface
   /// Virtual destructor
   virtual ~EnzoIntegrationQuanUpdate()
   {  }
-
-  /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoIntegrationQuanUpdate);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoIntegrationQuanUpdate (CkMigrateMessage *m)
-    : PUP::able(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    PUP::able::pup(p);
-    p|integration_keys_;
-    p|first_specific_index_;
-    p|density_index_;
-  }
 
   /// Iterates through all arrays in `dUcons_map` that are pre-registered
   /// integration quantities or are specified with `passive_list`. All elements
