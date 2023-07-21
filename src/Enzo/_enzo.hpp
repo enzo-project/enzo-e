@@ -308,4 +308,6 @@ extern "C" {
 #include "mesh/EnzoProlongPoisson.hpp"
 #include "mesh/EnzoRestrict.hpp"
 
+#include "hydro-mhd/SetMinimumSupport.hpp"
+
 #endif /* ENZO_PRIVATE_HPP */

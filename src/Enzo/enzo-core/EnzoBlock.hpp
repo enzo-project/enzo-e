@@ -91,11 +91,6 @@ public: // interface
   // Original Enzo functions
   //----------------------------------------------------------------------
 
-  /// Set the energy to provide minimal pressure support
-  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-                        enzo_float minimum_pressure_support_parameter,
-                        bool comoving_coordinates);
-
   /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();
 

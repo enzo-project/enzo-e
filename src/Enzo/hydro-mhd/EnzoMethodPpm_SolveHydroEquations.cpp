@@ -145,11 +145,12 @@ int EnzoMethodPpm::SolveHydroEquations
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
   if (use_minimum_pressure_support) {
-    if (block.SetMinimumSupport(MinimumSupportEnergyCoefficient,
+    if (enzo::SetMinimumSupport(block,
+                                MinimumSupportEnergyCoefficient,
                                 minimum_pressure_support_parameter,
                                 comoving_coordinates) == ENZO_FAIL) {
-      ERROR("EnzoBlock::SolveHydroEquations()",
-	    "EnzoBlock::SetMinimumSupport() returned ENZO_FAIL");
+      ERROR("EnzoMethodPpm::SolveHydroEquations()",
+	    "enzo::SetMinimumSupport() returned ENZO_FAIL");
     }
   }
 
@@ -309,7 +310,7 @@ int EnzoMethodPpm::SolveHydroEquations
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt, time+0.5*dt);
   }
 
-  ASSERT ("EnzoBlock::SolveHydroEquations()",
+  ASSERT ("EnzoMethodPpm::SolveHydroEquations()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
 	  ! (comoving_coordinates && (cosmology == NULL)) );
 
@@ -373,7 +374,7 @@ int EnzoMethodPpm::SolveHydroEquations
      );
 
 #ifdef EXIT_ON_ERROR  
-  ASSERT2 ("EnzoBlock::SolveHydroEquations",
+  ASSERT2 ("EnzoMethodPpm::SolveHydroEquations",
            "Error %d in call to ppm_de block %s",error,block.name().c_str(),
            (error == 0));
 #endif  
