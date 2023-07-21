@@ -43,6 +43,9 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 {
   // check compatability with EnzoPhysicsFluidProps
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+         "can't currently handle the case with a non-ideal EOS",
+         fluid_props->eos_variant().holds_alternative<EnzoEOSIdeal>());
   const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
   ASSERT("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
          "selected formulation of dual energy formalism is incompatible",
@@ -54,14 +57,6 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
          fluid_floor_config.has_density_floor() &
          fluid_floor_config.has_pressure_floor());
 
-  // Initialize equation of state (check the validity of quantity floors)
-  enzo_float de_eta = 0.0;
-  bool dual_energy_formalism = de_config.modern_formulation(&de_eta);
-  enzo_float density_floor = fluid_floor_config.density();
-  enzo_float pressure_floor = fluid_floor_config.pressure();
-  eos_ = new EnzoEOSIdeal(fluid_props->gamma(), density_floor, pressure_floor,
-			  dual_energy_formalism, de_eta);
-
 #ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
     // we can remove the following once EnzoMethodGrackle no longer requires
@@ -69,7 +64,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     ASSERT("EnzoMethodMHDVlct::determine_quantities_",
            ("Grackle cannot currently be used alongside this integrator "
             "unless the dual-energy formalism is in use"),
-           eos_->uses_dual_energy_formalism());
+           de_config.any_enabled());
   }
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -78,7 +73,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
   riemann_solver_ = EnzoRiemann::construct_riemann
     ({rsolver, mhd_choice_ != bfield_choice::no_bfield,
-      eos_->uses_dual_energy_formalism()});
+      de_config.any_enabled()});
 
   // determine integration and primitive field list
   integration_field_list_ = riemann_solver_->integration_quantity_keys();
@@ -167,7 +162,6 @@ EnzoMethodMHDVlct::bfield_choice EnzoMethodMHDVlct::parse_bfield_choice_
 
 EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
 {
-  delete eos_;
   delete half_dt_recon_;
   delete full_dt_recon_;
   delete riemann_solver_;
@@ -190,7 +184,6 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p|eos_;
   p|half_dt_recon_;
   p|full_dt_recon_;
   p|riemann_solver_;
@@ -249,7 +242,7 @@ EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
     scratch_space_ = new EnzoVlctScratchSpace
       (field_shape, integration_field_list_, primitive_field_list_,
        integration_quan_updater_->integration_keys(), passive_list,
-       eos_->uses_dual_energy_formalism());
+       enzo::fluid_props()->dual_energy_config().any_enabled());
   }
   return scratch_space_;
 }
@@ -426,6 +419,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       bfield_method_->register_target_block(block);
     }
 
+    EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+
     const enzo_float* const cell_widths = enzo::block(block)->CellWidth;
 
     double dt = block->dt();
@@ -465,9 +460,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       //   routine. This is only meaningful when grackle models molecular
       //   hydrogen (which modifes the adiabtic index)
       const bool ignore_grackle = true;
-      eos_->primitive_from_integration(cur_integration_map, primitive_map,
-                                       stale_depth, passive_list,
-                                       ignore_grackle);
+      fluid_props->primitive_from_integration(cur_integration_map,
+                                              primitive_map,
+                                              stale_depth, passive_list,
+                                              ignore_grackle);
 
       // Compute flux along each dimension
       EnzoEFltArrayMap *flux_maps[3] = {&xflux_map, &yflux_map, &zflux_map};
@@ -483,11 +479,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         EnzoEFltArrayMap pr_map = primr_map.subarray_map(z_slc, y_slc, x_slc);
 
         EFlt3DArray *interface_vel_arr_ptr, sliced_interface_vel_arr;
-        if (eos_->uses_dual_energy_formalism()){
-          // trim scratch-array for storing interface velocity values (computed
-          // by the Riemann Solver). This is used in the calculation of the
-          // internal energy source term). As with priml_map and primr_map, the
-          // array is bigger than necessary so it can be reused for each dim
+        if (fluid_props->dual_energy_config().any_enabled()){
+          // when using dual energy formalism, trim the trim scratch-array for
+          // storing interface velocity values (computed by the Riemann Solver).
+          // This is used in the calculation of the internal energy source
+          // term). As with priml_map and primr_map, the array is bigger than
+          // necessary so it can be reused for each axis
           sliced_interface_vel_arr =
             scratch->interface_vel_arr.subarray(z_slc, y_slc, x_slc);
           interface_vel_arr_ptr = &sliced_interface_vel_arr;
@@ -540,7 +537,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // total energy (and if necessary the total energy can be synchronized
       // with the internal energy)
       integration_quan_updater_->update_quantities
-        (external_integration_map, dUcons_map, out_integration_map, eos_,
+        (external_integration_map, dUcons_map, out_integration_map,
          stale_depth, passive_list);
 
       // increment stale_depth since the inner values have been updated
@@ -601,7 +598,7 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(primitive_map, priml_map, primr_map,
-				      dim, eos_, stale_depth, passive_list);
+				      dim, stale_depth, passive_list);
 
   // We temporarily increment the stale_depth for the rest of this calculation
   // here. We can't fully increment otherwise it will screw up the
@@ -617,7 +614,7 @@ void EnzoMethodMHDVlct::compute_flux_
   }
 
   // Next, compute the fluxes
-  riemann_solver_->solve(priml_map, primr_map, flux_map, dim, eos_,
+  riemann_solver_->solve(priml_map, primr_map, flux_map, dim,
                          cur_stale_depth, passive_list,
                          interface_velocity_arr_ptr);
 
@@ -632,10 +629,10 @@ void EnzoMethodMHDVlct::compute_flux_
 
   // if using dual energy formalism, compute the component of the internal
   // energy source term for this dim (and update dUcons_map).
-  if (eos_->uses_dual_energy_formalism()){
+  if (enzo::fluid_props()->dual_energy_config().any_enabled()){
     EnzoSourceInternalEnergy eint_src;
     eint_src.calculate_source(dim, cur_dt, cell_width, primitive_map,
-                              dUcons_map, *interface_velocity_arr_ptr, eos_,
+                              dUcons_map, *interface_velocity_arr_ptr,
                               cur_stale_depth);
   }
 
@@ -675,7 +672,7 @@ void EnzoMethodMHDVlct::compute_source_terms_
     //   acceleration fields at the partial timestep
     EnzoSourceGravity gravity_source;
     gravity_source.calculate_source(cur_dt, orig_integration_map, dUcons_map,
-                                    accel_map, eos_, stale_depth);
+                                    accel_map, stale_depth);
   }
 }
 
@@ -691,76 +688,88 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) throw()
   EnzoEFltArrayMap integration_map = get_integration_map_
     (block, (lazy_passive_list_.get_list()).get());
 
-  if (eos_->uses_dual_energy_formalism()){
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+
+  if (fluid_props->dual_energy_config().any_enabled()){
     // synchronize eint and etot.
     // This is only strictly necessary after problem initialization and when
     // there is an inflow boundary condition
-    eos_->apply_floor_to_energy_and_sync(integration_map, 0);
+    fluid_props->apply_floor_to_energy_and_sync(integration_map, 0);
   }
 
   // Compute thermal pressure (this presently requires that "pressure" is a
   // permanent field)
   Field field = block->data()->field();
-  EFlt3DArray pressure = field.view<enzo_float>("pressure");
-  eos_->pressure_from_integration(integration_map, pressure, 0);
+  CelloView<enzo_float, 3> pressure = field.view<enzo_float>("pressure");
+  fluid_props->pressure_from_integration(integration_map, pressure, 0);
 
   // Now load other necessary quantities
-  const enzo_float gamma = eos_->get_gamma();
-  EFlt3DArray density = integration_map.at("density");
-  EFlt3DArray velocity_x = integration_map.at("velocity_x");
-  EFlt3DArray velocity_y = integration_map.at("velocity_y");
-  EFlt3DArray velocity_z = integration_map.at("velocity_z");
+  using RdOnlyEFltView = CelloView<const enzo_float, 3>;
+  const RdOnlyEFltView density = integration_map.at("density");
 
-  const bool mhd = (mhd_choice_ != bfield_choice::no_bfield);
-  EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
-  if (mhd) {
-    bfieldc_x = integration_map.at("bfield_x");
-    bfieldc_y = integration_map.at("bfield_y");
-    bfieldc_z = integration_map.at("bfield_z");
-  }
+  const RdOnlyEFltView velocity_x = integration_map.at("velocity_x");
+  const RdOnlyEFltView velocity_y = integration_map.at("velocity_y");
+  const RdOnlyEFltView velocity_z = integration_map.at("velocity_z");
+
+  // this will raise an error if not Ideal EOS
+  const EnzoEOSIdeal eos = fluid_props->eos_variant().get<EnzoEOSIdeal>();
 
   // widths of cells
   EnzoBlock * enzo_block = enzo::block(block);
-  double dx = enzo_block->CellWidth[0];
-  double dy = enzo_block->CellWidth[1];
-  double dz = enzo_block->CellWidth[2];
+  const double dx = enzo_block->CellWidth[0];
+  const double dy = enzo_block->CellWidth[1];
+  const double dz = enzo_block->CellWidth[2];
 
-  // initialize
-  double dtBaryons = ENZO_HUGE_VAL;
+  // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+signal_speed) for all
+  // dimensions.
+  //   - dr_i and v_i are the the width of the cell and velocity along
+  //     dimension i.
+  //   - signal_speed is sound speed without Bfields and fast-magnetosonic
+  //     speed with Bfields
 
-  // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+cfast) for all dimensions.
-  // dr_i and v_i are the the width of the cell and velocity along dimension i.
-  // cfast = fast magnetosonic speed (Convention is to use max value:
-  // cfast = (va^2+cs^2)
+  // initialize returned value
+  double dtBaryons = std::numeric_limits<double>::max();
 
-  for (int iz=0; iz<density.shape(0); iz++) {
-    for (int iy=0; iy<density.shape(1); iy++) {
-      for (int ix=0; ix<density.shape(2); ix++) {
-	enzo_float bmag_sq = 0.0;
-        if (mhd){
-          bmag_sq = (bfieldc_x(iz,iy,ix) * bfieldc_x(iz,iy,ix) +
-		     bfieldc_y(iz,iy,ix) * bfieldc_y(iz,iy,ix) +
-		     bfieldc_z(iz,iy,ix) * bfieldc_z(iz,iy,ix));
-        }
-	// Using "Rationalized" Gaussian units (where the magnetic permeability
-	// is mu=1 and pressure = B^2/2)
-	// To convert B to normal Gaussian units, multiply by sqrt(4*pi)
-	enzo_float inv_dens= 1./density(iz,iy,ix);
-	double cfast = (double) std::sqrt(gamma * pressure(iz,iy,ix) *
-					  inv_dens + bmag_sq * inv_dens);
+  if (mhd_choice_ == bfield_choice::no_bfield) {
+    auto loop_body = [=, &dtBaryons](int iz, int iy, int ix)
+      {
+        double cs = (double) eos.sound_speed(density(iz,iy,ix),
+                                             pressure(iz,iy,ix));
+        double local_dt = enzo_utils::min<double>
+          (dx/(std::fabs((double) velocity_x(iz,iy,ix)) + cs),
+           dy/(std::fabs((double) velocity_y(iz,iy,ix)) + cs),
+           dz/(std::fabs((double) velocity_z(iz,iy,ix)) + cs));
+        dtBaryons = std::min(dtBaryons, local_dt);
+      };
+    enzo_utils::exec_loop(density.shape(0), density.shape(1), density.shape(2),
+                          0, loop_body);
 
-	dtBaryons = std::min(dtBaryons,
-			     dx/(std::fabs((double) velocity_x(iz,iy,ix)) +
-				 cfast));
-	dtBaryons = std::min(dtBaryons,
-			     dy/(std::fabs((double) velocity_y(iz,iy,ix)) +
-				 cfast));
-	dtBaryons = std::min(dtBaryons,
-			     dz/(std::fabs((double) velocity_z(iz,iy,ix))
-				 + cfast));
-      }
-    }
+  } else {
+    const RdOnlyEFltView bfieldc_x = integration_map.at("bfield_x");
+    const RdOnlyEFltView bfieldc_y = integration_map.at("bfield_y");
+    const RdOnlyEFltView bfieldc_z = integration_map.at("bfield_z");
+
+    auto loop_body = [=, &dtBaryons](int iz, int iy, int ix)
+      {
+        // if the bfield is 0 at any given point, the fast magnetosonic speed
+        // correctly reduces to the sound speed.
+        //
+        // We follow the convention of using the maximum value of the fast
+        // magnetosonic speed:     cfast = sqrt(va^2+cs^2)
+        double cfast = (double) eos.fast_magnetosonic_speed<0>
+          (density(iz,iy,ix), pressure(iz,iy,ix),
+           bfieldc_x(iz,iy,ix), bfieldc_y(iz,iy,ix), bfieldc_z(iz,iy,ix));
+
+        double local_dt = enzo_utils::min<double>
+           (dx/(std::fabs((double) velocity_x(iz,iy,ix)) + cfast),
+            dy/(std::fabs((double) velocity_y(iz,iy,ix)) + cfast),
+            dz/(std::fabs((double) velocity_z(iz,iy,ix)) + cfast));
+        dtBaryons = std::min(dtBaryons, local_dt);
+      };
+    enzo_utils::exec_loop(density.shape(0), density.shape(1), density.shape(2),
+                          0, loop_body);
   }
+
   // Multiply resulting dt by CourantSafetyNumber (for extra safety!).
   // This should be less than 0.5 for standard algorithm
   dtBaryons *= courant_;

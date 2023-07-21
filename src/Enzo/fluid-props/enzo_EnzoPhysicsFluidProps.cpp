@@ -1,44 +1,89 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoEOSIdeal.cpp
+/// @file     enzo_EnzoPhysicsFluidProps.cpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
-/// @date     Thurs May 2 2019
-/// @brief    [\ref Enzo] Implementation of EnzoEOSIdeal
+/// @date     2023-02-13
+/// @brief    [\ref Enzo] Implementation of the EnzoPhysicsFluidProps class
 
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_MATCHING_ARRAY_SHAPES
-
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::pup (PUP::er &p)
-{
-  // NOTE: change this function whenever attributes change
-  PUP::able::pup(p);
-  p|gamma_;
-  p|density_floor_;
-  p|pressure_floor_;
-  p|dual_energy_formalism_;
-  p|dual_energy_formalism_eta_;
+namespace { // define helper struct only used in this function
+  struct NameVisitor {
+    template<typename T> std::string operator()(T obj) { return T::name(); }
+  };
+}
+
+enzo_float EnzoPhysicsFluidProps::gamma() const noexcept {
+
+  // in c++17 this whole function simplifies down to:
+  //
+  // return eos_variant_.visit([](auto eos) -> enzo_float {
+  //   using T = std::decay_t<decltype(eos)>;
+  //   if constexpr (std::is_same<T,EnzoEOSIdeal>::value) { return eos.gamma; }
+  //
+  //   std::string name = T::name();
+  //   ERROR1("EnzoPhysicsFluidProps::gamma()",
+  //          "can't return gamma for EOS of type \"%s\". Either that type "
+  //          "doesn't support it OR it's a new type & this function has not "
+  //          "yet been updated to support it.", name.c_str());
+  //   }
+  // });
+
+  if (eos_variant_.holds_alternative<EnzoEOSIdeal>()) {
+    return eos_variant_.get<EnzoEOSIdeal>().gamma;
+  }
+
+  std::string name = eos_variant_.visit(NameVisitor());
+  ERROR1("EnzoPhysicsFluidProps::gamma()",
+         "can't return gamma for EOS of type \"%s\". Either that type "
+         "doesn't support it OR it's a new type & this function has not "
+         "yet been updated to support it.", name.c_str());
 }
 
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::primitive_from_integration
+namespace { // define helper struct only used in this function
+  struct IsBarotropicVisitor {
+    template <typename T>
+    bool operator()(T eos) const { return T::is_barotropic(); }
+  };
+}
+
+bool EnzoPhysicsFluidProps::has_barotropic_eos() const noexcept {
+  // in c++14 this function simplifies down to:
+  // return eos_variant_.visit([](auto eos) { return eos.is_barotropic(); });
+  return eos_variant_.visit(IsBarotropicVisitor());
+}
+
+//----------------------------------------------------------------------
+
+void EnzoPhysicsFluidProps::primitive_from_integration
 (const EnzoEFltArrayMap &integration_map, EnzoEFltArrayMap &primitive_map,
  const int stale_depth, const str_vec_t &passive_list,
  const bool ignore_grackle) const
 {
 
+  ASSERT("EnzoPhysicsFluidProps::primitive_from_integration",
+         "the current implementation assumes a non-barotropic EOS",
+         !this->has_barotropic_eos());
+
+  // load shape ahead of time and declare them const for optimization purposes
   const CelloView<const enzo_float, 3> density = integration_map.at("density");
   const int mz = density.shape(0);
   const int my = density.shape(1);
   const int mx = density.shape(2);
 
-  // The EOS object doesn't necessarily know what the integration quantities
-  // are. This means we take something of an exhaustive approach. This could be
-  // more clever if this operations were made a part of the Hydro Integrator
+  // This method was originally written as a method of the EOS class and since
+  // then, we the EOS object didn't necessarily know what the integration
+  // quantities are. For that reason, we take a somewhat exhaustive approach. 
+  // - This operation could be more efficient if if were made a part of the
+  //   Hydro/MHD Integrator
+  // - alternatively, the EnzoPhysicsFluidProps should be able to infer this
+  //   information in the future (if we pass this function hints about bfields
+  //   and CRs)
   std::vector<std::string> quantity_list =
     EnzoCenteredFieldRegistry::get_registered_quantities(true, true);
 
@@ -51,7 +96,7 @@ void EnzoEOSIdeal::primitive_from_integration
     const CelloView<enzo_float, 3> prim_array = primitive_map.at(key);
 
 #ifdef DEBUG_MATCHING_ARRAY_SHAPES
-    ASSERT6("EnzoEOSIdeal::primitive_from_integration",
+    ASSERT6("EnzoPhysicsFluidProps::primitive_from_integration",
             ("The array being copied from integration_map has shape "
              "(%d,%d,%d), while the destination array has shape (%d,%d,%d). "
              "They should be the same."),
@@ -91,11 +136,9 @@ void EnzoEOSIdeal::primitive_from_integration
                             stale_depth, ignore_grackle);
 }
 
-
-
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::pressure_from_integration
+void EnzoPhysicsFluidProps::pressure_from_integration
 (const EnzoEFltArrayMap &integration_map, const EFlt3DArray &pressure,
  const int stale_depth, const bool ignore_grackle) const
 {
@@ -104,18 +147,18 @@ void EnzoEOSIdeal::pressure_from_integration
                     integration_map.contains("bfield_y") ||
                     integration_map.contains("bfield_z"));
 
+  const bool idual = this->dual_energy_config().any_enabled();
+
   EnzoComputePressure::compute_pressure(EnzoFieldAdaptor(integration_map),
-                                        pressure, mhd,
-                                        this->uses_dual_energy_formalism(),
-                                        get_gamma(), stale_depth,
-                                        ignore_grackle);
+                                        pressure, mhd, idual, this->gamma(),
+                                        stale_depth, ignore_grackle);
 }
 
 //----------------------------------------------------------------------
 
 // based on the enzo's hydro_rk implementation of synchronization (found in the
 // Grid_UpdateMHD.C file)
-void EnzoEOSIdeal::apply_floor_to_energy_and_sync
+void EnzoPhysicsFluidProps::apply_floor_to_energy_and_sync
 (EnzoEFltArrayMap &integration_map, const int stale_depth) const
 {
 
@@ -145,12 +188,30 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   //   the Grackle routine), you'll recover a value smaller than the pressure
   //   floor.
 
-  const bool idual = this->uses_dual_energy_formalism();
+  // this method does nothing for a barotropic eos
+  if (this->has_barotropic_eos()) { return; }
+
+  const EnzoDualEnergyConfig& de_config = this->dual_energy_config();
+
+  const bool idual = de_config.any_enabled();
+
+  if (idual && !de_config.modern_formulation()){
+    ERROR("EnzoEOSIdeal::apply_floor_to_energy_and_sync",
+          "The current implementation only works when the dual energy "
+          "formalism is disabled or uses the \"modern formulation\"");
+  }
+
+  // retrieve the value of eta (if applicable)
+  enzo_float tmp_eta = 0.0; // temporary variable
+  de_config.modern_formulation(&tmp_eta);
+  const double eta = tmp_eta;
+
   const bool mag = (integration_map.contains("bfield_x") ||
                     integration_map.contains("bfield_y") ||
                     integration_map.contains("bfield_z"));
-  // in hydro_rk, eta was set equal to eta1 (it didn't use eta2 at all)
-  const double eta = dual_energy_formalism_eta_;
+
+  // historical context (in case we need to look back at the original code):
+  // In enzo-dev's hydro_rk, eta was set equal to eta1 (it didn't ever use eta2)
 
   const EFlt3DArray etot = integration_map.at("total_energy");
   const EFlt3DArray eint =
@@ -169,9 +230,9 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
   const RdOnlyEFlt3DArray bz = (mag) ?
     RdOnlyEFlt3DArray(integration_map.at("bfield_z")) : RdOnlyEFlt3DArray();
 
-  float ggm1 = get_gamma()*(get_gamma() - 1.);
-  enzo_float pressure_floor = get_pressure_floor();
-  enzo_float inv_gm1 = 1./(get_gamma()-1.);
+  float ggm1 = this->gamma()*(this->gamma() - 1.);
+  enzo_float pressure_floor = this->fluid_floor_config().pressure();
+  enzo_float inv_gm1 = 1./(this->gamma()-1.);
 
   // a requirement for an element of the internal energy field, cur_eint,
   // to be updated to the value computed from the total energy field, eint_1,
@@ -213,15 +274,14 @@ void EnzoEOSIdeal::apply_floor_to_energy_and_sync
 	       (eint_1 > half_factor*cur_eint) ){
 	    cur_eint = eint_1;
 	  }
-	  cur_eint = EnzoEquationOfState::apply_floor(cur_eint, eint_floor);
+	  cur_eint = enzo_utils::apply_floor(cur_eint, eint_floor);
 
 	  eint(iz,iy,ix) = cur_eint;
 	  etot(iz,iy,ix) = cur_eint + non_thermal_e;
 	} else {
 
 	  enzo_float etot_floor = eint_floor + non_thermal_e;
-	  etot(iz,iy,ix) = EnzoEquationOfState::apply_floor(etot(iz,iy,ix),
-							    etot_floor);
+	  etot(iz,iy,ix) = enzo_utils::apply_floor(etot(iz,iy,ix), etot_floor);
 	}
       }
     }

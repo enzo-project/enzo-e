@@ -39,7 +39,7 @@ struct EinfeldtWavespeed
   /// robust method and recommend it in most cases
 
   using LUT = EnzoRiemannLUT<inputLUT>;
-  using EOSStructT = EOSStructIdeal;
+  using EOSStructT = EnzoEOSIdeal;
 
   FORCE_INLINE void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
                                const lutarray<LUT> Ul, const lutarray<LUT> Ur,
@@ -188,7 +188,7 @@ struct DavisWavespeed
 public:
 
   using LUT = EnzoRiemannLUT<inputLUT>;
-  using EOSStructT = EOSStructIdeal;
+  using EOSStructT = EnzoEOSIdeal;
 
   void operator()(const lutarray<LUT> wl, const lutarray<LUT> wr,
                   const lutarray<LUT> Ul, const lutarray<LUT> Ur,

@@ -24,7 +24,7 @@ struct HLLCKernel
 public: // typedefs
   using WaveSpeedFunctor = EinfeldtWavespeed<HydroLUT>;
   using LUT = typename WaveSpeedFunctor::LUT;
-  using EOSStructT = EOSStructIdeal;
+  using EOSStructT = EnzoEOSIdeal;
 
 public: // fields
   const KernelConfig<EOSStructT> config;
