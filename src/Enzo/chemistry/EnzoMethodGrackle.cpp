@@ -484,7 +484,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 void EnzoMethodGrackle::compute_ ( Block * block) throw()
 {
   const EnzoConfig * enzo_config = enzo::config();
-  if (block->cycle() == enzo_config->initial_cycle) {
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     bool nohydro = ( (enzo::problem()->method("ppm") == nullptr) |
                      (enzo::problem()->method("mhd_vlct") == nullptr) |
                      (enzo::problem()->method("ppml") == nullptr) );
