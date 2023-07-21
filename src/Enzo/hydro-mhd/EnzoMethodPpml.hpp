@@ -40,6 +40,15 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) throw();
 
+private:
+
+  /// This method does most of the heavy-lifting
+  ///
+  /// @note
+  /// This is only a static method for historical reasons. Feel free to better
+  /// integrate this with the rest of the class
+  static int SolveMHDEquations( EnzoBlock& block, enzo_float dt );
+
 protected: // interface
 
   bool comoving_coordinates_;
