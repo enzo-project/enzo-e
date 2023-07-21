@@ -260,7 +260,6 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 
   /* Compute the pressure. */
 
-  const int in = cello::index_static();
   enzo_float gamma = enzo::fluid_props()->gamma();
 
   EnzoComputePressure compute_pressure(gamma, comoving_coordinates_);
