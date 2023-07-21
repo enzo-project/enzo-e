@@ -26,7 +26,7 @@ The checkpoint-restart tests consist of 4 steps:
 The testing machinery has two major limitations:
 
 1. it generally requires the usage of incomplete parameter files (the test machinery fills in some missing information as it goes)
-2. it makes enforces different assumptions about what should be contained inside of a parameter file when testing the scalable-checkpoint approach and when testing the older Charm++-approach.
+2. it makes different assumptions about what should be contained inside of a parameter file when testing the scalable-checkpoint approach and when testing the older Charm++-approach.
 
 The first limitation can be somewhat mitigated through the use of our `tools/ckpt_restart_test.py` script.
 

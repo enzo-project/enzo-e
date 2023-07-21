@@ -9,7 +9,7 @@ simulation is run with two versions of ``enzo-e`` and their results are compared
 This is useful for testing problems with no analytical solution or generally
 verifying that results from commonly run simulations don't drift.
 
-It is also useful for testing property of simulation runs beyond the exit-time/cycle of the simulation.
+It is also useful for testing properties of simulation runs beyond the exit-time/cycle of the simulation.
 (While such tests do exist in the ctest-framework, they often involve more boiler-plate code).
 
 `pytest <https://docs.pytest.org/>`__ is a Python-based framework for detecting
@@ -44,7 +44,7 @@ other useful answer testing functionality are located in the source in
 `test/answer_tests/answer_testing.py`. All answer tests are located in the
 other files within the `test/answer_tests` directory.
 
-Some other functionallity, that may be reused in other unrelated scripts provided in the Enzo-E repository, are provided in the ``test_utils`` subdirectory.
+Some other functionality, that may be reused in other unrelated scripts provided in the Enzo-E repository, is provided in the ``test_utils`` subdirectory.
 
 Running the Answer Test Suite
 -----------------------------
