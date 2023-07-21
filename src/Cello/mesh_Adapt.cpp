@@ -395,7 +395,6 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
                  ia3[1],it3[1],
                  ia3[2],it3[2]);
       }
-      //const int l = 1 << (max_level_ - info.index_.level());
       fprintf (fp,"%s   %d %s [%d %d] S%d C%d\n",
                 prefix.c_str(),i,neighbor_block,
                 info.level_min_,

@@ -399,7 +399,6 @@ void MethodOutput::compute_done (Block * block)
 void Block::r_method_output_done(CkReductionMsg *msg)
 {
   delete msg;
-  //MethodOutput * method = static_cast<MethodOutput*> (this->method());
   this->compute_done();
 }
 
