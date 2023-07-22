@@ -281,8 +281,6 @@ public: // interface
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
 
-      // EnzoMethodHeat
-      method_heat_alpha(0.0),
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -464,7 +462,6 @@ protected: // methods
   void read_method_feedback_(Parameters *);
   void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
-  void read_method_heat_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_star_maker_(Parameters *);
@@ -750,9 +747,6 @@ public: // attributes
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
-
-  /// EnzoMethodHeat
-  double                     method_heat_alpha;
 
   /// EnzoMethodHydro
   std::string                method_hydro_method;

@@ -20,12 +20,11 @@ class EnzoMethodHeat : public Method {
 public: // interface
 
   /// Create a new EnzoMethodHeat object
-  EnzoMethodHeat(double alpha, double courant);
+  EnzoMethodHeat(ParameterAccessor p);
 
   EnzoMethodHeat()
     : Method(),
-      alpha_(0.0),
-      courant_(0.0)
+      alpha_(0.0)
   { }
 
   /// Charm++ PUP::able declarations
@@ -34,8 +33,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodHeat (CkMigrateMessage *m)
     : Method (m),
-      alpha_(0.0),
-      courant_(0.0)
+      alpha_(0.0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -58,9 +56,6 @@ protected: // attributes
 
   /// Thermal diffusivity
   double alpha_;
-
-  /// Courant safety number
-  double courant_;
 };
 
 #endif /* ENZO_ENZO_METHOD_HEAT_HPP */

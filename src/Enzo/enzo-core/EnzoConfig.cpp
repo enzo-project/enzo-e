@@ -221,8 +221,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_bb_test_nominal_sound_speed(0.0),
   initial_bb_test_angular_rotation_velocity(0.0),
   initial_bb_test_external_density(0.0),
-  // EnzoMethodHeat
-  method_heat_alpha(0.0),
   // EnzoMethodHydro
   method_hydro_method(""),
   method_hydro_dual_energy(false),
@@ -614,8 +612,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_bb_test_angular_rotation_velocity;
   p | initial_bb_test_external_density;
 
-  p | method_heat_alpha;
-
   p | method_hydro_method;
   p | method_hydro_dual_energy;
   p | method_hydro_dual_energy_eta_1;
@@ -810,7 +806,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_feedback_(p);
   read_method_grackle_(p);
   read_method_gravity_(p);
-  read_method_heat_(p);
   read_method_merge_sinks_(p);
   read_method_ppm_(p);
   read_method_m1_closure_(p);
@@ -1905,14 +1900,6 @@ void EnzoConfig::read_method_check_(Parameters * p)
     }
   }
   method_check_monitor_iter = p->value_integer("monitor_iter",0);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_heat_(Parameters * p)
-{
-  method_heat_alpha = p->value_float
-    ("Method:heat:alpha",1.0);
 }
 
 //----------------------------------------------------------------------

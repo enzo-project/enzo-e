@@ -575,6 +575,14 @@ Method * EnzoProblem::create_method_
 {
   Method * method = 0;
 
+  // historically, this method would always call method->set_courant after
+  // building a new method object. But, with this new p_accessor approach, each
+  // method objects should opt out of this approach (so that they can set
+  // appropriate default courant factors)
+  // - in cases where the courant factor is not used, we may not explicitly set
+  //   this variable to true (since it doesn't really matter)
+  bool skip_auto_courant = false;
+
   // move creation of p_accessor up the call stack?
   ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
   Parameters* parameters = cello::simulation()->parameters();
@@ -619,7 +627,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "ppml") {
 
-    method = new EnzoMethodPpml;
+    method = new EnzoMethodPpml(p_accessor);
+    skip_auto_courant = true;
 
   } else if (name == "pm_deposit") {
 
@@ -631,9 +640,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "heat") {
 
-    method = new EnzoMethodHeat
-      (enzo_config->method_heat_alpha,
-       config->method_courant[index_method]);
+    method = new EnzoMethodHeat(p_accessor);
+    skip_auto_courant = true;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -816,7 +824,9 @@ Method * EnzoProblem::create_method_
   if (method) {
 
     // set the method's courant safety factor
-    method->set_courant(config->method_courant[index_method]);
+    if (!skip_auto_courant){
+      method->set_courant(config->method_courant[index_method]);
+    }
 
     ASSERT2("EnzoProblem::create_method",
 	    "Method created %s does not match method requested %s",
