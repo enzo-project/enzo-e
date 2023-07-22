@@ -269,8 +269,6 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
-  
-  sf_minimum_level_ = enzo_config->method_star_maker_min_level;
 
   // previously a parameter was parsed called "Method:feedback:min_level",
   // but that never got used!
@@ -351,7 +349,6 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p | sf_minimum_level_;
   p | supernovae_;
   p | unrestricted_sn_;
   p | stellar_winds_;
@@ -1546,11 +1543,15 @@ double EnzoMethodFeedbackSTARSS::timestep (Block * block) throw()
   // dt < star_lifetime (or something like that), especially if
   // important things happen throughout the star's lifetime.
   EnzoUnits * enzo_units = enzo::units();
-  const EnzoConfig * enzo_config = enzo::config();
+
+  EnzoMethodStarMaker* starmaker_method =
+    (EnzoMethodStarMaker*)(enzo::problem()->method("star_maker"));
+  ASSERT("EnzoMethodFeedbackSTARSS::timestep",
+         "requires \"star_maker\" method", starmaker_method != nullptr);
 
   double dtStar = std::numeric_limits<double>::max();
-  if (block->level() >= sf_minimum_level_){
-    const double pSNmax = 0.0005408 * enzo_config->method_star_maker_minimum_star_mass *
+  if (block->level() >= starmaker_method->sf_minimum_level()){
+    const double pSNmax = 0.0005408 * starmaker_method->minimum_star_mass() *
                           block->dt() * enzo_units->time() / enzo_constants::Myr_s * 1.25;
     if (pSNmax > 1.0) dtStar = block->dt() * 1.0 / pSNmax;
   }

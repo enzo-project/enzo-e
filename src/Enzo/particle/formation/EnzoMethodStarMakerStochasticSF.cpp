@@ -19,8 +19,8 @@
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerStochasticSF::EnzoMethodStarMakerStochasticSF
-()
-  : EnzoMethodStarMaker()
+(ParameterAccessor& p)
+  : EnzoMethodStarMaker(p)
 {
   // To Do: Make the seed an input parameter
   srand(time(NULL)); // need randum number generator for later

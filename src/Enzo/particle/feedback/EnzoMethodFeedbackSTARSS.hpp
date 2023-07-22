@@ -122,10 +122,6 @@ protected: // methods
 
 protected:
 
-  /// minimum level for star formation (this depends on configuration of other
-  /// methods)
-  int sf_minimum_level_;
-
   // configuration parameters (these are directly set by the user)
   bool supernovae_;
   bool unrestricted_sn_;

@@ -19,17 +19,15 @@
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
-()
-  : EnzoMethodStarMaker()
+(ParameterAccessor& p)
+  : EnzoMethodStarMaker(p),
+    min_level_(p.value_integer("min_level",0)),
+    turn_off_probability_(p.value_logical("turn_off_probability",false))
 {
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
   refresh->add_all_particles();
-
-  ParticleDescr * particle_descr = cello::particle_descr();
-
-  return;
 }
 
 //-------------------------------------------------------------------
@@ -42,7 +40,8 @@ void EnzoMethodStarMakerSTARSS::pup (PUP::er &p)
 
   EnzoMethodStarMaker::pup(p); // call parent class pup
 
-  return;
+  p | min_level_;
+  p | turn_off_probability_;
 }
 
 //------------------------------------------------------------------
@@ -61,7 +60,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   // Are we at the highest level?
   // Can we form stars at this level?
-  if ( (! block->is_leaf() ) || (block->level() < enzo_config->method_star_maker_min_level) ){
+  if ( (! block->is_leaf() ) || (block->level() < this->min_level_) ){
     block->compute_done();
     return;
   }
@@ -355,8 +354,8 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
                          per cell, it will break your sims! - AIW
        */
         double divisor = std::max(1.0, tff * tunit/enzo_constants::Myr_s);
-        double maximum_star_mass = enzo_config->method_star_maker_maximum_star_mass;
-        double minimum_star_mass = enzo_config->method_star_maker_minimum_star_mass;
+        double maximum_star_mass = this->star_particle_max_mass_;
+        double minimum_star_mass = this->minimum_star_mass();
          
         if (maximum_star_mass < 0){
             maximum_star_mass = this->maximum_star_fraction_ * cell_mass * munit_solar; //Msun
@@ -371,7 +370,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double p_form = 1.0 - std::exp(-bulk_SFR*dt*(tunit/enzo_constants::Myr_s)/
                 (this->maximum_star_fraction_*cell_mass*munit_solar));
 
-        if (enzo_config->method_star_maker_turn_off_probability) p_form = 1.0;
+        if (this->turn_off_probability_) p_form = 1.0;
 
         double random = double(mt()) / double(mt.max()); 
 

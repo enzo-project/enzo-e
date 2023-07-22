@@ -302,14 +302,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   : Method()
 {
   cello::particle_descr()->check_particle_attribute("star","mass");
-  const EnzoConfig * enzo_config = enzo::config();
-  EnzoUnits * enzo_units = enzo::units();
 
-  // AJE: This was the old way this was done:
-  // Initialize default refresh object
-  // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-  //                           enzo_sync_id_method_feedback);
-  // refresh(ir)->add_all_fields();
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
@@ -405,8 +398,12 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 {
 
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   Particle particle = enzo_block->data()->particle();
+
+  EnzoMethodStarMaker* star_maker_method =
+    (EnzoMethodStarMaker*)(enzo::problem()->method("star_maker"));
+  ASSERT("EnzoMethodDistributedFeedback::compute_",
+         "requires \"star_maker\" method", star_maker_method != nullptr);
 
   EnzoUnits * enzo_units = enzo::units();
 
@@ -552,7 +549,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           const float expected_sn_s99 = 10616.955572;
           // Number of expected SNe for the minimum star particle mass
           const float lambda         = expected_sn_s99 * 1.0E-6 *
-                                       enzo_config->method_star_maker_minimum_star_mass;
+                                       star_maker_method->minimum_star_mass();
 
 
 
@@ -687,7 +684,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
      //          This ejection rate is correct for the 10^6 solar mass 'cluster'
      //           used to compute these rates with starburst 99.  Reduce to account
      //           for the size of the star particle
-        wind_mass = wind_mass * enzo_config->method_star_maker_minimum_star_mass * 1.0E-6;
+        wind_mass = wind_mass * star_maker_method->minimum_star_mass() * 1.0E-6;
         wind_mass = wind_mass / enzo_constants::yr_s; // in Msun / s
         wind_mass = (wind_mass * enzo_units->time()) * enzo_block->dt; // Msun this timestep
 
@@ -801,7 +798,6 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   if (s49_tot <= 0) return;
 
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
   Field field = block->data()->field();

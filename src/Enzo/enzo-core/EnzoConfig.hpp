@@ -272,29 +272,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-
-      /// EnzoMethodStarMaker
-      method_star_maker_flavor(""),
-      method_star_maker_use_density_threshold(false),           // check above density threshold before SF
-      method_star_maker_use_velocity_divergence(false),         // check for converging flow before SF
-      method_star_maker_use_dynamical_time(false),              //
-      method_star_maker_use_altAlpha(false), // alternate virial parameter calculation
-      method_star_maker_use_cooling_time(false), 
-      method_star_maker_use_self_gravitating(false),           //
-      method_star_maker_use_h2_self_shielding(false),
-      method_star_maker_use_jeans_mass(false),
-      method_star_maker_use_overdensity_threshold(false),
-      method_star_maker_use_critical_metallicity(false),
-      method_star_maker_use_temperature_threshold(false),
-      method_star_maker_critical_metallicity(0.0),
-      method_star_maker_temperature_threshold(1.0E4),
-      method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
-      method_star_maker_maximum_mass_fraction(0.05),            // maximum cell mass fraction to convert to stars
-      method_star_maker_efficiency(0.01),            // star maker efficiency
-      method_star_maker_minimum_star_mass(0.0),    // minium star particle mass in solar masses
-      method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
-      method_star_maker_min_level(0), // minimum refinement level for star formation
-      method_star_maker_turn_off_probability(false),
       // EnzoMethodM1Closure
       method_m1_closure(false),
       method_m1_closure_N_groups(1), // # of frequency bins
@@ -437,7 +414,6 @@ protected: // methods
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
   void read_method_ppm_(Parameters *);
-  void read_method_star_maker_(Parameters *);
   void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_vlct_(Parameters *);
@@ -733,32 +709,6 @@ public: // attributes
   bool                       method_hydro_reconstruct_conservative;
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
- 
-  /// EnzoMethodStarMaker
-
-  std::string               method_star_maker_flavor;
-  bool                      method_star_maker_use_altAlpha;
-  bool                      method_star_maker_use_density_threshold;
-  bool                      method_star_maker_use_overdensity_threshold;
-  bool                      method_star_maker_use_temperature_threshold;
-  bool                      method_star_maker_use_critical_metallicity;
-  bool                      method_star_maker_use_velocity_divergence;
-  bool                      method_star_maker_use_cooling_time;
-  bool                      method_star_maker_use_dynamical_time;
-  bool                      method_star_maker_use_h2_self_shielding;
-  bool                      method_star_maker_use_jeans_mass;
-  bool                      method_star_maker_use_self_gravitating;
-  double                    method_star_maker_number_density_threshold;
-  double                    method_star_maker_overdensity_threshold;
-  double                    method_star_maker_temperature_threshold;
-  double                    method_star_maker_critical_metallicity;
-  double                    method_star_maker_maximum_mass_fraction;
-  double                    method_star_maker_efficiency;
-  double                    method_star_maker_minimum_star_mass;
-  double                    method_star_maker_maximum_star_mass;
-  int                       method_star_maker_min_level;
-  bool                      method_star_maker_turn_off_probability;
-
 
   /// EnzoMethodM1Closure
   

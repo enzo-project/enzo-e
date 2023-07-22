@@ -19,18 +19,10 @@
 
 //-------------------------------------------------------------------
 
-EnzoMethodStarMaker::EnzoMethodStarMaker
-()
+EnzoMethodStarMaker::EnzoMethodStarMaker(ParameterAccessor& p)
   : Method()
 {
   cello::particle_descr()->check_particle_attribute("star","mass");
-
-  const EnzoConfig * enzo_config = enzo::config();
-  // AJE: This was the old way this was done
-  // Initialize default Refresh object
-  // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-  //                           enzo_sync_id_method_star_maker);
-  // refresh(ir)->add_all_fields();
 
   cello::simulation()->refresh_set_name(ir_post_,name());
 
@@ -38,27 +30,30 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
 
   refresh->add_all_fields();
 
-  // Copy over parameters from config to local names here for convenience
-  use_density_threshold_     = enzo_config->method_star_maker_use_density_threshold;
-  use_velocity_divergence_   = enzo_config->method_star_maker_use_velocity_divergence;
-  use_self_gravitating_      = enzo_config->method_star_maker_use_self_gravitating;
-  use_altAlpha_              = enzo_config->method_star_maker_use_altAlpha;
-  use_h2_self_shielding_     = enzo_config->method_star_maker_use_h2_self_shielding;
-  use_jeans_mass_            = enzo_config->method_star_maker_use_jeans_mass;
-  number_density_threshold_  = enzo_config->method_star_maker_number_density_threshold;
-  efficiency_                = enzo_config->method_star_maker_efficiency;
-  maximum_star_fraction_     = enzo_config->method_star_maker_maximum_mass_fraction;
-  star_particle_min_mass_    = enzo_config->method_star_maker_minimum_star_mass;
-  star_particle_max_mass_    = enzo_config->method_star_maker_maximum_star_mass;
-  use_dynamical_time_        = enzo_config->method_star_maker_use_dynamical_time;
+  // parameter parsing:
+  use_density_threshold_     = p.value_logical("use_density_threshold",false);
+  use_velocity_divergence_   = p.value_logical("use_velocity_divergence",false);
+  use_self_gravitating_      = p.value_logical("use_self_gravitating", false);
+  use_altAlpha_              = p.value_logical("use_altAlpha",false);
+  use_h2_self_shielding_     = p.value_logical("use_h2_self_shielding", false);
+  use_jeans_mass_            = p.value_logical("use_jeans_mass", false);
+  number_density_threshold_  = p.value_float("number_density_threshold",0.0);
+  efficiency_                = p.value_float("efficiency",0.01);
+  maximum_star_fraction_     = p.value_float("maximum_mass_fraction",0.05);
+  star_particle_min_mass_    = p.value_float("minimum_star_mass",0.0);
+  star_particle_max_mass_    = p.value_float("maximum_star_mass",-1.0);
+  use_dynamical_time_        = p.value_logical("use_dynamical_time",false);
 
-  use_overdensity_threshold_ = enzo_config->method_star_maker_use_overdensity_threshold;
-  overdensity_threshold_     = enzo_config->method_star_maker_overdensity_threshold;
-  use_critical_metallicity_  = enzo_config->method_star_maker_use_critical_metallicity;
-  critical_metallicity_      = enzo_config->method_star_maker_critical_metallicity;
-  use_cooling_time_          = enzo_config->method_star_maker_use_cooling_time;
-  use_temperature_threshold_ = enzo_config->method_star_maker_use_temperature_threshold;
-  temperature_threshold_     = enzo_config->method_star_maker_temperature_threshold;
+  use_overdensity_threshold_ = p.value_logical("use_overdensity_threshold",
+                                               false);
+  overdensity_threshold_     = p.value_float("overdensity_threshold",0.0);
+  use_critical_metallicity_  = p.value_logical("use_critical_metallicity",
+                                               false);
+  critical_metallicity_      = p.value_float("critical_metallicity",0.0);
+  use_cooling_time_          = p.value_logical("use_cooling_time",false);
+  use_temperature_threshold_ = p.value_logical("use_temperature_threshold",
+                                               false);
+  temperature_threshold_     = p.value_float("temperature_threshold",1.0E4);
 }
 
 //-------------------------------------------------------------------
@@ -73,19 +68,23 @@ void EnzoMethodStarMaker::pup (PUP::er &p)
 
   p | use_density_threshold_;
   p | use_velocity_divergence_;
+  p | use_self_gravitating_;
+  p | use_altAlpha_;
+  p | use_h2_self_shielding_;
+  p | use_jeans_mass_;
+  p | use_overdensity_threshold_;
+  p | use_critical_metallicity_;
+  p | use_temperature_threshold_;
+  p | use_cooling_time_;
+  p | use_dynamical_time_;
+  p | overdensity_threshold_;
+  p | critical_metallicity_;
   p | number_density_threshold_;
   p | efficiency_;
   p | maximum_star_fraction_;
   p | star_particle_min_mass_;
   p | star_particle_max_mass_;
-  p | use_self_gravitating_;
-  p | use_h2_self_shielding_;
-  p | use_jeans_mass_;
-  p | use_cooling_time_;
-  p | use_overdensity_threshold_;
-  p | critical_metallicity_;
-
-  return;
+  p | temperature_threshold_;
 }
 
 //------------------------------------------------------------------

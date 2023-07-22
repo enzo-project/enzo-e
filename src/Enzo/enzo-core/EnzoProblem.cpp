@@ -725,14 +725,19 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "star_maker") {
 
+    // TODO: maybe make a factory method, EnzoMethodStarMaker::from_parameters,
+    // that parses the feedback flavor and creates the appropriate subclass.
+
+    // we are reading Method:star_maker:flavor
+    std::string flavor = p_accessor.value_string("flavor", "stochastic");
+
     // should generalize this to enable multiple maker types
-    if (enzo_config->method_star_maker_flavor == "stochastic"){
-      method = new EnzoMethodStarMakerStochasticSF();
-    } else if (enzo_config->method_star_maker_flavor == "STARSS" ||
-               enzo_config->method_star_maker_flavor == "starss") {
-      method = new EnzoMethodStarMakerSTARSS();
+    if (flavor == "stochastic"){
+      method = new EnzoMethodStarMakerStochasticSF(p_accessor);
+    } else if ((flavor == "STARSS") || (flavor == "starss")) {
+      method = new EnzoMethodStarMakerSTARSS(p_accessor);
     } else{ // does not do anything
-      method = new EnzoMethodStarMaker();
+      method = new EnzoMethodStarMaker(p_accessor);
     }
 
   } else if (name == "feedback") {
