@@ -91,7 +91,7 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   const enzo_float gamma = enzo::fluid_props()->gamma();
 
-  if (enzo::config()->method_grackle_use_grackle){
+  if (enzo::grackle_method() != nullptr){
 
 #ifdef CONFIG_USE_GRACKLE
     const EnzoMethodGrackle* grackle_method = enzo::grackle_method();

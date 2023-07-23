@@ -108,7 +108,7 @@ void EnzoComputePressure::compute_pressure
  ) throw()
 {
 
-  if (enzo::config()->method_grackle_use_grackle & !ignore_grackle){
+  if ((enzo::grackle_method() != nullptr) & !ignore_grackle){
 #ifdef CONFIG_USE_GRACKLE
     // the following assertion is not strictly necessary (the problem will be
     // caught later in EnzoMethodGrackle), but this is more informative...

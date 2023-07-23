@@ -340,11 +340,6 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
-      // EnzoMethodGrackle
-      method_grackle_use_grackle(false),
-      method_grackle_chemistry(),
-      method_grackle_use_cooling_timestep(false),
-      method_grackle_radiation_redshift(-1.0),
       // EnzoMethodGravity
       method_gravity_grav_const(0.0),
       method_gravity_solver(""),
@@ -460,7 +455,6 @@ protected: // methods
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
   void read_method_feedback_(Parameters *);
-  void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_ppm_(Parameters *);
@@ -838,12 +832,6 @@ public: // attributes
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
-
-  /// EnzoMethodGrackle
-  bool                       method_grackle_use_grackle;
-  GrackleChemistryData       method_grackle_chemistry;
-  bool                       method_grackle_use_cooling_timestep;
-  double                     method_grackle_radiation_redshift;
 
   /// EnzoMethodGravity
   double                     method_gravity_grav_const;

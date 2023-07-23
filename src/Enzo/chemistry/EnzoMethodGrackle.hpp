@@ -47,6 +47,16 @@ class EnzoMethodGrackle : public Method {
 
 public: // interface
 
+  /// factory method
+  ///
+  /// @note
+  /// In the future, this should be consolidated with the main constructor.
+  /// This only exists as a separate method to avoid merge conflicts
+  static EnzoMethodGrackle* from_parameters
+  (ParameterAccessor p,
+   const double physics_cosmology_initial_redshift,
+   const double time);
+
   /// Create a new EnzoMethodGrackle object
   EnzoMethodGrackle(GrackleChemistryData my_chemistry,
                     bool use_cooling_timestep,

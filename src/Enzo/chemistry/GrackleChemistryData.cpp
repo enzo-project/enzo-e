@@ -442,7 +442,7 @@ bool GrackleChemistryData::try_set_str_(const std::string& field,
 //----------------------------------------------------------------------
 
 GrackleChemistryData GrackleChemistryData::from_parameters
-(Parameters& p, const std::string& parameter_group,
+(ParameterAccessor p,
  const std::unordered_set<std::string>& forbid_leaf_names,
  const std::unordered_set<std::string>& ignore_leaf_names) noexcept
 {
@@ -450,13 +450,13 @@ GrackleChemistryData GrackleChemistryData::from_parameters
   ERROR("GrackleChemistryData::from_parameters", "Grackle isn't linked");
 #else
 
-  std::size_t pgrp_len = parameter_group.size();
+  const std::string& parameter_group_ = p.get_root_parpath();
+  std::size_t pgrp_len = parameter_group_.size();
   ASSERT("GrackleChemistryData::from_parameters", "parameter_group is \"\"",
          pgrp_len > 0);
-  const std::string config_name_prefix = (parameter_group[pgrp_len - 1] == ':')
-    ? parameter_group : parameter_group + ':';
-  const str_vec_t leaf_parameter_names
-    = p.leaf_parameter_names(config_name_prefix);
+  const std::string config_name_prefix = (parameter_group_[pgrp_len-1] == ':')
+    ? parameter_group_ : parameter_group_ + ':';
+  const str_vec_t leaf_parameter_names = p.leaf_parameter_names();
 
   // ToDo: check that there aren't any groups within parameter_group
 
@@ -485,9 +485,9 @@ GrackleChemistryData GrackleChemistryData::from_parameters
   GrackleChemistryData out;
 
   for (const std::string& name : leaf_parameter_names){
-    std::string full_conf_name = config_name_prefix + name;
 
     if (forbid_leaf_names.find(name) != forbid_leaf_names.end()) {
+      const std::string full_conf_name = config_name_prefix + name;
       ERROR1("GrackleChemistryData::from_parameters",
              "The config file is forbidden from having a parameter called %s",
              full_conf_name.c_str());
@@ -495,24 +495,24 @@ GrackleChemistryData GrackleChemistryData::from_parameters
       continue;
     }
 
-    switch (p.type(full_conf_name)){
+    switch (p.type(name)){
       case parameter_logical: {
-        bool value = p.value_logical(full_conf_name);
+        bool value = p.value_logical(name);
         if (out.try_set<int>(name, value)) {break;}
         general_param_err(name, "logical");
       }
       case parameter_integer: {
-        int value = p.value_integer(full_conf_name);
+        int value = p.value_integer(name);
         if (out.try_set<int>(name, value)) {break;}
         general_param_err(name, "integer");
       }
       case parameter_float: {
-        double value = p.value_float(full_conf_name);
+        double value = p.value_float(name);
         if (out.try_set<double>(name, value)) {break;}
         general_param_err(name, "float");
       }
       case parameter_string: {
-        std::string value = p.value_string(full_conf_name);
+        std::string value = p.value_string(name);
         if (out.try_set<std::string>(name,value)) {break;}
         general_param_err(name, "string");
       }
