@@ -943,6 +943,11 @@ Method * Problem::create_method_
 
     method = new MethodOrderMorton(config->mesh_min_level);
 
+  } else if (name == "order") {
+
+    method = new MethodOrder(config->method_order_type[index_method],
+                             config->mesh_min_level);
+
   } else if (name == "refresh") {
 
     method = new MethodRefresh

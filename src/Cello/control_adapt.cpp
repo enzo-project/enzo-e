@@ -204,9 +204,6 @@ void Block::adapt_update_()
 {
   TRACE_ADAPT("adapt_update_",this);
   if (index_.is_root() && (adapt_changed_ != 0)) {
-#ifdef TRACE_DONE_INSERTING
-    CkPrintf ("TRACE_DONE_INSERTING\n");
-#endif
     thisProxy.doneInserting();
   }
   adapt_end_();

@@ -38,7 +38,7 @@ class Block : public CBase_Block
 public: // interface
 
   /// create a Block whose MsgRefine is on the creating process
-  Block ( process_type ip_source, MsgType msg_type );
+  Block ( MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
 
@@ -254,6 +254,7 @@ public: // interface
   }
 
   void initial_exit_();
+
   void p_initial_exit()
   { initial_exit_(); }
 
@@ -593,8 +594,11 @@ public:
 
   void r_method_order_morton_continue(CkReductionMsg * msg);
   void r_method_order_morton_complete(CkReductionMsg * msg);
-  void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+  void p_method_order_morton_weight(int ic3[3], int count, Index index);
   void p_method_order_morton_index(int index, int count);
+
+  void p_method_order_accum_count (MsgOrder * msg);
+  void p_method_order_accum_index (MsgOrder * msg);
 
   void p_method_output_next (MsgOutput * msg);
   void p_method_output_write (MsgOutput * msg);

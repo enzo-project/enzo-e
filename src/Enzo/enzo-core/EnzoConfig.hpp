@@ -439,7 +439,6 @@ public: // interface
 protected: // methods
 
   void read_adapt_(Parameters *);
-
   void read_field_(Parameters *);
 
   //--------------------
@@ -886,7 +885,6 @@ public: // attributes
   double                     method_background_acceleration_center[3];
   double                     method_background_acceleration_angular_momentum[3];
   bool                       method_background_acceleration_apply_acceleration;
-
 
   /// EnzoMethodPmDeposit
 

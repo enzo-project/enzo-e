@@ -93,7 +93,7 @@ public: // interface
 
   /// Initialize the EnzoBlock chare array
 
-  EnzoBlock ( process_type ip_source, MsgType msg_type );
+  EnzoBlock ( MsgType msg_type );
   /// Initialize EnzoBlock using MsgRefine returned by creating process
   void set_msg_refine(MsgRefine * msg);
   void set_msg_check(EnzoMsgCheck * msg);

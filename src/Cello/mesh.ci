@@ -21,6 +21,7 @@ module mesh {
   readonly int MsgAdapt::counter[CONFIG_NODE_SIZE];
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
+  readonly int MsgOrder::counter[CONFIG_NODE_SIZE];
   readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
@@ -56,6 +57,7 @@ module mesh {
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
   PUPable MethodOrderMorton;
+  PUPable MethodOrder;
   PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
@@ -86,6 +88,7 @@ module mesh {
   message MsgAdapt;
   message MsgCoarsen;
   message MsgInitial;
+  message MsgOrder;
   message MsgOutput;
   message MsgRefine;
   message MsgRefresh;
@@ -93,7 +96,7 @@ module mesh {
 
   array[Index] Block {
 
-    entry Block (process_type ip_source,  MsgType msg_type);
+    entry Block (MsgType msg_type);
     entry void p_set_msg_refine(MsgRefine * msg);
     entry Block();
 
@@ -135,8 +138,11 @@ module mesh {
 
     entry void r_method_order_morton_continue(CkReductionMsg * msg);
     entry void r_method_order_morton_complete(CkReductionMsg * msg);
-    entry void p_method_order_morton_weight(int ic3[3], int weight, Index index);
+    entry void p_method_order_morton_weight(int ic3[3], int count, Index index);
     entry void p_method_order_morton_index(int index, int count);
+
+    entry void p_method_order_accum_count (MsgOrder *);
+    entry void p_method_order_accum_index (MsgOrder *);
 
     entry void p_method_output_next(MsgOutput *);
     entry void p_method_output_write(MsgOutput *);

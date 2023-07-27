@@ -157,8 +157,8 @@ EnzoBlock::EnzoBlock (CkMigrateMessage *m)
   proxy_enzo_simulation[0].p_method_balance_check();
 }
 
-EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
-  : CBase_EnzoBlock (ip_source, msg_type),
+EnzoBlock::EnzoBlock( MsgType msg_type)
+  : CBase_EnzoBlock (msg_type),
     redshift(0.0)
 
 {

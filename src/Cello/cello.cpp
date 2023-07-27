@@ -430,6 +430,11 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
+  int num_children(Block * block)
+  { return block->is_leaf() ? 0 : num_children(); }
+
+  //----------------------------------------------------------------------
+
   size_t num_blocks_process()
   {
     return hierarchy() ? hierarchy()->num_blocks() : 0;

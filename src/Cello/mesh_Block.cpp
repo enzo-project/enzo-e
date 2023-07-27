@@ -36,7 +36,7 @@ const char * phase_name[] = {
 
 // #define TRACE_BLOCK
 
-Block::Block ( process_type ip_source, MsgType msg_type )
+Block::Block ( MsgType msg_type )
   : CBase_Block(),
     data_(NULL),
     child_data_(NULL),

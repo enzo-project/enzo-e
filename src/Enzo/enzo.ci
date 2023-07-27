@@ -184,7 +184,7 @@ module enzo {
   //----------------------------------------------------------------------
   array[Index] EnzoBlock : Block {
 
-    entry EnzoBlock (process_type ip_source, MsgType msg_type);
+    entry EnzoBlock (MsgType msg_type);
 
     entry EnzoBlock();
 
