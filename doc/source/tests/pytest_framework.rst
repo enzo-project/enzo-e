@@ -9,8 +9,8 @@ simulation is run with two versions of ``enzo-e`` and their results are compared
 This is useful for testing problems with no analytical solution or generally
 verifying that results from commonly run simulations don't drift.
 
-It is also useful for testing property of simulation runs beyond the exit-time/cycle of the simulation.
-(While such tests do exist in the ctest-framework, they often involve more boiler-plate code).
+It is also useful in for testing problems that do have analytic solutions (the answer test might quantify how close a simulation result is to the analytic expected solution).
+While such tests do exist in the ctest-framework, they often involve more boiler-plate code.
 
 `pytest <https://docs.pytest.org/>`__ is a Python-based framework for detecting
 and running a series of tests within a source code repository. When running
@@ -121,7 +121,8 @@ First, check out the highest numbered gold standard tag and compile ``enzo-e``.
 
 .. code-block:: bash
 
-   $ git checkout gold-standard-1
+   # in the future, you will need to subsitute 004 for a higher number
+   $ git checkout gold-standard-004
    $ ...compile enzo-e
 
 Then, run the test suite by calling ``pytest`` with the answer test directory (make sure to configure behavior correctly with command-line arguments or environment variables).
