@@ -44,7 +44,7 @@ other useful answer testing functionality are located in the source in
 `test/answer_tests/answer_testing.py`. All answer tests are located in the
 other files within the `test/answer_tests` directory.
 
-Some other functionallity, that may be reused in other unrelated scripts provided in the Enzo-E repository, are provided in the ``test_utils`` subdirectory.
+Some other functionality, that may be reused in other unrelated scripts provided in the Enzo-E repository, are provided in the ``test_utils`` subdirectory.
 
 Running the Answer Test Suite
 -----------------------------
@@ -91,7 +91,7 @@ In cases where both are set, the command line argument is given precedence.
      - points to the build-directory where the target enzo-e binary was built (that binary has the path: BUILD_DIR/bin/enzo-e).
        The path to the charmrun launcher will be inferred from the `BUILD_DIR/CMakeCache.txt` file, but can be overwritten by the ``--charm`` flag or the ``CHARM_PATH`` environment variable.
        This precedence was chosen in case a user causes a change to relevant cached build-variables, but have not rebuilt Enzo-E (i.e. `CMakeCache.txt` may not be valid for the binary).
-       When this flag isn't specified, the test infrastructure searches for the enzo-e binary at ENZOE_ROOT/build/bin/enzo-e, but does'nt try to infer charmrun's location from `CMakeCache.txt`.
+       When this flag isn't specified, the test infrastructure searches for the enzo-e binary at ENZOE_ROOT/build/bin/enzo-e, but doesn't try to infer charmrun's location from `CMakeCache.txt`.
    * - ``--local-dir``
      - ``TEST_RESULTS_DIR``
      - points to a directory in which answers will be stored/loaded
