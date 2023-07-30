@@ -263,6 +263,63 @@ namespace cello {
 
   //---------------------------------------------------------------------- 
 
+  template<>
+  double & scalar<double>(Block * block, int is, int i)
+  {
+    return (block->data()->scalar_data_double()->value
+             (cello::scalar_descr_double(),is)[i]);
+  }
+
+  template<>
+  long double & scalar<long double>(Block * block, int is, int i)
+  {
+    Scalar<long double> scalar
+      (cello::scalar_descr_long_double(), block->data()->scalar_data_long_double());
+    return scalar.value(is)[i];
+  }
+
+  template<>
+  int & scalar<int>(Block * block, int is, int i)
+  {
+    Scalar<int> scalar
+      (cello::scalar_descr_int(), block->data()->scalar_data_int());
+    return scalar.value(is)[i];
+  }
+
+  template<>
+  long long & scalar<long long>(Block * block, int is, int i)
+  {
+    Scalar<long long> scalar
+      (cello::scalar_descr_long_long(), block->data()->scalar_data_long_long());
+    return scalar.value(is)[i];
+  }
+
+  template<>
+  Sync & scalar<Sync>(Block * block, int is, int i)
+  {
+    Scalar<Sync> scalar
+      (cello::scalar_descr_sync(), block->data()->scalar_data_sync());
+    return scalar.value(is)[i];
+  }
+
+  template<>
+  void * & scalar<void *>(Block * block, int is, int i)
+  {
+    Scalar<void *> scalar
+      (cello::scalar_descr_void(), block->data()->scalar_data_void());
+    return scalar.value(is)[i];
+  }
+
+  template<>
+  Index & scalar<Index>(Block * block, int is, int i)
+  {
+    Scalar<Index> scalar
+      (cello::scalar_descr_index(), block->data()->scalar_data_index());
+    return scalar.value(is)[i];
+  }
+
+  //---------------------------------------------------------------------- 
+
   CProxy_Block block_array()
   {
     return cello::hierarchy()->block_array();

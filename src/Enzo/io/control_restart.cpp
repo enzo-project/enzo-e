@@ -17,18 +17,18 @@
 #include "charm_mesh.hpp"
 #include "main.hpp"
 
-#define TRACE_RESTART
+// #define TRACE_RESTART
 
 //--------------------------------------------------
 #ifdef TRACE_RESTART
 #   define TRACE_BLOCK(MSG,BLOCK)                                       \
   {                                                                     \
     Memory * memory = Memory::instance();                               \
-    long long index_order, count_order;                                 \
-    BLOCK->get_order(&index_order, &count_order);                       \
+    long long order_index, order_count;                                 \
+    BLOCK->get_order(&order_index, &order_count);                       \
     CkPrintf ("%d TRACE_RESTART %lld %s  %g %lld\n",                    \
               CkMyPe(),                                                 \
-              index_order,                                              \
+              order_index,                                              \
               std::string(MSG).c_str(),                                 \
               cello::simulation()->timer(),                             \
               EnzoMsgCheck::counter[cello::index_static()]);            \
@@ -317,9 +317,10 @@ void IoEnzoReader::p_create_level (int level)
     int ic3[3];
     index.child(level,ic3,ic3+1,ic3+2);
 
-    long long index_order,count_order;
-    io_block->get_order(&index_order,&count_order);
-    int ip = (long long) CkNumPes()*index_order / count_order;
+    long long order_index,order_count;
+    Index order_next;
+    io_block->get_order(&order_index,&order_count,&order_next);
+    int ip = (long long) CkNumPes()*order_index / order_count;
 
     enzo::block_array()[index_parent].p_restart_refine(ic3,thisIndex,ip);
 

@@ -33,21 +33,20 @@
 
 //----------------------------------------------------------------------
 
-MethodOrder::MethodOrder(std::string type,
-                         int min_level) throw ()
+MethodOrder::MethodOrder(int min_level) throw ()
   : Method(),
     is_index_(-1),
     is_count_(-1),
     is_windex_(-1),
     is_wcount_(-1),
-    is_next_(-1),
     is_count_child_(-1),
     is_wcount_child_(-1),
+    is_next_(-1),
     is_sync_index_(-1),
     is_sync_count_(-1),
     min_level_(min_level)
 {
-
+  std::string type = "morton";
   if (type == "morton") {
     type_ = Type::morton;
   } else {
@@ -56,7 +55,7 @@ MethodOrder::MethodOrder(std::string type,
            type.c_str());
   }
   Refresh * refresh = cello::refresh(ir_post_);
-  cello::simulation()->refresh_set_name(ir_post_,name());
+  cello::simulation()->refresh_set_name(ir_post_,type);
   refresh->add_field("density");
 
   /// Create Scalar data for ordering index
@@ -66,16 +65,16 @@ MethodOrder::MethodOrder(std::string type,
   auto sd_sync = cello::scalar_descr_sync();
   auto sd_d    = cello::scalar_descr_double();
   // output scalars
-  is_index_        = sd_ll->  new_value(name() + ":index"); // block index 0..# participating blocks - 1
-  is_count_        = sd_ll->  new_value(name() + ":count"); // number of participating blocks
-  is_windex_       = sd_d->   new_value(name() + ":windex"); // weighted index
-  is_wcount_       = sd_d->   new_value(name() + ":wcount"); // weighted count
+  is_index_        = sd_ll->  new_value(type + ":index"); // block index 0..# participating blocks - 1
+  is_count_        = sd_ll->  new_value(type + ":count"); // number of participating blocks
+  is_windex_       = sd_d->   new_value(type + ":windex"); // weighted index
+  is_wcount_       = sd_d->   new_value(type + ":wcount"); // weighted count
+  is_next_         = sd_ind-> new_value(type + ":next"); // "next" index 
   // local scalars
-  is_next_         = sd_ind-> new_value(name() + ":next");
-  is_count_child_  = sd_ll->  new_value(name() + ":count_child",n);
-  is_wcount_child_ = sd_d->   new_value(name() + ":wcount_child",n);
-  is_sync_index_   = sd_sync->new_value(name() + ":sync_index");
-  is_sync_count_   = sd_sync->new_value(name() + ":sync_count");
+  is_count_child_  = sd_ll->  new_value(type + ":count_child",n);
+  is_wcount_child_ = sd_d->   new_value(type + ":wcount_child",n);
+  is_sync_index_   = sd_sync->new_value(type + ":sync_index");
+  is_sync_count_   = sd_sync->new_value(type + ":sync_count");
 }
 
 //======================================================================
@@ -87,7 +86,7 @@ void MethodOrder::compute (Block * block) throw()
   int ic3[3];
   block->index().child(block->level(),ic3,ic3+1,ic3+2,min_level_);
   accum_count(block,1,weight,ic3,1 + cello::num_children(block));
-  accum_index(block,0,0,0,0,2);
+  accum_index(block,0,0,0,0,1 + 1);
 }
 
 //----------------------------------------------------------------------
@@ -98,6 +97,7 @@ void MethodOrder::accum_count
   // set sync counter when available
   if (sync_stop != 0) {
     sync_count_(block).set_stop(sync_stop);
+    set_next_(block);
   } else {
     const int i = child_order_(ic3);
     count_child_(block,i) = count;
@@ -172,10 +172,7 @@ void MethodOrder::accum_index
   if (sync_index_(block).next()) {
     TRACE_ORDER_BLOCK("accum_index next",block);
     // create order message and forward to children
-    int index_order = index_(block);
-    double index_worder = windex_(block);
-    const int rank = cello::rank();
-    const int nc = cello::num_children();
+    const int nc = cello::num_children(block);
     int ic3[3];
     index += 1;
     windex += weight_(block);
@@ -218,10 +215,15 @@ void Block::p_method_order_accum_index(MsgOrder * msg)
 void MethodOrder::compute_complete_(Block * block)
 {
   TRACE_ORDER_BLOCK("compute_complete",block);
-  // Update Block's index and count
+
+  // Update Block's order variables
+
   block->set_order(index_(block),count_(block));
-  ASSERT2("compute_complete","index %d is not between 0 and count %d\n",index_(block),count_(block),
-          0 <= index_(block) && index_(block) < count_(block));
+  block->set_order_next (next_(block));
+
+  ASSERT2("compute_complete","index %d is not between 0 and count %d\n",
+          index_(block),count_(block),
+          (0 <= index_(block)) && (index_(block) < count_(block)));
   index_(block) = 0;
   count_(block) = 0;
   windex_(block) = 0.0;
@@ -234,57 +236,47 @@ void MethodOrder::compute_complete_(Block * block)
 
 long long & MethodOrder::index_(Block * block)
 {
-  Scalar<long long> scalar(cello::scalar_descr_long_long(),
-                     block->data()->scalar_data_long_long());
-  return *scalar.value(is_index_);
+  return cello::scalar<long long>(block,is_index_);
 }
 
 //----------------------------------------------------------------------
 
 long long & MethodOrder::count_(Block * block)
 {
-  Scalar<long long> scalar(cello::scalar_descr_long_long(),
-                     block->data()->scalar_data_long_long());
-  return *scalar.value(is_count_);
+  return cello::scalar<long long>(block,is_count_);
 }
 
 //----------------------------------------------------------------------
 
 double & MethodOrder::windex_(Block * block)
 {
-  Scalar<double> scalar(cello::scalar_descr_double(),
-                     block->data()->scalar_data_double());
-  return *scalar.value(is_index_);
+  return cello::scalar<double>(block,is_windex_);
 }
 
 //----------------------------------------------------------------------
 
 double & MethodOrder::wcount_(Block * block)
 {
-  Scalar<double> scalar(cello::scalar_descr_double(),
-                     block->data()->scalar_data_double());
-  return *scalar.value(is_wcount_);
+  return cello::scalar<double>(block,is_wcount_);
 }
 
 //----------------------------------------------------------------------
 
 Index & MethodOrder::next_(Block * block)
 {
-  Scalar<Index> scalar(cello::scalar_descr_index(),
-                     block->data()->scalar_data_index());
-  return *scalar.value(is_next_);
+  return cello::scalar<Index>(block,is_next_);
 }
-
-//----------------------------------------------------------------------
 
 Sync & MethodOrder::sync_index_(Block * block)
 {
-  Scalar<Sync> scalar(cello::scalar_descr_sync(),
-                      block->data()->scalar_data_sync());
-  return *scalar.value(is_sync_index_);
+  return cello::scalar<Sync>(block,is_sync_index_);
 }
 
-//----------------------------------------------------------------------
+
+Sync & MethodOrder::sync_count_(Block * block)
+{
+  return cello::scalar<Sync>(block,is_sync_count_);
+}
 
 long long & MethodOrder::count_child_(Block * block, int index)
 {
@@ -292,8 +284,6 @@ long long & MethodOrder::count_child_(Block * block, int index)
                      block->data()->scalar_data_long_long());
   return *(scalar.value(is_count_child_) + index);
 }
-
-//----------------------------------------------------------------------
 
 double & MethodOrder::wcount_child_(Block * block, int index)
 {
@@ -304,9 +294,12 @@ double & MethodOrder::wcount_child_(Block * block, int index)
 
 //----------------------------------------------------------------------
 
-Sync & MethodOrder::sync_count_(Block * block)
+void MethodOrder::set_next_(Block * block)
 {
-  Scalar<Sync> scalar(cello::scalar_descr_sync(),
-                      block->data()->scalar_data_sync());
-  return *scalar.value(is_sync_count_);
+  const int rank = cello::rank();
+  int na3[3];
+  cello::simulation()->hierarchy()->root_blocks(na3,na3+1,na3+2);
+  next_(block) = block->index().next(rank,na3,block->is_leaf(),min_level_);
 }
+
+//----------------------------------------------------------------------

@@ -4,7 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2022-03-01
 /// @brief    [\ref Problem] Declaration of the MethodOrder class for
-///           generating the Morton (Z-)ordering of blocks in the hierarchy
+///           generating a space-filling curve (SFC) ordering of blocks in the hierarchy
 
 #ifndef PROBLEM_METHOD_ORDER_HPP
 #define PROBLEM_METHOD_ORDER_HPP
@@ -18,8 +18,7 @@ class MethodOrder : public Method {
 public: // interface
 
   /// Constructor
-  MethodOrder(std::string type,
-              int min_level) throw();
+  MethodOrder(int min_level) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(MethodOrder);
@@ -36,9 +35,9 @@ public: // interface
     p | type_;
     p | is_index_;
     p | is_count_;
+    p | is_next_;
     p | is_windex_;
     p | is_wcount_;
-    p | is_next_;
     p | is_count_child_;
     p | is_wcount_child_;
     p | is_sync_index_;
@@ -48,7 +47,7 @@ public: // interface
 
 public: // virtual methods
 
-  /// Apply the method to determine the Morton ordering of blocks
+  /// Apply the method to determine the ordering of blocks
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw ()
@@ -70,7 +69,7 @@ private: // methods
 
   void compute_complete_(Block * block);
 
-  /// The block's Morton ordering index
+  /// The block's ordering index
   long long & index_(Block * block);
 
   /// The count of participating blocks
@@ -82,19 +81,19 @@ private: // methods
   /// The weighted count of the block
   double & wcount_(Block * block);
 
-  /// Return the pointer to the Index of the "next" block
-  Index & next_(Block * block);
-
-  /// Return the pointer to the given Block's child block count
+  /// Return the given Block's child block count
   long long & count_child_(Block * block, int index);
 
-  /// Return the pointer to the given Block's child weight
+  /// Return the given Block's child weight
   double & wcount_child_(Block * block, int index);
 
-  /// Return the pointer to the Block's Morton ordering index
+  /// Return the next block in the ordering
+  Index & next_(Block * block);
+
+  /// Return the Block's ordering index
   Sync & sync_index_(Block * block);
 
-  /// Return the pointer to the Block's weight (including self)
+  /// Return the Block's weight (including self)
   Sync & sync_count_(Block * block);
 
 private: // functions
@@ -112,6 +111,8 @@ private: // functions
             (i == child_order_(ic3)));
   }
 
+  void set_next_ (Block * block);
+
   inline double weight_(Block * block)
   { return 0.5; }
 
@@ -119,11 +120,10 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// Type of ordering ("morton")
-  std::string type_s_;
   /// enum type of ordering
   enum class Type { morton };
   Type type_;
+
   /// Block Scalar<long long> index
   int is_index_;
   /// Block Scalar<long long> count
@@ -132,12 +132,12 @@ private: // attributes
   int is_windex_;
   /// Block Scalar<double> weighted count
   int is_wcount_;
-  /// Block Scalar<Index> next
-  int is_next_;
   /// Block Scalar<int> child weight (array of size cello::num_children())
   int is_count_child_;
   /// Block Scalar<double> child weight (array of size cello::num_children())
   int is_wcount_child_;
+  /// Block Scalar<Index> next Index in ordering
+  int is_next_;
   /// Block Scalar<Sync> sync counter for index (coarse->fine)
   int is_sync_index_;
   /// Block Scalar<sync> sync counter for count (fine->coarse)

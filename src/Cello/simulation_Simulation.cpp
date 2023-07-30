@@ -16,7 +16,6 @@
 // #define TRACE_PROCESS_MEMORY
 
 // #define DEBUG_SIMULATION
-// #define DEBUG_MSG_REFINE
 
 Simulation::Simulation
 (

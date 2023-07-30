@@ -333,12 +333,18 @@ public: // interface
   /// Accessor functions for block ordering index and count 
   void set_order (long long index, long long count)
   {
-    index_order_ = index;
-    count_order_ = count;
+    order_index_ = index;
+    order_count_ = count;
   }
-  void get_order (long long * index, long long * count) const
-  { *index = index_order_;
-    *count = count_order_;
+  void set_order_next (Index next)
+  {
+    order_next_ = next;
+  }
+
+  void get_order (long long * index, long long * count, Index * next = 0) const
+  { *index = order_index_;
+    *count = order_count_;
+    if (next) *next  = order_next_;
   }
   
 protected: // methods
@@ -1026,8 +1032,9 @@ protected: // attributes
   std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
 
   /// Index and total count used for ordering blocks, e.g. for dynamic load balancing
-  long long index_order_;
-  long long count_order_;
+  long long order_index_;
+  long long order_count_;
+  Index order_next_;
 };
 
 #endif /* COMM_BLOCK_HPP */

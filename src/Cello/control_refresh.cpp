@@ -9,6 +9,7 @@
 // #define TRACE_LOAD_FACE
 // #define TRACE_PROLONG
 
+// #define TRACE_REFRESH
 // #define PRINT_COARSE_FIELD
 // #define DEBUG_ARRAY
 // #define DEBUG_ARRAY_CYCLE 0
@@ -38,10 +39,18 @@
 #  define TRACE_PROLONG(MSG,PROLONG,mf3,if3,nf3,mc3,ic3,nc3) /* ... */
 #endif
 
+#ifdef TRACE_REFRESH
+#  undef TRACE_REFRESH
+#  define TRACE_REFRESH(MSG,ID) CkPrintf ("TRACE_REFRESH %s %d %s\n",std::string(MSG).c_str(),ID,name().c_str()); fflush(stdout);
+#else
+#  define TRACE_REFRESH(MSG,ID) /* ... */
+#endif
+
 //======================================================================
 
 void Block::refresh_start (int id_refresh, int callback)
 {
+  TRACE_REFRESH("refresh_start",id_refresh);
   CHECK_ID(id_refresh);
   Refresh * refresh = cello::refresh(id_refresh);
   Sync * sync = sync_(id_refresh);
@@ -229,6 +238,7 @@ void Block::p_refresh_recv (MsgRefresh * msg_refresh)
 
 void Block::refresh_exit (Refresh & refresh)
 {
+  TRACE_REFRESH("refresh_exit",refresh.id());
   CHECK_ID(refresh.id());
   update_boundary_();
   control_sync (refresh.callback(),

@@ -48,6 +48,8 @@ MethodOrderMorton::MethodOrderMorton(int min_level) throw ()
 
 void MethodOrderMorton::compute (Block * block) throw()
 {
+  ERROR("MethodOrderMorton",
+        "\"order_morton\" ordering is depreciated: instead, use \"order\" with Method : order : type = \"morton\"");
   // Initialize counters, then barrier to ensure counters initialized
   // before first entry method can arrive
   TRACE_ORDER_BLOCK("compute",block);

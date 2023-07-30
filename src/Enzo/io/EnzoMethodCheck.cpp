@@ -215,17 +215,17 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
   TRACE_CHECK("[A] IoEnzoWriter::p_write");
   std::string name_this, name_next;
   Index index_this, index_next;
-  long long index_block;
+  long long order_index;
   bool is_first, is_last;
   std::string name_dir;
 
   msg_check->get_parameters
     (index_this,index_next,name_this,name_next,
-     index_block,is_first,is_last,name_dir);
+     order_index,is_first,is_last,name_dir);
 
   if (thisIndex == 0 && monitor_iter_ &&
-      ((is_first || is_last) || ((index_block % monitor_iter_) == 0))) {
-    cello::monitor()->print("Method", "check %d",index_block);
+      ((is_first || is_last) || ((order_index % monitor_iter_) == 0))) {
+    cello::monitor()->print("Method", "check %d",order_index);
   }
   
   // Write to block list file, opening or closing file as needed
@@ -326,42 +326,27 @@ int EnzoBlock::create_msg_check_
   bool * is_first
   )
 {
-  ScalarData<long long> *   scalar_data_long_long    = data()->scalar_data_long_long();
-  ScalarDescr *       scalar_descr_long_long   = cello::scalar_descr_long_long();
-  ScalarData<Index> * scalar_data_index  = data()->scalar_data_index();
-  ScalarDescr *       scalar_descr_index = cello::scalar_descr_index();
-  const long long is_index = scalar_descr_long_long->index(ordering+":index");
-  const long long is_count = scalar_descr_long_long->index(ordering+":count");
-  const long long is_next  = scalar_descr_index->index(ordering+":next");
-  const long long count    = *scalar_data_long_long->value(scalar_descr_long_long,is_count);
-  const Index next   = *scalar_data_index->value(scalar_descr_index,is_next);
-
-  const int rank = cello::rank();
-  const Hierarchy * hierarchy = enzo::simulation()->hierarchy();
-  int na3[3];
-  hierarchy->root_blocks(na3,na3+1,na3+2);
-
-  const int min_level = hierarchy->min_level();
-
   Index index_this, index_next;
   std::string name_this, name_next;
-  long long index_block;
   int index_file;
   bool is_last;
 
+  long long order_index, order_count;
+  Index order_next;
+  get_order(&order_index, &order_count, &order_next);
+
   index_this = this->index();
-  index_next = next;
+  index_next = order_next;
 
   name_this = this->name();
   name_next = this->name(index_next);
 
-  index_block    = *scalar_data_long_long->value(scalar_descr_long_long,is_index);
-  index_file = index_block*num_files/count;
+  index_file = order_index*num_files/order_count;
 
-  const long long ib  = index_block;
-  const long long ibm = index_block - 1;
-  const long long ibp = index_block + 1;
-  const long long nb = count;
+  const long long ib  = order_index;
+  const long long ibm = order_index - 1;
+  const long long ibp = order_index + 1;
+  const long long nb = order_count;
   const long long nf = num_files;
   if (is_first) { (*is_first) = (ib  == 0)  || (ib*nf/nb != (ibm)*nf/nb); }
   is_last  = (ibp == nb) || (ib*nf/nb != (ibp)*nf/nb);
@@ -372,7 +357,7 @@ int EnzoBlock::create_msg_check_
 
   (*msg_check)->set_parameters
     (index_this,index_next,name_this,name_next,
-     index_block,is_first?(*is_first):false,is_last);
+     order_index,is_first?(*is_first):false,is_last);
 
   (*msg_check)->set_name_dir (name_dir);
 
@@ -464,7 +449,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   Index  index_next;
   std::string  name_block;
   std::string  name_next;
-  long long  block_order;
+  long long  order_index;
   bool  is_first;
   bool  is_last;
   std::string  name_dir;
@@ -474,7 +459,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
       index_next,
       name_block,
       name_next,
-      block_order,
+      order_index,
       is_first,
       is_last,
       name_dir);

@@ -192,12 +192,12 @@ public: // interface
     self_.level_now_ = index.level();
   }
 
-  inline bool insert_neighbor (Index index)
-  { return insert_neighbor (index,self_.index_.is_sibling(index)); }
+  inline void insert_neighbor (Index index)
+  { insert_neighbor (index,self_.index_.is_sibling(index)); }
 
   /// Insert the given neighbor into the list of neighbors. Return
   /// true if successful and false if neighbor already inserted
-  bool insert_neighbor  (Index index, bool is_sibling);
+  void insert_neighbor  (Index index, bool is_sibling);
 
   /// Reset self and level bounds for next adapt phase
   void reset_bounds();

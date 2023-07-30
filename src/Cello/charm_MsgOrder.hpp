@@ -44,7 +44,7 @@ public: // interface
   //   return *this;
   // }
 
-  inline int get_index (int & index, double & windex) const
+  inline void get_index (int & index, double & windex) const
   {
     index  = index_;
     windex = windex_;
@@ -54,7 +54,7 @@ public: // interface
     index_ = index;
     windex_ = windex;
   }
-  inline int get_count (int & count, double & wcount) const
+  inline void get_count (int & count, double & wcount) const
   {
     count  = count_;
     wcount = wcount_;

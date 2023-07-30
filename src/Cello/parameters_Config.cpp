@@ -760,23 +760,32 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   //  Constraints on the block size based on the ghost depth
   if ( mesh_max_level > 0 ) {
-    if ( !(ax >= 2*field_ghost_depth[0] && ay >= 2*field_ghost_depth[1] && az >= 2*field_ghost_depth[2] ) ) {
-      ERROR3 ("Config::read", 
-		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth for AMR simulations: ", 
-		ax, ay, az);
-    }  
-    if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
+    if ( !(ax >= 2*field_ghost_depth[0] &&
+           ay >= 2*field_ghost_depth[1] &&
+           az >= 2*field_ghost_depth[2] ) ) {
       ERROR3 ("Config::read",
-  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even for AMR simulations" ,
-		      ax, ay, az);
-    }  
+              "Dimensions of the active zone on each block (%d, %d, %d) "
+              "must be at least double the size of the ghost depth for AMR simulations: ",
+              ax, ay, az);
+    }
+    if ( ! ((ax%2 == 0) &&
+            (ay%2 == 0) &&
+            (az%2 == 0)) ) {
+      ERROR3 ("Config::read",
+              "Dimensions of the active zone on each block (%d, %d, %d) "
+              "must each be even for AMR simulations" ,
+              ax, ay, az);
+    }
   }
-  else if ( mesh_max_level == 0 ) {   
-    if ( !(ax >= field_ghost_depth[0] && ay >= field_ghost_depth[1] && az >= field_ghost_depth[2] ) ) {
+  else if ( mesh_max_level == 0 ) {
+    if ( !(ax >= field_ghost_depth[0] &&
+           ay >= field_ghost_depth[1] &&
+           az >= field_ghost_depth[2] ) ) {
       ERROR3 ("Config::read",
-  		      "Dimensions of the active zone on each block (%d, %d, %d) should be at least as large as the ghost depth",
-		      ax, ay, az);
-    }  
+              "Dimensions of the active zone on each block (%d, %d, %d) "
+              "should be at least as large as the ghost depth",
+              ax, ay, az);
+    }
   }
 }
 
@@ -1184,7 +1193,7 @@ void Config::read_output_ (Parameters * p) throw()
             int color_rgb;
             if (name[0] == '#') {
               bool is_valid=true;
-              for (int i=1; i<name.size(); i++) {
+              for (size_t i=1; i<name.size(); i++) {
                 is_valid = is_valid && isxdigit(name[i]);
               }
               ASSERT1 ("Config::read_output()",

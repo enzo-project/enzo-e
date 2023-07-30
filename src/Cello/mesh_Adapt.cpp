@@ -25,7 +25,7 @@ void Adapt::set_face_level_last (const int ic3[3], const int if3[3],
 
 //----------------------------------------------------------------------
 
-bool Adapt::insert_neighbor (Index index, bool is_sibling)
+void Adapt::insert_neighbor (Index index, bool is_sibling)
 {
   const bool found = is_neighbor(index);
 
@@ -35,8 +35,6 @@ bool Adapt::insert_neighbor (Index index, bool is_sibling)
     LevelInfo neighbor { index, level, level-1, level+1, is_sibling, false };
     neighbor_list_.push_back(neighbor);
   }
-
-  return (! found);
 }
 
 //----------------------------------------------------------------------
@@ -86,7 +84,7 @@ void Adapt::refine_neighbor (Index index)
           Index index_child = index.index_child(icx,icy,icz);
           int adj = self_.index_.adjacency(index_child,rank_,periodicity_);
           if (adj >= 0) {
-            bool s = insert_neighbor(index_child);
+            insert_neighbor(index_child);
           }
         }
       }
@@ -351,12 +349,12 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
   if (fp != nullptr) {
     std::string prefix = std::string("DEBUG_ADAPT ")+message;
     fprintf (fp,"%s face_level curr: ",prefix.c_str());
-    for (int i=0; i<face_level_[0].size(); i++) {
+    for (size_t i=0; i<face_level_[0].size(); i++) {
       fprintf (fp,"%d ", face_level_[0].at(i));
     }
     fprintf (fp,"\n");
     fprintf (fp,"%s face_level next: ",prefix.c_str());
-    for (int i=0; i<face_level_[1].size(); i++) {
+    for (size_t i=0; i<face_level_[1].size(); i++) {
       fprintf (fp,"%d ", face_level_[1].at(i));
     }
     fprintf (fp,"\n");
@@ -366,7 +364,7 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
               periodicity_[1],
               periodicity_[2]);
 
-    for (int i=0; i<face_level_[2].size(); i++) {
+    for (size_t i=0; i<face_level_[2].size(); i++) {
       if (i%27==0) fprintf (fp,"\n%s face_level last: ",prefix.c_str());
       fprintf (fp,"%2d ", face_level_[2].at(i));
     }
@@ -396,7 +394,6 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
                  ia3[1],it3[1],
                  ia3[2],it3[2]);
       }
-      const int l = 1 << (max_level_ - level);
       fprintf (fp,"%s   %d %s [%d %d] S%d C%d\n",
                 prefix.c_str(),i,neighbor_block,
                 info.level_min_,

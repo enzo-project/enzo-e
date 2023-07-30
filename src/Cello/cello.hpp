@@ -781,6 +781,9 @@ namespace cello {
   /// Return the ScalarDescr object defining Block index Scalar data values
   ScalarDescr *   scalar_descr_index();
 
+  template <class T>
+  T & scalar(Block *, int is, int i=0);
+
   /// Return the ith Output object
   Output *        output (int index);
   /// Return the ith Solver
