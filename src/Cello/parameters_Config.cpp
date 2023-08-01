@@ -768,14 +768,14 @@ void Config::read_mesh_ (Parameters * p) throw()
               "must be at least double the size of the ghost depth for AMR simulations: ",
               ax, ay, az);
     }
-    if ( ! ((ax%2 == 0) &&
-            (ay%2 == 0) &&
-            (az%2 == 0)) ) {
-      ERROR3 ("Config::read",
-              "Dimensions of the active zone on each block (%d, %d, %d) "
-              "must each be even for AMR simulations" ,
-              ax, ay, az);
-    }
+
+    ASSERT3 ("Config::read",
+             "Dimensions of the active zone on each block (%d, %d, %d) "
+             "must each be even for AMR simulations" ,
+             ax, ay, az,
+             ( ( ax%2 == 0) &&
+               ((ay%2 == 0) || mesh_root_rank < 2) &&
+               ((az%2 == 0) || mesh_root_rank < 3) ) );
   }
   else if ( mesh_max_level == 0 ) {
     if ( !(ax >= field_ghost_depth[0] &&
