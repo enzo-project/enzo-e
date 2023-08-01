@@ -65,7 +65,7 @@ public: // interface
       physics_fluid_props_fluid_floor_config(),
       physics_fluid_props_mol_weight(0.0),
       // Gravity
-      physics_gravity(false),
+      physics_gravity_grav_constant_codeU(-1.0),
 
       //--------------------
       // INITIAL [sorted]
@@ -489,6 +489,7 @@ protected: // methods
   
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
+  void read_physics_gravity_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
 
@@ -535,7 +536,7 @@ public: // attributes
   double                     physics_fluid_props_mol_weight;
 
   /// Gravity
-  bool                       physics_gravity;
+  double                     physics_gravity_grav_constant_codeU;
 
   /// EnzoInitialBCenter;
   bool                       initial_bcenter_update_etot;

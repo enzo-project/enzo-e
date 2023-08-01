@@ -40,7 +40,7 @@ EnzoConfig::EnzoConfig() throw ()
   physics_fluid_props_fluid_floor_config(),
   physics_fluid_props_mol_weight(0.0),
   // Gravity
-  physics_gravity(false),
+  physics_gravity_grav_constant_codeU(-1.0),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
   // EnzoInitialBurkertBodenheimer
@@ -427,7 +427,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_fluid_props_fluid_floor_config;
   p | physics_fluid_props_mol_weight;
 
-  p | physics_gravity;
+  p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
 
@@ -1851,12 +1851,6 @@ void EnzoConfig::read_method_background_acceleration_(Parameters * p)
       (axis,"Method:background_acceleration:angular_momentum",0);
   }
 
-  // Not sure if I need. Seems this flag tells the hydo solver
-  // if gravity exists... so I would expect to need this... but Does
-  // not get triggered for self-gravity at the moment... so not sure
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "background_acceleration") physics_gravity=true;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -2084,16 +2078,12 @@ void EnzoConfig::read_physics_(Parameters * p)
             "\"fluid_prop\" is a typo for \"fluid_props\"");
     }
 
-    if (physics_list[index_physics] == "gravity") {
-
-      physics_gravity = true;
-
-    }
   }
 
   // this is intentionally done outside of the for-loop (for
   // backwards-compatability purposes)
   read_physics_fluid_props_(p);
+  read_physics_gravity_(p);
 }
 
 //----------------------------------------------------------------------
@@ -2487,6 +2477,14 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
             "\"Physics:fluid_props:mol_weight\" is specified.");
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_physics_gravity_(Parameters * p)
+{
+  physics_gravity_grav_constant_codeU = p->value_float
+    ("Physics:gravity:grav_const_codeU", -1.0);
 }
 
 //----------------------------------------------------------------------
