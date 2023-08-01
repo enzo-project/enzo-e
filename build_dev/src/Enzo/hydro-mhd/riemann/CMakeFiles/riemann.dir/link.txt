@@ -1,0 +1,2 @@
+/opt/apps/gcc/8.3.0/bin/ar qc libriemann.a CMakeFiles/riemann.dir/EnzoRiemann.cpp.o
+/opt/apps/gcc/8.3.0/bin/ranlib libriemann.a

@@ -171,7 +171,6 @@ void EnzoSimulation::p_fbnet_concatenate_sphere_lists()
   int nb = cello::num_blocks_process();
   sync_fbnet_count_.set_stop(nb);
 
-  //CkPrintf("counter value = %d, stopping value = %d\n", sync_fbnet_count_.value(), sync_fbnet_count_.stop());
   if (sync_fbnet_count_.next()) {
     #ifdef DEBUG_METHOD_FBNET
       CkPrintf("[%d] EnzoSimulation::p_fbnet_concatenate_sphere_lists() -- all blocks synchronized! Nspheres on this object = %d, Nblocks = %d\n", CkMyPe(), method_fbnet_sphere_list.size(), nb);
@@ -219,22 +218,21 @@ void EnzoBlock::p_method_fbnet_update_mesh(CkReductionMsg * msg)
   }
 
   // TODO: Add another sync counter here?
-//  if (enzo::simulation()->sync_fbnet_update_next()) {
-    //CkPrintf("[%d] clearing sync!!\n", CkMyPe());
+  if (enzo::simulation()->sync_fbnet_update_next()) {
     
-    enzo::simulation()->p_fbnet_done();
- /*   // clear sphere list attached to simulation object
+    //enzo::simulation()->p_fbnet_done();
+    // clear sphere list attached to simulation object
     enzo::simulation()->method_fbnet_clear_sphere_list();
     // reset synchronization counters
     enzo::simulation()->reset_sync_fbnet_count();
     enzo::simulation()->reset_sync_fbnet_update();
 
-    compute_done();
-*/
-//  }
-  #ifdef DEBUG_METHOD_FBNET
-    CkPrintf("[%d] compute_done() called\n", CkMyPe());
-  #endif
+    //compute_done();
+
+  }
+//  #ifdef DEBUG_METHOD_FBNET
+//    CkPrintf("[%d] compute_done() called\n", CkMyPe());
+//  #endif
   this->compute_done();
 }
 

@@ -1,0 +1,2 @@
+/opt/apps/gcc/8.3.0/bin/ar qc libparameters.a CMakeFiles/parameters.dir/parameters.cpp.o CMakeFiles/parameters.dir/parameters_Config.cpp.o CMakeFiles/parameters.dir/parameters_Param.cpp.o CMakeFiles/parameters.dir/parameters_Parameters.cpp.o CMakeFiles/parameters.dir/parse.tab.c.o CMakeFiles/parameters.dir/lex.yy.c.o
+/opt/apps/gcc/8.3.0/bin/ranlib libparameters.a

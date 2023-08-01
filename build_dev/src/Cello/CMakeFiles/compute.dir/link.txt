@@ -1,0 +1,2 @@
+/opt/apps/gcc/8.3.0/bin/ar qc libcompute.a CMakeFiles/compute.dir/compute_Matrix.cpp.o CMakeFiles/compute.dir/compute_Solver.cpp.o CMakeFiles/compute.dir/compute_SolverNull.cpp.o
+/opt/apps/gcc/8.3.0/bin/ranlib libcompute.a

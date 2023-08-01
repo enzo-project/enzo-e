@@ -196,7 +196,7 @@ double FBNet::get_radius(std::vector<double> masses, std::vector<double> creatio
 
   // initialize time bins
   std::vector<double> timebins;
-  for (int i=0; i <= std::floor(model_time_/model_dt_); i++) {
+  for (int i=0; i < std::floor(model_time_/model_dt_); i++) {
     timebins.push_back(i * (double) model_dt_);  
   }
   std::vector<double> time_bincounts;
@@ -232,25 +232,27 @@ double FBNet::get_radius(std::vector<double> masses, std::vector<double> creatio
     M = &M3_;
   }
 
-  ASSERT("FBNet::get_radius()", "Nbins != M.size()", 
-          Nbins == (*M).size());
+  ASSERT("FBNet::get_radius()", "Nbins+1 != M.size()", 
+          Nbins+1 == (*M).size()); // plus 1 to include bias feature
 
   ASSERT("FBNet::get_radius()", "&M is NULL pointer!",
           M != NULL);
 
-  double radius = 0.0;
+
   bool include_timebins = true; // TODO: Make this a parameter!
+
+  double radius = 1 * (*M)[0]; // index 0 in M reserved for bias feature
   for (int i=0; i < Nbins_mass; i++) {
-    radius += mass_bincounts[i] * (*M)[i];
+    radius += mass_bincounts[i] * (*M)[i+1];
   }
   if (include_timebins) {
     for (int i=0; i < Nbins_time; i++) {
-      radius += time_bincounts[i] * (*M)[Nbins_mass + i];
+      radius += time_bincounts[i] * (*M)[Nbins_mass+1 + i];
     }
   }
   // NOTE: this matrix multiplication gives us log(r) in kpc
   radius = std::pow(10, std::max(radius, std::log10(0.25)));
- 
+
   return radius;
 }
 

@@ -1,0 +1,2 @@
+/opt/apps/gcc/8.3.0/bin/ar qc libtest_Unit.a CMakeFiles/test_Unit.dir/test_Unit.cpp.o
+/opt/apps/gcc/8.3.0/bin/ranlib libtest_Unit.a

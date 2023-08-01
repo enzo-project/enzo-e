@@ -1,0 +1,2 @@
+/opt/apps/gcc/8.3.0/bin/ar qc liberror.a CMakeFiles/error.dir/error_Error.cpp.o
+/opt/apps/gcc/8.3.0/bin/ranlib liberror.a

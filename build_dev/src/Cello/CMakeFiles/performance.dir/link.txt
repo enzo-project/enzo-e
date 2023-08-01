@@ -1,0 +1,2 @@
+/opt/apps/gcc/8.3.0/bin/ar qc libperformance.a CMakeFiles/performance.dir/performance_Papi.cpp.o CMakeFiles/performance.dir/performance_Performance.cpp.o
+/opt/apps/gcc/8.3.0/bin/ranlib libperformance.a
