@@ -348,7 +348,6 @@ public: // interface
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
       // EnzoMethodGravity
-      method_gravity_grav_const(0.0),
       method_gravity_solver(""),
       method_gravity_order(4),
       method_gravity_dt_max(1.0e10),
@@ -868,7 +867,6 @@ public: // attributes
   double                     method_grackle_radiation_redshift;
 
   /// EnzoMethodGravity
-  double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
   int                        method_gravity_order;
   double                     method_gravity_dt_max;
