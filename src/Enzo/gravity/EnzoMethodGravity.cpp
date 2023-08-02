@@ -175,7 +175,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 	}
       }
     } else {
-      double grav_const = enzo::grav_constant_codeU(*enzo::units());
+      double grav_const = enzo::grav_constant_codeU();
       field.scale(ib, -4.0 * (cello::pi) * grav_const, idensity);
     }
 

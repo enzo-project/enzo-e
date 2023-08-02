@@ -83,12 +83,11 @@ namespace enzo {
   /// returns the gravitational constant in code units
   ///
   /// @note
-  /// We explicitly choose not to call enzo::units() within this function to
-  /// avoid surprising side effects in cosmological simulations. In more
-  /// detail, the conversion from cgs to comoving code units depends on the
-  /// state of the EnzoPhysicsCosmology object, and we don't want to silently
-  /// mutate that property inside this function).
-  double grav_constant_codeU(const Units& units) noexcept;
+  /// One might naively assume that the gravitational constant is
+  /// time-dependent when written in cosmological code units (since they are
+  /// comoving). However, the cosmological code units are explicitly defined so
+  /// that the gravitational constant is always fixed in code units
+  double grav_constant_codeU() noexcept;
 
   /// returns the gravitational constant in cgs
   ///

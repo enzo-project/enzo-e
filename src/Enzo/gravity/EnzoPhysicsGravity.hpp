@@ -91,50 +91,52 @@ public: // interface
   /// Return the user-configurable gravitational constant in cgs
   double grav_constant_cgs() const noexcept
   {
-    if (grav_constant_codeU_ <= 0) { return enzo_constants::grav_constant; }
-
-    Units* units = (Units*)enzo::units();
-    double factor = units->density() * (units->time() * units->time());
-    return grav_constant_codeU_ / factor;
+    return (grav_constant_codeU_ <= 0)
+      ? enzo_constants::grav_constant
+      : grav_constant_codeU_ / cgs_div_code_units_factor_();
   }
 
   /// Return the user-configurable gravitational constant in code units.
   ///
-  /// @param units Parameter specifying a reference to a Units instance (or an
-  ///     instance of a Units subclass). This is optional in a non-cosmological
-  ///     simulation (if a Units-instance is needed in this scenario, it will
-  ///     be acquired via enzo::units()). However, this argument is required in
-  ///     a cosmological simulation.
+  /// @note
+  /// The time code-units in cosmological simulations are defined such that
+  /// ``4*pi*G*rho_bar`` is equal to 1.0, where ``rho_bar`` is the mean matter
+  /// density of the universe at the current simulation time. For context, the
+  /// density code-units are defined such that the ``rho_bar`` has a value
+  /// of ``1.0``. In other words, G always has a value of 0.25/pi in
+  /// cosmological code units.
   ///
   /// @note
-  /// The units argument is required during cosmological simulations since the
-  /// the code units are comoving, which means the conversion from cgs to
-  /// comoving depends on simulation time. It is caller's responsibility, that
-  /// the units argument is configured for the correct time. (We explicitly
-  /// avoid doing this within this method to avoid altering the simulation's
-  /// global state).
-  ///
-  /// @note
-  /// If the user sets to the real-world value, this should correspond to
-  /// 6.67384e-8 cm^3 g^-1 s^-2 when converted to cgs.
-  double grav_constant_codeU(const Units& units) const noexcept
-  {
-    // this first case can only arise in non-cosmological sims
-    if (grav_constant_codeU_ > 0) { return grav_constant_codeU_; }
-
-    double factor = units.density() * (units.time() * units.time());
-    return enzo_constants::grav_constant * factor;
-  }
-
+  /// If the user sets this to the standard real-world value, this should
+  /// correspond to 6.67384e-8 cm^3 g^-1 s^-2 when converted to cgs.
   double grav_constant_codeU() const noexcept
   {
-    ASSERT("EnzoPhysicsGravity::grav_constant_codeU()",
-           "requires units arg in a cosmo sim", enzo::cosmology()==nullptr);
-    if (grav_constant_codeU_ > 0) { return grav_constant_codeU_; }
-    Units* units = (Units*)enzo::units();
-    ASSERT("EnzoPhysicsGravity::grav_constant_codeU()",
-           "enzo::units() returned a nullptr", units != nullptr);
-    return grav_constant_codeU(*units);
+    if (enzo::cosmology() != nullptr) {
+      ASSERT("EnzoPhysicsGravity::grav_constant_codeU",
+             "sanity check failed", grav_constant_codeU_ <= 0);
+      // we explicitly avoid using a Units* object because:
+      // (i) its unnecessary (and probably marginally less precise)
+      // (ii) EnzoUnits* relies on EnzoPhysicsCosmology having some state
+      //      (related to the current sim time). While that precise state
+      //      doesn't really matter in this calculation, it simplifies things
+      //      if we simply choose not to touch it.
+      return 0.25 / cello::pi;
+    } else if (grav_constant_codeU_ > 0) {
+      return grav_constant_codeU_;
+    } else {
+      return enzo_constants::grav_constant * cgs_div_code_units_factor_();
+    }
+  }
+
+protected:
+
+  /// helper function that computes conversion between code & cgs units
+  static double cgs_div_code_units_factor_() noexcept
+  {
+    // we avoid using EnzoUnits* since: (i) it's unnecessary and (ii) so we
+    // don't need to ensure that it's defined before this inline function
+    Units* units = cello::units();
+    return units->density() * (units->time() * units->time());
   }
 
 protected:

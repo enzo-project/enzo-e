@@ -81,8 +81,8 @@ namespace { // things inside of an anonymous namespace are local to this file
 
 namespace enzo {
 
-  double grav_constant_codeU(const Units& units) noexcept
-  { return get_physics_gravity_()->grav_constant_codeU(units); }
+  double grav_constant_codeU() noexcept
+  { return get_physics_gravity_()->grav_constant_codeU(); }
 
   double grav_constant_cgs() noexcept
   { return get_physics_gravity_()->grav_constant_cgs(); }
