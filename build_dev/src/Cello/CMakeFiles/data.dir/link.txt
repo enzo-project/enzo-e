@@ -1,2 +1,0 @@
-/opt/apps/gcc/8.3.0/bin/ar qc libdata.a CMakeFiles/data.dir/data_Data.cpp.o CMakeFiles/data.dir/data_DataMsg.cpp.o CMakeFiles/data.dir/data_Face.cpp.o CMakeFiles/data.dir/data_FaceFluxes.cpp.o CMakeFiles/data.dir/data_FieldData.cpp.o CMakeFiles/data.dir/data_FieldDescr.cpp.o CMakeFiles/data.dir/data_FieldFace.cpp.o CMakeFiles/data.dir/data_FluxData.cpp.o CMakeFiles/data.dir/data_ParticleData.cpp.o CMakeFiles/data.dir/data_ParticleDescr.cpp.o CMakeFiles/data.dir/data_png_array.cpp.o CMakeFiles/data.dir/field_face_store.F.o
-/opt/apps/gcc/8.3.0/bin/ranlib libdata.a

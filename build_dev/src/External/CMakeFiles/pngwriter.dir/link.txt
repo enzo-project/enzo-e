@@ -1,1 +1,0 @@
-/opt/intel/compilers_and_libraries_2020.1.217/linux/bin/intel64/icpc -fPIC -O3 -DNDEBUG -shared -Wl,-soname,libpngwriter.so -o libpngwriter.so CMakeFiles/pngwriter.dir/pngwriter.cpp.o  /usr/lib64/libpng.so /usr/lib64/libz.so 

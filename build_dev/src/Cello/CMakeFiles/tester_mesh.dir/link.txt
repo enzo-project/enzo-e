@@ -1,2 +1,0 @@
-/opt/apps/gcc/8.3.0/bin/ar qc libtester_mesh.a CMakeFiles/tester_mesh.dir/main_mesh.cpp.o
-/opt/apps/gcc/8.3.0/bin/ranlib libtester_mesh.a
