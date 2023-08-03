@@ -50,7 +50,8 @@ public: // interface
   ///
   /// @param grav_const_code_units When positive, this specifies the
   ///     gravitational constant in code units. Otherwise, the gravitational
-  ///     constant is assumed to be enzo_constants::grav_const when in cgs
+  ///     constant is defined such that it's equal to the value of
+  //      enzo_constants::standard_grav_const when converted to cgs
   EnzoPhysicsGravity(double grav_const_code_units)
     : Physics()
   {
@@ -92,7 +93,7 @@ public: // interface
   double grav_constant_cgs() const noexcept
   {
     return (grav_constant_codeU_ <= 0)
-      ? enzo_constants::grav_constant
+      ? enzo_constants::standard_grav_constant
       : grav_constant_codeU_ / cgs_div_code_units_factor_();
   }
 
@@ -124,7 +125,8 @@ public: // interface
     } else if (grav_constant_codeU_ > 0) {
       return grav_constant_codeU_;
     } else {
-      return enzo_constants::grav_constant * cgs_div_code_units_factor_();
+      return (enzo_constants::standard_grav_constant *
+              cgs_div_code_units_factor_());
     }
   }
 
@@ -141,9 +143,9 @@ protected:
 
 protected:
   /// Gravitational constant in code units (if set to the real-world value, it
-  /// should correspond to 6.67384e-8 cm^3 g^-1 s^-2 when converted to cgs).
+  /// should correspond to ~6.67e-8 cm^3 g^-1 s^-2 when converted to cgs).
   ///
-  /// When this isn't positive, we convert from enzo_constants::grav_constant
+  /// If it's not positive, convert from enzo_constants::standard_grav_constant
   double grav_constant_codeU_;
 };
 

@@ -91,9 +91,9 @@ namespace enzo {
 
   /// returns the gravitational constant in cgs
   ///
-  /// This is generally preferable to enzo_constants::grav_constant since this
-  /// will return the user-customizable value of the gravitational constant
-  /// (the user can only customize the value in non-cosmological simulations)
+  /// This is generally preferable to enzo_constants::standard_grav_constant
+  /// since this will return the user-customizable value of the gravitational
+  /// constant (the user can only customize the value in non-cosmological sims)
   double grav_constant_cgs() noexcept;
 }
 
