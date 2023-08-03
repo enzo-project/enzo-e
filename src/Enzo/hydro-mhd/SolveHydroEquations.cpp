@@ -128,7 +128,8 @@ int EnzoBlock::SolveHydroEquations
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if (UseMinimumPressureSupport[in] == TRUE) {
+  if ((cello::hierarchy()->max_level() == this->level()) &&
+      (UseMinimumPressureSupport[in] == TRUE)) {
     if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
 			  comoving_coordinates) == ENZO_FAIL) {
       ERROR("EnzoBlock::SolveHydroEquations()",
