@@ -274,7 +274,7 @@ gravity
    reference value` :math:`G\approx 6.67\times 10^{-8}\, {\rm cm}^3\,
    {\rm g}^{-1} {\rm s}^{-2}` :e:`(the actual value used within the
    codebase is not quoted here in case we ever update it). In this
-   case, the conversion between the cgs units and code-units are
+   case, the conversion between cgs units and code-units are
    handled internally.`
       
 

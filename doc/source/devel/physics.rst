@@ -9,7 +9,7 @@ This page tries to provide an overview for how to write :cpp:class:`!Physics` cl
 All physics classes are subclasses of the :cpp:class:`!Physics` class.
 Unlike other classes in the Enzo-E layer that descend from the Cello class-hierarchy (:cpp:class:`!Method`, :cpp:class:`!Initial`, :cpp:class:`!Prolong`, :cpp:class:`Refine`, etc.), the Cello-layer doesn't really interact much with instances of the :cpp:class:`!Physics` classes - beyond storing them.
 
-In practice, :cpp:class:`!Physics` classes are used commonly used to store problem-specific configuration information that needs to be accessed by multiple different :cpp:class:`!Method` classes and/or initializers.
+In practice, :cpp:class:`!Physics` classes are commonly used to store problem-specific configuration information that needs to be accessed by multiple different :cpp:class:`!Method` classes and/or initializers.
 Some functions that make use of this information are also sometimes introduced to these classes.
 
 
@@ -36,7 +36,7 @@ To understand when it may be useful to write a :cpp:class:`!Physics` class, it's
      - This approach has been used a fair amount in the past, but we are actively moving away from it (and discourage this approach).
 
 3. Cross-cutting configuration information is commonly only relevant when you are using a particular :cpp:class:`!Method` class.
-   In this case, you can store the configuration information within that :cpp:class:`!Method` class and define public instance-methods on that particular class that access the information.
+   In this case, you can store the configuration information within that :cpp:class:`!Method` class and define public instance-methods on that particular class that accesses the information.
 
      - This approach is strongly prefered over the preceding approaches 1 and 2.
        Refactoring is generally easier in this approach.
@@ -69,7 +69,7 @@ It's often most useful to encode configuration-information within a :cpp:class:`
 
 A particular scenario where this is relevant is when separate (somewhat-interchangable) :cpp:class:`!Method` classes implement different algorithms to model the same set of physics.
 For example, consider the storage/access of the dual-energy formalism configuration.
-Since this is mostly relevant in the context of a hydro-solver it may make sense to store this information :cpp:class:`!Method` class that encapsulates a hydro-solver.
+Since this is mostly relevant in the context of a hydro-solver it may make sense to store this information in the :cpp:class:`!Method` class that encapsulates a hydro-solver.
 However, because Enzo-E has :cpp:class:`!Method` classes that implement different hydro-solvers (that use the dual-energy formalism), we instead encode this information in a :cpp:class:`!Physics` class.
 
 There are also scenarios where some configuration information isn't really associated with any singular :cpp:class:`!Method`.
