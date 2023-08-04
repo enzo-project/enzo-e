@@ -43,7 +43,7 @@ To understand when it may be useful to write a :cpp:class:`!Physics` class, it's
        Moreover, this can be easier than defining a :cpp:class:`!Physics` class.
 
      - For this approach, it's important to understand how to access an instance of a particular kind of :cpp:class:`!Method` at an arbitrary point in the code (after all :cpp:class:`!Method` classes have been constructed).
-       One can use :cpp:expr:`enzo::problem()->method("<name>")` to return a pointer to the instance of the :cpp:class:`!Method` class that returns for which :cpp:func:`Method::name()` returns ``"<name>"``.
+       One can use :cpp:expr:`enzo::problem()->method("<name>")` to return a pointer to the instance of the :cpp:class:`!Method` class for which :cpp:func:`Method::name()` returns ``"<name>"``.
        If no such instance can be found, the expression returns a ``nullptr``.
        You then need to cast that pointer to the appropriate :cpp:class:`!Method` subclass before you access the information.
 
