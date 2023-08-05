@@ -250,30 +250,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_fade_SNR(true),
   method_feedback_NEvents(-1),
   method_feedback_radiation(true),
-  // EnzoMethodM1Closure
-  method_m1_closure(false),
-  method_m1_closure_N_groups(1), // # of frequency bins
-  method_m1_closure_flux_function("GLF"), // which flux function to use
-  method_m1_closure_hll_file("hll_evals.list"),
-  method_m1_closure_clight_frac(1.0), // reduced speed of light value to use
-  method_m1_closure_photon_escape_fraction(1.0),
-  method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles
-  method_m1_closure_temperature_blackbody(0.0),
-  method_m1_closure_particle_luminosity(-1.0), // Set emission rate for star particles
-  method_m1_closure_SED(), // supply list of emission rate fraction for all groups
-  method_m1_closure_min_photon_density(0.0),
-  method_m1_closure_attenuation(true),
-  method_m1_closure_thermochemistry(true),
-  method_m1_closure_recombination_radiation(false),
-  method_m1_closure_H2_photodissociation(false),
-  method_m1_closure_lyman_werner_background(false),
-  method_m1_closure_LWB_J21(-1.0),
-  method_m1_closure_cross_section_calculator("vernier"),
-  method_m1_closure_sigmaN(),
-  method_m1_closure_sigmaE(),
-  method_m1_closure_energy_lower(),
-  method_m1_closure_energy_upper(),
-  method_m1_closure_energy_mean(),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -664,30 +640,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_star_maker_min_level;
   p | method_star_maker_turn_off_probability;
 
-  p | method_m1_closure;
-  p | method_m1_closure_N_groups;
-  p | method_m1_closure_flux_function;
-  p | method_m1_closure_hll_file;
-  p | method_m1_closure_clight_frac;
-  p | method_m1_closure_photon_escape_fraction;
-  p | method_m1_closure_radiation_spectrum;
-  p | method_m1_closure_temperature_blackbody;
-  p | method_m1_closure_particle_luminosity;
-  p | method_m1_closure_SED;
-  p | method_m1_closure_min_photon_density;
-  p | method_m1_closure_attenuation;
-  p | method_m1_closure_thermochemistry;
-  p | method_m1_closure_recombination_radiation;
-  p | method_m1_closure_H2_photodissociation;
-  p | method_m1_closure_lyman_werner_background;
-  p | method_m1_closure_LWB_J21;
-  p | method_m1_closure_cross_section_calculator;
-  p | method_m1_closure_sigmaN;
-  p | method_m1_closure_sigmaE;
-  p | method_m1_closure_energy_lower;
-  p | method_m1_closure_energy_upper;
-  p | method_m1_closure_energy_mean;
-
   p | method_turbulence_edot;
 
   p | method_gravity_grav_const;
@@ -808,7 +760,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_gravity_(p);
   read_method_merge_sinks_(p);
   read_method_ppm_(p);
-  read_method_m1_closure_(p);
   read_method_star_maker_(p);
   read_method_turbulence_(p);
   read_method_vlct_(p);
@@ -1681,99 +1632,6 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
 
   method_star_maker_turn_off_probability = p->value_logical
     ("Method:star_maker:turn_off_probability",false);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_m1_closure_(Parameters * p)
-{
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "m1_closure") method_m1_closure=true;
-  }
-
-  method_m1_closure_N_groups = p->value_integer
-    ("Method:m1_closure:N_groups",1);
-
-  method_m1_closure_flux_function = p->value_string
-    ("Method:m1_closure:flux_function","GLF");
-
-  method_m1_closure_hll_file = p->value_string
-    ("Method:m1_closure:hll_file","hll_evals.list");
-
-  method_m1_closure_clight_frac = p->value_float
-    ("Method:m1_closure:clight_frac",1.0);
-
-  method_m1_closure_photon_escape_fraction = p->value_float
-    ("Method:m1_closure:photon_escape_fraction",1.0);
-
-  method_m1_closure_radiation_spectrum = p->value_string
-    ("Method:m1_closure:radiation_spectrum","custom");
-
-  method_m1_closure_temperature_blackbody = p->value_float
-    ("Method:m1_closure:temperature_blackbody",0.0);
-
-  method_m1_closure_particle_luminosity = p->value_float
-    ("Method:m1_closure:particle_luminosity",-1.0);
-
-  method_m1_closure_min_photon_density = p->value_float
-    ("Method:m1_closure:min_photon_density",0.0);
-
-  method_m1_closure_attenuation = p->value_logical
-    ("Method:m1_closure:attenuation", true);
-
-  method_m1_closure_thermochemistry = p->value_logical
-    ("Method:m1_closure:thermochemistry", true);
-
-  method_m1_closure_recombination_radiation = p->value_logical
-    ("Method:m1_closure:recombination_radiation",false);
-
-  method_m1_closure_H2_photodissociation = p->value_logical
-    ("Method:m1_closure:H2_photodissociation", false);
-
-  method_m1_closure_lyman_werner_background = p->value_logical
-    ("Method:m1_closure:lyman_werner_background", false);
-
-  method_m1_closure_LWB_J21 = p->value_float
-    ("Method:m1_closure:LWB_J21", -1.0);
-
-  method_m1_closure_cross_section_calculator = p->value_string
-    ("Method:m1_closure:cross_section_calculator","vernier");
-
-  method_m1_closure_SED.resize(method_m1_closure_N_groups);
-  method_m1_closure_energy_lower.resize(method_m1_closure_N_groups);
-  method_m1_closure_energy_upper.resize(method_m1_closure_N_groups);
-  method_m1_closure_energy_mean.resize(method_m1_closure_N_groups);
-  
-  int N_species = 3; // number of ionizable species for RT (HI, HeI, HeII)
-  method_m1_closure_sigmaN.resize(method_m1_closure_N_groups * N_species);
-  method_m1_closure_sigmaE.resize(method_m1_closure_N_groups * N_species);
-
-  // make default energy bins equally spaced between 1 eV and 101 eV
-  double bin_width = 100.0 / method_m1_closure_N_groups;
-  for (int i=0; i<method_m1_closure_N_groups; i++) {
-    // default SED (if this is being used) is flat spectrum
-    method_m1_closure_SED[i] = p->list_value_float
-      (i,"Method:m1_closure:SED", 1.0/method_m1_closure_N_groups);
-
-    method_m1_closure_energy_lower[i] = p->list_value_float
-      (i,"Method:m1_closure:energy_lower", 1.0 + bin_width*i);
-
-    method_m1_closure_energy_upper[i] = p->list_value_float
-      (i,"Method:m1_closure:energy_upper", 1.0 + bin_width*(i+1));
-
-    method_m1_closure_energy_mean[i] = p->list_value_float
-      (i,"Method:m1_closure:energy_mean", 
-         0.5*(method_m1_closure_energy_lower[i] + method_m1_closure_energy_upper[i]));
-
-    for (int j=0; j<N_species; j++) {
-      int sig_index = i*N_species + j;
-      method_m1_closure_sigmaN[sig_index] = p->list_value_float
-        (sig_index,"Method:m1_closure:sigmaN", 0.0);
-
-      method_m1_closure_sigmaE[sig_index] = p->list_value_float
-        (sig_index,"Method:m1_closure:sigmaE", 0.0);
-    }
-  }
 }
 
 //----------------------------------------------------------------------
