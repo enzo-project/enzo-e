@@ -14,21 +14,42 @@ class ParameterAccessor {
   /// @ingroup  Parameters
   /// @brief    [\ref Parameters] Acts as an interface for accessing parameters
   ///
-  /// A lightweight wrapper around a Parameters object that provides access
-  /// access to parameters stored by that object, which share a common root
-  /// "parameter_path" (defined below). Instances of this class are intended
-  /// to be used when initializing objects in other software components. The
-  /// two guiding principles include:
+  /// A lightweight wrapper around a Parameters object that provides methods
+  /// for accessing parameters, which share a common root "parameter_path"
+  /// (defined below), that are stored within the wrapped object. The common
+  /// root "parameter_path" is specified when an instance of this object is
+  /// initialized. When a string is passed to one of the accessor methods, the
+  /// string is internally appended to the end of the root "parameter_path" and
+  /// the result represents the full name of the queried parameter.
+  ///
+  /// Instances of this class are intended to be used when initializing objects
+  /// in other software components (an instance of this class should be passed
+  /// to a factory-method or constructor).
+  ///
+  /// This class was designed with a few guiding principles:
   ///     1. restricting access to parameters within the associated root path
   ///        This is to discourage design of objects that are configured by
   ///        parameters scattered throughout the parameter file. In rare cases
   ///        (e.g. deprecating a parameter), exceptions need to be made. Thus,
   ///        an "escape-hatch" is provided to directly access the wrapped
   ///        Parameters object.
-  ///     2. providing an explicit way to signal that  root-path's
-  ///        name. This can be useful when multiple instances of the same class
-  ///        (e.g. a Method class), but each instance has different
-  ///        configurations.
+  ///     2. providing an explicit way to signal that all parameters accessed
+  ///        through a given instance of this class share a single (queryable &
+  ///        immutable) root-path without requiring the root path to be
+  ///        explicitly specified as part of every parameter-path.
+  ///        - This capability is very useful when multiple instances of the
+  ///          same class (e.g. a Method class) needs to be initialized but
+  ///          each instance has different configurations.
+  ///        - In that scenario, each instance of the class is typically
+  ///          initialized from parameters where the last section(s) of the
+  ///          parameter-paths are unchanged, but the root path differs.
+  ///     3. We do NOT allow the common root-path to be mutated. Thus, if
+  ///        the parameter-accessor is passed to a helper function, you can
+  ///        always be confident that the root-path is unchanged by the
+  ///        function (without needing to check the implementation of that
+  ///        function). If we are ever tempted to mutate the root-path, we
+  ///        should just initialize a new ParameterAccessor (since they are
+  ///        lightweight)
   ///
   /// @par "parameter_path"
   /// Cello uses a "hierarchical" parameter file: the parameters themselves are
