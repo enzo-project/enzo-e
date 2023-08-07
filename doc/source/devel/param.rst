@@ -269,10 +269,10 @@ A code snippet using our new approach is shown below:
 
    The *only* other alternative is have :cpp:class:`!ParameterAccessor` instances "auto-magically" redirect absolute parameter-paths, but I think that will generally be more confusing. 
 
-Other Benefits
---------------
+Benefit: Discourage Usage of scattered parameters
+-------------------------------------------------
 
-Another benefit to the :cpp:expr:`ParameterAccessor::wrapped_Parameters_ref()` class is that it restricts access to parameters within the associated root-path.
+A benefit to the :cpp:expr:`ParameterAccessor::wrapped_Parameters_ref()` class is that it restricts access to parameters within the associated root-path.
 This discourages the design of classes that are configured by parameters scattered throughout the parameter file.
 
 In rare cases (e.g. during refactoring when we convert a previously Method-specific parameter to a Physics parameter and want to retain backwards compatability), exceptions need to be made.
@@ -288,6 +288,30 @@ Please, avoid using this "escape-hatch" unless it's truly necessary.
 
    If we were to do that, we would need to modify the code to recognize this convention.
    We would probably also want to modify the various parameter-accessor methods of the :cpp:class:`!ParameterAccessor` to continue to restrict access to parameters within the common root-path that a :cpp:class:`!ParameterAccessor` is configured with.
+
+Hypothetical Question: How do I query the parameter of some other :cpp:class:`!Method` subclass?
+------------------------------------------------------------------------------------------------
+
+The old approach encouraged a somewhat common programming-idiom, in which the configuration information of a primary :cpp:class:`!Method` subclass was accessed in a secondary location, by accessing the copy of the parameter-value stored as an attribute of the global :cpp:class:`!EnzoConfig` object.
+This secondary location is outside of the primary :cpp:class:`!Method` subclass; it could be within a different :cpp:class:`!Method` subclass, a :cpp:class:`!Compute` subclass, an :cpp:class:`!Initial` subclass, etc.
+
+Under the new approach, :cpp:class:`!EnzoConfig` will no longer hold a copy of each parameter-value, and this programming-idiom is no longer possible.
+We view this as a **feature** of the new-approach.
+
+There are 2 primary problems with this idiom:
+
+1. It makes refactoring of that parameter more difficult.
+
+2. It can lead to cases where you are trying to access parameter-values for :cpp:class:`!Method` subclasses (regardless of whether the subclass is being used in the simulation).
+
+Preferred alternatives to this idiom include either:
+
+1. introducing an accessor method to the primary :cpp:class:`!Method` subclass to directly query configuration-value that is stored as an attribute of that subclass
+2. alterinh the way in which the configuration value is specified and store it within a :cpp:class:`!Physics` class
+
+.. todo::
+
+   After GitHub PR #340 is merged, direct readers to the discussion about different ways to store global configuration information (this discusses when it's a good time to store information within a :cpp:class:`!Method` subclass or within a :cpp:class:`!Physics` subclass).
 
 =================
 Historic Approach
