@@ -26,7 +26,9 @@ list(FILTER LOCAL_SRC_FILES EXCLUDE REGEX "test_EnzoUnits")
 
 target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
 
-# Add a unit test
-add_executable(test_enzo_units "test_EnzoUnits.cpp")
-target_link_libraries(test_enzo_units PRIVATE enzo main_enzo)
-target_link_options(test_enzo_units PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+if (BUILD_TESTING)
+  # Add a unit test
+  add_executable(test_enzo_units "test_EnzoUnits.cpp")
+  target_link_libraries(test_enzo_units PRIVATE enzo main_enzo)
+  target_link_options(test_enzo_units PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+endif()
