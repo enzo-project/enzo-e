@@ -17,17 +17,11 @@ class EnzoMethodPpm : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPpm object
-  EnzoMethodPpm(bool store_fluxes_for_corrections,
-                bool diffusion,
-                int flattening,
-                bool pressure_free,
-                bool steepening,
-                bool use_minimum_pressure_support,
-                enzo_float minimum_pressure_support_parameter);
+  EnzoMethodPpm(bool store_fluxes_for_corrections, ParameterAccessor &p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoMethodPpm (CkMigrateMessage *m)
     : Method (m),

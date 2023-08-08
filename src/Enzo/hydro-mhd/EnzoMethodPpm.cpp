@@ -35,22 +35,21 @@
 //----------------------------------------------------------------------
 
 EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections,
-                              bool diffusion,
-                              int flattening,
-                              bool pressure_free,
-                              bool steepening,
-                              bool use_minimum_pressure_support,
-                              enzo_float minimum_pressure_support_parameter)
+                              ParameterAccessor &p)
   : Method(),
-    comoving_coordinates_(enzo::config()->physics_cosmology),
+    comoving_coordinates_(enzo::cosmology() != nullptr),
     store_fluxes_for_corrections_(store_fluxes_for_corrections),
-    diffusion_(diffusion),
-    flattening_(flattening),
-    pressure_free_(pressure_free),
-    steepening_(steepening),
-    use_minimum_pressure_support_(use_minimum_pressure_support),
-    minimum_pressure_support_parameter_(minimum_pressure_support_parameter)
+    diffusion_(p.value_logical("diffusion", false)),
+    flattening_(p.value_integer("flattening", 3)),
+    pressure_free_(p.value_logical("pressure_free", false)),
+    steepening_(p.value_logical("steepening", false)),
+    use_minimum_pressure_support_(p.value_logical
+                                  ("use_minimum_pressure_support",false)),
+    minimum_pressure_support_parameter_(p.value_integer
+                                        ("minimum_pressure_support_parameter",
+                                         100))
 {
+  this->set_courant(p.value_float("courant",1.0));
 
   // check compatability with EnzoPhysicsFluidProps
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
