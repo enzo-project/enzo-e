@@ -6,13 +6,11 @@ from answer_testing import \
     EnzoETest, \
     ytdataset_test, \
     assert_array_rel_equal, \
-    uses_grackle
-
-_base_file = os.path.basename(__file__)
+    uses_grackle, \
+    cached_opts
 
 # Set test tolerance based on compile precision
-use_double = os.environ.get("USE_DOUBLE", "false").lower() == "true"
-yt.mylog.info(f"{_base_file}: use_double = {use_double}")
+use_double = cached_opts().uses_double_prec
 if use_double:
     decimals = 12
 else:

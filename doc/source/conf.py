@@ -16,7 +16,7 @@ import json, sys, os, subprocess
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('./_ext'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -25,9 +25,9 @@ import json, sys, os, subprocess
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.intersphinx',
-              'sphinx.ext.todo',
-              'breathe',]
+extensions = ['sphinx.ext.todo',
+              'breathe',
+              'par']
 todo_include_todos=True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -133,7 +133,7 @@ html_css_files = {
     #                        https://github.com/readthedocs/sphinx_rtd_theme/issues/117
     #                        to solve the issue related to the tables
     #                        not wrapping
-   'roles.css'
+   'roles.css',
 }
 
 
@@ -269,9 +269,6 @@ epub_copyright = u'2022, Enzo Development Community'
 
 # Allow duplicate toc entries.
 #epub_tocdup = True
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
 
 # -- Set Breathe parameters and Execute Doxygen -------------------------------
 

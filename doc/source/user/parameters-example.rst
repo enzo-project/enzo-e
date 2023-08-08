@@ -141,11 +141,8 @@ Output Group
       cycle_step {
          field_list = ["density"];
          type     = "image";
-         name       = ["E-%03d.png","cycle"];
+         name     = ["E-%03d.png","cycle"];
          schedule = ["cycle","interval", 10];
-         colormap_alpha = [0.00, 0.00, 1.00, 0.0,
-                           0.00, 1.00, 0.00, 0.33,
-                           1.00, 1.00, 0.00, 0.66, 
-                           1.00, 0.00, 0.00, 1.0];
+         colormap = ["blue", "green", "yellow", "red"];
       }
    }

@@ -19,6 +19,10 @@ endif()
 #Define project and languages
 project(Enzo-E VERSION 1.0.0 LANGUAGES C CXX Fortran)
 
+# We need C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Don't allow in-source builds
@@ -50,15 +54,13 @@ find_package(Charm REQUIRED)
 # Link executables with the charmc wrapper
 STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_COMPILER}"
        CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
-# for book-keeping purposes create a library representing the external
-# Charm-library. We are going to make this an interface library (a header-only)
-# library since the charmc wrapper makes sure we link to the correct library
-add_library(CHARM_EXTERNAL INTERFACE)
-target_include_directories(CHARM_EXTERNAL INTERFACE ${CHARM_INCLUDE_DIRS})
 
 
 # Need to process Grackle here as both Cello and Enzo-E depend on it
 option(USE_GRACKLE "Use Grackle Chemistry" ON)
+# don't bother advertising the following option (but users can
+# overwrite it if they really want to - e.g. to reduce binary size)
+option(GRACKLE_USE_STATIC_LIBS  "sets Grackle's lib-type if USE_GRACKLE=ON" ON)
 if (USE_GRACKLE)
   find_package(Grackle)
   if (Grackle_FOUND)
@@ -307,6 +309,13 @@ if (__processedUserDefaults)
   include(${Enzo-E_CONFIG_PATH})
 endif()
 
+# we need to pull CTest sooner or later anyways. We do it before adding the
+# source directories because it introduces the BUILD_TESTING option which is
+# set to ON if it was not previously initialized (e.g. from the command line)
+# -> this option is used within source directories to determine whether the
+#    binaries for unit-tests should be declared
+include(CTest)
+
 # In principle a more fine grained control (i.e., target specific include directories
 # rather than this global one would be preferred, but, e.g., `pngwriter.h` is curently
 # included in many targets/libraries (without being linked) so we'll use the global for
@@ -319,10 +328,7 @@ add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
 
-include(CTest)
 
-# include(CTest) implicitly initializes BUILD_TESTING to ON if it was not
-# previously initialized (e.g. from the command line)
 if (BUILD_TESTING)
   add_subdirectory(test)
 endif()

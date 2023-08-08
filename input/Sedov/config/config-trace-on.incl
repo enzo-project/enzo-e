@@ -40,11 +40,7 @@ Output {
       particle_list = ["trace"];
       image_size = [1024,1024];
       colormap =   # blackbody
-          [   0.0, 0.0, 0.0,
-              1.0, 0.0, 0.0,
-              1.0, 1.0, 0.0,
-              1.0, 1.0, 1.0 
-          ];
+          [ "black", "red", "yellow", "white" ];
 
 
       name = ["trace-p%02d-c%06d.png", "proc","cycle"];
