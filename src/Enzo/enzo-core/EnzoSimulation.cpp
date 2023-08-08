@@ -87,10 +87,6 @@ void EnzoSimulation::pup (PUP::er &p)
   p | check_ordering_;
   p | check_directory_;
   p | restart_level_;
-
-  if (p.isUnpacking()) {
-    EnzoBlock::initialize(enzo::config());
-  }
 }
 
 //----------------------------------------------------------------------
@@ -207,9 +203,6 @@ void EnzoSimulation::initialize() throw()
 #endif  
   // Call initialize() on base Simulation class
   Simulation::initialize();
-
-  // Initialize EnzoBlock static variables
-  EnzoBlock::initialize(enzo::config());
 
 }
 

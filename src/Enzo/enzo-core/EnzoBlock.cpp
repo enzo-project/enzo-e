@@ -14,137 +14,6 @@
 
 // #define DEBUG_ENZO_BLOCK
 
-//======================================================================
-
-int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-
-// Chemistry
-
-int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
-
-// Physics
-
-int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
-
-// Problem-specific
-
-int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
-
-// Method PPM
-
-int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
-int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
-int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-
-// Numerics
-
-enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
-
-// Domain
-
-enzo_float EnzoBlock::DomainLeftEdge [3*CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::DomainRightEdge[3*CONFIG_NODE_SIZE];
-
-// PPM
-
-int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
-
-int EnzoBlock::ghost_depth[3*CONFIG_NODE_SIZE];
-
-// Fields
-
-int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
-
-//----------------------------------------------------------------------
-
-// STATIC
-void EnzoBlock::initialize(const EnzoConfig * enzo_config)
-{
-#ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d DEBUG_ENZO_BLOCK [static] EnzoBlock::initialize()\n",
-            CkMyPe());
-#endif
-  int gx = enzo_config->field_ghost_depth[0];
-  int gy = enzo_config->field_ghost_depth[1];
-  int gz = enzo_config->field_ghost_depth[2];
-
-  const int rank = enzo_config->mesh_root_rank;
-
-  if (rank < 1) gx = 0;
-  if (rank < 2) gy = 0;
-  if (rank < 3) gz = 0;
-
-  double time  = enzo_config->initial_time;
-
-  for (int in=0; in<CONFIG_NODE_SIZE; in++) {
-
-    GridRank[in] = 0;
-    NumberOfBaryonFields[in] = 0;
-
-    int i;
-
-    for (i=0; i<MAX_DIMENSION; i++) {
-      DomainLeftEdge [in*3+i] = 0;
-      DomainRightEdge[in*3+i] = 0;
-      ghost_depth[in*3+i] = 0;
-    }
-
-    GridRank[in]            = enzo_config->mesh_root_rank;
-
-    // Chemistry parameters
-
-    MultiSpecies[in] = 0;    // 0:0 1:6 2:9 3:12
-
-    // Gravity parameters
-
-    GravitationalConstant[in]           = 1.0;  // used only in SetMinimumSupport()
-
-    //Problem specific parameter
-
-    ProblemType[in] = 0;
-
-    // PPM parameters
-
-    PressureFree[in]              = enzo_config->ppm_pressure_free;
-    UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
-    MinimumPressureSupportParameter[in] =
-      enzo_config->ppm_minimum_pressure_support_parameter;
-
-    PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
-    PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
-    PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
-
-    ghost_depth[in*3+0] = gx;
-    ghost_depth[in*3+1] = gy;
-    ghost_depth[in*3+2] = gz;
-
-    NumberOfBaryonFields[in] = enzo_config->field_list.size();
-
-    // Check NumberOfBaryonFields
-
-    if (NumberOfBaryonFields[in] > MAX_NUMBER_OF_BARYON_FIELDS) {
-      ERROR2 ("EnzoBlock::initialize",
-	      "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
-	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields[in] );
-    }
-
-    DomainLeftEdge [in*3+0] = enzo_config->domain_lower[0];
-    DomainLeftEdge [in*3+1] = enzo_config->domain_lower[1];
-    DomainLeftEdge [in*3+2] = enzo_config->domain_lower[2];
-
-    DomainRightEdge[in*3+0] = enzo_config->domain_upper[0];
-    DomainRightEdge[in*3+1] = enzo_config->domain_upper[1];
-    DomainRightEdge[in*3+2] = enzo_config->domain_upper[2];
-
-    InitialTimeInCodeUnits[in] = time;
-
-  }
-
-} // void initialize()
-
 //----------------------------------------------------------------------
 
 EnzoBlock::EnzoBlock (CkMigrateMessage *m)
@@ -315,79 +184,8 @@ void EnzoBlock::write(FILE * fp) throw ()
 {
   const int in = cello::index_static();
 
-  fprintf (fp,"EnzoBlock: UseMinimumPressureSupport %d\n",
-	   UseMinimumPressureSupport[in]);
-  fprintf (fp,"EnzoBlock: MinimumPressureSupportParameter %g\n",
-	   MinimumPressureSupportParameter[in]);
-
-  // Chemistry
-
-  fprintf (fp,"EnzoBlock: MultiSpecies %d\n",
-	   MultiSpecies[in]);
-
-  // Physics
-
-  fprintf (fp,"EnzoBlock: PressureFree %d\n",
-	   PressureFree[in]);
-  //fprintf (fp,"EnzoBlock: Gamma %g\n",
-  //	   Gamma[in]);
-  fprintf (fp,"EnzoBlock: GravitationalConstant %g\n",
-	   GravitationalConstant[in]);
-
-  // Problem-specific
-
-  fprintf (fp,"EnzoBlock: ProblemType %d\n",
-	   ProblemType[in]);
-
-  // Method PPM
-
-  fprintf (fp,"EnzoBlock: PPMFlatteningParameter %d\n",
-	   PPMFlatteningParameter[in]);
-  fprintf (fp,"EnzoBlock: PPMDiffusionParameter %d\n",
-	   PPMDiffusionParameter[in]);
-  fprintf (fp,"EnzoBlock: PPMSteepeningParameter %d\n",
-	   PPMSteepeningParameter[in]);
-
-  // Numerics
-
-  /*
-  fprintf (fp,"EnzoBlock: DualEnergyFormalism %d\n",
-	   DualEnergyFormalism[in]);
-  fprintf (fp,"EnzoBlock: DualEnergyFormalismEta1 %g\n",
-	   DualEnergyFormalismEta1[in]);
-  fprintf (fp,"EnzoBlock: DualEnergyFormalismEta2 %g\n",
-	   DualEnergyFormalismEta2[in]);
-  fprintf (fp,"EnzoBlock: pressure_floor %g\n",
-	   pressure_floor[in]);
-  fprintf (fp,"EnzoBlock: density_density_floor %g\n",
-	   density_floor[in]);
-  fprintf (fp,"EnzoBlock: number_density_floor %g\n",
-	   number_density_floor[in]);
-  fprintf (fp,"EnzoBlock: temperature_floor %g\n",
-	   temperature_floor[in]);
-  */
-
-  fprintf (fp,"EnzoBlock: InitialRedshift %g\n",
-	   InitialRedshift[in]);
-  fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",
-	   InitialTimeInCodeUnits[in]);
-
-  // Domain
-
-  fprintf (fp,"EnzoBlock: DomainLeftEdge %g %g %g\n",
-	   DomainLeftEdge [in*3+0],
-	   DomainLeftEdge [in*3+1],
-	   DomainLeftEdge [in*3+2]);
-  fprintf (fp,"EnzoBlock: DomainRightEdge %g %g %g\n",
-	   DomainRightEdge[in*3+0],
-	   DomainRightEdge[in*3+1],
-	   DomainRightEdge[in*3+2]);
-
-  // Fields
-
   // Grid
 
-  fprintf (fp,"EnzoBlock: GridRank %d\n",    GridRank[in]);
   fprintf (fp,"EnzoBlock: GridDimension %d %d %d\n",
 	   GridDimension[0],GridDimension[1],GridDimension[2]);
   fprintf (fp,"EnzoBlock: GridStartIndex %d %d %d\n",
@@ -399,15 +197,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n",
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
-
-  fprintf (fp,"EnzoBlock: ghost %d %d %d\n",
-	   ghost_depth[in*3+0],
-	   ghost_depth[in*3+1],
-	   ghost_depth[in*3+2]);
-
-
-  fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
-	   NumberOfBaryonFields[in]);
 
   // problem
 
@@ -456,16 +245,42 @@ void EnzoBlock::initialize () throw()
 
   Field field = data()->field();
 
+  // the following check was originally located elsewhere, but we moved it here
+  // for lack of a better place to put it. We might be able to remove this in
+  // the future.
+  //
+  // It's unclear whether we should be using field.num_permanent() or a
+  // different count of fields. In any case, this is improvement over the count
+  // that was used previously in this check
+  if (field.num_permanent() > MAX_NUMBER_OF_BARYON_FIELDS) {
+    ERROR2 ("EnzoBlock::initialize",
+            "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
+            MAX_NUMBER_OF_BARYON_FIELDS, field.num_permanent() );
+  }
+
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);
 
-  int gx,gy,gz;
+  // query the ghost depth.
+  //
+  // Note: this is an improper way to do things... We only do it this way
+  // because this is how it used to be done when EnzoBlock::ghost_depth was a
+  // global variable
+  //
+  // In the future, we should be computing GridDimension, GridStartIndex and
+  // GridEndIndex within the Method objects where that information is needed
+  // and using the ghost_depth information relevant to the fields that are
+  // being used. Specifically, this would look something like:
+  //     int gx,gy,gz;
+  //     field.ghost_depth(field.field_id("density"), &gx, &gy, &gz);
+  //     if (cello::rank() < 1) gx = 0;
+  //     if (cello::rank() < 2) gy = 0;
+  //     if (cello::rank() < 3) gz = 0;
 
-  const int in = cello::index_static();
-
-  gx = EnzoBlock::ghost_depth[in*3+0];
-  gy = EnzoBlock::ghost_depth[in*3+1];
-  gz = EnzoBlock::ghost_depth[in*3+2];
+  const int rank = cello::rank();
+  int gx = (rank < 1) ? 0 : cello::config()->field_ghost_depth[0];
+  int gy = (rank < 2) ? 0 : cello::config()->field_ghost_depth[1];
+  int gz = (rank < 3) ? 0 : cello::config()->field_ghost_depth[2];
 
   GridDimension[0]  = nx + 2*gx;
   GridDimension[1]  = ny + 2*gy;
