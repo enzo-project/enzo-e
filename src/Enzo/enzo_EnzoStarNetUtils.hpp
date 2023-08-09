@@ -71,6 +71,9 @@ private:
   std::vector<double> Nstar_CDF_, Nstar_CDF_bins_;
   std::vector<double> creationtime_CDF_, creationtime_CDF_bins_;
 
-  std::vector<double> M0_, M1_, M2_, M3_; 
+  std::vector<double> M0_, M1_, M2_, M3_;
+
+  // stream for parallel random number generator
+  CrnStream * stream;
 };
 

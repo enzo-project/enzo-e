@@ -62,6 +62,9 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
   double sphere_x = 0.0, sphere_y = 0.0, sphere_z = 0.0;
   double sphere_r = 0.0;
   double sphere_mSNe = 0.0, sphere_mHNe = 0.0, sphere_mPISNe = 0.0;
+  int sphere_nSNe = 0, sphere_nHNe = 0, sphere_nPISNe = 0, sphere_nBH = 0;
+  double sphere_mstar = 0.0;
+
   bool contribute_sphere = false;
   if (block->is_leaf()) {
 
@@ -95,6 +98,12 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
     const int ia_mHNe = particle.attribute_index(it, "yield_HNe");
     const int ia_mPISNe = particle.attribute_index(it, "yield_PISNe");
 
+    const int ia_mstar = particle.attribute_index(it, "stellar_mass");
+    const int ia_nSNe = particle.attribute_index(it, "num_SNe");
+    const int ia_nHNe = particle.attribute_index(it, "num_HNe");
+    const int ia_nPISNe = particle.attribute_index(it, "num_PISNe");
+    const int ia_nBH = particle.attribute_index(it, "num_BH");
+
     const int ia_t = particle.attribute_index(it, "creation_time");
 
     const int dp = particle.stride(it, ia_x);
@@ -103,6 +112,12 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
     const int dm_SNe = particle.stride(it, ia_mSNe);
     const int dm_HNe = particle.stride(it, ia_mHNe);
     const int dm_PISNe = particle.stride(it, ia_mPISNe);
+    const int dm_star = particle.stride(it, ia_mstar);
+    const int dm_nSNe = particle.stride(it, ia_nSNe);
+    const int dm_nHNe = particle.stride(it, ia_nHNe);
+    const int dm_nPISNe = particle.stride(it, ia_nPISNe);
+    const int dm_nBH = particle.stride(it, ia_nBH);
+
     const int dt = particle.stride(it, ia_t);
 
     const int nb = particle.num_batches(it);
@@ -119,6 +134,12 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
       enzo_float * pmSNe = (enzo_float *) particle.attribute_array(it, ia_mSNe, ib);
       enzo_float * pmHNe = (enzo_float *) particle.attribute_array(it, ia_mHNe, ib);
       enzo_float * pmPISNe = (enzo_float *) particle.attribute_array(it, ia_mPISNe, ib);
+      enzo_float * pmstar = (enzo_float *) particle.attribute_array(it, ia_mstar, ib);
+      enzo_float * pnSNe = (enzo_float *) particle.attribute_array(it, ia_nSNe, ib);
+      enzo_float * pnHNe = (enzo_float *) particle.attribute_array(it, ia_nHNe, ib);
+      enzo_float * pnPISNe = (enzo_float *) particle.attribute_array(it, ia_nPISNe, ib);
+      enzo_float * pnBH = (enzo_float *) particle.attribute_array(it, ia_nBH, ib);
+
       enzo_float * pform  = (enzo_float *) particle.attribute_array(it, ia_t, ib);
 
       int np = particle.num_particles(it,ib);
@@ -131,6 +152,11 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
         int ipdm_SNe = ip*dm_SNe;
         int ipdm_HNe = ip*dm_HNe;
         int ipdm_PISNe = ip*dm_PISNe;
+        int ipdm_star = ip*dm_star;
+        int ipdm_nSNe = ip*dm_nSNe;
+        int ipdm_nHNe = ip*dm_nHNe;
+        int ipdm_nPISNe = ip*dm_nPISNe;
+        int ipdm_nBH = ip*dm_nBH;
         int ipdt = ip*dt;
         #ifdef DEBUG_METHOD_FBNET
           CkPrintf("EnzoMethodFBDeposit:: creation_time = %f; block time = %f; block_cycle = %d\n", pform[ipdt], block->time(), block->cycle());
@@ -143,6 +169,12 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
           sphere_mSNe = pmSNe[ipdm_SNe];
           sphere_mHNe = pmHNe[ipdm_HNe];
           sphere_mPISNe = pmPISNe[ipdm_PISNe];
+          sphere_mstar = pmstar[ipdm_star];
+          sphere_nSNe = pnSNe[ipdm_nSNe];
+          sphere_nHNe = pnHNe[ipdm_nHNe];
+          sphere_nPISNe = pnPISNe[ipdm_nPISNe];
+          sphere_nBH = pnBH[ipdm_nBH];
+
           contribute_sphere = true; 
         }
       }
@@ -150,11 +182,11 @@ void EnzoMethodFBNetDeposit::compute ( Block * block ) throw()
 
   }
 
-
   if (contribute_sphere) {
     double center[3] = {sphere_x, sphere_y, sphere_z};
 
-    EnzoObjectFeedbackSphere sphere(center, sphere_r, sphere_mSNe, sphere_mHNe, sphere_mPISNe);
+    EnzoObjectFeedbackSphere sphere(center, sphere_r, sphere_mSNe, sphere_mHNe, sphere_mPISNe,
+                                    sphere_nSNe, sphere_nHNe, sphere_nPISNe, sphere_nBH, sphere_mstar);
     #ifdef DEBUG_METHOD_FBNET
       CkPrintf("[%d] pushing back sphere_list\n", CkMyPe());
     #endif
@@ -184,7 +216,7 @@ void EnzoSimulation::p_fbnet_concatenate_sphere_lists()
 
     if (nspheres == 0) {
       double center_dummy[3] = {0.0,0.0,0.0};
-      EnzoObjectFeedbackSphere dummy_sphere(center_dummy,0.0,0.0,0.0,0.0);
+      EnzoObjectFeedbackSphere dummy_sphere(center_dummy,0.0,0.0,0.0,0.0,0,0,0,0,0.0);
       EnzoObjectFeedbackSphere sphere_arr[1] = {dummy_sphere};
       SIZE_ARRAY_TYPE(n,EnzoObjectFeedbackSphere,sphere_arr, 1);
 

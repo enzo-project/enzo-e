@@ -53,6 +53,10 @@ FBNet::FBNet ()
   std::vector<std::vector<double>*> regression_vars = {&M0_, &M1_, &M2_, &M3_};
   read_file(weights_file, regression_vars);
 
+  // set random seed for models with stochastic elements
+  //srand( time(NULL)*(CkMyPe()+1) ); 
+  //int seed = 0; // TODO: Make this a parameter!
+  //CrnInitStream(stream, seed, 0);
 }
 
 //---------------------------
@@ -80,7 +84,8 @@ void FBNet::read_file(std::string file, std::vector< std::vector<double> * > var
 int FBNet::get_Nstars() throw() 
 {
   double random = (double) rand()/RAND_MAX;
-  
+  //double random = CrnDouble(stream);  
+
   int Nstars = 0;
   // find into which bin the random number falls
   for (int i=0; i<Nstar_CDF_.size()-1; i++) {
@@ -90,13 +95,15 @@ int FBNet::get_Nstars() throw()
     }
   }
 
+  CkPrintf("[%d] FBNet::get_Nstars(): random = %f; Nstars = %d\n", CkMyPe(), random, Nstars);
   return std::max(Nstars, 1); // always return at least 1 star
 }
 
 double FBNet::get_mass() throw() 
 {
   double random = (double) rand()/RAND_MAX;
-  
+  //double random = CrnDouble(stream);  
+
   double Mstar = 0;
   // find into which bin the random number falls
   for (int i=0; i<mass_CDF_.size()-1; i++) {
@@ -112,7 +119,8 @@ double FBNet::get_mass() throw()
 double FBNet::get_creationtime() throw() 
 {
   double random = (double) rand()/RAND_MAX;
-  
+  //double random = CrnDouble(stream); 
+ 
   int creationtime = 0;
   // find into which bin the random number falls
   for (int i=0; i<creationtime_CDF_.size()-1; i++) {

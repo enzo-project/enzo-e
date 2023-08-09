@@ -365,6 +365,9 @@ void EnzoMethodGrackle::setup_grackle_fields
 
   grackle_fields->metal_density   = fadaptor.ptr_for_grackle("metal_density");
 
+  // H2 self-shielding length (for H2_self_shielding = 2)
+  grackle_fields->H2_self_shielding_length = fadaptor.ptr_for_grackle("H2_self_shielding_length");
+
   //  RADIATIVE TRANSFER HEATING AND IONIZATION RATES
   grackle_fields->RT_heating_rate         = fadaptor.ptr_for_grackle("RT_heating_rate");
   grackle_fields->RT_HI_ionization_rate   = fadaptor.ptr_for_grackle("RT_HI_ionization_rate");

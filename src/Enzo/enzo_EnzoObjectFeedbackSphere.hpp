@@ -3,19 +3,30 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
   public:
     /// Constructor
     EnzoObjectFeedbackSphere(double center[3], double radius, 
-      double metal_yield_SNe, double metal_yield_HNe, double metal_yield_PISNe) 
+      double metal_yield_SNe, double metal_yield_HNe, double metal_yield_PISNe,
+      int num_SNe, int num_HNe, int num_PISNe, int num_BH, double stellar_mass) 
       throw()
       : ObjectSphere(center, radius),
         metal_yield_SNe_(metal_yield_SNe),
         metal_yield_HNe_(metal_yield_HNe),
-        metal_yield_PISNe_(metal_yield_PISNe)
+        metal_yield_PISNe_(metal_yield_PISNe),
+        num_SNe_(num_SNe),
+        num_HNe_(num_HNe),
+        num_PISNe_(num_PISNe),
+        num_BH_(num_BH),
+        stellar_mass_(stellar_mass)
         { };
 
     EnzoObjectFeedbackSphere() throw()
       : ObjectSphere(),
         metal_yield_SNe_(0),
         metal_yield_HNe_(0),
-        metal_yield_PISNe_(0)
+        metal_yield_PISNe_(0),
+        num_SNe_(0),
+        num_HNe_(0),
+        num_PISNe_(0),
+        num_BH_(0),
+        stellar_mass_(0)
     { };
 
     /// Charm++ PUP::able declarations
@@ -25,7 +36,12 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
       : ObjectSphere(m),
         metal_yield_SNe_(0),
         metal_yield_HNe_(0),
-        metal_yield_PISNe_(0)
+        metal_yield_PISNe_(0),
+        num_SNe_(0),
+        num_HNe_(0),
+        num_PISNe_(0),
+        num_BH_(0),
+        stellar_mass_(0)
     { }
 
     void pup (PUP::er &p)
@@ -35,7 +51,12 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
       ObjectSphere::pup(p);
       p | metal_yield_SNe_;
       p | metal_yield_HNe_;
-      p | metal_yield_PISNe_; 
+      p | metal_yield_PISNe_;
+      p | num_SNe_;
+      p | num_HNe_;
+      p | num_PISNe_;
+      p | num_BH_;
+      p | stellar_mass_; 
     }
 
   ///--------------------
@@ -58,6 +79,11 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
     SIZE_SCALAR_TYPE(size,double,metal_yield_SNe_);
     SIZE_SCALAR_TYPE(size,double,metal_yield_HNe_);
     SIZE_SCALAR_TYPE(size,double,metal_yield_PISNe_);
+    SIZE_SCALAR_TYPE(size,int,num_SNe_);
+    SIZE_SCALAR_TYPE(size,int,num_HNe_);
+    SIZE_SCALAR_TYPE(size,int,num_PISNe_);
+    SIZE_SCALAR_TYPE(size,int,num_BH_);
+    SIZE_SCALAR_TYPE(size,double,stellar_mass_);
 
     return size;
   }
@@ -77,6 +103,11 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
     SAVE_SCALAR_TYPE(pc,double,metal_yield_SNe_);
     SAVE_SCALAR_TYPE(pc,double,metal_yield_HNe_);
     SAVE_SCALAR_TYPE(pc,double,metal_yield_PISNe_);
+    SAVE_SCALAR_TYPE(pc,int,num_SNe_);
+    SAVE_SCALAR_TYPE(pc,int,num_HNe_);
+    SAVE_SCALAR_TYPE(pc,int,num_PISNe_);
+    SAVE_SCALAR_TYPE(pc,int,num_BH_);
+    SAVE_SCALAR_TYPE(pc,double,stellar_mass_);
 
     ASSERT2 ("EnzoObjectFeedbackSphere::save_data()",
              "Expecting buffer size %d actual size %d",
@@ -101,6 +132,11 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
     LOAD_SCALAR_TYPE(pc,double,metal_yield_SNe_);
     LOAD_SCALAR_TYPE(pc,double,metal_yield_HNe_);
     LOAD_SCALAR_TYPE(pc,double,metal_yield_PISNe_);
+    LOAD_SCALAR_TYPE(pc,int,num_SNe_);
+    LOAD_SCALAR_TYPE(pc,int,num_HNe_);
+    LOAD_SCALAR_TYPE(pc,int,num_PISNe_);
+    LOAD_SCALAR_TYPE(pc,int,num_BH_);
+    LOAD_SCALAR_TYPE(pc,double,stellar_mass_);
 
     return pc;
   }
@@ -112,10 +148,16 @@ class EnzoObjectFeedbackSphere : public ObjectSphere {
     double metal_mass_SNe()   {return metal_yield_SNe_;}
     double metal_mass_HNe()   {return metal_yield_HNe_;}
     double metal_mass_PISNe() {return metal_yield_PISNe_;}
-
+    double stellar_mass()     {return stellar_mass_;}
+    int num_SNe()   {return num_SNe_;}
+    int num_HNe()   {return num_HNe_;}
+    int num_PISNe() {return num_PISNe_;}
+    int num_BH()    {return num_BH_;}
   private:
 
     double metal_yield_SNe_, metal_yield_HNe_, metal_yield_PISNe_;
+    double stellar_mass_;
+    int num_SNe_, num_HNe_, num_PISNe_, num_BH_;
 };
 
 

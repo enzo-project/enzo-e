@@ -260,6 +260,11 @@ EnzoConfig::EnzoConfig() throw ()
   method_inference_array_size(),
   method_inference_field_group(),
   method_inference_overdensity_threshold(0),
+  method_inference_model(),
+  method_inference_starnet_repeatable(false),
+  method_inference_starnet_critical_metallicity(3.1e-6),
+  method_inference_starnet_feedback(true),
+  method_inference_starnet_radius_modifier(0.2),
   method_inference_starnet_S1(true),
   method_inference_starnet_S2(true),
   // EnzoMethodM1Closure
@@ -674,6 +679,11 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p,method_inference_array_size,3);
   p | method_inference_field_group;
   p | method_inference_overdensity_threshold;
+  p | method_inference_model;
+  p | method_inference_starnet_repeatable;
+  p | method_inference_starnet_critical_metallicity;
+  p | method_inference_starnet_feedback;
+  p | method_inference_starnet_radius_modifier;
   p | method_inference_starnet_S1;
   p | method_inference_starnet_S2;
 
@@ -2003,6 +2013,21 @@ void EnzoConfig::read_method_inference_(Parameters* p)
 
   method_inference_overdensity_threshold = p->value_float
     ("Method:inference:overdensity_threshold",0.0);
+
+  method_inference_model = p->value_string
+    ("Method:inference:model", "starnet");  
+
+  method_inference_starnet_repeatable = p->value_logical
+    ("Method:inference:starnet_repeatable", false);
+
+  method_inference_starnet_critical_metallicity = p->value_float
+    ("Method:inference:starnet_critical_metallicity", 3.1e-6);
+
+  method_inference_starnet_feedback = p->value_logical
+    ("Method:inference:starnet_feedback", true);
+
+  method_inference_starnet_radius_modifier = p->value_float
+    ("Method:inference:starnet_radius_modifier", 0.2);
 
   method_inference_starnet_S1 = p->value_logical
     ("Method:inference:starnet_S1",true);
