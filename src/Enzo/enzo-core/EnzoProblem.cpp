@@ -694,7 +694,7 @@ Method * EnzoProblem::create_method_
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
     Prolong * prolong = create_prolong_
-      (config->method_prolong[index_method],config);
+      (p_accessor.value_string("prolong","linear"),config);
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);

@@ -117,7 +117,6 @@ void Config::pup (PUP::er &p)
   p | method_schedule_index;
   p | method_courant;
   p | method_flux_correct_single_array;
-  p | method_prolong;
   p | method_type;
 
   // Monitor
@@ -770,7 +769,6 @@ void Config::read_method_ (Parameters * p) throw()
   method_list.   resize(num_method);
   method_courant.resize(num_method);
   method_schedule_index.resize(num_method);
-  method_prolong.resize(num_method);
   method_type.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
@@ -805,9 +803,6 @@ void Config::read_method_ (Parameters * p) throw()
     // leaving this temporarily (not actually used in MethodFluxCorrect)
     method_flux_correct_single_array =
       p->value_logical (full_name + ":single_array",true);
-
-    method_prolong[index_method] =
-      p->value_string(full_name+":prolong","linear");
 
     method_type[index_method] = p->value_string
       (full_name + ":type", name);
