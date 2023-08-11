@@ -345,11 +345,6 @@ public: // interface
       method_grackle_chemistry(),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
-      // EnzoMethodGravity
-      method_gravity_solver(""),
-      method_gravity_order(4),
-      method_gravity_dt_max(1.0e10),
-      method_gravity_accumulate(false),
       // EnzoMethodBackgroundAcceleration
       method_background_acceleration_flavor(""),
       method_background_acceleration_mass(0.0),
@@ -460,7 +455,6 @@ protected: // methods
   void read_method_check_(Parameters *);
   void read_method_feedback_(Parameters *);
   void read_method_grackle_(Parameters *);
-  void read_method_gravity_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_star_maker_(Parameters *);
@@ -844,12 +838,6 @@ public: // attributes
   GrackleChemistryData       method_grackle_chemistry;
   bool                       method_grackle_use_cooling_timestep;
   double                     method_grackle_radiation_redshift;
-
-  /// EnzoMethodGravity
-  std::string                method_gravity_solver;
-  int                        method_gravity_order;
-  double                     method_gravity_dt_max;
-  bool                       method_gravity_accumulate;
 
   /// EnzoMethodBackgroundAcceleration
 

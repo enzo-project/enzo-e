@@ -20,19 +20,17 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodGravity::EnzoMethodGravity
-(int index_solver,
- int order,
- bool accumulate,
- int index_prolong,
- double dt_max)
+EnzoMethodGravity::EnzoMethodGravity(ParameterAccessor &p, int index_solver,
+                                     int index_prolong)
   : Method(),
     index_solver_(index_solver),
-    order_(order),
+    order_(p.value_integer("order",4)),
     ir_exit_(-1),
     index_prolong_(index_prolong),
-    dt_max_(dt_max)
+    dt_max_(p.value_float("dt_max",1.0e10))
 {
+  const bool accumulate = p.value_logical("accumulate",true);
+
   // Change this if fields used in this routine change
   // declare required fields
   cello::define_field ("density");
