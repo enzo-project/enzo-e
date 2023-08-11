@@ -27,7 +27,10 @@ public: // interface
 
   MsgCoarsen();
 
-  MsgCoarsen( int num_face_level, std::vector<int> & face_level, int ic3[3],
+  MsgCoarsen( int num_face_level,
+              std::vector<int> & face_level,
+              std::vector<int> & face_level_count,
+              int ic3[3],
               Adapt * adapt_child);
 
   virtual ~MsgCoarsen();
@@ -53,6 +56,8 @@ public: // interface
 
   /// Return the face_level_ attribute
   int * face_level() { return face_level_; }
+  /// Return the face_level_count_ attribute
+  int * face_level_count() { return face_level_count_; }
 
   Adapt * adapt_child() const { return adapt_child_; }
   
@@ -82,6 +87,7 @@ protected: // attributes
 
   int num_face_level_;
   int * face_level_;
+  int * face_level_count_;
   int ic3_[3];
 
 };

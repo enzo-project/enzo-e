@@ -133,10 +133,10 @@ public: // interface
   { return index_; }
 
   int face_level (const int if3[3]) const
-  { return adapt_.face_level(if3,Adapt::LevelType::curr); }
+  { return adapt_.face_level_curr(if3); }
 
   int face_level (int axis, int face) const
-  { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
+  { return adapt_.face_level_curr(axis,face); }
 
 
   int child_face_level (const int ic3[3], const int if3[3]) const
@@ -145,13 +145,19 @@ public: // interface
   int child_face_level_next (const int ic3[3], const int if3[3]) const
   { return child_face_level_next_[ICF3(ic3,if3)]; }
 
-  void set_child_face_level_curr (const int ic3[3], const int if3[3], int level)
-  { child_face_level_curr_[ICF3(ic3,if3)] = level;  }
+  void set_child_face_level_curr
+  (const int ic3[3], const int if3[3], int level, int count = -1);
 
-  void set_child_face_level_next (const int ic3[3], const int if3[3], int level)
-  { child_face_level_next_[ICF3(ic3,if3)] = level; }
+  void set_child_face_level_next
+  (const int ic3[3], const int if3[3], int level, int count = -1);
 
-
+  void clear_child_face_level_counts()
+  {
+    auto & curr_count = child_face_level_curr_count_;
+    std::fill(curr_count.begin(),curr_count.end(),-1);
+    auto & next_count = child_face_level_next_count_;
+    std::fill(next_count.begin(),next_count.end(),-1);
+  }
   /// Verify that new and old adapt neighbors match
   void verify_neighbors();
 
@@ -482,13 +488,14 @@ public:
    int ic3[3],
    std::vector<int> if3[3],
    int level_now, int level_new,
-   int level_max, bool can_coarsen);
-  
+   int level_max, bool can_coarsen,
+   int count);
+
   void p_adapt_recv_child (MsgCoarsen * msg);
 
   void adapt_recv (Index index_send, const int of3[3], const int ic3[3],
 		   int level_face_new, int level_relative,
-                   int level_max, bool can_coarsen);
+                   int level_max, bool can_coarsen, int count);
 
   void adapt_send_level();
 
@@ -977,9 +984,11 @@ protected: // attributes
 
   /// current level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_curr_;
+  std::vector<int> child_face_level_curr_count_;
 
   /// new level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_next_;
+  std::vector<int> child_face_level_next_count_;
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;

@@ -53,6 +53,8 @@ Block::Block ( MsgType msg_type )
     adapt_(),
     child_face_level_curr_(),
     child_face_level_next_(),
+    child_face_level_curr_count_(),
+    child_face_level_next_count_(),
     count_coarsen_(0),
     adapt_step_(0),
     adapt_ready_(false),
@@ -109,10 +111,6 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   }
 #endif
 
-#ifdef TRACE_REFINE
-  CkPrintf ("TRACE_REFINE %s\n",name().c_str());
-  fflush(stdout);
-#endif
   delete msg;
 }
 
@@ -178,22 +176,32 @@ void Block::init_refine_
 
   // Initialize neighbor face levels
 
+  const int nc = cello::num_children();
   if (num_face_level == 0) {
 
-    child_face_level_curr_.resize(cello::num_children()*27);
+    child_face_level_curr_.resize(nc*27);
 
-    adapt_.reset_face_level (Adapt::LevelType::curr);
+    adapt_.reset_face_level_curr();
 
   } else {
 
-    child_face_level_curr_.resize(cello::num_children()*num_face_level);
+    child_face_level_curr_.resize(nc*num_face_level);
 
-    adapt_.copy_face_level(Adapt::LevelType::curr,face_level);
+    adapt_.copy_face_level_curr(face_level);
 
   }
 
-  for (size_t i=0; i<child_face_level_curr_.size(); i++)
+  for (size_t i=0; i<child_face_level_curr_.size(); i++) {
     child_face_level_curr_[i] = 0;
+  }
+
+  // Initialize face level counts
+  child_face_level_curr_count_.resize(nc*27);
+  child_face_level_next_count_.resize(nc*27);
+  for (size_t i=0; i<child_face_level_curr_.size(); i++) {
+    child_face_level_curr_count_[i] = -1;
+    child_face_level_next_count_[i] = -1;
+  }
 
   initialize_child_face_levels_();
 
@@ -304,6 +312,8 @@ void Block::pup(PUP::er &p)
   p | adapt_;
   p | child_face_level_curr_;
   p | child_face_level_next_;
+  p | child_face_level_curr_count_;
+  p | child_face_level_next_count_;
   p | count_coarsen_;
   p | adapt_step_;
   p | adapt_ready_;
@@ -648,6 +658,8 @@ Block::Block ()
     adapt_(),
     child_face_level_curr_(),
     child_face_level_next_(),
+    child_face_level_curr_count_(),
+    child_face_level_next_count_(),
     count_coarsen_(0),
     adapt_step_(0),
     adapt_ready_(false),
@@ -946,6 +958,35 @@ void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
       is_boundary[axis][face] =
 	index_.is_on_boundary(axis,2*face-1,n3[axis]);
     }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Block::set_child_face_level_curr
+(const int ic3[3], const int if3[3], int level, int count)
+{
+  int i = ICF3(ic3,if3);
+  if (count < 0) {
+    child_face_level_curr_count_[i] = count;
+  }
+  if (count >= child_face_level_curr_count_[i]) {
+    child_face_level_curr_[i]       = level;
+    child_face_level_curr_count_[i] = count;
+  }
+}
+
+//----------------------------------------------------------------------
+void Block::set_child_face_level_next
+(const int ic3[3], const int if3[3], int level, int count)
+{
+  int i = ICF3(ic3,if3);
+  if (count < 0) {
+    child_face_level_next_count_[i] = count;
+  }
+  if (count >= child_face_level_next_count_[i]) {
+    child_face_level_next_[i]       = level;
+    child_face_level_next_count_[i] = count;
   }
 }
 

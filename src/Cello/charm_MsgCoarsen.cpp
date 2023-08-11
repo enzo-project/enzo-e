@@ -22,6 +22,7 @@ MsgCoarsen::MsgCoarsen()
     buffer_(NULL),
     num_face_level_(0),
     face_level_(NULL),
+    face_level_count_(NULL),
     adapt_child_(nullptr)
 {
   ic3_[0] = ic3_[1] = ic3_[2] = -1;
@@ -33,6 +34,7 @@ MsgCoarsen::MsgCoarsen()
 MsgCoarsen::MsgCoarsen
 (int num_face_level,
  std::vector<int> & face_level,
+ std::vector<int> & face_level_count,
  int ic3[3],
  Adapt * adapt_child)
   : CMessage_MsgCoarsen(),
@@ -41,6 +43,7 @@ MsgCoarsen::MsgCoarsen
     buffer_(NULL),
     num_face_level_(num_face_level),
     face_level_(new int[num_face_level]),
+    face_level_count_(new int[num_face_level]),
     adapt_child_(adapt_child)
 {
 
@@ -48,6 +51,7 @@ MsgCoarsen::MsgCoarsen
 
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
+    face_level_count_[i] = -1;
   }
   ic3_[0]=ic3[0];
   ic3_[1]=ic3[1];
@@ -61,9 +65,11 @@ MsgCoarsen::~MsgCoarsen()
   --counter[cello::index_static()];
 
   delete data_msg_;
-  data_msg_ = 0;
+  data_msg_ = nullptr;
   delete [] face_level_;
-  face_level_ = 0;
+  face_level_ = nullptr;
+  delete [] face_level_count_;
+  face_level_count_ = nullptr;
   CkFreeMsg (buffer_);
   buffer_=nullptr;
 }
@@ -99,6 +105,9 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   size += sizeof(int);
 
   // face_level_[]
+  size += msg->num_face_level_ * sizeof(int);
+
+  // face_level_count_[]
   size += msg->num_face_level_ * sizeof(int);
 
   // ic3_[]
@@ -138,6 +147,10 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   // face_level_[]
   for (int i=0; i<msg->num_face_level_; i++) {
     (*pi++) = msg->face_level_[i];
+  }
+  // face_level_count_[]
+  for (int i=0; i<msg->num_face_level_; i++) {
+    (*pi++) = msg->face_level_count_[i];
   }
 
   // ic3_[]
@@ -205,7 +218,17 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
       msg->face_level_[i] = (*pi++);
     }
   } else {
-    msg->face_level_ = 0;
+    msg->face_level_ = nullptr;
+  }
+
+  // face_level_count_[]
+  if (msg->num_face_level_ > 0) {
+    msg->face_level_count_ = new int [msg->num_face_level_];
+    for (int i = 0; i<msg->num_face_level_; i++) {
+      msg->face_level_count_[i] = (*pi++);
+    }
+  } else {
+    msg->face_level_count_ = nullptr;
   }
 
   // ic3_[]

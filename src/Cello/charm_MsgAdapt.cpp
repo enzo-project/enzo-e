@@ -41,6 +41,7 @@ void * MsgAdapt::pack (MsgAdapt * msg)
   SIZE_SCALAR_TYPE(size,int,   msg->level_min_);
   SIZE_SCALAR_TYPE(size,int,   msg->level_max_);
   SIZE_SCALAR_TYPE(size,bool,  msg->can_coarsen_);
+  SIZE_SCALAR_TYPE(size,int,   msg->count_);
   SIZE_ARRAY_TYPE(size,char,msg->tag_,TAG_LEN+1);
 
   //--------------------------------------------------
@@ -65,6 +66,7 @@ void * MsgAdapt::pack (MsgAdapt * msg)
   SAVE_SCALAR_TYPE(pc,int,   msg->level_min_);
   SAVE_SCALAR_TYPE(pc,int,   msg->level_max_);
   SAVE_SCALAR_TYPE(pc,bool,  msg->can_coarsen_);
+  SAVE_SCALAR_TYPE(pc,int,   msg->count_);
   SAVE_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
   
   ASSERT2("MsgAdapt::pack()",
@@ -106,6 +108,7 @@ MsgAdapt * MsgAdapt::unpack(void * buffer)
   LOAD_SCALAR_TYPE(pc,int,   msg->level_min_);
   LOAD_SCALAR_TYPE(pc,int,   msg->level_max_);
   LOAD_SCALAR_TYPE(pc,bool,  msg->can_coarsen_);
+  LOAD_SCALAR_TYPE(pc,int,   msg->count_);
   LOAD_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
 
   // 3. Save the input buffer for freeing later
