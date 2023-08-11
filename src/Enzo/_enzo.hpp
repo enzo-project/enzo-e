@@ -174,6 +174,8 @@ extern "C" {
 #include "fluid-props/EnzoFluidFloorConfig.hpp"
 #include "fluid-props/EnzoPhysicsFluidProps.hpp"
 
+#include "gravity/EnzoPhysicsGravity.hpp"
+
 #include "chemistry/GrackleChemistryData.hpp"
 
 #include "enzo-core/EnzoUnits.hpp"

@@ -199,7 +199,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
         if (! this->check_mass(mass)) continue;
 
-        double tdyn = sqrt(3.0 * cello::pi / 32.0 / enzo_constants::grav_constant /
+        double tdyn = sqrt(3.0 * cello::pi / 32.0 / enzo::grav_constant_cgs() /
                       (density[i] * enzo_units->density()));
 
         //
