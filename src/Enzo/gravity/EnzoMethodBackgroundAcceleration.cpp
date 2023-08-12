@@ -450,33 +450,9 @@ void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
                  const EnzoConfig * enzo_config,
                  const EnzoUnits * enzo_units, const double dt) throw()
 {
-  double DM_mass     = enzo_config->method_background_acceleration_DM_mass *
-                         enzo_constants::mass_solar / enzo_units->mass();
-  double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius *
-                          enzo_constants::kpc_cm / enzo_units->length();
-  double stellar_r   = enzo_config->method_background_acceleration_stellar_scale_height_r *
-                         enzo_constants::kpc_cm / enzo_units->length();
-  double stellar_z   = enzo_config->method_background_acceleration_stellar_scale_height_z *
-                         enzo_constants::kpc_cm / enzo_units->length();
-  double stellar_mass = enzo_config->method_background_acceleration_stellar_mass *
-                        enzo_constants::mass_solar / enzo_units->mass();
-  double bulge_mass   = enzo_config->method_background_acceleration_bulge_mass *
-                        enzo_constants::mass_solar / enzo_units->mass();
-  double bulgeradius = enzo_config->method_background_acceleration_bulge_radius *
-                        enzo_constants::kpc_cm / enzo_units->length();
-  const double * amom = enzo_config->method_background_acceleration_angular_momentum;
-
-  double rcore = enzo_config->method_background_acceleration_core_radius *
-                 enzo_constants::kpc_cm / enzo_units->length();
-
-  ASSERT1("Enzo::MethodBackgroundAcceleration", "DM halo mass (=%e code_units) must be positive and in units of solar masses", DM_mass, (DM_mass > 0));
-
-  double xtemp = DM_mass_radius / rcore;
-
-  // compute the density constant for an NFW halo (rho_o)
-  double DM_density = (DM_mass / (4.0 * cello::pi * std::pow(rcore,3))) / (std::log(1.0+xtemp)-xtemp/(1.0+xtemp));
-
-  double accel_sph, accel_R, accel_z;
+  const GalaxyModelParameterPack pack_dfltU =
+    GalaxyModelParameterPack::from_config(enzo_config);
+  const GalaxyModelFunctor functor(pack_dfltU, enzo_units);
 
   const int mx = block_info.dimensions[0];
   const int my = block_info.dimensions[1];
@@ -494,48 +470,13 @@ void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
        for (int ix=0; ix<mx; ix++){
          double x = block_info.x_val(ix) - accel_center[0];
 
-         // double rsqr  = x*x + y*y + z*z;
-         // double r     = sqrt(rsqr);
-
-         double zheight = amom[0]*x + amom[1]*y + amom[2]*z; // height above disk
-
-         // projected positions in plane of the disk
-         double xplane = x - zheight*amom[0];
-         double yplane = y - zheight*amom[1];
-         double zplane = z - zheight*amom[2];
-
-         double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
-         double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
-
-         // need to multiple all of the below by the gravitational constants
-         double xtemp     = radius/rcore;
-
-         //double
-         accel_sph = G_code * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                     + 4.0 * G_code * cello::pi * DM_density * rcore *
-                          (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
-
-         //double
-         accel_R   = G_code * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
-                             + pow(stellar_r + sqrt( pow(zheight,2)
-                            + pow(stellar_z,2)),2),3));
-         //double
-         accel_z   = G_code * stellar_mass / sqrt(pow(zheight,2)
-                               + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
-                               + pow(stellar_r + sqrt(pow(zheight,2)
-                               + pow(stellar_z,2)),2),3))
-                                   * (stellar_z * sqrt(pow(zheight,2) + pow(stellar_z,2)));
-
-         accel_sph = (radius  == 0.0 ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a));
-         accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a));
-         accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
-
-         accel_R = 0.0; accel_z = 0.0;
+         std::array<double,3> accel =
+           functor.accel_fluid(G_code, cosmo_a, x, y, z);
          // now apply accelerations in cartesian (grid) coordinates
          int i = INDEX(ix,iy,iz,mx,my);
-         if (ax) ax[i] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
-         if (ay) ay[i] -= (accel_sph * y + accel_R*yplane + accel_z*amom[1]);
-         if (az) az[i] -= (accel_sph * z + accel_R*zplane + accel_z*amom[2]);
+         if (ax) ax[i] -= accel[0];
+         if (ay) ay[i] -= accel[1];
+         if (az) az[i] -= accel[2];
         }
      }
   } // end loop over grid cells
@@ -589,43 +530,13 @@ void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
           const double y = py[ipdp] - accel_center[1];
           const double z = pz[ipdp] - accel_center[2];
 
-          double zheight = amom[0]*x + amom[1]*y + amom[2]*z; // height above disk
-
-          // projected positions in plane of the disk
-          double xplane = x - zheight*amom[0];
-          double yplane = y - zheight*amom[1];
-          double zplane = z - zheight*amom[2];
-
-          double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
-          double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
-
-          // need to multiple all of the below by the gravitational constants
-          double xtemp     = radius/rcore;
-
-          //double
-          accel_sph = G_code * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                     + 4.0 * G_code * cello::pi * DM_density * rcore *
-                          (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
-
-          accel_R   = G_code * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
-                              + pow(stellar_r + sqrt( pow(zheight,2)
-                             + pow(stellar_z,2)),2),3));
-          //double
-          accel_z   = G_code * stellar_mass / sqrt(pow(zheight,2)
-                                + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
-                                + pow(stellar_r + sqrt(pow(zheight,2)
-                                + pow(stellar_z,2)),2),3))
-                                    * (stellar_z * sqrt(pow(zheight,2) + pow(stellar_z,2)));
-
-          accel_sph = (radius  == 0.0 ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a));
-          accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a));
-          accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
+          std::array<double,3> accel =
+           functor.accel_particle(G_code, cosmo_a, x, y, z);
 
           // now apply accelerations in cartesian (grid) coordinates
-          if (pax) pax[ipda] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
-          if (pay) pay[ipda] -= (accel_sph * y + accel_R*yplane + accel_z*amom[1]);
-          if (paz) paz[ipda] -= (accel_sph * z + accel_R*zplane + accel_z*amom[2]);
-
+          if (pax) pax[ipda] -= accel[0];
+          if (pay) pay[ipda] -= accel[1];
+          if (paz) paz[ipda] -= accel[2];
 
         } // end loop over particles
 
