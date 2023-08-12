@@ -239,6 +239,68 @@ private:
 
 //---------------------------------------------------------------------
 
+struct PointMassModelParameterPack {
+  double mass;
+  double rcore;
+
+  static PointMassModelParameterPack from_config(const EnzoConfig* enzo_config){
+    double mass = enzo_config->method_background_acceleration_mass;
+    double rcore = enzo_config->method_background_acceleration_core_radius;
+    return {mass, rcore};
+  }
+
+  void pup(PUP::er &p) {
+    p | mass;
+    p | rcore;
+  }
+};
+
+class PointMassModelFunctor {
+
+public:
+
+  PointMassModelFunctor(const PointMassModelParameterPack& pack_dfltU,
+                     const EnzoUnits* enzo_units,
+                     const BlockInfo block_info, double cosmo_a)
+  {
+    pack_codeU_.mass =
+      pack_dfltU.mass * enzo_constants::mass_solar / enzo_units->mass();
+    pack_codeU_.rcore = std::max(0.1*block_info.cell_width[0],
+                                 pack_dfltU.rcore/enzo_units->length());
+
+    min_accel_ = pack_codeU_.mass /
+      ((pack_codeU_.rcore*pack_codeU_.rcore*pack_codeU_.rcore)*cosmo_a);
+  }
+
+  std::array<double,3> accel_fluid(double G_code, double cosmo_a,
+                                   double x, double y, double z)
+    const noexcept
+  {
+    double rsqr  = x*x + y*y + z*z;
+    double r     = sqrt(rsqr);
+
+    double accel =
+      G_code * std::min(pack_codeU_.mass / ((rsqr)*r*cosmo_a), min_accel_);
+
+    return {accel * x, accel * y, accel * z};
+  }
+
+  std::array<double,3> accel_particle(double G_code, double cosmo_a,
+                                      double x, double y, double z)
+    const noexcept
+  {
+    ERROR("PointMassModelFunctor::accel_particle", "Not implemented yet");
+    // this functionality was not implemented prior to the refactor. But, as
+    // far as I can tell, we can just call accel_fluid
+  }
+
+private:
+  PointMassModelParameterPack pack_codeU_;
+  double min_accel_;
+};
+
+//---------------------------------------------------------------------
+
 void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
                  double G_code, Particle * particle,
                  const BlockInfo block_info, const int rank,
