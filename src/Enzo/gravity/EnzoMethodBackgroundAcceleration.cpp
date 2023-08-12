@@ -301,21 +301,109 @@ private:
 
 //---------------------------------------------------------------------
 
-void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
-                 double G_code, Particle * particle,
-                 const BlockInfo block_info, const int rank,
-                 const enzo_float cosmo_a,
-                 const EnzoConfig * enzo_config,
-                 const EnzoUnits * enzo_units, const double dt) throw();
 
-//---------------------------------------------------------------------
+template<typename T>
+void compute_accel_(const T functor,
+                    enzo_float * ax, enzo_float * ay, enzo_float * az,
+                    double G_code, Particle * particle,
+                    const BlockInfo block_info, const int rank,
+                    const enzo_float cosmo_a,
+                    const EnzoConfig * enzo_config,
+                    const EnzoUnits * enzo_units, const double dt) noexcept
+{
+  const int mx = block_info.dimensions[0];
+  const int my = block_info.dimensions[1];
+  const int mz = block_info.dimensions[2];
 
-void PointMass(enzo_float * ax, enzo_float * ay, enzo_float * az,
-               double G_code, Particle * particle,
-               const BlockInfo block_info, const int rank,
-               const enzo_float cosmo_a,
-               const EnzoConfig * enzo_config,
-               const EnzoUnits * enzo_units, const double dt) throw();
+  const double* accel_center
+    = enzo_config->method_background_acceleration_center;
+
+  for (int iz=0; iz<mz; iz++){
+     double z = (rank >= 3) ? block_info.z_val(iz) - accel_center[2] : 0.0;
+
+     for (int iy=0; iy<my; iy++){
+       double y = (rank >= 2) ? block_info.y_val(iy) - accel_center[1] : 0.0;
+
+       for (int ix=0; ix<mx; ix++){
+         double x = block_info.x_val(ix) - accel_center[0];
+
+         std::array<double,3> accel =
+           functor.accel_fluid(G_code, cosmo_a, x, y, z);
+         // now apply accelerations in cartesian (grid) coordinates
+         int i = INDEX(ix,iy,iz,mx,my);
+         if (ax) ax[i] -= accel[0];
+         if (ay) ay[i] -= accel[1];
+         if (az) az[i] -= accel[2];
+        }
+     }
+  } // end loop over grid cells
+
+  // Update particle accelerations for gravitating particles
+
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Grouping * particle_groups = particle_descr->groups();
+
+  int num_is_grav = particle_groups->size("is_gravitating");
+
+  // Loop through particles to apply this to
+  for (int ipt = 0; ipt < num_is_grav; ipt++){
+
+    std::string particle_type = particle_groups->item("is_gravitating",ipt);
+    int it = particle->type_index(particle_type);
+
+    if (particle->num_particles(it) > 0){
+
+      int ia_x = (rank >= 1) ? particle->attribute_index (it, "x") : -1;
+      int ia_y = (rank >= 2) ? particle->attribute_index (it, "y") : -1;
+      int ia_z = (rank >= 3) ? particle->attribute_index (it, "z") : -1;
+
+      int ia_ax = (rank >= 1) ? particle->attribute_index (it, "ax") : -1;
+      int ia_ay = (rank >= 2) ? particle->attribute_index (it, "ay") : -1;
+      int ia_az = (rank >= 3) ? particle->attribute_index (it, "az") : -1;
+
+      int dp = particle->stride(it, ia_x);
+      int da = particle->stride(it, ia_ax);
+
+      int nb = particle->num_batches (it);
+
+      for (int ib=0; ib<nb; ib++){
+        enzo_float *px=0, *py=0, *pz=0;
+        enzo_float *pax=0, *pay=0, *paz=0;
+
+        px  = (enzo_float *) particle->attribute_array (it, ia_x, ib);
+        pax = (enzo_float *) particle->attribute_array (it, ia_ax, ib);
+        py  = (enzo_float *) particle->attribute_array (it, ia_y, ib);
+        pay = (enzo_float *) particle->attribute_array (it, ia_ay, ib);
+        pz  = (enzo_float *) particle->attribute_array (it, ia_z, ib);
+        paz = (enzo_float *) particle->attribute_array (it, ia_az, ib);
+
+        int np = particle->num_particles(it,ib);
+
+        for (int ip = 0; ip<np; ip++){
+          int ipdp = ip*dp;
+          int ipda = ip*da;
+
+          const double x = px[ipdp] - accel_center[0];
+          const double y = py[ipdp] - accel_center[1];
+          const double z = pz[ipdp] - accel_center[2];
+
+          std::array<double,3> accel =
+           functor.accel_particle(G_code, cosmo_a, x, y, z);
+
+          // now apply accelerations in cartesian (grid) coordinates
+          if (pax) pax[ipda] -= accel[0];
+          if (pay) pay[ipda] -= accel[1];
+          if (paz) paz[ipda] -= accel[2];
+
+        } // end loop over particles
+
+      } // end loop over batch
+
+    } // end if particles exist
+
+  } // end loop over particles
+
+}
 
 } // close anonymous namespace
 
@@ -424,15 +512,26 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
     double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
 
-    GalaxyModel(ax, ay, az, G_code, &particle, block_info, rank,
-                cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+    const GalaxyModelParameterPack pack_dfltU =
+      GalaxyModelParameterPack::from_config(enzo_config);
+    const GalaxyModelFunctor functor(pack_dfltU, enzo_units);
+
+    compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
+                   cosmo_a, enzo_config, enzo_units, enzo_block->dt);
 
   } else if (enzo_config->method_background_acceleration_flavor == "PointMass"){
 
     double G_code = this->G_four_pi_ *
             enzo_units->density() * enzo_units->time() * enzo_units->time();
-    PointMass(ax, ay, az, G_code, &particle, block_info, rank,
-              cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+
+    PointMassModelParameterPack pack_dfltU
+      = PointMassModelParameterPack::from_config(enzo_config);
+    const PointMassModelFunctor functor(pack_dfltU, enzo_units,
+                                        block_info, cosmo_a);
+
+    compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
+                   cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+
   } else {
 
     ERROR("EnzoMethodBackgroundAcceleration::compute_()",
@@ -444,171 +543,6 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   return;
 
 } // compute
-
-//---------------------------------------------------------------------
-
-// define the main helper functions:
-namespace { // stuff inside anonymous namespace are local to this source file
-
-void PointMass(enzo_float * ax, enzo_float * ay, enzo_float * az,
-               double G_code, Particle * particle,
-               const BlockInfo block_info, const int rank,
-               const enzo_float cosmo_a, const EnzoConfig * enzo_config,
-               const EnzoUnits * enzo_units, const double dt) throw()
-{
-  // just need to define position of each cell
-
-  PointMassModelParameterPack pack_dfltU
-    = PointMassModelParameterPack::from_config(enzo_config);
-  const PointMassModelFunctor functor(pack_dfltU, enzo_units,
-                                      block_info, cosmo_a);
-
-  const int mx = block_info.dimensions[0];
-  const int my = block_info.dimensions[1];
-  const int mz = block_info.dimensions[2];
-
-  const double* accel_center
-    = enzo_config->method_background_acceleration_center;
-
-  for (int iz=0; iz<mz; iz++){
-    double z = (rank >= 3) ? block_info.z_val(iz) - accel_center[2] : 0.0;
-
-    for (int iy=0; iy<my; iy++){
-      double y = (rank >= 2) ? block_info.y_val(iy) - accel_center[1] : 0.0;
-
-      for (int ix=0; ix<mx; ix++){
-        double x = block_info.x_val(ix) - accel_center[0];
-
-        std::array<double,3> accel =
-           functor.accel_fluid(G_code, cosmo_a, x, y, z);
-
-        int i = INDEX(ix,iy,iz,mx,my);
-
-        if (ax) ax[i] -= accel[0];
-        if (ay) ay[i] -= accel[1];
-        if (az) az[i] -= accel[2];
-
-      }
-    }
-  } // end loop over grid cells
-
-  // Update particle accelerations here -- leave for now
-
-  // Particle particle = block->data()->particle();
-
-  return;
-}
-
-//---------------------------------------------------------------------
-
-void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
-                 double G_code, Particle * particle,
-                 const BlockInfo block_info, const int rank,
-                 const enzo_float cosmo_a,
-                 const EnzoConfig * enzo_config,
-                 const EnzoUnits * enzo_units, const double dt) throw()
-{
-  const GalaxyModelParameterPack pack_dfltU =
-    GalaxyModelParameterPack::from_config(enzo_config);
-  const GalaxyModelFunctor functor(pack_dfltU, enzo_units);
-
-  const int mx = block_info.dimensions[0];
-  const int my = block_info.dimensions[1];
-  const int mz = block_info.dimensions[2];
-
-  const double* accel_center
-    = enzo_config->method_background_acceleration_center;
-
-  for (int iz=0; iz<mz; iz++){
-     double z = (rank >= 3) ? block_info.z_val(iz) - accel_center[2] : 0.0;
-
-     for (int iy=0; iy<my; iy++){
-       double y = (rank >= 2) ? block_info.y_val(iy) - accel_center[1] : 0.0;
-
-       for (int ix=0; ix<mx; ix++){
-         double x = block_info.x_val(ix) - accel_center[0];
-
-         std::array<double,3> accel =
-           functor.accel_fluid(G_code, cosmo_a, x, y, z);
-         // now apply accelerations in cartesian (grid) coordinates
-         int i = INDEX(ix,iy,iz,mx,my);
-         if (ax) ax[i] -= accel[0];
-         if (ay) ay[i] -= accel[1];
-         if (az) az[i] -= accel[2];
-        }
-     }
-  } // end loop over grid cells
-
-  // Update particle accelerations for gravitating particles
-
-  ParticleDescr * particle_descr = cello::particle_descr();
-  Grouping * particle_groups = particle_descr->groups();
-
-  int num_is_grav = particle_groups->size("is_gravitating");
-
-  // Loop through particles to apply this to
-  for (int ipt = 0; ipt < num_is_grav; ipt++){
-
-    std::string particle_type = particle_groups->item("is_gravitating",ipt);
-    int it = particle->type_index(particle_type);
-
-    if (particle->num_particles(it) > 0){
-
-      int ia_x = (rank >= 1) ? particle->attribute_index (it, "x") : -1;
-      int ia_y = (rank >= 2) ? particle->attribute_index (it, "y") : -1;
-      int ia_z = (rank >= 3) ? particle->attribute_index (it, "z") : -1;
-
-      int ia_ax = (rank >= 1) ? particle->attribute_index (it, "ax") : -1;
-      int ia_ay = (rank >= 2) ? particle->attribute_index (it, "ay") : -1;
-      int ia_az = (rank >= 3) ? particle->attribute_index (it, "az") : -1;
-
-      int dp = particle->stride(it, ia_x);
-      int da = particle->stride(it, ia_ax);
-
-      int nb = particle->num_batches (it);
-
-      for (int ib=0; ib<nb; ib++){
-        enzo_float *px=0, *py=0, *pz=0;
-        enzo_float *pax=0, *pay=0, *paz=0;
-
-        px  = (enzo_float *) particle->attribute_array (it, ia_x, ib);
-        pax = (enzo_float *) particle->attribute_array (it, ia_ax, ib);
-        py  = (enzo_float *) particle->attribute_array (it, ia_y, ib);
-        pay = (enzo_float *) particle->attribute_array (it, ia_ay, ib);
-        pz  = (enzo_float *) particle->attribute_array (it, ia_z, ib);
-        paz = (enzo_float *) particle->attribute_array (it, ia_az, ib);
-
-        int np = particle->num_particles(it,ib);
-
-        for (int ip = 0; ip<np; ip++){
-          int ipdp = ip*dp;
-          int ipda = ip*da;
-
-          const double x = px[ipdp] - accel_center[0];
-          const double y = py[ipdp] - accel_center[1];
-          const double z = pz[ipdp] - accel_center[2];
-
-          std::array<double,3> accel =
-           functor.accel_particle(G_code, cosmo_a, x, y, z);
-
-          // now apply accelerations in cartesian (grid) coordinates
-          if (pax) pax[ipda] -= accel[0];
-          if (pay) pay[ipda] -= accel[1];
-          if (paz) paz[ipda] -= accel[2];
-
-        } // end loop over particles
-
-      } // end loop over batch
-
-    } // end if particles exist
-
-  } // end loop over particles
-
-
-  return;
-}
-
-} // close anonymous namespace
 
 //---------------------------------------------------------------------
 
