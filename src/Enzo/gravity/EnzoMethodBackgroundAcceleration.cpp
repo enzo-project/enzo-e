@@ -260,8 +260,8 @@ class PointMassModelFunctor {
 public:
 
   PointMassModelFunctor(const PointMassModelParameterPack& pack_dfltU,
-                     const EnzoUnits* enzo_units,
-                     const BlockInfo block_info, double cosmo_a)
+                        const EnzoUnits* enzo_units,
+                        const BlockInfo block_info, double cosmo_a)
   {
     pack_codeU_.mass =
       pack_dfltU.mass * enzo_constants::mass_solar / enzo_units->mass();
@@ -458,12 +458,10 @@ void PointMass(enzo_float * ax, enzo_float * ay, enzo_float * az,
 {
   // just need to define position of each cell
 
-  double mass = enzo_config->method_background_acceleration_mass *
-                enzo_constants::mass_solar / enzo_units->mass();
-  double rcore = std::max(0.1*block_info.cell_width[0],
-                     enzo_config->method_background_acceleration_core_radius/enzo_units->length());
-
-  const double min_accel = mass / ((rcore*rcore*rcore)*cosmo_a);
+  PointMassModelParameterPack pack_dfltU
+    = PointMassModelParameterPack::from_config(enzo_config);
+  const PointMassModelFunctor functor(pack_dfltU, enzo_units,
+                                      block_info, cosmo_a);
 
   const int mx = block_info.dimensions[0];
   const int my = block_info.dimensions[1];
@@ -481,16 +479,14 @@ void PointMass(enzo_float * ax, enzo_float * ay, enzo_float * az,
       for (int ix=0; ix<mx; ix++){
         double x = block_info.x_val(ix) - accel_center[0];
 
-        double rsqr  = x*x + y*y + z*z;
-        double r     = sqrt(rsqr);
-
-        double accel = G_code * std::min(mass / ((rsqr)*r*cosmo_a), min_accel);
+        std::array<double,3> accel =
+           functor.accel_fluid(G_code, cosmo_a, x, y, z);
 
         int i = INDEX(ix,iy,iz,mx,my);
 
-        if (ax) ax[i] -= accel * x;
-        if (ay) ay[i] -= accel * y;
-        if (az) az[i] -= accel * z;
+        if (ax) ax[i] -= accel[0];
+        if (ay) ay[i] -= accel[1];
+        if (az) az[i] -= accel[2];
 
       }
     }
