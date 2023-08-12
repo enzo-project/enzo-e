@@ -59,7 +59,185 @@ struct BlockInfo {
 
 //---------------------------------------------------------------------
 
-// forward declare some helper functions:
+struct GalaxyModelParameterPack {
+
+  /// @class    GalaxyModelParameterPack
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] tracks the parameters needed for a background
+  /// potential of a Galaxy model
+
+  double DM_mass;
+  double DM_mass_radius;
+  double stellar_r;
+  double stellar_z;
+  double stellar_mass;
+  double bulge_mass;
+  double bulgeradius;
+  std::array<double,3> amom;
+  double rcore;
+
+  static GalaxyModelParameterPack from_config(const EnzoConfig* enzo_config) {
+    double DM_mass = enzo_config->method_background_acceleration_DM_mass;
+    double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius;
+    double stellar_r = enzo_config->method_background_acceleration_stellar_scale_height_r;
+    double stellar_z = enzo_config->method_background_acceleration_stellar_scale_height_z;
+    double stellar_mass = enzo_config->method_background_acceleration_stellar_mass;
+    double bulge_mass = enzo_config->method_background_acceleration_bulge_mass;
+    double bulgeradius = enzo_config->method_background_acceleration_bulge_radius;
+    std::array<double,3> amom
+      = {enzo_config->method_background_acceleration_angular_momentum[0],
+         enzo_config->method_background_acceleration_angular_momentum[1],
+         enzo_config->method_background_acceleration_angular_momentum[2]};
+    double rcore = enzo_config->method_background_acceleration_core_radius;
+
+    ASSERT1("GalaxyModel::GalaxyModel",
+            "DM halo mass (=%e code_units) must be positive and specified in "
+            "units of solar masses",
+            DM_mass, (DM_mass > 0));
+
+    return {DM_mass, DM_mass_radius, stellar_r, stellar_z,
+            stellar_mass, bulge_mass, bulgeradius, amom, rcore};
+  }
+
+  void pup(PUP::er &p) {
+    p | DM_mass;
+    p | DM_mass_radius;
+    p | stellar_r;
+    p | stellar_z;
+    p | stellar_mass;
+    p | bulge_mass;
+    p | bulgeradius;
+    p | amom;
+    p | rcore;
+  }
+};
+
+class GalaxyModelFunctor {
+
+  /// @class    GalaxyModelParameterPack
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Evaluates the background potential of a Galaxy model
+  ///
+  /// If we didn't support cosmological simulations, we would simply store the
+  /// fields of the GalaxyModelParameterPack struct as members of this class
+  /// (in terms of code units)
+
+public:
+  GalaxyModelFunctor(const GalaxyModelParameterPack& pack_dfltU,
+                     const EnzoUnits* enzo_units)
+  {
+    pack_codeU_.DM_mass =
+      pack_dfltU.DM_mass * enzo_constants::mass_solar / enzo_units->mass();
+    pack_codeU_.DM_mass_radius =
+      pack_dfltU.DM_mass_radius * enzo_constants::kpc_cm / enzo_units->length();
+    pack_codeU_.stellar_r =
+      pack_dfltU.stellar_r * enzo_constants::kpc_cm / enzo_units->length();
+    pack_codeU_.stellar_z =
+      pack_dfltU.stellar_z * enzo_constants::kpc_cm / enzo_units->length();
+    pack_codeU_.stellar_mass =
+      pack_dfltU.stellar_mass * enzo_constants::mass_solar / enzo_units->mass();
+    pack_codeU_.bulge_mass =
+      pack_dfltU.bulge_mass * enzo_constants::mass_solar / enzo_units->mass();
+    pack_codeU_.bulgeradius =
+      pack_dfltU.bulgeradius * enzo_constants::kpc_cm / enzo_units->length();
+    pack_codeU_.amom = pack_dfltU.amom;
+    pack_codeU_.rcore =
+      pack_dfltU.rcore * enzo_constants::kpc_cm / enzo_units->length();
+
+    double xtemp = pack_codeU_.DM_mass_radius / pack_codeU_.rcore;
+
+    // compute the density constant for an NFW halo (rho_o)
+    DM_density_ = (pack_codeU_.DM_mass / (4.0 * cello::pi * std::pow(pack_codeU_.rcore,3))) / (std::log(1.0+xtemp)-xtemp/(1.0+xtemp));
+  }
+
+  /// compute the x,y,z components of the acceleration
+  ///
+  /// @note
+  /// it's unclear to me why we only consider the spherical acceleration
+  /// component - this is equivalent to the way that the code was written
+  /// before refactoring
+  std::array<double,3> accel_fluid(double G_code, double cosmo_a,
+                                   double x, double y, double z)
+    const noexcept
+  { return accel_helper_<true>(G_code, cosmo_a, x, y, z); }
+
+  /// compute the x,y,z components of the acceleration
+  std::array<double,3> accel_particle(double G_code, double cosmo_a,
+                                      double x, double y, double z)
+    const noexcept
+  { return accel_helper_<false>(G_code, cosmo_a, x, y, z); }
+
+private:
+
+  template <bool only_sph_component>
+  std::array<double,3> accel_helper_(double G_code, double cosmo_a,
+                                     double x, double y, double z)
+    const noexcept
+  {
+    double zheight = (pack_codeU_.amom[0]*x +
+                      pack_codeU_.amom[1]*y +
+                      pack_codeU_.amom[2]*z); // height above disk
+
+    // projected positions in plane of the disk
+    double xplane = x - zheight*pack_codeU_.amom[0];
+    double yplane = y - zheight*pack_codeU_.amom[1];
+    double zplane = z - zheight*pack_codeU_.amom[2];
+
+    double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
+    double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
+
+    // need to multiple all of the below by the gravitational constants
+    double xtemp     = radius/pack_codeU_.rcore;
+
+    double bulge_denom = pow(radius + pack_codeU_.bulgeradius, 2);
+    double accel_sph =
+      G_code * pack_codeU_.bulge_mass / bulge_denom +  // bulge
+      4.0 * G_code * cello::pi * DM_density_ * pack_codeU_.rcore *
+      (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
+
+    double accel_R =
+      G_code * pack_codeU_.stellar_mass * rcyl /
+      sqrt( pow( pow(rcyl,2) +
+                 pow(pack_codeU_.stellar_r +
+                     sqrt( pow(zheight,2) + pow(pack_codeU_.stellar_z,2)),
+                     2),
+                 3)
+            );
+
+    double accel_z   =
+      G_code * pack_codeU_.stellar_mass /
+      sqrt(pow(zheight,2) + pow(pack_codeU_.stellar_z,2)) *
+      zheight / sqrt(pow(pow(rcyl,2) +
+                         pow(pack_codeU_.stellar_r +
+                             sqrt(pow(zheight,2)
+                                  + pow(pack_codeU_.stellar_z,2)),
+                             2),
+                         3))
+      * (pack_codeU_.stellar_z * sqrt(pow(zheight,2) +
+                                      pow(pack_codeU_.stellar_z,2)));
+
+    accel_sph = (radius  == 0.0) ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a);
+    accel_R   = (rcyl    == 0.0) ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a);
+    accel_z   = (zheight == 0.0) ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a;
+
+    if (only_sph_component) {
+      accel_R = 0.0; accel_z = 0.0;
+    }
+
+    return { accel_sph * x + accel_R*xplane + accel_z*pack_codeU_.amom[0],  // x
+             accel_sph * y + accel_R*yplane + accel_z*pack_codeU_.amom[1],  // y
+             accel_sph * z + accel_R*zplane + accel_z*pack_codeU_.amom[2]}; // z
+  }
+
+private:
+  GalaxyModelParameterPack pack_codeU_;
+
+  /// density constant for an NFW halo (rho_o)
+  double DM_density_;
+
+};
+
+//---------------------------------------------------------------------
 
 void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
                  double G_code, Particle * particle,
@@ -67,6 +245,8 @@ void GalaxyModel(enzo_float * ax, enzo_float * ay, enzo_float * az,
                  const enzo_float cosmo_a,
                  const EnzoConfig * enzo_config,
                  const EnzoUnits * enzo_units, const double dt) throw();
+
+//---------------------------------------------------------------------
 
 void PointMass(enzo_float * ax, enzo_float * ay, enzo_float * az,
                double G_code, Particle * particle,
