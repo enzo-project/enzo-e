@@ -260,12 +260,12 @@ class PointMassModelFunctor {
 public:
 
   PointMassModelFunctor(const PointMassModelParameterPack& pack_dfltU,
-                        const EnzoUnits* enzo_units,
-                        const BlockInfo block_info, double cosmo_a)
+                        const EnzoUnits* enzo_units, double cosmo_a,
+                        std::array<double,3> cell_width)
   {
     pack_codeU_.mass =
       pack_dfltU.mass * enzo_constants::mass_solar / enzo_units->mass();
-    pack_codeU_.rcore = std::max(0.1*block_info.cell_width[0],
+    pack_codeU_.rcore = std::max(0.1*cell_width[0],
                                  pack_dfltU.rcore/enzo_units->length());
 
     min_accel_ = pack_codeU_.mass /
@@ -527,7 +527,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
     PointMassModelParameterPack pack_dfltU
       = PointMassModelParameterPack::from_config(enzo_config);
     const PointMassModelFunctor functor(pack_dfltU, enzo_units,
-                                        block_info, cosmo_a);
+                                        cosmo_a, block_info.cell_width);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
                    cosmo_a, enzo_config, enzo_units, enzo_block->dt);
