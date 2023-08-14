@@ -112,6 +112,10 @@ commands:
       usegrackle:
         type: boolean
         default: true
+      setupCTests:
+        type: boolean
+        default: true
+        description: whether to build CTest machinery (has no effect on pytest framework)
     steps:
       - run:
           name: "Checkout target tag from enzo-e repository."
@@ -128,9 +132,6 @@ commands:
             source $BASH_ENV
             source $HOME/venv/bin/activate
 
-            # convert boolean parameter to an env var storing 0 or 1
-            USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
-            USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
             # remove build directory in case we've already compiled before
             rm -rf build
 
@@ -139,11 +140,11 @@ commands:
                     -GNinja \
                     -DUSE_DOUBLE_PREC=<< parameters.usedouble >> \
                     -DUSE_GRACKLE=<< parameters.usegrackle >> \
+                    -DBUILD_TESTING=<< parameters.setupCTests >> \
                     -Bbuild \
                     -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" \
                     -DPython3_FIND_VIRTUALENV=ONLY
               cmake --build build -j 4
-              source $HOME/venv/bin/activate
             fi
 
   run-ctests:
@@ -277,6 +278,7 @@ jobs:
           tag: tip
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
+          setupCTests: true
 
       - run-ctests:
           skipfile: notafile
@@ -318,9 +320,10 @@ jobs:
 
       - compile-enzoe:
           usedouble: << parameters.usedouble >>
-          tag: gold-standard-003
+          tag: gold-standard-004
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
+          setupCTests: false
 
       - run-answer-tests:
           usedouble: << parameters.usedouble >>
@@ -332,6 +335,7 @@ jobs:
           tag: tip
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
+          setupCTests: false
 
       - run-answer-tests:
           usedouble: << parameters.usedouble >>

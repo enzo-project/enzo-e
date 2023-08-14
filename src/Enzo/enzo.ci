@@ -111,7 +111,6 @@ module enzo {
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
 
-  PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrationQuanUpdate;
   PUPable EnzoReconstructorNN;
   // EnzoReconstructorPLMEnzoRKLim

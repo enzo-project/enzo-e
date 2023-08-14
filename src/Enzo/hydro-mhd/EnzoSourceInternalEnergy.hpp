@@ -74,7 +74,6 @@ public:
   ///     the Riemann Solver). This should have the same dimensions as the
   ///     arrays stored in prim_map/dUcons_map, except along dimension `dim`.
   ///     Along that dimension, this array should hold one fewer value.
-  /// @param[in]  eos Instance of the fluid's EnzoEquationOfState object
   /// @param[in]  stale_depth indicates the current stale_depth for the
   ///     supplied cell-centered quantities. The update using the
   ///     reconstructor's delayed_staling_rate should be applied at some
@@ -84,7 +83,6 @@ public:
                         const EnzoEFltArrayMap &prim_map,
                         EnzoEFltArrayMap &dUcons_map,
                         const CelloView<const enzo_float,3> &interface_velocity,
-                        const EnzoEquationOfState *eos,
 			const int stale_depth)
     const throw();
 };

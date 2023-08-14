@@ -28,7 +28,7 @@ struct HLLDKernel
 
 public: // typedefs
   using LUT = EnzoRiemannLUT<MHDLUT>;
-  using EOSStructT = EOSStructIdeal;
+  using EOSStructT = EnzoEOSIdeal;
 
   struct Cons1D { enzo_float d, mx, my, mz, e, by, bz; };
 

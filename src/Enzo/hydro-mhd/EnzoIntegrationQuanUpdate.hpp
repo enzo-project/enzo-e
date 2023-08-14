@@ -98,15 +98,13 @@ public: // interface
   ///     integration quantities will be stored (This can be a reference to the
   ///     same Map referenced by initial_integration_map). The updated
   ///     passively advected scalars will be stored here.
-  /// @param[in]  eos Pointer to the fluid's equation of state object. When
-  ///     applicable used for placing a density floor.
   /// @param[in]  stale_depth The stale depth at the time of the function call
   ///     (the stale_depth must be incremented after this function is called)
   /// @param[in]  passive_list A list of keys for passive scalars.
   void update_quantities
   (EnzoEFltArrayMap &initial_integration_map,
    const EnzoEFltArrayMap &dUcons_map,
-   EnzoEFltArrayMap &out_integration_map, EnzoEquationOfState *eos,
+   EnzoEFltArrayMap &out_integration_map,
    const int stale_depth, const str_vec_t &passive_list) const;
 
   /// provides a const vector of all registerred integration keys

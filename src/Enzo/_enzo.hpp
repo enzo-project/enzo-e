@@ -167,8 +167,15 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
+#include "utils/EnzoEFltArrayMap.hpp"
+#include "utils/utils.hpp"
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
+
+// [order dependencies:]
+#include "fluid-props/EnzoEOSIdeal.hpp"
+#include "fluid-props/EnzoEOSIsothermal.hpp"
+#include "fluid-props/EnzoEOSVariant.hpp"
 
 #include "fluid-props/EnzoDualEnergyConfig.hpp"
 #include "fluid-props/EnzoFluidFloorConfig.hpp"
@@ -231,10 +238,6 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "particle/formation/EnzoSinkParticle.hpp"
 #include "particle/formation/EnzoBondiHoyleSinkParticle.hpp"
 #include "particle/formation/EnzoFluxSinkParticle.hpp"
-
-// [order dependencies:]
-#include "fluid-props/EnzoEquationOfState.hpp"
-#include "fluid-props/EnzoEOSIdeal.hpp"
 
 #include "utils/EnzoCenteredFieldRegistry.hpp"
 #include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"

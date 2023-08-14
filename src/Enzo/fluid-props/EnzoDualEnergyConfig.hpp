@@ -56,6 +56,9 @@ public:
     return {eta1, eta2};
   }
 
+  /// queries if any formulation of the dual energy formalism is enabled
+  bool any_enabled() const noexcept { return !is_disabled(); }
+
   /// queries if the dual energy formalism is disabled
   bool is_disabled() const noexcept { return primary_eta_ < 0; }
 
