@@ -338,9 +338,13 @@ function(addUnitTestBinary BINNAME SRCS LIB TESTER)
   #   TESTER:    Tester target library (usually, this is tester_default,
   #              tester_mesh, OR tester_simulation)
 
-  add_executable(${BINNAME} ${SRCS})
-  target_link_libraries(${BINNAME} PUBLIC ${LIB} ${TESTER})
-  target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+  if (BUILD_TESTING)
+    # only declare the binary for a unit-test when BUILD_TESTING is ON (the
+    # default case)
+    add_executable(${BINNAME} ${SRCS})
+    target_link_libraries(${BINNAME} PUBLIC ${LIB} ${TESTER})
+    target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+  endif()
 endfunction(addUnitTestBinary)
 
 # tests of the cello-component
