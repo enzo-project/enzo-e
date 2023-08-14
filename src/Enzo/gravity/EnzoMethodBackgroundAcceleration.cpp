@@ -311,34 +311,34 @@ void compute_accel_(const T functor,
 //---------------------------------------------------------------------
 
 EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
-(bool zero_acceleration)
+(ParameterAccessor &p)
  : Method(),
-   zero_acceleration_(zero_acceleration),
+   zero_acceleration_(false),
    G_four_pi_(4.0 * cello::pi * enzo_constants::grav_constant),
    potential_center_xyz_{}, // fills array with zeros
-   flavor_(""),
+   flavor_(p.value_string("flavor","unknown")),
    galaxy_pack_dfltU_(nullptr),
    point_mass_pack_dfltU_(nullptr)
 {
 
-  const EnzoConfig * enzo_config = enzo::config();
+  // If self-gravity is calculated, we do not need to zero out the acceleration
+  // field from the previous time stepbefore adding the background acceleration
+  bool preceded_by_gravity = enzo::problem()->method("gravity") != nullptr;
+  zero_acceleration_ = !preceded_by_gravity;
 
-  const double* accel_center
-    = enzo_config->method_background_acceleration_center;
-  for (int i = 0; i < 3; i++) { potential_center_xyz_[i] = accel_center[i]; }
-
-  flavor_ = enzo_config->method_background_acceleration_flavor;
+  for (int i = 0; i < 3; i++) {
+    potential_center_xyz_[i] = p.list_value_float(i,"center",0.5);
+  }
 
   if (flavor_ == "GalaxyModel") {
     galaxy_pack_dfltU_ = std::unique_ptr<EnzoPotentialConfigGalaxy>
       (new EnzoPotentialConfigGalaxy);
-    *galaxy_pack_dfltU_ = EnzoPotentialConfigGalaxy::from_config(enzo_config);
+    *galaxy_pack_dfltU_ = EnzoPotentialConfigGalaxy::from_parameters(p);
 
   } else if (flavor_ == "PointMass") {
     point_mass_pack_dfltU_ = std::unique_ptr<EnzoPotentialConfigPointMass>
       (new EnzoPotentialConfigPointMass);
-    *point_mass_pack_dfltU_ = EnzoPotentialConfigPointMass::from_config
-      (enzo_config);
+    *point_mass_pack_dfltU_ = EnzoPotentialConfigPointMass::from_parameters(p);
 
   } else {
     ERROR1("EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration",
@@ -387,9 +387,6 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   //TRACE_METHOD("compute()",block);
   EnzoBlock * enzo_block = enzo::block(block);
   Units * units = (Units*)enzo::units();
-
-  // this parameter only ever existed for debugging purposes. We will remove it
-  //if (!(enzo_config->method_background_acceleration_apply_acceleration)) return;
 
   Field field = block->data()->field();
 

@@ -19,7 +19,7 @@ class EnzoMethodBackgroundAcceleration : public Method {
 public: // interface
 
   /// Create a new EnzoMethodBackgroundAcceleration object
-  EnzoMethodBackgroundAcceleration(bool zero_acceleration);
+  EnzoMethodBackgroundAcceleration(ParameterAccessor &p);
 
   /// Destructor
   virtual ~EnzoMethodBackgroundAcceleration() throw() {}
@@ -62,6 +62,9 @@ public: // interface
   { return "background_acceleration"; }
 
   virtual double timestep (Block * block) throw();
+
+  const EnzoPotentialConfigGalaxy* try_get_config_galaxy() const
+  { return galaxy_pack_dfltU_.get(); }
 
 protected: // methods
 

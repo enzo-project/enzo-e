@@ -353,18 +353,6 @@ public: // interface
       method_gravity_order(4),
       method_gravity_dt_max(1.0e10),
       method_gravity_accumulate(false),
-      // EnzoMethodBackgroundAcceleration
-      method_background_acceleration_flavor(""),
-      method_background_acceleration_mass(0.0),
-      method_background_acceleration_DM_mass(0.0),
-      method_background_acceleration_bulge_mass(0.0),
-      method_background_acceleration_core_radius(0.0),
-      method_background_acceleration_bulge_radius(0.0),
-      method_background_acceleration_stellar_mass(0.0),
-      method_background_acceleration_DM_mass_radius(0.0),
-      method_background_acceleration_stellar_scale_height_r(0.0),
-      method_background_acceleration_stellar_scale_height_z(0.0),
-      method_background_acceleration_apply_acceleration(true),
       // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
       method_vlct_half_dt_reconstruct_method(""),
@@ -410,12 +398,9 @@ public: // interface
       initial_IG_bfield[axis]         = 0.0;
       initial_accretion_test_sink_position[axis] = 0.0;
       initial_accretion_test_sink_velocity[axis] = 0.0;
-      method_background_acceleration_center[axis] = 0.5;
-      method_background_acceleration_angular_momentum[axis] = 0;
 
       initial_feedback_test_position[axis] = 0.5;
     }
-    method_background_acceleration_angular_momentum[2] = 1;
   }
 
   /// CHARM++ Pack / Unpack function
@@ -857,22 +842,6 @@ public: // attributes
   int                        method_gravity_order;
   double                     method_gravity_dt_max;
   bool                       method_gravity_accumulate;
-
-  /// EnzoMethodBackgroundAcceleration
-
-  std::string                method_background_acceleration_flavor;
-  double                     method_background_acceleration_mass;
-  double                     method_background_acceleration_DM_mass;
-  double                     method_background_acceleration_bulge_mass;
-  double                     method_background_acceleration_core_radius;
-  double                     method_background_acceleration_bulge_radius;
-  double                     method_background_acceleration_stellar_mass;
-  double                     method_background_acceleration_DM_mass_radius;
-  double                     method_background_acceleration_stellar_scale_height_r;
-  double                     method_background_acceleration_stellar_scale_height_z;
-  double                     method_background_acceleration_center[3];
-  double                     method_background_acceleration_angular_momentum[3];
-  bool                       method_background_acceleration_apply_acceleration;
 
   /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;

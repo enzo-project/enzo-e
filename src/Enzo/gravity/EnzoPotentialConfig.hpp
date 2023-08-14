@@ -45,6 +45,7 @@ struct EnzoPotentialConfigGalaxy {
   /// If we ever start using the idea of a Galaxy model across multiple Methods,
   /// it might make sense to somehow convert this into a Physics class
 
+
   /// dark matter mass (default units of solar masses)
   double DM_mass;
   /// dark matter mass radius (default units of kpc)
@@ -64,19 +65,19 @@ struct EnzoPotentialConfigGalaxy {
   /// core radius (default units of kpc)
   double rcore;
 
-  static EnzoPotentialConfigGalaxy from_config(const EnzoConfig* enzo_config) {
-    double DM_mass = enzo_config->method_background_acceleration_DM_mass;
-    double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius;
-    double stellar_r = enzo_config->method_background_acceleration_stellar_scale_height_r;
-    double stellar_z = enzo_config->method_background_acceleration_stellar_scale_height_z;
-    double stellar_mass = enzo_config->method_background_acceleration_stellar_mass;
-    double bulge_mass = enzo_config->method_background_acceleration_bulge_mass;
-    double bulgeradius = enzo_config->method_background_acceleration_bulge_radius;
-    std::array<double,3> amom
-      = {enzo_config->method_background_acceleration_angular_momentum[0],
-         enzo_config->method_background_acceleration_angular_momentum[1],
-         enzo_config->method_background_acceleration_angular_momentum[2]};
-    double rcore = enzo_config->method_background_acceleration_core_radius;
+  static EnzoPotentialConfigGalaxy from_parameters(ParameterAccessor &p) {
+    double DM_mass = p.value_float("DM_mass",-1.0);
+    double DM_mass_radius = p.value_float("DM_mass_radius", 0.0);
+    double stellar_r = p.value_float("stellar_scale_height_r", 1.0E-10);
+    double stellar_z = p.value_float("stellar_scale_height_z", 1.0E-10);
+    double stellar_mass = p.value_float("stellar_mass", 0.0);
+    double bulge_mass = p.value_float("bulge_mass", 0.0);
+    double bulgeradius = p.value_float("bulge_radius", 1.0E-10);
+    std::array<double,3> amom;
+    for (int axis = 0; axis < 3; axis++) {
+      amom[axis] = p.list_value_float(axis,"angular_momentum",0);
+    }
+    double rcore = p.value_float("core_radius", 1.0E-10);
 
     ASSERT1("GalaxyModel::GalaxyModel",
             "DM halo mass (=%e code_units) must be positive and specified in "
@@ -124,15 +125,15 @@ struct EnzoPotentialConfigPointMass {
   /// @brief    [\ref Enzo] tracks the parameters needed for a background
   ///           potential of an isolated point-mass
 
+
   /// point-source mass (default units of solar masses)
   double mass;
   /// core-radius (default units of cm)
   double rcore;
 
-  static EnzoPotentialConfigPointMass from_config(const EnzoConfig* enzo_config){
-    double mass = enzo_config->method_background_acceleration_mass;
-    double rcore = enzo_config->method_background_acceleration_core_radius;
-    return {mass, rcore};
+  static EnzoPotentialConfigPointMass from_parameters(ParameterAccessor &p) {
+    return {p.value_float("mass",0.0),
+            p.value_float("core_radius", 1.0E-10)};
   }
 
   /// static method to convert from default units to code units

@@ -311,18 +311,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_gravity_order(4),
   method_gravity_dt_max(0.0),
   method_gravity_accumulate(false),
-  /// EnzoMethodBackgroundAcceleration
-  method_background_acceleration_flavor(""),
-  method_background_acceleration_mass(0.0),
-  method_background_acceleration_DM_mass(0.0),
-  method_background_acceleration_bulge_mass(0.0),
-  method_background_acceleration_core_radius(1.0E-10),
-  method_background_acceleration_bulge_radius(1.0E-10),
-  method_background_acceleration_stellar_mass(0.0),
-  method_background_acceleration_DM_mass_radius(0.0),
-  method_background_acceleration_stellar_scale_height_r(1.0E-10),
-  method_background_acceleration_stellar_scale_height_z(1.0E-10),
-  method_background_acceleration_apply_acceleration(true), // for debugging
   /// EnzoMethodMHDVlct
   method_vlct_riemann_solver(""),
   method_vlct_half_dt_reconstruct_method(""),
@@ -364,13 +352,9 @@ EnzoConfig::EnzoConfig() throw ()
     initial_collapse_array[i] = 0;
     initial_IG_center_position[i] = 0.5;
     initial_IG_bfield[i] = 0.0;
-    method_background_acceleration_center[i] = 0.5;
-    method_background_acceleration_angular_momentum[i] = 0;
 
     initial_feedback_test_position[i] = 0.5;
   }
-
-  method_background_acceleration_angular_momentum[2] = 1;
 }
 
 //----------------------------------------------------------------------
@@ -700,20 +684,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_dt_max;
   p | method_gravity_accumulate;
 
-  p | method_background_acceleration_flavor;
-  p | method_background_acceleration_mass;
-  p | method_background_acceleration_DM_mass;
-  p | method_background_acceleration_bulge_mass;
-  p | method_background_acceleration_core_radius;
-  p | method_background_acceleration_bulge_radius;
-  p | method_background_acceleration_stellar_mass;
-  p | method_background_acceleration_DM_mass_radius;
-  p | method_background_acceleration_stellar_scale_height_r;
-  p | method_background_acceleration_stellar_scale_height_z;
-  p | method_background_acceleration_apply_acceleration;
-  PUParray(p,method_background_acceleration_angular_momentum,3);
-  PUParray(p,method_background_acceleration_center,3);
-
   p | method_vlct_riemann_solver;
   p | method_vlct_half_dt_reconstruct_method;
   p | method_vlct_full_dt_reconstruct_method;
@@ -805,7 +775,6 @@ void EnzoConfig::read(Parameters * p) throw()
   // Method [sorted]
 
   read_method_accretion_(p);
-  read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_feedback_(p);
   read_method_grackle_(p);
@@ -1778,58 +1747,6 @@ void EnzoConfig::read_method_m1_closure_(Parameters * p)
       method_m1_closure_sigmaE[sig_index] = p->list_value_float
         (sig_index,"Method:m1_closure:sigmaE", 0.0);
     }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_background_acceleration_(Parameters * p)
-{
-  method_background_acceleration_flavor = p->value_string
-   ("Method:background_acceleration:flavor","unknown");
-
-  method_background_acceleration_mass = p->value_float
-   ("Method:background_acceleration:mass",0.0);
-
-  method_background_acceleration_DM_mass = p->value_float
-   ("Method:background_acceleration:DM_mass",-1.0);
-
-  method_background_acceleration_bulge_mass = p->value_float
-    ("Method:background_acceleration:bulge_mass", 0.0);
-
-  method_background_acceleration_core_radius = p->value_float
-    ("Method:background_acceleration:core_radius", 1.0E-10);
-
-  method_background_acceleration_bulge_radius = p->value_float
-    ("Method:background_acceleration:bulge_radius", 1.0E-10);
-
-  method_background_acceleration_stellar_mass = p->value_float
-    ("Method:background_acceleration:stellar_mass", 0.0);
-
-  method_background_acceleration_DM_mass_radius = p->value_float
-   ("Method:background_acceleration:DM_mass_radius", 0.0);
-
-  method_background_acceleration_stellar_scale_height_r = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_r", 1.0E-10);
-
-  method_background_acceleration_stellar_scale_height_z = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_z", 1.0E-10);
-
-  method_background_acceleration_apply_acceleration = p->value_logical
-    ("Method:background_acceleration:apply_acceleration", true);
-
-  for (int axis = 0; axis < 3; axis++){
-    method_background_acceleration_center[axis] = p->list_value_float
-      (axis,"Method:background_acceleration:center",0.5);
-    method_background_acceleration_angular_momentum[axis] = p->list_value_float
-      (axis,"Method:background_acceleration:angular_momentum",0);
-  }
-
-  // Not sure if I need. Seems this flag tells the hydo solver
-  // if gravity exists... so I would expect to need this... but Does
-  // not get triggered for self-gravity at the moment... so not sure
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "background_acceleration") physics_gravity=true;
   }
 }
 
