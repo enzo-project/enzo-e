@@ -9,14 +9,6 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// What are these defs and do I need them?
-//#include "enzo.decl.h"
-//
-//
-// #define CK_TEMPLATES_ONLY
-// #include "enzo.def.h"
-// #undef CK_TEMPLATES_ONLY
-
 //---------------------------------------------------------------------
 
 namespace { // stuff inside anonymous namespace are local to this source file
