@@ -67,9 +67,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_feedback,
   enzo_sync_id_method_radiative_transfer,
-#ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
-#endif
   enzo_sync_id_method_gravity,
   enzo_sync_id_method_gravity_continue,
   enzo_sync_id_method_heat,
@@ -149,7 +147,16 @@ struct enzo_fluxes
 #ifdef CONFIG_USE_GRACKLE
 #include <stdlib.h>
 extern "C" {
+  #define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
   #include <grackle.h>
+}
+#else
+extern "C" { // declare the names of Grackle types so can reduce the usage of
+             // ifdef statements
+  struct chemistry_data;
+  struct chemistry_data_storage;
+  struct code_units;
+  struct grackle_field_data;
 }
 #endif
 
@@ -174,9 +181,13 @@ extern "C" {
 #include "fluid-props/EnzoFluidFloorConfig.hpp"
 #include "fluid-props/EnzoPhysicsFluidProps.hpp"
 
-#include "chemistry/GrackleChemistryData.hpp"
-
 #include "enzo-core/EnzoUnits.hpp"
+
+// [order dependencies:]
+#include "utils/EnzoEFltArrayMap.hpp"
+#include "utils/EnzoFieldAdaptor.hpp"
+#include "chemistry/GrackleChemistryData.hpp"
+#include "chemistry/GrackleFacade.hpp"
 
 #include "enzo-core/EnzoFactory.hpp"
 
@@ -229,7 +240,6 @@ extern "C" {
 #include "particle/formation/EnzoFluxSinkParticle.hpp"
 
 #include "utils/EnzoCenteredFieldRegistry.hpp"
-#include "utils/EnzoFieldAdaptor.hpp"
 #include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
 #include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
 #include "hydro-mhd/EnzoPermutedCoordinates.hpp"
@@ -282,10 +292,7 @@ extern "C" {
 #include "utils/EnzoComputeCicInterp.hpp"
 #include "fluid-props/EnzoComputePressure.hpp"
 #include "fluid-props/EnzoComputeTemperature.hpp"
-
-#ifdef CONFIG_USE_GRACKLE
-  #include "chemistry/EnzoComputeCoolingTime.hpp"
-#endif
+#include "chemistry/EnzoComputeCoolingTime.hpp"
 
 #include "enzo-core/EnzoStopping.hpp"
 
