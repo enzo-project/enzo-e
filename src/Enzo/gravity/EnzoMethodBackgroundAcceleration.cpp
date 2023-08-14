@@ -70,26 +70,9 @@ class GalaxyModel {
   /// (in terms of code units)
 
 public:
-  GalaxyModel(const EnzoPotentialConfigGalaxy& pack_dfltU,
-              const EnzoUnits* enzo_units)
+  GalaxyModel(const EnzoPotentialConfigGalaxy& pack_dfltU, const Units* units)
   {
-    pack_codeU_.DM_mass =
-      pack_dfltU.DM_mass * enzo_constants::mass_solar / enzo_units->mass();
-    pack_codeU_.DM_mass_radius =
-      pack_dfltU.DM_mass_radius * enzo_constants::kpc_cm / enzo_units->length();
-    pack_codeU_.stellar_r =
-      pack_dfltU.stellar_r * enzo_constants::kpc_cm / enzo_units->length();
-    pack_codeU_.stellar_z =
-      pack_dfltU.stellar_z * enzo_constants::kpc_cm / enzo_units->length();
-    pack_codeU_.stellar_mass =
-      pack_dfltU.stellar_mass * enzo_constants::mass_solar / enzo_units->mass();
-    pack_codeU_.bulge_mass =
-      pack_dfltU.bulge_mass * enzo_constants::mass_solar / enzo_units->mass();
-    pack_codeU_.bulgeradius =
-      pack_dfltU.bulgeradius * enzo_constants::kpc_cm / enzo_units->length();
-    pack_codeU_.amom = pack_dfltU.amom;
-    pack_codeU_.rcore =
-      pack_dfltU.rcore * enzo_constants::kpc_cm / enzo_units->length();
+    pack_codeU_ = EnzoPotentialConfigGalaxy::to_codeU(pack_dfltU, units);
 
     double xtemp = pack_codeU_.DM_mass_radius / pack_codeU_.rcore;
 
@@ -191,17 +174,14 @@ class PointMassModel {
 public:
 
   PointMassModel(const EnzoPotentialConfigPointMass& pack_dfltU,
-                 const EnzoUnits* enzo_units, double cosmo_a,
+                 const Units* units, double cosmo_a,
                  std::array<double,3> cell_width)
   {
-    pack_codeU_.mass =
-      pack_dfltU.mass * enzo_constants::mass_solar / enzo_units->mass();
-    // TODO: should we be using the min or max cell_width?
-    pack_codeU_.rcore = std::max(0.1*cell_width[0],
-                                 pack_dfltU.rcore/enzo_units->length());
+    pack_codeU_ = EnzoPotentialConfigPointMass::to_codeU(pack_dfltU, units);
 
-    min_accel_ = pack_codeU_.mass /
-      ((pack_codeU_.rcore*pack_codeU_.rcore*pack_codeU_.rcore)*cosmo_a);
+    // TODO: should we be using the min or max cell_width?
+    double rcore_tmp = std::max(0.1*cell_width[0], pack_codeU_.rcore);
+    min_accel_ = pack_codeU_.mass / ((rcore_tmp*rcore_tmp*rcore_tmp)*cosmo_a);
   }
 
   std::array<double,3> accel_fluid(double G_code, double cosmo_a,
@@ -241,7 +221,7 @@ void compute_accel_(const T functor,
                     const BlockInfo block_info, const int rank,
                     const enzo_float cosmo_a,
                     const std::array<double, 3> accel_center,
-                    const EnzoUnits * enzo_units, const double dt) noexcept
+                    const double dt) noexcept
 {
   const int mx = block_info.dimensions[0];
   const int my = block_info.dimensions[1];
@@ -414,7 +394,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   //TRACE_METHOD("compute()",block);
   EnzoBlock * enzo_block = enzo::block(block);
-  EnzoUnits * enzo_units = enzo::units();
+  Units * units = (Units*)enzo::units();
 
   // this parameter only ever existed for debugging purposes. We will remove it
   //if (!(enzo_config->method_background_acceleration_apply_acceleration)) return;
@@ -459,21 +439,21 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   if (galaxy_pack_dfltU_ != nullptr) {
 
-    double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
-    const GalaxyModel functor(*galaxy_pack_dfltU_, enzo_units);
+    double G_code = enzo_constants::grav_constant * units->density() * units->time() * units->time();
+    const GalaxyModel functor(*galaxy_pack_dfltU_, units);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
-                   cosmo_a, potential_center_xyz_, enzo_units, enzo_block->dt);
+                   cosmo_a, potential_center_xyz_, enzo_block->dt);
 
   } else if (point_mass_pack_dfltU_ != nullptr) {
 
     double G_code = this->G_four_pi_ *
-            enzo_units->density() * enzo_units->time() * enzo_units->time();
-    const PointMassModel functor(*point_mass_pack_dfltU_, enzo_units,
+            units->density() * units->time() * units->time();
+    const PointMassModel functor(*point_mass_pack_dfltU_, units,
                                  cosmo_a, block_info.cell_width);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
-                   cosmo_a, potential_center_xyz_, enzo_units, enzo_block->dt);
+                   cosmo_a, potential_center_xyz_, enzo_block->dt);
 
   } else {
 

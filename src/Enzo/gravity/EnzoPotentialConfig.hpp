@@ -41,15 +41,27 @@ struct EnzoPotentialConfigGalaxy {
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] tracks the parameters needed for a background
   ///           potential of a Galaxy model
+  ///
+  /// If we ever start using the idea of a Galaxy model across multiple Methods,
+  /// it might make sense to somehow convert this into a Physics class
 
+  /// dark matter mass (default units of solar masses)
   double DM_mass;
+  /// dark matter mass radius (default units of kpc)
   double DM_mass_radius;
+  /// disk stellar scale height r (default units of kpc)
   double stellar_r;
+  /// disk stellar scale height z (default units of kpc)
   double stellar_z;
+  /// disk stellar mass (default units of solar masses)
   double stellar_mass;
+  /// bulge mass (default units of solar masses)
   double bulge_mass;
+  /// bulgeradius (default units of kpc)
   double bulgeradius;
+  /// angular momentum vector
   std::array<double,3> amom;
+  /// core radius (default units of kpc)
   double rcore;
 
   static EnzoPotentialConfigGalaxy from_config(const EnzoConfig* enzo_config) {
@@ -75,6 +87,22 @@ struct EnzoPotentialConfigGalaxy {
             stellar_mass, bulge_mass, bulgeradius, amom, rcore};
   }
 
+  /// static method to convert from default units to code units
+  static EnzoPotentialConfigGalaxy to_codeU
+  (const EnzoPotentialConfigGalaxy& pack_dfltU, const Units* units) noexcept
+  {
+    return
+      { pack_dfltU.DM_mass * enzo_constants::mass_solar / units->mass(),
+        pack_dfltU.DM_mass_radius * enzo_constants::kpc_cm / units->length(),
+        pack_dfltU.stellar_r * enzo_constants::kpc_cm / units->length(),
+        pack_dfltU.stellar_z * enzo_constants::kpc_cm / units->length(),
+        pack_dfltU.stellar_mass * enzo_constants::mass_solar / units->mass(),
+        pack_dfltU.bulge_mass * enzo_constants::mass_solar / units->mass(),
+        pack_dfltU.bulgeradius * enzo_constants::kpc_cm / units->length(),
+        pack_dfltU.amom,
+        pack_dfltU.rcore * enzo_constants::kpc_cm / units->length() };
+  }
+
   void pup(PUP::er &p) {
     p | DM_mass;
     p | DM_mass_radius;
@@ -91,13 +119,29 @@ struct EnzoPotentialConfigGalaxy {
 //---------------------------------------------------------------------
 
 struct EnzoPotentialConfigPointMass {
+  /// @class    EnzoPotentialConfigPointMass
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] tracks the parameters needed for a background
+  ///           potential of an isolated point-mass
+
+  /// point-source mass (default units of solar masses)
   double mass;
+  /// core-radius (default units of cm)
   double rcore;
 
   static EnzoPotentialConfigPointMass from_config(const EnzoConfig* enzo_config){
     double mass = enzo_config->method_background_acceleration_mass;
     double rcore = enzo_config->method_background_acceleration_core_radius;
     return {mass, rcore};
+  }
+
+  /// static method to convert from default units to code units
+  static EnzoPotentialConfigPointMass to_codeU
+  (const EnzoPotentialConfigPointMass& pack_dfltU, const Units* units) noexcept
+  {
+    return
+      { pack_dfltU.mass * enzo_constants::mass_solar / units->mass(),
+        pack_dfltU.rcore / units->length() };
   }
 
   void pup(PUP::er &p) {
