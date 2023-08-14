@@ -5,8 +5,6 @@
 /// @date     2019-05-07
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputeCoolingTime functions
 
-#ifdef CONFIG_USE_GRACKLE
-
 #ifndef ENZO_ENZO_COMPUTE_COOLINGTIME_HPP
 #define ENZO_ENZO_COMPUTE_COOLINGTIME_HPP
 
@@ -45,7 +43,6 @@ public: // interface
 
   void compute_(Block * block,
    enzo_float * ct,
-   code_units * grackle_units = NULL,
    grackle_field_data * grackle_fields = NULL
  );
 
@@ -57,5 +54,3 @@ private: // attributes
 };
 
 #endif /* ENZO_ENZO_COMPUTE_COOLINGTIME_HPP */
-
-#endif
