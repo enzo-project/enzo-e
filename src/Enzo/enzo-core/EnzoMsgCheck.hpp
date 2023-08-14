@@ -11,7 +11,7 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-#define ADAPT_BUFFER_SIZE 1000
+#define ADAPT_BUFFER_SIZE 2000
 
 class EnzoBlock;
 
