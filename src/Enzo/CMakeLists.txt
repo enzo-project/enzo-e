@@ -103,6 +103,10 @@ add_subdirectory(initial)
 add_subdirectory(mesh)
 
 # define the Enzo::tests target
+# (note that the tests subdirectory introduces problem initializers that can
+# be used to setup test-problems. The BUILD_TESTING option has no impact on
+# what is built from this directory. The option only affects whether binaries,
+# expressly used for unit-testing are built)
 add_subdirectory(tests)
 
 # define the Enzo::utils target
@@ -133,12 +137,14 @@ add_executable(enzo-e enzo-e.cpp)
 target_link_libraries(enzo-e PRIVATE enzo main_enzo ${External_LIBS})
 target_link_options(enzo-e PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
-# define a unit test:
-#
-# consider removing the enzo-specific stuff from this test so that we can
-# define it entirely in the Cello layer
-add_executable(
-  test_class_size "${CMAKE_CURRENT_SOURCE_DIR}/../Cello/test_class_size.cpp"
-)
-target_link_libraries(test_class_size PRIVATE enzo mesh tester_mesh)
-target_link_options(test_class_size PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+if (BUILD_TESTING)
+  # define a unit test:
+  #
+  # consider removing the enzo-specific stuff from this test so that we can
+  # define it entirely in the Cello layer
+  add_executable(
+    test_class_size "${CMAKE_CURRENT_SOURCE_DIR}/../Cello/test_class_size.cpp"
+    )
+  target_link_libraries(test_class_size PRIVATE enzo mesh tester_mesh)
+  target_link_options(test_class_size PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+endif()
