@@ -22,14 +22,12 @@
 
 EnzoMethodGravity::EnzoMethodGravity
 (int index_solver,
- double grav_const,
  int order,
  bool accumulate,
  int index_prolong,
  double dt_max)
   : Method(),
     index_solver_(index_solver),
-    grav_const_(grav_const),
     order_(order),
     ir_exit_(-1),
     index_prolong_(index_prolong),
@@ -177,7 +175,8 @@ void EnzoMethodGravity::compute(Block * block) throw()
 	}
       }
     } else {
-      field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
+      double grav_const = enzo::grav_constant_codeU();
+      field.scale(ib, -4.0 * (cello::pi) * grav_const, idensity);
     }
 
   } else {

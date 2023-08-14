@@ -128,6 +128,7 @@ module enzo {
 
   PUPable EnzoPhysicsCosmology;
   PUPable EnzoPhysicsFluidProps;
+  PUPable EnzoPhysicsGravity;
 
   PUPable EnzoProblem;
   PUPable EnzoProlong;

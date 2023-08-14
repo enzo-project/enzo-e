@@ -31,7 +31,6 @@ public: // interface
   EnzoMethodBackgroundAcceleration (CkMigrateMessage *m)
     : Method(m),
       zero_acceleration_(false),
-      G_four_pi_(0.0),
       potential_center_xyz_{}, // fills array with zeros
       flavor_(""),
       galaxy_pack_dfltU_(nullptr),
@@ -48,7 +47,6 @@ public: // interface
     Method::pup(p);
 
     p | zero_acceleration_;
-    p | G_four_pi_;
     p | potential_center_xyz_;
     p | flavor_;
     p | galaxy_pack_dfltU_;
@@ -74,7 +72,6 @@ protected: // attributes
 
   /// Convenience. Gravitational constant times 4 pi
   bool zero_acceleration_;
-  double G_four_pi_;
 
   /// location of the center of the potential, in code units
   std::array<double,3> potential_center_xyz_;

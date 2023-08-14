@@ -65,7 +65,7 @@ public: // interface
       physics_fluid_props_fluid_floor_config(),
       physics_fluid_props_mol_weight(0.0),
       // Gravity
-      physics_gravity(false),
+      physics_gravity_grav_constant_codeU(-1.0),
 
       //--------------------
       // INITIAL [sorted]
@@ -348,7 +348,6 @@ public: // interface
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
       // EnzoMethodGravity
-      method_gravity_grav_const(0.0),
       method_gravity_solver(""),
       method_gravity_order(4),
       method_gravity_dt_max(1.0e10),
@@ -459,6 +458,7 @@ protected: // methods
   
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
+  void read_physics_gravity_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
 
@@ -505,7 +505,7 @@ public: // attributes
   double                     physics_fluid_props_mol_weight;
 
   /// Gravity
-  bool                       physics_gravity;
+  double                     physics_gravity_grav_constant_codeU;
 
   /// EnzoInitialBCenter;
   bool                       initial_bcenter_update_etot;
@@ -837,7 +837,6 @@ public: // attributes
   double                     method_grackle_radiation_redshift;
 
   /// EnzoMethodGravity
-  double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
   int                        method_gravity_order;
   double                     method_gravity_dt_max;

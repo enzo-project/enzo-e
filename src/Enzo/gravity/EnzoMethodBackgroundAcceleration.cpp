@@ -314,7 +314,6 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
 (ParameterAccessor &p)
  : Method(),
    zero_acceleration_(false),
-   G_four_pi_(4.0 * cello::pi * enzo_constants::grav_constant),
    potential_center_xyz_{}, // fills array with zeros
    flavor_(p.value_string("flavor","unknown")),
    galaxy_pack_dfltU_(nullptr),
@@ -428,7 +427,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   if (galaxy_pack_dfltU_ != nullptr) {
 
-    double G_code = enzo_constants::grav_constant * units->density() * units->time() * units->time();
+    double G_code = enzo::grav_constant_cgs() * units->density() * units->time() * units->time();
     const GalaxyModel functor(*galaxy_pack_dfltU_, units);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
@@ -436,7 +435,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   } else if (point_mass_pack_dfltU_ != nullptr) {
 
-    double G_code = this->G_four_pi_ *
+    double G_code = (4.0 * cello::pi * enzo::grav_constant_cgs()) *
             units->density() * units->time() * units->time();
     const PointMassModel functor(*point_mass_pack_dfltU_, units,
                                  cosmo_a, block_info.cell_width);
