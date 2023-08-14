@@ -250,6 +250,8 @@ extern "C" {
 #include "hydro-mhd/EnzoBfieldMethod.hpp"
 #include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
+#include "gravity/EnzoPotentialConfig.hpp"
+
 #include "particle/formation/EnzoMethodAccretion.hpp"
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "particle/formation/EnzoMethodBondiHoyleAccretion.hpp"

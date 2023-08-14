@@ -12,10 +12,9 @@
 
 class EnzoMethodBackgroundAcceleration : public Method {
 
-  /// @class    enzo_EnzoMethodBackgroundAcceleration
+  /// @class    EnzoMethodBackgroundAcceleration
   /// @ingroup  Enzo
-  ///
-  /// @brief
+  /// @brief    [\ref Enzo] Evaluates an analytic background potential
 
 public: // interface
 
@@ -30,12 +29,16 @@ public: // interface
 
   /// Charm++ PUP::able migration Constructor
   EnzoMethodBackgroundAcceleration (CkMigrateMessage *m)
-      : Method(m), zero_acceleration_(false)
-      { }
+    : Method(m),
+      zero_acceleration_(false),
+      G_four_pi_(0.0),
+      potential_center_xyz_{}, // fills array with zeros
+      flavor_(""),
+      galaxy_pack_dfltU_(nullptr),
+      point_mass_pack_dfltU_(nullptr)
+  { }
 
   /// CHARM++ Pack / Unpack function
-//----------------------------------------------------------------------------
-
   void pup (PUP::er &p)
   {
     // NOTE: Change this function whenever attributes Change
@@ -46,10 +49,11 @@ public: // interface
 
     p | zero_acceleration_;
     p | G_four_pi_;
-
+    p | potential_center_xyz_;
+    p | flavor_;
+    p | galaxy_pack_dfltU_;
+    p | point_mass_pack_dfltU_;
   }
-
-  ///
 
   ///
   virtual void compute (Block *block) throw();
@@ -65,12 +69,26 @@ protected: // methods
 
 protected: // attributes
 
-   /// Convenience. Gravitational constant times 4 pi
-   bool zero_acceleration_;
-   double G_four_pi_;
+  /// Convenience. Gravitational constant times 4 pi
+  bool zero_acceleration_;
+  double G_four_pi_;
+
+  /// location of the center of the potential, in code units
+  std::array<double,3> potential_center_xyz_;
+
+  /// the type of background potential to be used
+  std::string flavor_;
+
+  /// stores the parameter-pack for a GalaxyPotential in default units
+  ///
+  /// (either this or point_mass_pack_dfltU_ must be non-null -- but not both)
+  std::unique_ptr<EnzoPotentialConfigGalaxy> galaxy_pack_dfltU_;
+
+  /// stores the parameter-pack for a PointMass in default units
+  ///
+  /// (either this or galaxy_pack_dfltU_ must be non-null -- but not both)
+  std::unique_ptr<EnzoPotentialConfigPointMass> point_mass_pack_dfltU_;
 };
 
-// make a new class here of acceleration models
-// to simplify computation a little bit
 
 #endif /*  ENZO_ENZO_METHOD_BACKGROUND_ACCELERATION_HPP */

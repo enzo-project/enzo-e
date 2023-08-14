@@ -59,72 +59,19 @@ struct BlockInfo {
 
 //---------------------------------------------------------------------
 
-struct GalaxyModelParameterPack {
+class GalaxyModel {
 
-  /// @class    GalaxyModelParameterPack
-  /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] tracks the parameters needed for a background
-  /// potential of a Galaxy model
-
-  double DM_mass;
-  double DM_mass_radius;
-  double stellar_r;
-  double stellar_z;
-  double stellar_mass;
-  double bulge_mass;
-  double bulgeradius;
-  std::array<double,3> amom;
-  double rcore;
-
-  static GalaxyModelParameterPack from_config(const EnzoConfig* enzo_config) {
-    double DM_mass = enzo_config->method_background_acceleration_DM_mass;
-    double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius;
-    double stellar_r = enzo_config->method_background_acceleration_stellar_scale_height_r;
-    double stellar_z = enzo_config->method_background_acceleration_stellar_scale_height_z;
-    double stellar_mass = enzo_config->method_background_acceleration_stellar_mass;
-    double bulge_mass = enzo_config->method_background_acceleration_bulge_mass;
-    double bulgeradius = enzo_config->method_background_acceleration_bulge_radius;
-    std::array<double,3> amom
-      = {enzo_config->method_background_acceleration_angular_momentum[0],
-         enzo_config->method_background_acceleration_angular_momentum[1],
-         enzo_config->method_background_acceleration_angular_momentum[2]};
-    double rcore = enzo_config->method_background_acceleration_core_radius;
-
-    ASSERT1("GalaxyModel::GalaxyModel",
-            "DM halo mass (=%e code_units) must be positive and specified in "
-            "units of solar masses",
-            DM_mass, (DM_mass > 0));
-
-    return {DM_mass, DM_mass_radius, stellar_r, stellar_z,
-            stellar_mass, bulge_mass, bulgeradius, amom, rcore};
-  }
-
-  void pup(PUP::er &p) {
-    p | DM_mass;
-    p | DM_mass_radius;
-    p | stellar_r;
-    p | stellar_z;
-    p | stellar_mass;
-    p | bulge_mass;
-    p | bulgeradius;
-    p | amom;
-    p | rcore;
-  }
-};
-
-class GalaxyModelFunctor {
-
-  /// @class    GalaxyModelParameterPack
+  /// @class    GalaxyModel
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Evaluates the background potential of a Galaxy model
   ///
   /// If we didn't support cosmological simulations, we would simply store the
-  /// fields of the GalaxyModelParameterPack struct as members of this class
+  /// fields of the EnzoPotentialConfigGalaxy struct as members of this class
   /// (in terms of code units)
 
 public:
-  GalaxyModelFunctor(const GalaxyModelParameterPack& pack_dfltU,
-                     const EnzoUnits* enzo_units)
+  GalaxyModel(const EnzoPotentialConfigGalaxy& pack_dfltU,
+              const EnzoUnits* enzo_units)
   {
     pack_codeU_.DM_mass =
       pack_dfltU.DM_mass * enzo_constants::mass_solar / enzo_units->mass();
@@ -230,7 +177,7 @@ private:
   }
 
 private:
-  GalaxyModelParameterPack pack_codeU_;
+  EnzoPotentialConfigGalaxy pack_codeU_;
 
   /// density constant for an NFW halo (rho_o)
   double DM_density_;
@@ -239,32 +186,17 @@ private:
 
 //---------------------------------------------------------------------
 
-struct PointMassModelParameterPack {
-  double mass;
-  double rcore;
-
-  static PointMassModelParameterPack from_config(const EnzoConfig* enzo_config){
-    double mass = enzo_config->method_background_acceleration_mass;
-    double rcore = enzo_config->method_background_acceleration_core_radius;
-    return {mass, rcore};
-  }
-
-  void pup(PUP::er &p) {
-    p | mass;
-    p | rcore;
-  }
-};
-
-class PointMassModelFunctor {
+class PointMassModel {
 
 public:
 
-  PointMassModelFunctor(const PointMassModelParameterPack& pack_dfltU,
-                        const EnzoUnits* enzo_units, double cosmo_a,
-                        std::array<double,3> cell_width)
+  PointMassModel(const EnzoPotentialConfigPointMass& pack_dfltU,
+                 const EnzoUnits* enzo_units, double cosmo_a,
+                 std::array<double,3> cell_width)
   {
     pack_codeU_.mass =
       pack_dfltU.mass * enzo_constants::mass_solar / enzo_units->mass();
+    // TODO: should we be using the min or max cell_width?
     pack_codeU_.rcore = std::max(0.1*cell_width[0],
                                  pack_dfltU.rcore/enzo_units->length());
 
@@ -289,13 +221,13 @@ public:
                                       double x, double y, double z)
     const noexcept
   {
-    ERROR("PointMassModelFunctor::accel_particle", "Not implemented yet");
+    ERROR("PointMassModel::accel_particle", "Not implemented yet");
     // this functionality was not implemented prior to the refactor. But, as
     // far as I can tell, we can just call accel_fluid
   }
 
 private:
-  PointMassModelParameterPack pack_codeU_;
+  EnzoPotentialConfigPointMass pack_codeU_;
   double min_accel_;
 };
 
@@ -308,15 +240,12 @@ void compute_accel_(const T functor,
                     double G_code, Particle * particle,
                     const BlockInfo block_info, const int rank,
                     const enzo_float cosmo_a,
-                    const EnzoConfig * enzo_config,
+                    const std::array<double, 3> accel_center,
                     const EnzoUnits * enzo_units, const double dt) noexcept
 {
   const int mx = block_info.dimensions[0];
   const int my = block_info.dimensions[1];
   const int mz = block_info.dimensions[2];
-
-  const double* accel_center
-    = enzo_config->method_background_acceleration_center;
 
   for (int iz=0; iz<mz; iz++){
      double z = (rank >= 3) ? block_info.z_val(iz) - accel_center[2] : 0.0;
@@ -410,16 +339,43 @@ void compute_accel_(const T functor,
 //---------------------------------------------------------------------
 
 EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
-(bool zero_acceleration) // do need
+(bool zero_acceleration)
  : Method(),
-   zero_acceleration_(zero_acceleration)
+   zero_acceleration_(zero_acceleration),
+   G_four_pi_(4.0 * cello::pi * enzo_constants::grav_constant),
+   potential_center_xyz_{}, // fills array with zeros
+   flavor_(""),
+   galaxy_pack_dfltU_(nullptr),
+   point_mass_pack_dfltU_(nullptr)
 {
 
-  this->G_four_pi_ = 4.0 * cello::pi * enzo_constants::grav_constant;
+  const EnzoConfig * enzo_config = enzo::config();
+
+  const double* accel_center
+    = enzo_config->method_background_acceleration_center;
+  for (int i = 0; i < 3; i++) { potential_center_xyz_[i] = accel_center[i]; }
+
+  flavor_ = enzo_config->method_background_acceleration_flavor;
+
+  if (flavor_ == "GalaxyModel") {
+    galaxy_pack_dfltU_ = std::unique_ptr<EnzoPotentialConfigGalaxy>
+      (new EnzoPotentialConfigGalaxy);
+    *galaxy_pack_dfltU_ = EnzoPotentialConfigGalaxy::from_config(enzo_config);
+
+  } else if (flavor_ == "PointMass") {
+    point_mass_pack_dfltU_ = std::unique_ptr<EnzoPotentialConfigPointMass>
+      (new EnzoPotentialConfigPointMass);
+    *point_mass_pack_dfltU_ = EnzoPotentialConfigPointMass::from_config
+      (enzo_config);
+
+  } else {
+    ERROR1("EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration",
+           "Background acceleration flavor not recognized: %s",
+           flavor_.c_str());
+  }
 
   FieldDescr * field_descr = cello::field_descr();
 
-  //const int id =  field_descr->field_id("density");
   const int iax = field_descr->field_id("acceleration_x");
   const int iay = field_descr->field_id("acceleration_y");
   const int iaz = field_descr->field_id("acceleration_z");
@@ -427,18 +383,11 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
 
   // Do not need to refresh acceleration fields in this method
   // since we do not need to know any ghost zone information
-  //
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field(iax);
   refresh->add_field(iay);
   refresh->add_field(iaz);
-
-  // refresh(ir)->add_field(id);
-  // iax iay and iax are used in method gravity to do
-  // refreshing of fields.... Do I need ot do this here? If so
-  // why do I need it..... otherwise I can just worry about field
-  // access with field_values?
 
   return;
 
@@ -465,10 +414,10 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   //TRACE_METHOD("compute()",block);
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
-  if (!(enzo_config->method_background_acceleration_apply_acceleration)) return;
+  // this parameter only ever existed for debugging purposes. We will remove it
+  //if (!(enzo_config->method_background_acceleration_apply_acceleration)) return;
 
   Field field = block->data()->field();
 
@@ -508,29 +457,23 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   // unclear why the gravitational constant is different in each branch!
 
-  if (enzo_config->method_background_acceleration_flavor == "GalaxyModel"){
+  if (galaxy_pack_dfltU_ != nullptr) {
 
     double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
-
-    const GalaxyModelParameterPack pack_dfltU =
-      GalaxyModelParameterPack::from_config(enzo_config);
-    const GalaxyModelFunctor functor(pack_dfltU, enzo_units);
+    const GalaxyModel functor(*galaxy_pack_dfltU_, enzo_units);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
-                   cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+                   cosmo_a, potential_center_xyz_, enzo_units, enzo_block->dt);
 
-  } else if (enzo_config->method_background_acceleration_flavor == "PointMass"){
+  } else if (point_mass_pack_dfltU_ != nullptr) {
 
     double G_code = this->G_four_pi_ *
             enzo_units->density() * enzo_units->time() * enzo_units->time();
-
-    PointMassModelParameterPack pack_dfltU
-      = PointMassModelParameterPack::from_config(enzo_config);
-    const PointMassModelFunctor functor(pack_dfltU, enzo_units,
-                                        cosmo_a, block_info.cell_width);
+    const PointMassModel functor(*point_mass_pack_dfltU_, enzo_units,
+                                 cosmo_a, block_info.cell_width);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
-                   cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+                   cosmo_a, potential_center_xyz_, enzo_units, enzo_block->dt);
 
   } else {
 
@@ -613,11 +556,3 @@ double EnzoMethodBackgroundAcceleration::timestep (Block * block) throw()
 
   return 0.5*dt;
 }
-
-/* Placeholder for the general DM potential
-   methods (NFW is a specific case)
-void EnzoMethodBackgroundAcceleration::General(void){
-
-  return;
-}
-*/
