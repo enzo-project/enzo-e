@@ -20,10 +20,10 @@ MsgCoarsen::MsgCoarsen()
     is_local_(true),
     data_msg_(NULL),
     buffer_(NULL),
+    adapt_child_(nullptr),
     num_face_level_(0),
     face_level_(NULL),
-    face_level_count_(NULL),
-    adapt_child_(nullptr)
+    face_level_count_(NULL)
 {
   ic3_[0] = ic3_[1] = ic3_[2] = -1;
   ++counter[cello::index_static()]; 
@@ -41,10 +41,10 @@ MsgCoarsen::MsgCoarsen
     is_local_(true),
     data_msg_(NULL),
     buffer_(NULL),
+    adapt_child_(adapt_child),
     num_face_level_(num_face_level),
     face_level_(new int[num_face_level]),
-    face_level_count_(new int[num_face_level]),
-    adapt_child_(adapt_child)
+    face_level_count_(new int[num_face_level])
 {
 
   ++counter[cello::index_static()]; 

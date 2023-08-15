@@ -572,7 +572,7 @@ void Block::adapt_recv_level()
 
 void Block::adapt_check_messages_()
 {
-  for (int i=0; i<adapt_msg_list_.size(); i++) {
+  for (size_t i=0; i<adapt_msg_list_.size(); i++) {
     MsgAdapt * msg = adapt_msg_list_[i];
     adapt_recv_level (
                       msg->adapt_step_,
@@ -604,7 +604,7 @@ void Block::adapt_recv_level
   bool changed = false;
   int level_min=0;
   performance_start_(perf_adapt_update);
-  for (int i=0; i<ofv[0].size(); i++) {
+  for (size_t i=0; i<ofv[0].size(); i++) {
 
     int if3[3] = {ofv[0][i],ofv[1][i],ofv[2][i]};
 

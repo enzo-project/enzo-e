@@ -152,7 +152,7 @@ public: // interface
   inline void reset_face_level_last()
   {
     clear_last_face_count();
-    const int nc = cello::num_children();
+    const size_t nc = cello::num_children();
     if (face_level_last_.size() != nc)
         face_level_last_.resize(nc);
     for (size_t i=0; i<nc; i++) {
@@ -191,7 +191,7 @@ public: // interface
   void clear_last_face_count()
   {
     auto & last = face_level_last_count_;
-    const int nc = cello::num_children();
+    const size_t nc = cello::num_children();
     if (last.size() != nc) last.resize(nc);
     for (size_t i=0; i<nc; i++) {
       if (last[i].size() != 27) last[i].resize(27);
