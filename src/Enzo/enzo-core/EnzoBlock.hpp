@@ -202,11 +202,11 @@ public: /// entry methods
   //--------------------------------------------------
 
   /// Call to Block array to self-identify as "first" when writing
-  /// checkpoint files based on Ordering object
-  void p_check_write_first(int num_files, std::string ordering, std::string);
+  /// checkpoint files based on Block::order_index_
+  void p_check_write_first(int num_files, std::string name_dir);
 
   /// Call to single Block to return data for checkpoint
-  void p_check_write_next(int num_files, std::string ordering);
+  void p_check_write_next(int num_files);
 
   /// Exit EnzoMethodCheck
   void p_check_done();
@@ -343,7 +343,7 @@ protected: // methods
 
   /// Create EnzoMsgCheck, returning file index
   int create_msg_check_
-  ( EnzoMsgCheck ** msg_check, int num_files, std::string ordering,
+  ( EnzoMsgCheck ** msg_check, int num_files,
     std::string name_dir = "", bool * is_first = nullptr);
 
   /// Initialize restart data in Block

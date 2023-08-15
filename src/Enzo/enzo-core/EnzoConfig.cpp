@@ -197,7 +197,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_use_gas_particles(false),      // Set up gas by depositing baryonic particles to grid
   // EnzoMethodCheck
   method_check_num_files(1),
-  method_check_ordering("order_morton"),
   method_check_dir(),
   method_check_monitor_iter(0),
   method_check_include_ghosts(false),
@@ -598,7 +597,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_merge_sinks_test_particle_data_filename;
 
   p | method_check_num_files;
-  p | method_check_ordering;
   p | method_check_dir;
   p | method_check_monitor_iter;
   p | method_check_include_ghosts;
@@ -1919,8 +1917,6 @@ void EnzoConfig::read_method_check_(Parameters * p)
 
   method_check_num_files = p->value_integer
     ("num_files",1);
-  method_check_ordering = p->value_string
-    ("ordering","order_morton");
 
   if (p->type("dir") == parameter_string) {
     method_check_dir.resize(1);

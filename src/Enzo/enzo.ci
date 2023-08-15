@@ -210,8 +210,8 @@ module enzo {
 
     // checkpoint
     entry void p_check_write_first
-      (int num_files, std::string ordering, std::string name_dir);
-    entry void p_check_write_next (int num_files, std::string ordering);
+      (int num_files, std::string name_dir);
+    entry void p_check_write_next (int num_files);
     entry void p_check_done();
 
     // restart
@@ -290,8 +290,7 @@ module enzo {
 
   array[1D] IoEnzoWriter : IoWriter {
     entry IoEnzoWriter();
-    entry IoEnzoWriter (int num_files, std::string ordering,
-                        int monitor_iter, int include_ghosts);
+    entry IoEnzoWriter (int num_files, int monitor_iter, int include_ghosts);
     entry void p_write(EnzoMsgCheck * );
   };
 

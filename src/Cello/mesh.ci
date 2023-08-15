@@ -56,7 +56,6 @@ module mesh {
   PUPable MethodDebug;
   PUPable MethodFluxCorrect;
   PUPable MethodNull;
-  PUPable MethodOrderMorton;
   PUPable MethodOrder;
   PUPable MethodOutput;
   PUPable MethodRefresh;
@@ -135,11 +134,6 @@ module mesh {
 
     entry void p_method_flux_correct_refresh();
     entry void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
-
-    entry void r_method_order_morton_continue(CkReductionMsg * msg);
-    entry void r_method_order_morton_complete(CkReductionMsg * msg);
-    entry void p_method_order_morton_weight(int ic3[3], int count, Index index);
-    entry void p_method_order_morton_index(int index, int count);
 
     entry void p_method_order_accum_count (MsgOrder *);
     entry void p_method_order_accum_index (MsgOrder *);

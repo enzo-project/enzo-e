@@ -96,7 +96,7 @@ public: // interface
     method_flux_correct_single_array(true),
     method_field_list(),
     method_particle_list(),
-    method_order_type(),
+    method_order_ordering(),
     method_output_blocking(),
     method_output_all_blocks(),
     method_prolong(),
@@ -273,7 +273,7 @@ public: // interface
       method_flux_correct_single_array(true),
       method_field_list(),
       method_particle_list(),
-      method_order_type(),
+      method_order_ordering(),
       method_output_blocking(),
       method_output_all_blocks(),
       method_prolong(),
@@ -504,7 +504,7 @@ public: // attributes
 
   std::vector< std::vector< std::string > > method_field_list;
   std::vector< std::vector< std::string > > method_particle_list;
-  std::vector <std::string>  method_order_type;
+  std::vector <std::string>  method_order_ordering;
   std::vector< int >         method_output_blocking[3];
   std::vector< bool >        method_output_all_blocks;
   std::vector<std::string>   method_prolong;

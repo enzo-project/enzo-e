@@ -939,10 +939,6 @@ Method * Problem::create_method_
         config->method_output_blocking[1][index_method],
         config->method_output_blocking[2][index_method]);
 
-  } else if (name == "order_morton") {
-
-    method = new MethodOrderMorton(config->mesh_min_level);
-
   } else if (name == "order") {
 
     method = new MethodOrder(config->mesh_min_level);

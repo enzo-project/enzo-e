@@ -18,7 +18,7 @@ public: // interface
 
   /// Create a new EnzoMethodCheck object
   EnzoMethodCheck
-  (int num_files, std::string ordering,
+  (int num_files, 
    std::vector<std::string> directory,
    int monitor_iter,
    bool include_ghosts);
@@ -50,9 +50,6 @@ protected: // attributes
 
   /// Number of files to write EnzoBlock data to
   int num_files_;
-
-  /// Ordering method for EnzoBlocks; default "order_morton"
-  std::string ordering_;
 
   /// Disk directory for writing checkpoint files
   std::vector<std::string> directory_;

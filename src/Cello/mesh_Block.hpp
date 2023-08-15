@@ -603,12 +603,8 @@ public:
 
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
-  void r_method_debug_sum_fields(CkReductionMsg * msg);
 
-  void r_method_order_morton_continue(CkReductionMsg * msg);
-  void r_method_order_morton_complete(CkReductionMsg * msg);
-  void p_method_order_morton_weight(int ic3[3], int count, Index index);
-  void p_method_order_morton_index(int index, int count);
+  void r_method_debug_sum_fields(CkReductionMsg * msg);
 
   void p_method_order_accum_count (MsgOrder * msg);
   void p_method_order_accum_index (MsgOrder * msg);

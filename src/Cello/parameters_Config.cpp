@@ -131,7 +131,7 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_single_array;
   p | method_field_list;
   p | method_particle_list;
-  p | method_order_type;
+  p | method_order_ordering;
   PUParray (p,method_output_blocking,3);
   p | method_output_all_blocks;
   p | method_prolong;
@@ -814,7 +814,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_flux_correct_min_digits_values.resize(num_method);
   method_field_list.resize(num_method);
   method_particle_list.resize(num_method);
-  method_order_type.resize(num_method);
+  method_order_ordering.resize(num_method);
   method_output_blocking[0].resize(num_method);
   method_output_blocking[1].resize(num_method);
   method_output_blocking[2].resize(num_method);
@@ -949,8 +949,8 @@ void Config::read_method_ (Parameters * p) throw()
         p->list_value_string(i,full_name+":particle_list");
     }
 
-    method_order_type[index_method] =
-      p->value_string(full_name+":type","morton");
+    method_order_ordering[index_method] =
+      p->value_string(full_name+":ordering","morton");
 
     for (int i=0; i<3; i++) {
       method_output_blocking[i][index_method] =
