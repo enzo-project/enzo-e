@@ -5,8 +5,8 @@ Adapt { min_level = -2; }
      gravity {
          solver = "dd";
      };
-     list = ["order_morton","check","debug","pm_deposit", "gravity", "pm_update", "comoving_expansion" ];
-     order_morton {
+     list = ["order","check","debug","pm_deposit", "gravity", "pm_update", "comoving_expansion" ];
+     order {
          schedule {
              list = [140];
              var = "cycle";
@@ -15,7 +15,6 @@ Adapt { min_level = -2; }
      check {
          dir = [ "Check-%02d", "cycle" ];
          num_files = 4;
-         ordering = "order_morton";
          schedule {
              list = [140];
              var = "cycle";
