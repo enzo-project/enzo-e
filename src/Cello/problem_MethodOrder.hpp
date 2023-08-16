@@ -18,7 +18,8 @@ class MethodOrder : public Method {
 public: // interface
 
   /// Constructor
-  MethodOrder(int min_level) throw();
+  MethodOrder(std::string ordering,
+              int min_level) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(MethodOrder);

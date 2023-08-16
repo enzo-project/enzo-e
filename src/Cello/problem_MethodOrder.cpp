@@ -33,7 +33,9 @@
 
 //----------------------------------------------------------------------
 
-MethodOrder::MethodOrder(int min_level) throw ()
+MethodOrder::MethodOrder
+(std::string ordering,
+ int min_level) throw ()
   : Method(),
     is_index_(-1),
     is_count_(-1),
@@ -46,16 +48,15 @@ MethodOrder::MethodOrder(int min_level) throw ()
     is_sync_count_(-1),
     min_level_(min_level)
 {
-  std::string type = "morton";
-  if (type == "morton") {
+  if (ordering == "morton") {
     type_ = Type::morton;
   } else {
     ERROR1("MethodOrder()",
           "Unsupported MethodOrder type %s",
-           type.c_str());
+           ordering.c_str());
   }
   Refresh * refresh = cello::refresh(ir_post_);
-  cello::simulation()->refresh_set_name(ir_post_,type);
+  cello::simulation()->refresh_set_name(ir_post_,ordering);
   refresh->add_field("density");
 
   /// Create Scalar data for ordering index
@@ -65,16 +66,16 @@ MethodOrder::MethodOrder(int min_level) throw ()
   auto sd_sync = cello::scalar_descr_sync();
   auto sd_d    = cello::scalar_descr_double();
   // output scalars
-  is_index_        = sd_ll->  new_value(type + ":index"); // block index 0..# participating blocks - 1
-  is_count_        = sd_ll->  new_value(type + ":count"); // number of participating blocks
-  is_windex_       = sd_d->   new_value(type + ":windex"); // weighted index
-  is_wcount_       = sd_d->   new_value(type + ":wcount"); // weighted count
-  is_next_         = sd_ind-> new_value(type + ":next"); // "next" index 
+  is_index_        = sd_ll->  new_value(ordering + ":index"); // block index 0..# participating blocks - 1
+  is_count_        = sd_ll->  new_value(ordering + ":count"); // number of participating blocks
+  is_windex_       = sd_d->   new_value(ordering + ":windex"); // weighted index
+  is_wcount_       = sd_d->   new_value(ordering + ":wcount"); // weighted count
+  is_next_         = sd_ind-> new_value(ordering + ":next"); // "next" index 
   // local scalars
-  is_count_child_  = sd_ll->  new_value(type + ":count_child",n);
-  is_wcount_child_ = sd_d->   new_value(type + ":wcount_child",n);
-  is_sync_index_   = sd_sync->new_value(type + ":sync_index");
-  is_sync_count_   = sd_sync->new_value(type + ":sync_count");
+  is_count_child_  = sd_ll->  new_value(ordering + ":count_child",n);
+  is_wcount_child_ = sd_d->   new_value(ordering + ":wcount_child",n);
+  is_sync_index_   = sd_sync->new_value(ordering + ":sync_index");
+  is_sync_count_   = sd_sync->new_value(ordering + ":sync_count");
 }
 
 //======================================================================

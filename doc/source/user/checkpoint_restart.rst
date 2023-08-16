@@ -18,15 +18,14 @@ Checkpoint
 
    Method {
      ...
-     list = [ "order_morton", "check", ... ];
-     order_morton {
+     list = [ "order", "check", ... ];
+     order {
         schedule { var = "cycle";  start = 5;  step = 5;  }
      }
      check {
         schedule { var = "cycle";  start = 5;  step = 5;  }
         dir = [ "Check-%02d", "cycle" ];
         num_files = 4;
-        ordering = "order_morton";
      }
      ...
    }
@@ -37,6 +36,9 @@ cycle.
 See the ``input/Checkpoint/test_cosmo-checkpoint.in`` parameter
 file for a working example of writing checkpoint directories.
 
+Also see the :ref:`order method` section on more information about the
+required ``"order"`` method, and how to use multiple ordering methods
+in the same simulation.
 
 .. note::
    Currently, there is a restriction that the domain blocking must

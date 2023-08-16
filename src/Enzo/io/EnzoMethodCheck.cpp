@@ -73,7 +73,6 @@ void EnzoMethodCheck::pup (PUP::er &p)
 
 void EnzoMethodCheck::compute ( Block * block) throw()
 {
-  if (block->index().is_root()) CkPrintf ("EnzoMethodCheck\n");
   const bool is_first_cycle = (cello::simulation()->cycle() ==
                                cello::simulation()->initial_cycle());
   if (!is_first_cycle) {

@@ -941,7 +941,9 @@ Method * Problem::create_method_
 
   } else if (name == "order") {
 
-    method = new MethodOrder(config->mesh_min_level);
+    method = new MethodOrder
+      (config->method_order_ordering[index_method],
+       config->mesh_min_level);
 
   } else if (name == "refresh") {
 

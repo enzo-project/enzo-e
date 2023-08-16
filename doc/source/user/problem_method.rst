@@ -98,7 +98,7 @@ parameters
 
 While the Charm++ parallel programming system supports many load balancers,
 Enzo-E also implements its own dynamic load balancer based on space-filling
-curves. As such, it relies on the ``"ordering"`` Method to be called
+curves. As such, it relies on the ``"order"`` Method to be called
 before ``"balance"``.
 
 There are currently no method-specific parameters, though ``schedule``
