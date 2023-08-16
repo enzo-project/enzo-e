@@ -10,7 +10,7 @@
 
 #include "enzo.hpp"
 
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 
 // #define DEBUG_TURBULENCE
 

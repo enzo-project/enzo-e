@@ -201,7 +201,6 @@ void Block::p_refresh_recv (MsgRefresh * msg_refresh)
 {
   const int id_refresh = msg_refresh->id_refresh();
   CHECK_ID(id_refresh);
-
   Sync * sync = sync_(id_refresh);
 
   if (sync->state() == RefreshState::READY) {

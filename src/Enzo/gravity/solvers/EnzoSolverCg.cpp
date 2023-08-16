@@ -6,7 +6,7 @@
 /// @brief    Implements the CG Krylov iterative linear solver
 
 #include "enzo.hpp"
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 
 // #define COPY_FIELD
 

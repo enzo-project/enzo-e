@@ -88,6 +88,7 @@ namespace enzo {
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
 extern CProxy_IoEnzoWriter proxy_io_enzo_writer;
 extern CProxy_IoEnzoReader proxy_io_enzo_reader;
+extern CProxy_EnzoLevelArray proxy_level_array;
 extern void mutex_init();
 extern void mutex_init_bcg_iter();
 #endif /* ENZO_HPP */

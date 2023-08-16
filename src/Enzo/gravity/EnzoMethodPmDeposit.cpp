@@ -212,7 +212,6 @@ namespace { // define local helper functions in anonymous namespace
 #ifdef DEBUG_COLLAPS
 	  CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
 #endif
-
 	  for (int ip=0; ip<np; ip++) {
 	    double x = xa[ip*dp] + vxa[ip*dv]*dt_div_cosmoa;
 

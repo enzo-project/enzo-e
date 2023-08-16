@@ -26,6 +26,7 @@
 CProxy_EnzoSimulation proxy_enzo_simulation;
 CProxy_IoEnzoWriter   proxy_io_enzo_writer;
 CProxy_IoEnzoReader   proxy_io_enzo_reader;
+CProxy_EnzoLevelArray proxy_level_array;
 
 //----------------------------------------------------------------------
 
@@ -34,6 +35,7 @@ EnzoSimulation::EnzoSimulation
  const char         parameter_file[],
  int                n)
   : CBase_EnzoSimulation(parameter_file, n),
+    infer_count_arrays_(0),
     check_num_files_(0),
     check_ordering_(""),
     check_directory_(),
@@ -83,6 +85,10 @@ void EnzoSimulation::pup (PUP::er &p)
 
   p | sync_check_writer_created_;
   p | sync_check_done_;
+  p | sync_infer_count_;
+  p | sync_infer_create_;
+  p | sync_infer_done_;
+  p | infer_count_arrays_;
   p | check_num_files_;
   p | check_ordering_;
   p | check_directory_;

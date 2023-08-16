@@ -52,7 +52,7 @@ public:
 
   /// Reset the counter to 0
   void reset () throw () ;
-  
+
   /// Decrement the stopping value by one
   inline int operator -- () 
   { --index_stop_; return index_stop_; }
@@ -87,11 +87,11 @@ private: // methods
 
   /// Check whether stop reached
   void check_done_() throw ();
-  
+
 private: // attributes
 
   int is_done_;
-  
+
   /// Last value of the parallel sync index
   int index_stop_;
 

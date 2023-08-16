@@ -1,0 +1,37 @@
+   @startuml
+
+   box "Inference arrays" #LightBlue
+   participant array_i as a0
+   participant array_j as a2
+   end box
+
+   box "Root process" #LightYellow
+   participant "Root process" as root
+   end box
+
+   box "Block levels" #LightPink
+   participant "B0" as b0
+   participant "B1" as b1
+   participant "B2" as b2
+   participant "B3" as b3
+   participant "B4" as b4
+   end box
+
+
+   == 2. allocate ==
+
+   b2 -> a0 : EnzoLevelArray()
+   activate a0 #DarkSalmon
+   b2 -> a2
+   activate a2 #DarkSalmon
+
+   a0 -> root : p_infer_array_created()
+   a2 -> root
+
+   hnote over root : sync_create
+   root -> root : doneInserting()
+
+   root -> a0 : p_request_data()
+   root -> a2
+
+@enduml

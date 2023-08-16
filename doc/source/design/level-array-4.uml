@@ -1,0 +1,26 @@
+   @startuml
+
+   box "Inference arrays" #LightBlue
+   participant array_i as a0
+   participant array_j as a2
+   end box
+
+   box "Root process" #LightYellow
+   participant "Root process" as root
+   end box
+
+   box "Block levels" #LightPink
+   participant "B0" as b0
+   participant "B1" as b1
+   participant "B2" as b2
+   participant "B3" as b3
+   participant "B4" as b4
+   end box
+
+   == 4. apply inference ==
+
+   a0 -> a0 : apply_inference()
+   a2 -> a2
+
+
+@enduml

@@ -91,6 +91,14 @@
 /// @brief    Placeholder for code that is incomplete
 #define INCOMPLETE(M)                                                   \
   { cello::message(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M);  }
+#define INCOMPLETE1(M,A1)                                               \
+  { cello::message(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M,A1);  }
+#define INCOMPLETE2(M,A1,A2)                                            \
+  { cello::message(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M,A1,A2);  }
+#define INCOMPLETE3(M,A1,A2,A3)                                         \
+  { cello::message(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M,A1,A2,A3);  }
+#define INCOMPLETE4(M,A1,A2,A3,A4)                                      \
+  { cello::message(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M,A1,A2,A3,A4);  }
 
 //----------------------------------------------------------------------
 /// @def      TRACE
