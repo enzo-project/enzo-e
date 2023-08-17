@@ -191,16 +191,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
-    initial = new EnzoInitialInclinedWave
-      (cycle, time,
-       enzo_config->initial_inclinedwave_alpha,
-       enzo_config->initial_inclinedwave_beta,
-       enzo::fluid_props()->gamma(),
-       enzo_config->initial_inclinedwave_amplitude,
-       enzo_config->initial_inclinedwave_lambda,
-       enzo_config->initial_inclinedwave_parallel_vel,
-       enzo_config->initial_inclinedwave_positive_vel,
-       enzo_config->initial_inclinedwave_wave_type);
+    initial = new EnzoInitialInclinedWave(cycle, time, p_accessor);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,

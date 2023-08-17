@@ -111,14 +111,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
-  // EnzoInitialInclinedWave
-  initial_inclinedwave_alpha(0.0),
-  initial_inclinedwave_beta(0.0),
-  initial_inclinedwave_amplitude(0.0),
-  initial_inclinedwave_lambda(0.0),
-  initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
-  initial_inclinedwave_positive_vel(true),
-  initial_inclinedwave_wave_type(""),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -445,14 +437,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_maximum_metallicity;
   p | initial_grackle_test_reset_energies;
 
-  p | initial_inclinedwave_alpha;
-  p | initial_inclinedwave_beta;
-  p | initial_inclinedwave_amplitude;
-  p | initial_inclinedwave_lambda;
-  p | initial_inclinedwave_parallel_vel;
-  p | initial_inclinedwave_positive_vel;
-  p | initial_inclinedwave_wave_type;
-
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
   p | initial_sedov_radius_relative;
@@ -771,7 +755,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_feedback_test_(p);
   read_initial_grackle_(p);
   read_initial_hdf5_(p);
-  read_initial_inclined_wave_(p);
   read_initial_isolated_galaxy_(p);
   read_initial_merge_sinks_test_(p);
   read_initial_music_(p);
@@ -1037,31 +1020,6 @@ void EnzoConfig::read_initial_burkertbodenheimer_(Parameters * p)
    p->value_logical ("Initial:burkertbodenheimer:rotating",true);
   initial_burkertbodenheimer_outer_velocity =
    p->value_float ("Initial:burkertbodenheimer:outer_velocity",-1.0);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_inclined_wave_(Parameters * p)
-{
-
-  // InitialInclinedWave initialization
-
-  initial_inclinedwave_alpha          = p->value_float
-    ("Initial:inclined_wave:alpha",0.0);
-  initial_inclinedwave_beta           = p->value_float
-    ("Initial:inclined_wave:beta",0.0);
-  initial_inclinedwave_amplitude      = p->value_float
-    ("Initial:inclined_wave:amplitude",1.e-6);
-  initial_inclinedwave_lambda         = p->value_float
-    ("Initial:inclined_wave:lambda",1.0);
-  // The default vaue for parallel_vel is known by EnzoInitialInclinedWave
-  // to mean that a value was not specified
-  initial_inclinedwave_parallel_vel   = p->value_float
-    ("Initial:inclined_wave:parallel_vel", std::numeric_limits<double>::min());
-  initial_inclinedwave_positive_vel   = p->value_logical
-    ("Initial:inclined_wave:positive_vel",true);
-  initial_inclinedwave_wave_type      = p->value_string
-    ("Initial:inclined_wave:wave_type","alfven");
 }
 
 //----------------------------------------------------------------------

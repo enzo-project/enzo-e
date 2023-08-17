@@ -644,20 +644,27 @@ static void setup_fluid_(Block *block, HydroInitPack hydro_init_pack,
 
 //----------------------------------------------------------------------
 
-EnzoInitialInclinedWave::EnzoInitialInclinedWave
-(int cycle, double time, double alpha, double beta, double gamma,
- double amplitude, double lambda, double parallel_vel,bool pos_vel,
- std::string wave_type) throw()
+EnzoInitialInclinedWave::EnzoInitialInclinedWave(int cycle, double time,
+                                                 ParameterAccessor &p) throw()
   : Initial (cycle,time),
-    alpha_(alpha),
-    beta_(beta),
-    gamma_(gamma),
-    amplitude_(amplitude),
-    lambda_(lambda),
-    parallel_vel_(parallel_vel),
-    pos_vel_(pos_vel),
-    wave_type_(wave_type)
+    alpha_(p.value_float("alpha",0.0)),
+    beta_(p.value_float("beta",0.0)),
+    gamma_(enzo::fluid_props()->gamma()), // TODO: drop this as a parameter
+    amplitude_(p.value_float("amplitude",1.e-6)),
+    lambda_(p.value_float("lambda",1.0)),
+    parallel_vel_(p.value_float("parallel_vel",
+                                std::numeric_limits<double>::min())),
+    pos_vel_(p.value_logical("positive_vel",true)),
+    wave_type_("")
 {
+  const std::string wave_type_param_name = p.full_name("wave_type");
+  if (p.param("wave_type") == nullptr){
+    ERROR1("EnzoInitialInclinedWave::EnzoInitialInclinedWave",
+           "%s must be specified", wave_type_param_name.c_str());
+  } else {
+    wave_type_ = p.value_string("wave_type", "");
+  }
+
   std::vector<std::string> mhd_waves = mhd_waves_();
   std::vector<std::string> hd_waves  =  hd_waves_();
 
@@ -667,7 +674,7 @@ EnzoInitialInclinedWave::EnzoInitialInclinedWave
   if (is_MHD_wave | (wave_type_ == "jeans")){
     ASSERT1("EnzoInitialInclinedWave",
 	    "parallel_vel isn't currently supported for wave_type: \"%s\"",
-	    wave_type.c_str(), !specified_parallel_vel_());
+	    wave_type_.c_str(), !specified_parallel_vel_());
   } else if (std::find(hd_waves.begin(), hd_waves.end(), wave_type_)
 	     == hd_waves.end()) {
     // wave_type_ isn't a known type. Raise error with list of known
@@ -684,8 +691,9 @@ EnzoInitialInclinedWave::EnzoInitialInclinedWave
     ss << ", 'jeans'";
 
     std::string s = ss.str();
-    ERROR1("EnzoInitialInclinedWave", "Invalid wave_type, must be %s",
-	   s.c_str());
+    ERROR3("EnzoInitialInclinedWave",
+           "%s has invalid value, \"%s\". Must be %s",
+	   wave_type_param_name.c_str(), wave_type_.c_str(), s.c_str());
   }
 }
 

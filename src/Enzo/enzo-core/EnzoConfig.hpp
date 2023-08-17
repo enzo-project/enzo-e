@@ -178,14 +178,6 @@ public: // interface
       initial_IG_stellar_bulge(false),
       initial_IG_stellar_disk(false),
       initial_IG_use_gas_particles(false),       //
-      // EnzoInitialInclinedWave
-      initial_inclinedwave_alpha(0.0),
-      initial_inclinedwave_amplitude(0.0),
-      initial_inclinedwave_beta(0.0),
-      initial_inclinedwave_lambda(0.0),
-      initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
-      initial_inclinedwave_positive_vel(true),
-      initial_inclinedwave_wave_type(""),
       // EnzoInitialMergeSinksTest
       initial_merge_sinks_test_particle_data_filename(""),
       // EnzoInitialMusic
@@ -435,7 +427,6 @@ protected: // methods
   void read_initial_feedback_test_(Parameters *);
   void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
-  void read_initial_inclined_wave_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_music_(Parameters *);
@@ -579,15 +570,6 @@ public: // attributes
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
-
-  /// EnzoInitialInclinedWave
-  double                     initial_inclinedwave_alpha;
-  double                     initial_inclinedwave_beta;
-  double                     initial_inclinedwave_amplitude;
-  double                     initial_inclinedwave_lambda;
-  double                     initial_inclinedwave_parallel_vel;
-  bool                       initial_inclinedwave_positive_vel;
-  std::string                initial_inclinedwave_wave_type;
 
   /// EnzoInitialMusic
 
