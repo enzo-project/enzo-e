@@ -87,6 +87,11 @@ Initial * EnzoProblem::create_initial_
 
   Initial * initial = 0;
 
+  // move creation of p_accessor up the call stack?
+  const std::string root_path =
+    ("Initial:" + parameters->list_value_string(index, "Initial:list"));
+  ParameterAccessor p_accessor(*parameters, root_path);
+
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
 
@@ -214,14 +219,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
-    initial = new EnzoInitialShockTube
-      (enzo::fluid_props()->gamma(),
-       cycle, time,
-       enzo_config->initial_shock_tube_setup_name,
-       enzo_config->initial_shock_tube_aligned_ax,
-       enzo_config->initial_shock_tube_axis_velocity,
-       enzo_config->initial_shock_tube_trans_velocity,
-       enzo_config->initial_shock_tube_flip_initialize);
+    initial = new EnzoInitialShockTube(cycle, time, p_accessor);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup

@@ -100,15 +100,14 @@ std::string vector_to_string_(std::vector<std::string> &vec)
 
 //----------------------------------------------------------------------
 
-EnzoInitialShockTube::EnzoInitialShockTube(double gamma, int cycle, double time,
-					   std::string setup_name,
-					   std::string aligned_ax_name,
-					   double axis_velocity,
-					   double trans_velocity,
-					   bool flipped_initialize)
-  : Initial(cycle, time), gamma_(gamma), setup_name_(setup_name),
-    aligned_ax_(0), axis_velocity_(axis_velocity),
-    trans_velocity_(trans_velocity), flipped_initialize_(flipped_initialize)
+EnzoInitialShockTube::EnzoInitialShockTube(int cycle, double time,
+					   ParameterAccessor &p)
+  : Initial(cycle, time),
+    setup_name_(p.value_string("setup_name","")),
+    aligned_ax_(0),
+    axis_velocity_(p.value_float("axis_velocity",0.0)),
+    trans_velocity_(p.value_float("transverse_velocity",0.0)),
+    flipped_initialize_(p.value_logical("flip_initialize", false))
 {
 
   if (std::find(shock_tube_setups.begin(),
@@ -116,28 +115,31 @@ EnzoInitialShockTube::EnzoInitialShockTube(double gamma, int cycle, double time,
 		setup_name_) == shock_tube_setups.end()){
     // the current name is not known
     std::string allowed_names = vector_to_string_(shock_tube_setups);
+    std::string param_name = p.full_name("setup_name");
+
     // There is a character limit but we are probably fine (we are exiting
     // early anyways)
-    ERROR2("EnzoInitialShockTube",
-	   "Invalid setup_name specified (must be %s), not %s.",
-	   allowed_names.c_str(), setup_name_.c_str());
+    ERROR3("EnzoInitialShockTube",
+	   "%s specifies an invalid name: (must be %s), not %s.",
+	   param_name.c_str(), allowed_names.c_str(), setup_name_.c_str());
   }
 
-
-  ASSERT1("EnzoInitialShockTube",
-	  "Invalid aligned_ax value specified (must be x, y, or z), not %s.",
-	  aligned_ax_name.c_str(),
-	  aligned_ax_name == "x" || aligned_ax_name == "y"
-	  || aligned_ax_name == "z");
-  if (aligned_ax_name == "x"){
+  std::string aligned_ax_name = p.value_string("aligned_ax","x");
+  if (aligned_ax_name == "x") {
     aligned_ax_ = 0;
-  } else if (aligned_ax_name == "y"){
+  } else if (aligned_ax_name == "y") {
     aligned_ax_ = 1;
-  } else {
+  } else if (aligned_ax_name == "z") {
     aligned_ax_ = 2;
+  } else {
+    std::string param_name = p.full_name("aligned_ax");
+    ERROR2("EnzoInitialShockTube",
+           "%s must specify \"x\", \"y\", or \"z\", not \"%s\"",
+           param_name.c_str(), aligned_ax_name.c_str());
   }
+
 }
-  
+
 //----------------------------------------------------------------------
 
 void EnzoInitialShockTube::pup (PUP::er &p)
@@ -148,7 +150,6 @@ void EnzoInitialShockTube::pup (PUP::er &p)
 
   Initial::pup(p);
 
-  p | gamma_;
   p | setup_name_;
   p | aligned_ax_;
   p | axis_velocity_;
@@ -200,6 +201,10 @@ void EnzoInitialShockTube::enforce_block
     setup_maps_(shock_tube_l[setup_name_], true, r_vals);
   }
 
+  // retrieve the adiabatic index. (The following will cause the program to
+  // abort with an error if it was configured without an ideal eos)
+  double gamma = enzo::fluid_props()->eos_variant().get<EnzoEOSIdeal>().gamma;
+
   enzo_float flip = (flipped_initialize_) ? -1. : 1.;
   enzo_float aligned_bfield_val = flip * shock_tube_bfield_0[setup_name_];
   enzo_float axis_velocity      = flip * axis_velocity_;
@@ -248,7 +253,7 @@ void EnzoInitialShockTube::enforce_block
 
     // (optionally) compute the specific internal energy
     enzo_float eint = (cur_val_map->at("pressure") /
-		       ((gamma_ - 1.) * cur_val_map->at("density")));
+		       ((gamma - 1.) * cur_val_map->at("density")));
     if (field.is_field("internal_energy")){
       arr = field.view<enzo_float>("internal_energy");
       initializer_helper_(*cur_slice, eint, arr);

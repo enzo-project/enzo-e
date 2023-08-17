@@ -224,12 +224,6 @@ public: // interface
       initial_sedov_random_radius_relative(0.0),
       initial_sedov_random_te_multiplier(0),
       initial_sedov_rank(0),
-      // EnzoInitialShockTube
-      initial_shock_tube_aligned_ax(""),
-      initial_shock_tube_axis_velocity(0.0),
-      initial_shock_tube_flip_initialize(false),
-      initial_shock_tube_setup_name(""),
-      initial_shock_tube_trans_velocity(0.0),
       // EnzoInitialShuCollapse
       initial_shu_collapse_central_sink_exists(false),
       initial_shu_collapse_central_sink_mass(0.0),
@@ -448,7 +442,6 @@ protected: // methods
   void read_initial_pm_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
-  void read_initial_shock_tube_(Parameters *);
   void read_initial_shu_collapse_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
@@ -638,13 +631,6 @@ public: // attributes
   double                     initial_sedov_random_pressure_out;
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
-
-  /// EnzoInitialShockTube
-  std::string                initial_shock_tube_setup_name;
-  std::string                initial_shock_tube_aligned_ax;
-  double                     initial_shock_tube_axis_velocity;
-  double                     initial_shock_tube_trans_velocity;
-  bool                       initial_shock_tube_flip_initialize;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;

@@ -155,12 +155,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_pressure_out(0.0),
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
-  // EnzoInitialShockTube
-  initial_shock_tube_setup_name(""),
-  initial_shock_tube_aligned_ax(""),
-  initial_shock_tube_axis_velocity(0.0),
-  initial_shock_tube_trans_velocity(0.0),
-  initial_shock_tube_flip_initialize(false),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -564,12 +558,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_disk;
   p | initial_IG_use_gas_particles;
 
-  p | initial_shock_tube_setup_name;
-  p | initial_shock_tube_aligned_ax;
-  p | initial_shock_tube_axis_velocity;
-  p | initial_shock_tube_trans_velocity;
-  p | initial_shock_tube_flip_initialize;
-
   p | initial_soup_rank;
   p | initial_soup_file;
   p | initial_soup_rotate;
@@ -790,7 +778,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_pm_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
-  read_initial_shock_tube_(p);
   read_initial_shu_collapse_(p);
   read_initial_soup_(p);
   read_initial_turbulence_(p);
@@ -1124,23 +1111,6 @@ void EnzoConfig::read_initial_sedov_random_(Parameters * p)
     p->value_float   ("Initial:sedov_random:density",1.0);
   initial_sedov_random_te_multiplier =
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_shock_tube_(Parameters * p)
-{
-  // Shock Tube Initialization
-  initial_shock_tube_setup_name = p->value_string
-    ("Initial:shock_tube:setup_name","");
-  initial_shock_tube_aligned_ax = p->value_string
-    ("Initial:shock_tube:aligned_ax","x");
-  initial_shock_tube_axis_velocity = p->value_float
-    ("Initial:shock_tube:axis_velocity",0.0);
-  initial_shock_tube_trans_velocity = p->value_float
-    ("Initial:shock_tube:transverse_velocity",0.0);
-  initial_shock_tube_flip_initialize = p -> value_logical
-    ("Initial:shock_tube:flip_initialize", false);
 }
 
 //----------------------------------------------------------------------
