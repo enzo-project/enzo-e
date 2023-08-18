@@ -35,6 +35,9 @@ module enzo {
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  // ALWAYS define the following (even if CONFIG_USE_GRACKLE is not defined)
+  PUPable GrackleFacade;
+
   // EnzoInitial
 #ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
@@ -71,10 +74,7 @@ module enzo {
   PUPable EnzoRefineShock;
 
   // EnzoCompute
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoComputeCoolingTime;
-#endif
-
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
@@ -86,9 +86,7 @@ module enzo {
   PUPable EnzoMatrixIdentity;
 
   // EnzoMethod
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoMethodGrackle;
-#endif
   PUPable EnzoMethodAccretion;
   PUPable EnzoMethodBackgroundAcceleration;
   PUPable EnzoMethodBondiHoyleAccretion;
