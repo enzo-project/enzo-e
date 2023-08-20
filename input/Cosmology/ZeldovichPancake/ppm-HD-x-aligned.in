@@ -1,5 +1,17 @@
-   #include "input/vlct/vl_de.incl"
+# Problem: x-axis aligned Zeldovich Pancake problem for ppm integrator
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
    include "input/Cosmology/ZeldovichPancake/x-aligned-HD.incl"
+
+   Physics {
+      list += ["fluid_props"];
+      fluid_props {
+         dual_energy {
+            type = "bryan95";
+            eta = [0.001, 0.1];
+         }
+      }
+   }
 
    Method {
       list = ["cosmology",
@@ -17,7 +29,6 @@
 
    Output {
       data {
-         #dir = ["method-ppm-HD_x-aligned-pancake_%04d","cycle"];
          dir = ["method-ppm-HD_x-aligned-pancake_%.3e","time"];
       }
    }

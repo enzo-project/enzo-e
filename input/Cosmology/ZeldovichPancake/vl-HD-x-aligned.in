@@ -1,5 +1,12 @@
+# Problem: x-axis aligned Zeldovich Pancake problem for VL hydro integrator
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
    include "input/vlct/vl_de.incl"
    include "input/Cosmology/ZeldovichPancake/x-aligned-HD.incl"
+
+   Physics {
+      fluid_props { dual_energy { eta = 0.01; } }
+   }
 
    Method {
       list = ["cosmology",
@@ -11,7 +18,6 @@
 
    Output {
       data {
-         #dir = ["method-vlct-HD_x-aligned-pancake_%04d","cycle"];
-         dir = ["method-vlct-HD_x-aligned-pancake_%.3e","time"];
+         dir = ["method-vl-HD_x-aligned-pancake_%.3e","time"];
       }
    }
