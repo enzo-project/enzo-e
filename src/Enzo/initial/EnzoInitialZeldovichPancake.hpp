@@ -22,9 +22,7 @@ class EnzoInitialZeldovichPancake : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialZeldovichPancake(double gamma, int cycle, double time)
-    : Initial(cycle, time), gamma_(gamma)
-  { }
+  EnzoInitialZeldovichPancake(double gamma, int cycle, double time);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialZeldovichPancake);
