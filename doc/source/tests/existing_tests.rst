@@ -72,3 +72,4 @@ The answer test suite currently covers the following simulations:
 
 .. toctree::
    grackle-pytest
+   zeldovich-pancake
