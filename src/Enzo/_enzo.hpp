@@ -167,6 +167,7 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
+
 #include "utils/EnzoEFltArrayMap.hpp"
 #include "utils/utils.hpp"
 
@@ -228,6 +229,7 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "tests/EnzoInitialMergeSinksTest.hpp"
 #include "tests/EnzoInitialAccretionTest.hpp"
 #include "initial/EnzoInitialShuCollapse.hpp"
+#include "initial/EnzoInitialZeldovichPancake.hpp"
 #include "tests/EnzoInitialBBTest.hpp"
 
 #include "mesh/EnzoRefineShock.hpp"

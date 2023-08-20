@@ -1,0 +1,17 @@
+   include "input/vlct/vl_de.incl"
+   include "input/Cosmology/ZeldovichPancake/x-aligned-HD.incl"
+
+   Method {
+      list = ["cosmology",
+              "pm_deposit",
+              "gravity",
+              "mhd_vlct",
+              "comoving_expansion"];
+   }
+
+   Output {
+      data {
+         #dir = ["method-vlct-HD_x-aligned-pancake_%04d","cycle"];
+         dir = ["method-vlct-HD_x-aligned-pancake_%.3e","time"];
+      }
+   }

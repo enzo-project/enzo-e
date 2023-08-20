@@ -50,6 +50,15 @@ public: // virtual methods
   virtual void enforce_block
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
+  /// Performs all of the heavy lifting related to initializing cosmology and
+  /// initializing the energy fields from a temperature
+  ///
+  /// This is a public static can be called by other initializers. (There's
+  /// little harm in this function getting called multiple times for a single
+  /// block)
+  static void init_cosmology
+  ( Block * block, double temperature, double gamma ) throw();
+
 private: // functions
 
 
