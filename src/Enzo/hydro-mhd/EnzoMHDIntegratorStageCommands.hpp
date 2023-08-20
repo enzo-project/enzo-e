@@ -200,8 +200,9 @@ public:
   ///     terms are skipped.
   /// @param[in]     cur_dt Size of the timestep used in the current stage
   /// @param[in]     stale_depth indicates the current stale_depth.
-  /// @param[in]     cell_widths_xyz holds the cell widths along the x, y, and
-  ///      dimensions, respectively.
+  /// @param[in]     proper_cell_widths_xyz holds the cell widths along the x,
+  ///     y, and z dimensions, respectively. They should always be proper
+  ///     distances (even in cosmological sims).
   ///
   /// @note This function expects that calling the `contiguous_arrays()`
   /// instance method for `prim_map_l`, `prim_map_r`, and any map contained
@@ -222,7 +223,7 @@ public:
    unsigned short stage_index,
    double cur_dt,
    int stale_depth,
-   const std::array<enzo_float,3> cell_widths_xyz) const noexcept;
+   const std::array<enzo_float,3> proper_cell_widths_xyz) const noexcept;
 
   /// return the amount that stale_depth increases during a given stage
   ///
@@ -261,13 +262,16 @@ protected:
   ///
   /// If using the dual energy formalism, this also computes a part of the
   /// internal energy density source term,
-  ///    `dt * pressure * (dvx/dx + dvy/dy + dvz/dz)`
-  /// (`vx`, `vy`, `vz` are velocity components & scale factor dependence is
-  /// omitted), and adds it to the 'internal_energy' entry in `dUcons_map`.
-  /// More specifically, it handles the dimensionally split part of the term
-  /// involving the derivative along `dim`. The velocity component along `dim`
-  /// at the cell-interfaces (estimated by the Riemann Solver) to compute the
-  /// derivatives.
+  /// `dt * pressure * (dvx/dx + dvy/dy + dvz/dz)`. In detail, this computes
+  ///   - `-dt * pressure * dvx/dx`, when `dim == 0`
+  ///   - `-dt * pressure * dvy/dy`, when `dim == 1`
+  ///   - `-dt * pressure * dvz/dz`, when `dim == 2`
+  /// and adds the results to the "internal_energy" entry in `dUcons_map`. This
+  /// estimates the velocity derivative using the velocity component along
+  /// `dim` at the cell-interfaces (estimated by the Riemann Solver) and the
+  /// `proper_cell_width`. This is valid for both cosmological and
+  /// non-cosmological simulations. In cosmological simulations, the other
+  /// cosmological expansion term is handled in a separate `Method` object.
   ///
   /// This function should NOT be modified to directly compute any other source
   /// terms unless they similarly have dependence on dimensional quantites
@@ -277,7 +281,8 @@ protected:
   /// @param[in]     dim Dimension along which to compute fluxes. Values of 0,
   ///     1, and 2 correspond to the x, y, and z directions, respectively.
   /// @param[in]     dt The current timestep.
-  /// @param[in]     cell_width The cell width along dimension `dim`.
+  /// @param[in]     proper_cell_width The cell width along dimension `dim`.
+  ///     This should always be a proper distance (even in cosmological sims).
   /// @param[in]     primitive_map Map of arrays holding cell-centered
   ///     primitive quantities that are to be reconstructed (This includes
   ///     specific passive scalars).
@@ -308,7 +313,7 @@ protected:
   ///     performing reconstruction)
   /// @param[in]     passive_list A list of keys for passively advected scalars.
   void compute_flux_
-  (const int dim, const double cur_dt, const enzo_float cell_width,
+  (const int dim, const double cur_dt, const enzo_float proper_cell_width,
    EnzoEFltArrayMap &primitive_map,
    EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
    EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,

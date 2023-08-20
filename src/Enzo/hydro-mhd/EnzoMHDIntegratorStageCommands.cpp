@@ -116,7 +116,7 @@ void EnzoMHDIntegratorStageCommands::compute_update_stage
  unsigned short stage_index,
  double cur_dt,
  int stale_depth,
- const std::array<enzo_float,3> cell_widths_xyz
+ const std::array<enzo_float,3> proper_cell_widths_xyz
  ) const noexcept
 {
   check_valid_stage_index_(static_cast<int>(stage_index));
@@ -170,7 +170,7 @@ void EnzoMHDIntegratorStageCommands::compute_update_stage
       interface_vel_arr_ptr = nullptr;
     }
 
-    compute_flux_(dim, cur_dt, cell_widths_xyz[dim], primitive_map,
+    compute_flux_(dim, cur_dt, proper_cell_widths_xyz[dim], primitive_map,
                   pl_map, pr_map, flux_maps_xyz[dim], dUcons_map,
                   interface_vel_arr_ptr, *reconstructor, bfield_method_,
                   stale_depth, passive_list);
@@ -207,7 +207,7 @@ void EnzoMHDIntegratorStageCommands::compute_update_stage
 //----------------------------------------------------------------------
 
 void EnzoMHDIntegratorStageCommands::compute_flux_
-(const int dim, const double cur_dt, const enzo_float cell_width,
+(const int dim, const double cur_dt, const enzo_float proper_cell_width,
  EnzoEFltArrayMap &primitive_map,
  EnzoEFltArrayMap &priml_map, EnzoEFltArrayMap &primr_map,
  EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
@@ -242,7 +242,8 @@ void EnzoMHDIntegratorStageCommands::compute_flux_
   // from the fluxes and use these values to update dUcons_map (which is used
   // to accumulate the total change in these quantities over the current
   // [partial] timestep)
-  integration_quan_updater_->accumulate_flux_component(dim, cur_dt, cell_width,
+  integration_quan_updater_->accumulate_flux_component(dim, cur_dt,
+                                                       proper_cell_width,
                                                        flux_map, dUcons_map,
                                                        cur_stale_depth,
                                                        passive_list);
@@ -251,7 +252,7 @@ void EnzoMHDIntegratorStageCommands::compute_flux_
   // energy source term for this dim (and update dUcons_map).
   if (enzo::fluid_props()->dual_energy_config().any_enabled()){
     EnzoSourceInternalEnergy eint_src;
-    eint_src.calculate_source(dim, cur_dt, cell_width, primitive_map,
+    eint_src.calculate_source(dim, cur_dt, proper_cell_width, primitive_map,
                               dUcons_map, *interface_velocity_arr_ptr,
                               cur_stale_depth);
   }

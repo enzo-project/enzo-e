@@ -32,6 +32,9 @@
 ///        - bfield          (both integration and primitive)
 ///      When using the dual energy formalism there is also:
 ///        - internal_energy (just integration)
+///    - When using comoving coordinates, the integration and primitives are
+///      all defined in the comoving frame. Source terms related to comoving
+///      expansion are all handled externally by `EnzoMethodComovingExpansion`
 ///
 ///    EnzoEFltArrayMap Objects
 ///    ------------------------
@@ -163,11 +166,12 @@ protected: // methods
   /// @param[in]  dim indicates the dimension that the fluxes in `flux_map`
   ///     were computed along. Values of 0, 1, and 2 correspond to the x, y,
   ///     and z directions, respectively.
-  /// @param[in]  cell_width is the width of a cell along the dimension `dim`
+  /// @param[in]  proper_cell_width The cell width along dimension `dim`. This
+  ///     should always be a proper distance (even in cosmological sims).
   /// @param[in]  dt is the value of the current timestep
   void save_fluxes_for_corrections_
-  (Block * block, const EnzoEFltArrayMap &flux_map, int dim, double cell_width,
-   double dt) const noexcept;
+  (Block * block, const EnzoEFltArrayMap &flux_map, int dim,
+   double proper_cell_width, double dt) const noexcept;
 
   /// Returns a pointer to the scratch space struct. If the scratch space has
   /// not already been allocated, it will be allocated now.

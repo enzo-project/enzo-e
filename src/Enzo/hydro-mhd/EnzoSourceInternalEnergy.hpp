@@ -34,19 +34,32 @@ class EnzoSourceInternalEnergy
   /// @brief    [\ref Enzo] Encapsulates the calculation of the internal energy
   ///           source term along a given dimension.
   ///
-  /// The source term in question for the internal energy density is formally
-  /// defined as follows. We define the jth component of the interface velocity
-  /// as vbar and grid width along this dimension as dx. For all cell
-  /// locations (i,j,k) there is a source term, over a timestep dt, of:
-  ///     -1 * dt* pressure_j * (vbar_{j+1/2} - vbar_{j+1/2}) / (a * dx_j)
-  /// a corresponding term is added for each dimension (although this
-  /// implementation only handles a single dimension at a time).
+  /// For convenience, we split the encapsulated source term up by into 3
+  /// pieces; one for each dimension (this class needs to be called separately
+  /// for each dimension). We define the portion of the source term for the ith
+  /// dimension that get's applied at every cell locations as:
+  /// @code{.unparsed}
+  ///    -1 * dt * pressure[i] * (vbar[i+1/2] - vbar[i-1/2]) / (a * cellwidth_i)
+  /// @endcode
+  /// In the above equation:
+  ///   * the bracketted variables indicate the relative positions of variables
+  ///     on the grid along the ith dimension (values of `i` map to a
+  ///     cell-centered position). You can assume that the omitted indices
+  ///     along the other dimensions are always cell-centered.
+  ///   * `vbar` is the ith component of the velocity at the cell interface
+  ///   * `a` is the current scale-factor.
+  ///   * `cellwidth_i` is the comoving cell width along the ith dimension. In
+  ///     practice, this calculation always expects to be passed the proper
+  ///     cell-width, which is always equal to `a * cellwidth_i`.
   ///
-  /// As in Enzo's PPM method, the cell-centerred pressure is computed from the
+  /// This source-term is compatible with both non-cosmological and
+  /// cosmological simulations. In cosmological calculations the internal
+  /// energy density has another source term, but that get's handled separately
+  /// by `EnzoMethodComovingExpansion`.
+  ///
+  /// As in Enzo's PPM method, the cell-centered pressure is computed from the
   /// internal energy (although the internal energy and total energy should
   /// have been synchronized at the start of the timestep)
-  ///
-  /// The current implementation ignores the scale factor.
 
 public:
 
@@ -58,6 +71,8 @@ public:
   ///     internal Energy source term. Values of 0, 1, and 2 correspond to the
   ///     the x, y, and z directions, respectively.
   /// @param[in]  dt The time time-step overwhich to apply the source term
+  /// @param[in]  proper_cell_width The cell width along dimension `dim`. This
+  ///     should always be a proper distance (even in cosmological sims).
   /// @param[in]  prim_map Map holding the values of the cell-centered
   ///     primitives from the start of the (partial) timestep (but after the
   ///     synchronization of the internal energy with the total energy).
@@ -79,7 +94,7 @@ public:
   ///     reconstructor's delayed_staling_rate should be applied at some
   ///     time after this function call.
   void calculate_source(const int dim, const double dt,
-			const enzo_float cell_width,
+			const enzo_float proper_cell_width,
                         const EnzoEFltArrayMap &prim_map,
                         EnzoEFltArrayMap &dUcons_map,
                         const CelloView<const enzo_float,3> &interface_velocity,

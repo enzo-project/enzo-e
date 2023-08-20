@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------
 
 void EnzoSourceInternalEnergy::calculate_source
-(const int dim, const double dt, const enzo_float cell_width,
+(const int dim, const double dt, const enzo_float proper_cell_width,
  const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &dUcons_map,
  const CelloView<const enzo_float,3> &interface_velocity,
  const int stale_depth) const throw()
@@ -28,7 +28,7 @@ void EnzoSourceInternalEnergy::calculate_source
 	 "The EOS can't be barotropic when using the dual energy formalism.",
 	 !(fluid_props->has_barotropic_eos()) );
 
-  const enzo_float dtdx = dt/cell_width;
+  const enzo_float dtdx = dt/proper_cell_width;
 
   EnzoPermutedCoordinates coord(dim);
 
@@ -39,9 +39,10 @@ void EnzoSourceInternalEnergy::calculate_source
   //
   // Note  - deint_dens holds the accumulated change in the internal energy
   //         density over the current time-step
-  //       - we compute pressure from the cell-centered density ane specific
-  //         internal from the start of the time-step (adopting convention from
-  //         flux_hll.F - we also could just use the precomputed field)
+  //       - we compute pressure from the cell-centered density and specific
+  //         internal energy that are taken from the start of the time-step
+  //         (if we adopted the convention from flux_hll.F, we could
+  //         alternatively use the precomputed pressure field)
 
   CSlice full_ax(nullptr, nullptr);
 

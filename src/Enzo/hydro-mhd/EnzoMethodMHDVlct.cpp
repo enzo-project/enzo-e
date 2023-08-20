@@ -220,8 +220,8 @@ EnzoVlctScratchSpace* EnzoMethodMHDVlct::get_scratch_ptr_
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::save_fluxes_for_corrections_
-(Block * block, const EnzoEFltArrayMap &flux_map, int dim, double cell_width,
- double dt) const noexcept
+(Block * block, const EnzoEFltArrayMap &flux_map, int dim,
+ double proper_cell_width, double dt) const noexcept
 {
 
   Field field = block->data()->field();
@@ -233,7 +233,7 @@ void EnzoMethodMHDVlct::save_fluxes_for_corrections_
   int gx, gy, gz;
   field.ghost_depth(density_field_id, &gx, &gy, &gz);
 
-  double dt_dxi = dt/cell_width;
+  double dt_dxi = dt/proper_cell_width;
 
   FluxData * flux_data = block->data()->flux_data();
   const int nf = flux_data->num_fields();
@@ -392,13 +392,25 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       bfield_method_->register_target_block(block);
     }
 
-    const std::array<enzo_float,3> cell_widths_xyz =
-      { enzo::block(block)->CellWidth[0],
-        enzo::block(block)->CellWidth[1],
-        enzo::block(block)->CellWidth[2],
-      };
+    const double dt = block->dt();
 
-    double dt = block->dt();
+    // compute the proper_cell_widths (independent of whether we're using
+    // comoving coordinates or not). For a pure hydro simulation, this is all
+    // we need to do to be compatible with cosmology. Cosmology is not
+    // currently supported with magnetic fields (an error is raised elsewhere).
+    // - In the future we might want to compute different values of cosmo_a for
+    //   the partial and the full timestep
+    double cosmo_a = 1.0;
+    if (enzo::cosmology() != nullptr) {
+      double cosmo_dadt = 0.0;
+      enzo::cosmology()->compute_expansion_factor
+        (&cosmo_a, &cosmo_dadt, block->time() + 0.5*dt);
+    }
+    const std::array<enzo_float,3> proper_cell_widths_xyz =
+      { enzo::block(block)->CellWidth[0] * cosmo_a,
+        enzo::block(block)->CellWidth[1] * cosmo_a,
+        enzo::block(block)->CellWidth[2] * cosmo_a,
+      };
 
     // stale_depth indicates the number of field entries from the outermost
     // field value that the region including "stale" values (need to be
@@ -442,7 +454,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
          primitive_map, priml_map, primr_map,
          flux_maps_xyz, dUcons_map, accel_map, interface_vel_arr,
          passive_list, this->bfield_method_, stage_index,
-         cur_dt, stale_depth, cell_widths_xyz);
+         cur_dt, stale_depth, proper_cell_widths_xyz);
 
       // update the stale_depth from the current stage
       stale_depth += integrator_->staling_from_stage((int)stage_index);
@@ -455,7 +467,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
         //   same effect is also present in the Ppm Solver
         for (int i = 0; i < 3; i++) {
           save_fluxes_for_corrections_(block, flux_maps_xyz[i], i,
-                                       cell_widths_xyz[i], cur_dt);
+                                       proper_cell_widths_xyz[i], cur_dt);
         }
       }
 
@@ -473,11 +485,18 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 void EnzoMethodMHDVlct::post_init_checks_() const noexcept
 {
-  ASSERT("EnzoMethodMHDVlct::post_init_checks_",
-         "This solver isn't currently compatible with cosmological sims",
-         enzo::cosmology() == nullptr);
-
   const Problem* problem = enzo::problem();
+
+  if (enzo::cosmology() != nullptr){
+    ASSERT("EnzoMethodMHDVlct::post_init_checks_",
+           ("This solver isn't currently compatible with cosmological sims "
+            "when using bfields"),
+           integrator_->is_pure_hydro());
+    ASSERT("EnzoMethodMHDVlct::post_init_checks_",
+           "when using cosmology, this method MUST precede the "
+           "comoving_expansion method",
+           problem->method_precedes("mhd_vlct","comoving_expansion"));
+  }
 
   // problems would arise relating to particle-mesh deposition (relating to
   // particle drift before deposition) and in cosmological simulations if the
