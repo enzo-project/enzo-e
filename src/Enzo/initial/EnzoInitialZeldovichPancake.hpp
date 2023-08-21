@@ -22,14 +22,14 @@ class EnzoInitialZeldovichPancake : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialZeldovichPancake(double gamma, int cycle, double time);
+  EnzoInitialZeldovichPancake(int cycle, double time);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialZeldovichPancake);
 
   /// CHARM++ migration constructor
   EnzoInitialZeldovichPancake(CkMigrateMessage *m)
-    : Initial (m), gamma_(0.0)
+    : Initial (m), aligned_ax_(0)
   {  }
 
   /// Destructor
@@ -41,7 +41,7 @@ public: // interface
     // NOTE: update whenever attributes change
     TRACEPUP;
     Initial::pup(p);
-    p | gamma_;
+    p | aligned_ax_;
   }
 
   /// Initialize the block
@@ -50,8 +50,8 @@ public: // interface
 
 private: // attributes
 
-  /// adiabatic index
-  double gamma_;
+  /// specify orientation of problem 0,1,2 correspond to x,y,z
+  int aligned_ax_;
 };
 
 #endif /* ENZO_ENZO_INITIAL_ZELDOVICH_PANCAKE_HPP */

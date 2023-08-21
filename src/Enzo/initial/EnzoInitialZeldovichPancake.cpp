@@ -11,8 +11,8 @@
 //----------------------------------------------------------------------
 
 EnzoInitialZeldovichPancake::EnzoInitialZeldovichPancake
-(double gamma, int cycle, double time)
-  : Initial(cycle, time), gamma_(gamma)
+(int cycle, double time)
+  : Initial(cycle, time), aligned_ax_(0)
 {
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
@@ -26,11 +26,16 @@ EnzoInitialZeldovichPancake::EnzoInitialZeldovichPancake
          (cosmology->omega_baryon_now() == 1.0) &
          (cosmology->omega_cdm_now() == 0.0) &
          (cosmology->omega_lambda_now() == 0.0) );
+
+  // I suspect that things will work correctly, but I have not tried yet
+  ASSERT("EnzoInitialZeldovichPancake::enforce_block",
+         "initializer hasn't been tested with a rank of 1 or 2",
+         cello::rank() == 3);
 }
 
 //----------------------------------------------------------------------
 
-namespace{
+namespace{ // things within this anonymous namespace are local to this file
 
 struct PressureFreeFluidProps{ double density; double velocity; };
 
@@ -119,15 +124,16 @@ private:
   /// background density (usually taken to be the critical density)
   double rho_bkg_;
 };
- 
+
 }
+
 
 //----------------------------------------------------------------------
 
 void EnzoInitialZeldovichPancake::enforce_block
 ( Block * block, const Hierarchy  * hierarchy ) throw()
 {
-  // ports of initialization routine from Grid_ZeldovichPancakeInitializeGrid.C
+  // port of initialization routine from Grid_ZeldovichPancakeInitializeGrid.C
   // The initial conditions come from section 7.2 of Anninos+ (1994).
   //
   // The following features were supported by the original Enzo initializer,
@@ -151,10 +157,11 @@ void EnzoInitialZeldovichPancake::enforce_block
          "is (considerably) larger than the collapse redshift",
          init_z > collapse_z);
 
-  double x_domain_min, x_domain_max;
-  cello::hierarchy()->lower(&x_domain_min, nullptr, nullptr);
-  cello::hierarchy()->upper(&x_domain_max, nullptr, nullptr);
-  const double lambda = x_domain_max - x_domain_min;
+  double domain_min_xyz[3], domain_max_xyz[3];
+  cello::hierarchy()->lower(domain_min_xyz, domain_min_xyz+1, domain_min_xyz+2);
+  cello::hierarchy()->upper(domain_max_xyz, domain_max_xyz+1, domain_max_xyz+2);
+  const double lambda =
+    domain_max_xyz[aligned_ax_] - domain_min_xyz[aligned_ax_];
 
   // In the original version of the code (from enzo), some multiplications &
   // divisions by factors of lambda were dropped since it was defined to be 1.
@@ -189,10 +196,15 @@ void EnzoInitialZeldovichPancake::enforce_block
   field.ghost_depth(field.field_id("density"),&gx,&gy,&gz);
 
   std::vector<double> xc(mx);
-  std::vector<double> dummy(std::max(my, mz));
-  data->field_cells (xc.data(), dummy.data(), dummy.data(), gx, gy, gz);
-  const double pancake_center = (0.5*(x_domain_min + x_domain_max) +
-                                 pancake_central_offset);
+  std::vector<double> yc(my);
+  std::vector<double> zc(mz);
+  data->field_cells (xc.data(), yc.data(), zc.data(), gx, gy, gz);
+  const double pancake_center =
+    (0.5*(domain_max_xyz[aligned_ax_] + domain_min_xyz[aligned_ax_]) +
+     pancake_central_offset);
+
+  // ensure consistency between cello:rank and the defined vel fields:
+  enzo_utils::assert_rank_velocity_field_consistency(*field.field_descr());
 
   const bool idual = enzo::fluid_props()->dual_energy_config().any_enabled();
 
@@ -200,18 +212,28 @@ void EnzoInitialZeldovichPancake::enforce_block
   CelloView<enzo_float,3> e_tot = field.view<enzo_float>("total_energy");
   CelloView<enzo_float,3> e_int = (idual) ?
     field.view<enzo_float>("internal_energy") : CelloView<enzo_float,3>();
-  CelloView<enzo_float,3> vx = field.view<enzo_float>("velocity_x");
-  CelloView<enzo_float,3> vy = (cello::rank() >= 2) ?
-    field.view<enzo_float>("velocity_y") : CelloView<enzo_float,3>();
-  CelloView<enzo_float,3> vz = (cello::rank() >= 3) ?
-    field.view<enzo_float>("velocity_z") : CelloView<enzo_float,3>();
 
+  // load the velocities
   ASSERT("EnzoInitialZeldovichPancake::enforce_block",
-         "current implementation only supports 3D sims", cello::rank() == 3);
+         "rank is incompatible with the axis-direction",
+         cello::rank() >= aligned_ax_);
+  const EnzoPermutedCoordinates coord(aligned_ax_);
+  const std::string velocities[3] = {"velocity_x", "velocity_y", "velocity_z"};
+
+  CelloView<enzo_float,3> aligned_vel =
+    field.view<enzo_float>(velocities[coord.i_axis()]);
+  std::array<CelloView<enzo_float,3>, 2> transverse_vel =
+    { field.is_field(velocities[coord.j_axis()])
+      ? field.view<enzo_float>(velocities[coord.j_axis()])
+      : CelloView<enzo_float,3>(),
+      field.is_field(velocities[coord.k_axis()])
+      ? field.view<enzo_float>(velocities[coord.k_axis()])
+      : CelloView<enzo_float,3>()
+    };
 
   EnzoUnits * units = enzo::units();
 
-  const double gm1 = gamma_ - 1.0;
+  const double gm1 = enzo::fluid_props()->gamma() - 1.0;
   const double bulkv = 0.0; // convert to problem units?
   const double kelvin_per_energy_units = units->kelvin_per_energy_units();
 
@@ -220,26 +242,40 @@ void EnzoInitialZeldovichPancake::enforce_block
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
 
-        PressureFreeFluidProps props = get_fluid_props(xc[ix] - pancake_center);
+        // the following line is not very efficient, but that's probably fine
+        // (since this is only an initializer)
+        double pos = (aligned_ax_ == 0) ? xc[ix]
+          : (aligned_ax_ == 1) ? yc[iy] : zc[iz];
+        PressureFreeFluidProps props = get_fluid_props(pos - pancake_center);
 
         // We multiply by omega_baryon_now to be explicit. But it's not really
         // necessary since we currently force it to be 1.0
         double cur_density = omega_baryon_now * props.density;
-        double cur_vx = props.velocity + bulkv;
+        double cur_vel = props.velocity + bulkv;
 
         // we are initializing the internal energy such that the entropy is
         // initialy constant
         double cur_eint =
           ((init_temperature_K / kelvin_per_energy_units) *
            std::pow(cur_density / omega_baryon_now, gm1) / gm1);
-        double cur_etot = cur_eint + 0.5 * (cur_vx * cur_vx);
+        double cur_etot = cur_eint + 0.5 * (cur_vel * cur_vel);
 
         density(iz,iy,ix) = cur_density;
-        vx(iz,iy,ix) = cur_vx;
-        vy(iz,iy,ix) = 0.0;
-        vz(iz,iy,ix) = 0.0;
+        aligned_vel(iz,iy,ix) = cur_vel;
         e_tot(iz,iy,ix) = cur_etot;
         if (idual) { e_int(iz,iy,ix) = cur_eint; }
+      }
+    }
+  }
+
+  // initialize the other velocity components:
+  for (int i = 0; i <2; i++) {
+    if (transverse_vel[i].is_null()) { continue; }
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+        for (int ix=gx; ix<mx-gx; ix++) {
+          transverse_vel[i](iz,iy,ix) = 0.0;
+        }
       }
     }
   }
