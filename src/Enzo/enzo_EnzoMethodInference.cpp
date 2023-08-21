@@ -1563,8 +1563,8 @@ void EnzoMethodInference::spawn_remnant_particle ( Block * block,
   pmstar[io] = sphere->stellar_mass();
   pnSNe[io] = sphere->num_SNe();
   pnHNe[io] = sphere->num_HNe();
-  pnHNe[io] = sphere->num_PISNe();
-  pnHNe[io] = sphere->num_BH();
+  pnPISNe[io] = sphere->num_PISNe();
+  pnBH[io] = sphere->num_BH();
 
   enzo_float * density = (enzo_float *) field.values("density");
   enzo_float * velocity_x = (enzo_float *) field.values("velocity_x");
