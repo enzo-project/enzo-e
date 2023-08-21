@@ -287,7 +287,9 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_bb_test_angular_rotation_velocity,
        enzo_config->initial_bb_test_external_density);
   } else if (type == "zeldovich_pancake") {
-    initial = new EnzoInitialZeldovichPancake (cycle, time);
+    initial = new EnzoInitialZeldovichPancake
+      (cycle, time,
+       enzo_config->initial_zeldovich_pancake_aligned_ax);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);

@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------
 
 EnzoInitialZeldovichPancake::EnzoInitialZeldovichPancake
-(int cycle, double time)
+(int cycle, double time, std::string aligned_ax_name)
   : Initial(cycle, time), aligned_ax_(0)
 {
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
@@ -26,6 +26,18 @@ EnzoInitialZeldovichPancake::EnzoInitialZeldovichPancake
          (cosmology->omega_baryon_now() == 1.0) &
          (cosmology->omega_cdm_now() == 0.0) &
          (cosmology->omega_lambda_now() == 0.0) );
+
+  if (aligned_ax_name == "x") {
+    aligned_ax_ = 0;
+  } else if (aligned_ax_name == "y") {
+    aligned_ax_ = 1;
+  } else if (aligned_ax_name == "y") {
+    aligned_ax_ = 2;
+  } else {
+    ERROR1("EnzoInitialZeldovichPancake::EnzoInitialZeldovichPancake",
+           "aligned_ax_name must be x, y, or z. It can't be \"%s\"",
+           aligned_ax_name.c_str());
+  }
 
   // I suspect that things will work correctly, but I have not tried yet
   ASSERT("EnzoInitialZeldovichPancake::enforce_block",

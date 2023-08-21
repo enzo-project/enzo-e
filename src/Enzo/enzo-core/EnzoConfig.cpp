@@ -172,6 +172,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
   initial_turbulence_temperature(0.0),
+  // EnzoInitialZeldovichPancake
+  initial_zeldovich_pancake_aligned_ax(""),
   // EnzoInitialIsolatedGalaxy
   initial_IG_analytic_velocity(false),
   initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
@@ -493,6 +495,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_turbulence_density;
   p | initial_turbulence_pressure;
   p | initial_turbulence_temperature;
+
+  p | initial_zeldovich_pancake_aligned_ax;
 
   p | initial_hdf5_max_level;
   p | initial_hdf5_format;
@@ -821,6 +825,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_shu_collapse_(p);
   read_initial_soup_(p);
   read_initial_turbulence_(p);
+  read_initial_zeldovich_pancake_(p);
 
   // it's important for read_physics_ to precede read_method_grackle_
   read_physics_(p);
@@ -1290,6 +1295,14 @@ void EnzoConfig::read_initial_turbulence_(Parameters * p)
   	    ! ((initial_turbulence_pressure != 0.0) &&
   	       (initial_turbulence_temperature != 0.0)));
   }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_initial_zeldovich_pancake_(Parameters *p)
+{
+  initial_zeldovich_pancake_aligned_ax = p->value_string
+    ("Initial:zeldovich_pancake:aligned_ax","x");
 }
 
 //----------------------------------------------------------------------

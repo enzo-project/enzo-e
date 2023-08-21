@@ -22,7 +22,8 @@ class EnzoInitialZeldovichPancake : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialZeldovichPancake(int cycle, double time);
+  EnzoInitialZeldovichPancake(int cycle, double time,
+                              std::string aligned_ax_name);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialZeldovichPancake);

@@ -248,6 +248,8 @@ public: // interface
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
+      // EnzoInitialZeldovichPancake
+      initial_zeldovich_pancake_aligned_ax(""),
 
       //--------------------
       // METHODS [sorted]
@@ -466,6 +468,7 @@ protected: // methods
   void read_initial_shu_collapse_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
+  void read_initial_zeldovich_pancake_(Parameters *);
 
   //--------------------
   // read_method [sorted]
@@ -679,6 +682,9 @@ public: // attributes
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
+
+  // EnzoInitialZeldovichPancake
+  std::string                initial_zeldovich_pancake_aligned_ax;
 
   /// EnzoInitialFeedbackTest
 
