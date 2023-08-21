@@ -31,7 +31,95 @@ EnzoInitialZeldovichPancake::EnzoInitialZeldovichPancake
 //----------------------------------------------------------------------
 
 namespace{
+
 struct PressureFreeFluidProps{ double density; double velocity; };
+
+class ZeldovichPancakeSoln {
+
+  /// @class    ZeldovichPancakeSoln
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Functor that computes the solution for the
+  ///     Zeldovich Pancake problem (for a pressure-free fluid) and a given
+  ///     redshift
+
+public:
+
+  ZeldovichPancakeSoln(double collapse_z, double target_z,
+                       double wavelength, double rho_bkg)
+  {
+    k_ = (2.0 * cello::pi) / wavelength;
+
+    // Section 7.2 of Anninos+ (1994), defines an amplitude, A', such that the
+    // caustic forms at collapse_z. This is given by:
+    //       A' = -5*(1+collapse_z) / (2 * k).
+    //  in this equation, k is the wavenumber of the perturbation
+    //
+    // Like in the original Enzo implementation, we use an alternative, more
+    // convenient, definition for amplitude, of
+    //       A' * (2/5) * a * k
+    // where a is the scale factor of interest (the value at target_z).
+    // (Note: Unlike the version in Enzo, we preserve the minus sign in A'
+    // as part of our new amplitude definiton). This is given by:
+    my_amp_ = -(1.0 + collapse_z) / (1.0 + target_z);
+
+    // -> We also define the amplitude for the velocity eqn as (2/5) * adot * A'
+    my_amp_vel_ =
+      -std::sqrt(2.0/3.0) * (1.0 + collapse_z) / ((1.0 + target_z) * k_);
+
+    rho_bkg_ = rho_bkg;
+  }
+
+  ZeldovichPancakeSoln(const ZeldovichPancakeSoln&) = default;
+
+  PressureFreeFluidProps operator()(double x_euler) const {
+    // the argument is the position relative to center of pancake
+
+    // The analytic functions that describe the evolution of the
+    // pressure-free fluid are written in terms of the initial position of
+    // the fluid-elements (i.e. when the perturbation is introduced). These
+    // "initial positions" are the Lagrangian positions.
+    //
+    // We will use the a Newton-Raphson method to convert the given position
+    // into the Lagrangian position
+    //
+    // NOTE: the implementation in Enzo reverses Eulerian & Lagrangian names:
+    //  * it considers the position on the grid at init_z to be Lagrangian
+    //  * it considers the pressure-free fluid element's position at the time
+    //    when the perturbation got introduced to be Eulerian
+    // That convention is confusing
+
+    double x_lagrange = x_euler;
+    double x_lagrange_old = std::numeric_limits<double>::max();
+
+    const double _TOL = 1e-6;
+    while (fabs((x_lagrange-x_lagrange_old)/x_lagrange) > _TOL) {
+      x_lagrange_old = x_lagrange;
+      // unlike the version in Enzo, my_amp includes the negative sign
+      x_lagrange +=(x_euler - x_lagrange - my_amp_*std::sin(k_*x_lagrange)/k_)
+                  /(1                    + my_amp_*std::cos(k_*x_lagrange));
+    }
+
+    // now that we have x_lagrange, compute the density and velocity
+
+    PressureFreeFluidProps out;
+    // unlike the version in Enzo, my_amp includes the negative sign
+    out.density = rho_bkg_ / (1 + my_amp_ * std::cos(k_ * x_lagrange));
+    out.velocity = my_amp_vel_ * std::sin(k_ * x_lagrange);
+    return out;
+  }
+
+private:
+
+  /// wavenumber
+  double k_;
+  /// revised amplitude
+  double my_amp_;
+  /// revised ampliude
+  double my_amp_vel_;
+  /// background density (usually taken to be the critical density)
+  double rho_bkg_;
+};
+ 
 }
 
 //----------------------------------------------------------------------
@@ -48,7 +136,6 @@ void EnzoInitialZeldovichPancake::enforce_block
   //     which Li+ 2008 & Collins+ 2010 extended the variant of the problem
   //     introduced in Ryu+ 1993)
   //   - initializing a problem where omega_cdm is non-zero
-  const double _TOL = 1e-6;
 
   // todo: make some/most of the following configurable in the future
   const double init_temperature_K = 100.0; // in units of kelvin
@@ -86,62 +173,14 @@ void EnzoInitialZeldovichPancake::enforce_block
   // 1. Define a function to compute the properties of that pressure-free fluid
   //    at a given position on the grid at `init_z`.
 
-  // 1a. precompute some useful constants:
-  const double kx = (2.0 * cello::pi) / lambda;
+  // the background-density used in the the ZeldovichPancake problem is the
+  // critical mass density of the universe. Density code-units are defined such
+  // that when cosmology->omega_matter_now() == 1, this density is equal to 1.0
+  const double rho_bkg = 1.0;
+  const ZeldovichPancakeSoln get_fluid_props(collapse_z, init_z,
+                                             lambda, rho_bkg);
 
-  // Section 7.2 of Anninos+ (1994), defines an amplitude, A', such that the
-  // caustic forms at collapse_z. This is given by:
-  //       A' = -5*(1+collapse_z) / (2 * kx).
-  // -> Like in the original Enzo implementation, we use an alternative, more
-  //    convenient, definition for amplitude, of
-  //       A' * (2/5) * a * kx 
-  //    where a is the scale factor of interest (the value at init_z). (Note:
-  //    Unlike the version in Enzo, we preserve the minus sign in A' as part of
-  //    our new amplitude definiton). This is given by:
-  const double my_amp = -(1.0 + collapse_z) / (1.0 + init_z);
-
-  // -> We also define the amplitude for the velocity eqn as (2/5) * adot * A'
-  const double my_amp_vel =
-    -std::sqrt(2.0/3.0) * (1.0 + collapse_z) / ((1.0 + init_z) * kx);
-
-  // 1b. Now define the function to compute density and velocity at a given
-  //     position on the grid (relative to the center) at redshift = `init_z`
-
-  auto get_fluid_props = [&](double x_euler) // position relative to center
-    {
-      // The analytic functions that describe the evolution of the
-      // pressure-free fluid are written in terms of the initial position of
-      // the fluid-elements (i.e. when the perturbation is introduced). These
-      // "initial positions" are the Lagrangian positions.
-      //
-      // We will use the a Newton-Raphson method to convert the given position
-      // into the Lagrangian position
-      //
-      // NOTE: the implementation in Enzo reverses Eulerian & Lagrangian names:
-      //  * it considers the position on the grid at init_z to be Lagrangian
-      //  * it considers the pressure-free fluid element's position at the time
-      //    when the perturbation got introduced to be Eulerian
-      // That convention is confusing
-
-      double x_lagrange = x_euler;
-      double x_lagrange_old = std::numeric_limits<double>::max();
-      while (fabs((x_lagrange-x_lagrange_old)/x_lagrange) > _TOL) {
-        x_lagrange_old = x_lagrange;
-        // unlike the version in Enzo, my_amp includes the negative sign
-        x_lagrange +=(x_euler - x_lagrange - my_amp*std::sin(kx*x_lagrange)/kx)
-                     /(1                   + my_amp*std::cos(kx*x_lagrange));
-      }
-
-      // now that we have x_lagrange, compute the density and velocity
-
-      PressureFreeFluidProps out;
-      // unlike the version in Enzo, my_amp includes the negative sign
-      out.density = omega_baryon_now/(1 + my_amp * std::cos(kx*x_lagrange));
-      out.velocity = my_amp_vel * std::sin(kx*x_lagrange);
-      return out;
-    };
-
-  // 2. load some other information:
+  // 2. load some other information (about the grid):
   Data* data = block->data();
   Field field = data->field();
   int mx,my,mz;
@@ -182,8 +221,14 @@ void EnzoInitialZeldovichPancake::enforce_block
       for (int ix=gx; ix<mx-gx; ix++) {
 
         PressureFreeFluidProps props = get_fluid_props(xc[ix] - pancake_center);
-        double cur_density = props.density;
+
+        // We multiply by omega_baryon_now to be explicit. But it's not really
+        // necessary since we currently force it to be 1.0
+        double cur_density = omega_baryon_now * props.density;
         double cur_vx = props.velocity + bulkv;
+
+        // we are initializing the internal energy such that the entropy is
+        // initialy constant
         double cur_eint =
           ((init_temperature_K / kelvin_per_energy_units) *
            std::pow(cur_density / omega_baryon_now, gm1) / gm1);
@@ -195,7 +240,6 @@ void EnzoInitialZeldovichPancake::enforce_block
         vz(iz,iy,ix) = 0.0;
         e_tot(iz,iy,ix) = cur_etot;
         if (idual) { e_int(iz,iy,ix) = cur_eint; }
-
       }
     }
   }
