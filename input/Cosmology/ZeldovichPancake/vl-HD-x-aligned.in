@@ -14,6 +14,10 @@
               "gravity",
               "mhd_vlct",
               "comoving_expansion"];
+
+      # since the problem should only be evolving along 1 axis, I expect that
+      # we could increase the size of the courant factor to about 0.5 for vl
+      # integrator
    }
 
    Output {

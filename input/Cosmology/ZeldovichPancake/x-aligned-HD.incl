@@ -74,7 +74,7 @@
 
    Stopping{
       redshift = 0.0;
-      cycle = 1000;
+      cycle = 100000;
    }
 
    Output {
@@ -86,7 +86,11 @@
          name = ["data-%03d.h5", "proc"];
          schedule {
             var = "time";
-            list = [7.888567524390e+01];  # redshift 0
+            # initially I was outputting results at 78.88567524390, which
+            # corresponds to z = 0 in the ppm run. But, I found that I needed
+            # output results at 78.5964825793378 for the purposes of the
+            # vl runs
+            list = [78.5964825793378]; # redshift 0
          }
       }
    }
