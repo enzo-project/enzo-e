@@ -65,6 +65,7 @@ module enzo {
   PUPable EnzoInitialShuCollapse;
   PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
+  PUPable EnzoInitialZeldovichPancake;
 
   PUPable IoEnzoBlock;
 

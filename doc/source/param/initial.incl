@@ -28,6 +28,7 @@
    * :t:`"turbulence"` :e:`Initialize fields for driving turbulence, including "driving_[xyz]" fields.`
    * :t:`"value"` :e:`Initialize fields using expressions directly from the parameter file.`
    * :t:`"vlct_bfield"` :e:`Initialize the cell-centered magnetic fields for use by the VL + CT method. For more details, see` :ref:`vlct_bfield_init`
+   * :t:`"zeldovich_pancake"` :e:`Initialize the Zeldovich Pancake test problem. For more details, see` :ref:`the section describing the tests using this initializer <zeldovich-pancake-test>`.
 
 Parameters specific to individual initializers are specified in subgroups.
 
@@ -1270,3 +1271,22 @@ integrators that don't require face-centered B-fields*
    parameters of Initial:value. If this parameter is not specified, but the
    values of the other components of the magnetic vector potential are, then
    this component is assumed to be zero everywhere.`
+
+
+zeldovich_pancake
+-----------------
+
+This subgroup is used to initialize a problem based on the solution to the Zel'dovich Pancake problem.
+We use the density and velocity profiles from the solution for a pressure-free fluid to initialize an ordinary gas.
+
+----
+
+.. par:parameter:: Initial:zeldovich_pancake:aligned_ax
+
+   :Summary: :s:`Specify the axis along which the Zel'dovich Pancake evolves.`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`x`
+   :Scope:   :z:`Enzo`
+
+   :e:`Allowed values are` ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`.`
+

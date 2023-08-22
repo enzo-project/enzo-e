@@ -66,7 +66,8 @@ public: // interface
   /// @param[in]     dim The dimension along which to compute the flux
   ///     divergence.
   /// @param[in]     dt The current timestep.
-  /// @param[in]     cell_width The cell width along dimension `dim`.
+  /// @param[in]     proper_cell_width The cell width along dimension `dim`.
+  ///     This should always be a proper distance (even in cosmological sims).
   /// @param[in]     flux_map Map of arrays holding the fluxes computed for
   ///     the current timestep. The values of these fields should be stored
   ///     on the cell faces along the `dim` dimension.
@@ -77,7 +78,12 @@ public: // interface
   ///     call. This should match the stale depth at the time the fluxes were
   ///     computed.
   /// @param[in]     passive_list A list of keys for passive scalars.
-  void accumulate_flux_component(int dim, double dt, enzo_float cell_width,
+  ///
+  /// @note
+  /// By always using the cell width measured in the proper frame, this is
+  /// compatible with both cosmological and non-cosmological simulations.
+  void accumulate_flux_component(int dim, double dt,
+                                 enzo_float proper_cell_width,
                                  const EnzoEFltArrayMap &flux_map,
                                  EnzoEFltArrayMap &dUcons_map, int stale_depth,
                                  const str_vec_t &passive_list) const noexcept;

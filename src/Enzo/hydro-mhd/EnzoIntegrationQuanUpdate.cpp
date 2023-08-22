@@ -101,12 +101,12 @@ void EnzoIntegrationQuanUpdate::clear_dUcons_map
 //----------------------------------------------------------------------
 
 void EnzoIntegrationQuanUpdate::accumulate_flux_component
-(int dim, double dt, enzo_float cell_width, const EnzoEFltArrayMap &flux_map,
- EnzoEFltArrayMap &dUcons_map, int stale_depth,
- const str_vec_t &passive_list) const noexcept
+(int dim, double dt, enzo_float proper_cell_width,
+ const EnzoEFltArrayMap &flux_map, EnzoEFltArrayMap &dUcons_map,
+ int stale_depth, const str_vec_t &passive_list) const noexcept
 {
   EnzoPermutedCoordinates coord(dim);
-  enzo_float dtdx_i = dt/cell_width;
+  enzo_float dtdx_i = dt/proper_cell_width;
 
   auto accumulate = [dtdx_i,stale_depth,coord,
                      &flux_map,&dUcons_map](const std::string& key)

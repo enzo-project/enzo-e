@@ -248,6 +248,8 @@ public: // interface
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
+      // EnzoInitialZeldovichPancake
+      initial_zeldovich_pancake_aligned_ax(""),
 
       //--------------------
       // METHODS [sorted]
@@ -371,8 +373,8 @@ public: // interface
       method_pm_update_max_dt(0.0),
       // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
-      method_vlct_half_dt_reconstruct_method(""),
-      method_vlct_full_dt_reconstruct_method(""),
+      method_vlct_time_scheme(""),
+      method_vlct_reconstruct_method(""),
       method_vlct_theta_limiter(0.0),
       method_vlct_mhd_choice(""),
       // EnzoMethodMergeSinks
@@ -466,6 +468,7 @@ protected: // methods
   void read_initial_shu_collapse_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
+  void read_initial_zeldovich_pancake_(Parameters *);
 
   //--------------------
   // read_method [sorted]
@@ -679,6 +682,9 @@ public: // attributes
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
+
+  // EnzoInitialZeldovichPancake
+  std::string                initial_zeldovich_pancake_aligned_ax;
 
   /// EnzoInitialFeedbackTest
 
@@ -900,8 +906,8 @@ public: // attributes
 
   /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;
-  std::string                method_vlct_half_dt_reconstruct_method;
-  std::string                method_vlct_full_dt_reconstruct_method;
+  std::string                method_vlct_time_scheme;
+  std::string                method_vlct_reconstruct_method;
   double                     method_vlct_theta_limiter;
   std::string                method_vlct_mhd_choice;
 

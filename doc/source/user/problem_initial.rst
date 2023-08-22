@@ -121,3 +121,8 @@ a 3D array of Sedov blast waves.
    partially initialized ``"total_energy"`` fields with the specific
    magnetic energy computed from the newly computed cell-centered
    bfields and pre-initialized ``"density"`` fields.
+
+``"zeldovich_pancake"``
+
+   Initialize the Zeldovich-Pancake test problem.
+   For more information, see :ref:`the section describing the tests using this initializer <zeldovich-pancake-test>`.

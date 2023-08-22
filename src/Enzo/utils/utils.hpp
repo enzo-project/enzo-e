@@ -69,6 +69,7 @@ namespace enzo_utils {
     return out;
   }
 
+  //----------------------------------------------------------------------
 
   /// Utiltity template function used for executing a Compute-Kernel (currently
   /// only used for CPU bound tasks)
@@ -101,6 +102,20 @@ namespace enzo_utils {
       }
     }
   }
+
+  //----------------------------------------------------------------------
+
+  /// checks whether the existence of certain velocity fields are consistent
+  /// with the rank. If it isn't consistent, the program aborts with an
+  /// informative error
+  ///
+  /// This function allows the ``"velocity_x"``, ``"velocity_y"``, and
+  /// ``"velocity_z"`` to exist when ``cello::rank()`` is 1, 2, or 3. It also
+  /// permits the following 2 cases:
+  ///  * when ``cello::rank() == 1``, just the ``"velocity_x"`` field exists 
+  ///  * when ``cello::rank() == 2``, just the ``"velocity_x"`` &
+  ///   ``"velocity_y"`` fields exist.
+  void assert_rank_velocity_field_consistency(FieldDescr&) noexcept;
 
 }
 

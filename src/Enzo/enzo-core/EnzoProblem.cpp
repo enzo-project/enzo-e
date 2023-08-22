@@ -286,6 +286,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_bb_test_nominal_sound_speed,
        enzo_config->initial_bb_test_angular_rotation_velocity,
        enzo_config->initial_bb_test_external_density);
+  } else if (type == "zeldovich_pancake") {
+    initial = new EnzoInitialZeldovichPancake
+      (cycle, time,
+       enzo_config->initial_zeldovich_pancake_aligned_ax);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters);
@@ -695,8 +699,8 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodMHDVlct
       (enzo_config->method_vlct_riemann_solver,
-       enzo_config->method_vlct_half_dt_reconstruct_method,
-       enzo_config->method_vlct_full_dt_reconstruct_method,
+       enzo_config->method_vlct_time_scheme,
+       enzo_config->method_vlct_reconstruct_method,
        enzo_config->method_vlct_theta_limiter,
        enzo_config->method_vlct_mhd_choice,
        store_fluxes_for_corrections);

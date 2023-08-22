@@ -1,0 +1,34 @@
+# Problem: x-axis aligned Zeldovich Pancake problem for ppm integrator
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   include "input/Cosmology/ZeldovichPancake/x-aligned-HD.incl"
+
+   Physics {
+      list += ["fluid_props"];
+      fluid_props {
+         dual_energy {
+            type = "bryan95";
+            eta = [0.001, 0.1];
+         }
+      }
+   }
+
+   Method {
+      list = ["cosmology",
+              "pm_deposit",
+              "gravity",
+              "ppm",
+              "comoving_expansion"];
+      ppm {
+         courant = 0.8;
+         diffusion = false;
+         flattening = 0;
+         steepening = false;
+      }
+   }
+
+   Output {
+      data {
+         dir = ["method-ppm-HD_x-aligned-pancake_%.3e","time"];
+      }
+   }

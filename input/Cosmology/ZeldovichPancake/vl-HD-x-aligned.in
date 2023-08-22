@@ -1,0 +1,27 @@
+# Problem: x-axis aligned Zeldovich Pancake problem for VL hydro integrator
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   include "input/vlct/vl_de.incl"
+   include "input/Cosmology/ZeldovichPancake/x-aligned-HD.incl"
+
+   Physics {
+      fluid_props { dual_energy { eta = 0.01; } }
+   }
+
+   Method {
+      list = ["cosmology",
+              "pm_deposit",
+              "gravity",
+              "mhd_vlct",
+              "comoving_expansion"];
+
+      # since the problem should only be evolving along 1 axis, I expect that
+      # we could increase the size of the courant factor to about 0.5 for vl
+      # integrator
+   }
+
+   Output {
+      data {
+         dir = ["method-vl-HD_x-aligned-pancake_%.3e","time"];
+      }
+   }
