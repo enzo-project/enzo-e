@@ -223,10 +223,7 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
-
-#ifdef BYPASS_CHARM_MEM_LEAK
 enum class MsgType { msg_refine, msg_check };
-#endif
 
 /// Length of hex message tags used for debugging
 #define TAG_LEN 8
