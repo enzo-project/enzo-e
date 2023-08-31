@@ -123,18 +123,6 @@ enum return_enum {
 const int field_undefined = -1;
 
 //----------------------------------------------------------------------
-
-struct enzo_fluxes
-{
-  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
-  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
-  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-};
-
-//----------------------------------------------------------------------
 // Cello include file
 //----------------------------------------------------------------------
 
@@ -202,6 +190,7 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "io/IoEnzoBlock.hpp"
 #include "io/IoEnzoReader.hpp"
 #include "io/IoEnzoWriter.hpp"
+#include "enzo_IoEnzoSimulation.hpp"
 
 #include "enzo-core/EnzoBoundary.hpp"
 
@@ -223,6 +212,7 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "initial/EnzoInitialShockTube.hpp"
 #include "initial/EnzoInitialSoup.hpp"
 #include "initial/EnzoInitialTurbulence.hpp"
+#include "enzo_EnzoInitialTurbulenceMhdIT.hpp"
 #include "initial/EnzoInitialIsolatedGalaxy.hpp"
 #include "initial/EnzoInitialBurkertBodenheimer.hpp"
 #include "tests/EnzoInitialMergeSinksTest.hpp"
@@ -282,12 +272,15 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "particle/EnzoMethodPmUpdate.hpp"
 #include "hydro-mhd/EnzoMethodPpm.hpp"
 #include "hydro-mhd/EnzoMethodPpml.hpp"
+#include "enzo_EnzoMethodPpmlIG.hpp"
 #include "particle/formation/EnzoMethodSinkMaker.hpp"
 #include "particle/formation/EnzoMethodStarMaker.hpp"
 #include "particle/formation/EnzoMethodStarMakerSTARSS.hpp"
 #include "particle/formation/EnzoMethodStarMakerStochasticSF.hpp"
 #include "particle/formation/EnzoMethodThresholdAccretion.hpp"
 #include "assorted/EnzoMethodTurbulence.hpp"
+#include "enzo_EnzoMethodTurbulenceMhdIT.hpp"
+#include "enzo_EnzoMethodTurbulenceOU.hpp"
 #include "gravity/matrix/EnzoMatrixDiagonal.hpp"
 #include "gravity/matrix/EnzoMatrixIdentity.hpp"
 #include "gravity/matrix/EnzoMatrixLaplace.hpp"

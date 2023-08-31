@@ -17,7 +17,7 @@ class EnzoMethodPpml : public Method {
 public: // interface
 
   /// Creae a new EnzoMethodPpml object
-  EnzoMethodPpml();
+  EnzoMethodPpml(double dt_weight);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpml);
@@ -25,7 +25,8 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodPpml (CkMigrateMessage *m)
     : Method (m),
-      comoving_coordinates_(false)
+      comoving_coordinates_(false),
+      dt_weight_(1.0)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -43,6 +44,7 @@ public: // interface
 protected: // interface
 
   bool comoving_coordinates_;
+  double dt_weight_;
 };
 
 #endif /* ENZO_ENZO_METHOD_PPML_HPP */

@@ -31,7 +31,8 @@ public: // interface
 
   /// Copy constructor
   EnzoMsgCheck(const EnzoMsgCheck & enzo_msg_check) throw()
-    : CMessage_EnzoMsgCheck() // do NOT call copy constructor on base
+    : CMessage_EnzoMsgCheck(), // do NOT call copy constructor on base
+      buffer_(nullptr)
   {
     ++counter[cello::index_static()];
     copy_(enzo_msg_check);

@@ -20,6 +20,7 @@ IoBlock::IoBlock() throw ()
   meta_name_.push_back("time");
   meta_name_.push_back("dt");
   meta_name_.push_back("array");
+  meta_name_.push_back("is_leaf");
 }
 
 //----------------------------------------------------------------------
@@ -37,6 +38,7 @@ void IoBlock::set_block (Block * block) throw()
   time_  = block->time_;
   dt_    = block->dt_;
   for (i=0; i<3; i++) array_[i] = block->array_[i];
+  is_leaf_ = block->is_leaf_ ? 1 : 0;
 }
 
 //----------------------------------------------------------------------
@@ -78,6 +80,9 @@ void IoBlock::meta_value
     *buffer = (void *) & array_;
     *type   = type_int;
     *nxd    = 3;
+  } else if (index == count++) {
+    *buffer = (void *) & is_leaf_;
+    *type   = type_int;
   }
 }
 //======================================================================
@@ -96,6 +101,7 @@ int IoBlock::data_size () const
   SIZE_SCALAR_TYPE(size,double, time_);
   SIZE_SCALAR_TYPE(size,double, dt_);
   SIZE_ARRAY_TYPE(size,int,array_,3);
+  SIZE_SCALAR_TYPE(size,int,is_leaf_);
 
   return size;
 }
@@ -116,6 +122,7 @@ char * IoBlock::save_data (char * buffer) const
   SAVE_SCALAR_TYPE(pc,double, time_);
   SAVE_SCALAR_TYPE(pc,double, dt_);
   SAVE_ARRAY_TYPE(pc,int,array_,3);
+  SAVE_SCALAR_TYPE(pc,int, is_leaf_);
 
   ASSERT2 ("IoBlock::save_data()",
   	   "Expecting buffer size %d actual size %d",
@@ -142,6 +149,7 @@ char * IoBlock::load_data (char * buffer)
   LOAD_SCALAR_TYPE(pc,double, time_);
   LOAD_SCALAR_TYPE(pc,double, dt_);
   LOAD_ARRAY_TYPE(pc,int,array_,3);
+  LOAD_SCALAR_TYPE(pc,int,is_leaf_);
 
   return pc;
 }
@@ -162,5 +170,6 @@ void IoBlock::save_to (void * v)
   b->cycle_ = cycle_;
   b->time_  = time_;
   b->dt_    = dt_;
+  b->is_leaf_ = is_leaf_;
 }
 

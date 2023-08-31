@@ -1,0 +1,51 @@
+include "input/Hydro/method_turbulence3d.incl"
+
+Field {
+   list += [
+        "acceleration_x",
+        "acceleration_y",
+        "acceleration_z",
+        "work_1",
+        "work_2",
+        "work_3"];
+ }
+ Initial {
+     list = ["value"];
+     turbulence {
+         density     = 1.0000000000000;
+         temperature = 1.0000000000000;
+     }
+ }
+
+Method {
+     list = [ "ppm", "turbulence_ou"];
+     ppm {
+         courant = 0.5;
+         diffusion = true;
+         dual_energy = false;
+         flattening = 3;
+         steepening = true;
+     }
+     turbulence_ou {
+         courant = 0.5;
+         mach_number = 0.3;
+         injection_rate = 0.01;
+         kfa = 12.57;
+         kfi = 6.27;
+         olap = 0;
+         read_sol = false;
+         sol_weight = 1.0;
+         totemp = 5.95238;
+         update_solution = true;
+         hc_alpha = 10.0;
+         hc_sigma = 0.0983448;
+         apply_cooling = false;
+         apply_forcing = true;
+         apply_injection_rate = true;
+         cooling_term = -1;
+     }
+}
+Mesh {
+     root_blocks = [ 2, 2, 2 ];
+     root_size = [ 32, 32, 32 ];
+ }

@@ -2,12 +2,12 @@ c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 
-      Subroutine POTOKy(Nx,Dx,Dt,Qlx,Qrx,Qpm,Qdx,Qdz,Qrp,Fm) 
+      Subroutine POTOKy(Nx,Dx,Dt,Qlx,Qrx,Qpm,Qdx,Qdz,Qrp,Fm)
       Implicit NONE
       Integer nx,i,m,l
 
       ENZO_REAL Qlx(Nx,7),Qrx(Nx,7),Qpm(Nx,7),Qdx(Nx,7),Qdz(Nx,7)
-      ENZO_REAL Qrp(Nx,7),Fm(Nx,7) 
+      ENZO_REAL Qrp(Nx,7),Fm(Nx,7)
       
       ENZO_REAL qp(7),px(7),qc(7),qvl(7),qvr(7)
       ENZO_REAL vm(7),ql(7,7),qr(7,7),uv(7),vl(7)
@@ -21,11 +21,11 @@ c     See LICENSE_PPML file for license and copyright information
          Do m=1,7
             qrp(i,m)=0.
             fm(i,m)=0.
-         Enddo                  
-      Enddo                  
+         Enddo
+      Enddo
 
       Do i=3,Nx-3
-         
+
          Do m=1,7
             
             Qvl(m)=Qlx(i,m)
@@ -51,7 +51,7 @@ c     See LICENSE_PPML file for license and copyright information
             
             DXI=QC(7)*DTX
 
-            CALL FPML(DXI,QVL,QVR,QP,VM) 
+            CALL FPML(DXI,QVL,QVR,QP,VM)
 
             CALL VECTLRY(QP,QL,QR,UV)
             CALL MATR_AX(QP,AX)
@@ -69,15 +69,15 @@ c     See LICENSE_PPML file for license and copyright information
                AV(M)=AV(M)*DTX/2.
             ENDDO
 
-            DO M=1,7  
+            DO M=1,7
                
-               IF(QC(M).GT.0.)THEN                  
+               IF(QC(M).GT.0.)THEN
 
                   DXI=QC(M)*DTX
 
-                  CALL FPML(DXI,QVL,QVR,QP,QV) 
+                  CALL FPML(DXI,QVL,QVR,QP,QV)
 
-                  SL(M)=0.   
+                  SL(M)=0.
                   DO L=1,7
                      SL(M)=SL(M)+QL(M,L)*(VM(L)-QV(L)+AV(L))
                   ENDDO
@@ -90,24 +90,24 @@ c     See LICENSE_PPML file for license and copyright information
                
             ENDDO
             
-            DO M=1,7 
+            DO M=1,7
                QUL(M)=VM(M)-VL(M)
             ENDDO
             
          ELSE
 
-            DO M=1,7 
+            DO M=1,7
                QUL(M)=QVR(M)
             ENDDO
 
-         ENDIF 
+         ENDIF
 
          
-         IF(TC(1).LT.0.)THEN                  
+         IF(TC(1).LT.0.)THEN
             
             DXI=-TC(1)*DTX
 
-            CALL FPMR(DXI,TVL,TVR,TP,VM) 
+            CALL FPMR(DXI,TVL,TVR,TP,VM)
 
             CALL VECTLRY(TP,QL,QR,UV)
             CALL MATR_AX(TP,AX)
@@ -125,15 +125,15 @@ c     See LICENSE_PPML file for license and copyright information
                AV(M)=AV(M)*DTX/2.
             ENDDO
 
-            DO M=1,7  
-               
-               IF(TC(M).LT.0.)THEN                  
+            DO M=1,7
+
+               IF(TC(M).LT.0.)THEN
 
                   DXI=-TC(M)*DTX
 
-                  CALL FPMR(DXI,TVL,TVR,TP,QV) 
+                  CALL FPMR(DXI,TVL,TVR,TP,QV)
 
-                  SL(M)=0.   
+                  SL(M)=0.
                   DO L=1,7
                      SL(M)=SL(M)+QL(M,L)*(VM(L)-QV(L)+AV(L))
                   ENDDO
@@ -152,11 +152,11 @@ c     See LICENSE_PPML file for license and copyright information
 
          ELSE
 
-            DO M=1,7 
+            DO M=1,7
                QUR(M)=TVL(M)
             ENDDO
 
-         ENDIF 
+         ENDIF
 
          DO M=1,7
             TL(M)=QUL(M)
@@ -173,8 +173,8 @@ c     See LICENSE_PPML file for license and copyright information
          CALL HLLDy(PX,VL,FR,UR) !HLLD method
 
          DO M=1,7  
-            FM(I,M)=FR(M)      
-         ENDDO 
+            FM(I,M)=FR(M)
+         ENDDO
 
 
 
@@ -186,7 +186,7 @@ c     See LICENSE_PPML file for license and copyright information
 
             DXI=1.-QC(7)*DTX
 
-            CALL FQML(DXI,QVL,QVR,QP,VM) 
+            CALL FQML(DXI,QVL,QVR,QP,VM)
 
             CALL VECTLRY(QP,QL,QR,UV)
             CALL MATR_AX(QP,AX)
@@ -204,15 +204,15 @@ c     See LICENSE_PPML file for license and copyright information
                AV(M)=AV(M)*DTX/2.
             ENDDO
 
-            DO M=1,7  
+            DO M=1,7
                
-               IF(QC(M).GT.0.)THEN                  
+               IF(QC(M).GT.0.)THEN
 
                   DXI=1.-QC(M)*DTX
 
-                  CALL FQML(DXI,QVL,QVR,QP,QV) 
+                  CALL FQML(DXI,QVL,QVR,QP,QV)
 
-                  SL(M)=0.   
+                  SL(M)=0.
                   DO L=1,7
                      SL(M)=SL(M)+QL(M,L)*(QP(L)-QV(L)+AV(L))
                   ENDDO
@@ -225,23 +225,23 @@ c     See LICENSE_PPML file for license and copyright information
                
             ENDDO
             
-            DO M=1,7 
+            DO M=1,7
                QUL(M)=QP(M)-VL(M)
             ENDDO
             
          ELSE
 
-            DO M=1,7 
+            DO M=1,7
                QUL(M)=QVR(M)
             ENDDO
 
-         ENDIF 
+         ENDIF
 
-         IF(TC(1).LT.0.)THEN                  
+         IF(TC(1).LT.0.)THEN
             
             DXI=-TC(1)*DTX
 
-            CALL FQML(DXI,TVL,TVR,TP,VM) 
+            CALL FQML(DXI,TVL,TVR,TP,VM)
 
             CALL VECTLRY(TP,QL,QR,UV)
             CALL MATR_AX(TP,AX)
@@ -259,15 +259,15 @@ c     See LICENSE_PPML file for license and copyright information
                AV(M)=AV(M)*DTX/2.
             ENDDO
 
-            DO M=1,7  
+            DO M=1,7
                
-               IF(TC(M).LT.0.)THEN                  
+               IF(TC(M).LT.0.)THEN
 
                   DXI=-TC(M)*DTX
 
-                  CALL FQML(DXI,TVL,TVR,TP,QV) 
+                  CALL FQML(DXI,TVL,TVR,TP,QV)
 
-                  SL(M)=0.   
+                  SL(M)=0.
                   DO L=1,7
                      SL(M)=SL(M)+QL(M,L)*(TP(L)-QV(L)+AV(L))
                   ENDDO
@@ -280,17 +280,17 @@ c     See LICENSE_PPML file for license and copyright information
 
             ENDDO
             
-            DO M=1,7 
+            DO M=1,7
                QUR(M)=TP(M)-VL(M)
             ENDDO
 
          ELSE
 
-            DO M=1,7 
+            DO M=1,7
                QUR(M)=TVL(M)
             ENDDO
 
-         ENDIF 
+         ENDIF
 
          DO M=1,7
             TL(M)=QUL(M)
@@ -305,12 +305,12 @@ c     See LICENSE_PPML file for license and copyright information
          CALL CONS(TL,PX)
          CALL CONS(TR,VL)
          CALL HLLDy(PX,VL,FR,UR) !HLLD method
-         
+
 
          CALL PRIM(UR,PX)
 
-         DO M=1,7  
-            QRP(I,M)=PX(M)      
+         DO M=1,7
+            QRP(I,M)=PX(M)
          ENDDO 
 
       ENDDO

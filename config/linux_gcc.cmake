@@ -11,7 +11,7 @@ if(NOT __processedUserDefaults)
   set(CMAKE_Fortran_COMPILER gfortran CACHE STRING "")
   # Note (12/2021): passing -march=native to gfortran seems to slow down the
   # PPM solver
-  set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132" CACHE STRING "Default Fortran flags")
+  set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132 -std=legacy" CACHE STRING "Default Fortran flags")
 
   # these flag(s) are currently only used when using openmp-simd optimizations
   # (to specify available/prefered instruction sets).

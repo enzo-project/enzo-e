@@ -159,6 +159,7 @@ Block::Block ( MsgRefine * msg )
     index_solver_(),
     refresh_()
 {
+
 #ifdef TRACE_BLOCK
 
   CkPrintf ("%d TRACE_BLOCK %s Block::Block(MsgRefine)\n",  CkMyPe(),name(thisIndex).c_str());

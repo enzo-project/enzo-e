@@ -13,9 +13,10 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml() 
+EnzoMethodPpml::EnzoMethodPpml(double dt_weight) 
   : Method(),
-    comoving_coordinates_(enzo::config()->physics_cosmology)
+    comoving_coordinates_(enzo::config()->physics_cosmology),
+    dt_weight_(dt_weight)
 {
   // Initialize the default Refresh object
   cello::simulation()->refresh_set_name(ir_post_,name());
@@ -48,20 +49,22 @@ void EnzoMethodPpml::pup (PUP::er &p)
 
   Method::pup(p);
   p | comoving_coordinates_;
+  p | dt_weight_;
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodPpml::compute ( Block * block ) throw()
 {
+  if (block->is_leaf()) {
 
-  if (!block->is_leaf()) return;
+    EnzoBlock * enzo_block = enzo::block(block);
+    double dt = dt_weight_ * block->dt();
+    enzo_block->SolveMHDEquations ( dt );
 
-  EnzoBlock * enzo_block = enzo::block(block);
+  }
 
-  enzo_block->SolveMHDEquations ( block->dt() );
-
-  enzo_block->compute_done();
+  block->compute_done();
 
 }
 
@@ -69,7 +72,6 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
 double EnzoMethodPpml::timestep (Block * block) throw()
 {
- 
   EnzoBlock * enzo_block = enzo::block(block);
 
   /* initialize */
@@ -149,22 +151,22 @@ double EnzoMethodPpml::timestep (Block * block) throw()
     enzo_float * bz = (enzo_float *) field.values("bfieldz");
 
     FORTRAN_NAME(calc_dt_ppml)
-      (enzo_block->GridDimension, 
-       enzo_block->GridDimension+1, 
-       enzo_block->GridDimension+2,
-       enzo_block->GridStartIndex, 
-       enzo_block->GridEndIndex,
-       enzo_block->GridStartIndex+1, 
-       enzo_block->GridEndIndex+1,
-       enzo_block->GridStartIndex+2, 
-       enzo_block->GridEndIndex+2,
-       &enzo_block->CellWidth[0], 
-       &enzo_block->CellWidth[1], 
-       &enzo_block->CellWidth[2],
-       d,
-       vx, vy, vz,
-       bx, by, bz,
-       &dtBaryons);
+      (enzo_block->GridDimension,   // ( )
+       enzo_block->GridDimension+1,   // ( )
+       enzo_block->GridDimension+2,  // ( )
+       enzo_block->GridStartIndex,   // ( )
+       enzo_block->GridEndIndex,  // ( )
+       enzo_block->GridStartIndex+1,   // ( )
+       enzo_block->GridEndIndex+1,  // ( )
+       enzo_block->GridStartIndex+2,   // ( )
+       enzo_block->GridEndIndex+2,  // ( )
+       &enzo_block->CellWidth[0],   // ( )
+       &enzo_block->CellWidth[1],   // ( )
+       &enzo_block->CellWidth[2],  // ( )
+       d,  // ( )
+       vx, vy, vz,  // ( )
+       bx, by, bz,  // ( )
+       &dtBaryons);  // ( )
     /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
  
     dtBaryons *= courant_;
@@ -176,7 +178,6 @@ double EnzoMethodPpml::timestep (Block * block) throw()
   dt = std::numeric_limits<enzo_float>::max();
 
   dt = MIN(dt, dtBaryons);
-
 
   return dt;
 }

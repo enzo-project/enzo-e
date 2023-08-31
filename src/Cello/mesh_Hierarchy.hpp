@@ -39,11 +39,11 @@ public: // interface
     block_exists_(false)
   {
     for (int axis=0; axis<3; axis++) {
-      root_size_[axis] = 0;
       lower_[axis] = 0.0;
       upper_[axis] = 0.0;
       blocking_[axis] = 0;
       periodicity_[axis] = 0;
+      root_size_[axis] = 0;
     }
   }
   
@@ -66,11 +66,10 @@ public: // interface
 
   /// Set domain upper extent
   void set_upper(double x, double y, double z) throw ();
-
-  /// Set root-level grid size
+  /// Set root-level grid size in cells
   void set_root_size(int nx, int ny, int nz) throw ();
 
-  /// Set root-level grid size
+  /// Set root-level grid size in blocks
   void set_blocking(int nbx, int nby, int nbz) throw ();
 
   //----------------------------------------------------------------------
@@ -256,9 +255,6 @@ protected: // attributes
   CProxy_Block block_array_;
   bool           block_exists_;
 
-  /// Size of the root grid
-  int root_size_[3];
-
   /// Lower extent of the hierarchy
   double lower_[3];
 
@@ -270,6 +266,9 @@ protected: // attributes
 
   /// Periodicity of boundary conditions on faces
   int periodicity_[3];
+
+  /// Size of the root grid
+  int root_size_[3];
 
 public: // static attributes
 

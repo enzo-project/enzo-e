@@ -26,7 +26,7 @@ EnzoMsgCheck::EnzoMsgCheck()
     block_upper_(),
     block_size_(),
     tag_(),
-    io_block_(),
+    io_block_(nullptr),
     index_this_(),
     index_next_(),
     name_this_(),
@@ -182,7 +182,8 @@ EnzoMsgCheck * EnzoMsgCheck::unpack(void * buffer)
 
   // Allocate storage using CkAllocBuffer (not new!)
 
-  EnzoMsgCheck * msg = (EnzoMsgCheck *) CkAllocBuffer (buffer,sizeof(EnzoMsgCheck));
+  EnzoMsgCheck * msg = (EnzoMsgCheck *) CkAllocBuffer
+    (buffer,sizeof(EnzoMsgCheck));
 
   msg = new ((void*)msg) EnzoMsgCheck;
 

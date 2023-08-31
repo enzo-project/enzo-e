@@ -48,6 +48,7 @@ public: // interface
     p | time_;
     p |  dt_;
     PUParray(p,array_,3);
+    p | is_leaf_;
   }
 
   /// Set block
@@ -101,6 +102,8 @@ public: // interface
     CkPrintf ("DEBUG_IO_BLOCK dt_             %g\n", dt_);
     CkPrintf ("DEBUG_IO_BLOCK array_          %d %d %d\n",
               array_[0], array_[1], array_[2]);
+    CkPrintf ("DEBUG_IO_BLOCK is_leaf_        %d\n",
+              is_leaf_);
   }
 protected: // attributes
 
@@ -112,6 +115,7 @@ protected: // attributes
   double time_;
   double dt_;
   int array_[3];
+  int is_leaf_;
 
 };
 

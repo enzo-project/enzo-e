@@ -588,9 +588,9 @@ int FieldData::field_size
 (
  const FieldDescr * field_descr,
  int                id_field,
- int              * nx,
- int              * ny,
- int              * nz
+ int              * mx,
+ int              * my,
+ int              * mz
  ) const throw()
 {
   // Adjust memory usage due to ghosts if needed
@@ -609,9 +609,9 @@ int FieldData::field_size
 
   // Compute array size
 
-  if (nx) (*nx) = size_[0] + 2*gx + cx;
-  if (ny) (*ny) = size_[1] + 2*gy + cy;
-  if (nz) (*nz) = size_[2] + 2*gz + cz;
+  if (mx) (*mx) = size_[0] + 2*gx + cx;
+  if (my) (*my) = size_[1] + 2*gy + cy;
+  if (mz) (*mz) = size_[2] + 2*gz + cz;
 
   // Return array size in bytes
 
@@ -620,9 +620,9 @@ int FieldData::field_size
 
   int bytes_total = bytes_per_element;
 
-  if (nx) bytes_total *= (*nx);
-  if (ny) bytes_total *= (*ny);
-  if (nz) bytes_total *= (*nz);
+  if (mx) bytes_total *= (*mx);
+  if (my) bytes_total *= (*my);
+  if (mz) bytes_total *= (*mz);
 
   return bytes_total;
 }

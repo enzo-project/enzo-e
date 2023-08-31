@@ -10,6 +10,7 @@
 #include "test.hpp"
 
 // #define DEBUG_DEBUG
+// #define CHECK_FOR_NANS
 //----------------------------------------------------------------------
 
 MethodDebug::MethodDebug
@@ -94,9 +95,20 @@ void MethodDebug::compute ( Block * block) throw()
             reduce[k+kmax] = std::max(reduce[k+1],(long double)(values[i]));
             reduce[k+ksum] += values[i];
             reduce[k+knum] += rel_vol;
-          }
+#ifdef CHECK_FOR_NANS
+            static int count_nan = 0;
+            if (values[i] != values[i] && count_nan++ < 10) {
+              WARNING5("MethodDebug",
+                       "Found NAN in field %s block %s element %d %d %d",
+                       field.field_name(index_field).c_str(),
+                       block->name().c_str(),
+                       ix,iy,iz);
+            }
+#endif
+         }
         }
       }
+
       k += 4;
     }
 

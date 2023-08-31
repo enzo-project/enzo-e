@@ -221,11 +221,11 @@ c     See LICENSE_PPML file for license and copyright information
 c     if (.not.((SL_rot.le.0.).and.(0.le.SR_rot))) then
 c     ERROR_MESSAGE
 
-c     print*,'Error in HLLDS procedure! Press any key.' 
+c     print*,'Error in HLLDS procedure! Press any key.'
 c     pause
 c     endif
 
- 8888 continue 
+ 8888 continue
 
 c     print*,'hlld finished'
 c     pause
@@ -233,7 +233,7 @@ c     pause
       End                       ! Subroutine HLLDx
 
       Subroutine HLLDy(UL,UR,F,U) !SL and SR from min/max
-      
+
       ENZO_REAL U(7),F(7),UL(7),UR(7)
 
       Integer i
@@ -689,9 +689,9 @@ c        print*,'Error in HLLDS procedure! Press any key.'
 c        pause
 c        endif
 
-6666        continue 
+ 6666       continue 
 
 c      print*,'hlld finished'
 c        pause
 
-      End ! Subroutine HLLDz
+        End                     ! Subroutine HLLDz

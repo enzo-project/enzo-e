@@ -203,6 +203,12 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_pressure,
        enzo_config->initial_turbulence_temperature,
        enzo::fluid_props()->gamma());
+  } else if (type == "turbulence_mhd_it") {
+    initial = new EnzoInitialTurbulenceMhdIT 
+      (cycle,time, 
+       enzo_config->initial_turbulence_density,
+       enzo_config->initial_turbulence_bfieldx,
+       enzo::fluid_props()->gamma());
   } else if (type == "pm") {
     std::string param_str = "Initial:" + config->initial_list[index] + ":mask";
     initial = new EnzoInitialPm
@@ -610,9 +616,13 @@ Method * EnzoProblem::create_method_
        );
 */
 
-  } else if (name == "ppml") {
+  } else if (name == "ppml" || name == "ppml_it") {
 
-    method = new EnzoMethodPpml;
+    method = new EnzoMethodPpml(enzo_config->method_ppml_dt_weight);
+
+  } else if (name == "ppml_ig") {
+
+    method = new EnzoMethodPpmlIG;
 
   } else if (name == "pm_deposit") {
 
@@ -665,6 +675,39 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
+
+  } else if (name == "turbulence_mhd_it") {
+
+    method = new EnzoMethodTurbulenceMhdIT 
+      (enzo_config->method_turbulence_edot,
+       enzo_config->initial_turbulence_density,
+       enzo_config->initial_turbulence_bfieldx,
+       enzo_config->method_turbulence_mach_number,
+       enzo_config->physics_cosmology);
+
+  } else if (name == "turbulence_ou") {
+
+    CkPrintf ("enzo_config->method_turbulence_apply_forcing %d\n",
+              enzo_config->method_turbulence_apply_forcing);
+    method = new EnzoMethodTurbulenceOU 
+      (enzo::fluid_props()->gamma(),
+       enzo_config->domain_lower,
+       enzo_config->domain_upper,
+       enzo_config->method_turbulence_apply_cooling,
+       enzo_config->method_turbulence_apply_forcing,
+       enzo_config->method_turbulence_apply_injection_rate,
+       enzo_config->method_turbulence_cooling_term,
+       enzo_config->method_turbulence_hc_alpha, 
+       enzo_config->method_turbulence_hc_sigma,
+       enzo_config->method_turbulence_injection_rate,
+       enzo_config->method_turbulence_kfi,
+       enzo_config->method_turbulence_kfa,
+       enzo_config->method_turbulence_mach_number,
+       enzo_config->method_turbulence_olap,
+       enzo_config->method_turbulence_read_sol,
+       enzo_config->method_turbulence_sol_weight,
+       enzo_config->method_turbulence_totemp,
+       enzo_config->method_turbulence_update_solution);
 
   } else if (name == "cosmology") {
 

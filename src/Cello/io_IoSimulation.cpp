@@ -22,7 +22,6 @@ IoSimulation::IoSimulation(const Simulation * s) throw ()
   meta_name_.push_back("dt");
 }
 
-
 //----------------------------------------------------------------------
 
 void IoSimulation::meta_value

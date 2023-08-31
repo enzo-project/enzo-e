@@ -814,7 +814,7 @@ void OutputImage::image_write_ () throw()
       if (min <= value && value <= max) {
 
 	// map v to lower colormap index
-	size_t k =  (n - 1)*(value - min) / (max-min);
+	size_t k =  (max>min)?(n - 1)*(value - min) / (max-min) : n/2;
 
 	// prevent k == colormap_[0].size()-1, which happens if value == max
 
@@ -824,7 +824,7 @@ void OutputImage::image_write_ () throw()
 	double lo = min +  k   *(max-min)/(n-1);
 	double hi = min + (k+1)*(max-min)/(n-1);
 
-	double ratio = (value - lo) / (hi-lo);
+	double ratio = (hi>lo)?(value - lo) / (hi-lo) : 0.5;
 
 	r = (1-ratio)*colormap_[0][k] + ratio*colormap_[0][k+1];
 	g = (1-ratio)*colormap_[1][k] + ratio*colormap_[1][k+1];
