@@ -79,15 +79,8 @@ public: // interface
    int * face_level,
    Adapt * adapt,
    Simulation * simulation = 0,
-   int io_reader = -1
-   ) const throw();
-
-  void create_block_check
-  (
-   EnzoMsgCheck * msg_check,
-   CProxy_Block block_array,
-   Index index
-   ) const throw();
+   int io_reader = -1,
+   int ip = -1) const throw();
 };
 
 #endif /* ENZO_ENZO_FACTORY_HPP */
