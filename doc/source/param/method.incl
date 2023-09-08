@@ -51,6 +51,11 @@
            }
         }
 
+   :e:`There are a subset of parameters that can be specified for all
+   methods.  For example, a` :ref:`schedule_param` :e:`subgroup can
+   be defined for any method object (to dictate when the method is
+   executed).`
+
    :e:`For more detailed documentation on Methods, see` :ref:`using-methods`
 
 ----
