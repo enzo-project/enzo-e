@@ -258,6 +258,7 @@ public: // interface
       method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
+      method_check_include_ghosts(false),
       /// EnzoMethodFeedback
       method_feedback_ejecta_mass(0.0),
       method_feedback_ejecta_metal_fraction(0.0),
@@ -273,7 +274,6 @@ public: // interface
       method_feedback_supernovae(true),
       method_feedback_unrestricted_sn(true),
       method_feedback_stellar_winds(true),
-      method_feedback_radiation(true),
       method_feedback_min_level(0),
       method_feedback_analytic_SNR_shell_mass(true),
       method_feedback_fade_SNR(true),
@@ -283,6 +283,7 @@ public: // interface
 
       // EnzoMethodHeat
       method_heat_alpha(0.0),
+
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -292,7 +293,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -762,6 +762,7 @@ public: // attributes
   std::string                method_check_ordering;
   std::vector<std::string>   method_check_dir;
   int                        method_check_monitor_iter;
+  bool                       method_check_include_ghosts;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
@@ -780,7 +781,6 @@ public: // attributes
   std::string                method_hydro_riemann_solver;
 
   /// EnzoMethodFeedback
-
   std::string               method_feedback_flavor;
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
@@ -794,7 +794,6 @@ public: // attributes
 
   
   /// EnzoMethodFeedbackSTARSS
-  
   bool                       method_feedback_supernovae;
   bool                       method_feedback_unrestricted_sn;
   bool                       method_feedback_stellar_winds;
@@ -803,9 +802,8 @@ public: // attributes
   bool                       method_feedback_analytic_SNR_shell_mass;
   bool                       method_feedback_fade_SNR;
   int                        method_feedback_NEvents;
- 
-  /// EnzoMethodStarMaker
 
+  /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;
   bool                      method_star_maker_use_altAlpha;
   bool                      method_star_maker_use_density_threshold;
