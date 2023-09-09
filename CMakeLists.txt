@@ -319,6 +319,13 @@ if (__processedUserDefaults)
   include(${Enzo-E_CONFIG_PATH})
 endif()
 
+# we need to pull CTest sooner or later anyways. We do it before adding the
+# source directories because it introduces the BUILD_TESTING option which is
+# set to ON if it was not previously initialized (e.g. from the command line)
+# -> this option is used within source directories to determine whether the
+#    binaries for unit-tests should be declared
+include(CTest)
+
 # In principle a more fine grained control (i.e., target specific include directories
 # rather than this global one would be preferred, but, e.g., `pngwriter.h` is curently
 # included in many targets/libraries (without being linked) so we'll use the global for
@@ -331,10 +338,7 @@ add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
 
-include(CTest)
 
-# include(CTest) implicitly initializes BUILD_TESTING to ON if it was not
-# previously initialized (e.g. from the command line)
 if (BUILD_TESTING)
   add_subdirectory(test)
 endif()

@@ -22,13 +22,15 @@ public: // interface
     ordering_(""),
     stream_block_list_(),
     file_(nullptr),
-    monitor_iter_(0)
+    monitor_iter_(0),
+    include_ghosts_(false)
   {  }
 
   /// Constructor
   IoEnzoWriter(int num_files,
                std::string ordering,
-               int monitor_iter) throw();
+               int monitor_iter,
+               bool include_ghosts) throw();
 
   /// CHARM++ migration constructor
   IoEnzoWriter(CkMigrateMessage *m) : CBase_IoEnzoWriter(m) {}
@@ -41,6 +43,7 @@ public: // interface
     p | num_files_;
     p | ordering_;
     p | monitor_iter_;
+    p | include_ghosts_;
   }
 
 public: // entry methods
@@ -77,6 +80,9 @@ protected: // attributes
   /// How often to output write status wrt block indices in first
   /// file; 0 for no output
   int monitor_iter_;
+
+  /// Whether to include ghost zones
+  bool include_ghosts_;
 };
 
 #endif /* ENZO_IO_ENZO_WRITER_HPP */
