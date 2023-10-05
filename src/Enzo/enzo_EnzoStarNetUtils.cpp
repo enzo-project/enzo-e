@@ -272,6 +272,9 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   EnzoUnits * enzo_units = enzo::units();
   double lunit = enzo_units->length();
   double munit = enzo_units->mass();
+  double rhounit = enzo_units->density();
+  double vunit = enzo_units->velocity();
+  double Eunit = vunit*vunit; // specific energy
 
   Field field = enzo_block->data()->field();
 
@@ -294,6 +297,38 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   enzo_float * PopIII_HNe_metal_density = (enzo_float *) field.values("PopIII_HNe_metal_density");
   enzo_float * PopIII_PISNe_metal_density = (enzo_float *) field.values("PopIII_PISNe_metal_density");
 
+  // species fields
+  enzo_float * dHI    = field.is_field("HI_density") ? 
+          (enzo_float*) field.values("HI_density") : NULL;
+  enzo_float * dHII   = field.is_field("HII_density") ? 
+          (enzo_float*) field.values("HII_density") : NULL;
+  enzo_float * dHeI   = field.is_field("HeI_density") ? 
+          (enzo_float*) field.values("HeI_density") : NULL;
+  enzo_float * dHeII  = field.is_field("HeII_density") ? 
+          (enzo_float*) field.values("HeII_density") : NULL;
+  enzo_float * dHeIII = field.is_field("HeIII_density") ? 
+          (enzo_float*) field.values("HeIII_density") : NULL;
+  enzo_float * d_el   = field.is_field("e_density") ?
+          (enzo_float*) field.values("e_density") : NULL;
+ 
+  enzo_float * dH2I   = field.is_field("H2I_density") ? 
+          (enzo_float*) field.values("H2I_density") : NULL;
+  enzo_float * dH2II  = field.is_field("H2II_density") ? 
+          (enzo_float*) field.values("H2II_density") : NULL;
+  enzo_float * dHM    = field.is_field("HM_density") ? 
+          (enzo_float*) field.values("HM_density") : NULL;
+
+  enzo_float * dDI    = field.is_field("DI_density") ? 
+         (enzo_float *) field.values("DI_density") : NULL;
+  enzo_float * dDII   = field.is_field("DII_density") ? 
+         (enzo_float *) field.values("DII_density") : NULL;
+  enzo_float * dHDI   = field.is_field("HDI_density") ? 
+         (enzo_float *) field.values("HDI_density") : NULL;
+
+
+  enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");
+  enzo_float * total_energy = (enzo_float *) field.values("total_energy");
+
   double metal_mass_tot = sphere.metal_mass_SNe() + sphere.metal_mass_HNe() + sphere.metal_mass_PISNe();
   if (metal_mass_tot == 0.0) { 
     // do nothing if no yield
@@ -308,6 +343,7 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
 
   double r_code = sphere.r();
   double inv_vol = 3 / (4*cello::pi * r_code*r_code*r_code);
+  double hx_cm = hx*lunit;
 
   // compute average density for deposited metals
   double drho_SNe   = sphere.metal_mass_SNe()  * inv_vol;
@@ -315,13 +351,12 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   double drho_PISNe = sphere.metal_mass_PISNe()* inv_vol;
   double drho = drho_SNe + drho_HNe + drho_PISNe;
 
-
   #ifdef DEBUG_METHOD_FBNET
     CkPrintf("[%d] FBNet::update_mesh -- rho = %1.2e, rho_SNe = %1.2e, rho_HNe = %1.2e, rho_PISNe = %1.2e\n", CkMyPe(), drho, drho_SNe, drho_HNe, drho_PISNe);
   #endif
 
   int r_hx = std::ceil(r_code/hx), r_hy = std::ceil(r_code/hy), r_hz = std::ceil(r_code/hz);
-  // CiC deposit with cloud radius of r_code
+  // Deposit metals over radius r_code
   // Feedback spheres may intersect neighboring blocks in such a way that
   // the volume of the sphere will extend past the available ghost zones.
   // Account for this by looping through ALL identified feedback spheres in the domain,
@@ -329,6 +364,12 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
   // Since spheres have uniform density, this is as simple as adding a check in the 
   // CiC routine that the current cell being indexed actually lies within the block.
 
+  const GrackleChemistryData * grackle_chem = enzo::grackle_chemistry();
+  const int primordial_chemistry = (grackle_chem == nullptr) ?
+    0 : grackle_chem->get<int>("primordial_chemistry");
+
+  const double dflt_mu = static_cast<double>(enzo::fluid_props()->mol_weight());
+  double mu = dflt_mu;
   for (int iz_ = iz-r_hz; iz_ <= iz+r_hz; iz_++) {
     // if out of bounds, go to next iteration
     if ((iz_ < 0) || (mz <= iz_)) continue;
@@ -349,6 +390,32 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
         PopIII_SNe_metal_density[i_]   += contained*drho_SNe;
         PopIII_HNe_metal_density[i_]   += contained*drho_HNe;
         PopIII_PISNe_metal_density[i_] += contained*drho_PISNe;
+
+        // compute MMW
+        if (primordial_chemistry > 0) {
+          // use species fields to get number density times mass_Hydrogen
+          // (note: "e_density" field tracks ndens_electron * mass_Hydrogen)
+          double ndens_times_mH
+            =  d_el[i_] + dHI[i_] + dHII[i_] + 0.25*(dHeI[i_]+dHeII[i_]+dHeIII[i_]);
+
+          if (primordial_chemistry > 1) {
+            ndens_times_mH += dHM[i_] + 0.5*(dH2I[i_]+dH2II[i_]);
+          }
+          if (primordial_chemistry > 2) {
+            ndens_times_mH += 0.5*(dDI[i_] + dDII[i_]) + dHDI[i_]/3.0;
+          }
+          
+          ndens_times_mH += metal_density[i_]/16.0;
+
+          mu = density[i_] / ndens_times_mH;
+        }
+       
+        // add energy to cell consistent with 1e4 K gas
+        double delta_ie = 1.5 * enzo_constants::kboltz * 1e4 / (mu * enzo_constants::mass_hydrogen); // erg/g 
+        delta_ie /= Eunit; // put into code units
+
+        internal_energy[i_] += contained * delta_ie;
+        total_energy[i_] += contained * delta_ie; 
   
         //if (contained) {    
         //  CkPrintf("FBNet::update_mesh -- metal density = %1.2e; radius = %1.2e kpc\n", drho, r_code * lunit/enzo_constants::kpc_cm);
