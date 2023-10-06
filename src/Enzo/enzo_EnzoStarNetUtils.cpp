@@ -370,6 +370,8 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
 
   const double dflt_mu = static_cast<double>(enzo::fluid_props()->mol_weight());
   double mu = dflt_mu;
+
+  double tiny_number = 1e-20;
   for (int iz_ = iz-r_hz; iz_ <= iz+r_hz; iz_++) {
     // if out of bounds, go to next iteration
     if ((iz_ < 0) || (mz <= iz_)) continue;
@@ -384,43 +386,78 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
 
         // if cell is within the deposition radius
         bool contained = ( (iz-iz_)*(iz-iz_) + (iy-iy_)*(iy-iy_) + (ix-ix_)*(ix-ix_) <= r_hx*r_hx );
-        density[i_]                    += contained*drho;
-        metal_density[i_]              += contained*drho;
-        PopIII_metal_density[i_]       += contained*drho;
-        PopIII_SNe_metal_density[i_]   += contained*drho_SNe;
-        PopIII_HNe_metal_density[i_]   += contained*drho_HNe;
-        PopIII_PISNe_metal_density[i_] += contained*drho_PISNe;
 
-        // compute MMW
-        if (primordial_chemistry > 0) {
-          // use species fields to get number density times mass_Hydrogen
-          // (note: "e_density" field tracks ndens_electron * mass_Hydrogen)
-          double ndens_times_mH
-            =  d_el[i_] + dHI[i_] + dHII[i_] + 0.25*(dHeI[i_]+dHeII[i_]+dHeIII[i_]);
+        if (contained) {       
+          density[i_]                    += drho;
+          metal_density[i_]              += drho;
+          PopIII_metal_density[i_]       += drho;
+          PopIII_SNe_metal_density[i_]   += drho_SNe;
+          PopIII_HNe_metal_density[i_]   += drho_HNe;
+          PopIII_PISNe_metal_density[i_] += drho_PISNe;
 
-          if (primordial_chemistry > 1) {
-            ndens_times_mH += dHM[i_] + 0.5*(dH2I[i_]+dH2II[i_]);
-          }
-          if (primordial_chemistry > 2) {
-            ndens_times_mH += 0.5*(dDI[i_] + dDII[i_]) + dHDI[i_]/3.0;
-          }
+          // compute MMW
+          if (primordial_chemistry > 0) {
+            // use species fields to get number density times mass_Hydrogen
+            // (note: "e_density" field tracks ndens_electron * mass_Hydrogen)
+            double ndens_times_mH
+              =  d_el[i_] + dHI[i_] + dHII[i_] + 0.25*(dHeI[i_]+dHeII[i_]+dHeIII[i_]);
+
+            if (primordial_chemistry > 1) {
+              ndens_times_mH += dHM[i_] + 0.5*(dH2I[i_]+dH2II[i_]);
+            }
+            if (primordial_chemistry > 2) {
+              ndens_times_mH += 0.5*(dDI[i_] + dDII[i_]) + dHDI[i_]/3.0;
+            }
           
-          ndens_times_mH += metal_density[i_]/16.0;
+            ndens_times_mH += metal_density[i_]/16.0;
 
-          mu = density[i_] / ndens_times_mH;
-        }
+            mu = density[i_] / ndens_times_mH;
+          }
        
-        // add energy to cell consistent with 1e4 K gas
-        double delta_ie = 1.5 * enzo_constants::kboltz * 1e4 / (mu * enzo_constants::mass_hydrogen); // erg/g 
-        delta_ie /= Eunit; // put into code units
+          // add energy to cell consistent with 1e4 K gas
+          double delta_ie = 1.5 * enzo_constants::kboltz * 1e4 / (mu * enzo_constants::mass_hydrogen); // erg/g 
+          delta_ie /= Eunit; // put into code units
 
-        internal_energy[i_] += contained * delta_ie;
-        total_energy[i_] += contained * delta_ie; 
-  
+          internal_energy[i_] += delta_ie;
+          total_energy[i_] += delta_ie;
+
+          // dissociate all H2 
+
+          // (H2I -> 2HI -> 2HII + 2e-)
+          dHII[i_] += 2*dH2I[i_];
+          d_el[i_] += 2*dH2I[i_]; 
+
+          dH2I[i_] = tiny_number;
+
+          // (H2II -> 2HII + e-)
+          dHII[i_] += 2*dH2II[i_];
+          d_el[i_] +=   dH2II[i_];
+
+          dH2II[i_] = tiny_number;
+
+          // (HM -> HII + 2e-)
+          dHII[i_] +=   dHM[i_];
+          d_el[i_] += 2*dHM[i_];
+
+          dHM[i_] = tiny_number;
+        
+          // ionize all HI (H -> HII + e-)
+          dHII[i_] += dHI[i_];
+          d_el[i_] += dHI[i_];
+ 
+          dHI[i_] = tiny_number;
+
+          // singly ionize all HeI (HeI -> HeII + e-)
+          dHeII[i_] +=      dHeI[i_];
+          d_el[i_]  += 0.25*dHeI[i_]; 
+
+          dHeI[i_] = tiny_number;
+
+        }
+
         //if (contained) {    
         //  CkPrintf("FBNet::update_mesh -- metal density = %1.2e; radius = %1.2e kpc\n", drho, r_code * lunit/enzo_constants::kpc_cm);
         //}
-
 
       }
     }
