@@ -59,10 +59,7 @@ commands:
 
             # Install Nested ICs files
             cd $HOME
-            pwd
-            ls -la
             git clone https://github.com/brenjohn/enzo-e_nested_ics.git
-            ls -la
             mv enzo-e_nested_ics/ics32 enzo-e/input/Nested_ICs/
 
   install-grackle:
