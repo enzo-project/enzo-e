@@ -776,7 +776,7 @@ void Simulation::initialize_balance_() throw()
 
 void Simulation::initialize_block_array_() throw()
 {
-  if (CkMyPE() == 0) {
+  if (CkMyPe() == 0) {
     // Set sync counter for initial blocks;
     int num_initial_blocks = initial_block_count();
     sync_init_block_count_.set_stop(num_initial_blocks);

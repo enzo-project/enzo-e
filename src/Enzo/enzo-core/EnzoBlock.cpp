@@ -305,12 +305,13 @@ void EnzoBlock::instantiate_children() throw()
       &adapt_);
 
     msg->set_data_msg(data_msg);
-    #ifdef BYPASS_CHARM_MEM_LEAK
-      enzo::simulation()->set_msg_refine (index_child, msg);
-      thisProxy[index_child].insert (process_type(CkMyPe()), MsgType::msg_refine);
-    #else
-      thisProxy[index_child].insert (msg);
-    #endif
+    // #ifdef BYPASS_CHARM_MEM_LEAK
+    //   enzo::simulation()->set_msg_refine (index_child, msg);
+    //   thisProxy[index_child].insert (process_type(CkMyPe()), MsgType::msg_refine);
+    // #else
+    //   thisProxy[index_child].insert (msg);
+    // #endif
+    cello::simulation()->p_refine_create_block (msg);
 
     children_.push_back(index_child);
   }
