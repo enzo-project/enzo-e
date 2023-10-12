@@ -104,11 +104,14 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_hdf5_field_datasets,
        enzo_config->initial_hdf5_field_coords,
        enzo_config->initial_hdf5_field_names,
+       enzo_config->initial_hdf5_field_levels,
        enzo_config->initial_hdf5_particle_files,
        enzo_config->initial_hdf5_particle_datasets,
        enzo_config->initial_hdf5_particle_coords,
        enzo_config->initial_hdf5_particle_types,
-       enzo_config->initial_hdf5_particle_attributes);
+       enzo_config->initial_hdf5_particle_attributes,
+       enzo_config->initial_hdf5_particle_levels
+       );
 
   } else if (type == "music") {
 

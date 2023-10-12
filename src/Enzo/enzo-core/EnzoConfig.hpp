@@ -142,6 +142,7 @@ public: // interface
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
+      initial_hdf5_field_levels(),
       initial_hdf5_field_datasets(),
       initial_hdf5_field_files(),
       initial_hdf5_field_names(),
@@ -149,6 +150,7 @@ public: // interface
       initial_hdf5_max_level(),
       initial_hdf5_monitor_iter(),
       initial_hdf5_particle_attributes(),
+      initial_hdf5_particle_levels(),
       initial_hdf5_particle_coords(),
       initial_hdf5_particle_datasets(),
       initial_hdf5_particle_files(),
@@ -599,11 +601,13 @@ public: // attributes
   std::vector < std::string > initial_hdf5_field_datasets;
   std::vector < std::string > initial_hdf5_field_names;
   std::vector < std::string > initial_hdf5_field_coords;
+  std::vector < int >         initial_hdf5_field_levels;
   std::vector < std::string > initial_hdf5_particle_files;
   std::vector < std::string > initial_hdf5_particle_datasets;
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
+  std::vector < int >         initial_hdf5_particle_levels;
 
   /// EnzoInitialInclinedWave
   double                     initial_inclinedwave_alpha;

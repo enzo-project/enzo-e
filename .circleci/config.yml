@@ -57,6 +57,11 @@ commands:
             export MAX_BUILD_CORES=2
             pip install -e .
 
+            # Install Nested ICs files
+            cd $HOME
+            git clone https://github.com/brenjohn/enzo-e_nested_ics.git
+            mv enzo-e_nested_ics/ics32 enzo-e/input/Nested_ICs/
+
   install-grackle:
     description: "Install grackle."
     parameters:
