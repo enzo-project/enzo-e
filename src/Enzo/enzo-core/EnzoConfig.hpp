@@ -308,6 +308,8 @@ public: // interface
       method_inference_starnet_radius_modifier(0.2),
       method_inference_starnet_S1(true),
       method_inference_starnet_S2(true),
+      ///EnzoMethodFBNetDeposit
+      method_fbnet_deposit_hot_deposit(false),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -493,6 +495,7 @@ protected: // methods
   void read_method_gravity_(Parameters *);
   void read_method_heat_(Parameters *);
   void read_method_inference_(Parameters *);
+  void read_method_fbnet_deposit_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_pm_deposit_(Parameters *);
   void read_method_pm_update_(Parameters *);
@@ -833,6 +836,9 @@ public: // attributes
   double                     method_inference_starnet_radius_modifier;
   bool                       method_inference_starnet_S1;
   bool                       method_inference_starnet_S2;
+
+  /// EnzoMethodFBNetDeposit
+  bool                       method_fbnet_deposit_hot_deposit;
 
   /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;

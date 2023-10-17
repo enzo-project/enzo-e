@@ -267,6 +267,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_inference_starnet_radius_modifier(0.2),
   method_inference_starnet_S1(true),
   method_inference_starnet_S2(true),
+  // EnzoMethodFBNetDeposit
+  method_fbnet_deposit_hot_deposit(false),
   // EnzoMethodM1Closure
   method_m1_closure(false),
   method_m1_closure_N_groups(1), // # of frequency bins
@@ -687,6 +689,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_inference_starnet_S1;
   p | method_inference_starnet_S2;
 
+  p | method_fbnet_deposit_hot_deposit;
+
   p | method_star_maker_flavor;
   p | method_star_maker_use_altAlpha;
   p | method_star_maker_use_density_threshold;
@@ -865,6 +869,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_gravity_(p);
   read_method_heat_(p);
   read_method_inference_(p);
+  read_method_fbnet_deposit_(p);
   read_method_merge_sinks_(p);
   read_method_pm_deposit_(p);
   read_method_pm_update_(p);
@@ -2034,6 +2039,14 @@ void EnzoConfig::read_method_inference_(Parameters* p)
 
   method_inference_starnet_S2 = p->value_logical
     ("Method:inference:starnet_S2",true);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_fbnet_deposit_(Parameters * p)
+{
+  method_fbnet_deposit_hot_deposit = p->value_logical
+    ("Method:fbnet_deposit:hot_deposit",false);
 }
 
 //----------------------------------------------------------------------

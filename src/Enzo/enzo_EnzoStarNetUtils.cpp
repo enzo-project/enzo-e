@@ -413,45 +413,47 @@ void FBNet::update_mesh(EnzoBlock * enzo_block, EnzoObjectFeedbackSphere sphere)
 
             mu = density[i_] / ndens_times_mH;
           }
-       
-          // add energy to cell consistent with 1e4 K gas
-          double delta_ie = 1.5 * enzo_constants::kboltz * 1e4 / (mu * enzo_constants::mass_hydrogen); // erg/g 
-          delta_ie /= Eunit; // put into code units
 
-          internal_energy[i_] += delta_ie;
-          total_energy[i_] += delta_ie;
+          if (enzo_config->method_fbnet_deposit_hot_deposit) {   
+            // add energy to cell consistent with 1e4 K gas
+            double delta_ie = 1.5 * enzo_constants::kboltz * 1e4 / (mu * enzo_constants::mass_hydrogen); // erg/g 
+            delta_ie /= Eunit; // put into code units
 
-          // dissociate all H2 
+            internal_energy[i_] += delta_ie;
+            total_energy[i_] += delta_ie;
 
-          // (H2I -> 2HI -> 2HII + 2e-)
-          dHII[i_] += 2*dH2I[i_];
-          d_el[i_] += 2*dH2I[i_]; 
+            // dissociate all H2 
 
-          dH2I[i_] = tiny_number;
+            // (H2I -> 2HI -> 2HII + 2e-)
+            dHII[i_] += 2*dH2I[i_];
+            d_el[i_] += 2*dH2I[i_]; 
 
-          // (H2II -> 2HII + e-)
-          dHII[i_] += 2*dH2II[i_];
-          d_el[i_] +=   dH2II[i_];
+            dH2I[i_] = tiny_number;
 
-          dH2II[i_] = tiny_number;
+            // (H2II -> 2HII + e-)
+            dHII[i_] += 2*dH2II[i_];
+            d_el[i_] +=   dH2II[i_];
 
-          // (HM -> HII + 2e-)
-          dHII[i_] +=   dHM[i_];
-          d_el[i_] += 2*dHM[i_];
+            dH2II[i_] = tiny_number;
 
-          dHM[i_] = tiny_number;
+            // (HM -> HII + 2e-)
+            dHII[i_] +=   dHM[i_];
+            d_el[i_] += 2*dHM[i_];
+
+            dHM[i_] = tiny_number;
         
-          // ionize all HI (H -> HII + e-)
-          dHII[i_] += dHI[i_];
-          d_el[i_] += dHI[i_];
- 
-          dHI[i_] = tiny_number;
+            // ionize all HI (H -> HII + e-)
+            dHII[i_] += dHI[i_];
+            d_el[i_] += dHI[i_];
+  
+            dHI[i_] = tiny_number;
 
-          // singly ionize all HeI (HeI -> HeII + e-)
-          dHeII[i_] +=      dHeI[i_];
-          d_el[i_]  += 0.25*dHeI[i_]; 
+            // singly ionize all HeI (HeI -> HeII + e-)
+            dHeII[i_] +=      dHeI[i_];
+            d_el[i_]  += 0.25*dHeI[i_]; 
 
-          dHeI[i_] = tiny_number;
+            dHeI[i_] = tiny_number;
+          }
 
         }
 
