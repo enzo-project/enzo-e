@@ -174,11 +174,18 @@ module enzo {
     entry void p_check_done();
     entry void p_set_io_writer(CProxy_IoEnzoWriter proxy);
 
+    // EnzoMethodInfer
+    entry void p_infer_set_array_count(int count);
+    entry void p_infer_array_created();
+    entry void p_infer_done();
+
     // enzo_control_restart
     entry void p_set_io_reader(CProxy_IoEnzoReader proxy);
     entry void p_io_reader_created();
     entry void p_restart_next_level();
     entry void p_restart_level_created();
+    // enzo_level_array
+    entry void p_set_level_array(CProxy_EnzoLevelArray proxy);
   };
 
   //----------------------------------------------------------------------

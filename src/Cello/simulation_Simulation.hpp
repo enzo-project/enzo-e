@@ -406,9 +406,6 @@ public: // virtual functions
   int refresh_count() const
   { return refresh_list_.size(); }
 
-  int num_blocks_level (int level) {
-    return num_blocks_level_[level];
-  }
 protected: // functions
 
   /// Initialize the Config object

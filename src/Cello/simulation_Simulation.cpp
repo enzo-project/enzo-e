@@ -141,8 +141,7 @@ Simulation::Simulation()
   max_solver_iter_(),
   restart_directory_(),
   restart_num_files_(),
-  restart_stream_file_list_(),
-  num_blocks_level_()
+  restart_stream_file_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -201,7 +200,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     max_solver_iter_(),
     restart_directory_(),
     restart_num_files_(),
-    restart_stream_file_list_(),
+    restart_stream_file_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION

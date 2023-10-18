@@ -293,6 +293,14 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
+      /// EnzoMethodInference
+      method_inference_level_base(0),
+      method_inference_level_array(0),
+      method_inference_level_infer(0),
+      method_inference_array_dims(),
+      method_inference_array_size(),
+      method_inference_field_group(),
+      method_inference_overdensity_threshold(0),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -803,6 +811,15 @@ public: // attributes
   bool                       method_feedback_analytic_SNR_shell_mass;
   bool                       method_feedback_fade_SNR;
   int                        method_feedback_NEvents;
+
+  /// EnzoMethodInference
+  int                        method_inference_level_base;
+  int                        method_inference_level_array;
+  int                        method_inference_level_infer;
+  int                        method_inference_array_dims[3];
+  int                        method_inference_array_size[3];
+  std::string                method_inference_field_group;
+  float                      method_inference_overdensity_threshold;
 
   /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;
