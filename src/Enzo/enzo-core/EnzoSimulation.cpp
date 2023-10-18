@@ -100,22 +100,24 @@ void EnzoSimulation::pup (PUP::er &p)
 }
 
 //----------------------------------------------------------------------
-#ifdef BYPASS_CHARM_MEM_LEAK
+void EnzoSimulation::p_refine_create_block(MsgRefine * msg)
+{ refine_create_block(msg); }
 
-void EnzoSimulation::p_get_msg_refine(Index index)
+void EnzoSimulation::refine_create_block(MsgRefine * msg)
 {
-  MsgRefine * msg = get_msg_refine(index);
+  Index index = msg->index();
+  if (msg_refine_map_[index] != NULL) {
+    int v3[3];
+    index.values(v3);
+    ASSERT3 ("EnzoSimulation::p_refine_create_block",
+	    "index %08x %08x %08x is already in the msg_refine mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg == NULL));
+  }
+  msg_refine_map_[index] = msg;
 
-  enzo::block_array()[index].p_set_msg_refine(msg);
-}
-
-void EnzoSimulation::p_get_msg_check(Index index)
-{
-  EnzoMsgCheck * msg = get_msg_check(index);
-#ifdef DEBUG_MSG_CHECK  
-  CkPrintf ("%d DEBUG_MSG_CHECK sending %p\n",CkMyPe(),msg);
-#endif
-  enzo::block_array()[index].p_set_msg_check(msg);
+  int ip = CkMyPe();
+  enzo::block_array()[index].insert(ip,MsgType::msg_refine,ip);
 }
 
 //----------------------------------------------------------------------
@@ -126,7 +128,7 @@ void EnzoSimulation::set_msg_check(Index index, EnzoMsgCheck * msg)
    
     int v3[3];
     index.values(v3);
-    ASSERT3 ("EnzoSimulation::p_set_msg_check",
+    ASSERT3 ("EnzoSimulation::set_msg_check",
 	    "index %08x %08x %08x is already in the msg_check mapping",
 	    v3[0],v3[1],v3[2],
 	    (msg == NULL));
@@ -154,8 +156,25 @@ EnzoMsgCheck * EnzoSimulation::get_msg_check(Index index)
   return msg;
 }
 
-#endif
+//----------------------------------------------------------------------
 
+MsgRefine * EnzoSimulation::get_msg_refine(Index index)
+{
+  int v3[3];
+  index.values(v3);
+  MsgRefine * msg = msg_refine_map_[index];
+  if (msg == NULL) {
+    int v3[3];
+    index.values(v3);
+    
+    ASSERT3 ("EnzoSimulation::get_msg_refine",
+	    "index %08x %08x %08x is not in the msg_refine mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg != NULL));
+  }
+  msg_refine_map_.erase(index);
+  return msg;
+}
 //----------------------------------------------------------------------
 
 void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)

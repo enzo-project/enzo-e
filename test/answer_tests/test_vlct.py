@@ -4,14 +4,11 @@ import yt
 from answer_testing import \
     EnzoETest, \
     ytdataset_test, \
-    assert_array_rel_equal
-
-_base_file = os.path.basename(__file__)
+    assert_array_rel_equal, \
+    cached_opts
 
 # Set test tolerance based on compile precision
-use_double = os.environ.get("USE_DOUBLE", "false").lower() == "true"
-yt.mylog.info(f"{_base_file}: use_double = {use_double}")
-if use_double:
+if cached_opts().uses_double_prec:
     decimals = 12
 else:
     decimals = 6

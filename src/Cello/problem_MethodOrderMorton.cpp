@@ -225,12 +225,8 @@ void Block::r_method_order_morton_complete(CkReductionMsg * msg)
 
 void MethodOrderMorton::compute_complete(Block * block)
 {
-  long long index = *pindex_(block);
-  long long count = *pcount_(block);
-  double & ratio = *pratio_(block);
-
-  ratio = (count != 0) ? index/count : -1;
-
+  // Update Block's index and count
+  block->set_order(*pindex_(block),*pcount_(block));
   block->compute_done();
 }
 

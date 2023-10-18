@@ -258,6 +258,7 @@ public: // interface
       method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
+      method_check_include_ghosts(false),
       /// EnzoMethodFeedback
       method_feedback_ejecta_mass(0.0),
       method_feedback_ejecta_metal_fraction(0.0),
@@ -273,7 +274,6 @@ public: // interface
       method_feedback_supernovae(true),
       method_feedback_unrestricted_sn(true),
       method_feedback_stellar_winds(true),
-      method_feedback_radiation(true),
       method_feedback_min_level(0),
       method_feedback_analytic_SNR_shell_mass(true),
       method_feedback_fade_SNR(true),
@@ -293,14 +293,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-      /// EnzoMethodInference
-      method_inference_level_base(0),
-      method_inference_level_array(0),
-      method_inference_level_infer(0),
-      method_inference_array_dims(),
-      method_inference_array_size(),
-      method_inference_field_group(),
-      method_inference_overdensity_threshold(0),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -771,6 +763,7 @@ public: // attributes
   std::string                method_check_ordering;
   std::vector<std::string>   method_check_dir;
   int                        method_check_monitor_iter;
+  bool                       method_check_include_ghosts;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
@@ -810,15 +803,6 @@ public: // attributes
   bool                       method_feedback_analytic_SNR_shell_mass;
   bool                       method_feedback_fade_SNR;
   int                        method_feedback_NEvents;
-
-  /// EnzoMethodInference
-  int                        method_inference_level_base;
-  int                        method_inference_level_array;
-  int                        method_inference_level_infer;
-  int                        method_inference_array_dims[3];
-  int                        method_inference_array_size[3];
-  std::string                method_inference_field_group;
-  float                      method_inference_overdensity_threshold;
 
   /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;
