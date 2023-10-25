@@ -4,50 +4,50 @@
 
 .. toctree::
 
-.. _Adaptive Timestep Design:
+.. _Adaptive Time Step Design:
 
 
-************************
-Adaptive Timestep Design
-************************
+*************************
+Adaptive Time Step Design
+*************************
 
 ========
 Notation
 ========
 
-In this section we introduce some notation to allow for precisely
-describing adaptive time-stepping algorithms.
+In this section we introduce some notation to help in describing
+adaptive time stepping algorithms.
 
 ----------------
 Cycles and steps
 ----------------
 
-Traditionally in ENZO and Enzo-E we use the term "cycle" to represent
-the index for the current time step. With adaptive time steps,
-however, at any given time different methods or different blocks may
-be taking different time steps, so this is insufficient.
-
-We introduce the term "step" to indicate substeps within a cycle. The
-largest time step of any method and block determines the cycle
-interval length. Steps are indexed within the cycle, so step 0 is the
-first step, and the number of steps depends on the method and/or
-block. For globally constant time-steps for each cycle, there is a
-single step 0 that coincides with the cycle.
+Traditionally in Enzo-E, we use the term "cycle" to represent a unique
+global time step. With adaptive time steps, however, at any given time
+different methods or different blocks may be taking different time
+steps, so this is insufficient.  We use the term "step" to indicate
+subdivisions within a cycle. The largest time step of any method and
+block determines the cycle interval length. Steps are indexed within
+the cycle, so step 0 is the first step, and the number of steps
+depends on the method and/or block. For globally constant time steps
+for each cycle, there is a single step 0 that coincides with the
+cycle.
 
 .. figure:: dt-cycle-step.png
            :width: 400
 
-           This figure illustrates cycles (time intervals between t0
-           and t1, and between t1 and t2) and steps (rectangular
-           regions within cycles)
+           This figure illustrates cycles (time intervals between
+           :math:`t_0` and :math:`t_1`, and between :math:`t_1` and
+           :math:`t_2`) and steps (rectangular regions within cycles)
 
 One constraint we impose on steps is that they are "quantized", that
 is have the value :math:`2^k` for some integer value :math:`k`. Since
 cycles are defined as the largest step over all blocks and methods,
-this applies to cycles as well. (This constraint may be relaxed in
-some cases, for example with non-adaptive time-steps, though having
-quantized time steps can improve accuracy in some numerical methods in
-which error terms cancel due to symmetry).
+this applies to cycles as well. This constraint may be relaxed in some
+cases, for example with non-adaptive time steps; however, having
+quantized time steps can improve accuracy and help maintain other
+favorable properties in some numerical methods where error terms
+cancel due to symmetry.
 
 Notation concerning time steps are summarized below:
 
@@ -57,34 +57,24 @@ Notation concerning time steps are summarized below:
 * **cycle**: time interval defined as the minimal interval such that steps for all methods on blocks align at the end points. Typically indexed using the
   variable :code:`i`.
 * **cycle depth**: ratio of the cycle length with the smallest step in the cycle.
-* :math:`\overline{dt}_{i,j}^{b,m}` : Computed timestep at step :math:`(i,j)` on block :math:`b` for method m, provided by :code:`Method::timestep()`
-* :math:`dt_{i,j}^{b,m}`: Actual (quantized) timestep at step :math:`(i,j)`  on block :math:`b` for method m, defined as :math:`dt_{i,j}^{b,m} \equiv \{2^\tau : 2^\tau \le \overline{dt}_{i,j}^{b,m} < 2^{\tau+1}, \tau \in \mathbb{Z} \}`
-* :math:`\tau_{i,j}^{b,m}`: Integer defining timestep: see :math:`dt_{i,j}^{b,m}`
-* :math:`dt_{i,j}^{m}`: Minimum timestep at step :math:`(i,j)` for method :math:`m` over all blocks
-* :math:`dt_{i,j}^{b}`: Minimum  timestep at step :math:`(i,j)` for block :math:`b` over all methods
-* :math:`dt_{i,j}`: Minimum timestep at step :math:`(i,j)` for all blocks with all methods
+* :math:`\overline{dt}_{i,j}^{b,m}` : Computed time step at step :math:`(i,j)` on block :math:`b` for method m, provided by :code:`Method::timestep()`
+* :math:`dt_{i,j}^{b,m}`: Actual (quantized) time step at step :math:`(i,j)`  on block :math:`b` for method m, defined as :math:`dt_{i,j}^{b,m} \equiv \{2^\tau : 2^\tau \le \overline{dt}_{i,j}^{b,m} < 2^{\tau+1}, \tau \in \mathbb{Z} \}`
+* :math:`\tau_{i,j}^{b,m}`: Integer defining the actual time step: see :math:`dt_{i,j}^{b,m}`
+* :math:`dt_{i,j}^{m}`: Minimum time step at step :math:`(i,j)` for method :math:`m` over all blocks
+* :math:`dt_{i,j}^{b}`: Minimum  time step at step :math:`(i,j)` for block :math:`b` over all methods
+* :math:`dt_{i,j}`: Minimum time step at step :math:`(i,j)` for all blocks with all methods
 * :math:`t_{i,j}^{b,m}`: Time at the start of cycle :math:`(i,j)` on block for method m
-
-==========
-Properties
-==========
-
-Steps have a constant width for a given cycle, so :math:`t_{i,j_1+1} - t_{i,j_1} = t_{i,j_2+1} - t_{i,j_2}` for all valid :math:`0 \le j_1,j_2 <` steps in cycle :math:`i`. Note that some specific steps may be larger, but the indexing is relative to the smallest step over all blocks and methods.
-
-All steps align at cycle boundaries; that is, no steps straddle cycle
-boundaries.
 
 ===============
 Data structures
 ===============
 
 Most data structures remain the same, but some small amount of extra
-functionality is desired to simplify adaptive time-stepping.
-
-One important one is being able to access field and particle values at
-some other time than explicitly computed, using interpolation or in
-some cases extrapolation. We would like this to be as seemless as possible
-to the Methods.
+functionality is desired to simplify adaptive time stepping.  The main
+one is being able to access field and particle values at some other
+time than explicitly available, using interpolation or in some cases
+extrapolation of saved values. We would like this to be as seemless as
+possible to the Methods.
 
 ------
 Fields
@@ -104,11 +94,12 @@ a value of 0 implying any amount of extrapolation would flag an
 error.
 
 One small complexity is that memory must be allocated when the desired
-time is not found in the history, but otherwise doesn't. To deal with
-this, we return the field values as a C++ :code:`shared_ptr`, a smart
-pointer that handles deallocating allocated memory automatically. Note
-we cannot use the preferred :code:`unique_ptr` because we need a
-custom deleter, which is only available with :code:`shared_ptr` s.
+time is not found in the history, but otherwise should not be. To deal
+with this, we return the field values as a C++ :code:`shared_ptr`, a
+smart pointer that handles deallocating allocated memory
+automatically. Note we cannot use the preferred :code:`unique_ptr`
+because we need a custom deleter, which is only available with
+:code:`shared_ptr`.
 
 
 ---------
@@ -134,8 +125,8 @@ close to but not within a block's scope is a possible solution.
 Parameters
 ==========
 
-Additional parameters will be required to implement adaptive
-time-stepping. In the subsections belowe we enumerate these additional
+Additional parameters will be required to implement adaptive time
+stepping. In the subsections below we enumerate these additional
 parameters.
 
 --------------------------------
@@ -153,14 +144,14 @@ defined for each method, with default values for both being 1.0.
 method up to the given amount, and :code:`dt_ratio_max` > 1.0 allows
 for super-cycling a method up to the given amount. Note that both can
 be "engaged", so that a method can either super- or sub-cycle with
-respect to other methods. The amount is relative to a methods with
+respect to other methods. The amount is relative to methods with
 :code:`dt_ratio_min` = :code:`dt_ratio_max` = 1.
 
 * :code:`Adapt : time_step_type`
 
-Adaptive time-stepping is enabled using :code:`Adapt : time_step_type`
+Adaptive time stepping is enabled using :code:`Adapt : time_step_type`
 which has allowed values :code:`none` (default), :code:`method` (for
 sub-/super-cycling), and :code:`block` (for local adaptive
-time-stepping). The type can be a list containing both :code:`block`
+time stepping). The type can be a list containing both :code:`block`
 and :code:`method`.
 
