@@ -167,8 +167,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cloud_metal_mass_frac,
        enzo_config->initial_cloud_initialize_uniform_bfield,
        enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_stddev,
-       enzo_config->initial_cloud_trunc_dev,
+       enzo_config->initial_cloud_perturb_Nwaves,
+       enzo_config->initial_cloud_perturb_amplitude,
+       enzo_config->initial_cloud_perturb_min_wavelength,
+       enzo_config->initial_cloud_perturb_max_wavelength,
        enzo_config->initial_cloud_perturb_seed);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
