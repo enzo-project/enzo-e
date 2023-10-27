@@ -345,6 +345,22 @@ The following options are useful for debugging.
      - Trace main phases
      - OFF
 
+Misc Options
+^^^^^^^^^^^^
+
+The following options don't really belong in any other category
+
+.. list-table:: Misc Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_PRECOMPILED_HEADERS``
+     - Precompile headers to try to reduce compile time
+     - ON
+
 .. _how_to_specify_the_configuration:
 
 Specifying Configuration Options
