@@ -108,7 +108,7 @@ discussion about file naming can be found in the previous section)
 | Restriction         | ``EnzoRestrict``\ *Name*  | ``Restrict``     |
 +---------------------+---------------------------+------------------+
 
-Classes outside of the Cello-Hierarcy
+Classes outside of the Cello-Hierarchy
 -------------------------------------
 
 There's a temptation to try to squeeze everything into a subclass
