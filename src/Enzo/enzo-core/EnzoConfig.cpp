@@ -202,6 +202,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_check_ordering("order_morton"),
   method_check_dir(),
   method_check_monitor_iter(0),
+  method_check_include_ghosts(false),
   // EnzoInitialMergeSinksTest
   initial_merge_sinks_test_particle_data_filename(""),
   // EnzoInitialAccretionTest
@@ -604,6 +605,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_ordering;
   p | method_check_dir;
   p | method_check_monitor_iter;
+  p | method_check_include_ghosts;
 
   PUParray(p,initial_accretion_test_sink_position,3);
   PUParray(p,initial_accretion_test_sink_velocity,3);
@@ -1948,7 +1950,8 @@ void EnzoConfig::read_method_check_(Parameters * p)
       method_check_dir[i] = p->list_value_string(i,"dir","");
     }
   }
-  method_check_monitor_iter = p->value_integer("monitor_iter",0);
+  method_check_monitor_iter   = p->value_integer("monitor_iter",0);
+  method_check_include_ghosts = p->value_logical("include_ghosts",false);
 }
 
 //----------------------------------------------------------------------

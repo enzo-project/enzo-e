@@ -1,0 +1,81 @@
+The ``"check"`` method is used for writing HDF5 data files used by
+Cello for restart. The ``"check"`` method can also be used for data
+dumps, though currently all data (all fields and all particles on all
+blocks) are written to disk.  This method should typically be called
+with a schedule.
+
+**Warning 1: Currently requires the** ``"order_morton"`` **method to be called beforehand, with a matching schedule.**
+
+**Warning 2: If a file or directory corresponding to a requested checkpoint
+dump already exists, no data will be written.** This is to avoid over-writing
+checkpoint files, but may not necessarily be what is expected. This behavior
+may be revised in the future.
+
+
+----
+
+.. par:parameter:: Method:check:dir
+
+   :Summary: :s:`Directory in which to write the checkpoint files`
+   :Type:    :par:typefmt:`list ( string )`
+   :Default: :d:`""`
+   :Scope:     :c:`Enzo`
+
+   :e:`This parameter specifies the subdirectory for the output file.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), "proc" (the process rank), and "flipflop" (alternating 0 and 1).`
+
+   *Note warning 2 above: if the directory pre-exists, no data will be written!*
+
+----
+
+.. par:parameter:: Method:check:num_files
+
+   :Summary: :s:`The number of HDF5 files in which to store restart data`
+   :Type:   :par:typefmt:`integer`
+   :Default: :d:`1`
+   :Scope:     :z:`Enzo`
+
+   :e:`This parameter specifies the number of HDF5 files to use for writing checkpoint data. Since an ordering is used, files will be close to the same size. For large runs, using a value close to the number of compute nodes is generally a reasonable value. Note that parallel HDF5 is not (currently) used, so the only parallelism available is from writing to multiple files. Do not use the default of 1 for large runs!`
+
+----
+
+.. par:parameter:: Method:check:ordering
+
+   :Summary: :s:`Block-ordering used for determining block-to-file mapping`
+   :Type:   :par:typefmt:`string`
+   :Default: :d:`"order_morton"`
+   :Scope:     :z:`Enzo`
+
+   :e:`This parameter defines the method used for ordering blocks. Currently,
+   the default "order_morton" is the only allowed value.`
+
+----
+
+.. par:parameter:: Method:check:include_ghosts
+
+   :Summary: :s:`Whether to include ghost zones in checkpoint files`
+   :Type:   :par:typefmt:`logical`
+   :Default: :d:`false`
+   :Scope:     :z:`Enzo`
+
+   :e:`This parameter specifies whether to include ghost zones when
+   writing field data to HDF5 files. While this should likely be left
+   as false to save disk storage (e.g. a factor of about 3.375 when`
+   16\ :sup:`3` :e:`blocks are used), earlier versions of Enzo-E always
+   included ghost zones, so if the original behavior is required this
+   should be set to true.`
+
+----
+
+.. par:parameter:: Method:check:monitor_iter
+
+   :Summary: :s:`How often to write progress updates`
+   :Type:   :par:typefmt:`integer`
+   :Default: :d:`0`
+   :Scope:     :z:`Enzo`
+
+   :e:`This is a debugging parameter, used to periodically write
+   progress updates to stdout. The value indicates how often
+   an update gets written, with 0 meaning no output, and k>0
+   meaning output every time k blocks get written. This can
+   produce a lot of output for large problems and k=1.`
+
