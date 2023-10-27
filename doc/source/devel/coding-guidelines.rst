@@ -210,7 +210,7 @@ We recommend some of the following coding practices:
          behavior of a base class by subclassing it.
        * Unfortunately, this practice easily/commonly produces code
          where the control flow is less explicit, which makes the code
-         harder to reason about.If the base class has a chain of
+         harder to reason about. If the base class has a chain of
          methods, where some can be selectively overwritten, there is
          a lot more to think about at any given time.
        * An alternative approach for code reuse in these circumstances
