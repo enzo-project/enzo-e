@@ -339,7 +339,7 @@ jobs:
           tag: tip
           skipfile: notafile
           useprecompiledheaders: true
-          usegrackle: << parameters.usegrackle >>
+          usegrackle: false
           setupCTests: false
 
       - run: echo "About to test compilation without precompiled headers"
