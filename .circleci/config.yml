@@ -125,6 +125,10 @@ commands:
       useprecompiledheaders:
         type: boolean
         default: true
+      setupCTests:
+        type: boolean
+        default: true
+        description: whether to build CTest machinery (has no effect on pytest framework)
     steps:
       - run:
           name: "Checkout target tag from enzo-e repository."
@@ -141,9 +145,6 @@ commands:
             source $BASH_ENV
             source $HOME/venv/bin/activate
 
-            # convert boolean parameter to an env var storing 0 or 1
-            USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
-            USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
             # remove build directory in case we've already compiled before
             rm -rf build
 
@@ -153,11 +154,11 @@ commands:
                     -DUSE_DOUBLE_PREC=<< parameters.usedouble >> \
                     -DUSE_GRACKLE=<< parameters.usegrackle >> \
                     -DUSE_PRECOMPILED_HEADERS=<< parameters.useprecompiledheaders >> \
+                    -DBUILD_TESTING=<< parameters.setupCTests >> \
                     -Bbuild \
                     -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" \
                     -DPython3_FIND_VIRTUALENV=ONLY
               cmake --build build -j 4
-              source $HOME/venv/bin/activate
             fi
 
   run-ctests:
@@ -293,6 +294,7 @@ jobs:
           tag: tip
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
+          setupCTests: true
 
       - when:
           condition:
@@ -336,8 +338,9 @@ jobs:
           usedouble: << parameters.usedouble >>
           tag: tip
           skipfile: notafile
-          usegrackle: false
           useprecompiledheaders: true
+          usegrackle: << parameters.usegrackle >>
+          setupCTests: false
 
       - run: echo "About to test compilation without precompiled headers"
 
@@ -348,8 +351,14 @@ jobs:
           usedouble: << parameters.usedouble >>
           tag: tip
           skipfile: notafile
-          usegrackle: false
           useprecompiledheaders: false
+          usegrackle: << parameters.usegrackle >>
+          setupCTests: false
+
+      - run-answer-tests:
+          usedouble: << parameters.usedouble >>
+          usegrackle: << parameters.usegrackle >>
+          generate: false
 
   docs-build:
     docker:

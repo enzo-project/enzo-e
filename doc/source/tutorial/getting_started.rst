@@ -284,7 +284,7 @@ These options control compilation choices that can be used to facillitate profil
 Testing Options
 ^^^^^^^^^^^^^^^
 
-These options configure properties of parallel automated tests.
+These options configure properties of automated tests. These options currently just affect tests in the :ref:`ctest framework <ctest>` and don't affect tests in the :ref:`pytest framework <pytest>`.
 
 .. list-table:: Testing-Related Configuration
    :widths: 10 30 5
@@ -302,6 +302,10 @@ These options configure properties of parallel automated tests.
    * - ``PARALLEL_LAUNCHER_NPROC``
      - Number of processors to run parallel unit tests
      - 4
+   * - ``BUILD_TESTING``
+     - Whether to setup the CTest infrastructure and build unit test binaries (which are primarily built to be executed by the CTest infrastructure). This has no effect on the pytest infrastructure.
+     - "ON"
+
 
 Debugging Options
 ^^^^^^^^^^^^^^^^^
