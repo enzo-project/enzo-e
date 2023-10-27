@@ -79,7 +79,7 @@ Naming classes
 
 Enzo-E classes all begin with ``Enzo``.
 
-Subclasses of the Cello-Hierarcy
+Subclasses of the Cello-Hierarchy
 --------------------------------
 
 For functionality to be executed within a simulation, that functionality must be executed by a subclass of a Cello class. For that reason, most classes in the Enzo-layer are subclasses of a Cello class.
