@@ -46,14 +46,14 @@ public: // functions
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-  /// Request by newly created EnzoBlock to get its MsgRefine object
-  virtual void p_get_msg_refine(Index index);
+  virtual void p_refine_create_block(MsgRefine*);
+  void refine_create_block(MsgRefine*);
 
-  virtual void p_get_msg_check(Index index);
   void set_msg_check (Index index, EnzoMsgCheck *);
-  EnzoMsgCheck * get_msg_check (Index index);
-#endif
+
+  /// Request by newly created EnzoBlock to get its MsgRefine object
+  MsgRefine * get_msg_refine(Index index);
+  EnzoMsgCheck * get_msg_check(Index index);
 
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
@@ -141,15 +141,12 @@ private: // attributes
   Sync sync_method_balance_;
   /// Current restart level
   int restart_level_;
-
   /// Turbulence state for checkpoint/restart
   /// (should be moved to a Simulation Scalar object)
   std::vector<double> turbou_real_state_;
   std::vector<int>    turbou_int_state_;
-
-#ifdef BYPASS_CHARM_MEM_LEAK
+  /// MsgCheck objects for newly created Blocks on this process
   std::map<Index,EnzoMsgCheck *> msg_check_map_;
-#endif
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

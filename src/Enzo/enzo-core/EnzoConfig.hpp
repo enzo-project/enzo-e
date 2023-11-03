@@ -259,6 +259,7 @@ public: // interface
       method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
+      method_check_include_ghosts(false),
       /// EnzoMethodFeedback
       method_feedback_ejecta_mass(0.0),
       method_feedback_ejecta_metal_fraction(0.0),
@@ -274,7 +275,6 @@ public: // interface
       method_feedback_supernovae(true),
       method_feedback_unrestricted_sn(true),
       method_feedback_stellar_winds(true),
-      method_feedback_radiation(true),
       method_feedback_min_level(0),
       method_feedback_analytic_SNR_shell_mass(true),
       method_feedback_fade_SNR(true),
@@ -288,7 +288,6 @@ public: // interface
       method_ppml_dt_weight(1.0),
       // EnzoMethodPpmlIg
       method_ppml_b0(),
-
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -793,6 +792,7 @@ public: // attributes
   std::string                method_check_ordering;
   std::vector<std::string>   method_check_dir;
   int                        method_check_monitor_iter;
+  bool                       method_check_include_ghosts;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;

@@ -14,6 +14,7 @@ void Refresh::add_field(std::string field_name)
   const int id_field = cello::field_descr()->field_id(field_name);
   add_field(id_field);
 }
+
 //----------------------------------------------------------------------
 
 void Refresh::add_field_src_dst(std::string field_src, std::string field_dst)
@@ -71,6 +72,13 @@ std::vector<int> Refresh::field_list_dst() const
   }
 }
 
+//----------------------------------------------------------------------
+
+void Refresh::add_particle(std::string particle_type)
+{
+  const int id_particle = cello::particle_descr()->type_index(particle_type);
+  add_field(id_particle);
+}
 //----------------------------------------------------------------------
 
 void Refresh::box_accumulate_adjust

@@ -35,8 +35,7 @@ public: // interface
     num_particles_(0), 
     num_zones_total_(0), 
     num_zones_real_(0), 
-    block_array_(),
-    block_exists_(false)
+    block_array_()
   {
     for (int axis=0; axis<3; axis++) {
       lower_[axis] = 0.0;
@@ -127,12 +126,6 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Return whether Blocks have been allocated or not
-  bool blocks_allocated() const throw()
-  { 
-    return block_exists_;
-  }
-
   /// Deallocate local Blocks
   void deallocate_blocks() throw();
 
@@ -204,9 +197,9 @@ public: // interface
 
   CProxy_Block new_block_proxy (bool allocate_data) throw();
 
-  void create_block_array (bool allocate_data) throw();
+  void create_block_array () throw();
 
-  void create_subblock_array (bool allocate_data) throw();
+  void create_subblock_array () throw();
 
   /// Return the number of root-level Blocks along each rank
   /// in the given level (default level is root)
@@ -253,7 +246,6 @@ protected: // attributes
   
   /// Array of Blocks 
   CProxy_Block block_array_;
-  bool           block_exists_;
 
   /// Lower extent of the hierarchy
   double lower_[3];

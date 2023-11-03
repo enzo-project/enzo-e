@@ -68,6 +68,12 @@ void Main::exit_()
 
   EnzoSimulation * simulation = enzo::simulation();
 
+  const int in = cello::index_static();
+  if (EnzoMsgCheck::counter[in] != 0) {
+    CkPrintf ("%d Main::exit_() EnzoMsgCheck::counter = %ld != 0\n",
+              CkMyPe(),EnzoMsgCheck::counter[in]);
+  }
+
   if (simulation) {
     enzo_finalize(simulation);
   }

@@ -806,7 +806,8 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_check_num_files,
        enzo_config->method_check_ordering,
        enzo_config->method_check_dir,
-       enzo_config->method_check_monitor_iter);
+       enzo_config->method_check_monitor_iter,
+       enzo_config->method_check_include_ghosts);
 
   } else if (name == "merge_sinks") {
 

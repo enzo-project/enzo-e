@@ -16,30 +16,30 @@ module simulation {
 
   group [migratable] Simulation {
 
-    entry Simulation (const char filename[n], int n); // [S0]
+    entry Simulation (const char filename[n], int n);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-    entry void p_get_msg_refine (Index);
-#endif
+    entry void p_refine_create_block (MsgRefine *);
 
-    entry void r_initialize_block_array (CkReductionMsg * msg);    // [SC2]
+    entry void r_initialize_block_array (CkReductionMsg * msg);
+    entry void r_initialize_root_blocks_created(CkReductionMsg * msg);
 
-    entry void s_write (); // [SC6]
-    entry void r_write (CkReductionMsg * msg); // [SC7]
+    entry void s_write ();
+    entry void r_write (CkReductionMsg * msg);
     entry void r_write_checkpoint_output ();
 
     entry void r_restart_start(CkReductionMsg *);
     entry void p_restart_enter(std::string dir);
 
-    entry void p_output_write (int n, char buffer[n]); // [SC8]
+    entry void p_output_write (int n, char buffer[n]);
     entry void r_output_barrier (CkReductionMsg * msg);
     entry void p_output_start (int index_output);
 
-    entry void r_monitor_performance_reduce (CkReductionMsg * msg); // [SC9]
+    entry void r_monitor_performance_reduce (CkReductionMsg * msg);
     entry void p_monitor_performance();
 
     entry void p_set_block_array (CProxy_Block block_array);
 
+    entry void p_initialize_state(MsgState *);
   };
 
   /// Initial mapping of array elements

@@ -91,19 +91,12 @@ public:
 
 public: // interface
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   /// Initialize the EnzoBlock chare array
-  
+
   EnzoBlock ( process_type ip_source, MsgType msg_type );
   /// Initialize EnzoBlock using MsgRefine returned by creating process
-  virtual void p_set_msg_refine(MsgRefine * msg);
-  virtual void p_set_msg_check(EnzoMsgCheck * msg);
-
-#else
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock ( MsgRefine * msg );
-  EnzoBlock ( EnzoMsgCheck * msg );
-#endif
+  void set_msg_refine(MsgRefine * msg);
+  void set_msg_check(EnzoMsgCheck * msg);
 
   /// Initialize an empty EnzoBlock
   EnzoBlock()
@@ -247,8 +240,8 @@ public: /// entry methods
   void p_restart_set_data(EnzoMsgCheck * );
 
   /// Refine to create the specified child in this block
-  void p_restart_refine (int ic3[3], int io_reader);
-  
+  void p_restart_refine (int ic3[3], int io_reader, int ip);
+
   /// Exit restart
   void p_restart_done();
 
@@ -373,7 +366,7 @@ public: /// entry methods
 
 protected: // methods
 
-  /// Create EnzoMsgCheck, returning file file index
+  /// Create EnzoMsgCheck, returning file index
   int create_msg_check_
   ( EnzoMsgCheck ** msg_check, int num_files, std::string ordering,
     std::string name_dir = "", bool * is_first = nullptr);

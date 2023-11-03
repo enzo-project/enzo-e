@@ -224,6 +224,8 @@ void Block::r_method_order_morton_complete(CkReductionMsg * msg)
 
 void MethodOrderMorton::compute_complete(Block * block)
 {
+  // Update Block's index and count
+  block->set_order(*pindex_(block),*pcount_(block));
   block->compute_done();
 }
 

@@ -169,10 +169,7 @@ module enzo {
 
     entry void r_startup_begun (CkReductionMsg *);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-    entry void p_get_msg_refine(Index index);
-    entry void p_get_msg_check(Index index);
-#endif
+    entry void p_refine_create_block (MsgRefine *);
 
     //EnzoMethodBalance
     entry void r_method_balance_count(CkReductionMsg * msg);
@@ -200,23 +197,17 @@ module enzo {
   //----------------------------------------------------------------------
   array[Index] EnzoBlock : Block {
 
-#ifdef BYPASS_CHARM_MEM_LEAK
     entry EnzoBlock (process_type ip_source, MsgType msg_type);
-    entry void p_set_msg_refine (MsgRefine    * msg);
-    entry void p_set_msg_check  (EnzoMsgCheck * msg);
-#else
-    entry EnzoBlock (MsgRefine    * msg);
-    entry EnzoBlock (EnzoMsgCheck * msg);
-#endif
+
     entry EnzoBlock();
- 
+
     // EnzoMethodFeedbackSTARSS synchronization entry methods
     entry void p_method_feedback_starss_end();
- 
+
     // EnzoMethodM1Closure synchronization entry methods
     entry void p_method_m1_closure_solve_transport_eqn();
-    entry void p_method_m1_closure_set_global_averages(CkReductionMsg *msg);  
- 
+    entry void p_method_m1_closure_set_global_averages(CkReductionMsg *msg);
+
     // EnzoMethodTurbulence synchronization entry methods
 
     entry void r_method_turbulence_end(CkReductionMsg *msg);
@@ -252,7 +243,7 @@ module enzo {
     entry void p_check_done();
 
     // restart
-    entry void p_restart_refine (int ic3[3], int io_reader);
+    entry void p_restart_refine (int ic3[3], int io_reader, int ip);
     entry void p_restart_set_data(EnzoMsgCheck *);
     entry void p_restart_done();
 
@@ -327,7 +318,8 @@ module enzo {
 
   array[1D] IoEnzoWriter : IoWriter {
     entry IoEnzoWriter();
-    entry IoEnzoWriter (int num_files, std::string ordering, int monitor_iter);
+    entry IoEnzoWriter (int num_files, std::string ordering,
+                        int monitor_iter, int include_ghosts);
     entry void p_write(EnzoMsgCheck * );
   };
 
