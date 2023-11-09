@@ -19,7 +19,7 @@ OutputData::OutputData
  int index,
  const Factory * factory,
  Config * config
-) throw ()
+ ) throw ()
   : Output(index,factory),
     text_block_count_(0)
 {
@@ -67,11 +67,11 @@ void OutputData::pup (PUP::er &p)
 void OutputData::open () throw()
 {
 #ifdef TRACE_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT OutputData::open()\n",CkMyPe());
+  CkPrintf ("%d TRACE_OUTPUT OutputData::open()\n",CkMyPe());
 #endif
-    std::string file_name = expand_name_(&file_name_,&file_args_);
+  std::string file_name = expand_name_(&file_name_,&file_args_);
 
-    std::string dir = directory();
+  std::string dir = directory();
 
   Monitor::instance()->print
     ("Output","writing data file %s",
@@ -87,7 +87,7 @@ void OutputData::open () throw()
 void OutputData::close () throw()
 {
 #ifdef TRACE_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT OutputData::close()\n",CkMyPe());
+  CkPrintf ("%d TRACE_OUTPUT OutputData::close()\n",CkMyPe());
 #endif
   if (file_) file_->file_close();
   delete file_;  file_ = 0;
@@ -98,7 +98,7 @@ void OutputData::close () throw()
 void OutputData::finalize () throw ()
 {
 #ifdef TRACE_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT OutputData::finalize()\n",CkMyPe());
+  CkPrintf ("%d TRACE_OUTPUT OutputData::finalize()\n",CkMyPe());
 #endif
   Output::finalize();
 }
@@ -126,7 +126,7 @@ void OutputData::write_hierarchy ( const Hierarchy  * hierarchy ) throw()
 void OutputData::write_block ( const  Block * block ) throw()
 {
 #ifdef TRACE_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT OutputData::write_block()\n",CkMyPe());
+  CkPrintf ("%d TRACE_OUTPUT OutputData::write_block()\n",CkMyPe());
 #endif
 
   char file[256];
@@ -221,8 +221,8 @@ void OutputData::write_block ( const  Block * block ) throw()
 
 void OutputData::write_field_data
 (
-  const FieldData * field_data,
-  int index_field) throw()
+ const FieldData * field_data,
+ int index_field) throw()
 {
   io_field_data()->set_field_data((FieldData*)field_data);
   io_field_data()->set_field_index(index_field);
@@ -275,62 +275,56 @@ void OutputData::write_particle_data
   const int nb = particle.num_batches(it);
   const int na = particle.num_attributes(it);
 
-  if (nb > 0) {
+  // For each particle attribute
+  for (int ia=0; ia<na; ia++) {
 
-    // For each particle attribute
-    for (int ia=0; ia<na; ia++) {
+    int np = particle.num_particles (it);
 
-      int np = particle.num_particles (it);
+    const std::string name = "particle_"
+      +                particle.type_name(it) + "_"
+      +                particle.attribute_name(it,ia);
 
-      if (np > 0) {
+    const int type = particle.attribute_type(it,ia);
 
-        const std::string name = "particle_"
-        +                particle.type_name(it) + "_"
-        +                particle.attribute_name(it,ia);
+    // create the disk array
+    file_->data_create(name.c_str(),type,np,1,1,1,np,1,1,1);
 
-      const int type = particle.attribute_type(it,ia);
+    int i0 = 0;
 
-      // create the disk array
-      file_->data_create(name.c_str(),type,np,1,1,1,np,1,1,1);
+    // for each batch of particles
 
-      int i0 = 0;
+    for (int ib=0; ib<nb; ib++) {
 
-      // for each batch of particles
+      int mb = particle.num_particles(it,ib);
 
-      for (int ib=0; ib<nb; ib++) {
+      // create the memory space for the batch
+      file_->mem_create(mb,1,1,mb,1,1,0,0,0);
 
-        int mb = particle.num_particles(it,ib);
+      const void * buffer = (const void *) particle.attribute_array(it,ia,ib);
 
-        // create the memory space for the batch
-        file_->mem_create(mb,1,1,mb,1,1,0,0,0);
+      // find the hyper_slab of the disk dataset
+      file_->data_slice
+        (np, 1, 1, 1,
+         mb, 1, 1, 1,
+         i0, 0, 0, 0);
 
-        const void * buffer = (const void *) particle.attribute_array(it,ia,ib);
+      i0 += mb;
 
-        // find the hyper_slab of the disk dataset
-        file_->data_slice
-          (np, 1, 1, 1,
-           mb, 1, 1, 1,
-           i0, 0, 0, 0);
+      // write the batch to disk
+      file_->data_write(buffer);
 
-        i0 += mb;
-
-        // write the batch to disk
-        file_->data_write(buffer);
-
-        file_->mem_close();
-      }
-
-      // check that the number of particles equals the number written
-
-      ASSERT2 ("OutputData::write_particle_data()",
-               "Particle count mismatch %d particles %d written",
-               np,i0,
-               np == i0);
-
-      // close the attribute dataset
-      file_->data_close();
-      }
+      file_->mem_close();
     }
+
+    // check that the number of particles equals the number written
+
+    ASSERT2 ("OutputData::write_particle_data()",
+             "Particle count mismatch %d particles %d written",
+             np,i0,
+             np == i0);
+
+    // close the attribute dataset
+    file_->data_close();
   }
 }
 
