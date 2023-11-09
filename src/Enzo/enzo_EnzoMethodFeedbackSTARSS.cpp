@@ -1024,7 +1024,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   double pTerminal;
   if (Z_Zsun > 0.01) {
-    // Thornton, 1998, sqrt(2 * M_R * E_R), eqs 22, 23, 33, 34
+    // Thornton, 1998, sqrt(2 * M_R * E_R), eqs 15, 21, 26, 32
     pTerminal = 2.7298e5 * pow(ejectaEnergy/1e51, 13./14.) * pow(n_mean, -0.12) * pow(Z_Zsun, -0.14); // Msun km/s
   }
 
