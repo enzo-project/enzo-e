@@ -395,12 +395,12 @@ jobs:
           tag: tip
           skipfile: notafile
           useprecompiledheaders: false
-          usegrackle: << parameters.usegrackle >>
+          usegrackle: true
           setupCTests: false
 
       - run-answer-tests:
           usedouble: << parameters.usedouble >>
-          usegrackle: << parameters.usegrackle >>
+          usegrackle: true
           generate: false
 
   docs-build:
