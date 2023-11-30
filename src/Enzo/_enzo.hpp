@@ -307,9 +307,4 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "mesh/EnzoProlongPoisson.hpp"
 #include "mesh/EnzoRestrict.hpp"
 
-#include "enzo_Index3.hpp"
-#include "enzo_EnzoLevelArray.hpp"
-#include "enzo_EnzoMethodInference.hpp"
-
-
 #endif /* ENZO_PRIVATE_HPP */

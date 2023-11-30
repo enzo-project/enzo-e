@@ -654,17 +654,6 @@ Method * EnzoProblem::create_method_
 
 #endif /* CONFIG_USE_GRACKLE */
 
-  } else if (name == "inference") {
-
-    method = new EnzoMethodInference
-      (enzo_config->method_inference_level_base,
-       enzo_config->method_inference_level_array,
-       enzo_config->method_inference_level_infer,
-       enzo_config->method_inference_array_dims,
-       enzo_config->method_inference_array_size,
-       enzo_config->method_inference_field_group,
-       enzo_config->method_inference_overdensity_threshold);
-
   } else if (name == "balance") {
 
     method = new EnzoMethodBalance;
