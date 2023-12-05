@@ -75,20 +75,19 @@ target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 # add files in enzo-core to enzo target (and define a unit test)
 add_subdirectory(enzo-core)
 
-# add files in hydro-mhd to enzo target and define the riemann library
-add_subdirectory(hydro-mhd)
-
 # add source files from other subdirectories to the enzo target
 add_subdirectory(assorted)
 add_subdirectory(chemistry)
 add_subdirectory(cosmology)
 add_subdirectory(fluid-props)
 add_subdirectory(gravity)
+add_subdirectory(hydro-mhd)
 add_subdirectory(initial)
 add_subdirectory(io)
 add_subdirectory(mesh)
 add_subdirectory(obsolete)
 add_subdirectory(particle)
+add_subdirectory(turbulence)
 add_subdirectory(utils)
 
 # note that the tests subdirectory introduces problem initializers that can

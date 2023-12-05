@@ -2109,8 +2109,6 @@ void EnzoConfig::read_method_turbulence_(Parameters * p)
     ("Method:turbulence:edot",-1.0);
   method_turbulence_mach_number = mach = p->value_float
     ("Method:turbulence:mach_number",mach);
-  initial_turbulence_density = p->value_float 
-    ("Initial:turbulence_mhd_it:density",1.0);
 
   // MHD Turbulence method and initialization
 
