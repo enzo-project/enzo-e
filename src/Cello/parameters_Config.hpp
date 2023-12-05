@@ -79,6 +79,8 @@ public: // interface
     num_method(0),
     method_courant_global(1.0),
     method_list(),
+    method_dt_ratio_min(),
+    method_dt_ratio_max(),
     method_schedule_index(),
     method_file_name(),
     method_path_name(),
@@ -190,7 +192,8 @@ public: // interface
     units_time(1.0),
     testing_cycle_final(0),
     testing_time_final(),
-    testing_time_tolerance(0.0)
+    testing_time_tolerance(0.0),
+    timestep_adapt_type()
   { }
 
   /// CHARM++ PUP::able declaration
@@ -256,6 +259,8 @@ public: // interface
       num_method(0),
       method_courant_global(1.0),
       method_list(),
+      method_dt_ratio_min(),
+      method_dt_ratio_max(),
       method_schedule_index(),
       method_file_name(),
       method_path_name(),
@@ -354,8 +359,8 @@ public: // interface
       solver_prolong(),
       solver_min_level(),
       solver_max_level(),
-    solver_field_x(),
-    solver_field_b(),
+      solver_field_x(),
+      solver_field_b(),
       stopping_cycle(0),
       stopping_time(0.0),
       stopping_seconds(0.0),
@@ -367,7 +372,8 @@ public: // interface
       units_time(1.0),
       testing_cycle_final(0),
       testing_time_final(),
-      testing_time_tolerance(0.0)
+      testing_time_tolerance(0.0),
+      timestep_adapt_type()
   {
     for (int axis=0; axis<3; axis++) {
       domain_lower[axis] = 0.0;
@@ -482,6 +488,8 @@ public: // attributes
   int                        num_method;
   double                     method_courant_global;
   std::vector<std::string>   method_list;
+  std::vector<double>        method_dt_ratio_min;
+  std::vector<double>        method_dt_ratio_max;
 
   std::vector<int>           method_schedule_index;
 
@@ -635,6 +643,8 @@ public: // attributes
   std::vector<double>        testing_time_final;
   double                     testing_time_tolerance;
 
+  std::vector<std::string>   timestep_adapt_type;
+
 protected: // functions
 
   void read_adapt_       ( Parameters * ) throw();
@@ -654,6 +664,7 @@ protected: // functions
   void read_solver_      ( Parameters * ) throw();
   void read_stopping_    ( Parameters * ) throw();
   void read_testing_     ( Parameters * ) throw();
+  void read_timestep_    ( Parameters * ) throw();
   void read_units_       ( Parameters * ) throw();
 
   int read_schedule_( Parameters * ,

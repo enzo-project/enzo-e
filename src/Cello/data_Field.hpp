@@ -197,7 +197,11 @@ public: // interface
   /// back older generations up to num_history()
   void save_history (double time)
   { field_data_->save_history(field_descr_,time); }
-  
+
+  /// Initialize "current" fields to given time
+  void init_history_time (double time)
+  { field_data_->init_history_time(field_descr_,time); }
+
   /// Return time for given history
   double history_time (int ih) const
   { return field_data_->history_time (field_descr_,ih); }
@@ -254,6 +258,14 @@ public: // interface
 
   const char * values (std::string name, int index_history=0) const throw ()
   { return field_data_->values(field_descr_,name,index_history); }
+
+  std::shared_ptr<char[]> values (int id_field, double time)
+  {
+    return field_data_->values(field_descr_,id_field,time); }
+  
+  std::shared_ptr<char[]> values (std::string name, double time)
+  {
+    return field_data_->values(field_descr_,name,time); }
 
   /// Return a CelloView that acts as a view of the corresponding field
   ///

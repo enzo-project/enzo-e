@@ -93,7 +93,6 @@ Initial * EnzoProblem::create_initial_
   const EnzoConfig * enzo_config = enzo::config();
 
   if (type == "hdf5") {
-
     initial = new EnzoInitialHdf5
       (cycle,time,
        enzo_config->initial_hdf5_max_level,

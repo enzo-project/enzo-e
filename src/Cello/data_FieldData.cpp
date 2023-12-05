@@ -179,6 +179,52 @@ char * FieldData::values
 
 //----------------------------------------------------------------------
 
+std::shared_ptr<char[]> FieldData::values (const FieldDescr * field_descr,
+                                           int id_field, double time)
+{
+  const int nh = history_time_.size();
+  ASSERT2("FieldData::values(field_descr,id_field,time)",
+          "Cannot interpolate: no field history available for time %g (available time %g)",
+          time,nh>0?history_time_[0]:-1,
+          nh>0 && ((time == history_time_[0]) || (nh > 1)));
+  for (int ih=0; ih<nh; ih++) {
+    if (time==history_time_[ih]) {
+      // field at given time? return (but don't delete!)
+      std::shared_ptr<char[]> ptr(values(field_descr,id_field,ih),
+                                  [](auto p){ /* no-op deleter */ });
+      return ptr;
+    } else if (time < history_time_[ih]) {
+      // field between time[ih-1] < time < time[ih]?
+      int mx,my,mz;
+      std::shared_ptr<char[]> ptr
+        (new char[field_size(field_descr,id_field,&mx,&my,&mz)]);
+      cello_float * v = (cello_float *)&ptr[0];
+      int i0=std::max(0,ih-1);
+      int i1=std::max(1,ih);
+      cello_float * v0 = (cello_float * )values(field_descr,id_field,i0);
+      cello_float * v1 = (cello_float * )values(field_descr,id_field,i1);
+      cello_float a0 = (time              - history_time_[i1])
+        /              (history_time_[i0] - history_time_[i1]); 
+      cello_float a1 = (history_time_[i0] - time)
+        /              (history_time_[i1] - history_time_[i0]); 
+      CkPrintf ("Interpolate time %g using time %g and %g using %g v0 + %g v1\n",
+                time,history_time_[i0],history_time_[i1],
+                a0,a1);
+      for (int iz=0; iz<mz; iz++) {
+        for (int iy=0; iy<my; iy++) {
+          for (int ix=0; ix<mx; ix++) {
+            int i = ix+mx*(iy+my*iz);
+            v[i] = a0*v0[i] + a1*v1[i];
+          }
+        }
+      }
+      return ptr;
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 const char * FieldData::coarse_values
 ( const FieldDescr * field_descr,
   int id_field, int index_history ) const throw ()
@@ -894,15 +940,7 @@ void FieldData::scale_
 
 void FieldData::save_history (const FieldDescr * field_descr, double time)
 {
-  // Cycle temporary field id's, and copy permanent to history_id_[0]
-
-  // if history_ == 3,
-  //
-  // save history_id_[2]
-  // history_id_[2] = history_id_[1];
-  // history_id_[1] = history_id_[0];
-  // history_id_[0] = history_id_[2];
-  // copy history_id_[0] = permanent
+ // Cycle temporary field id's, and copy permanent to history_id_[0]
 
   const int np = field_descr->num_permanent();
   const int nh = field_descr->num_history();
@@ -1405,8 +1443,8 @@ template CelloView<double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
+
 template CelloView<long double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
-

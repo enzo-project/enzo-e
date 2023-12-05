@@ -114,6 +114,8 @@ void Config::pup (PUP::er &p)
   p | num_method;
   p | method_courant_global;
   p | method_list;
+  p | method_dt_ratio_min;
+  p | method_dt_ratio_max;
   p | method_schedule_index;
   p | method_file_name;
   p | method_path_name;
@@ -251,6 +253,9 @@ void Config::pup (PUP::er &p)
   p | testing_time_final;
   p | testing_time_tolerance;
 
+  // Timestep
+  p | timestep_adapt_type;
+
 }
 
 //----------------------------------------------------------------------
@@ -275,6 +280,7 @@ void Config::read(Parameters * p) throw()
   read_physics_(p);
   read_stopping_(p);
   read_testing_(p);
+  read_timestep_(p);
   read_units_(p);
 
   TRACE("END   Config::read()");
@@ -793,6 +799,8 @@ void Config::read_method_ (Parameters * p) throw()
   num_method = p->list_length("Method:list");
 
   method_list.   resize(num_method);
+  method_dt_ratio_min.resize(num_method);
+  method_dt_ratio_max.resize(num_method);
   method_courant.resize(num_method);
   method_file_name.resize(num_method);
   method_path_name.resize(num_method);
@@ -833,9 +841,17 @@ void Config::read_method_ (Parameters * p) throw()
 
     method_list[index_method] = name;
 
+    // Read minimum and maximum allowed time step ratios for
+    // super- or sub-cycling.
+
+    method_dt_ratio_min[index_method] = p->value_float
+      (full_name+":dt_ratio_min", 1.0);
+    method_dt_ratio_max[index_method] = p->value_float
+      (full_name+":dt_ratio_max", 1.0);
+
     // Read schedule for the Method object if any
-      
-    const bool method_scheduled = 
+
+    const bool method_scheduled =
       (p->type(full_name + ":schedule:var") != parameter_unknown);
 
     if (method_scheduled) {
@@ -1641,6 +1657,40 @@ void Config::read_testing_ (Parameters * p) throw()
     testing_time_final[0]  = p->value_float  ("Testing:time_final", 0.0);
   }
   testing_time_tolerance = p->value_float  ("Testing:time_tolerance", 1e-6);
+}
+
+//======================================================================
+
+void Config::read_timestep_ (Parameters * p) throw()
+{
+  const std::string parameter = "Timestep:adapt_type";
+
+  if (p->type(parameter) == parameter_list) {
+    const int length = p->list_length(parameter);
+    for (int i=0; i<length; i++) {
+      if (p->list_type(i,parameter) == parameter_string) {
+        const std::string value = p->list_value_string (i,parameter,"default");
+        if (value == "method" || value == "block" || value == "none")
+          timestep_adapt_type.push_back(value);
+        else
+          ERROR2("Config::read_timestep_",
+                 "Timestep : adapt_type[%d] = %s; "
+                 "allowed values are a string or list of \"none\", "
+                 "\"method\", or \"block\" ",
+                 i,value.c_str());
+      } else {
+        ERROR("Config::read_timestep_",
+              "Timestep : adapt_type must be a string or list of strings");
+      }
+    }
+  } else if (p->type(parameter) == parameter_string) {
+    const std::string value = p->value_string (parameter,"default");
+    if (value == "method" || value == "block" || value == "none")
+      timestep_adapt_type.push_back(value);
+  } else if (p->type(parameter) != parameter_unknown){
+    ERROR("Config::read_timestep_",
+          "Timestep : adapt_type must be a string or list of strings");
+  }
 }
 
 //======================================================================

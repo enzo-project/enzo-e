@@ -61,8 +61,8 @@ void EnzoFactory::create_block_array
 
   int count_adapt;
 
-  int    cycle = 0;
-  double time  = 0.0;
+  int    cycle = enzo::simulation()->cycle();
+  double time  = enzo::simulation()->time();
   double dt    = 0.0;
   int num_face_level = 0;
   int * face_level = 0;
@@ -144,8 +144,8 @@ void EnzoFactory::create_subblock_array
 
     int count_adapt;
 
-    int    cycle = 0;
-    double time  = 0.0;
+    int    cycle = enzo::simulation()->cycle();
+    double time  = enzo::simulation()->time();
     double dt    = 0.0;
     int num_face_level = 0;
     int * face_level = 0;

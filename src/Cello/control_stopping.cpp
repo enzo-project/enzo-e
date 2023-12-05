@@ -23,7 +23,7 @@
 
 // #define DEBUG_STOPPING
 
-#define TRACE_DT
+// #define TRACE_DT
 
 #ifdef DEBUG_STOPPING
 #   define TRACE_STOPPING(A)					\
@@ -119,8 +119,8 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
     if (index().is_root() && dt_method[k] < std::numeric_limits<double>::max()) {
       CkPrintf ("TRACE_DT method %d %s %g\n",
                 k,problem->method(k)->name().c_str(),dt_method[k]);
-#endif
     }
+#endif
   }
 
   delete msg;
