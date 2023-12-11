@@ -449,7 +449,7 @@ FieldMsg * EnzoSolverDd::pack_field_(EnzoBlock * enzo_block,
   refresh->add_field(index_field);
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, g3, refresh_type, refresh, true);
+    (if3, ic3, g3, refresh_type, refresh);
 
   if (refresh_type == refresh_fine) {
     refresh->set_prolong(index_prolong_);
@@ -499,7 +499,7 @@ void EnzoSolverDd::unpack_field_
   int * ic3 = msg->ic3;
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, g3, refresh_type, refresh, true);
+    (if3, ic3, g3, refresh_type, refresh);
 
   if (refresh_type == refresh_fine) {
     refresh->set_prolong(index_prolong_);

@@ -56,14 +56,8 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   int size = 0;
 
-  size += sizeof(int); // id_refresh
-  size += sizeof(int);  // have_data
-  int have_data = (msg->data_msg_ != nullptr);
-
-  if (have_data) {
-    // data_msg_
-    size += msg->data_msg_->data_size();
-  }
+  SIZE_SCALAR_TYPE(size,int,msg->id_refresh_);
+  SIZE_OBJECT_PTR_TYPE(size,DataMsg,msg->data_msg_);
 
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
@@ -75,20 +69,10 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   //  3. serialize message data into buffer 
   //--------------------------------------------------
 
-  union {
-    char * pc;
-    int  * pi;
-  };
+  char * pc = buffer;
 
-  pc = buffer;
-
-  (*pi++) = msg->id_refresh_;
-
-  have_data = (msg->data_msg_ != nullptr);
-  (*pi++) = have_data;
-  if (have_data) {
-    pc = msg->data_msg_->save_data(pc);
-  }
+  SAVE_SCALAR_TYPE(pc,int,msg->id_refresh_);
+  SAVE_OBJECT_PTR_TYPE(pc,DataMsg,msg->data_msg_);
 
   delete msg;
 
@@ -108,33 +92,21 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 {
 
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
- 
+
   MsgRefresh * msg = 
     (MsgRefresh *) CkAllocBuffer (buffer,sizeof(MsgRefresh));
 
   msg = new ((void*)msg) MsgRefresh;
-  
+
   msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
 
-  union {
-    char * pc;
-    int  * pi;
-  };
+  char * pc = (char *) buffer;
 
-  pc = (char *) buffer;
-
-  msg->id_refresh_ = (*pi++) ;
-
-  int have_data = (*pi++);
-  if (have_data) {
-    msg->data_msg_ = new DataMsg;
-    pc = msg->data_msg_->load_data(pc);
-  } else {
-    msg->data_msg_ = nullptr;
-  }
+  LOAD_SCALAR_TYPE(pc,int,msg->id_refresh_);
+  LOAD_OBJECT_PTR_TYPE(pc,DataMsg,msg->data_msg_);
 
   // 3. Save the input buffer for freeing later
 

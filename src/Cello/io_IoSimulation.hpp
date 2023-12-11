@@ -49,9 +49,16 @@ public: // interface
 
   /// Return the ith metadata item associated with the object
   virtual void meta_value 
-  (int index, 
+  (int index,
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
+
+  void get_state (double & time, double & dt, int & cycle)
+  {
+    time = time_;
+    dt = dt_;
+    cycle = cycle_;
+  }
 
   /// Copy the values to the object
   virtual void save_to (void *); 
