@@ -148,7 +148,7 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   // Adapt class
   SAVE_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_child_);
 
-  ASSERT2("MsgRefresh::pack()",
+  ASSERT2("MsgCoarsen::pack()",
 	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);

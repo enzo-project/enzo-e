@@ -20,6 +20,8 @@ IoBlock::IoBlock() throw ()
   meta_name_.push_back("time");
   meta_name_.push_back("dt");
   meta_name_.push_back("array");
+  meta_name_.push_back("index_order");
+  meta_name_.push_back("count_order");
 }
 
 //----------------------------------------------------------------------
@@ -37,6 +39,7 @@ void IoBlock::set_block (Block * block) throw()
   time_  = block->time_;
   dt_    = block->dt_;
   for (i=0; i<3; i++) array_[i] = block->array_[i];
+  block->get_order(&index_order_, &count_order_);
 }
 
 //----------------------------------------------------------------------
@@ -78,6 +81,12 @@ void IoBlock::meta_value
     *buffer = (void *) & array_;
     *type   = type_int;
     *nxd    = 3;
+  } else if (index == count++) {
+    *buffer = (void *) & index_order_;
+    *type   = type_long_long;
+  } else if (index == count++) {
+    *buffer = (void *) & count_order_;
+    *type   = type_long_long;
   }
 }
 //======================================================================
@@ -96,6 +105,8 @@ int IoBlock::data_size () const
   SIZE_SCALAR_TYPE(size,double, time_);
   SIZE_SCALAR_TYPE(size,double, dt_);
   SIZE_ARRAY_TYPE(size,int,array_,3);
+  SIZE_SCALAR_TYPE(size,long long, index_order_);
+  SIZE_SCALAR_TYPE(size,long long, count_order_);
 
   return size;
 }
@@ -116,6 +127,8 @@ char * IoBlock::save_data (char * buffer) const
   SAVE_SCALAR_TYPE(pc,double, time_);
   SAVE_SCALAR_TYPE(pc,double, dt_);
   SAVE_ARRAY_TYPE(pc,int,array_,3);
+  SAVE_SCALAR_TYPE(pc,long long, index_order_);
+  SAVE_SCALAR_TYPE(pc,long long, count_order_);
 
   ASSERT2 ("IoBlock::save_data()",
   	   "Expecting buffer size %d actual size %d",
@@ -142,6 +155,8 @@ char * IoBlock::load_data (char * buffer)
   LOAD_SCALAR_TYPE(pc,double, time_);
   LOAD_SCALAR_TYPE(pc,double, dt_);
   LOAD_ARRAY_TYPE(pc,int,array_,3);
+  LOAD_SCALAR_TYPE(pc,long long, index_order_);
+  LOAD_SCALAR_TYPE(pc,long long, count_order_);
 
   return pc;
 }
@@ -162,5 +177,6 @@ void IoBlock::save_to (void * v)
   b->cycle_ = cycle_;
   b->time_  = time_;
   b->dt_    = dt_;
+  b->set_order(index_order_, count_order_);
 }
 

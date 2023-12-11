@@ -9,7 +9,6 @@
 
 #include "charm_enzo.hpp"
 
-// #define DEBUG_FACTORY
 // #define TRACE_FACTORY
 
 //----------------------------------------------------------------------
@@ -39,14 +38,7 @@ CProxy_Block EnzoFactory::new_block_proxy
 {
   CProxy_EnzoBlock enzo_block_array;
 
-  //  CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
-  CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
-
-
-  CkArrayOptions opts;
-  opts.setMap(array_map);
-
-  enzo_block_array = CProxy_EnzoBlock::ckNew(opts);
+  enzo_block_array = CProxy_EnzoBlock::ckNew();
 
   return enzo_block_array;
   
@@ -78,32 +70,37 @@ void EnzoFactory::create_block_array
 #ifdef TRACE_FACTORY
   CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
 #endif
+
+  int nax,nay,naz;
+  cello::hierarchy()->root_blocks(&nax,&nay,&naz);
+
   for (int ix=0; ix<nbx; ix++) {
     for (int iy=0; iy<nby; iy++) {
       for (int iz=0; iz<nbz; iz++) {
 
-	Index index(ix,iy,iz);
+        const int ip = ((long long) CkNumPes()) *
+          (ix + nax*(iy + nay*iz)) / (nax*nay*naz);
 
-	MsgRefine * msg = new MsgRefine 
-	  (index,
-	   nx,ny,nz,
-	   num_field_blocks,
-	   count_adapt = 0,
-	   cycle,time,dt,
-	   refresh_same,
-	   num_face_level, face_level,
-           nullptr);
+        if (ip == CkMyPe()) {
 
-	msg->set_data_msg(data_msg);
+          Index index(ix,iy,iz);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-	enzo::simulation()->set_msg_refine (index,msg);
-	enzo_block_array[index].insert (process_type(CkMyPe()), MsgType::msg_refine);
-#else
-	enzo_block_array[index].insert (msg);
-#endif
-	// --------------------------------------------------
+          MsgRefine * msg = new MsgRefine 
+            (index,
+             nx,ny,nz,
+             num_field_blocks,
+             count_adapt = 0,
+             cycle,time,dt,
+             refresh_same,
+             num_face_level, face_level,
+             nullptr);
 
+          msg->set_data_msg(data_msg);
+
+          // Use MappingArray initial mapping
+          //  proxy_enzo_simulation[ip].p_refine_create_block (msg);
+          enzo::simulation()->refine_create_block(msg);
+        }
       }
     }
   }
@@ -136,6 +133,9 @@ void EnzoFactory::create_subblock_array
 
   CProxy_EnzoBlock enzo_block_array = enzo::block_array();
 
+  int nax,nay,naz;
+  cello::hierarchy()->root_blocks(&nax,&nay,&naz);
+
   for (int level = -1; level >= min_level; level--) {
 
     if (nbx > 1) nbx = ceil(0.5*nbx);
@@ -155,42 +155,39 @@ void EnzoFactory::create_subblock_array
 #endif
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
-	for (int iz=0; iz<nbz; iz++) {
+        for (int iz=0; iz<nbz; iz++) {
 
-	  int shift = -level;
+          const int ip = ((long long) CkNumPes()) *
+            (ix + nax*(iy + nay*iz)) / (nax*nay*naz);
+
+          if (ip == CkMyPe()) {
+
+            int shift = -level;
  
-	  Index index(ix<<shift,iy<<shift,iz<<shift);
+            Index index(ix<<shift,iy<<shift,iz<<shift);
 
-	  index.set_level(level);
+            index.set_level(level);
 
-	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
+            TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-	  MsgRefine * msg = new MsgRefine 
-	    (index,
-	     nx,ny,nz,
-	     num_field_blocks,
-	     count_adapt=0,
-	     cycle,time,dt,
-	     refresh_same,
-	     num_face_level, face_level,
-             nullptr);
+            MsgRefine * msg = new MsgRefine 
+              (index,
+               nx,ny,nz,
+               num_field_blocks,
+               count_adapt=0,
+               cycle,time,dt,
+               refresh_same,
+               num_face_level, face_level,
+               nullptr);
 
-	  msg->set_data_msg(data_msg);
+            msg->set_data_msg(data_msg);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-	  enzo::simulation()->set_msg_refine (index,msg);
-	  enzo_block_array[index].insert (process_type(CkMyPe()), MsgType::msg_refine);
-#else
-	  enzo_block_array[index].insert (msg);
-#endif
-	  // --------------------------------------------------
-
-	}
+            enzo::simulation()->refine_create_block (msg);
+          }
+        }
       }
     }
-
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -209,8 +206,8 @@ void EnzoFactory::create_block
  int * face_level,
  Adapt * adapt,
  Simulation * simulation,
- int io_reader
- ) const throw()
+ int io_reader,
+ int ip) const throw()
 {
 #ifdef TRACE_FACTORY
   CkPrintf ("TRACE_FACTORY create_block %d %d %d\n");
@@ -225,14 +222,6 @@ void EnzoFactory::create_block
 
   const int rank = cello::rank();
 
-#ifdef DEBUG_FACTORY
-  CkPrintf ("EnzoFactory::create_block: ");
-  for (int i=0; i<num_face_level; i++) {
-    CkPrintf ("%d ",face_level[i]);
-  }
-  CkPrintf ("\n");
-#endif
-
    MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,
@@ -245,40 +234,9 @@ void EnzoFactory::create_block
      io_reader);
 
   msg->set_data_msg(data_msg);
+  
+  if (ip == -1) ip = CkMyPe();
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-  enzo::simulation()->set_msg_refine (index,msg);
-  enzo_block_array[index].insert ( process_type(CkMyPe()), MsgType::msg_refine );
-#else
-  enzo_block_array[index].insert (msg);
-#endif
-}
-
-// //----------------------------------------------------------------------
-
-void EnzoFactory::create_block_check
-(
- EnzoMsgCheck * msg_check,
- CProxy_Block block_array,
- Index index
- ) const throw()
-{
-#ifdef TRACE_FACTORY
-  CkPrintf ("TRACE_FACTORY create_block %d %d %d\n");
-  index.print("TRACE_FACTORY create_block",2);
-#endif  
-
-  TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
-  TRACE2("EnzoFactory::create_block() num_field_blocks %d  count_adapt %d",
-	 num_field_blocks,count_adapt);
-
-  CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock) block_array;
-
-#ifdef BYPASS_CHARM_MEM_LEAK
-  enzo::simulation()->set_msg_check (index,msg_check);
-  enzo_block_array[index].insert ( process_type(CkMyPe()), MsgType::msg_check );
-#else
-  enzo_block_array[index].insert (msg_check);
-#endif
+  proxy_enzo_simulation[ip].p_refine_create_block (msg);
 }
 

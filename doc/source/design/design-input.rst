@@ -236,7 +236,6 @@ same number of files as (physical) nodes in the simulation.
 Data files are named ``block_data-`` `x` ``.h5``, where 0 <= x <
 ``num_files``. The format of data files is given in the next section.
 
-
 Each data file has an associated `block-list` text file named
 ``block_data-`` `x` ``.block_list``. The block-list file contains a
 list of all block names in the associated data file, together with each

@@ -124,10 +124,10 @@ void EnzoIntegrationQuanUpdate::accumulate_flux_component
 
       // define:  fl(k,j,i)        -> flux(k, j, i+1/2)
       //          fr(k,j,i)        -> flux(k, j, i+3/2)
-      const CelloArray<const enzo_float,3> flux = flux_map.get(key,stale_depth);
-      const CelloArray<const enzo_float,3> fl
+      const CelloView<const enzo_float,3> flux = flux_map.get(key,stale_depth);
+      const CelloView<const enzo_float,3> fl
         = coord.get_subarray(flux, full_ax, full_ax, CSlice(0, -1));
-      const CelloArray<const enzo_float,3> fr
+      const CelloView<const enzo_float,3> fr
         = coord.get_subarray(flux, full_ax, full_ax, CSlice(1, nullptr));
 
       for (int iz=0; iz<dU_center.shape(0); iz++) {
@@ -162,13 +162,13 @@ EnzoIntegrationQuanUpdate::load_integration_quan_(EnzoEFltArrayMap &map,
 
 //----------------------------------------------------------------------
 
-const std::vector<CelloArray<const enzo_float, 3>>
+const std::vector<CelloView<const enzo_float, 3>>
 EnzoIntegrationQuanUpdate::load_integration_quan_(const EnzoEFltArrayMap &map,
                                                   int stale_depth)
   const noexcept
 {
   std::size_t nfields = integration_keys_.size();
-  std::vector<CelloArray<const enzo_float, 3>> out;
+  std::vector<CelloView<const enzo_float, 3>> out;
   out.reserve(nfields);
   for (std::size_t i = 0; i<nfields; i++){
     out.push_back(map.get(integration_keys_[i], stale_depth));
@@ -181,22 +181,22 @@ EnzoIntegrationQuanUpdate::load_integration_quan_(const EnzoEFltArrayMap &map,
 void EnzoIntegrationQuanUpdate::update_quantities
 (EnzoEFltArrayMap &initial_integration_map, const EnzoEFltArrayMap &dUcons_map,
  EnzoEFltArrayMap &out_integration_map,
- EnzoEquationOfState *eos, const int stale_depth,
- const str_vec_t &passive_list) const
+ const int stale_depth, const str_vec_t &passive_list) const
 {
 
   // Update passive scalars, it doesn't currently support renormalizing to 1
   update_passive_scalars_(initial_integration_map, dUcons_map,
                           out_integration_map, stale_depth, passive_list);
 
-  // For now, not having density floor affect momentum or total energy density
-  enzo_float density_floor = eos->get_density_floor();
+  // For now, density floor doesn't affect momentum or total energy density
+  const enzo_float density_floor =
+    enzo::fluid_props()->fluid_floor_config().density();
 
   const std::vector<EFlt3DArray> cur_prim = load_integration_quan_
     (initial_integration_map, stale_depth);
   const std::vector<EFlt3DArray> out_prim = load_integration_quan_
     (out_integration_map,stale_depth);
-  const std::vector<CelloArray<const enzo_float,3>> dU = load_integration_quan_
+  const std::vector<CelloView<const enzo_float,3>> dU = load_integration_quan_
     (dUcons_map, stale_depth);
   const std::size_t nfields = integration_keys_.size();
 
@@ -214,7 +214,7 @@ void EnzoIntegrationQuanUpdate::update_quantities
 
 	// possibly place a floor on the updated density.
 	enzo_float new_rho = out_prim[density_index_](iz,iy,ix);
-	new_rho = EnzoEquationOfState::apply_floor(new_rho, density_floor);
+	new_rho = enzo_utils::apply_floor(new_rho, density_floor);
 	out_prim[density_index_](iz,iy,ix) = new_rho;
 
 	// update the specific integration primitives
@@ -230,7 +230,9 @@ void EnzoIntegrationQuanUpdate::update_quantities
 
   // apply floor to energy and sync the internal energy with total energy
   // (the latter only occurs if the dual energy formalism is in use)
-  eos->apply_floor_to_energy_and_sync(out_integration_map, stale_depth + 1);
+  EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
+  fluid_props->apply_floor_to_energy_and_sync(out_integration_map,
+                                              stale_depth + 1);
 }
 
 //----------------------------------------------------------------------
@@ -250,7 +252,7 @@ void EnzoIntegrationQuanUpdate::update_passive_scalars_
     const EFlt3DArray cur_conserved = initial_integration_map.get(key,
 								  stale_depth);
     const EFlt3DArray out_conserved = out_integration_map.get(key, stale_depth);
-    const CelloArray<const enzo_float, 3> dU = dUcons_map.get(key, stale_depth);
+    const CelloView<const enzo_float, 3> dU = dUcons_map.get(key, stale_depth);
 
     for (int iz=1; iz<mz-1; iz++) {
       for (int iy=1; iy<my-1; iy++) {

@@ -17,6 +17,8 @@ Enzo-E methods.
 
 Specifies cosmological parameters
 
+.. _user-fluid_props:
+
 ``"fluid_props"``
 =================
 

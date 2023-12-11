@@ -92,12 +92,12 @@ namespace enzo_field_adaptor_detail {
 
   std::array<int,3> ArrayMapWrapper::field_strides() const noexcept{
     std::array<int,3> out;
-    CelloArray<const enzo_float,3> first_arr = array_map_[0];
+    CelloView<const enzo_float,3> first_arr = array_map_[0];
     out = {first_arr.stride(0), first_arr.stride(1), first_arr.stride(2)};
 
     // TODO: track if strides are consistent within EnzoEFltArrayMap
     for (std::size_t i = 1; i < array_map_.size(); i++){
-      CelloArray<const enzo_float,3> cur = array_map_[i];
+      CelloView<const enzo_float,3> cur = array_map_[i];
       if ( (out[0] != cur.stride(0)) || (out[1] != cur.stride(1)) ||
            (out[2] != cur.stride(2)) ){
         ERROR("ArrayMapWrapper::field_strides",
@@ -121,7 +121,7 @@ namespace enzo_field_adaptor_detail {
 
     std::array<int,3> strides = this->field_strides();
     int stride_x = strides[2];
-    // if we allow for selecting different indexing schemes in CelloArray we'll
+    // if we allow for selecting different indexing schemes in CelloView we'll
     // need to revise this method. In this scenario, strides[2] != 1
     ASSERT("ArrayMapWrapper::grackle_field_grid_props",
            "implmentation needs to be revisited", stride_x == 1);

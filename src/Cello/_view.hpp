@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     error_Error.hpp
+/// @file     _view.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Mon Jun 3 2019
-/// @brief    Private include file for the \ref Array component
+/// @brief    Private include file for the \ref View component
 
-#ifndef _ARRAY_HPP
-#define _ARRAY_HPP
+#ifndef _VIEW_HPP
+#define _VIEW_HPP
 
 //----------------------------------------------------------------------
 // System includes
@@ -22,8 +22,8 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "array_CelloArray.hpp"
-#include "array_CArrCollec.hpp"
-#include "array_StringIndRdOnlyMap.hpp"
+#include "view_CelloView.hpp"
+#include "view_ViewCollec.hpp"
+#include "view_StringIndRdOnlyMap.hpp"
 
-#endif /* _ARRAY_HPP */
+#endif /* _VIEW_HPP */

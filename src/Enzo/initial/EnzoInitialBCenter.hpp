@@ -86,9 +86,9 @@ public: // interface
   ///  Ay: (mz+1,  my,mx+1)
   ///  Az: (  mz,my+1,mx+1)
   static void initialize_bfield_interface( Block * block,
-					   CelloArray<double,3> &Ax,
-					   CelloArray<double,3> &Ay,
-					   CelloArray<double,3> &Az);
+					   CelloView<double,3> &Ax,
+					   CelloView<double,3> &Ay,
+					   CelloView<double,3> &Az);
 
 public:
 

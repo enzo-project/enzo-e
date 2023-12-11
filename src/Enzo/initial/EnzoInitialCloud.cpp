@@ -7,15 +7,247 @@
 
 #include <random>
 #include <limits>
+#include <array>
 
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 #include "cello.hpp"
 
+
+// return random value drawn from a uniform distribution on the unit interval
+double uniform_dist_transform_(std::minstd_rand &generator,
+                               bool include_zero, bool include_one){
+
+  static_assert((generator.max() <= UINT32_MAX) && (generator.min() == 1), 
+                "Unexpected PRNG Property"); // sanity-check!
+
+  // cast to double since they can perfectly represent all values of uint32_t
+  double raw = static_cast<double>(generator());
+
+  double range;
+  if (include_zero && include_one){
+    range = static_cast<double>(generator.max()) - 1.;
+    raw--;
+  } else if (include_zero) {
+    range = static_cast<double>(generator.max());
+    raw--;
+  } else if (include_one) {
+    range = static_cast<double>(generator.max());
+
+  } else {
+    range = static_cast<double>(generator.max()) + 1.;
+
+  }
+  return raw / range;
+}
+
+
+// draw samples from a prng and transform it to a gaussian distribution
+// For simplicity, using the standard Box-muller (truncates at ~6.6*sigma)
+//
+// std::normal_distribution isn't portable across library versions & platforms
+std::pair<double, double> normal_dist_transform_(std::minstd_rand &generator){
+
+  double x1 = uniform_dist_transform_(generator, false, false);
+  double x2 = uniform_dist_transform_(generator, false, false);
+
+  double coef = std::sqrt(-2.*std::log(x1));
+  return std::pair<double,double>(coef * std::cos(2. * cello::pi * x2),
+                                  coef * std::sin(2. * cello::pi * x2));
+}
+
+std::array<double,3> sample_sphere_points_(std::minstd_rand &generator){
+  // draw a sample from uniform distribution on the surface of unit sphere
+  // and return corresponding unit vector  
+
+  double x,y,z;
+  const int MAX_ITER = 10000000; 
+  for (int i =0; i < MAX_ITER; i++){
+
+    std::pair<double,double> pair1 = normal_dist_transform_(generator);
+    std::pair<double,double> pair2 = normal_dist_transform_(generator);
+
+    x = pair1.first;
+    y = pair1.second;
+    z = pair2.first;
+
+    if ((x != 0.) || (y != 0.) || (z!=0.)){
+      break;
+    } else if (i+1 == MAX_ITER){
+      abort(); // almost certainly won't occur unless there's a bug
+    }
+  }
+
+  double magnitude = std::sqrt(x*x + y*y + z*z);
+  return {x/magnitude,y/magnitude,z/magnitude};
+}
+
+class WavePerturbation {
+  /// This density perturbations modelled by summing a series of inclined
+  /// planar cosine waves
+
+public:
+  WavePerturbation(std::size_t Nwaves, uint32_t seed, double amplitude,
+                   double min_lambda, double max_lambda) noexcept
+  {
+    Nwaves_ = Nwaves;
+    amplitude_ = amplitude;
+    if (Nwaves_ > 0 && amplitude_ > 0.){
+      std::minstd_rand generator(seed);
+
+      // These are sanity-checks for our assumptions for our about the
+      // generator
+      static_assert((generator.max() <= UINT32_MAX) &&(generator.min() == 1), 
+                    "Unexpected PRNG Property"); // sanity-check!
+
+      for (std::size_t i=0; i < Nwaves; i++){
+        // draw wavelength from [min_lambda, max_lambda]
+        double lambda = min_lambda +
+          (max_lambda - min_lambda) * uniform_dist_transform_(generator,
+                                                              true, true);
+        std::array<double,3> khat = sample_sphere_points_(generator);
+        kx_.push_back(khat[0] * 2 * cello::pi / lambda);
+        ky_.push_back(khat[1] * 2 * cello::pi / lambda);
+        kz_.push_back(khat[2] * 2 * cello::pi / lambda);
+
+        // draw phase from [0,pi). Don't need to include values between pi and
+        // 2*pi since k_x, k_y, and k_z can each be positive or negative
+        phi_.push_back(cello::pi * uniform_dist_transform_(generator, true,
+                                                           false) );
+      }
+    }
+  }
+
+  void print_summary() const noexcept
+  {
+    if (Nwaves_ == 0){
+      cello::monitor()->print ("EnzoInitialCloud", "Not perturbing cloud.");
+    } else {
+      for (std::size_t i=0; i < Nwaves_; i++){
+        cello::monitor()->print
+          ("EnzoInitialCloud",
+           "Perturb %2u/%d: kx=%+1.8e ky=%+1.8e kz=%+1.8e phi=%1.8e",
+           i,Nwaves_,kx_[i],ky_[i],kz_[i],phi_[i]);
+      }
+    }
+  }
+
+
+  double operator() (double xc, double yc, double zc,
+                     double hx, double hy, double hz) const noexcept
+  {
+    // The total instantaneous perturbation at location (x,y,z) is given by:
+    //    delta = amplitude * Sum( cos(kx_i * x + ky_i*y + kz_i*z + phi_i)),
+    // in which the sum runs from i=0 to i = N_waves_-1
+    //
+    // The volume averaged perturbation, for a cell at center (xc,yc,zc) withs
+    // widths (hx,hy,hz) is given by
+    //     alpha * Sum( ci * cos(kx_i*xc + ky_i*yc + kz_i*zc + phi_i) ),
+    // where:
+    //   - the sum runs from i=0 to i = N_waves_-1
+    //   - alpha = (8 * amplitue / (hx*hy*hz) )
+    //   - ci = sin(kx_i*hx/2)*sin(ky_i*hy/2)*sin(kz_i*hz/2) / (kx_i*ky_i*kz_i)
+
+    double total = 0.;
+    double alpha = 8. * amplitude_ / (hx * hy * hz);
+    for (std::size_t i = 0; i < Nwaves_; i++){
+      double ci = ( std::sin(kx_[i] * hx * 0.5) *
+                    std::sin(ky_[i] * hy * 0.5) *
+                    std::sin(kz_[i] * hz * 0.5) ) / (kx_[i] * ky_[i] * kz_[i]);
+
+      total += ci * std::cos(kx_[i]*xc + ky_[i]*yc + kz_[i]*zc + phi_[i]);
+    }
+    return alpha * total;
+  }
+
+private:
+  /// number of waves
+  std::size_t Nwaves_;
+
+  /// Wavelength amplitude
+  double amplitude_;
+
+  /// vector holding sets of wavenumber components
+  std::vector<double> kx_;
+  std::vector<double> ky_;
+  std::vector<double> kz_;
+
+  /// vector holding the different phases of the different waves
+  std::vector<double> phi_;
+
+};
+
 //----------------------------------------------------------------------
 
-void prep_subcell_offsets_(double* subcell_offsets, double cell_width,
-			   int subsample_n)
+enum class CellIntersection{ enclosed_cell, partial_overlap, no_overlap };
+
+//----------------------------------------------------------------------
+
+class SphereRegion
+{
+public:
+  SphereRegion(double center_x, double center_y, double center_z, double radius)
+  {
+    center_[0] = center_x;
+    center_[1] = center_y;
+    center_[2] = center_z;
+    ASSERT("SphereRegion", "radius must be >0", radius>0);
+    sqr_radius_ = radius*radius;
+  }
+
+  /// returns whether a point lies within the sphere
+  inline bool check_point(double x, double y, double z) const noexcept
+  {
+    double dx = x - center_[0];
+    double dy = y - center_[1];
+    double dz = z - center_[2];
+    return (dx*dx + dy*dy + dz*dz) <= sqr_radius_;
+  }
+
+  /// determine whether a cell intersects with the sphere
+  /// past the (x,y,z) coordinates of the lower left and upper right corners
+  CellIntersection check_intersect(std::array<double,3> left,
+                                   std::array<double,3> right) const noexcept 
+  {
+    std::array<double, 3> nearest;    // nearest point in cell to center_
+    std::array<double, 3> furthest;   // furthest point in cell from center_
+
+    for (std::size_t i = 0; i<3; i++){
+      if (center_[i] <= left[i]){
+        nearest[i]  = left[i];
+        furthest[i] = right[i];
+      } else if (center_[i] >= right[i]) {
+        nearest[i] = right[i];
+        furthest[i] = left[i];
+      } else {
+        nearest[i] = center_[i];
+        if ((center_[i] - left[i]) > (right[i] - center_[i])){
+          furthest[i] = left[i];
+        } else {
+          furthest[i] = right[i];
+        }
+      }
+    }
+
+    if (check_point(furthest[0], furthest[1], furthest[2])){
+      return CellIntersection::enclosed_cell;
+    } else if (!check_point(nearest[0], nearest[1], nearest[2])){
+      return CellIntersection::no_overlap;
+    } else {
+      return CellIntersection::partial_overlap;
+    }
+  }
+
+private:
+
+  /// center x,y, and z of sphere
+  std::array<double,3> center_;
+  /// squared sphere radius
+  double sqr_radius_;
+};
+
+void prep_subcell_offsets_(std::vector<double> &subcell_offsets,
+                           double cell_width, int subsample_n)
 {
   int num_subcells_axis = (int)std::pow(2,subsample_n);
   double cur_frac = 1./std::pow(2,subsample_n+1);
@@ -26,29 +258,29 @@ void prep_subcell_offsets_(double* subcell_offsets, double cell_width,
   }
 }
 
-class SphereRegion
-{
+class CloudInitHelper {
+
 public:
-  SphereRegion(Data *data, int subsample_n,
-	       double center_x, double center_y, double center_z,
-	       double radius)
-    : subsample_n_(subsample_n),
+
+  CloudInitHelper(Block *block, int subsample_n, SphereRegion region,
+                  WavePerturbation perturb_generator)
+    : region_(region),
+      perturb_generator_(perturb_generator),
+      subsample_n_(subsample_n),
       num_subcells_axis_((int)std::pow(2,subsample_n)),
       num_subsampled_cells_(std::pow(std::pow(2,subsample_n),3)),
-      center_x_(center_x),
-      center_y_(center_y),
-      center_z_(center_z),
-      radius_(radius),
-      sqr_radius_(radius*radius),
-      cell_xf_(nullptr),
-      cell_yf_(nullptr),
-      cell_zf_(nullptr),
-      subcell_xoffsets_(nullptr),
-      subcell_yoffsets_(nullptr),
-      subcell_zoffsets_(nullptr)
+      cell_widths_(),
+      subcell_widths_(),
+      cell_xf_(),
+      cell_yf_(),
+      cell_zf_(),
+      subcell_xoffsets_(),
+      subcell_yoffsets_(),
+      subcell_zoffsets_()
   {
     ASSERT("SphereRegion", "subsample_num must be >= 0", subsample_n>=0);
-    ASSERT("SphereRegion", "radius must be >0", radius>0);
+
+    Data* data = block->data();
 
     double hx, hy, hz;
     data->field_cell_width(&hx,&hy,&hz);
@@ -57,6 +289,11 @@ public:
 	   "the cell width along each axis is assumed to be the same",
 	   (fabs((hy - hx)/hx) <= INIT_CLOUD_TOLERANCE) &&
            (fabs((hz - hx)/hx) <= INIT_CLOUD_TOLERANCE));
+
+    double n_subcells_axis = static_cast<double>(num_subcells_axis_);
+    cell_widths_ = {hx, hy, hz};
+    subcell_widths_ =
+      {hx/n_subcells_axis, hy/n_subcells_axis, hz/n_subcells_axis};
 
     Field field = data->field();
     int nx,ny,nz;
@@ -68,117 +305,94 @@ public:
     ndy = ny + 2*gy;
     ndz = nz + 2*gz;
 
-    cell_xf_ = new double[ndx + 1];
-    cell_yf_ = new double[ndy + 1];
-    cell_zf_ = new double[ndz + 1];
+    cell_xf_ = std::vector<double>(ndx + 1);
+    cell_yf_ = std::vector<double>(ndy + 1);
+    cell_zf_ = std::vector<double>(ndz + 1);
 
-    data->field_cell_faces(cell_xf_,cell_yf_,cell_zf_,gx,gy,gz,1,1,1);
+    data->field_cell_faces(cell_xf_.data(), cell_yf_.data(), cell_zf_.data(),
+                           gx,gy,gz,1,1,1);
 
-    subcell_xoffsets_ = new double[ndx];
-    subcell_yoffsets_ = new double[ndy];
-    subcell_zoffsets_ = new double[ndz];
+    subcell_xoffsets_ = std::vector<double>(num_subcells_axis_);
+    subcell_yoffsets_ = std::vector<double>(num_subcells_axis_);
+    subcell_zoffsets_ = std::vector<double>(num_subcells_axis_);
 
     prep_subcell_offsets_(subcell_xoffsets_, hx, subsample_n_);
     prep_subcell_offsets_(subcell_yoffsets_, hy, subsample_n_);
     prep_subcell_offsets_(subcell_zoffsets_, hz, subsample_n_);
+
+    if (block->index().is_root()) { perturb_generator_.print_summary(); }
   }
 
-  ~SphereRegion(){
-    delete[] cell_xf_;
-    delete[] cell_yf_;
-    delete[] cell_zf_;
-
-    delete[] subcell_xoffsets_;
-    delete[] subcell_yoffsets_;
-    delete[] subcell_zoffsets_;
-  }
-
-
-  /// returns whether a point lies within the sphere
-  bool check_point(double x, double y, double z)
+  void query_cell(int iz, int iy, int ix, double &frac_enclosed,
+                  double &perturbation) const noexcept
   {
-    return (x*x + y*y + z*z) <= sqr_radius_;
-  }
-
-  /// returns the fraction of the cell at (iz, iy, ix) that is enclosed by the
-  /// sphere 
-  double cell_fraction_enclosed(int iz, int iy, int ix){
     // Get the x,y,z on the lower left and upper right corners of the cell
-    double left_x = cell_xf_[ix];  double right_x = cell_xf_[ix+1];
-    double left_y = cell_yf_[iy];  double right_y = cell_yf_[iy+1];
-    double left_z = cell_zf_[iz];  double right_z = cell_zf_[iz+1];
+    std::array<double,3> left, right;
+    left[0] = cell_xf_[ix];    right[0] = cell_xf_[ix+1];
+    left[1] = cell_yf_[iy];    right[1] = cell_yf_[iy+1];
+    left[2] = cell_zf_[iz];    right[2] = cell_zf_[iz+1];
 
-    // Find the closest and furthest points on the cell from the sphere center
-    double closest_x, closest_y, closest_z;
-    double furthest_x, furthest_y, furthest_z;
-    find_closest_furthest_points_(left_x, right_x, center_x_, &closest_x,
-				  &furthest_x);
-    find_closest_furthest_points_(left_y, right_y, center_y_, &closest_y,
-				  &furthest_y);
-    find_closest_furthest_points_(left_z, right_z, center_z_, &closest_z,
-				  &furthest_z);
-    
-    
-    if (check_point(furthest_x, furthest_y, furthest_z)){
-      // if the furthest point on the cell is enclosed in the sphere, then the
-      // entire cell is enclosed
-      return 1.0;
-    } else if (!check_point(closest_x, closest_y, closest_z)){
-      // if the closest point on the cell is not enclosed then, then the none of
-      // cell is enclosed
-      return 0.0;
-    }
-
-    // now let's determine the fraction of the cell that is enclosed
-
-    int n_enclosed = 0;
-    for (int sub_iz=0; sub_iz<num_subcells_axis_; sub_iz++){
-      double sub_zc = left_z+subcell_zoffsets_[sub_iz];
-
-      for (int sub_iy=0; sub_iy<num_subcells_axis_; sub_iy++){
-	double sub_yc = left_y + subcell_yoffsets_[sub_iy];
-
-	for (int sub_ix=0; sub_ix<num_subcells_axis_; sub_ix++){
-	  double sub_xc = left_x+subcell_xoffsets_[sub_ix];
-
-	  if (check_point(sub_xc, sub_yc, sub_zc)){
-	    // if the subcell center is enclosed, increment n_enclosed
-	    n_enclosed++;
-	  }
-	}
+    switch (region_.check_intersect(left,right)){
+    case CellIntersection::enclosed_cell :
+      {
+        frac_enclosed = 1.0;
+        perturbation = perturb_generator_
+          (0.5*(left[0] + right[0]), 0.5*(left[1] + right[1]),
+           0.5*(left[2] + right[2]), cell_widths_[0], cell_widths_[1],
+           cell_widths_[2]);
+        return;
       }
+    case CellIntersection::no_overlap :
+      {
+        frac_enclosed = 0.0;
+        perturbation = 0.0;
+        return;
+      }
+    case CellIntersection::partial_overlap :
+      {
+        // determine the fraction of the cell that is enclosed and calculate
+        // the average density perturbation of that region
+        double perturb_sum = 0.;
+
+        int n_enclosed = 0;
+        for (int sub_iz=0; sub_iz<num_subcells_axis_; sub_iz++){
+          double sub_zc = left[2] + subcell_zoffsets_[sub_iz];
+
+          for (int sub_iy=0; sub_iy<num_subcells_axis_; sub_iy++){
+            double sub_yc = left[1] + subcell_yoffsets_[sub_iy];
+
+            for (int sub_ix=0; sub_ix<num_subcells_axis_; sub_ix++){
+              double sub_xc = left[0] + subcell_xoffsets_[sub_ix];
+
+              if (region_.check_point(sub_xc, sub_yc, sub_zc)){
+                // if the subcell center is enclosed, increment n_enclosed
+                n_enclosed++;
+
+                perturb_sum += perturb_generator_(sub_xc, sub_yc, sub_zc,
+                                                  subcell_widths_[0],
+                                                  subcell_widths_[1],
+                                                  subcell_widths_[2]);
+              }
+            }
+          }
+        }
+
+        frac_enclosed = static_cast<double>(n_enclosed)/num_subsampled_cells_;
+        if (n_enclosed > 0){
+          perturbation = perturb_sum / static_cast<double>(n_enclosed);
+        } else { // I don't think that this should ever be evaluated
+          perturbation = 0.;
+        }
+      }
+
     }
-
-    return ((double)n_enclosed)/num_subsampled_cells_;
-
   }
 
+  
 private:
 
-  /// Finds the closest and nearest coordinate values in a cell
-  /// (This get's called separately for x, y, and z)
-  void find_closest_furthest_points_(double cell_min_pos, double cell_max_pos,
-				     double sphere_center,
-				     double *nearest_point,
-				     double *furthest_point)
-  {
-    if (sphere_center <= cell_min_pos){
-      *nearest_point = cell_min_pos;
-      *furthest_point = cell_max_pos;
-    } else if (sphere_center >= cell_max_pos) {
-      *nearest_point = cell_max_pos;
-      *furthest_point = cell_min_pos;
-    } else {
-      *nearest_point = sphere_center;
-      if ((sphere_center - cell_min_pos) > (cell_max_pos - sphere_center)){
-	*furthest_point = cell_min_pos;
-      } else {
-	*furthest_point = cell_max_pos;
-      }
-    }
-  }
-
-public:
+  const SphereRegion region_;
+  const WavePerturbation perturb_generator_;
 
   /// subsample_n
   int subsample_n_;
@@ -187,77 +401,22 @@ public:
   /// total number of subsampled_cells
   double num_subsampled_cells_;
 
-  /// center of spher
-  double center_x_;
-  double center_y_;
-  double center_z_;
-  /// sphere radius
-  double radius_;
-  double sqr_radius_;
+  /// x, y, and z cell widths
+  std::array<double,3> cell_widths_;
+  /// x, y, and z subcell widths
+  std::array<double,3> subcell_widths_;
 
   /// x, y, and z cell face positions. Along axis i, if there are mi cells
   /// (including ghost cells), then the corresponding array has mi+1 elements
-  double *cell_xf_;
-  double *cell_yf_;
-  double *cell_zf_;
+  std::vector<double> cell_xf_;
+  std::vector<double> cell_yf_;
+  std::vector<double> cell_zf_;
 
   /// offsets from the left  cell face that indicates the center of a given
   /// sub-sampled cell
-  double *subcell_xoffsets_;
-  double *subcell_yoffsets_;
-  double *subcell_zoffsets_;
-
-};
-
-//----------------------------------------------------------------------
-
-class TruncatedGaussianNoise
-{
-public:
-
-  TruncatedGaussianNoise(Block* block, unsigned int default_seed, double mean,
-			 double standard_deviation, double trunc_deviations)
-  {
-    // first compute the random seed for the current block
-    int ix, iy, iz, nx, ny, nz;
-    block->index_global(&ix, &iy, &iz, &nx, &ny, &nz);
-    unsigned int index = (unsigned int)(ix + nx*(iy + ny*iz));
-
-    unsigned int wraparound_diff =
-      std::numeric_limits<unsigned int>::max() - default_seed;
-    if (index > wraparound_diff){
-      gen_.seed(index - wraparound_diff - 1);
-    } else {
-      gen_.seed(default_seed + index);
-    }
-
-    ASSERT("TruncatedGaussianNoise", "trunc_deviations must be >= zero",
-	   trunc_deviations>=0);
-    truncate_ = (trunc_deviations != 0.);
-    upper_lim_ = mean + trunc_deviations * standard_deviation;
-    lower_lim_ = mean - trunc_deviations * standard_deviation;
-    dist_ = std::normal_distribution<double>{mean,standard_deviation};
-  }
-
-  double operator()(){
-    if (truncate_){
-      double out = dist_(gen_);
-      while (out > upper_lim_ || out < lower_lim_){
-	out = dist_(gen_);
-      }
-      return out;
-    } else {
-      return dist_(gen_);
-    }
-  }
-
-private:
-
-  std::mt19937 gen_;
-  std::normal_distribution<double> dist_;
-  bool truncate_;
-  double upper_lim_;
-  double lower_lim_;
+  std::vector<double> subcell_xoffsets_;
+  std::vector<double> subcell_yoffsets_;
+  std::vector<double> subcell_zoffsets_;
 };
 
 //----------------------------------------------------------------------
@@ -453,8 +612,14 @@ void EnzoInitialCloud::enforce_block
   EFlt3DArray total_energy = field.view<enzo_float>("total_energy");
 
   // Currently assume pressure equilibrium and pre-initialized uniform B-field
-  SphereRegion sph(block->data(), subsample_n_, cloud_center_x_,
-		   cloud_center_y_, cloud_center_z_, cloud_radius_);
+  CloudInitHelper init_helper(block, subsample_n_,
+                              SphereRegion(cloud_center_x_, cloud_center_y_,
+                                           cloud_center_z_, cloud_radius_),
+                              WavePerturbation(perturb_Nwaves_, perturb_seed_,
+                                               perturb_amplitude_,
+                                               perturb_min_wavelength_,
+                                               perturb_max_wavelength_)
+                              );
 
   // Passively advected scalar "cloud_dye" denotes the material originally
   // located in the cloud
@@ -491,10 +656,6 @@ void EnzoInitialCloud::enforce_block
   double eint_density; // internal energy density (constant over full domain).
                        // used to initialize total energy in cells overlapping
                        // with the cloud
-
-  TruncatedGaussianNoise random_factor_gen(block, perturb_seed_, 1.,
-					   perturb_stddev_, truncate_dev_);
-  const bool use_random_factor = (perturb_stddev_ != 0);
 
   if (dual_energy){
     internal_energy = field.view<enzo_float>("internal_energy");
@@ -544,20 +705,17 @@ void EnzoInitialCloud::enforce_block
 	// cloud_mass_weight = M_wind/M_cell
 	//   = (1-f) * rho_wind / rho_cell
 
-	double frac_enclosed = sph.cell_fraction_enclosed(iz, iy, ix);
+	double frac_enclosed, perturbation;
+        init_helper.query_cell(iz, iy, ix, frac_enclosed, perturbation);
+        perturbation += 1.;
 
-	double random_factor = 1.;
-	if (use_random_factor && frac_enclosed > 0){
-	  random_factor = random_factor_gen();
-	}
-
-	double avg_density = (frac_enclosed * density_cloud_ * random_factor +
+	double avg_density = (frac_enclosed * density_cloud_ * perturbation +
 			      (1. - frac_enclosed) * density_wind_);
 
 	density(iz,iy,ix) = avg_density;
 	if (use_cloud_dye){
 	  cloud_dye_density(iz,iy,ix) = (frac_enclosed * density_cloud_ *
-					 random_factor);
+                                         perturbation);
 	}
 	if (set_metal_density){
 	  metal_density(iz,iy,ix) = metal_mass_frac_ * avg_density;

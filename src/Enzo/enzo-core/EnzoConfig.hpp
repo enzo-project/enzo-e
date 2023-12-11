@@ -14,96 +14,6 @@
 
 class Parameters;
 
-#ifdef CONFIG_USE_GRACKLE
-// Operator to allow Grackle's chemistry data to PUP
-inline void operator|(PUP::er &p, chemistry_data &c){
-  // all values are single ints, floats, or doubles with the
-  // exception of grackle_data_file
-  p | c.use_grackle;
-  p | c.with_radiative_cooling;
-  p | c.primordial_chemistry;
-  p | c.dust_chemistry;
-  p | c.metal_cooling;
-  p | c.UVbackground;
-
-  bool skip_strlen = (p.isUnpacking() || c.grackle_data_file == NULL);
-  int length = (skip_strlen) ? 0 : strlen(c.grackle_data_file);
-  p | length;
-  if (length > 0){
-    char* temp;
-    if (p.isUnpacking()){
-      temp = new char[length+1];
-      c.grackle_data_file= temp;
-    } else {
-      // this is a hack that's necessary because PUParray won't work with a
-      // const char* type (i.e. we need to cast away the const).
-      // -> This won't be necessary after PR #290
-      temp = (char*)temp;
-    }
-    PUParray(p, temp, length+1);
-  } else {
-    c.grackle_data_file = NULL;
-  }
-
-  p | c.cmb_temperature_floor;
-  p | c.Gamma;
-  p | c.h2_on_dust;
-  p | c.use_dust_density_field;
-  p | c.dust_recombination_cooling;
-  p | c.photoelectric_heating;
-  p | c.photoelectric_heating_rate;
-  p | c.use_isrf_field;
-  p | c.interstellar_radiation_field;
-  p | c.use_volumetric_heating_rate;
-  p | c.use_specific_heating_rate;
-  p | c.three_body_rate;
-  p | c.cie_cooling;
-  p | c.h2_optical_depth_approximation;
-  p | c.ih2co;
-  p | c.ipiht;
-  p | c.HydrogenFractionByMass;
-  p | c.DeuteriumToHydrogenRatio;
-  p | c.SolarMetalFractionByMass;
-  p | c.local_dust_to_gas_ratio;
-  p | c.NumberOfTemperatureBins;
-  p | c.CaseBRecombination;
-  p | c.TemperatureStart;
-  p | c.TemperatureEnd;
-  p | c.NumberOfDustTemperatureBins;
-  p | c.DustTemperatureStart;
-  p | c.DustTemperatureEnd;
-  p | c.Compton_xray_heating;
-  p | c.LWbackground_sawtooth_suppression;
-  p | c.LWbackground_intensity;
-  p | c.UVbackground_redshift_on;
-  p | c.UVbackground_redshift_off;
-  p | c.UVbackground_redshift_fullon;
-  p | c.UVbackground_redshift_drop;
-  p | c.cloudy_electron_fraction_factor;
-  p | c.use_radiative_transfer;
-  p | c.radiative_transfer_coupled_rate_solver;
-  p | c.radiative_transfer_intermediate_step;
-  p | c.radiative_transfer_hydrogen_only;
-  p | c.self_shielding_method;
-  p | c.H2_self_shielding;
-  p | c.H2_custom_shielding;
-  p | c.h2_charge_exchange_rate;
-  p | c.h2_dust_rate;
-  p | c.h2_h_cooling_rate;
-  p | c.collisional_excitation_rates;
-  p | c.collisional_ionisation_rates;
-  p | c.recombination_cooling_rates;
-  p | c.bremsstrahlung_cooling_rates;
-  p | c.max_iterations;
-  p | c.exit_after_iterations_exceeded;
-
-# ifdef CONFIG_SMP_MODE
-  // Corresponds to -D_OPENMP in Grackle
-  p | omp_nthreads;
-# endif
-}
-#endif
-
 class EnzoConfig : public Config {
 
   /// @class    EnzoConfig
@@ -151,8 +61,8 @@ public: // interface
       physics_cosmology_final_redshift(0.0),
       // FluidProps
       physics_fluid_props_de_config(),
+      physics_fluid_props_eos_variant(),
       physics_fluid_props_fluid_floor_config(),
-      physics_fluid_props_gamma(0.0),
       physics_fluid_props_mol_weight(0.0),
       // Gravity
       physics_gravity(false),
@@ -194,11 +104,13 @@ public: // interface
       initial_cloud_etot_wind(0.0),
       initial_cloud_initialize_uniform_bfield(false),
       initial_cloud_metal_mass_frac(0.0),
+      initial_cloud_perturb_Nwaves(0),
+      initial_cloud_perturb_amplitude(0.0),
+      initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
+      initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
       initial_cloud_perturb_seed(0),
-      initial_cloud_perturb_stddev(0.0),
       initial_cloud_radius(0.),
       initial_cloud_subsample_n(0),
-      initial_cloud_trunc_dev(0.0),
       initial_cloud_velocity_wind(0.0),
       // EnzoInitialCollapse
       initial_collapse_mass(0.0),
@@ -221,7 +133,6 @@ public: // interface
       initial_feedback_test_star_mass(),
       initial_feedback_test_temperature(),
       initial_feedback_test_luminosity(),
-#ifdef CONFIG_USE_GRACKLE
       // EnzoGrackleTest
       initial_grackle_test_maximum_H_number_density(1000.0),
       initial_grackle_test_maximum_metallicity(1.0),
@@ -230,7 +141,6 @@ public: // interface
       initial_grackle_test_minimum_metallicity(1.0E-4),
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_reset_energies(0),
-#endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
@@ -350,6 +260,7 @@ public: // interface
       method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
+      method_check_include_ghosts(false),
       /// EnzoMethodFeedback
       method_feedback_ejecta_mass(0.0),
       method_feedback_ejecta_metal_fraction(0.0),
@@ -365,7 +276,6 @@ public: // interface
       method_feedback_supernovae(true),
       method_feedback_unrestricted_sn(true),
       method_feedback_stellar_winds(true),
-      method_feedback_radiation(true),
       method_feedback_min_level(0),
       method_feedback_analytic_SNR_shell_mass(true),
       method_feedback_fade_SNR(true),
@@ -375,6 +285,7 @@ public: // interface
 
       // EnzoMethodHeat
       method_heat_alpha(0.0),
+
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -384,7 +295,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -436,11 +346,9 @@ public: // interface
       method_turbulence_mach_number(0.0),
       // EnzoMethodGrackle
       method_grackle_use_grackle(false),
-#ifdef CONFIG_USE_GRACKLE
-      method_grackle_chemistry(nullptr),
+      method_grackle_chemistry(),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
-#endif
       // EnzoMethodGravity
       method_gravity_grav_const(0.0),
       method_gravity_solver(""),
@@ -624,8 +532,8 @@ public: // attributes
 
   /// FluidProps
   EnzoDualEnergyConfig       physics_fluid_props_de_config;
+  EnzoEOSVariant             physics_fluid_props_eos_variant;
   EnzoFluidFloorConfig       physics_fluid_props_fluid_floor_config;
-  double                     physics_fluid_props_gamma;
   double                     physics_fluid_props_mol_weight;
 
   /// Gravity
@@ -646,22 +554,24 @@ public: // attributes
   double                     initial_burkertbodenheimer_outer_velocity;
 
   /// EnzoInitialCloud;
-  int                        initial_cloud_subsample_n;
-  double                     initial_cloud_radius;
   double                     initial_cloud_center_x;
   double                     initial_cloud_center_y;
   double                     initial_cloud_center_z;
   double                     initial_cloud_density_cloud;
   double                     initial_cloud_density_wind;
-  double                     initial_cloud_velocity_wind;
-  double                     initial_cloud_etot_wind;
   double                     initial_cloud_eint_wind;
-  double                     initial_cloud_metal_mass_frac;
+  double                     initial_cloud_etot_wind;
   bool                       initial_cloud_initialize_uniform_bfield;
   double                     initial_cloud_uniform_bfield[3];
-  double                     initial_cloud_perturb_stddev;
-  double                     initial_cloud_trunc_dev;
+  double                     initial_cloud_metal_mass_frac;
+  int                        initial_cloud_perturb_Nwaves;
+  double                     initial_cloud_perturb_amplitude;
+  double                     initial_cloud_perturb_min_wavelength;
+  double                     initial_cloud_perturb_max_wavelength;
   unsigned int               initial_cloud_perturb_seed;
+  double                     initial_cloud_radius;
+  int                        initial_cloud_subsample_n;
+  double                     initial_cloud_velocity_wind;
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
@@ -675,7 +585,6 @@ public: // attributes
   double                     initial_collapse_temperature;
 
   /// EnzoGrackleTest
-#ifdef CONFIG_USE_GRACKLE
   double                     initial_grackle_test_maximum_H_number_density;
   double                     initial_grackle_test_maximum_metallicity;
   double                     initial_grackle_test_maximum_temperature;
@@ -683,8 +592,6 @@ public: // attributes
   double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_minimum_temperature;
   int                        initial_grackle_test_reset_energies;
-
-#endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoInitialHdf5
 
@@ -859,6 +766,7 @@ public: // attributes
   std::string                method_check_ordering;
   std::vector<std::string>   method_check_dir;
   int                        method_check_monitor_iter;
+  bool                       method_check_include_ghosts;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
@@ -877,7 +785,6 @@ public: // attributes
   std::string                method_hydro_riemann_solver;
 
   /// EnzoMethodFeedback
-
   std::string               method_feedback_flavor;
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
@@ -891,7 +798,6 @@ public: // attributes
 
   
   /// EnzoMethodFeedbackSTARSS
-  
   bool                       method_feedback_supernovae;
   bool                       method_feedback_unrestricted_sn;
   bool                       method_feedback_stellar_winds;
@@ -900,9 +806,8 @@ public: // attributes
   bool                       method_feedback_analytic_SNR_shell_mass;
   bool                       method_feedback_fade_SNR;
   int                        method_feedback_NEvents;
- 
-  /// EnzoMethodStarMaker
 
+  /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;
   bool                      method_star_maker_use_altAlpha;
   bool                      method_star_maker_use_density_threshold;
@@ -959,11 +864,9 @@ public: // attributes
 
   /// EnzoMethodGrackle
   bool                       method_grackle_use_grackle;
-#ifdef CONFIG_USE_GRACKLE
-  chemistry_data *           method_grackle_chemistry;
+  GrackleChemistryData       method_grackle_chemistry;
   bool                       method_grackle_use_cooling_timestep;
   double                     method_grackle_radiation_redshift;
-#endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoMethodGravity
   double                     method_gravity_grav_const;

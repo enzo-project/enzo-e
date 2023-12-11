@@ -111,11 +111,11 @@ struct KernelConfig{
   ///   cell interface
   /**@{*/
   /// array to store the computed fluxes
-  const CelloArray<enzo_float,4> flux_arr;
+  const CelloView<enzo_float,4> flux_arr;
   /// array of primitives reconstructed on the left side of cell interfaces
-  const CelloArray<const enzo_float,4> prim_arr_l;
+  const CelloView<const enzo_float,4> prim_arr_l;
   /// array of primitives reconstructed on the right side of cell interfaces
-  const CelloArray<const enzo_float,4> prim_arr_r;
+  const CelloView<const enzo_float,4> prim_arr_r;
   /**@}*/
 
   /// @name DualEnergyArrays
@@ -133,9 +133,9 @@ struct KernelConfig{
   /// When `flux_arr.shape(0) > LUT::num_entries`, this can technically alias
   /// one of `flux_arr`'s subarrays without a corresponding `LUT` entry. In
   /// practice, kernels will NEVER be affected by this.
-  const CelloArray<enzo_float,3> internal_energy_flux_arr;
+  const CelloView<enzo_float,3> internal_energy_flux_arr;
   /// array to store the velocity (along `dim`) computed at the cell interface
-  const CelloArray<enzo_float,3> velocity_i_bar_arr;
+  const CelloView<enzo_float,3> velocity_i_bar_arr;
   /**@}*/
 };
 // SPHINX-SNIPPET-KERNELCONFIG-END-INCLUDE
@@ -197,9 +197,9 @@ public: // interface
   void solve (const EnzoEFltArrayMap &prim_map_l,
 	      const EnzoEFltArrayMap &prim_map_r,
               EnzoEFltArrayMap &flux_map, const int dim,
-	      const EnzoEquationOfState *eos, const int stale_depth,
+	      const int stale_depth,
 	      const str_vec_t &passive_list,
-              const CelloArray<enzo_float,3> * const interface_velocity) const;
+              const CelloView<enzo_float,3> * const interface_velocity) const;
 
   const std::vector<std::string> integration_quantity_keys() const noexcept
   { return integration_quantity_keys_; }
@@ -265,18 +265,15 @@ EnzoRiemannImpl<KernelFunctor>::EnzoRiemannImpl
 template <class KernelFunctor>
 void EnzoRiemannImpl<KernelFunctor>::solve
 (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
- EnzoEFltArrayMap &flux_map, const int dim, const EnzoEquationOfState *eos,
+ EnzoEFltArrayMap &flux_map, const int dim,
  const int stale_depth, const str_vec_t &passive_list,
- const CelloArray<enzo_float,3> * const interface_velocity) const
+ const CelloView<enzo_float,3> * const interface_velocity) const
 {
 
   // Currently just going to assume that we have an Ideal Equation of State
   // (should probably test that...)
-  const enzo_float gamma = eos->get_gamma();
-  const EOSStructIdeal eos_struct = {gamma};
-
-  static_assert(std::is_same<EOSStructIdeal, EOSStructT>::value,
-                "We currently assume that all EOSs are ideal");
+  const EnzoEOSIdeal eos_struct
+    = enzo::fluid_props()->eos_variant().get<EnzoEOSIdeal>();
 
   // The strategy is to allocate some scratch space for internal_energy_flux &
   // velocity_i_bar_array, even if we don't care about dual-energy in order to

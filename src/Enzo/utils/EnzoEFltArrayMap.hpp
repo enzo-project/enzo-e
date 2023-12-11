@@ -68,20 +68,20 @@ public: // interface
   ///
   /// Unlike the analogous ``std::map::operator[]`` method, this cannot be used
   /// to insert a new value. This behaves similarly to ``std::map::at``
-  CelloArray<const enzo_float, 3> operator[] (const std::string& key) const
+  CelloView<const enzo_float, 3> operator[] (const std::string& key) const
     noexcept { return at_(key); }
-  CelloArray<enzo_float, 3> operator[] (const std::string& key) noexcept
+  CelloView<enzo_float, 3> operator[] (const std::string& key) noexcept
   { return at_(key); }
-  CelloArray<const enzo_float, 3> operator[] (std::size_t index) const
+  CelloView<const enzo_float, 3> operator[] (std::size_t index) const
     noexcept { return at_(index); }
-  CelloArray<enzo_float, 3> operator[] (std::size_t index) noexcept
+  CelloView<enzo_float, 3> operator[] (std::size_t index) noexcept
   { return at_(index); }
 
   /// Returns a reference to the mapped array associated with the specified
   /// index/key
-  CelloArray<const enzo_float, 3> at(const std::string& key) const
+  CelloView<const enzo_float, 3> at(const std::string& key) const
     noexcept { return at_(key); }
-  CelloArray<enzo_float, 3> at(const std::string& key) noexcept
+  CelloView<enzo_float, 3> at(const std::string& key) noexcept
     { return at_(key); }
 
   /// Checks whether the container holds the specified key
@@ -90,10 +90,10 @@ public: // interface
 
   /// Similar to `at`, but a slice of the array ommitting staled values is
   /// returned by value
-  CelloArray<enzo_float, 3> get(const std::string& key,
+  CelloView<enzo_float, 3> get(const std::string& key,
 				int stale_depth = 0) noexcept
   { return get_(key, stale_depth); }
-  CelloArray<const enzo_float, 3> get(const std::string& key,
+  CelloView<const enzo_float, 3> get(const std::string& key,
 				      int stale_depth = 0) const noexcept
   { return get_(key, stale_depth); }
 
@@ -154,9 +154,9 @@ public: // interface
   /// @note
   /// The program will abort if this method is called on an object for which
   /// the `contiguous_arrays()` method returns `false`.
-  CelloArray<enzo_float, 4> get_backing_array() noexcept
+  CelloView<enzo_float, 4> get_backing_array() noexcept
   { return arrays_.get_backing_array(); }
-  CelloArray<const enzo_float, 4> get_backing_array() const noexcept
+  CelloView<const enzo_float, 4> get_backing_array() const noexcept
   { return arrays_.get_backing_array(); }
 
 private: // helper methods
@@ -165,7 +165,7 @@ private: // helper methods
   /// unnecessary work relating to initialization
   EnzoEFltArrayMap(std::string name,
                    const StringIndRdOnlyMap& str_index_map,
-                   CArrCollec<enzo_float>&& arrays)
+                   ViewCollec<enzo_float>&& arrays)
     : name_(name),
       str_index_map_(str_index_map),
       arrays_(arrays)
@@ -174,9 +174,9 @@ private: // helper methods
   void validate_invariants_() const noexcept;
 
   // The following 3 helper methods should NEVER be publically exposed
-  CelloArray<enzo_float, 3> at_(const std::string& key) const noexcept;
-  CelloArray<enzo_float, 3> at_(std::size_t index) const noexcept;
-  CelloArray<enzo_float, 3> get_(const std::string& key, int stale_depth)
+  CelloView<enzo_float, 3> at_(const std::string& key) const noexcept;
+  CelloView<enzo_float, 3> at_(std::size_t index) const noexcept;
+  CelloView<enzo_float, 3> get_(const std::string& key, int stale_depth)
     const noexcept;
 
 private: // attributes
@@ -186,7 +186,7 @@ private: // attributes
   // str_index_map_ maps the keys to the index
   StringIndRdOnlyMap str_index_map_;
   // arrays_ is the ordered collection of arrays_
-  CArrCollec<enzo_float> arrays_;
+  ViewCollec<enzo_float> arrays_;
 };
 
 #endif /* ENZO_ENZO_EFLT_ARRAY_MAP_HPP */
