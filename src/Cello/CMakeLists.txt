@@ -102,15 +102,52 @@ message("link options: ${Cello_TARGET_LINK_OPTIONS}")
 # components anyway for explicitness and in case we ever reorganize or
 # transform these libraries so that they are no-longer header-only
 
-add_library(array INTERFACE)
-target_link_libraries(array INTERFACE error monitor)
-
-
 add_library(parallel INTERFACE)
 target_link_libraries(parallel
   INTERFACE cello_component charm_component error
   INTERFACE CHARM::CHARM_HEADERS # charm++.hpp included in a public header file
 )
+
+add_library(view INTERFACE)
+target_link_libraries(view INTERFACE error monitor)
+
+
+# A brief segue: define a common target, cello_component_PCH, that is used to
+# propagate a precompiled header
+# - if USE_PRECOMPILED_HEADERS is OFF, then linking against this target does
+#   nothing!
+# - A precompiled header stores the contents of preparsed headers in a binary
+#   format. They can significantly reduce compilation times when they are used
+#   to define large headers that are included in MANY files.
+# - NOTE: there's still a compile-time cost to including unnecessary headers
+#   (For example, even when the <charm++.h> header is precompiled, a bunch of
+#   time is still spent instantiate functions)
+#
+# Using a precompiled header will forcibly include all preparsed headers
+# inside a source file. If care isn't taken, this can unintentionally lead to
+# a source file knowing about symbols that it hasn't properly included.
+# Obviously, we REALLY want to avoid that scenario.
+#
+# For that reason, we are going to do something simple, we are just going to
+# precompile some of the expensive external headers included by cello.hpp.
+# - we will only use this for targets for which ALL source files include the
+#   cello.hpp file (as a rule of thumb, this should just be used when the
+#   cello_component target, defined below, is a public dependency). This saves
+#   time parsing the <vector> and <charm++.h> headers.
+# - In the worst case scenario, we are limiting the symbols can know about
+#   (that it shouldn't) to stuff in the std:: namespace and stuff from charm++
+#
+# Because it's good practice to make precompiled headers opt-in (since a given
+# file can only use 1 precompiled header), all targets that link to this to
+# target use a PRIVATE dependence (to avoid transitive dependence)
+add_library(cello_component_PCH INTERFACE)
+if(USE_PRECOMPILED_HEADERS)
+  target_precompile_headers(cello_component_PCH INTERFACE
+    <random> # this takes a shockingly long time to compile (and really
+             # shouldn't be in cello.hpp)
+    <string> <vector> <charm++.h> "\"pup_stl.h\""
+  )
+endif()
 
 #===============================================
 # Defining Cello-Component Targets step 2 (of 3)
@@ -139,10 +176,12 @@ target_link_libraries(parallel
 # (and rely upon on CMake's ability to handle such transitive dependencies for
 # us). This might help speed up incremental re-compilation
 
+
 # first, we define 2 targets that have "special names"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # These names were chosen to minimize confusion (we have other targets that
 # share similar names)
+
 
 # note: in the near future, we may make a separate target called something like
 # CELLO_COMBINED to represent the complete library that is composed of the
@@ -154,7 +193,9 @@ target_link_libraries (cello_component
   PUBLIC CHARM::CHARM_HEADERS # charm++.h included in public header
   PRIVATE charm_component error simulation # these private dependencies arise
                                            # from source files
+  PRIVATE cello_component_PCH # cello component-precompiled header
 )
+
 
 
 file(GLOB CHARM_COMP_SRC_FILES charm*.cpp *charm*.hpp)
@@ -178,7 +219,8 @@ target_include_directories (charm_component
 addCelloLib(compute "")
 target_link_libraries(compute
   PUBLIC cello_component charm_component error performance monitor memory
-         parallel disk io parameters problem mesh array data simulation
+         parallel disk io parameters problem mesh view data simulation
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -186,6 +228,7 @@ addCelloLib(control "")
 target_link_libraries(control
   PUBLIC cello_component charm_component
   PRIVATE simulation mesh # these arise from source files
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -193,7 +236,8 @@ target_link_libraries(control
 addCelloLib(data  "field_face_store.F")
 target_link_libraries(data
   PUBLIC cello_component charm_component error memory performance monitor
-         parallel disk problem mesh parameters io compute simulation array
+         parallel disk problem mesh parameters io compute simulation view
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -214,7 +258,8 @@ target_link_libraries(io
   PUBLIC Boost::filesystem pngwriter # with minimal refactoring, we could make
                                      # these into private dependencies
   PUBLIC cello_component charm_component parallel monitor performance error
-         parameters disk problem compute mesh array data simulation
+         parameters disk problem compute mesh view data simulation
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -225,7 +270,8 @@ target_link_libraries(memory PUBLIC error parallel monitor)
 addCelloLib(mesh "")
 target_link_libraries(mesh
   PUBLIC cello_component charm_component performance monitor parallel disk
-         parameters control io problem compute simulation array data
+         parameters control io problem compute simulation view data
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -258,14 +304,16 @@ endif()
 addCelloLib(problem "")
 target_link_libraries(problem
   PUBLIC cello_component charm_component error performance monitor memory
-         parallel disk io parameters compute control mesh array data simulation
+         parallel disk io parameters compute control mesh view data simulation
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 addCelloLib(simulation "")
 # somehow the main component needs to be a private dependency
 target_link_libraries(simulation
   PUBLIC cello_component charm_component error memory performance monitor
-         parallel disk problem mesh array data parameters io compute
+         parallel disk problem mesh view data parameters io compute
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -339,25 +387,20 @@ function(addUnitTestBinary BINNAME SRCS LIB TESTER)
   #   TESTER:    Tester target library (usually, this is tester_default,
   #              tester_mesh, OR tester_simulation)
 
-  add_executable(${BINNAME} ${SRCS})
-  target_link_libraries(${BINNAME} PUBLIC ${LIB} ${TESTER})
-  target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+  if (BUILD_TESTING)
+    # only declare the binary for a unit-test when BUILD_TESTING is ON (the
+    # default case)
+    add_executable(${BINNAME} ${SRCS})
+    target_link_libraries(${BINNAME} PUBLIC ${LIB} ${TESTER})
+    target_link_options(${BINNAME} PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+  endif()
 endfunction(addUnitTestBinary)
-
-
-
-# tests of the array component
-addUnitTestBinary(test_carr_collec "test_CArrCollec.cpp" array tester_default)
-addUnitTestBinary(test_cello_array "test_CelloArray.cpp" array tester_default)
-addUnitTestBinary(
-  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" array tester_default
-)
 
 # tests of the cello-component
 addUnitTestBinary(test_type "test_Type.cpp" cello_component tester_default)
 
 # tests of the disk component
-addUnitTestBinary(test_file_hdf5 "test_CArrCollec.cpp" disk tester_default)
+addUnitTestBinary(test_file_hdf5 "test_FileHdf5.cpp" disk tester_default)
 
 # tests of the error component
 addUnitTestBinary(test_error "test_Error.cpp" error tester_default)
@@ -412,6 +455,13 @@ addUnitTestBinary(test_timer "test_Timer.cpp" performance tester_default)
 if (use_papi)
   addUnitTestBinary(test_papi "test_Papi.cpp" performance tester_default)
 endif()
+
+# tests of the view component
+addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
+addUnitTestBinary(test_cello_view "test_CelloView.cpp" view tester_default)
+addUnitTestBinary(
+  test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" view tester_default
+)
 
 # the following test is broken (an API change is not reflected in the test)
 #addUnitTestBinary(test_index "test_Index.cpp" mesh tester_mesh)

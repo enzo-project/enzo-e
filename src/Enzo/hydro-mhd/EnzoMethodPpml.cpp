@@ -28,6 +28,14 @@ EnzoMethodPpml::EnzoMethodPpml()
   const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
   ASSERT("EnzoMethodPpml::EnzoMethodPpml",
          "incompatible with dual energy formalism", de_config.is_disabled());
+
+  // technically, the PPML solver doesn't directly use any of the functionality
+  // implemented by EnzoEOSIsothermal, (it implements the required
+  // functionality in fortran), but this check is here to ensure that the EOS
+  // is handled consistently by different Methods in a given Enzo-E simulation
+  ASSERT("EnzoMethodPpml::EnzoMethodPpml",
+         "PPML solver is currently incompatible with a non-isothermal EOS",
+         fluid_props->eos_variant().holds_alternative<EnzoEOSIsothermal>());
 }
 
 //----------------------------------------------------------------------

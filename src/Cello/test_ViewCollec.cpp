@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_CArrCollec.cpp
+/// @file     test_ViewCollec.cpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     2021-11-27
-/// @brief    Test program for the CArrCollec
+/// @brief    Test program for the ViewCollec
 
 #include "main.hpp"
 #include "test.hpp"
-#include "array.hpp"
+#include "view.hpp"
 
 #include <array>
 #include <utility> // for std::pair
@@ -18,7 +18,7 @@
 namespace {
 
   template<typename T>
-  void assign_range_3Darray(const CelloArray<T,3>& arr, T start, T step) {
+  void assign_range_3Darray(const CelloView<T,3>& arr, T start, T step) {
     int count = 0;
 
     const int mz = arr.shape(0);
@@ -37,24 +37,24 @@ namespace {
   }
 
   template<typename T>
-  CelloArray<T,3> range_3Darray(int mz, int my, int mx, T start, T step) {
-    CelloArray<T,3> out(mz,my,mx);
+  CelloView<T,3> range_3Darray(int mz, int my, int mx, T start, T step) {
+    CelloView<T,3> out(mz,my,mx);
     assign_range_3Darray(out, start, step);
     return out;
   }
 
   template<typename T>
-  class CArrCollecFactory {
+  class ViewCollecFactory {
   public:
-    CArrCollecFactory(bool single_array) : single_array_(single_array) { }
+    ViewCollecFactory(bool single_array) : single_array_(single_array) { }
 
-    CArrCollec<T> operator()(const std::array<int,3>& shape,
+    ViewCollec<T> operator()(const std::array<int,3>& shape,
                              const std::vector<std::pair<T,T>>& start_step_list)
       const noexcept
     {
       const std::size_t n_arrays = start_step_list.size();
-      if (n_arrays == 0){ return CArrCollec<T>(); }
-      CArrCollec<T> collection = init_collec_(n_arrays, shape);
+      if (n_arrays == 0){ return ViewCollec<T>(); }
+      ViewCollec<T> collection = init_collec_(n_arrays, shape);
 
       // now actually initialize the values
       for (std::size_t i = 0; i < n_arrays; i++){
@@ -69,17 +69,17 @@ namespace {
 
   private:
 
-    CArrCollec<T> init_collec_(std::size_t n_arrays,
+    ViewCollec<T> init_collec_(std::size_t n_arrays,
                                const std::array<int,3>& shape) const noexcept
     {
       if (single_array_){
-        return CArrCollec<T>(n_arrays, shape);
+        return ViewCollec<T>(n_arrays, shape);
       } else {
-        std::vector<CelloArray<T,3>> vec_of_arrays;
+        std::vector<CelloView<T,3>> vec_of_arrays;
         for (std::size_t i = 0; i < n_arrays; i++){
-          vec_of_arrays.push_back(CelloArray<T,3>(shape[0],shape[1],shape[2]));
+          vec_of_arrays.push_back(CelloView<T,3>(shape[0],shape[1],shape[2]));
         }
-        return CArrCollec<T>(vec_of_arrays);
+        return ViewCollec<T>(vec_of_arrays);
       }
     }
 
@@ -88,7 +88,7 @@ namespace {
   };
 
   template<typename T>
-  void assert_allequal3D(const CelloArray<T,3>& a, const CelloArray<T,3>& b) {
+  void assert_allequal3D(const CelloView<T,3>& a, const CelloView<T,3>& b) {
     ASSERT("assert_allequal3D",
            "The arrays don't have the same shape",
            (a.shape(0) == b.shape(0)) &&
@@ -113,8 +113,8 @@ namespace {
 
   // the contents of a and b don't need to be aliases to pass this assertion
   template<typename T>
-  void assert_allequal_array_elem(const CArrCollec<T>& a,
-                                  const CArrCollec<T>& b) {
+  void assert_allequal_array_elem(const ViewCollec<T>& a,
+                                  const ViewCollec<T>& b) {
     ASSERT("assert_allequal_array_elem",
            "The size of the collections are not the same.",
            a.size() == b.size());
@@ -123,7 +123,7 @@ namespace {
 
 
   template<typename T>
-  void common_checks_(const char* test_name, CArrCollec<T>& collec,
+  void common_checks_(const char* test_name, ViewCollec<T>& collec,
                       std::size_t n_arrays, const std::array<int,3>& shape,
                       bool expect_contiguous) noexcept
   {
@@ -142,7 +142,7 @@ namespace {
     }
 
     if (expect_contiguous){
-        CelloArray<T,4> backing_arr = collec.get_backing_array();
+        CelloView<T,4> backing_arr = collec.get_backing_array();
         ASSERT(test_name, "Unexpected backing_array() shape.",
                (backing_arr.shape(0) == n_arrays) &
                (backing_arr.shape(1) == shape[0]) &
@@ -170,7 +170,7 @@ class InitializationTests{
 
 private:
   void test_default_construction(){
-    CArrCollec<double> collec;
+    ViewCollec<double> collec;
 
     ASSERT("InitializationTests::test_default_construction",
            "a default-constructed collection should have 0 entries.",
@@ -184,14 +184,14 @@ private:
   // Where applicable it also helps test that the entries of the specified
   // collection alias any specified arrays
   //
-  // check_array_elem_values is a functor that accepts a CArrCollec<double>
+  // check_array_elem_values is a functor that accepts a ViewCollec<double>
   // reference and checks 
   // When alias_vec is not empty, this will check that the ith array in collec
   // is an alias of alias_vec
   template<typename F>
-  CArrCollec<double>* test_helper_
-  (const char* f_name, CArrCollec<double>& collec, F& check_array_elem_values,
-   const std::vector<CelloArray<double,3>>& alias_vec) const noexcept
+  ViewCollec<double>* test_helper_
+  (const char* f_name, ViewCollec<double>& collec, F& check_array_elem_values,
+   const std::vector<CelloView<double,3>>& alias_vec) const noexcept
   {
     std::size_t n_arrays = collec.size();
     std::array<int,3> shape{collec.array_shape(0),
@@ -201,14 +201,14 @@ private:
 
     // define a function to verify that the contents of the collection are
     // aliases of the arrays in vec
-    auto all_arrays_are_aliases = [=,&alias_vec](CArrCollec<double>& collec)
+    auto all_arrays_are_aliases = [=,&alias_vec](ViewCollec<double>& collec)
       {
         if (alias_vec.size() == 0) {
           return true;
         } else if (alias_vec.size() != n_arrays){
           ERROR(f_name,
-                "Ill-posed test, alias_vec should either hold no CelloArrays "
-                "or as many CelloArrays as collec");
+                "Ill-posed test, alias_vec should either hold no CelloViews "
+                "or as many CelloViews as collec");
         }
 
         for (std::size_t i = 0; i < n_arrays; i++){
@@ -224,7 +224,7 @@ private:
 
     // test the copy constructor
     {
-      CArrCollec<double> copied_collec(collec);
+      ViewCollec<double> copied_collec(collec);
       common_checks_(f_name, copied_collec, n_arrays, shape, expect_contiguous);
       check_array_elem_values(copied_collec);
       ASSERT(f_name, ("At least one array from the copy-constructed collection "
@@ -233,7 +233,7 @@ private:
     }
 
     // now, test the move constructor (and allocate the destination location)
-    CArrCollec<double>* out_ptr = new CArrCollec<double>(std::move(collec));
+    ViewCollec<double>* out_ptr = new ViewCollec<double>(std::move(collec));
     common_checks_("InitializationTests::test_wrap_existing", *out_ptr,
                    2, {5,4,3}, expect_contiguous);
     ASSERT(f_name, ("At least one array from the move-constructed collection "
@@ -245,12 +245,12 @@ private:
 
   /// test construction of a collection that wraps existing arrays
   void test_wrap_existing(){
-    CArrCollec<double>* collec_ptr = nullptr; // initialize for later use
+    ViewCollec<double>* collec_ptr = nullptr; // initialize for later use
 
     // initialize the reference values
-    CelloArray<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
-    CelloArray<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
-    auto check_array_elem_values = [&ref0, &ref1](CArrCollec<double>& collec)
+    CelloView<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
+    CelloView<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
+    auto check_array_elem_values = [&ref0, &ref1](ViewCollec<double>& collec)
       {
         assert_allequal3D(collec[0], ref0);
         assert_allequal3D(collec[1], ref1);
@@ -259,10 +259,10 @@ private:
 
     {
       // define the vector of arrays that will be wrapped
-      std::vector<CelloArray<double, 3>> vec{ref0.deepcopy(), ref1.deepcopy()};
+      std::vector<CelloView<double, 3>> vec{ref0.deepcopy(), ref1.deepcopy()};
 
       // initialize the collection
-      CArrCollec<double> temp_collec(vec);
+      ViewCollec<double> temp_collec(vec);
 
       // test properties of temp_collec
       common_checks_("InitializationTests::test_wrap_existing", temp_collec,
@@ -288,12 +288,12 @@ private:
 
   /// test construction of a collection that allocates it's own arrays
   void test_new_alloc(){
-    CArrCollec<double>* collec_ptr = nullptr; // initialize for later use
+    ViewCollec<double>* collec_ptr = nullptr; // initialize for later use
 
     // initialize the reference values
-    CelloArray<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
-    CelloArray<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
-    auto check_array_elem_values = [&ref0, &ref1](CArrCollec<double>& collec)
+    CelloView<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
+    CelloView<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
+    auto check_array_elem_values = [&ref0, &ref1](ViewCollec<double>& collec)
       {
         assert_allequal3D(collec[0], ref0);
         assert_allequal3D(collec[1], ref1);
@@ -301,7 +301,7 @@ private:
 
     {
       // initialize the collection
-      CArrCollec<double> temp_collec(2, {5,4,3});
+      ViewCollec<double> temp_collec(2, {5,4,3});
 
       // test properties of temp_collec
       common_checks_("InitializationTests::test_new_alloc", temp_collec,
@@ -337,8 +337,8 @@ private:
   /// this is more of a test of the factory methods than anything else
   void test_with_factories(){
     for (bool use_single_arr: {false, true}){
-      CArrCollecFactory<double> factory(use_single_arr);
-      CArrCollec<double> collec = factory({3,4,5},
+      ViewCollecFactory<double> factory(use_single_arr);
+      ViewCollec<double> collec = factory({3,4,5},
                                           {{1.,0.5}, {100., 2.}, {1000., 4.}});
 
       common_checks_("test_with_factories", collec, 3, {3,4,5}, use_single_arr);
@@ -364,27 +364,27 @@ class VariableAssignmentTests{
 
   template<bool test_copy_assignment>
   void test_assignment_helper_
-  (const CArrCollecFactory<double>& main_factory,
-   const CArrCollecFactory<double>& alt_factory,
+  (const ViewCollecFactory<double>& main_factory,
+   const ViewCollecFactory<double>& alt_factory,
    const std::array<int,3>& alt_shape,
    const std::vector<std::pair<double,double>>& alt_start_step_list)
   {
     std::string test_name;
 
     // initialize the destination variable
-    CArrCollec<double> dest_collec(alt_factory(alt_shape, alt_start_step_list));
+    ViewCollec<double> dest_collec(alt_factory(alt_shape, alt_start_step_list));
 
     // perform the assignment
     if (test_copy_assignment){
       test_name = "VariableAssignmentTests::test_assignment_helper_<true>";
       // make the source variable a constant so that the compiler cannot use
       // move assignment
-      const CArrCollec<double> src(main_factory({3,4,5},
+      const ViewCollec<double> src(main_factory({3,4,5},
                                                 {{1.,0.5}, {4.,2.}, {16.,4.}}));
       dest_collec = src;
     } else {
       test_name = "VariableAssignmentTests::test_assignment_helper_<false>";
-      CArrCollec<double> src(main_factory({3,4,5},
+      ViewCollec<double> src(main_factory({3,4,5},
                                           {{1.,0.5}, {4.,2.}, {16.,4.}}));
       dest_collec = std::move(src);
     }
@@ -394,9 +394,9 @@ class VariableAssignmentTests{
                    expect_contiguous);
   }
 
-  void test_assignment_(const CArrCollecFactory<double>& main_factory){
-    CArrCollecFactory<double> contig_factory(true);
-    CArrCollecFactory<double> wrapped_arr_factory(false);
+  void test_assignment_(const ViewCollecFactory<double>& main_factory){
+    ViewCollecFactory<double> contig_factory(true);
+    ViewCollecFactory<double> wrapped_arr_factory(false);
 
     // test copy assignment
     test_assignment_helper_<true>(main_factory, contig_factory,
@@ -414,8 +414,8 @@ class VariableAssignmentTests{
 public:
 
   void run_tests(){
-    test_assignment_(CArrCollecFactory<double>(true));
-    test_assignment_(CArrCollecFactory<double>(false));
+    test_assignment_(ViewCollecFactory<double>(true));
+    test_assignment_(ViewCollecFactory<double>(false));
   }
 
 };
@@ -428,7 +428,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  unit_class("CArrCollec");
+  unit_class("ViewCollec");
   
   InitializationTests init_tests;
   init_tests.run_tests();

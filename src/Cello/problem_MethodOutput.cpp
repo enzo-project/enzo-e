@@ -733,7 +733,7 @@ DataMsg * MethodOutput::create_data_msg_ (Block * block)
 
   // Create FieldFace object specifying fields to send
   FieldFace * field_face = block->create_face
-    (if3,ic3,g3, refresh_same, refresh, true);
+    (if3,ic3,g3, refresh_same, refresh);
 
   int gx=-1,gy=-1,gz=-1;
   field_face->ghost(&gx,&gy,&gz);

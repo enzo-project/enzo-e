@@ -167,8 +167,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cloud_metal_mass_frac,
        enzo_config->initial_cloud_initialize_uniform_bfield,
        enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_stddev,
-       enzo_config->initial_cloud_trunc_dev,
+       enzo_config->initial_cloud_perturb_Nwaves,
+       enzo_config->initial_cloud_perturb_amplitude,
+       enzo_config->initial_cloud_perturb_min_wavelength,
+       enzo_config->initial_cloud_perturb_max_wavelength,
        enzo_config->initial_cloud_perturb_seed);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
@@ -634,15 +636,18 @@ Method * EnzoProblem::create_method_
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
-      (enzo_config->physics_cosmology_initial_redshift,
+      (enzo_config->method_grackle_chemistry,
+       enzo_config->method_grackle_use_cooling_timestep,
+       enzo_config->method_grackle_radiation_redshift,
+       enzo_config->physics_cosmology_initial_redshift,
        enzo::simulation()->time());
 
 #endif /* CONFIG_USE_GRACKLE */
 
   } else if (name == "balance") {
-    
+
     method = new EnzoMethodBalance;
-    
+
   } else if (name == "turbulence") {
 
     method = new EnzoMethodTurbulence
@@ -749,7 +754,8 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_check_num_files,
        enzo_config->method_check_ordering,
        enzo_config->method_check_dir,
-       enzo_config->method_check_monitor_iter);
+       enzo_config->method_check_monitor_iter,
+       enzo_config->method_check_include_ghosts);
 
   } else if (name == "merge_sinks") {
 
@@ -882,7 +888,7 @@ Physics * EnzoProblem::create_physics_
       (
        enzo_config->physics_fluid_props_de_config,
        enzo_config->physics_fluid_props_fluid_floor_config,
-       enzo_config->physics_fluid_props_gamma,
+       enzo_config->physics_fluid_props_eos_variant,
        enzo_config->physics_fluid_props_mol_weight
        );
 

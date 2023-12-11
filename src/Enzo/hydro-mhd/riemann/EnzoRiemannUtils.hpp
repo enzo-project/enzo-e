@@ -18,114 +18,6 @@
 
 //----------------------------------------------------------------------
 
-namespace{
-
-  /// computes the squared magnitude of a 3D vector
-  ///
-  /// @note
-  /// This function uses parentheses to dictate the order of operations.
-  /// This is primarily done to take advantage of the `-fprotect-parens` flag
-  /// provided by several mainstream c++ compilers (e.g. gcc, clang, icpc).
-  /// This flag will honor the order of operations specified by parentheses
-  /// even when value-unsafe optimizations for floating-point operations are
-  /// enabled (e.g. -ffast-math).
-  FORCE_INLINE enzo_float squared_mag_vec3D(enzo_float i,
-                                            enzo_float j,
-                                            enzo_float k) noexcept
-  { return ((i*i) + ((j*j) + (k*k))); }
-
-}
-
-//----------------------------------------------------------------------
-
-struct EOSStructIdeal{
-  /// @class    EOSStructIdeal
-  /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulates the equation of state for an ideal gas
-  ///           (a.k.a. a calorically perfect gas).
-  ///
-  /// The plan is to replace EnzoEOSIdeal with new, lighter-weight machinery
-  /// that makes use of structs like this one.
-  ///
-  /// Instances of this class are expected to typically be declared `const`
-  ///
-  /// @note
-  /// Currently all members are public so that this can act as an aggregate in
-  /// order to make constructors/destructors trivial (and cheap!).
-  ///
-  /// @note
-  /// For performance purposes, we may want to consider the inverse of
-  /// `(gamma - 1)` as a separate member.
-
-public:
-  /// stores the adiabtic index
-  enzo_float gamma;
-
-private:
-
-  /// computes the sound speed squared
-  FORCE_INLINE enzo_float sound_speed_sq_(const enzo_float density,
-                                          const enzo_float pressure) const
-    noexcept
-  { return gamma * pressure / density; }
-
-public:
-
-  /// returns the adiabatic index
-  FORCE_INLINE enzo_float get_gamma() const noexcept { return gamma; }
-
-  /// computes the specific internal energy
-  FORCE_INLINE enzo_float specific_eint(const enzo_float density,
-                                        const enzo_float pressure) const
-    noexcept
-  { return pressure / ( (gamma - 1.0) * density); }
-
-  /// computes the internal energy density
-  FORCE_INLINE enzo_float eint_dens(const enzo_float density,
-                                    const enzo_float pressure) const noexcept
-  { return pressure / (gamma - 1.0); }
-
-  /// computes the adiabatic sound speed
-  FORCE_INLINE enzo_float sound_speed(const enzo_float density,
-                                      const enzo_float pressure) const noexcept
-  { return std::sqrt(sound_speed_sq_(density, pressure)); }
-
-  /// computes the fast magnetosonic speed
-  ///
-  /// @tparam fixed_cos2 When set to -1, this has no effect. When set to 0 or
-  ///     to 1, this fixes cos2 to that value
-  ///
-  /// This method has been implemented so that it will return the correct
-  /// answer when all components of the magnetic field are set to 0.
-  template<int fixed_cos2 = -1>
-  inline enzo_float fast_magnetosonic_speed(const enzo_float density,
-                                            const enzo_float pressure,
-                                            const enzo_float bfield_i,
-                                            const enzo_float bfield_j,
-                                            const enzo_float bfield_k)
-    const noexcept
-  {
-    const enzo_float B2 = squared_mag_vec3D(bfield_i, bfield_j, bfield_k);
-    const enzo_float cs2 = sound_speed_sq_(density, pressure);
-
-    // the following branch is evaluated at compile-time
-    if ((fixed_cos2 == 0) | (fixed_cos2 == 1)){
-      enzo_float va2 = B2/density;
-      return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
-                                              4.*cs2*va2*fixed_cos2)));
-    } else {
-      const enzo_float inv_density = 1.0/density;
-      const enzo_float va2 = B2 * inv_density;
-      const enzo_float va2_cos2 = (bfield_i*bfield_i) * inv_density;
-      return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
-                                              4.*cs2*va2_cos2)));
-    }
-  }
-
-};
-
-//----------------------------------------------------------------------
-
 namespace enzo_riemann_utils{
 
   /// Computes the magnetic pressure
@@ -137,7 +29,7 @@ namespace enzo_riemann_utils{
     enzo_float bi = (LUT::bfield_i >= 0) ? prim[LUT::bfield_i] : 0;
     enzo_float bj = (LUT::bfield_j >= 0) ? prim[LUT::bfield_j] : 0;
     enzo_float bk = (LUT::bfield_k >= 0) ? prim[LUT::bfield_k] : 0;
-    return 0.5 * squared_mag_vec3D(bi, bj, bk);
+    return 0.5 * enzo_utils::squared_mag_vec3D(bi, bj, bk);
   }
 
   //----------------------------------------------------------------------
@@ -155,7 +47,7 @@ namespace enzo_riemann_utils{
   /// We might want to consolidate this with active_fluxes
   template <class LUT>
   inline lutarray<LUT> compute_conserved(const lutarray<LUT> prim,
-                                         const EOSStructIdeal& eos) noexcept
+                                         const EnzoEOSIdeal& eos) noexcept
   {
     lutarray<LUT> cons;
 
@@ -179,7 +71,7 @@ namespace enzo_riemann_utils{
       const enzo_float vj = prim[LUT::velocity_j];
       const enzo_float vk = prim[LUT::velocity_k];
       const enzo_float kinetic_edens
-        = 0.5 * density * squared_mag_vec3D(vi, vj, vk);
+        = 0.5 * density * enzo_utils::squared_mag_vec3D(vi, vj, vk);
 
       enzo_float magnetic_edens = mag_pressure<LUT>(prim);
 
@@ -199,7 +91,7 @@ namespace enzo_riemann_utils{
   template <class LUT, int fixed_cos2 = -1>
   inline enzo_float fast_magnetosonic_speed(const lutarray<LUT> prim_vals,
                                             enzo_float pressure,
-                                            const EOSStructIdeal& eos) noexcept
+                                            const EnzoEOSIdeal& eos) noexcept
   {
     if (!LUT::has_bfields){
       return eos.sound_speed(prim_vals[LUT::density], pressure);
@@ -347,7 +239,7 @@ namespace enzo_riemann_utils{
                                              const enzo_float pressure_l,
                                              const enzo_float density_r,
                                              const enzo_float pressure_r,
-                                             const EOSStructIdeal& eos,
+                                             const EnzoEOSIdeal& eos,
                                              const enzo_float density_flux)
     noexcept
   {
@@ -375,7 +267,7 @@ namespace enzo_riemann_utils{
   static void solve_passive_advection
   (const EnzoEFltArrayMap &prim_map_l, const EnzoEFltArrayMap &prim_map_r,
    EnzoEFltArrayMap &flux_map,
-   const CelloArray<const enzo_float,3> &density_flux,
+   const CelloView<const enzo_float,3> &density_flux,
    const int stale_depth, const str_vec_t &passive_list) noexcept
   {
     const std::size_t num_keys = passive_list.size();
@@ -384,10 +276,10 @@ namespace enzo_riemann_utils{
     // This was essentially transcribed from hydro_rk in Enzo:
 
     // load array of fields
-    CelloArray<const enzo_float, 3> *wl_arrays =
-      new CelloArray<const enzo_float, 3>[num_keys];
-    CelloArray<const enzo_float, 3> *wr_arrays =
-      new CelloArray<const enzo_float, 3>[num_keys];
+    CelloView<const enzo_float, 3> *wl_arrays =
+      new CelloView<const enzo_float, 3>[num_keys];
+    CelloView<const enzo_float, 3> *wr_arrays =
+      new CelloView<const enzo_float, 3>[num_keys];
     EFlt3DArray *flux_arrays = new EFlt3DArray[num_keys];
 
     for (std::size_t ind=0; ind<num_keys; ind++){
@@ -442,8 +334,8 @@ namespace enzo_riemann_utils{
     /// If the scratch-space arrays have not been pre-allocated, they will be
     /// allocated by this method
     void get_arrays(int mx, int my, int mz,
-                    CelloArray<enzo_float,3>& internal_energy_flux,
-                    CelloArray<enzo_float,3>& velocity_i_bar_array) noexcept
+                    CelloView<enzo_float,3>& internal_energy_flux,
+                    CelloView<enzo_float,3>& velocity_i_bar_array) noexcept
     {
       if (internal_energy_flux_.is_null()){
         // make the scratch space bigger than necessary (since the shape will
@@ -468,8 +360,8 @@ namespace enzo_riemann_utils{
 
   private: // attributes
 
-    CelloArray<enzo_float,3> internal_energy_flux_;
-    CelloArray<enzo_float,3> velocity_i_bar_array_;
+    CelloView<enzo_float,3> internal_energy_flux_;
+    CelloView<enzo_float,3> velocity_i_bar_array_;
   };
 
   //----------------------------------------------------------------------
@@ -481,10 +373,10 @@ namespace enzo_riemann_utils{
   /// data, even if we don't technically need it, in order to avoid branching
   static void prep_dual_energy_arrays_
   (bool calculate_internal_energy_flux, EnzoEFltArrayMap &flux_map,
-   const CelloArray<enzo_float,3> * const interface_velocity,
+   const CelloView<enzo_float,3> * const interface_velocity,
    ScratchArrays_ * ptr,
-   CelloArray<enzo_float,3>& internal_energy_flux,
-   CelloArray<enzo_float,3>& velocity_i_bar_array)
+   CelloView<enzo_float,3>& internal_energy_flux,
+   CelloView<enzo_float,3>& velocity_i_bar_array)
   {
     if ((calculate_internal_energy_flux) && (interface_velocity == nullptr)){
       ERROR("EnzoRiemannImpl2::solve",

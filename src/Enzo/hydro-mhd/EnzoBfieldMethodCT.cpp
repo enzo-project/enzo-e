@@ -11,10 +11,10 @@
 //----------------------------------------------------------------------
 
 namespace{
-  std::array<CelloArray<const enzo_float,3>,3> immutable_arr_of_EFlt3DArray
-    (const std::array<CelloArray<enzo_float,3>,3>& arg) noexcept
+  std::array<CelloView<const enzo_float,3>,3> immutable_arr_of_EFlt3DArray
+    (const std::array<CelloView<enzo_float,3>,3>& arg) noexcept
   {
-    std::array<CelloArray<const enzo_float,3>, 3> out;
+    std::array<CelloView<const enzo_float,3>, 3> out;
     for (std::size_t i = 0; i < 3; i++){ out[i] = arg[i]; }
     return out;
   }
@@ -186,13 +186,13 @@ void EnzoBfieldMethodCT::identify_upwind(const EnzoEFltArrayMap &flux_map,
     ERROR("EnzoBfieldMethodCT::identify_upwind",
           "dim has an invalid value");
   } else {
-    const CelloArray<const enzo_float, 3> density_flux = flux_map.get
+    const CelloView<const enzo_float, 3> density_flux = flux_map.get
       ("density", stale_depth);
 
     CSlice stale_slc = (stale_depth > 0) ?
       CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
-    const CelloArray<enzo_float, 3> weight_field =
+    const CelloView<enzo_float, 3> weight_field =
       weight_l_[dim].subarray(stale_slc, stale_slc, stale_slc);
 
     // Iteration limits compatible with both 2D and 3D grids
@@ -277,10 +277,10 @@ void EnzoBfieldMethodCT::compute_center_efield
   int k = coord.k_axis();
 
   // Load the jth and kth components of the velocity and cell-centered bfield
-  const CelloArray<const enzo_float, 3> vel_j = integration_map.at(v_names[j]);
-  const CelloArray<const enzo_float, 3> vel_k = integration_map.at(v_names[k]);
-  const CelloArray<const enzo_float, 3> b_j = integration_map.at(b_names[j]);
-  const CelloArray<const enzo_float, 3> b_k = integration_map.at(b_names[k]);
+  const CelloView<const enzo_float, 3> vel_j = integration_map.at(v_names[j]);
+  const CelloView<const enzo_float, 3> vel_k = integration_map.at(v_names[k]);
+  const CelloView<const enzo_float, 3> b_j = integration_map.at(b_names[j]);
+  const CelloView<const enzo_float, 3> b_k = integration_map.at(b_names[k]);
 
   for (int iz=stale_depth; iz<efield.shape(0)-stale_depth; iz++) {
     for (int iy=stale_depth; iy<efield.shape(1)-stale_depth; iy++) {
@@ -385,19 +385,19 @@ void EnzoBfieldMethodCT::compute_center_efield
 template<bool negate_Ej>
 void compute_edge_(int xstart, int ystart, int zstart,
 		   int xstop, int ystop, int zstop,
-		   const CelloArray<enzo_float, 3> &Eedge,
-		   const CelloArray<const enzo_float, 3> &Wj,
-		   const CelloArray<const enzo_float, 3> &Wj_kp1,
-		   const CelloArray<const enzo_float, 3> &Wk,
-		   const CelloArray<const enzo_float, 3> &Wk_jp1,
-		   const CelloArray<const enzo_float, 3> &Ec,
-		   const CelloArray<const enzo_float, 3> &Ec_jkp1,
-		   const CelloArray<const enzo_float, 3> &Ec_jp1,
-		   const CelloArray<const enzo_float, 3> &Ec_kp1,
-		   const CelloArray<const enzo_float, 3> &Ej,
-		   const CelloArray<const enzo_float, 3> &Ej_kp1,
-		   const CelloArray<const enzo_float, 3> &Ek,
-		   const CelloArray<const enzo_float, 3> &Ek_jp1)
+		   const CelloView<enzo_float, 3> &Eedge,
+		   const CelloView<const enzo_float, 3> &Wj,
+		   const CelloView<const enzo_float, 3> &Wj_kp1,
+		   const CelloView<const enzo_float, 3> &Wk,
+		   const CelloView<const enzo_float, 3> &Wk_jp1,
+		   const CelloView<const enzo_float, 3> &Ec,
+		   const CelloView<const enzo_float, 3> &Ec_jkp1,
+		   const CelloView<const enzo_float, 3> &Ec_jp1,
+		   const CelloView<const enzo_float, 3> &Ec_kp1,
+		   const CelloView<const enzo_float, 3> &Ej,
+		   const CelloView<const enzo_float, 3> &Ej_kp1,
+		   const CelloView<const enzo_float, 3> &Ek,
+		   const CelloView<const enzo_float, 3> &Ek_jp1)
 {
   for (int iz = zstart; iz < zstop; iz++){
     for (int iy = ystart; iy < ystop; iy++){
@@ -479,10 +479,10 @@ void compute_edge_(int xstart, int ystart, int zstart,
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
 void EnzoBfieldMethodCT::compute_edge_efield
-(int dim, const CelloArray<const enzo_float, 3> &center_efield,
- const CelloArray<enzo_float, 3> &edge_efield,
+(int dim, const CelloView<const enzo_float, 3> &center_efield,
+ const CelloView<enzo_float, 3> &edge_efield,
  const EnzoEFltArrayMap &jflux_map, const EnzoEFltArrayMap &kflux_map,
- const std::array<CelloArray<const enzo_float, 3>,3> &weight_l, int stale_depth)
+ const std::array<CelloView<const enzo_float, 3>,3> &weight_l, int stale_depth)
 {
 
   EnzoPermutedCoordinates coord(dim);
@@ -497,7 +497,7 @@ void EnzoBfieldMethodCT::compute_edge_efield
   // Initialize edge-centered Efield [it maps (k,j,i) -> (k+1/2,j+1/2,i)]
   EFlt3DArray Eedge = edge_efield.subarray(stale_slc, stale_slc, stale_slc);
 
-  using RdOnlyEFlt3DArray = CelloArray<const enzo_float, 3>;
+  using RdOnlyEFlt3DArray = CelloView<const enzo_float, 3>;
 
   // Initialize Cell-Centered E-fields
   const RdOnlyEFlt3DArray Ec = center_efield.subarray(stale_slc, stale_slc,
@@ -563,7 +563,7 @@ void EnzoBfieldMethodCT::compute_all_edge_efields
   (const EnzoEFltArrayMap &integration_map, const EnzoEFltArrayMap &xflux_map,
    const EnzoEFltArrayMap &yflux_map, const EnzoEFltArrayMap &zflux_map,
    EFlt3DArray &center_efield, std::array<EFlt3DArray,3> &edge_efield_l,
-   const std::array< CelloArray<const enzo_float, 3>, 3> &weight_l,
+   const std::array< CelloView<const enzo_float, 3>, 3> &weight_l,
    int stale_depth)
 {
 
@@ -617,9 +617,9 @@ void EnzoBfieldMethodCT::compute_all_edge_efields
 //   E_j_term(k,j,i+1/2) = dt/dk*(ej_Rk(k,j,i) - ej_Lk(k,j,i))
 void EnzoBfieldMethodCT::update_bfield
 (const enzo_float* &cell_widths, int dim,
- const std::array<CelloArray<const enzo_float, 3>,3> &efield_l,
- const CelloArray<enzo_float, 3> &cur_interface_bfield,
- const CelloArray<enzo_float, 3> &out_interface_bfield,
+ const std::array<CelloView<const enzo_float, 3>,3> &efield_l,
+ const CelloView<enzo_float, 3> &cur_interface_bfield,
+ const CelloView<enzo_float, 3> &out_interface_bfield,
  enzo_float dt, int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
@@ -632,12 +632,12 @@ void EnzoBfieldMethodCT::update_bfield
       CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
   // Load edge centered efields 
-  CelloArray<const enzo_float, 3> E_j, ej_Lk, ej_Rk, E_k, ek_Lj, ek_Rj;
+  CelloView<const enzo_float, 3> E_j, ej_Lk, ej_Rk, E_k, ek_Lj, ek_Rj;
   E_j = efield_l[coord.j_axis()].subarray(stale_slc, stale_slc, stale_slc);
   E_k = efield_l[coord.k_axis()].subarray(stale_slc, stale_slc, stale_slc);
 
   // Load interface bfields (includes exterior faces)
-  CelloArray<enzo_float, 3> cur_bfield, bcur, out_bfield, bout;
+  CelloView<enzo_float, 3> cur_bfield, bcur, out_bfield, bout;
   cur_bfield = cur_interface_bfield.subarray(stale_slc, stale_slc, stale_slc);
   out_bfield = out_interface_bfield.subarray(stale_slc, stale_slc, stale_slc);
 
@@ -701,21 +701,21 @@ void EnzoBfieldMethodCT::update_bfield
 //   Bi_left(k,j,i)    ->  B_i(k,j,i+1/2)
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoBfieldMethodCT::compute_center_bfield
-(int dim, const CelloArray<enzo_float,3> &bfieldc_comp,
- const CelloArray<const enzo_float,3> &bfieldi_comp, int stale_depth)
+(int dim, const CelloView<enzo_float,3> &bfieldc_comp,
+ const CelloView<const enzo_float,3> &bfieldi_comp, int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
   CSlice stale_slc = (stale_depth > 0) ?
       CSlice(stale_depth,-stale_depth) : CSlice(nullptr, nullptr);
 
   // Load Cell-centered fields
-  const CelloArray<enzo_float,3> b_center
+  const CelloView<enzo_float,3> b_center
     = bfieldc_comp.subarray(stale_slc,stale_slc,stale_slc);
   // Load Face-centered fields
-  const CelloArray<const enzo_float,3> bi_left
+  const CelloView<const enzo_float,3> bi_left
     = bfieldi_comp.subarray(stale_slc,stale_slc,stale_slc);
   // Get the view of the Face-center B-field that starting from i=1
-  const CelloArray<const enzo_float,3> bi_right
+  const CelloView<const enzo_float,3> bi_right
     = coord.left_edge_offset(bi_left,0,0,1);
 
   // iteration limits are compatible with a 2D grid and 3D grid
