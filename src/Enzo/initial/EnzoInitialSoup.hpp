@@ -90,11 +90,6 @@ public: // virtual functions
   virtual void enforce_block
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
-  /// Return whether enforce() expects block != NULL
-  virtual bool expects_blocks_allocated() const throw()
-  { return true; }
-
-
 private: // functions
 
 private: // attributes

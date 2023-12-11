@@ -349,16 +349,29 @@ specified in one of 2 ways:
    have been initialized by another Initial subgroup (e.g. value)
    prior to the call of this subgroup.
 
-The initial density of a cell (from a uniform-resolution mesh) is
-initialized to
-:math:`f_{V} \rho_{\rm cl} \delta + (1 - f_{\rm V})\rho_{\rm w}`,
-where :math:`f_{V}` is the fraction of the cell's volume enclosed
-by the cloud (estimated by subsampling) and :math:`\delta` is
-nominally `1`. Machinery is provided to optionally produce
-perturbations to break symmetries in the initial density
-distribution. When this machinery is used, :math:`\delta` is
-randomly drawn from a truncated Gaussian with :math:`\mu=1`.
-Pressure equilibria is maintained when this machinery is used.
+The initial density of a cell entirely enclosed by the cloud is the spatial average taken over that cell of :math:`\rho_{\rm cl} (1 + \delta (\vec{x}))`, where :math:`\delta (\vec{x})` is a spatially varying perturbation term that we will return to momentarily.
+Outside of the cloud, we initialize the density to :math:`\rho_{\rm w}`.
+
+We use subsampling near the edge of cloud to estimate the fraction of the cell's volume occupied by the cloud, :math:`f_{V}`.
+In more detail, we initialize the density of these cells to :math:`f_{V} \rho_{\rm inside-avg} + (1 - f_{\rm V})\rho_{\rm w}`, where :math:`\rho_{\rm inside-avg}` is the average of :math:`\rho_{\rm cl} (1 + \delta (\vec{x}))` taken over all subcells that lie within the cloud.
+
+Now, we consider the definition of the perturbation term that can be used to break symmetries in the cloud's initial density distribution.
+This is a sum of :math:`N` planar waves or: 
+:math:`\delta (\vec{x}) = A \sum_{i=1}^{N} \cos \left(\frac{2 \pi}{\lambda_{i}} \hat{e}_i \cdot \vec{x} + \phi_i\right)`, where
+
+* :math:`N` is set by :par:param:`~Initial:cloud:perturb_Nwaves`
+* :math:`A` is set by :par:param:`~Initial:cloud:perturb_amplitude`
+* for each :math:`i` we draw a random unit vector :math:`\hat{e}_i`, as well as random values for :math:`\lambda_{i}` and :math:`\phi_i` from :math:`[\lambda_{\rm min}, \lambda_{\rm max}]` and :math:`[0,\pi)`.
+  :math:`\lambda_{\rm min}` and :math:`\lambda_{\rm max}` are set by the parameters :par:param:`~Initial:cloud:perturb_min_lambda` and :par:param:`~Initial:cloud:perturb_max_lambda`.
+  As an aside, :math:`\phi_i` doesn't need to sample values within the interval :math:`[\pi, 2\pi)` since :math:`\hat{e}_i` samples all directions.
+
+The random values are all drawn from uniform distributions using a PRNG seeded by the value of :par:param:`~Initial:cloud:perturb_seed`.
+
+.. note::
+
+   The randomly drawn values should be portable across different machines.
+   But, this has not been rigorously tested.
+
 
 .. par:parameter:: Initial:cloud:subsample_n
 
@@ -503,36 +516,6 @@ Pressure equilibria is maintained when this machinery is used.
 
 ----
 
-.. par:parameter:: Initial:cloud:perturb_standard_deviation
-
-   :Summary: :s:`standard deviation used for perturbations`
-   :Type:    :par:typefmt:`float`
-   :Default: :d:`0`
-   :Scope:   Enzo
-
-   :e:`This must be either 0 or a positive value. In the former case, the
-   perturbation machinery is not used. In the latter case, it gives the
-   standard deviation of the truncated gaussian for truncation (technically,
-   it's the standard deviation of the gaussian before truncation).`
-
-----
-
-.. par:parameter:: Initial:cloud:perturb_truncation_deviation
-
-   :Summary: :s:`number of deviation where perturbation gaussian is truncated`
-   :Type:    :par:typefmt:`float`
-   :Default: :d:`0`
-   :Scope:   Enzo
-
-   :e:`Meaningless unless Initial:cloud:perturb_standard_deviation is
-   positive. This must be either 0 or a positive value. In the former
-   case, the gaussian is not truncated (nominally allowing the
-   possibility of negative values). In the latter case, this determines
-   the number of standard deviations from the mean at which the gaussian
-   should be truncated.`
-
-----
-
 .. par:parameter:: Initial:cloud:perturb_seed
 
    :Summary: :s:`Seeds the perturbations to cloud density`
@@ -540,17 +523,54 @@ Pressure equilibria is maintained when this machinery is used.
    :Default: :d:`0`
    :Scope:   Enzo
 
-   :e:`This must be a zero or larger. Meaningless unless
-   Initial:cloud:perturb_standard_deviation is positive.`
+   :e:`This must hold a value representable by a 32-bit unsigned integer.
+   It is meaningless unless` :par:param:`~Initial:cloud:perturb_Nwaves` :e:`and` :par:param:`~Initial:cloud:perturb_amplitude` :e:`are positive.`
 
-      .. warning::
+----
 
-         Due to reliance on ``std::normal_distribution`` the perturbations are
-         not currently guaranteed to be the same (when the seed is the same) for
-         different compilers or versions of the c++ standard library.
+.. par:parameter:: Initial:cloud:perturb_Nwaves
 
-         Changes in the grid resolution, domain size, way that mesh is divided
-         across root blocks, or ghost depth will also affect the perturbations.
+   :Summary: :s:`Number of planar waves to use in perturbation machinery`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`0`
+   :Scope:   Enzo
+
+   :e:`This should be zero or larger.`
+
+----
+
+.. par:parameter:: Initial:cloud:perturb_amplitude
+
+   :Summary: :s:`Planar wave amplitude to use in perturbation machinery`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`0.0`
+   :Scope:   Enzo
+
+   :e:`This must be a non-negative value`
+
+----
+
+.. par:parameter:: Initial:cloud:perturb_min_lambda
+
+   :Summary: :s:`Lower bound on wavelengths used in perturbation machinery`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
+
+   :e:`This must be a non-negative value and must be less than` :par:param:`~Initial:cloud:perturb_max_lambda`.
+   :e:`It is meaningless unless` :par:param:`~Initial:cloud:perturb_Nwaves` :e:`and` :par:param:`~Initial:cloud:perturb_amplitude` :e:`are positive.`
+
+----
+
+.. par:parameter:: Initial:cloud:perturb_max_lambda
+
+   :Summary: :s:`Upper bound on wavelengths used in perturbation machinery`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:   Enzo
+
+   :e:`This must be a non-negative value and must exceed` :par:param:`~Initial:cloud:perturb_min_lambda`.
+   :e:`It is meaningless unless` :par:param:`~Initial:cloud:perturb_Nwaves` :e:`and` :par:param:`~Initial:cloud:perturb_amplitude` :e:`are positive.`
 
 ----
 
