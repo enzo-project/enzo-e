@@ -166,3 +166,21 @@ parameter, which has allowed values :code:`none` (default),
 adaptive time stepping). The type can be a list containing both
 :code:`block` and :code:`method`.
 
+====================
+Supercycling Gravity
+====================
+
+.. figure:: supercycle-gravity.png
+           :width: 688
+
+           This figure shows two possible variations of supercycling
+           gravity. Squares represent hydro solves, circles represent
+           gravity potential solves, and trangles represent
+           acceleration computations.  Time runs horizontally
+           left-to-right.  On the left is traditional
+           (non-supercycled) gravity, where gravity solves are
+           computed at times t+dt/2 aligned with accelerations.  In
+           the upper-right variation, gravity is aligned with every
+           other acceleration step ("a-aligned"); in the lower-right
+           variation, gravity is aligned with every other hydro step
+           (h-aligned).
