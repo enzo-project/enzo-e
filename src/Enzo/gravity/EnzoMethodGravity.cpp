@@ -5,8 +5,7 @@
 /// @date     2016-11-07
 /// @brief    Implements the EnzoMethodGravity class
 
-
-// #define FIELD_VALUES_TIME
+// #define TEST_FIELD_VALUES_TIME
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -142,7 +141,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 #ifdef DEBUG_COPY_B
   const int ib_copy = field.field_id ("B_copy");
   enzo_float * B_copy = (enzo_float*) field.values (ib_copy);
-#endif  
+#endif
 #ifdef DEBUG_COPY_DENSITIES  
   const int id_copy = field.field_id ("D_copy");
   const int idt_copy = field.field_id ("DT_copy");
@@ -152,13 +151,66 @@ void EnzoMethodGravity::compute(Block * block) throw()
 #endif  
 
   double time = block->time();
-#ifdef FIELD_VALUES_TIME
-  auto D = field.values("density",time);
-#else  
-  enzo_float * D = (enzo_float*) field.values (idensity);
+  enzo_float * D;
+  // default current time
+  D = (enzo_float*) field.values (idensity);
+#ifdef TEST_FIELD_VALUES_TIME
+  if (block->cycle() > 0) {
+    // if history available use given time
+    const double t0 = field.history_time(0);
+    const double t1 = field.history_time(1);
+    enzo_float * d0 = (enzo_float *) field.values("density",0);
+    enzo_float * d1 = (enzo_float *) field.values("density",1);
+    double a0e=-0.25;
+    double ai=0.25;
+    double a1e=1.25;
+    const double ti = (ai*t0 + (1.0-ai)*t1);
+    const double t0e = (a0e*t0 + (1.0-a0e)*t1);
+    const double t1e = (a1e*t0 + (1.0-a1e)*t1);
+    auto D0e = field.values_at<enzo_float>("density",t0e);
+    auto D0 = field.values_at<enzo_float>("density",t0);
+    auto DI = field.values_at<enzo_float>("density",ti);
+    auto D1 = field.values_at<enzo_float>("density",t1);
+    auto D1e = field.values_at<enzo_float>("density",t1e);
+    double s0e=0, s0ec=0;
+    double s0=0, s0c=0;
+    double si=0, sic=0;
+    double s1=0, s1c=0;
+    double s1e=0, s1ec=0;
+    for (int i=0; i<m; i++) {
+      s0e += a0e*d0[i] + (1.0-a0e)*d1[i];
+      s0ec += D0e[i];
+      s0 += d0[i];
+      s0c += D0[i];
+      si += ai*d0[i] + (1.0-ai)*d1[i];
+      sic += DI[i];
+      s1 += d1[i];
+      s1c += D1[i];
+      s1e += a1e*d0[i] + (1.0-a1e)*d1[i];
+      s1ec += D1e[i];
+    }
+    CkPrintf ("DEBUG_FIELD time %g %g\n",t0,t1);
+    CkPrintf ("DEBUG_FIELD %s sum  %g %g\n",block->name().c_str(),s0,s1);
+    CkPrintf ("DEBUG_FIELD %s D0e %20.16g %20.16g\n",
+              block->name().c_str(),s0e,s0ec);
+    CkPrintf ("DEBUG_FIELD %s D0 %20.16g %20.16g\n",
+              block->name().c_str(),s0,s0c);
+    CkPrintf ("DEBUG_FIELD %s DI %20.16g %20.16g\n",
+              block->name().c_str(),si,sic);
+    CkPrintf ("DEBUG_FIELD %s D1 %20.16g %20.16g\n",
+              block->name().c_str(),s1,s1c);
+    CkPrintf ("DEBUG_FIELD %s D1e %20.16g %20.16g\n",
+              block->name().c_str(),s1e,s1ec);
+    CkPrintf ("DEBUG_FIELD field %p %p\n",d0,d1);
+  }
 #endif
 
-  for (int i=0; i<m; i++) D[i] += B[i];
+  double ds=0,bs=0;
+  for (int i=0; i<m; i++) {
+    D[i] += B[i];
+    ds+=D[i];
+    bs+=B[i];
+  }
 
   // Add density_particle values to density_particle_accumulate ghosts
 
@@ -184,7 +236,15 @@ void EnzoMethodGravity::compute(Block * block) throw()
 	}
       }
     } else {
-      field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
+      const double scale = -4.0 * (cello::pi) * grav_const_;
+      for (int iz=0; iz<mz; iz++) {
+        for (int iy=0; iy<my; iy++) {
+          for (int ix=0; ix<mx; ix++) {
+            const int i = ix + mx*(iy + my*iz);
+            B[i] = scale * D[i];
+          }
+        }
+      }
     }
 
   } else {

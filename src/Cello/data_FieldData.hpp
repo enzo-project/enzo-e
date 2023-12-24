@@ -69,12 +69,13 @@ public: // interface
 		       std::string name, int history=0) const throw ()
   { return values (field_descr,field_descr->field_id(name),history); }
 
-  std::shared_ptr<char[]> values (const FieldDescr * field_descr,
+  template <class T>
+  std::shared_ptr<T[]> values_at (const FieldDescr * field_descr,
                                   int id_field, double time);
-  std::shared_ptr<char[]> values (const FieldDescr * field_descr,
-                                  std::string name, double time)
-  { return values (field_descr,field_descr->field_id(name),time); }
-
+  template <class T>
+  std::shared_ptr<T[]> values_at (const FieldDescr * field_descr,
+                                  std::string name, double time);
+  
   /// Return a CelloView that acts as a view of the corresponding field
   ///
   /// If the field cannot be found the program will abort with an error.
@@ -278,14 +279,14 @@ public: // interface
   /// Initialize "current" fields to given time
   void init_history_time (const FieldDescr *, double time)
   {
-    //    history_time_[0] = time;
+    history_time_[0] = time;
   }
 
   /// Return time for given history
   double history_time (const FieldDescr * field_descr, int ih) const
   {
     const int nh = field_descr->num_history();
-    return (1 <= ih && ih <= nh) ? history_time_[ih-1] : 0.0;
+    return (0 <= ih && ih <= nh) ? history_time_[ih] : 0.0;
   }
 
   //----------------------------------------------------------------------

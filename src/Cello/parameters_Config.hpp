@@ -488,8 +488,8 @@ public: // attributes
   int                        num_method;
   double                     method_courant_global;
   std::vector<std::string>   method_list;
-  std::vector<double>        method_dt_ratio_min;
-  std::vector<double>        method_dt_ratio_max;
+  std::vector<int>           method_dt_ratio_min;
+  std::vector<int>           method_dt_ratio_max;
 
   std::vector<int>           method_schedule_index;
 

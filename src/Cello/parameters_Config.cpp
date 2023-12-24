@@ -841,13 +841,13 @@ void Config::read_method_ (Parameters * p) throw()
 
     method_list[index_method] = name;
 
-    // Read minimum and maximum allowed time step ratios for
-    // super- or sub-cycling.
+    // Read minimum number of super-cycles allowed, and maximum number of
+    // sub-cycles allowed.
 
-    method_dt_ratio_min[index_method] = p->value_float
-      (full_name+":dt_ratio_min", 1.0);
-    method_dt_ratio_max[index_method] = p->value_float
-      (full_name+":dt_ratio_max", 1.0);
+    method_dt_ratio_min[index_method] = p->value_integer
+      (full_name+":dt_ratio_min", 1);
+    method_dt_ratio_max[index_method] = p->value_integer
+      (full_name+":dt_ratio_max", 1);
 
     // Read schedule for the Method object if any
 

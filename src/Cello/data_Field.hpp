@@ -259,13 +259,13 @@ public: // interface
   const char * values (std::string name, int index_history=0) const throw ()
   { return field_data_->values(field_descr_,name,index_history); }
 
-  std::shared_ptr<char[]> values (int id_field, double time)
-  {
-    return field_data_->values(field_descr_,id_field,time); }
-  
-  std::shared_ptr<char[]> values (std::string name, double time)
-  {
-    return field_data_->values(field_descr_,name,time); }
+  template <class T>
+  std::shared_ptr<T[]> values_at(int id_field, double time)
+  { return field_data_->values_at<T>(field_descr_,id_field,time); }
+
+  template <class T>
+  std::shared_ptr<T[]> values_at (std::string name, double time)
+  { return field_data_->values_at<T>(field_descr_,name,time); }
 
   /// Return a CelloView that acts as a view of the corresponding field
   ///

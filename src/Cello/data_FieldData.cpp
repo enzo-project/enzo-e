@@ -144,14 +144,19 @@ char * FieldData::values
  int id_field, int index_history ) throw ()
 {
   char * values = nullptr;
+  int id_save = id_field;
 
   if (id_field >= 0) {
 
-    int nh = field_descr->num_history();
-    if (field_descr->is_permanent(id_field) &&
-	(1 <= index_history && index_history <= nh)) {
+    if (field_descr->is_permanent(id_field)) {
+      const int ih = index_history;
+      const int nh = field_descr->num_history();
+      ASSERT2("FieldData::values()",
+            "index_history %d must be between 0 and %d",
+            ih,nh,
+            (0 <= ih && ih <= nh));
       const int np = field_descr->num_permanent();
-      id_field = history_id_[id_field + np*(index_history-1)];
+      id_field = history_id_[id_field + np*ih];
     }
 
     if (field_descr->is_permanent(id_field)) {
@@ -179,37 +184,55 @@ char * FieldData::values
 
 //----------------------------------------------------------------------
 
-std::shared_ptr<char[]> FieldData::values (const FieldDescr * field_descr,
+template <class T>
+std::shared_ptr<T[]> FieldData::values_at (const FieldDescr * field_descr,
+                                           std::string name, double time)
+{ return values_at<T> (field_descr,field_descr->field_id(name),time); }
+
+template std::shared_ptr<double[]>
+FieldData::values_at<double> (const FieldDescr * , std::string, double);
+template std::shared_ptr<float[]>
+FieldData::values_at<float> (const FieldDescr * , std::string, double);
+
+//----------------------------------------------------------------------
+
+template <class T>
+std::shared_ptr<T[]> FieldData::values_at (const FieldDescr * field_descr,
                                            int id_field, double time)
 {
   const int nh = history_time_.size();
-  ASSERT2("FieldData::values(field_descr,id_field,time)",
-          "Cannot interpolate: no field history available for time %g (available time %g)",
-          time,nh>0?history_time_[0]:-1,
-          nh>0 && ((time == history_time_[0]) || (nh > 1)));
+
+  // Verify that either (time == current) or history available
+  ASSERT2("FieldData::values_at(field_descr,id_field,time)",
+          "Cannot interpolate: no field history available for time %g "
+          "(available time %g)",
+          time, history_time_[0],
+          ((time == history_time_[0]) || (nh >= 2)));
+
   for (int ih=0; ih<nh; ih++) {
-    if (time==history_time_[ih]) {
-      // field at given time? return (but don't delete!)
-      std::shared_ptr<char[]> ptr(values(field_descr,id_field,ih),
-                                  [](auto p){ /* no-op deleter */ });
+
+    if (time == history_time_[ih]) {
+      // field at given time available? return (but don't delete!)
+      std::shared_ptr<T[]> ptr((T*)values(field_descr,id_field,ih),
+                             [](auto p){ /* no-op deleter */ });
       return ptr;
-    } else if (time < history_time_[ih]) {
-      // field between time[ih-1] < time < time[ih]?
+
+    } else if ((history_time_[ih] < time) ||
+              (ih == nh-1) ) {
+
+      // field between time[ih-1] < time < time[ih] or
+      // or extrapolate before oldest?
       int mx,my,mz;
-      std::shared_ptr<char[]> ptr
-        (new char[field_size(field_descr,id_field,&mx,&my,&mz)]);
-      cello_float * v = (cello_float *)&ptr[0];
+      dimensions(field_descr,id_field,&mx,&my,&mz);
+      std::shared_ptr<T[]> v (new T[mx*my*mz]);
       int i0=std::max(0,ih-1);
       int i1=std::max(1,ih);
-      cello_float * v0 = (cello_float * )values(field_descr,id_field,i0);
-      cello_float * v1 = (cello_float * )values(field_descr,id_field,i1);
-      cello_float a0 = (time              - history_time_[i1])
-        /              (history_time_[i0] - history_time_[i1]); 
-      cello_float a1 = (history_time_[i0] - time)
-        /              (history_time_[i1] - history_time_[i0]); 
-      CkPrintf ("Interpolate time %g using time %g and %g using %g v0 + %g v1\n",
-                time,history_time_[i0],history_time_[i1],
-                a0,a1);
+      T * v0 = (T*)values(field_descr,id_field,i0);
+      T * v1 = (T*)values(field_descr,id_field,i1);
+      T a0 = (time              - history_time_[i1])
+        /    (history_time_[i0] - history_time_[i1]); 
+      T a1 = (history_time_[i0] - time)
+        /    (history_time_[i0] - history_time_[i1]); 
       for (int iz=0; iz<mz; iz++) {
         for (int iy=0; iy<my; iy++) {
           for (int ix=0; ix<mx; ix++) {
@@ -218,10 +241,15 @@ std::shared_ptr<char[]> FieldData::values (const FieldDescr * field_descr,
           }
         }
       }
-      return ptr;
+      return v;
     }
   }
 }
+
+template std::shared_ptr<double[]>
+FieldData::values_at<double> (const FieldDescr *, int, double);
+template std::shared_ptr<float[]>
+FieldData::values_at<float> (const FieldDescr *, int, double);
 
 //----------------------------------------------------------------------
 
@@ -271,7 +299,7 @@ char * FieldData::unknowns
   if (field_descr->is_permanent(id_field) &&
       (1 <= index_history && index_history <= nh)) {
     const int np = field_descr->num_permanent();
-    id_field = history_id_[id_field + np*(index_history-1)];
+    id_field = history_id_[id_field + np*index_history];
   }
 
   // First get values including ghosts
@@ -450,7 +478,7 @@ void FieldData::allocate_permanent
   const int nh = field_descr->num_history();
   for (int ih=0; ih<nh; ih++) {
     for (int ip=0; ip<np; ip++) {
-      int i = ip + np*ih;
+      const int i = ip + np*(ih+1);
       allocate_temporary (field_descr,history_id_[i]);
     }
   }
@@ -940,7 +968,7 @@ void FieldData::scale_
 
 void FieldData::save_history (const FieldDescr * field_descr, double time)
 {
- // Cycle temporary field id's, and copy permanent to history_id_[0]
+  // Cycle temporary field id's, and copy permanent to history_id_[0]
 
   const int np = field_descr->num_permanent();
   const int nh = field_descr->num_history();
@@ -952,11 +980,11 @@ void FieldData::save_history (const FieldDescr * field_descr, double time)
     std::vector<int> history_id_save;
     history_id_save.resize(np);
     for (int ip=0; ip<np; ip++) {
-      history_id_save[ip] = history_id_[ip+np*(nh-1)];
+      history_id_save[ip] = history_id_[ip+np*nh];
     }
 
     // Shuffle remaining id's
-    for (int ih=nh-1; ih>0; ih--) {
+    for (int ih=nh; ih>1; ih--) {
       for (int ip=0; ip<np; ip++) {
 	history_id_[ip+np*(ih)] = history_id_[ip+np*(ih-1)];
       }
@@ -965,7 +993,7 @@ void FieldData::save_history (const FieldDescr * field_descr, double time)
     // Copy saved oldest id's to newest id's
 
     for (int ip=0; ip<np; ip++) {
-      history_id_[ip] = history_id_save[ip];
+      history_id_[ip+np] = history_id_save[ip];
     }
 
     // Copy field values to newest history
@@ -979,7 +1007,7 @@ void FieldData::save_history (const FieldDescr * field_descr, double time)
 
     // Shuffle times and save newest time
 
-    for (int ih=nh-1; ih>0; ih--) {
+    for (int ih=nh; ih>0; ih--) {
       history_time_[ih] = history_time_[ih-1];
     }
 
@@ -1310,17 +1338,15 @@ void FieldData::set_history_(const FieldDescr * field_descr)
   const int np = field_descr->num_permanent();
   const int nh = field_descr->num_history();
 
-  if (nh > 0) {
-    history_id_.  resize(np*nh);
-    history_time_.resize(nh);
-    for (int ih=0; ih<nh; ih++) {
-      for (int ip=0; ip<np; ip++) {
+  history_id_.  resize(np*(nh+1));
+  history_time_.resize(nh+1);
+  for (int ih=0; ih<=nh; ih++) {
+    for (int ip=0; ip<np; ip++) {
 
-	int i = ip + np*ih;
-	history_id_[i] = field_descr->history_id(ip,ih+1);
-      }
-      history_time_[ih] = 0.0;
+      int i = ip + np*ih;
+      history_id_[i] = (ih==0) ? ip : field_descr->history_id(ip,ih);
     }
+    history_time_[ih] = 0.0;
   }
 }
 //----------------------------------------------------------------------
