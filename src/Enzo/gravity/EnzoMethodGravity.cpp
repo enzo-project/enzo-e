@@ -111,7 +111,7 @@ EnzoMethodGravity::EnzoMethodGravity
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
-  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle) {
+  if (enzo::simulation()->state().cycle() == enzo::config()->initial_cycle) {
     // Check if the pm_deposit method is being used and precedes the
     // gravity method.
     ASSERT("EnzoMethodGravity",
@@ -150,12 +150,12 @@ void EnzoMethodGravity::compute(Block * block) throw()
   enzo_float * DT_copy = (enzo_float*) field.values (idt_copy);
 #endif  
 
-  double time = block->time();
+  double time = block->state().time();
   enzo_float * D;
   // default current time
   D = (enzo_float*) field.values (idensity);
 #ifdef TEST_FIELD_VALUES_TIME
-  if (block->cycle() > 0) {
+  if (block->state().cycle() > 0) {
     // if history available use given time
     const double t0 = field.history_time(0);
     const double t1 = field.history_time(1);
@@ -325,7 +325,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
     double dt   = enzo_block->timestep();
-    double time = enzo_block->time();
+    double time = enzo_block->state().time();
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
     //    cosmology-> compute_expansion_factor (&a,&dadt,time);
 
@@ -389,8 +389,8 @@ double EnzoMethodGravity::timestep_ (Block * block) throw()
   if (cosmology) {
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
-    double dt = block->dt();
-    double time = block->time();
+    double dt = block->state().dt();
+    double time = block->state().time();
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
     if (rank >= 1) hx*=cosmo_a;
     if (rank >= 2) hy*=cosmo_a;

@@ -322,6 +322,7 @@ int EnzoBlock::SolveHydroEquations
   int iposrec = 0;
 
   int error = 0;
+  int cycle = state_.cycle();
 
   FORTRAN_NAME(ppm_de)
     (
@@ -331,7 +332,7 @@ int EnzoBlock::SolveHydroEquations
      acceleration_x,
      acceleration_y,
      acceleration_z,
-     &gamma, &dt, &cycle_,
+     &gamma, &dt, &cycle,
      CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
      &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,

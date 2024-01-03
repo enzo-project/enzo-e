@@ -231,7 +231,7 @@ void Block::adapt_end_()
   sync_coarsen_.set_stop(cello::num_children());
 
   const int initial_cycle = cello::config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
+  const bool is_first_cycle = (initial_cycle == state().cycle());
   const int level_maximum = cello::config()->mesh_max_level;
 
   bool adapt_again = (is_first_cycle && (adapt_step_ < level_maximum));
@@ -254,7 +254,7 @@ bool Block::do_adapt_()
 {
   int adapt_interval = cello::config()->adapt_interval;
 
-  return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
+  return ((adapt_interval && ((state_.cycle() % adapt_interval) == 0)));
 }
 
 //----------------------------------------------------------------------
@@ -288,13 +288,13 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 
     Schedule * schedule = refine->schedule();
 
-    if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
+    if ((schedule==NULL) || schedule->write_this_cycle(state_.cycle(),state_.time()) ) {
       adapt = std::max(adapt,refine->apply(this));
     }
 
   }
   const int initial_cycle = cello::config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
+  const bool is_first_cycle = (initial_cycle == state_.cycle());
 
   if (adapt == adapt_coarsen && level > 0 && ! is_first_cycle)
     level_desired = level - 1;
@@ -393,7 +393,7 @@ void Block::adapt_refine_()
 	 nx,ny,nz,
 	 num_field_data,
 	 adapt_step_,
-	 cycle_,time_,dt_,
+	 state_.cycle(),state_.time(),state_.dt(),
 	 narray, array, refresh_fine,
 	 27,
          &child_face_level_curr_.data()[27*IC3(ic3)],

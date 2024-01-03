@@ -9,6 +9,8 @@
 #ifndef MESH_BLOCK_HPP
 #define MESH_BLOCK_HPP
 
+#include "data_State.hpp"
+
 class Data;
 class MsgRefresh;
 class MsgRefine;
@@ -90,14 +92,6 @@ public: // interface
   inline void index_array (int * ix, int * iy, int * iz) const throw ()
   { index_.array(ix,iy,iz); }
 
-  /// Return the current cycle number
-  int cycle() const throw()
-  { return cycle_; };
-
-  /// Return the current time
-  double time() const throw()
-  { return time_; };
-
   /// Return the level in the Hierarchy
   int level() const throw()
   {  return index_.level(); };
@@ -111,18 +105,14 @@ public: // interface
   /// Set  process to migrate to next
   void set_ip_next(int ip) { ip_next_ = ip; }
 
-  /// Return the current timestep
-  double dt() const throw()
-  { return dt_; };
+  /// Return Block's current state (const)
+  constexpr State & state ()
+  { return state_; }
 
   /// Return current cell widths
   void cell_width
   (double * dx, double * dy = 0, double * dz = 0)
   const throw();
-
-  /// Return the current stopping criteria
-  bool stop() const throw()
-  { return stop_; };
 
   /// Return whether this Block is a leaf in the octree array
   bool is_leaf() const
@@ -781,27 +771,8 @@ public: // virtual functions
   /// Set state
   void set_state (int cycle, double time, double dt, bool stop)
   {
-    set_cycle(cycle);
-    set_time(time);
-    set_dt(dt);
-    set_stop(stop);
+    state_.init(cycle,time,dt,stop);
   }
-
-  /// Set Block's cycle
-  void set_cycle (int cycle) throw()
-  { cycle_ = cycle;}
-
-  /// Set Block's time
-  virtual void set_time (double time) throw()
-  { time_  = time; }
-
-  /// Set Block's timestep
-  virtual void set_dt (double dt) throw()
-  { dt_  = dt; }
-
-  /// Set Block's stopping criteria
-  void set_stop (double stop) throw()
-  { stop_  = stop; }
 
   /// Initialize Block
   virtual void initialize ();
@@ -929,20 +900,9 @@ protected: // attributes
   /// Desired level for the next cycle
   int level_next_;
 
-  //--------------------------------------------------
+  /// Block's current state (cycle, time, dt, stopping, etc.)
+  State state_;
 
-  /// Current cycle number
-  int cycle_;
-
-  /// Current time
-  double time_;
-
-  /// Current timestep
-  double dt_;
-
-  /// Current stopping criteria
-  bool stop_;
-  
   //--------------------------------------------------
 
   /// Index of current initialization routine

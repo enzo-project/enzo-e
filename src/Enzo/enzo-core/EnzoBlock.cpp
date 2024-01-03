@@ -356,7 +356,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 
 void EnzoBlock::set_dt (double dt_param) throw ()
 {
-  Block::set_dt (dt_param);
+  state_.set_dt(dt_param);
 
   dt = dt_param;
 }
@@ -365,7 +365,7 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
-  Block::set_time (time);
+  state_.set_time(time);
 
   Simulation * simulation = cello::simulation();
   EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();

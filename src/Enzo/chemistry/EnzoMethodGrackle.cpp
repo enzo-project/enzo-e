@@ -270,7 +270,7 @@ void EnzoMethodGrackle::compute_ ( Block * block) throw()
   ERROR("EnzoMethodGrackle::compute_", "Enzo-E isn't linked to grackle");
 #else
   const EnzoConfig * enzo_config = enzo::config();
-  if (block->cycle() == enzo_config->initial_cycle) {
+  if (block->state().cycle() == enzo_config->initial_cycle) {
     bool nohydro = ( (enzo::problem()->method("ppm") == nullptr) |
                      (enzo::problem()->method("mhd_vlct") == nullptr) |
                      (enzo::problem()->method("ppml") == nullptr) );
@@ -282,10 +282,10 @@ void EnzoMethodGrackle::compute_ ( Block * block) throw()
   }
 
   // Solve chemistry
-  // NOTE: should we set compute_time to `block->time() + 0.5*block->dt()`?
+  // NOTE: should we set compute_time to `time + 0.5*dt`?
   //       I think that's what enzo-classic does...
-  double compute_time = block->time(); // only matters in cosmological sims
-  grackle_facade_.solve_chemistry(block, compute_time, block->dt());
+  double compute_time = block->state().time(); // only matters in cosmological sims
+  grackle_facade_.solve_chemistry(block, compute_time, block->state().dt());
 
   // now we have to do some extra-work after the fact (such as adjusting total
   // energy density and applying floors...)

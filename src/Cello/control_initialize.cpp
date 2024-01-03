@@ -121,7 +121,8 @@ void  Block::initial_new_next_()
   if (initial && (! initial_restart)) {
     initial->enforce_block(this,nullptr);
   } else {
-    bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
+    const auto initial_cycle = cello::config()->initial_cycle;
+    bool is_first_cycle = (state_.cycle() == initial_cycle);
     if (is_first_cycle && level() <= 0) {
       initial_exit_();
     }

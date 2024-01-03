@@ -357,7 +357,11 @@ static void allocate_FC_flux_buffer_(Block * block) throw()
 
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
-  if (block->cycle() == enzo::config()->initial_cycle) { post_init_checks_(); }
+  const auto cycle_block = block->state().cycle();
+  const auto cycle_initial = enzo::config()->initial_cycle;
+
+  if (cycle_block == cycle_initial)
+    { post_init_checks_(); }
 
   if (store_fluxes_for_corrections_){ allocate_FC_flux_buffer_(block); }
 
@@ -423,7 +427,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     const enzo_float* const cell_widths = enzo::block(block)->CellWidth;
 
-    double dt = block->dt();
+    const double dt = block->state().dt();
 
     // stale_depth indicates the number of field entries from the outermost
     // field value that the region including "stale" values (need to be

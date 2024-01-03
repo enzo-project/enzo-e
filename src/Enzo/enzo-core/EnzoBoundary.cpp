@@ -122,7 +122,7 @@ void EnzoBoundary::enforce_reflecting_
   data -> lower(&xm,&ym,&zm);
   data -> upper(&xp,&yp,&zp);
 
-  double t = block->time();
+  double t = block->state().time();
 
   const int rank = cello::rank();
 
@@ -315,7 +315,7 @@ void EnzoBoundary::enforce_outflow_
   data -> lower(&xm,&ym,&zm);
   data -> upper(&xp,&yp,&zp);
 
-  double t = block->time();
+  double t = block->state().time();
 
   // @@@
   // @@@ BUG: loops through all fields; should only use fields in field_list

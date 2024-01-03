@@ -677,7 +677,7 @@ void EnzoMethodHydro::ppm_method_ ( Block * block )
   EnzoComputePressure compute_pressure (gamma_,	comoving_coordinates_);
   compute_pressure.compute(block);
 
-  const int cycle = block->cycle();
+  const int cycle = block->state().cycle();
   const int rank  = cello::rank();
 
   for (int i0=0; i0<3; i0++) {
@@ -954,7 +954,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   if (cosmology) {
     cosmology->compute_expansion_factor
-      (&cosmo_a, &cosmo_dadt, (enzo_float)block->time());
+      (&cosmo_a, &cosmo_dadt, (enzo_float)block->state().time());
   }
 
   double h = 0.0;
@@ -964,7 +964,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   enzo_float hya = cosmo_a*h;
   enzo_float hza = cosmo_a*h;
 
-  enzo_float dt = block->dt();
+  enzo_float dt = block->state().dt();
 
   enzo_float * flatten_array = new enzo_float[ns];
 

@@ -639,7 +639,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_grackle_use_cooling_timestep,
        enzo_config->method_grackle_radiation_redshift,
        enzo_config->physics_cosmology_initial_redshift,
-       enzo::simulation()->time());
+       enzo::simulation()->state().time());
 
 #endif /* CONFIG_USE_GRACKLE */
 

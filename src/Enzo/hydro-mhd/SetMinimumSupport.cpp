@@ -28,7 +28,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 	    ! (comoving_coordinates && (cosmology == NULL)) );
 
     if (comoving_coordinates) {
-      cosmology ->compute_expansion_factor(&cosmo_a, &cosmo_dadt,time());
+      cosmology ->compute_expansion_factor(&cosmo_a, &cosmo_dadt,state().time());
     }
 
     enzo_float CosmoFactor = 1.0/cosmo_a;

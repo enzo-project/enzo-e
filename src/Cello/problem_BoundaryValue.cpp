@@ -57,7 +57,7 @@ void BoundaryValue::enforce
     data -> lower(&xm,&ym,&zm);
     data -> upper(&xp,&yp,&zp);
 
-    double t = block->time();
+    double t = block->state().time();
 
     for (size_t index = 0; index < field_list_.size(); index++) {
 

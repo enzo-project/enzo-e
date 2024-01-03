@@ -455,6 +455,9 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader, int ip)
   char * array = 0;
   int num_field_data = 1;
 
+  int cycle = state_.cycle();
+  double time = state_.time();
+  double dt = state_.dt();
   factory->create_block
     (
      data_msg,
@@ -462,7 +465,7 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader, int ip)
      nx,ny,nz,
      num_field_data,
      adapt_step_,
-     cycle_,time_,dt_,
+     cycle, time, dt,
      narray, array, refresh_fine,
      27,
      &child_face_level_curr_.data()[27*IC3(ic3)],

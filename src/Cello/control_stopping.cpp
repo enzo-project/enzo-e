@@ -55,9 +55,9 @@ void Block::stopping_begin_()
   int stopping_interval = cello::config()->stopping_interval;
 
   bool stopping_reduce = stopping_interval ? 
-    ((cycle_ % stopping_interval) == 0) : false;
+    ((state_.cycle() % stopping_interval) == 0) : false;
 
-  if (stopping_reduce || dt_==0.0) {
+  if (stopping_reduce || state_.dt()==0.0) {
 
     // Compute dt_ik for block i and method k
 
@@ -70,7 +70,7 @@ void Block::stopping_begin_()
     // Evaluate local stopping criteria
 
     Stopping * stopping = problem->stopping();
-    const int stop_block = stopping->complete(cycle_,time_);
+    const int stop_block = stopping->complete(state_.cycle(),state_.time());
     min_reduce[0] = stop_block ? 1.0 : 0.0;
 
     // Evaluate dt for each method k
@@ -85,7 +85,7 @@ void Block::stopping_begin_()
     CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
 	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
 #endif
-    contribute(n*sizeof(double), &min_reduce[0], CkReduction::min_double, callback);
+    contribute(n*sizeof(double), min_reduce.data(), CkReduction::min_double, callback);
 
   } else {
 
@@ -105,69 +105,45 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
   double * min_reduce = (double * )msg->getData();
 
-  stop_ = min_reduce[0] == 1.0 ? true : false;
+  state_.set_stopping(min_reduce[0] == 1.0);
 
-  dt_   = min_reduce[0];
+  // Compute minimum timestep dt over all methods
   Simulation * simulation = cello::simulation();
   Problem * problem = simulation->problem();
-  std::vector<double> dt_method(problem->num_methods());
-  dt_ = std::numeric_limits<double>::max();
+  double dt_global = std::numeric_limits<double>::max();
+  auto & dt_method = state().get_method_dt(problem->num_methods());
   for (int k=0; k<problem->num_methods(); k++) {
-    dt_method[k] = min_reduce[k+1];
-    dt_ = std::min(dt_,dt_method[k]);
-#ifdef TRACE_DT
-    if (index().is_root() && dt_method[k] < std::numeric_limits<double>::max()) {
-      CkPrintf ("TRACE_DT method %d %s %g\n",
-                k,problem->method(k)->name().c_str(),dt_method[k]);
-    }
-#endif
+    double dt = min_reduce[k+1];
+    dt_global = std::min(dt_global,dt);
+    dt_method[k] = dt;
   }
 
   delete msg;
 
-#ifdef TRACE_DT
-  if (index().is_root()) CkPrintf ("TRACE_DT base dt %g\n",dt_);
-#endif
+  // Adjust timestep dt for global courant condition
+  dt_global *= Method::courant_global;
 
-  dt_ *= Method::courant_global;
-
-#ifdef TRACE_DT
-  if (index().is_root()) CkPrintf ("TRACE_DT final dt %g\n",dt_);
-#endif
-
-  // Quantize timestep: find largest k st 2**k <= dt_
-  if (index().is_root()) {
-    double dt = dt_;
-    int k=0;
-    while (dt < 1) { dt*=2; --k; }
-    while (dt >=2) { dt/=2; ++k; }
-#ifdef TRACE_DT
-    CkPrintf ("TRACE_DT final bits %d\n",k);
-#endif
-  }
-
-
-  // adjust dt_ to align with any scheduled output times
+  // adjust timestep dt to align with any scheduled output times
+  double time_curr = state_.time();
   int index_output=0;
   while (Output * output = problem->output(index_output++)) {
     Schedule * schedule = output->schedule();
-    dt_ = schedule->update_timestep(time_,dt_);
+    dt_global = schedule->update_timestep(time_curr,dt_global);
   }
 
   // Reduce timestep to not overshoot final time from stopping criteria
 
   Stopping * stopping = problem->stopping();
-
   double time_stop = stopping->stop_time();
-  double time_curr = time_;
 
-  dt_ = std::min (dt_, (time_stop - time_curr));
+  dt_global = std::min (dt_global, (time_stop - time_curr));
 
-  set_dt   (dt_);
-  set_stop (stop_);
+  // Update Block state timestep
+  state_.set_dt(dt_global);
 
-  simulation->set_dt(dt_);
-  simulation->set_stop(stop_);
+  // Update simulation state to block state
+  simulation->state().set_dt      (state_.dt());
+  simulation->state().set_stopping(state_.stopping());
 
 #ifdef CONFIG_USE_PROJECTIONS
   bool was_off = (simulation->projections_tracing() == false);
@@ -214,7 +190,7 @@ void Block::stopping_balance_()
   Schedule * schedule = cello::simulation()->schedule_balance();
 
   bool do_balance = (schedule && 
-		     schedule->write_this_cycle(cycle_,time_));
+		     schedule->write_this_cycle(state_.cycle(),state_.time()));
 
   if (do_balance) {
 
