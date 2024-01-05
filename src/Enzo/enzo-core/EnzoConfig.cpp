@@ -2387,7 +2387,7 @@ namespace{
       // STEP 2: determine the eos-type
       std::string type;
       if (is_type_specified) {
-        type = p->value(prefix + "type","");
+        type = p->value_string(prefix + "type","");
       } else if (is_gamma_specified) {
         WARNING1("parse_eos_choice_",
                  "Going forward, \"Physics:fluid_props:eos:type\" must be set "

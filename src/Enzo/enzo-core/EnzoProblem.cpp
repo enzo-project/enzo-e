@@ -678,8 +678,6 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "turbulence_ou") {
 
-    CkPrintf ("enzo_config->method_turbulence_apply_forcing %d\n",
-              enzo_config->method_turbulence_apply_forcing);
     method = new EnzoMethodTurbulenceOU 
       (enzo::fluid_props()->gamma(),
        enzo_config->domain_lower,

@@ -31,13 +31,17 @@
      * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
        out in favor of using a more general "mhd" method instead, with a
        specific mhd solver specified.*
+     * :t:`"ppml_it"` :e:`alternate name for "ppml".`
+     * :t:`"ppml_ig"` :e:`for the adiabatic version of PPML.`   *This may be phased
+       out in favor of using a more general "mhd" method instead, with a
+       specific mhd solver specified.*
      * :t:`"mhd_vlct"` :e:`for the VL + CT (van Leer + Constrained Transport) MHD
        solver.`
      * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
        out in favor of a more general "move_particles" method.**
      * :t:`"turbulence"` :e:`computes random forcing for turbulence
        simulations.`
-
+     * :t:`"turbulence_ou"` :e:`implements Ornstein-Uhlenbeck driven turbulence.`
 
    :e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
 
@@ -461,6 +465,12 @@ ppm
 .. include:: method_ppm.incl
 
 
+ppml
+----
+
+.. include:: method_ppml.incl
+
+
 sink_maker
 ----------
 
@@ -578,3 +588,8 @@ turbulence
    :Default: :d:`0.0`
    :Scope:     :z:`Enzo`
    :Todo: :o:`write`
+
+turbulence_ou
+-------------
+
+.. include:: method_turbulence_ou.incl
