@@ -5,8 +5,9 @@
 /// @date      Thu Feb 21 16:11:36 PST 2008
 /// @brief     Implementation of the FileHdf5 class
 
-#include "cello.hpp"
+#include <hdf5.h>
 
+#include "cello.hpp"
 #include "disk.hpp"
 
 // #define TRACE_DISK
@@ -810,7 +811,7 @@ void FileHdf5::set_compress (int level) throw ()
 //======================================================================
 
 void FileHdf5::write_meta_
-( hid_t type_id,
+( int64_t type_id,
   const void * buffer, std::string name, int type,
   int n1, int n2, int n3, int n4) throw()
 {
@@ -886,7 +887,7 @@ void FileHdf5::write_meta_
 
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::scalar_to_hdf5_ (int type) const throw()
+int64_t FileHdf5::scalar_to_hdf5_ (int type) const throw()
 {
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -
@@ -961,7 +962,7 @@ hid_t FileHdf5::scalar_to_hdf5_ (int type) const throw()
 
 //----------------------------------------------------------------------
 
-int FileHdf5::hdf5_to_scalar_ (hid_t hdf5_type) const throw()
+int FileHdf5::hdf5_to_scalar_ (int64_t hdf5_type) const throw()
 {
 
   H5T_class_t hdf5_class = H5Tget_class(hdf5_type);
@@ -1060,7 +1061,7 @@ std::string FileHdf5::relative_to_absolute_
 //----------------------------------------------------------------------
 
 void FileHdf5::get_extents_
-( hid_t data_space_id, int * n1, int * n2, int * n3, int * n4) throw ()
+( int64_t data_space_id, int * n1, int * n2, int * n3, int * n4) throw ()
 {
 
    hsize_t data_size[MAX_DATA_RANK];
@@ -1101,7 +1102,7 @@ void FileHdf5::get_extents_
 
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
+int64_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
 			      int n1, int n2, int n3, int n4,
 			      int o1, int o2, int o3, int o4) throw ()
 {
@@ -1211,7 +1212,7 @@ hid_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
 
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::space_slice_(hid_t space_id,
+int64_t FileHdf5::space_slice_(int64_t space_id,
 			     int m1, int m2, int m3, int m4,
 			     int n1, int n2, int n3, int n4,
 			     int o1, int o2, int o3, int o4) throw ()
@@ -1242,7 +1243,7 @@ hid_t FileHdf5::space_slice_(hid_t space_id,
 
 //----------------------------------------------------------------------
 
-void FileHdf5::space_close_ (hid_t space_id) throw()
+void FileHdf5::space_close_ (int64_t space_id) throw()
 {
   // Close space
 
@@ -1257,7 +1258,7 @@ void FileHdf5::space_close_ (hid_t space_id) throw()
 
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
+int64_t FileHdf5::open_dataset_ (int64_t group, std::string name) throw()
 {
   
 #ifdef TRACE_DISK
@@ -1290,7 +1291,7 @@ void FileHdf5::close_dataset_ () throw()
 
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::get_data_space_(hid_t data_id, std::string name) throw ()
+int64_t FileHdf5::get_data_space_(int64_t data_id, std::string name) throw ()
 {
 
   hid_t data_space_id = H5Dget_space (data_id);
@@ -1309,7 +1310,7 @@ hid_t FileHdf5::get_data_space_(hid_t data_id, std::string name) throw ()
 }
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::get_attr_space_(hid_t attr_id, std::string name) throw ()
+int64_t FileHdf5::get_attr_space_(int64_t attr_id, std::string name) throw ()
 {
 
   hid_t data_space_id = H5Aget_space (attr_id);

@@ -200,16 +200,16 @@ public: // functions
 protected: // functions
 
   virtual void write_meta_
-  ( hid_t id, const void * buffer, std::string name, int type,
+  ( int64_t id, const void * buffer, std::string name, int type,
     int n1=1, int n2=0, int n3=0, int n4=0) throw();
 
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
-  hid_t scalar_to_hdf5_(int type) const throw();
+  int64_t scalar_to_hdf5_(int type) const throw();
 
   /// Convert the scalar type to an HDF5 datatype
-  int hdf5_to_scalar_(hid_t type) const throw();
+  int hdf5_to_scalar_(int64_t type) const throw();
 
   /// Convert a relative path to an absolute path
   std::string relative_to_absolute_
@@ -217,37 +217,37 @@ private: // functions
 
   /// Get output extents
   void get_extents_
-  ( hid_t space_id, int * n1, int * n2=0, int * n3=0, int * n4=0) throw();
+  ( int64_t space_id, int * n1, int * n2=0, int * n3=0, int * n4=0) throw();
 
   /// create the space for the array on disk
 
   /// create data spaces for memory or disk data
-  hid_t space_create_
+  int64_t space_create_
   (int m1, int m2, int m3, int m4,
    int n1, int n2, int n3, int n4,
    int o1, int o2, int o3, int o4) throw();
 
   /// given a space, select a slice
-  hid_t space_slice_
-  (hid_t space_id,
+  int64_t space_slice_
+  (int64_t space_id,
    int m1, int m2, int m3, int m4,
    int n1, int n2, int n3, int n4,
    int o1, int o2, int o3, int o4) throw();
   
   /// Close the given dataspace
-  void space_close_ (hid_t space_id) throw();
+  void space_close_ (int64_t space_id) throw();
 
   /// Return the space for the given dataset
-  hid_t get_data_space_(hid_t dataset_id, std::string name) throw ();
+  int64_t get_data_space_(int64_t dataset_id, std::string name) throw ();
 
   /// Close the given memspace
-  void close_mem_space_ (hid_t space_id) throw();
+  void close_mem_space_ (int64_t space_id) throw();
 
   /// Return the space for the given attribute
-  hid_t get_attr_space_(hid_t dataset_id, std::string name) throw ();
+  int64_t get_attr_space_(int64_t dataset_id, std::string name) throw ();
 
   /// Open the dataset
-  hid_t open_dataset_ (hid_t group, std::string name) throw();
+  int64_t open_dataset_ (int64_t group, std::string name) throw();
 
   /// Close the dataset
   void close_dataset_ () throw();
@@ -260,34 +260,34 @@ public: // static attributes
 private: // attributes
 
   /// HDF5 file descriptor
-  hid_t file_id_;
+  int64_t file_id_;
 
   /// Whether file is open or closed
   bool  is_file_open_;
 
 
   /// HDF5 dataset descriptor
-  hid_t data_id_;
+  int64_t data_id_;
 
   /// HDF5 dataspace descriptor
-  hid_t data_space_id_;
+  int64_t data_space_id_;
 
   /// HDF5 memory space descriptor
-  hid_t mem_space_id_;
+  int64_t mem_space_id_;
 
 
   /// HDF5 attribute descriptor
-  hid_t attribute_id_;
+  int64_t attribute_id_;
 
 
   /// HDF5 group descriptor
-  hid_t group_id_;
+  int64_t group_id_;
 
   /// Group name 
   std::string group_name_;
 
   /// HDF5 group property list
-  hid_t group_prop_;
+  int64_t group_prop_;
 
   /// Whether a group is open or closed
   bool is_group_open_;
@@ -302,10 +302,10 @@ private: // attributes
   int data_rank_;
 
   /// Dataset size
-  hsize_t data_dims_[4];
+  int64_t data_dims_[4];
 
   /// HDF5 dataset property list
-  hid_t data_prop_;
+  int64_t data_prop_;
 
   /// Whether a dataset is open or closed
   bool  is_data_open_;
