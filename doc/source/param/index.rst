@@ -1,5 +1,5 @@
 .. include:: ../roles.incl
-	     
+
 *************************
 Enzo-E / Cello Parameters
 *************************
@@ -157,7 +157,6 @@ Mesh
 ----
 
 .. include:: mesh.incl
-
 
 ------
 Method

@@ -579,6 +579,8 @@ turbulence
    :Scope:     :z:`Enzo`
    :Todo: :o:`write`
 
+   :e:`Prescribes kinetic energy injection rate for a forcing method based on random but constant-in-time external x-, y-, z-acceleration fields. The code would normalize the accelerations so that the resulting actual injection rate is constant during the simulation and equal to edot. For details of the method see` `Mac Low (1999) <https://ui.adsabs.harvard.edu/abs/1999ApJ...524..169M/abstract>`_  :e:`The default setting edot=-1 turns this forcing off.`
+
 ----
 
 .. par:parameter:: Method:turbulence:mach_number
@@ -588,6 +590,8 @@ turbulence
    :Default: :d:`0.0`
    :Scope:     :z:`Enzo`
    :Todo: :o:`write`
+
+   :e:`Specifies the target sonic Mach number for a forced turbulence simulation. If` :p:`mach_number` :e:`is not zero, the energy injection rate will be calculated based on the Mach number.`
 
 turbulence_ou
 -------------

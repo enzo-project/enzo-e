@@ -1,181 +1,187 @@
 
-:p:`Method:turbulence_ou` parameters are used to initialize parameters for
-Enzo-E's Ornstein-Uhlenbeck driven turbulence method.
+:p:`Method:turbulence_ou` parameters are used to initialize parameters
+for Enzo-E's Ornstein-Uhlenbeck driven turbulence method.  See Section
+2.1 on Turbulence Forcing in `Wolfram Schmidt, Numerical Modelling of
+Astrophysical Turbulence, Springer 2014
+<https://link.springer.com/book/10.1007/978-3-319-01475-3>`_.
+
 
 ----
 
-.. par:parameter:: Method:turbulence:edot
+.. par:parameter:: Method:turbulence_ou:edot
 
    :Summary: :s:`edot`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(0.0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Prescribes the kinetic energy injection rate for Ornstein-Uhlenbeck forcing; goes with` :p:`apply_injection_rate=true.`
+
+
 
 ----
 
-.. par:parameter:: Method:turbulence:mach_number
+.. par:parameter:: Method:turbulence_ou:mach_number
 
    :Summary: :s:`mach_number`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(0.0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Specifies the target sonic Mach number for a forced turbulence simulation. If mach_number is not zero, the energy injection rate will be calculated based on the Mach number.`
 
 ----
 
-.. par:parameter:: Method:turbulence:apply_cooling
+.. par:parameter:: Method:turbulence_ou:apply_cooling
 
    :Summary: :s:`apply_cooling`
    :Type:   :par:typefmt:`logical`
    :Default: :d:`(false)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`A dummy parameter reserved for future use to include a generalized cooling function in the energy equation, which will be treated as a (possibly stiff) source term similar to the energy source associated with turbulence forcing. Cooling is intended for use as an energy sink balancing energy injection by the forcing if gamma\ne1 (e.g., as in Porter et al. (2002)) or in combination with heating to enable simulations of turbulent multiphase ISM. Cooling and heating functions can be defined analytically (e.g., as piecewise-linear approximations).`
 
 ----
 
-.. par:parameter:: Method:turbulence:apply_forcing
+.. par:parameter:: Method:turbulence_ou:apply_forcing
 
    :Summary: :s:`apply_forcing`
    :Type:   :par:typefmt:`logical`
    :Default: :d:`(false)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`A switch turning ON the implementation of Ornstein-Uhlenbeck forcing algorithm. If` :p:`apply_forcing=false`:e:`, OU forcing will be turned OFF.`
 
 ----
 
-.. par:parameter:: Method:turbulence:apply_injection_rate
+.. par:parameter:: Method:turbulence_ou:apply_injection_rate
 
    :Summary: :s:`apply_injection_rate`
    :Type:   :par:typefmt:`logical`
    :Default: :d:`(false)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`A switch turning ON an implementation of Ornstein-Uhlenbeck (OU) forcing algorithm, which uses a specified injection_rate instead of the Mach number to calculated the pumping. If` :p:`apply_injection_rate=true`:e:`, the OU forcing routine will keep the energy injection rate constant through the simulation, similar to edot in constant-in-time forcing. If` :p:`apply_injection_rate=false`:e:`, the actual injection rate will be free to oscillate around the mean prescribed by the OU algorithm.`
 
 ----
 
-.. par:parameter:: Method:turbulence:cooling_term
+.. par:parameter:: Method:turbulence_ou:cooling_term
 
    :Summary: :s:`cooling_term`
    :Type:   :par:typefmt:`integer`
    :Default: :d:`(0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   **Parameter description...**
 
 ----
 
-.. par:parameter:: Method:turbulence:hc_alpha
+.. par:parameter:: Method:turbulence_ou:hc_alpha
 
    :Summary: :s:`hc_alpha`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(0.0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Parameter of the generalized cooling function.`
 
 ----
 
-.. par:parameter:: Method:turbulence:hc_sigma
+.. par:parameter:: Method:turbulence_ou:hc_sigma
 
    :Summary: :s:`hc_sigma`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(0.0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Also a parameter for the cooling term for the case of Stefan's law used in Porter et al. (2002).`
 
 ----
 
-.. par:parameter:: Method:turbulence:injection_rate
+.. par:parameter:: Method:turbulence_ou:injection_rate
 
    :Summary: :s:`injection_rate`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(0.006)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   **Parameter description...**
 
 ----
 
-.. par:parameter:: Method:turbulence:kfa
+.. par:parameter:: Method:turbulence_ou:kfa
 
    :Summary: :s:`kfa`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(12.57)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Maximum wave number for external forcing. The kfa/kfi parameters define a parabolic profile used to normalize contributions of different random modes contributing to the external acceleration fields. Modes with wave number outside the [kfi, kfa] interval are ignored.`
 
 ----
 
-.. par:parameter:: Method:turbulence:kfi
+.. par:parameter:: Method:turbulence_ou:kfi
 
    :Summary: :s:`kfi`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(6.27)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Minimum  wave number for external forcing.`
 
 ----
 
-.. par:parameter:: Method:turbulence:olap
+.. par:parameter:: Method:turbulence_ou:olap
 
    :Summary: :s:`olap`
    :Type:   :par:typefmt:`integer`
    :Default: :d:`(0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`This is overlap parameter from the "donor" code, which used overlapping grids. It is equal to twice the number of ghost zones in Enzo fluid solvers, e.g.` :p:`olap=8` :e:`in case of 4 ghost zones. Not sure where and why exactly this is used in Enzo-E.`
 
 ----
 
-.. par:parameter:: Method:turbulence:read_sol
+.. par:parameter:: Method:turbulence_ou:read_sol
 
    :Summary: :s:`read_sol`
    :Type:   :par:typefmt:`logical`
    :Default: :d:`(false)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Also a parameter from the "donor" code. There, it tells if the solution (including current fluid dynamic fields and state variables of OU forcing) should be read from files previously written. If true, the code will mimic a smooth restart from previously computed numerical solution by reading the flow fields and modal content of the OU force. If false, the fields and the forcing state will be calculated as if a new simulation of forced turbulence is initialized.`
 
 ----
 
-.. par:parameter:: Method:turbulence:sol_weight
+.. par:parameter:: Method:turbulence_ou:sol_weight
 
    :Summary: :s:`sol_weight`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(1.0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   :e:`Solenoidal fraction of the OU acceleration fields. For purely solenoidal forcing` :p:`sol_weight=1.0`:e:`; for purely compressive forcing` :p:`sol_weight=0.0.`
 
 ----
 
-.. par:parameter:: Method:turbulence:totemp
+.. par:parameter:: Method:turbulence_ou:totemp
 
    :Summary: :s:`totemp`
    :Type:   :par:typefmt:`float`
    :Default: :d:`(0.0)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   **Parameter description...**
 
 ----
 
-.. par:parameter:: Method:turbulence:update_solution
+.. par:parameter:: Method:turbulence_ou:update_solution
 
    :Summary: :s:`update_solution`
    :Type:   :par:typefmt:`logical`
    :Default: :d:`(false)`
    :Scope:     :z:`Enzo`
 
-   :e:`This parameter...`
+   **Parameter description...**
 
 ----

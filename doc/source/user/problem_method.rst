@@ -851,12 +851,12 @@ This method currently ignores all of the floor parameters that are set in the ``
 
 
 ``"ppml"`` (or ``"ppml_ig"``) method
-=================
+====================================
 
 PPML ideal MHD solver
 
 ``"ppml_it"`` method
-=================
+====================
 
 PPML adiabatic MHD solver
 
