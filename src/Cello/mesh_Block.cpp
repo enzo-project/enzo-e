@@ -127,6 +127,7 @@ void Block::init_refine_
  Adapt * adapt)
 {
   index_ = index;
+  state_.init_method(cello::problem()->num_methods());
   state_.init(cycle,time,dt,false);
   adapt_step_ = num_adapt_steps;
   adapt_ready_ = false;

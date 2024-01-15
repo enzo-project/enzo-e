@@ -173,14 +173,63 @@ Supercycling Gravity
 .. figure:: supercycle-gravity.png
            :width: 688
 
-           This figure shows two possible variations of supercycling
-           gravity. Squares represent hydro solves, circles represent
-           gravity potential solves, and trangles represent
-           acceleration computations.  Time runs horizontally
-           left-to-right.  On the left is traditional
-           (non-supercycled) gravity, where gravity solves are
-           computed at times t+dt/2 aligned with accelerations.  In
-           the upper-right variation, gravity is aligned with every
-           other acceleration step ("a-aligned"); in the lower-right
-           variation, gravity is aligned with every other hydro step
+           This figure illustrates two possible variations of
+           supercycling gravity. Circles represent linear solves for
+           gravitational potential, squares represent hydro solves, and
+           triangles represent acceleration computations.  Time runs
+           horizontally left-to-right.  The left figure shows
+           traditional (non-supercycled) gravity, where gravity solves
+           are **aligned with acceleration steps**.  The
+           upper-right variation shows gravity aligned with **every
+           other acceleration step** ("a-aligned"); in the lower-right
+           variation, gravity is aligned with **every other hydro step**
            (h-aligned).
+
+
+As a driving use-case, we wish to super-cycle gravity solves with
+respect to the hydrodynamics. The rationale is that gravitational
+potential typically changes at a longer time-scale than hydrodynamics,
+so performing a full Poisson solve at every cycle can be
+wasteful. Note this will not always be the case, and we still *always*
+respect *all* timestep restrictions for *all* methods.
+
+Supercycling can be performed in multiple ways; below we discuss two
+of them: "a-aligned gravity" and "h-aligned gravity". But first we
+review Enzo-E's current (non-supercycled) approach.
+
+-----------------------
+non-supercycled gravity
+-----------------------
+
+The gravitational potential is used to compute gravitational
+accelerations, which are applied to all gravitating particles and
+fields. We use a leapfrog integration scheme because it is 2nd order
+accurate (small short-scale errors) and symplectic (qualitatively
+correct long-scale behavior). This involves computing time-centered
+accelerations. Since we start with non-time centered values, we must
+either extrapolate the input (density) to the gravity solve, or
+extrapolate the output (potential) from the gravity solve. In ENZO and
+Enzo-E, the extrapolation is done before the gravity solve. When
+supercycling gravity, we allow this extrapolation to be either before
+or after. This results in the two algorithmic variants described
+below.
+
+-----------------------
+a-aligned gravity
+-----------------------
+
+In a-aligned gravity, we compute gravitational potentials as we do now
+in Enzo-E, but skip every-other one. For skipped cycles, we
+extrapolate potentials saved from multiple (two) previous cycles to
+compute accelerations where computed potentials are not available.
+
+-----------------------
+h-aligned gravity
+-----------------------
+
+In h-aligned gravity, we compute gravitational potentials at times
+aligned with every-other hydrodynamics cycle. Like with a-aligned
+gravity, accelerations are computed from extrapolated potentials,
+though this extrapolation is performed at every cycle. The benefit is
+no extrapolation of densities is required before the gravity solves.
+

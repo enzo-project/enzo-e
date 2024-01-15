@@ -107,15 +107,22 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
   state_.set_stopping(min_reduce[0] == 1.0);
 
-  // Compute minimum timestep dt over all methods
+  // Compute timestep
   Simulation * simulation = cello::simulation();
   Problem * problem = simulation->problem();
   double dt_global = std::numeric_limits<double>::max();
-  auto & dt_method = state().get_method_dt(problem->num_methods());
+  auto & dt_method = state().get_method_dt();
+  // compute minimum timestep dt over all methods
   for (int k=0; k<problem->num_methods(); k++) {
-    double dt = min_reduce[k+1];
-    dt_global = std::min(dt_global,dt);
-    dt_method[k] = dt;
+    dt_method[k] = min_reduce[k+1];
+    dt_global = std::min(dt_global,dt_method[k]);
+  }
+  // determine method supercycling dt
+  for (int k=0; k<problem->num_methods(); k++) {
+    const double max_super = problem->method(k)->max_supercycle();
+    double ratio = dt_method[k] / dt_global;
+    double allowed_super = std::min(std::floor(ratio),max_super);
+    dt_method[k] = allowed_super * dt_global;
   }
 
   delete msg;

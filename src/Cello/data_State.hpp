@@ -105,8 +105,7 @@ public: // interface
     return method_dt_[index_method];
   }
   /// get vector timestep per method
-  std::vector<double> & get_method_dt(int n) {
-    if (method_dt_.size() < n) method_dt_.resize(n);
+  std::vector<double> & get_method_dt() {
     return method_dt_;
   }
   /// get scalar time for given method
@@ -118,8 +117,7 @@ public: // interface
     return method_time_[index_method];
   }
   /// get vector time per method
-  std::vector<double> & get_method_time(int n) {
-    if (method_time_.size() < n) method_time_.resize(n);
+  std::vector<double> & get_method_time() {
     return method_time_;
   }
 
