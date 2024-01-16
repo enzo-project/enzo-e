@@ -106,7 +106,11 @@ public: // interface
   void set_ip_next(int ip) { ip_next_ = ip; }
 
   /// Return Block's current state (const)
-  constexpr State & state ()
+  State state () const
+  { return state_; }
+
+  /// Return Block's current state (const)
+  State & state ()
   { return state_; }
 
   /// Return current cell widths

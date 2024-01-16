@@ -469,7 +469,7 @@ void Problem::initialize_method
   Method::courant_global = config->method_courant_global;
 
   method_list_.push_back(new MethodNull(config->method_null_dt)); 
-  
+
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
     std::string name = config->method_type[index_method];

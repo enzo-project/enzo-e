@@ -22,9 +22,6 @@ public: // interface
   /// Create a new Method
   Method (double courant = 1.0) throw();
 
-  /// Destructor
-  virtual ~Method() throw();
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(Method);
 
@@ -38,6 +35,9 @@ public: // interface
       max_supercycle_(1),
       index_method_(-1)
   { }
+
+  /// Destructor
+  virtual ~Method() throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -95,12 +95,15 @@ public: // virtual functions
   void set_courant(double courant) throw ()
   { courant_ = courant; }
 
-  /// Initialize subcycling and supercycling
+  /// Initialize subcycling, supercycling, and index_method
   void set_max_subcycle (int max_subcycle)
   { max_subcycle_ = max_subcycle; }
 
   void set_max_supercycle (int max_supercycle)
   { max_supercycle_ = max_supercycle; }
+
+  void set_index(int index)
+  { index_method_ = index; }
 
   /// Access subcycling and supercycling limits
   int max_subcycle () const
@@ -108,9 +111,6 @@ public: // virtual functions
 
   int max_supercycle () const
   { return max_supercycle_; }
-
-  int set_index(int index)
-  { index_method_ = index; }
 
 protected: // functions
 

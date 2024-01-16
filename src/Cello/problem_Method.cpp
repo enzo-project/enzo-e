@@ -14,7 +14,11 @@ double Method::courant_global = 1.0;
 Method::Method (double courant) throw()
   : schedule_(NULL),
     courant_(courant),
-    neighbor_type_(neighbor_leaf)
+    neighbor_type_(neighbor_leaf),
+    max_subcycle_(1),
+    max_supercycle_(1),
+    index_method_(0)
+    
 {
   ir_post_ = add_refresh_();
   cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_compute_continue());
@@ -37,6 +41,9 @@ void Method::pup (PUP::er &p)
   p | courant_;
   p | ir_post_;
   p | neighbor_type_;
+  p | max_subcycle_;
+  p | max_supercycle_;
+  p | index_method_;
 
 }
 

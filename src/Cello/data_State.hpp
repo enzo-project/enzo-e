@@ -14,6 +14,43 @@ class State {
   /// @ingroup  Data
   /// @brief    [\ref Data] 
 
+  class MethodState {
+    friend State;
+  public:
+    void init() {
+      dt_        = 0.0;
+      time_      = 0.0;
+      num_steps_ = 0;
+      step_      = 0;
+    }
+    void pup (PUP::er &p) {
+      p | dt_;
+      p | time_;
+      p | num_steps_;
+      p | step_;
+    }
+
+    double dt() const { return dt_; }
+    double time() const { return time_; }
+    int num_steps() const { return num_steps_; }
+    int step() const { return step_; }
+
+    void set_dt(double dt) { dt_ = dt; }
+    void set_time(double time) { time_ = time; }
+    void set_num_steps(int num_steps) { num_steps_ = num_steps; }
+    void set_step(int step) { step_ = step; }
+
+  protected:
+    /// Method's timestep
+    double dt_;
+    /// Method's current time_    
+    double time_;
+    /// Number of steps expected for method ( > 1 for supercycling)
+    int num_steps_;
+    /// Number of steps remaining for method
+    int step_;
+  };
+
 public: // interface
 
   /// Constructor
@@ -22,9 +59,8 @@ public: // interface
     time_(0.0),
     dt_(0.0),
     stopping_(false),
-    method_time_(),
-    method_dt_()
-  {
+    method_state_()
+ {
   }
 
   /// Constructor
@@ -33,8 +69,7 @@ public: // interface
       time_(time),
       dt_(dt),
       stopping_(stopping),
-      method_dt_(),
-      method_time_()
+      method_state_()
   {
   }
 
@@ -46,22 +81,18 @@ public: // interface
     p | time_;
     p | dt_;
     p | stopping_;
-    p | method_dt_;
-    p | method_time_;
+    p | method_state_;
   };
 
   //----------------------------------------------------------------------
   /// Initializers
   //----------------------------------------------------------------------
 
-  void set_cycle(int cycle)
-  { cycle_ = cycle; }
-  void set_time (double time)
-  { time_ = time; }
-  void set_dt (double dt)
-  { dt_ = dt; }
-  void set_stopping (bool stopping)
-  { stopping_ = stopping; }
+  void set_cycle(int cycle) { cycle_ = cycle; }
+  void set_time (double time) { time_ = time; }
+  void set_dt (double dt) { dt_ = dt; }
+  void set_stopping (bool stopping) { stopping_ = stopping; }
+  
   void init (int cycle, double time, double dt, bool stopping)
   {
     set_cycle (cycle);
@@ -73,13 +104,11 @@ public: // interface
   void init_method(int n = 0)
   {
     if (n==0) {
-      method_dt_.clear();
-      method_time_.clear();
+      method_state_.clear();
     } else {
-      method_dt_.resize(n);
-      method_time_.resize(n);
-      std::fill(method_dt_.begin(),method_dt_.end(), 0.0);
-      std::fill(method_time_.begin(),method_time_.end(),0.0);
+      method_state_.resize(n);
+      for (auto & m : method_state_)
+        m.init();
     }
   }
 
@@ -87,38 +116,18 @@ public: // interface
   /// Accessors
   //----------------------------------------------------------------------
 
-  /// get scalar cycle
   int cycle() const { return cycle_; }
-  /// get scalar time
   double time() const { return time_; }
-  /// get scalar timestep
   double dt() const { return dt_; }
-  /// get scalar stopping criteria
   bool stopping () const { return stopping_; }
 
-  /// get timestep for given method
-  double method_dt(int index_method) const {
-    ASSERT2("State::method_dt()",
-            "dt array length %d is too small for index %d",
-            method_dt_.size(),index_method,
-            ((0 <= index_method) && (index_method < method_dt_.size())));
-    return method_dt_[index_method];
-  }
-  /// get vector timestep per method
-  std::vector<double> & get_method_dt() {
-    return method_dt_;
-  }
-  /// get scalar time for given method
-  double method_time(int index_method) const {
-    ASSERT2("State::method_time()",
-            "time array length %d is too small for index %d",
-            method_time_.size(),index_method,
-            ((0 <= index_method) && (index_method < method_time_.size())));
-    return method_time_[index_method];
-  }
-  /// get vector time per method
-  std::vector<double> & get_method_time() {
-    return method_time_;
+  /// Get ith MethodState
+  MethodState & method(int index_method) {
+    ASSERT2("State::method()",
+            "array length %d is too small for index %d",
+            method_state_.size(),index_method,
+            ((0 <= index_method) && (index_method < method_state_.size())));
+    return method_state_[index_method];
   }
 
   //----------------------------------------------------------------------
@@ -130,8 +139,8 @@ public: // interface
   { cycle_ += increment; }
 
   /// increment time by given amount (default dt_)
-  void increment_time (double dt = -1)
-  { time_ += (dt==-1) ? dt_ : dt; }
+  void increment_time (double dt)
+  { time_ += dt; }
 
 private: // functions
 
@@ -152,12 +161,8 @@ protected: // attributes
   /// Current stopping criteria
   bool stopping_;
 
-  /// Current timestep for each method
-  std::vector<double> method_dt_;
-
-  /// Current time for each method
-  std::vector<double> method_time_;
-
+  /// Method-specific state scalars
+  std::vector<MethodState> method_state_;
 };
 
 #endif /* DATA_STATE_HPP */
