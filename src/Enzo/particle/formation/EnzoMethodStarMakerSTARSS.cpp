@@ -85,7 +85,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   const int rank = cello::rank();
 
-  double dt    = enzo_block->dt; // timestep in code units
+  auto dt = enzo_block->state().dt(); // timestep in code units
   enzo_float cosmo_a = 1.0;
   enzo_float cosmo_dadt = 0.0;
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();

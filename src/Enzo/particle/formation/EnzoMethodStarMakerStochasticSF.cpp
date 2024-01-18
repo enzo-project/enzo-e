@@ -207,7 +207,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         // (just set to efficiency if dynamical time is ignored)
         //
         double star_fraction =  this->use_dynamical_time_ ?
-                                std::min(this->efficiency_ * enzo_block->dt * enzo_units->time() / tdyn, 1.0) :
+          std::min(this->efficiency_ * enzo_block->state().dt() * enzo_units->time() / tdyn, 1.0) :
                                          this->efficiency_ ;
 
         // if this is less than the mass of a single particle,

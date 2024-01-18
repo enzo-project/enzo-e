@@ -506,7 +506,7 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
 
   double cell_volume = hx*hy*hz * enzo_units->volume(); 
 
-  double dt = enzo_block->dt * tunit;
+  double dt = enzo_block->state().dt() * tunit;
 
   // get relevant field variables
   enzo_float * N          = (enzo_float *) field.values(
@@ -1312,7 +1312,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   double tunit = enzo_units->time();
   double Nunit = enzo_units->photon_number_density();
 
-  double dt = enzo_block->dt;
+  double dt = enzo_block->state().dt();
   double hx = (xp-xm)/(mx-2*gx);
   double hy = (yp-ym)/(my-2*gy);
   double hz = (zp-zm)/(mz-2*gz);

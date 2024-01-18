@@ -149,7 +149,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 EnzoBlock::EnzoBlock (CkMigrateMessage *m)
   : CBase_EnzoBlock (m)
-    // dt(0.0),
     // redshift(0.0)
 {
   TRACE("CkMigrateMessage");
@@ -226,8 +225,6 @@ void EnzoBlock::pup(PUP::er &p)
   TRACE ("BEGIN EnzoBlock::pup()");
 
   CBase_EnzoBlock::pup(p);
-
-  p | dt;
 
   const int in = cello::index_static();
 
@@ -348,17 +345,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // problem
 
-  fprintf (fp,"EnzoBlock: dt %g\n", dt);
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::set_dt (double dt_param) throw ()
-{
-  state_.set_dt(dt_param);
-
-  dt = dt_param;
 }
 
 //----------------------------------------------------------------------

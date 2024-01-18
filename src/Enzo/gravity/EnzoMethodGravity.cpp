@@ -324,8 +324,8 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
-    double dt   = enzo_block->timestep();
-    double time = enzo_block->state().time();
+    auto dt   = enzo_block->state().dt();
+    auto time = enzo_block->state().time();
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
     //    cosmology-> compute_expansion_factor (&a,&dadt,time);
 

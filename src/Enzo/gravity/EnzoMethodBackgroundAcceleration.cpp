@@ -122,15 +122,16 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   }
 
   Particle particle = enzo_block->data()->particle();
+  auto dt = enzo_block->state().dt();
 
   if (enzo_config->method_background_acceleration_flavor == "GalaxyModel"){
 
     this->GalaxyModel(ax, ay, az, &particle, rank,
-                      cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+                      cosmo_a, enzo_config, enzo_units, dt);
 
   } else if (enzo_config->method_background_acceleration_flavor == "PointMass"){
     this->PointMass(ax, ay, az, &particle, rank,
-                    cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+                    cosmo_a, enzo_config, enzo_units, dt);
   } else {
 
     ERROR("EnzoMethodBackgroundAcceleration::compute_()",
