@@ -160,7 +160,11 @@ public: // interface
   int SolveMHDEquations(enzo_float dt);
 
   /// Set EnzoBlock's time (overloaded to update current time)
-  virtual void set_time (double time) throw();
+  virtual void set_state (int cycle, double time, double dt, bool stop) override
+  {
+    Block::set_state(cycle,time,dt,stop);
+    set_time_(time);
+  }
 
   /// Set EnzoBlock's stopping criteria
   void set_stop (bool stop) throw();
@@ -356,6 +360,8 @@ protected: // methods
 
   /// Create a DataMsg object for this block
   DataMsg *create_data_msg_();
+
+  void set_time_(double time) throw();
 
 protected: // attributes
 

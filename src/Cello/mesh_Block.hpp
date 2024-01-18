@@ -773,7 +773,7 @@ public: // virtual functions
                                const double& z, bool include_ghost = false);
 
   /// Set state
-  void set_state (int cycle, double time, double dt, bool stop)
+  virtual void set_state (int cycle, double time, double dt, bool stop)
   {
     state_.init(cycle,time,dt,stop);
   }

@@ -349,22 +349,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::set_time (double time) throw ()
-{
-  state_.set_time(time);
-
-  Simulation * simulation = cello::simulation();
-  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-  EnzoPhysicsCosmology * cosmology = units->cosmology();
-
-  if (cosmology) {
-    cosmology->set_current_time(time);
-    redshift = cosmology->current_redshift();
-  }
-}
-
-//----------------------------------------------------------------------
-
 void EnzoBlock::initialize () throw()
 {
   double xm,ym,zm;
@@ -418,3 +402,16 @@ void EnzoBlock::initialize () throw()
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }
 
+//======================================================================
+
+void EnzoBlock::set_time_ (double time) throw ()
+{
+  Simulation * simulation = cello::simulation();
+  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
+  EnzoPhysicsCosmology * cosmology = units->cosmology();
+
+  if (cosmology) {
+    cosmology->set_current_time(time);
+    redshift = cosmology->current_redshift();
+  }
+}
