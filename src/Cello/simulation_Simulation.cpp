@@ -34,7 +34,7 @@ Simulation::Simulation
   rank_(0),
   cycle_watch_(-1),
   cycle_initial_(-1),
-  state_(0, 0.0, 0.0, false),
+  state_(new State (0, 0.0, 0.0, false)),
   phase_(phase_unknown),
   config_(&g_config),
   problem_(NULL),
@@ -102,7 +102,7 @@ Simulation::Simulation()
   rank_(0),
   cycle_watch_(-1),
   cycle_initial_(-1),
-  state_(0, 0.0, 0.0, false),
+  state_(new State (0, 0.0, 0.0, false)),
   phase_(phase_unknown),
   config_(&g_config),
   problem_(NULL),
@@ -158,7 +158,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     rank_(0),
     cycle_watch_(-1),
     cycle_initial_(-1),
-    state_(0, 0.0, 0.0, false),
+    state_(new State (0, 0.0, 0.0, false)),
     phase_(phase_unknown),
     config_(&g_config),
     problem_(NULL),
@@ -235,7 +235,7 @@ void Simulation::pup (PUP::er &p)
   p | rank_; 
   p | cycle_watch_;
   p | cycle_initial_;
-  p | state_;
+  p | *state_;
   p | phase_;
 
   p | problem_; // PUPable
@@ -363,7 +363,7 @@ void Simulation::initialize_simulation_() throw()
 	  "Parameter 'Mesh:root_rank' must be 1, 2, or 3",
 	  (1 <= rank_) && (rank_ <= 3));
 
-  state_.init(config_->initial_cycle,
+  state_->init(config_->initial_cycle,
               config_->initial_time,
               0.0, false);
 
@@ -809,7 +809,7 @@ const Factory * Simulation::factory() const throw()
 
 void Simulation::update_state(int cycle, double time, double dt, double stop) 
 {
-  state_.init(cycle,time,dt,(stop != 0));
+  state_->init(cycle,time,dt,(stop != 0));
 }
 
 //----------------------------------------------------------------------
@@ -817,7 +817,7 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 void Simulation::p_initialize_state(MsgState * msg)
 {
   msg->update(this);
-  cycle_initial_ = state_.cycle();
+  cycle_initial_ = state_->cycle();
   delete msg;
 }
 
@@ -869,9 +869,9 @@ void Simulation::data_delete_particles(int64_t count)
 void Simulation::monitor_output()
 {
   monitor()-> print("", "-------------------------------------");
-  monitor()-> print("Simulation", "cycle %04d",      state_.cycle());
-  monitor()-> print("Simulation", "time-sim %15.12e",state_.time());
-  monitor()-> print("Simulation", "dt %15.12e",      state_.dt());
+  monitor()-> print("Simulation", "cycle %04d",      state_->cycle());
+  monitor()-> print("Simulation", "time-sim %15.12e",state_->time());
+  monitor()-> print("Simulation", "dt %15.12e",      state_->dt());
   thisProxy.p_monitor_performance();
 }
 

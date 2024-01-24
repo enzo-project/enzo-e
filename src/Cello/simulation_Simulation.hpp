@@ -128,17 +128,13 @@ public: // interface
   { return monitor_; }
 
   /// Get Simulation state (cycle, time, etc.)
-  constexpr State & state ()
-  { return state_; }
-
-  /// Get Simulation state (const)
-  const State & state () const
-  { return state_; }
+  auto & state ()  { return state_; }
+  const auto & state () const  { return state_; }
 
   /// Return true iff cycle_ changes
   bool cycle_changed() {
     bool value = false;
-    const int cycle = state_.cycle();
+    const int cycle = state_->cycle();
     if (cycle != cycle_watch_) {
       value = true;
       cycle_watch_ = cycle;
@@ -476,7 +472,7 @@ protected: // attributes
   int cycle_initial_;
 
   /// Current state of the simulation (time, cycle, etc.)
-  State state_;
+  std::shared_ptr<State> state_;
 
   /// Current phase of the cycle
   mutable int phase_;

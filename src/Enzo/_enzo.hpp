@@ -190,13 +190,10 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "chemistry/GrackleFacade.hpp"
 
 #include "enzo-core/EnzoFactory.hpp"
-
 #include "enzo-core/EnzoSimulation.hpp"
-
 #include "enzo-core/EnzoProblem.hpp"
-
 #include "enzo-core/EnzoConfig.hpp"
-
+#include "enzo-core/EnzoState.hpp"
 #include "enzo-core/EnzoBlock.hpp"
 
 #include "io/IoEnzoBlock.hpp"

@@ -122,7 +122,7 @@ void  Block::initial_new_next_()
     initial->enforce_block(this,nullptr);
   } else {
     const auto initial_cycle = cello::config()->initial_cycle;
-    bool is_first_cycle = (state_.cycle() == initial_cycle);
+    bool is_first_cycle = (state_->cycle() == initial_cycle);
     if (is_first_cycle && level() <= 0) {
       initial_exit_();
     }

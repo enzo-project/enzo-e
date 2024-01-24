@@ -442,7 +442,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
 
   if (is_finest_(block)) {
 
-    const bool reuse_x = reuse_solution_ (block->state().cycle());
+    const bool reuse_x = reuse_solution_ (block->state()->cycle());
 #ifdef TRACE_SOLVER_BCG      
     if (CkMyPe()==0) {
       CkPrintf ("DEBUG_SOLVER_BCG reusing solution X <- X_copy \n");
@@ -723,7 +723,7 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
 
   /// initialize/update current error, store error statistics
 
-  const int cycle = block->state().cycle();
+  const int cycle = block->state()->cycle();
   const bool reuse_x = reuse_solution_ (cycle);
 
   const int iter = (s_iter_(block));

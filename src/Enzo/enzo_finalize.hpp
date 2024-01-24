@@ -10,7 +10,7 @@ void Main::enzo_finalize (Simulation * simulation)
   unit_class ("Enzo-E");
   unit_func  ("final cycle");
   if (cycle_final != 0) {
-    const int cycle = simulation->state().cycle();
+    const int cycle = simulation->state()->cycle();
     unit_assert (cycle==cycle_final);
     monitor->print ("Testing","actual   cycle:  %d",cycle);
     monitor->print ("Testing","expected cycle:  %d",cycle_final);
@@ -20,7 +20,7 @@ void Main::enzo_finalize (Simulation * simulation)
 
   unit_class ("Enzo-E");
   unit_func  ("final time");
-  const double time = simulation->state().time();
+  const double time = simulation->state()->time();
   monitor->print ("Testing","actual sim-time:  %.15g", time);
   monitor->print ("Testing","tolerance:      %g",time_tolerance);
   

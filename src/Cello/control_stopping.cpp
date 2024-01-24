@@ -55,9 +55,9 @@ void Block::stopping_begin_()
   int stopping_interval = cello::config()->stopping_interval;
 
   bool stopping_reduce = stopping_interval ? 
-    ((state_.cycle() % stopping_interval) == 0) : false;
+    ((state_->cycle() % stopping_interval) == 0) : false;
 
-  if (stopping_reduce || state_.dt()==0.0) {
+  if (stopping_reduce || state_->dt()==0.0) {
 
     // Compute dt_ik for block i and method k
 
@@ -70,7 +70,7 @@ void Block::stopping_begin_()
     // Evaluate local stopping criteria
 
     Stopping * stopping = problem->stopping();
-    const int stop_block = stopping->complete(state_.cycle(),state_.time());
+    const int stop_block = stopping->complete(state_->cycle(),state_->time());
     min_reduce[0] = stop_block ? 1.0 : 0.0;
 
     // Evaluate dt for each method k
@@ -105,7 +105,7 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
   double * min_reduce = (double * )msg->getData();
 
-  state_.set_stopping(min_reduce[0] == 1.0);
+  state_->set_stopping(min_reduce[0] == 1.0);
 
   // Compute timestep
   Simulation * simulation = cello::simulation();
@@ -124,7 +124,7 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
     const double max_super = problem->method(k)->max_supercycle();
     double ratio = dt_method / dt_global;
     double allowed_super = std::min(std::floor(ratio),max_super);
-    state().method(k).set_dt(allowed_super * dt_global);
+    state_->method(k).set_dt(allowed_super * dt_global);
   }
 
   delete msg;
@@ -133,7 +133,7 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   dt_global *= Method::courant_global;
 
   // adjust timestep dt to align with any scheduled output times
-  double time_curr = state_.time();
+  double time_curr = state_->time();
   int index_output=0;
   while (Output * output = problem->output(index_output++)) {
     Schedule * schedule = output->schedule();
@@ -148,11 +148,11 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   dt_global = std::min (dt_global, (time_stop - time_curr));
 
   // Update Block state timestep
-  state_.set_dt(dt_global);
+  state_->set_dt(dt_global);
 
   // Update simulation state to block state
-  simulation->state().set_dt      (state_.dt());
-  simulation->state().set_stopping(state_.stopping());
+  simulation->state()->set_dt      (state_->dt());
+  simulation->state()->set_stopping(state_->stopping());
 
 #ifdef CONFIG_USE_PROJECTIONS
   bool was_off = (simulation->projections_tracing() == false);
@@ -199,7 +199,7 @@ void Block::stopping_balance_()
   Schedule * schedule = cello::simulation()->schedule_balance();
 
   bool do_balance = (schedule && 
-		     schedule->write_this_cycle(state_.cycle(),state_.time()));
+		     schedule->write_this_cycle(state_->cycle(),state_->time()));
 
   if (do_balance) {
 

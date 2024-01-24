@@ -47,16 +47,13 @@ public: // interface
   /// Destructor
   virtual ~Block();
 
-  /// Copy constructor
-  Block(const Block & block)
-  /// @param     block  Object being copied
-  { copy_(block);  }
+  /// Copy constructor: disallow
+  Block(const Block & block) = delete;
 
-  /// Assignment operator
-  Block & operator = (const Block & block)
-  /// @param     block  Source object of the assignment
-  /// @return    The target assigned object
-  {  copy_(block);  return *this; }
+  /// Assignment operator: disallow
+  Block & operator = (const Block & block) = delete;
+
+public:
 
   //----------------------------------------------------------------------
   // CHARM
@@ -105,13 +102,9 @@ public: // interface
   /// Set  process to migrate to next
   void set_ip_next(int ip) { ip_next_ = ip; }
 
-  /// Return Block's current state (const)
-  State state () const
-  { return state_; }
-
-  /// Return Block's current state (const)
-  State & state ()
-  { return state_; }
+  /// Return pointer to Block's current state
+  auto & state () { return state_; }
+  const auto & state () const { return state_; }
 
   /// Return current cell widths
   void cell_width
@@ -772,12 +765,6 @@ public: // virtual functions
   bool check_position_in_block(const double& x, const double &y,
                                const double& z, bool include_ghost = false);
 
-  /// Set state
-  virtual void set_state (int cycle, double time, double dt, bool stop)
-  {
-    state_.init(cycle,time,dt,stop);
-  }
-
   /// Initialize Block
   virtual void initialize ();
 
@@ -839,12 +826,6 @@ protected: // functions
     return buffer;
   }
 
-  /// Allocate and copy in attributes from give Block
-  void copy_(const Block & block) throw();
-
-  /// Return the (lower) indices of the Block in the level,
-  /// and the number of indices
-
   /// Update face_level_[] for given child in refined Block
   void refine_face_level_update_ (Index index_child);
 
@@ -905,7 +886,7 @@ protected: // attributes
   int level_next_;
 
   /// Block's current state (cycle, time, dt, stopping, etc.)
-  State state_;
+  std::shared_ptr<State> state_;
 
   //--------------------------------------------------
 

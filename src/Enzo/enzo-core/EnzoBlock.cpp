@@ -149,18 +149,18 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
 EnzoBlock::EnzoBlock (CkMigrateMessage *m)
   : CBase_EnzoBlock (m)
-    // redshift(0.0)
 {
+  state_ = std::make_shared<EnzoState>(0, 0.0, 0.0, false);
+
   TRACE("CkMigrateMessage");
   // EnzoSimulation[0] counts migrated Blocks
   proxy_enzo_simulation[0].p_method_balance_check();
 }
 
 EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
-  : CBase_EnzoBlock (ip_source, msg_type),
-    redshift(0.0)
-
+  : CBase_EnzoBlock (ip_source, msg_type)
 {
+  state_ = std::make_shared<EnzoState>(0, 0.0, 0.0, false);
 #ifdef TRACE_BLOCK
 
   CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip) msg_type %d\n",
@@ -239,8 +239,6 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,GridStartIndex,MAX_DIMENSION);
   PUParray(p,GridEndIndex,MAX_DIMENSION);
   PUParray(p,CellWidth,MAX_DIMENSION);
-
-  p | redshift;
 }
 
 //======================================================================
@@ -402,16 +400,3 @@ void EnzoBlock::initialize () throw()
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }
 
-//======================================================================
-
-void EnzoBlock::set_time_ (double time) throw ()
-{
-  Simulation * simulation = cello::simulation();
-  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-  EnzoPhysicsCosmology * cosmology = units->cosmology();
-
-  if (cosmology) {
-    cosmology->set_current_time(time);
-    redshift = cosmology->current_redshift();
-  }
-}

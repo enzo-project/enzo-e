@@ -116,7 +116,7 @@ void EnzoInitialPm::uniform_placement_
       for (int iz=0; iz<nz; ++iz) zv[iz] = zm + (iz + 0.5)*hz;
     }
 
-    const double t = block->state().time();
+    const double t = block->state()->time();
 
     mask_->evaluate (bitmask, t, 
                      nx, nx, xv,

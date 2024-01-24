@@ -41,7 +41,7 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     data_(NULL),
     child_data_(NULL),
     level_next_(0),
-    state_(0, 0.0, 0.0, false),
+    state_(new State(0,0.0,0.0,false)),
     index_initial_(0),
     children_(),
     sync_coarsen_(),
@@ -64,6 +64,7 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     index_solver_(),
     refresh_()
 {
+
 #ifdef TRACE_BLOCK
 
   CkPrintf ("%d TRACE_BLOCK %s Block::Block(ip)\n",  CkMyPe(),name(thisIndex).c_str());
@@ -127,8 +128,8 @@ void Block::init_refine_
  Adapt * adapt)
 {
   index_ = index;
-  state_.init_method(cello::problem()->num_methods());
-  state_.init(cycle,time,dt,false);
+  state_->init_method(cello::problem()->num_methods());
+  state_->init(cycle,time,dt,false);
   adapt_step_ = num_adapt_steps;
   adapt_ready_ = false;
   adapt_balanced_ = false;
@@ -166,7 +167,9 @@ void Block::init_refine_
 
   // Update state
 
-  set_state (cycle,time,dt,state_.stopping());
+  state_->set_cycle(cycle);
+  state_->set_time(time);
+  state_->set_dt(dt);
 
   sync_coarsen_.reset();
   sync_coarsen_.set_stop(cello::num_children());
@@ -250,7 +253,7 @@ void Block::initialize()
 
   const bool initial_new    = cello::config()->initial_new;
   if (! initial_new) {
-    const bool is_first_cycle = (state_.cycle() == cello::config()->initial_cycle);
+    const bool is_first_cycle = (state_->cycle() == cello::config()->initial_cycle);
     if (is_first_cycle && level() <= 0) {
       CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
       contribute(0,0,CkReduction::concat,callback);
@@ -286,7 +289,7 @@ void Block::pup(PUP::er &p)
   p | index_;
   PUParray(p,array_,3);
   p | level_next_;
-  p | state_;
+  p | *state_;
   p | index_initial_;
   p | children_;
   p | sync_coarsen_;
@@ -415,13 +418,13 @@ void Block::print (FILE * fp_in) const
   fprintf (fp,"%d %s PRINT_BLOCK level_next_ = %d\n",
            ip,name_.c_str(),level_next_);
   fprintf (fp,"%d %s PRINT_BLOCK cycle_ = %d\n",
-           ip,name_.c_str(),state_.cycle());
+           ip,name_.c_str(),state_->cycle());
   fprintf (fp,"%d %s PRINT_BLOCK time_ = %f\n",
-           ip,name_.c_str(),state_.time());
+           ip,name_.c_str(),state_->time());
   fprintf (fp,"%d %s PRINT_BLOCK dt_ = %f\n",
-           ip,name_.c_str(),state_.dt());
+           ip,name_.c_str(),state_->dt());
   fprintf (fp,"%d %s PRINT_BLOCK stop_ = %d\n",
-           ip,name_.c_str(),state_.stopping());
+           ip,name_.c_str(),state_->stopping());
   fprintf (fp,"%d %s PRINT_BLOCK index_initial_ = %d\n",
            ip,name_.c_str(),index_initial_);
   fprintf (fp,"%d %s PRINT_BLOCK children_.size() = %lu\n",
@@ -539,7 +542,7 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
   CkPrintf ("TRACE_BLOCK %s apply_initial()\n",name().c_str());
   fflush(stdout);
 #endif
-  const bool is_first_cycle = (state_.cycle() == cello::config()->initial_cycle);
+  const bool is_first_cycle = (state_->cycle() == cello::config()->initial_cycle);
   if (! is_first_cycle) {
     msg->update(data());
   } else {
@@ -651,7 +654,7 @@ Block::Block ()
     data_(NULL),
     child_data_(NULL),
     level_next_(0),
-    state_(0, 0.0, 0.0, false),
+    state_(new State (0, 0.0, 0.0, false)),
     index_initial_(0),
     children_(),
     sync_coarsen_(),
@@ -699,7 +702,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
   adapt_.set_valid(true);
 
   const bool initial_cycle =
-    (cello::simulation()->state().cycle() == cello::config()->initial_cycle);
+    (cello::simulation()->state()->cycle() == cello::config()->initial_cycle);
 
   if ( (level <= 0) && initial_cycle ) {
     // If root-level (or below) block in first simulation cycle,
@@ -1055,21 +1058,6 @@ void Block::facing_child_(int jc3[3], const int ic3[3], const int if3[3]) const
   jc3[2] = if3[2] ? 1 - ic3[2] : ic3[2];
   TRACE9("facing_child %d %d %d  child %d %d %d  face %d %d %d",
 	 jc3[0],jc3[1],jc3[2],ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
-}
-
-//----------------------------------------------------------------------
-
-void Block::copy_(const Block & block) throw()
-{
-  data_->copy_(*block.data());
-  if (child_data_) child_data_->copy_(*block.child_data());
-
-  state_      = block.state_;
-  adapt_step_ = block.adapt_step_;
-  adapt_ready_ = block.adapt_ready_;
-  adapt_balanced_ = block.adapt_balanced_;
-  adapt_changed_ = block.adapt_changed_;
-  coarsened_  = block.coarsened_;
 }
 
 //----------------------------------------------------------------------

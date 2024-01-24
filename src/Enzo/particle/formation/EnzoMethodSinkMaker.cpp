@@ -97,7 +97,7 @@ void EnzoMethodSinkMaker::pup (PUP::er &p)
 
 void EnzoMethodSinkMaker::compute ( Block *block) throw()
 {
-  const auto cycle = enzo::simulation()->state().cycle();
+  const auto cycle = enzo::simulation()->state()->cycle();
   const auto cycle_initial = enzo::config()->initial_cycle;
   if ( cycle == cycle_initial )
     do_checks_(block);
@@ -218,7 +218,7 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
   // IDs and will be used for the seeds for the random number generator which generates the
   // initial particle positions.
   const uint64_t global_cell_index_start =
-    (enzo::simulation()->state().cycle() * n_blocks + global_block_index) * n_cells_per_block;
+    (enzo::simulation()->state()->cycle() * n_blocks + global_block_index) * n_cells_per_block;
 
   // Will be used to generate the random offsets
   std::uniform_real_distribution<double> distribution (0.0,1.0);
@@ -315,7 +315,7 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 	// Set creation time equal to current time
 	pcreation_time     =
 	  (enzo_float *) particle.attribute_array(it, ia_creation_time, ibatch);
-	pcreation_time[ip_batch * dcreation_time] = enzo::block(block)->state().time();
+	pcreation_time[ip_batch * dcreation_time] = enzo::block(block)->state()->time();
 
 	// Set ID to be the global cell index
 	pid = (int64_t * ) particle.attribute_array(it, ia_id, ibatch);

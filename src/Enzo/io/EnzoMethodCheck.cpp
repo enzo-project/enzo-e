@@ -94,7 +94,7 @@ void EnzoMethodCheck::compute ( Block * block) throw()
 {
   TRACE_CHECK_BLOCK("[2] EnzoMethodCheck::compute()",block);
 
-  const auto cycle_simulation = cello::simulation()->state().cycle();
+  const auto cycle_simulation = cello::simulation()->state()->cycle();
   const auto cycle_initial    = cello::simulation()->initial_cycle();
   if (! (cycle_simulation == cycle_initial)) {
     CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
@@ -390,8 +390,8 @@ std::string Simulation::file_create_dir_
 (std::vector<std::string> directory_format, bool & already_exists)
 {
   const int counter = Simulation::file_counter_++;
-  const int cycle = cello::simulation()->state().cycle();
-  const double time = cello::simulation()->state().time();
+  const int cycle = cello::simulation()->state()->cycle();
+  const double time = cello::simulation()->state()->time();
 
   cello::create_directory
     (&directory_format, counter,cycle,time,already_exists);

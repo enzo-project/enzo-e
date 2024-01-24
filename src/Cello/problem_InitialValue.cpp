@@ -87,7 +87,7 @@ void InitialValue::enforce_block ( Block * block,
   int gx, gy, gz;
   field.ghost_depth(0,&gx,&gy,&gz);
 
-  double t = block->state().time();
+  double t = block->state()->time();
 
   FieldDescr * field_descr = cello::field_descr();
   for (int index_field = 0;

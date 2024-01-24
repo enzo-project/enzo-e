@@ -532,7 +532,7 @@ namespace { // define local helper functions in anonymous namespace
 void EnzoMethodPmDeposit::compute ( Block * block) throw()
 {
 
-  auto cycle = enzo::simulation()->state().cycle();
+  auto cycle = enzo::simulation()->state()->cycle();
   auto cycle_initial = enzo::config()->initial_cycle;
 
   if (cycle == cycle_initial) {
@@ -574,8 +574,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float cosmo_a=1.0;
     enzo_float cosmo_dadt=0.0;
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    const double time = block->state().time();
-    const double dt   = block->state().dt();
+    const double time = block->state()->time();
+    const double dt   = block->state()->dt();
     if (cosmology) {
       cosmology->compute_expansion_factor
         (&cosmo_a,&cosmo_dadt,time + alpha_*dt);

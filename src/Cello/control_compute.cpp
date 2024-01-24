@@ -85,7 +85,7 @@ void Block::compute_continue_ ()
   Schedule * schedule = method->schedule();
   bool is_scheduled = 
     (schedule==NULL) ||
-    (schedule->write_this_cycle(state_.cycle(),state_.time()));
+    (schedule->write_this_cycle(state_->cycle(),state_->time()));
 
   if (is_scheduled) {
     TRACE2 ("Block::compute_continue() method = %d %p\n",
@@ -138,19 +138,22 @@ void Block::compute_end_ ()
 #endif
 
   // Update block cycle and time
-  state_.increment_cycle();
-  state_.increment_time(state_.dt());
+  int cycle   = state_->cycle();
+  double time = state_->time();
+  double dt   = state_->dt();
+  state_->set_cycle(cycle + 1);
+  state_->set_time (time + dt);
 
   // Push back fields if saving old ones
-  data()->field().save_history(state_.time());
+  data()->field().save_history(state_->time());
 
   // delete fluxes
   data()->flux_data()->deallocate();
 
   // Update Simulation cycle and time (redundant)
-  State & sim_state = cello::simulation()->state();
-  sim_state.set_cycle(state_.cycle());
-  sim_state.set_time(state_.time());
+  auto & global_state = cello::simulation()->state();
+  global_state->set_cycle(state_->cycle());
+  global_state->set_time(state_->time());
 
   compute_exit_();
 

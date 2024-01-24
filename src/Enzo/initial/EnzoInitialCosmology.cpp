@@ -30,7 +30,7 @@ EnzoInitialCosmology::EnzoInitialCosmology
   cosmology->set_current_redshift(r0);
 
   // set initial time based on redshift
-  enzo::simulation()->state().set_time(cosmology->time_from_redshift(r0));
+  enzo::simulation()->state()->set_time(cosmology->time_from_redshift(r0));
 }
 
 //----------------------------------------------------------------------
@@ -48,8 +48,8 @@ void EnzoInitialCosmology::enforce_block
       pow((1.0 + cosmology->initial_redshift())/(1.0 + 200.00), 2.0);
   }
 
-  double time = enzo::simulation()->state().time();
-  block->state().set_time (time);
+  double time = enzo::simulation()->state()->time();
+  block->state()->set_time (time);
 
   const double default_mu = 0.6;
 

@@ -44,7 +44,7 @@ void EnzoMethodThresholdAccretion::pup (PUP::er &p)
 void EnzoMethodThresholdAccretion::compute (Block * block) throw()
 {
 
-  if (enzo::simulation()->state().cycle() == enzo::config()->initial_cycle)
+  if (enzo::simulation()->state()->cycle() == enzo::config()->initial_cycle)
     do_checks_(block);
 
   if (block->is_leaf()) {

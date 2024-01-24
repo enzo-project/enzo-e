@@ -38,8 +38,7 @@ void EnzoComputeCoolingTime::compute ( Block * block) throw()
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
-  enzo_float * ct = field.is_field("cooling_time") ?
-                    (enzo_float*) field.values("cooling_time", i_hist_) : NULL;
+  auto * ct = (enzo_float*) field.values("cooling_time", i_hist_);
 
   if (!ct) {
     ERROR("EnzoComputeCoolingTime::compute()",
@@ -47,6 +46,7 @@ void EnzoComputeCoolingTime::compute ( Block * block) throw()
   }
 
   compute(block, ct);
+  
 }
 
 //---------------------------------------------------------------------

@@ -455,9 +455,9 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader, int ip)
   char * array = 0;
   int num_field_data = 1;
 
-  int cycle = state_.cycle();
-  double time = state_.time();
-  double dt = state_.dt();
+  int cycle = state_->cycle();
+  double time = state_->time();
+  double dt = state_->dt();
   factory->create_block
     (
      data_msg,

@@ -159,8 +159,8 @@ void MethodOutput::compute ( Block * block) throw()
     int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
     (*counter)++;
     bool already_exists = false;
-    const int cycle   = block->state().cycle();
-    const double time = block->state().time();
+    const int cycle   = block->state()->cycle();
+    const double time = block->state()->time();
     std::string path_name = cello::create_directory
       (&path_name_,(*counter),cycle,time,already_exists);
   }
@@ -215,8 +215,8 @@ void MethodOutput::compute_continue(Block * block)
 
   // Open *.block_list file and save FILE pointer
   const int count   = file_count_(block);
-  const int cycle   = block->state().cycle();
-  const double time = block->state().time();
+  const int cycle   = block->state()->cycle();
+  const double time = block->state()->time();
   std::string file_name = cello::expand_name
     (&file_name_,count,cycle,time);
 
@@ -422,8 +422,8 @@ FileHdf5 * MethodOutput::file_open_(Block * block, int a3[3])
   ScalarData<int> * scalar_int = block->data()->scalar_data_int();
   int * counter = scalar_int->value(cello::scalar_descr_int(),is_count_);
 
-  const auto cycle = block->state().cycle();
-  const auto time  = block->state().time();
+  const auto cycle = block->state()->cycle();
+  const auto time  = block->state()->time();
   std::string path_name = cello::expand_name
     (&path_name_,(*counter),cycle,time);
 

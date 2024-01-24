@@ -322,7 +322,7 @@ int EnzoBlock::SolveHydroEquations
   int iposrec = 0;
 
   int error = 0;
-  int cycle = state_.cycle();
+  int cycle = state_->cycle();
 
   FORTRAN_NAME(ppm_de)
     (

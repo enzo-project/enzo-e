@@ -36,7 +36,7 @@ MsgState::~MsgState()
 
 void MsgState::update (Simulation * simulation)
 {
-  simulation->state().init(cycle_,time_,dt_,stop_);
+  simulation->state()->init(cycle_,time_,dt_,stop_);
 }
 
 //----------------------------------------------------------------------

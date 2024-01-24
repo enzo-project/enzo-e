@@ -105,8 +105,8 @@ void EnzoComputeAcceleration::compute_(Block * block)
 
   enzo_float cosmo_a = 1.0;
   enzo_float cosmo_dadt = 0.0;
-  const double time = block->state().time();
-  double dt   = block->state().dt();
+  const double time = block->state()->time();
+  double dt   = block->state()->dt();
 
   if (cosmology) {
 

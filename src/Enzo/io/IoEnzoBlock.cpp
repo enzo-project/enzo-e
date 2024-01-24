@@ -35,7 +35,7 @@ void IoEnzoBlock::set_block (Block * block) throw()
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
 
-  enzo_dt_ = enzo_block->state().dt();
+  enzo_dt_ = enzo_block->state()->dt();
   for (int i=0; i<3; i++) {
     enzo_GridLeftEdge_[i] = enzo_block->GridLeftEdge[i];
     enzo_GridDimension_[i] = enzo_block->GridDimension[i];
@@ -43,7 +43,7 @@ void IoEnzoBlock::set_block (Block * block) throw()
     enzo_GridEndIndex_[i] = enzo_block->GridEndIndex[i];
     enzo_CellWidth_[i] = enzo_block->CellWidth[i];
   }
-  enzo_redshift_ = enzo_block->redshift;
+  enzo_redshift_ = enzo_block->state()->redshift();
 }
 
 //----------------------------------------------------------------------
@@ -188,7 +188,7 @@ void IoEnzoBlock::save_to (void * v)
 
   EnzoBlock * enzo_block = (EnzoBlock *)v;
 
-  enzo_block->state().set_dt(enzo_dt_);
+  enzo_block->state()->set_dt(enzo_dt_);
   for (int i=0; i<3; i++) {
     enzo_block->GridLeftEdge[i] = enzo_GridLeftEdge_[i];;
     enzo_block->GridDimension[i] = enzo_GridDimension_[i];;
@@ -196,7 +196,7 @@ void IoEnzoBlock::save_to (void * v)
     enzo_block->GridEndIndex[i] = enzo_GridEndIndex_[i];;
     enzo_block->CellWidth[i] = enzo_CellWidth_[i];;
   }
-  enzo_block->redshift = enzo_redshift_;;
+  enzo_block->state()->set_redshift(enzo_redshift_);
 }
 
 //----------------------------------------------------------------------

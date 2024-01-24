@@ -59,7 +59,7 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
   EnzoBlock * enzo_block = enzo::block(block);
 
-  enzo_block->SolveMHDEquations ( block->state().dt() );
+  enzo_block->SolveMHDEquations ( block->state()->dt() );
 
   enzo_block->compute_done();
 
@@ -101,7 +101,7 @@ double EnzoMethodPpml::timestep (Block * block) throw()
 	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
   if (cosmology) {
-    const auto time = enzo_block->state().time();
+    const auto time = enzo_block->state()->time();
     cosmology->compute_expansion_factor (&cosmo_a, &cosmo_dadt, time);
   }
   //  float afloat = float(a);

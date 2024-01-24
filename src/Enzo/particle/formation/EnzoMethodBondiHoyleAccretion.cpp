@@ -42,7 +42,7 @@ void EnzoMethodBondiHoyleAccretion::pup (PUP::er &p)
 void EnzoMethodBondiHoyleAccretion::compute (Block * block) throw()
 {
 
-  const auto cycle_simulation = enzo::simulation()->state().cycle();
+  const auto cycle_simulation = enzo::simulation()->state()->cycle();
   const auto cycle_initial = enzo::config()->initial_cycle;
   if ( cycle_simulation == cycle_initial )
     do_checks_(block);

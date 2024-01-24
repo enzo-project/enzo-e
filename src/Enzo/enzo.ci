@@ -142,6 +142,8 @@ module enzo {
   PUPable EnzoSolverMg0;
   PUPable EnzoSolverJacobi;
 
+  PUPable EnzoState;
+
   PUPable EnzoStopping;
 
   PUPable EnzoUnits;

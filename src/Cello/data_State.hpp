@@ -8,13 +8,16 @@
 #ifndef DATA_STATE_HPP
 #define DATA_STATE_HPP
 
-class State {
+class State : public PUP::able {
 
   /// @class    State
   /// @ingroup  Data
   /// @brief    [\ref Data] 
 
   class MethodState {
+    /// @class    MethodState
+    /// @ingroup  Data
+    /// @brief    [\ref Data] State of individual methods
     friend State;
   public:
     void init() {
@@ -55,7 +58,8 @@ public: // interface
 
   /// Constructor
   State() throw()
-  : cycle_(0),
+  : PUP::able(),
+    cycle_(0),
     time_(0.0),
     dt_(0.0),
     stopping_(false),
@@ -65,7 +69,8 @@ public: // interface
 
   /// Constructor
   State(int cycle, double time, double dt, bool stopping) throw()
-    : cycle_(cycle),
+    : PUP::able(),
+      cycle_(cycle),
       time_(time),
       dt_(dt),
       stopping_(stopping),
@@ -73,10 +78,17 @@ public: // interface
   {
   }
 
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(State);
+
+  State (CkMigrateMessage *m)
+    : PUP::able(m)
+  { }
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
     TRACEPUP;
+    PUP::able::pup(p);
     p | cycle_;
     p | time_;
     p | dt_;
@@ -88,11 +100,11 @@ public: // interface
   /// Initializers
   //----------------------------------------------------------------------
 
-  void set_cycle(int cycle) { cycle_ = cycle; }
-  void set_time (double time) { time_ = time; }
-  void set_dt (double dt) { dt_ = dt; }
-  void set_stopping (bool stopping) { stopping_ = stopping; }
-  
+  virtual void set_cycle(int cycle) { cycle_ = cycle; }
+  virtual void set_time (double time) { time_ = time; }
+  virtual void set_dt (double dt) { dt_ = dt; }
+  virtual void set_stopping (bool stopping) { stopping_ = stopping; }
+
   void init (int cycle, double time, double dt, bool stopping)
   {
     set_cycle (cycle);
@@ -129,18 +141,6 @@ public: // interface
             ((0 <= index_method) && (index_method < method_state_.size())));
     return method_state_[index_method];
   }
-
-  //----------------------------------------------------------------------
-  /// Modifiers
-  //----------------------------------------------------------------------
-
-  /// increment cycle by given amount (default one)
-  void increment_cycle (int increment = 1)
-  { cycle_ += increment; }
-
-  /// increment time by given amount (default dt_)
-  void increment_time (double dt)
-  { time_ += dt; }
 
 private: // functions
 

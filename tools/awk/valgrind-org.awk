@@ -16,14 +16,14 @@ BEGIN{
     for (i=1; i<NF; i++) {
 	if ($i == "blocks") nb=$(i-1);
     }
-    printf "** TODO Invalid %s of size %d\n",$3,$NF
+    printf "** TODO Conditional jump or move depends on uninitialised value(s)\n"
 }    
 /Invalid/ {
     p=1;
     for (i=1; i<NF; i++) {
 	if ($i == "blocks") nb=$(i-1);
     }
-    printf "** TODO Conditional jump or move depends on uninitialised value(s)\n"
+    printf "** TODO Invalid %s of size %d\n",$3,$NF
 }
 /Use of uninitialised value of size/ {
     p=1;

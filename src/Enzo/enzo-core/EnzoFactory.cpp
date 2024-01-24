@@ -61,8 +61,8 @@ void EnzoFactory::create_block_array
 
   int count_adapt;
 
-  int    cycle = enzo::simulation()->state().cycle();
-  double time  = enzo::simulation()->state().time();
+  int    cycle = enzo::simulation()->state()->cycle();
+  double time  = enzo::simulation()->state()->time();
   double dt    = 0.0;
   int num_face_level = 0;
   int * face_level = 0;
@@ -144,8 +144,8 @@ void EnzoFactory::create_subblock_array
 
     int count_adapt;
 
-    int    cycle = enzo::simulation()->state().cycle();
-    double time  = enzo::simulation()->state().time();
+    int    cycle = enzo::simulation()->state()->cycle();
+    double time  = enzo::simulation()->state()->time();
     double dt    = 0.0;
     int num_face_level = 0;
     int * face_level = 0;
