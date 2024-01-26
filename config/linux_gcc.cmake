@@ -13,11 +13,11 @@ if(NOT __processedUserDefaults)
   # PPM solver
   set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132 -std=legacy " CACHE STRING "Default Fortran flags")
 
-#  set(__ARCH_C_OPT_FLAGS "-O3 -g -funroll-loops")
-#  set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-#  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
-#  set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
-#  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
+  set(__ARCH_C_OPT_FLAGS "-O3 -g -funroll-loops")
+  set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
+  set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
 
   # these flag(s) are currently only used when using openmp-simd optimizations
   # (to specify available/prefered instruction sets).

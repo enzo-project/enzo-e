@@ -57,6 +57,8 @@ public: // interface
   bool value (std::string s, bool deflt) throw()
   { return value_logical(s,deflt); }
 
+  std::string value (std::string s, const char * deflt) throw()
+  { return value_string(s,deflt); }
   std::string value (std::string s, std::string deflt) throw()
   { return value_string(s,deflt); }
 
