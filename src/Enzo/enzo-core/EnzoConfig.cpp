@@ -2385,20 +2385,29 @@ namespace{
 
       } else {
         ERROR1("parse_eos_choice_",
-               "there is currently no support for building of type \"%s\".",
+               "there's no support for building an eos of type \"%s\".",
                type.c_str());
       }
     }
 
 
     if (legacy_gamma_specified) {
+      double gamma = p->value_float("Field:gamma", -1.0);
+      if (gamma <= 1.0) {
+        std::string isothermal_name = EnzoEOSIsothermal::name();
+        ERROR2("parse_eos_choice_",
+               "\"Field:gamma\" is a legacy parameter that will be removed. "
+               "It has an invalid value of 1 or smaller. If you want to "
+               "initialize an \"%s\" EOS, you should delete this parameter & "
+               "assign Physics:fluid_props:eos:type a value of \"%s\"",
+               isothermal_name.c_str(), isothermal_name.c_str());
+      }
       WARNING1("parse_eos_choice_",
                "\"Field:gamma\" is a legacy parameter that will be removed. "
                "It is being used to configure an \"%s\" EOS. Going forward, "
                "set parameters in the \"Physics:fluid_props:eos\" parameter "
                "group instead.",
                ideal_name.c_str());
-      double gamma = p->value_float("Field:gamma", -1.0);
       return EnzoEOSVariant(EnzoEOSIdeal::construct(gamma));
 
     } else if (hydro_type == "ppml") {
