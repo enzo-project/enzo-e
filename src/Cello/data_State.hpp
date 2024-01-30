@@ -14,6 +14,8 @@ class State : public PUP::able {
   /// @ingroup  Data
   /// @brief    [\ref Data] 
 
+public: // component classes
+  
   class MethodState {
     /// @class    MethodState
     /// @ingroup  Data
@@ -142,6 +144,20 @@ public: // interface
     return method_state_[index_method];
   }
 
+  void print(std::string msg)
+  {
+    CkPrintf ("State %s\n",msg.c_str());
+    CkPrintf ("  cycle    %d\n",cycle_);
+    CkPrintf ("  time     %g\n",time_);
+    CkPrintf ("  dt       %g\n",dt_);
+    CkPrintf ("  stopping %d\n",stopping_?1:0);
+    for (int i=0; i<method_state_.size(); i++) {
+      CkPrintf ("       Method %d time      %g\n",i,method_state_[i].time());
+      CkPrintf ("       Method %d dt        %g\n",i,method_state_[i].dt());
+      CkPrintf ("       Method %d num_steps %d\n",i,method_state_[i].num_steps());
+      CkPrintf ("       Method %d step      %d\n",i,method_state_[i].step());
+    }
+  }
 private: // functions
 
 

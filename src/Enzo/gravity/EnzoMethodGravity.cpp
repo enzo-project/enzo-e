@@ -12,11 +12,6 @@
 
 #include "charm_enzo.hpp"
 
-// #define DEBUG_COPY_B
-// #define DEBUG_COPY_DENSITIES
-// #define DEBUG_COPY_POTENTIAL
-// #define DEBUG_COPY_ACCELERATION
-
 //----------------------------------------------------------------------
 
 EnzoMethodGravity::EnzoMethodGravity
@@ -45,23 +40,6 @@ EnzoMethodGravity::EnzoMethodGravity
   if (rank >= 2) cello::define_field ("acceleration_y");
   if (rank >= 3) cello::define_field ("acceleration_z");
 
-#ifdef DEBUG_FIELD_FACE
-  cello::define_field ("debug_1");
-  cello::define_field ("debug_2");
-#endif
-#ifdef DEBUG_COPY_B
-  cello::define_field ("B_copy");
-#endif
-#ifdef DEBUG_COPY_POTENTIAL
-  cello::define_field ("potential_copy");
-#endif
-#ifdef DEBUG_COPY_DENSITIES
-  cello::define_field ("density_total_copy");
-#endif
-#ifdef READ_ENZO_POTENTIAL
-  cello::define_field ("potential_enzo");
-  cello::define_field ("potential_dff");
-#endif
 
   if (accumulate){
     cello::define_field ("density_particle");
@@ -129,7 +107,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   ASSERT ("EnzoMethodGravity::compute",
           "modifying density in EnzoMethodGravity?",
           idensity != id);
-  
   // Solve the linear system
   int mx,my,mz;
   int gx,gy,gz;
@@ -138,85 +115,20 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   const int m = mx*my*mz;
   enzo_float * B = (enzo_float*) field.values (ib);
-#ifdef DEBUG_COPY_B
-  const int ib_copy = field.field_id ("B_copy");
-  enzo_float * B_copy = (enzo_float*) field.values (ib_copy);
-#endif
-#ifdef DEBUG_COPY_DENSITIES  
-  const int id_copy = field.field_id ("D_copy");
-  const int idt_copy = field.field_id ("DT_copy");
-  enzo_float * D_copy = (enzo_float*) field.values (id_copy);
-
-  enzo_float * DT_copy = (enzo_float*) field.values (idt_copy);
-#endif  
 
   double time = block->state()->time();
   enzo_float * D;
   // default current time
   D = (enzo_float*) field.values (idensity);
-#ifdef TEST_FIELD_VALUES_TIME
-  if (block->state()->cycle() > 0) {
-    // if history available use given time
-    const double t0 = field.history_time(0);
-    const double t1 = field.history_time(1);
-    enzo_float * d0 = (enzo_float *) field.values("density",0);
-    enzo_float * d1 = (enzo_float *) field.values("density",1);
-    double a0e=-0.25;
-    double ai=0.25;
-    double a1e=1.25;
-    const double ti = (ai*t0 + (1.0-ai)*t1);
-    const double t0e = (a0e*t0 + (1.0-a0e)*t1);
-    const double t1e = (a1e*t0 + (1.0-a1e)*t1);
-    auto D0e = field.values_at<enzo_float>("density",t0e);
-    auto D0 = field.values_at<enzo_float>("density",t0);
-    auto DI = field.values_at<enzo_float>("density",ti);
-    auto D1 = field.values_at<enzo_float>("density",t1);
-    auto D1e = field.values_at<enzo_float>("density",t1e);
-    double s0e=0, s0ec=0;
-    double s0=0, s0c=0;
-    double si=0, sic=0;
-    double s1=0, s1c=0;
-    double s1e=0, s1ec=0;
-    for (int i=0; i<m; i++) {
-      s0e += a0e*d0[i] + (1.0-a0e)*d1[i];
-      s0ec += D0e[i];
-      s0 += d0[i];
-      s0c += D0[i];
-      si += ai*d0[i] + (1.0-ai)*d1[i];
-      sic += DI[i];
-      s1 += d1[i];
-      s1c += D1[i];
-      s1e += a1e*d0[i] + (1.0-a1e)*d1[i];
-      s1ec += D1e[i];
-    }
-    CkPrintf ("DEBUG_FIELD time %g %g\n",t0,t1);
-    CkPrintf ("DEBUG_FIELD %s sum  %g %g\n",block->name().c_str(),s0,s1);
-    CkPrintf ("DEBUG_FIELD %s D0e %20.16g %20.16g\n",
-              block->name().c_str(),s0e,s0ec);
-    CkPrintf ("DEBUG_FIELD %s D0 %20.16g %20.16g\n",
-              block->name().c_str(),s0,s0c);
-    CkPrintf ("DEBUG_FIELD %s DI %20.16g %20.16g\n",
-              block->name().c_str(),si,sic);
-    CkPrintf ("DEBUG_FIELD %s D1 %20.16g %20.16g\n",
-              block->name().c_str(),s1,s1c);
-    CkPrintf ("DEBUG_FIELD %s D1e %20.16g %20.16g\n",
-              block->name().c_str(),s1e,s1ec);
-    CkPrintf ("DEBUG_FIELD field %p %p\n",d0,d1);
-  }
-#endif
 
-  double ds=0,bs=0;
   for (int i=0; i<m; i++) {
     D[i] += B[i];
-    ds+=D[i];
-    bs+=B[i];
   }
 
   // Add density_particle values to density_particle_accumulate ghosts
 
-  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-
   if (block->is_leaf()) {
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
     if (cosmology) {
       int gx,gy,gz;
       field.ghost_depth(0,&gx,&gy,&gz);
@@ -252,7 +164,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
     for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
 
   }
-  
+
   Solver * solver = enzo::problem()->solver(index_solver_);
 
   // May exit before solve is done...
@@ -262,14 +174,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
   std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
   solver->set_field_x(ix);
   solver->set_field_b(ib);
-#ifdef DEBUG_COPY_B
-  if (B_copy) for (int i=0; i<m; i++) B_copy[i] = B[i];
-#endif	
-#ifdef DEBUG_COPY_DENSITIES
-  enzo_float * DT = (enzo_float*) field.values (idt);
-  if (DT_copy) for (int i=0; i<m; i++) DT_copy[i] = DT[i];
-  if (D_copy) for (int i=0; i<m; i++) D_copy[i] = D[i];
-#endif	
   solver->apply (A, block);
 }
 
@@ -346,12 +250,6 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   enzo_float * de_t = (enzo_float*) field.values("density_total");
   if (de_t) for (int i=0; i<m; i++) de_t[i] = 0.0;
 
-#ifdef DEBUG_COPY_POTENTIAL
-  enzo_float * potential_copy = (enzo_float*) field.values ("potential_copy");
-  if (potential_copy) {
-    for (int i=0; i<m; i++) potential_copy[i] = potential[i];
-  }
-#endif	
 }
 
 //----------------------------------------------------------------------

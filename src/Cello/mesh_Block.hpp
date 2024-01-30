@@ -343,6 +343,9 @@ protected: // methods
   /// Exit control compute phase
   void compute_exit_();
 
+  /// Update Method state variables after method completes a step
+  void compute_update_method_state_(int index_method);
+
 public: // methods
 
   /// Prepare to call compute_next_() after computing (used to
@@ -721,6 +724,8 @@ protected:
   void stopping_balance_();
   void stopping_load_balance_();
   void stopping_exit_();
+  double stopping_compute_global_dt_(double min_reduce[]);
+  void stopping_update_method_state_(double min_reduce[],double dt_global);
 
 public:
   /// Exit the stopping phase to exit

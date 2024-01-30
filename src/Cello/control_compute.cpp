@@ -119,8 +119,29 @@ void Block::compute_done ()
   if (cycle() >= CYCLE)
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_done_()\n", CkMyPe(),name().c_str());
 #endif
+  compute_update_method_state_(index_method_);
   index_method_++;
   compute_next_();
+}
+
+//----------------------------------------------------------------------
+
+void Block::compute_update_method_state_(int index_method)
+{
+  auto & method_state = state_->method(index_method);
+  const double dt_global = state_->dt();
+  const double time_global = state_->time();
+  const double time_method = method_state.time();
+  const double dt_method = method_state.dt();
+  const int step_method = method_state.step();
+  const int num_step_method = method_state.num_steps();
+  const int max_supercycle = method()->max_supercycle();
+  const int max_subcycle = method()->max_subcycle();
+  if (max_subcycle == 1) { // if not subcycling
+    // update method time with dt_global, which may be less than dt_method if supercycling
+    method_state.set_time(time_method + dt_global);
+    method_state.set_step(step_method + 1);
+  }
 }
 
 //----------------------------------------------------------------------

@@ -201,6 +201,12 @@ review Enzo-E's current (non-supercycled) approach.
 non-supercycled gravity
 -----------------------
 
+.. math::
+   \rho_{i+1/2} &\leftarrow \mbox{extrapolate}(\rho_{i-1},\rho_{i}) \\
+   \bar\rho_{i+1/2} &\leftarrow \mbox{shift_and_scale}(\rho_{i+1/2}) \\
+   \mbox{solve } \nabla^2 \phi_{i+1/2} &= \bar\rho_{i+1/2} \\
+   a_{i+1/2} &\leftarrow \nabla \phi_{i+1/2}
+
 The gravitational potential is used to compute gravitational
 accelerations, which are applied to all gravitating particles and
 fields. We use a leapfrog integration scheme because it is 2nd order
@@ -214,22 +220,49 @@ supercycling gravity, we allow this extrapolation to be either before
 or after. This results in the two algorithmic variants described
 below.
 
------------------------
+-----------------
 a-aligned gravity
------------------------
+-----------------
+
+Solve cycle:
+
+.. math::
+   \rho_{i+1/2} &\leftarrow \mbox{extrapolate}(\rho_{i-1},\rho_{i}) \\
+   \bar\rho_{i+1/2} &\leftarrow \mbox{shift_and_scale}(\rho_{i+1/2}) \\
+   \mbox{solve } \nabla^2 \phi_{i+1/2} &= \bar\rho_{i+1/2} \\
+   a_{i+1/2} &\leftarrow \nabla \phi_{i+1/2}
+
+Non-solve cycle (step s > 0, num steps n):
+
+.. math::
+   \phi_{i+1/2} &= \mbox{extrapolate}(\phi_{i-n-s},\phi_{i-n}) \\
+   a_{i+1/2} &\leftarrow \nabla \phi_{i+1/2}
 
 In a-aligned gravity, we compute gravitational potentials as we do now
 in Enzo-E, but skip every-other one. For skipped cycles, we
 extrapolate potentials saved from multiple (two) previous cycles to
 compute accelerations where computed potentials are not available.
 
------------------------
+-----------------
 h-aligned gravity
------------------------
+-----------------
+
+Solve cycle:
+
+.. math::
+   \bar\rho_{i} &\leftarrow \mbox{shift_and_scale}(\rho_{i}) \\
+   \mbox{solve } \nabla^2 \phi_{i} &= \bar\rho_{i} \\
+   \phi_{i+1/2} &= \mbox{extrapolate}(\phi_{i-1},\phi_{i}) \\
+   a_{i+1/2} &\leftarrow \nabla \phi_{i+1/2}
+
+Non-solve cycle (step s > 0, num steps n):
+
+.. math::
+   \phi_{i+1/2} &= \mbox{extrapolate}(\phi_{i-n-s},\phi_{i-s}) \\
+   a_{i+1/2} &\leftarrow \nabla \phi_{i+1/2}
 
 In h-aligned gravity, we compute gravitational potentials at times
 aligned with every-other hydrodynamics cycle. Like with a-aligned
 gravity, accelerations are computed from extrapolated potentials,
 though this extrapolation is performed at every cycle. The benefit is
 no extrapolation of densities is required before the gravity solves.
-

@@ -25,6 +25,8 @@
 
 // #define TRACE_DT
 
+// #define DEBUG_STATE
+
 #ifdef DEBUG_STOPPING
 #   define TRACE_STOPPING(A)					\
   CkPrintf ("%d %s:%d %s TRACE %s\n",					\
@@ -108,49 +110,17 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   state_->set_stopping(min_reduce[0] == 1.0);
 
   // Compute timestep
-  Simulation * simulation = cello::simulation();
-  Problem * problem = simulation->problem();
-  double dt_global = std::numeric_limits<double>::max();
+  double dt_global = stopping_compute_global_dt_(min_reduce);
 
-  // compute minimum timestep dt_global over all methods
-  for (int k=0; k<problem->num_methods(); k++) {
-    const double dt_method = min_reduce[k+1];
-    dt_global = std::min(dt_global,dt_method);
-  }
-
-  // determine method supercycling dt
-  for (int k=0; k<problem->num_methods(); k++) {
-    const double dt_method = min_reduce[k+1];
-    const double max_super = problem->method(k)->max_supercycle();
-    double ratio = dt_method / dt_global;
-    double allowed_super = std::min(std::floor(ratio),max_super);
-    state_->method(k).set_dt(allowed_super * dt_global);
-  }
+  stopping_update_method_state_(min_reduce,dt_global);
 
   delete msg;
-
-  // Adjust timestep dt for global courant condition
-  dt_global *= Method::courant_global;
-
-  // adjust timestep dt to align with any scheduled output times
-  double time_curr = state_->time();
-  int index_output=0;
-  while (Output * output = problem->output(index_output++)) {
-    Schedule * schedule = output->schedule();
-    dt_global = schedule->update_timestep(time_curr,dt_global);
-  }
-
-  // Reduce timestep to not overshoot final time from stopping criteria
-
-  Stopping * stopping = problem->stopping();
-  double time_stop = stopping->stop_time();
-
-  dt_global = std::min (dt_global, (time_stop - time_curr));
 
   // Update Block state timestep
   state_->set_dt(dt_global);
 
   // Update simulation state to block state
+  Simulation * simulation = cello::simulation();
   simulation->state()->set_dt      (state_->dt());
   simulation->state()->set_stopping(state_->stopping());
 
@@ -188,6 +158,74 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   stopping_balance_();
 
   performance_stop_(perf_stopping);
+}
+
+//----------------------------------------------------------------------
+
+double Block::stopping_compute_global_dt_ (double min_reduce[])
+{
+  Simulation * simulation = cello::simulation();
+  Problem * problem = simulation->problem();
+  double dt_global = std::numeric_limits<double>::max();
+
+  // compute minimum timestep dt_global over all methods
+  for (int k=0; k<problem->num_methods(); k++) {
+    const double dt_method = min_reduce[k+1];
+    dt_global = std::min(dt_global,dt_method);
+  }
+
+  // Adjust timestep dt for global courant condition
+  dt_global *= Method::courant_global;
+
+  // adjust timestep dt to align with any scheduled output times
+  double time_curr = state_->time();
+  int index_output=0;
+  while (Output * output = problem->output(index_output++)) {
+    Schedule * schedule = output->schedule();
+    dt_global = schedule->update_timestep(time_curr,dt_global);
+  }
+
+  // Reduce timestep to not overshoot final time from stopping criteria
+
+  Stopping * stopping = problem->stopping();
+  double time_stop = stopping->stop_time();
+
+  dt_global = std::min (dt_global, (time_stop - time_curr));
+
+  return dt_global;
+}
+
+//----------------------------------------------------------------------
+
+void Block::stopping_update_method_state_(double min_reduce[], double dt_global)
+{
+  // update Method states for supercycling
+  Simulation * simulation = cello::simulation();
+  Problem * problem = simulation->problem();
+#ifdef DEBUG_STATE
+  // Write current state
+  if (index().is_root()) {
+    state()->print("update_method_state");
+  }
+#endif
+  for (int k=0; k<problem->num_methods(); k++) {
+    const double dt_method = min_reduce[k+1];
+    const int max_super = problem->method(k)->max_supercycle();
+    const double max_dt_method = dt_global*max_super;
+    const double ratio = max_dt_method / dt_global;
+    const int desired_super = int(std::floor(ratio));
+    const int allowed_super = std::min(desired_super,max_super);
+    State::MethodState & method_state = state_->method(k);
+    const int step = method_state.step();
+    const int num_steps = method_state.num_steps();
+    bool update_state = (step >= num_steps);
+    if (update_state) {
+      method_state.set_time(state_->time());
+      method_state.set_dt(allowed_super * dt_global);
+      method_state.set_num_steps(allowed_super);
+      method_state.set_step(0);
+    }
+  }
 }
 
 //----------------------------------------------------------------------
