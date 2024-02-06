@@ -51,11 +51,11 @@ Hierarchy::Hierarchy
   num_blocks_level_.resize(max_level - min_level + 1);
 
   for (int i=0; i<3; i++) {
-    root_size_[i] = 1;
     lower_[i] = 0.0;
     upper_[i] = 1.0;
     blocking_[i] = 0;
     periodicity_[i] = 0;
+    root_size_[i] = 1;
   }
 }
 
@@ -103,12 +103,12 @@ void Hierarchy::pup (PUP::er &p)
 
   p | block_array_;
 
-  PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
 
   PUParray(p,blocking_,3);
   PUParray(p,periodicity_,3);
+  PUParray(p,root_size_,3);
 
 }
 
@@ -182,11 +182,19 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-void Hierarchy::root_blocks (int * nbx, int * nby, int * nbz) const throw()
+void Hierarchy::root_blocks
+(int * nbx, int * nby, int * nbz,int level) const throw()
 {
   if (nbx) (*nbx) = blocking_[0];
   if (nby) (*nby) = blocking_[1];
   if (nbz) (*nbz) = blocking_[2];
+  if (level > 0) {
+    const int r = std::pow(2,level);
+    const int rank = cello::rank();
+    if (nbx && rank >= 1) (*nbx) *= r;
+    if (nby && rank >= 2) (*nby) *= r;
+    if (nbz && rank >= 3) (*nbz) *= r;
+  }
 }
 
 //----------------------------------------------------------------------

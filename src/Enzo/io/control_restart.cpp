@@ -134,7 +134,10 @@ void Simulation::p_restart_enter (std::string name_dir)
   TRACE_SYNC(sync_restart_created_,"sync_restart_created_ set_stop()");
   sync_restart_created_.set_stop(restart_num_files_);
   TRACE_SYNC(sync_restart_next_,"sync_restart_next_ set_stop()");
-  sync_restart_next_.set_stop(restart_num_files_);
+
+  // Synchronize after all files are done reading AND all EnzoMsgRestart
+  // objects received
+  sync_restart_next_.set_stop(restart_num_files_ + CkNumPes());
 
   // Create new empty IoEnzoReader chare array and distribute to other processing elements
   CProxy_MappingIo io_map  = CProxy_MappingIo::ckNew(restart_num_files_);
@@ -172,7 +175,6 @@ void EnzoSimulation::p_io_reader_created()
   // Wait for all io_readers to be created
   TRACE_SYNC(sync_restart_created_,"sync_restart_created_ next()");
   if (sync_restart_created_.next()) {
-    // distribute array proxy to other simulation objects
     proxy_enzo_simulation.p_set_io_reader(proxy_io_enzo_reader);
   }
 }
@@ -353,6 +355,7 @@ void IoEnzoReader::block_ready_()
   // Wait for all of the reader's blocks in the current level to be
   // ready
   if (sync_blocks_.next()) {
+    TRACE_READER("p_block_ready() calling p_restart_next_level",this);
     proxy_enzo_simulation[0].p_restart_next_level();
   }
 }
@@ -365,6 +368,8 @@ void EnzoSimulation::p_restart_next_level()
   TRACE_SIMULATION("EnzoSimulation::p_restart_next_level()",this);
   TRACE_SYNC(sync_restart_next_,"sync_restart_next_ next()");
   if (sync_restart_next_.next()) {
+    // first update sync stop to only count restart_num_files_
+    sync_restart_next_.set_stop(restart_num_files_);
     const int max_level = cello::config()->mesh_max_level;
     if (++restart_level_ <= max_level) {
       proxy_io_enzo_reader.p_create_level(restart_level_);
@@ -588,7 +593,6 @@ std::ifstream IoEnzoReader::stream_open_blocks_
 
 void IoEnzoReader::file_read_hierarchy_()
 {
-  // Simulation data
   if (thisIndex == 0) {
     IoSimulation io_simulation = (cello::simulation());
     for (size_t i=0; i<io_simulation.meta_count(); i++) {
@@ -604,7 +608,6 @@ void IoEnzoReader::file_read_hierarchy_()
       // Read object's ith metadata
       file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
     }
-
     // Get current state
     double time,dt;
     int cycle;
@@ -619,6 +622,27 @@ void IoEnzoReader::file_read_hierarchy_()
   }
 }
 
+//----------------------------------------------------------------------
+
+void EnzoSimulation::p_restart_get_io_simulation(int n, char * buffer)
+
+{
+  char * p = buffer;
+
+  IoEnzoSimulation io_simulation (enzo::simulation());
+  p = io_simulation.load_data(p);
+  io_simulation.save_to((void *)this);
+
+  IoHierarchy io_hierarchy (cello::hierarchy());
+  p = io_hierarchy.load_data(p);
+  io_hierarchy.save_to((void *)this);
+
+  // Synchronize at root EnzoSimulation
+  if (thisIndex == 0) {
+    TRACE_SIMULATION("p_restart_get_io_simulation() calling p_restart_next_level",this);
+    proxy_enzo_simulation[0].p_restart_next_level();
+  }
+}
 //----------------------------------------------------------------------
 
 void IoEnzoReader::file_read_block_

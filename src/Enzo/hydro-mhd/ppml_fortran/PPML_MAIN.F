@@ -125,7 +125,11 @@ c
       if (nx.le.0) then
 C     ERROR_MESSAGE
       endif
-      
+
+c
+c     Active cells start from i,j,k1 and end at i,j,k2
+c     Number of ghost zones i,j,kghost=3 for PPM, supposed to be 2 for PPML
+c      
       i1=GridStartIndex(1)+1
       j1=GridStartIndex(2)+1
       k1=GridStartIndex(3)+1
@@ -155,7 +159,11 @@ C     ERROR_MESSAGE
                                 !          i2=Nx-3
                                 !          j2=Ny-3
                                 !          k2=Nz-3
-
+c
+c     nx(yz)b=1 -- fist zone of the grid
+c     nx(yz)e   -- last
+c     nx(yz)p   -- total number of grid zones in a given direction (duplicates nx,y,z for no reason)
+c
       
       nxb=i1-ighost 
       nxe=i2+ighost 
@@ -261,7 +269,9 @@ c--------------------------------------------------------
                dx1(i)=vax-vay+vaz-cga+dsc-cgs                        
                
             Enddo
-
+c
+c         1D monotonicity constraint (Procedire 1) ??? [AK]
+c
             Call Monot(1,nxp,Dx1,Dx2,qp1,qr1,qlx1,qrx1)
             
             Do i=nxb+1,nxe
@@ -269,6 +279,9 @@ c--------------------------------------------------------
                Qrx1(i,5)=Qr1(i,5)
             Enddo
 
+c
+c     2D monotonicity constraint (Timothy Barth, homepage @ NASA AMES)  
+c
             Do i=nxb+1,nxe-1
 
                dn1=Qp1(i,1)
@@ -336,7 +349,9 @@ c--------------------------------------------------------
                qrx1(i,7)=max(bz1,min(bz2,qrx1(i,7)))
 
             Enddo
-            
+c
+c      PPM correction for local extremum
+c            
             CALL QDD6(nxp,Qrx1,Qlx1,Qvr1,Qvl1,Qp1)
 
             Do i=nxb,nxe
@@ -351,7 +366,7 @@ c--------------------------------------------------------
                dnrx(i,j,k)=Qrp1(i,1)                
                vxrx(i,j,k)=Qrp1(i,2)                
                vyrx(i,j,k)=Qrp1(i,3)                
-               vzrx(i,j,k)=Qrp1(i,4)                
+               vzrx(i,j,k)=Qrp1(i,4)
                byrx(i,j,k)=Qrp1(i,6)                
                bzrx(i,j,k)=Qrp1(i,7)
 
@@ -772,6 +787,15 @@ C     !
 C     !     Gardiner&Stone CT 
 C     !
 C     !-----------------------------------------------------------------
+!
+!     This piece follows Ustyugov et al. (2009), page 7622, Fig. 7
+!     and computes E-field values at the grid nodes (see last equation on p. 7622):
+!     Ex(ijk), Ey(ijk), and Ez(ijk).
+!
+!     The B-fields on cell edges are computed using Stokes' theorem (46) and equations on page 7623
+!     in the next step named "Evolution of all variables."
+!     Then at the very end cell-centered B-fields are computed as averages. 
+
       epsk=1.0e-12
 
       DO K=k1-1,k2
@@ -1285,7 +1309,13 @@ c
 c     Evolution of all variables
 c     
 c-------------------------------------------------------------------
-
+!
+!     This piece computes B-fields at cell interfaces, subject to div(B)=0 constraint.
+!     These primitive variables cannot be computed simply as a solution to the Riemann problem.
+!     The CT-based B-fields are only computed for active zones and only as r-states, with one
+!     exception. The aligned field component (e.g. bxrx along x) is computed as the right face 
+!     value for the 1st ghost zone to the left from active area.
+!
       Do k=k1,k2
          Do j=j1,j2
             Do i=i1-1,i2
@@ -1334,6 +1364,7 @@ c     write(10,*) i,f1(i,j,k)
 c     enddo
 c     close(10)
 
+
       Call Conserv(nxp,nyp,nzp,dn,vx,vy,vz,bx,by,bz,
      &     qu1,qu2,qu3,qu4,qu5,qu6,qu7)           
 
@@ -1361,6 +1392,11 @@ c     close(10)
 
                QH(7)=QU7(I,J,K)-Dt/Dx*(F7(I,J,K)-F7(I-1,J,K)
      &              +G7(I,J,K)-G7(I,J-1,K)+H7(I,J,K)-H7(I,J,K-1))
+
+c
+c       Update for cell-centered B-field components [Ustyugov et al. (2009), page 7623]
+c       Why do we need QH(5,6,7) computed above through fluxes? Why do we duplicate? =AK
+c
 
                qh(5)=0.5*(bxrx(i,j,k)+bxrx(i-1,j,k))  
                qh(6)=0.5*(byry(i,j,k)+byry(i,j-1,k))  

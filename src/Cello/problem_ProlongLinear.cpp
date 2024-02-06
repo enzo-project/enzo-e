@@ -11,7 +11,7 @@
 #include "problem.hpp"
 
 // #define TRACE_SUMS
-
+// #define TRACE_PROLONG
 //----------------------------------------------------------------------
 
 ProlongLinear::ProlongLinear() throw()
@@ -265,7 +265,7 @@ void ProlongLinear::apply_
         const int mfx = mf3[0];
         const int mcy = mc3[1];
         const int myf = mf3[1];
-    
+
         for (int ifx = 0; ifx<nfx; ifx++) {
 
           int icx = ((ifx+1) >> 1) - gcx;

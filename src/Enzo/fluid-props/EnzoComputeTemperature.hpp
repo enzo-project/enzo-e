@@ -24,7 +24,7 @@ public: // interface
   (double density_floor,
    double temperature_floor,
    double mol_weight,
-   bool comoving_coordinates);
+   bool comoving_coordinates = false);
 
   /// Create a new EnzoComputeTemperature object
   EnzoComputeTemperature(const EnzoPhysicsFluidProps* fluid_props,

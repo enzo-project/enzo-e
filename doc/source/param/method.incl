@@ -31,13 +31,17 @@
      * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
        out in favor of using a more general "mhd" method instead, with a
        specific mhd solver specified.*
+     * :t:`"ppml_it"` :e:`alternate name for "ppml".`
+     * :t:`"ppml_ig"` :e:`for the adiabatic version of PPML.`   *This may be phased
+       out in favor of using a more general "mhd" method instead, with a
+       specific mhd solver specified.*
      * :t:`"mhd_vlct"` :e:`for the VL + CT (van Leer + Constrained Transport) MHD
        solver.`
      * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
        out in favor of a more general "move_particles" method.**
      * :t:`"turbulence"` :e:`computes random forcing for turbulence
        simulations.`
-
+     * :t:`"turbulence_ou"` :e:`implements Ornstein-Uhlenbeck driven turbulence.`
 
    :e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
 
@@ -461,6 +465,12 @@ ppm
 .. include:: method_ppm.incl
 
 
+ppml
+----
+
+.. include:: method_ppml.incl
+
+
 sink_maker
 ----------
 
@@ -569,6 +579,8 @@ turbulence
    :Scope:     :z:`Enzo`
    :Todo: :o:`write`
 
+   :e:`Prescribes kinetic energy injection rate for a forcing method based on random but constant-in-time external x-, y-, z-acceleration fields. The code would normalize the accelerations so that the resulting actual injection rate is constant during the simulation and equal to edot. For details of the method see` `Mac Low (1999) <https://ui.adsabs.harvard.edu/abs/1999ApJ...524..169M/abstract>`_  :e:`The default setting edot=-1 turns this forcing off.`
+
 ----
 
 .. par:parameter:: Method:turbulence:mach_number
@@ -578,3 +590,10 @@ turbulence
    :Default: :d:`0.0`
    :Scope:     :z:`Enzo`
    :Todo: :o:`write`
+
+   :e:`Specifies the target sonic Mach number for a forced turbulence simulation. If` :p:`mach_number` :e:`is not zero, the energy injection rate will be calculated based on the Mach number.`
+
+turbulence_ou
+-------------
+
+.. include:: method_turbulence_ou.incl

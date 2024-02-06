@@ -27,8 +27,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    particle_list_(),
     particles_are_copied_(false),
+    particle_list_(),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -57,8 +57,8 @@ public: // interface
       field_list_src_(),
       field_list_dst_(),
       all_particles_(false),
-      particle_list_(),
       particles_are_copied_(false),
+      particle_list_(),
       all_fluxes_(false),
       ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank),
@@ -85,8 +85,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    particle_list_(),
     particles_are_copied_(false),
+    particle_list_(),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -113,8 +113,8 @@ public: // interface
     p | field_list_src_;
     p | field_list_dst_;
     p | all_particles_;
-    p | particle_list_;
     p | particles_are_copied_;
+    p | particle_list_;
     p | all_fluxes_;
     p | ghost_depth_;
     p | min_face_rank_;

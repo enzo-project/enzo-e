@@ -248,6 +248,7 @@ public: // interface
       initial_soup_rotate(false),
       // EnzoInitialTurbulence
       initial_turbulence_density(0.0),
+      initial_turbulence_bfieldx(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
 
@@ -285,7 +286,10 @@ public: // interface
 
       // EnzoMethodHeat
       method_heat_alpha(0.0),
-
+      // EnzoMethodPpml
+      method_ppml_dt_weight(1.0),
+      // EnzoMethodPpmlIg
+      method_ppml_b0(),
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -344,6 +348,21 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
+      // EnzoMethodTurbulenceOU
+      method_turbulence_apply_cooling(false),
+      method_turbulence_apply_forcing(false),
+      method_turbulence_apply_injection_rate(false),
+      method_turbulence_cooling_term(0),
+      method_turbulence_hc_alpha(0.0), 
+      method_turbulence_hc_sigma(0.0),
+      method_turbulence_injection_rate(0.006),
+      method_turbulence_kfa(12.57),
+      method_turbulence_kfi(6.27),
+      method_turbulence_olap(0),
+      method_turbulence_read_sol(false),
+      method_turbulence_sol_weight(1.0),
+      method_turbulence_totemp(0.0),
+      method_turbulence_update_solution(false),
       // EnzoMethodGrackle
       method_grackle_use_grackle(false),
       method_grackle_chemistry(),
@@ -482,6 +501,7 @@ protected: // methods
   void read_method_merge_sinks_(Parameters *);
   void read_method_pm_deposit_(Parameters *);
   void read_method_pm_update_(Parameters *);
+  void read_method_ppml_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_sink_maker_(Parameters *);
   void read_method_star_maker_(Parameters *);
@@ -681,6 +701,7 @@ public: // attributes
 
   /// EnzoInitialTurbulence
   double                     initial_turbulence_density;
+  double                     initial_turbulence_bfieldx;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 
@@ -774,6 +795,12 @@ public: // attributes
   /// EnzoMethodHeat
   double                     method_heat_alpha;
 
+  /// EnzoMethodPpml
+  double                     method_ppml_dt_weight;
+
+  /// EnzoMethodPpmlIg
+  double                     method_ppml_b0[3];
+
   /// EnzoMethodHydro
   std::string                method_hydro_method;
   bool                       method_hydro_dual_energy;
@@ -861,6 +888,23 @@ public: // attributes
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
+
+  /// EnzoMethodTurbulenceOU
+
+  bool method_turbulence_apply_cooling;
+  bool method_turbulence_apply_forcing;
+  bool method_turbulence_apply_injection_rate;
+  int method_turbulence_cooling_term;
+  double method_turbulence_hc_alpha;
+  double method_turbulence_hc_sigma;
+  double method_turbulence_injection_rate;
+  double method_turbulence_kfa;
+  double method_turbulence_kfi;
+  int method_turbulence_olap;
+  bool method_turbulence_read_sol;
+  double method_turbulence_sol_weight;
+  double method_turbulence_totemp;
+  bool method_turbulence_update_solution;
 
   /// EnzoMethodGrackle
   bool                       method_grackle_use_grackle;

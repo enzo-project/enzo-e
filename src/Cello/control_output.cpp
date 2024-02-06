@@ -107,7 +107,6 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void Simulation::output_start(int index_output)
 {
-  TRACE_OUTPUT("Simulation::output_start()");
   Output * output = problem()->output(index_output);
   output->init();
   output->open();
@@ -119,6 +118,7 @@ void Simulation::output_start(int index_output)
 
 void Simulation::r_output_barrier(CkReductionMsg * msg)
 {
+  TRACE_OUTPUT("Simulation::output_barrier()");
   delete msg;
   Output * output = problem()->output(index_output_);
   output->write_simulation(this);

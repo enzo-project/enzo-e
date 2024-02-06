@@ -850,10 +850,15 @@ See :ref:`using-fluid_props-de` for additional details.
 This method currently ignores all of the floor parameters that are set in the ``physics:fluid_props:floors`` section of the parameter file.
 
 
-``"ppml"`` method
-=================
+``"ppml"`` (or ``"ppml_ig"``) method
+====================================
 
 PPML ideal MHD solver
+
+``"ppml_it"`` method
+====================
+
+PPML adiabatic MHD solver
 
 .. _vlct_overview:
 

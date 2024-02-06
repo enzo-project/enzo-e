@@ -21,6 +21,38 @@
 
 #include "enzo.hpp"
 
+// #define DEBUG_FIELDS
+
+#ifdef DEBUG_FIELDS
+#   define CHECK_FIELD(VALUES,NAME)             \
+  ASSERT1("CHECK_FIELD",                        \
+          "Field %s must be defined",           \
+          NAME,                                 \
+          (VALUES != nullptr));
+
+#   define FIELD_STATS(NAME,VALUES,mx,my,mz,gx,gy,gz)           \
+  {                                                             \
+   double avg=0.0, max=-1.0, min=1e9;                           \
+   int count=0;                                                 \
+   for (int iz=gz; iz<mz-gz; iz++) {                            \
+     for (int iy=gy; iy<my-gy; iy++) {                          \
+       for (int ix=gx; ix<mx-gx; ix++) {                        \
+         const int i=ix+mx*(iy+my*iz);                          \
+         avg += VALUES[i];                                      \
+         max = std::max(max,VALUES[i]);                         \
+         min = std::min(min,VALUES[i]);                         \
+         count++;                                               \
+       }                                                        \
+     }                                                          \
+   }                                                            \
+   avg /= count;                                                \
+   CkPrintf ("FIELD_STATS %s  %g %g %g\n",NAME,min,avg,max);    \
+   }
+#else
+#   define CHECK_FIELD(VALUES,NAME) /* ... */
+#   define FIELD_STATS(NAME,VALUES,mx,my,mz,gx,gy,gz) /* ... */
+#endif
+
 int EnzoBlock::SolveMHDEquations( enzo_float dt )
 {
 
@@ -56,6 +88,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     enzo_float *bfieldx    = (enzo_float *) field.values ("bfieldx");
     enzo_float *bfieldy    = (enzo_float *) field.values ("bfieldy");
     enzo_float *bfieldz    = (enzo_float *) field.values ("bfieldz");
+
     enzo_float *dens_rx    = (enzo_float *) field.values ("dens_rx");
     enzo_float *velox_rx   = (enzo_float *) field.values ("velox_rx");
     enzo_float *veloy_rx   = (enzo_float *) field.values ("veloy_rx");
@@ -80,57 +113,34 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     enzo_float *bfieldy_rz = (enzo_float *) field.values ("bfieldy_rz");
     enzo_float *bfieldz_rz = (enzo_float *) field.values ("bfieldz_rz");
 
-    /* allocate space for fluxes */
-
-//     for (i = 0; i < NumberOfSubgrids; i++) {
-//       for (dim = 0; dim < GridRank; dim++)  {
-
-// 	/* compute size (in floats) of flux storage */
-
-//         size = 1;
-//         for (j = 0; j < GridRank; j++)
-//           size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
-//                   SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
-
-// 	/* set unused dims (for the solver, which is hardwired for 3d). */
-
-//         for (j = GridRank; j < 3; j++) {
-//           SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j]  = 0;
-//           SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j]    = 0;
-//           SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
-//           SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j]   = 0;
-//         }
-
-// 	/* Allocate space (if necessary). */
-
-//         for (field = 0; field < NumberOfBaryonFields; field++) {
-// 	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-// 	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new enzo_float[size];
-// 	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-// 	    SubgridFluxes[i]->RightFluxes[field][dim] = new enzo_float[size];
-// 	  for (n = 0; n < size; n++) {
-// 	    SubgridFluxes[i]->LeftFluxes[field][dim][n]  = 0;
-// 	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
-// 	  }
-//         }
-
-// 	for (field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
-// 	     field++) {
-//           SubgridFluxes[i]->LeftFluxes[field][dim]  = NULL;
-//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-// 	}
-
-//       }  // next dimension
-
-//       /* make things pretty */
-
-//       for (dim = GridRank; dim < 3; dim++)
-//         for (field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
-//           SubgridFluxes[i]->LeftFluxes[field][dim]  = NULL;
-//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-// 	}
-
-//     } // end of loop over subgrids
+    CHECK_FIELD(density,"density");
+    CHECK_FIELD(velox,"velox");
+    CHECK_FIELD(veloy,"veloy");
+    CHECK_FIELD(veloz,"veloz");
+    CHECK_FIELD(bfieldx,"bfieldx");
+    CHECK_FIELD(bfieldy,"bfieldy");
+    CHECK_FIELD(bfieldz,"bfieldz");
+    CHECK_FIELD(dens_rx,"dens_rx");
+    CHECK_FIELD(velox_rx,"velox_rx");
+    CHECK_FIELD(veloy_rx,"veloy_rx");
+    CHECK_FIELD(veloz_rx,"veloz_rx");
+    CHECK_FIELD(bfieldx_rx,"bfieldx_rx");
+    CHECK_FIELD(bfieldy_rx,"bfieldy_rx");
+    CHECK_FIELD(bfieldz_rx,"bfieldz_rx");
+    CHECK_FIELD(dens_ry,"dens_ry");
+    CHECK_FIELD(velox_ry,"velox_ry");
+    CHECK_FIELD(veloy_ry,"veloy_ry");
+    CHECK_FIELD(veloz_ry,"veloz_ry");
+    CHECK_FIELD(bfieldx_ry,"bfieldx_ry");
+    CHECK_FIELD(bfieldy_ry,"bfieldy_ry");
+    CHECK_FIELD(bfieldz_ry,"bfieldz_ry");
+    CHECK_FIELD(dens_rz,"dens_rz");
+    CHECK_FIELD(velox_rz,"velox_rz");
+    CHECK_FIELD(veloy_rz,"veloy_rz");
+    CHECK_FIELD(veloz_rz,"veloz_rz");
+    CHECK_FIELD(bfieldx_rz,"bfieldx_rz");
+    CHECK_FIELD(bfieldy_rz,"bfieldy_rz");
+    CHECK_FIELD(bfieldz_rz,"bfieldz_rz");
 
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
@@ -328,27 +338,50 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     /* note: Start/EndIndex are zero based */
 
 
-    /* current PPML implementation only supports 3D and does not support color fields */	
+    /* current PPML implementation only supports 3D and does not
+       support color fields */
 
-      FORTRAN_NAME(ppml)
-	(density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,
-	 dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,
-	 dens_ry,velox_ry,veloy_ry,veloz_ry,bfieldx_ry,bfieldy_ry,bfieldz_ry,
-	 dens_rz,velox_rz,veloy_rz,veloz_rz,bfieldx_rz,bfieldy_rz,bfieldz_rz,
-	 &dt, &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
-	 &GridDimension[0], &GridDimension[1], &GridDimension[2],
-	 GridStartIndex, GridEndIndex,
-	 &NumberOfSubgrids, leftface, rightface,
-	 istart, iend, jstart, jend,
-	 standard, dnindex,
-	 vxindex, vyindex, vzindex,
-	 bxindex, byindex, bzindex,
-	 f1,f2,f3,f4,f5,f6,f7,
-	 g1,g2,g3,g4,g5,g6,g7,
-	 h1,h2,h3,h4,h5,h6,h7,
-	 ex,ey,ez,
-	 qu1,qu2,qu3,qu4,qu5,qu6,qu7);
+    enzo_float *velocity_x      = (enzo_float *) field.values ("velocity_x");
+    enzo_float *velocity_y      = (enzo_float *) field.values ("velocity_y");
+    enzo_float *velocity_z      = (enzo_float *) field.values ("velocity_z");
+    bool have_velocity = (velocity_x != nullptr);
+
+    int mx,my,mz;
+    field.dimensions(0,&mx,&my,&mz);
+    const int m = mx*my*mz;
+
+    if (have_velocity) {
+      std::copy_n(velocity_x,m,velox);
+      std::copy_n(velocity_y,m,veloy);
+      std::copy_n(velocity_z,m,veloz);
+    }
+
+    FORTRAN_NAME(ppml)
+      (density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,
+       dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,
+       dens_ry,velox_ry,veloy_ry,veloz_ry,bfieldx_ry,bfieldy_ry,bfieldz_ry,
+       dens_rz,velox_rz,veloy_rz,veloz_rz,bfieldx_rz,bfieldy_rz,bfieldz_rz,
+       &dt, &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
+       &GridDimension[0], &GridDimension[1], &GridDimension[2], 
+       GridStartIndex, GridEndIndex,
+       &NumberOfSubgrids, leftface, rightface,
+       istart, iend, jstart, jend,
+       standard, dnindex,
+       vxindex, vyindex, vzindex,
+       bxindex, byindex, bzindex,
+       f1,f2,f3,f4,f5,f6,f7,
+       g1,g2,g3,g4,g5,g6,g7,
+       h1,h2,h3,h4,h5,h6,h7,
+       ex,ey,ez,
+       qu1,qu2,qu3,qu4,qu5,qu6,qu7);
+
     /* deallocate temporary space for solver */
+ 
+    if (have_velocity) {
+      std::copy_n(velox,m,velocity_x);
+      std::copy_n(veloy,m,velocity_y);
+      std::copy_n(veloz,m,velocity_z);
+    }
 
     delete [] temp;
 

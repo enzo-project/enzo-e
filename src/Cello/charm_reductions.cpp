@@ -65,9 +65,6 @@ CkReductionMsg * r_reduce_method_debug(int n, CkReductionMsg ** msgs)
 
   const int length = 1 + 4*num_fields;
   std::vector<long double> accum;
-  ASSERT1 ("r_reduce_method_debug",
-	   "Sanity check failed on expected accumulator array %d",
-	   length, (length < 500));
   accum.resize(length);
   accum.clear();
 

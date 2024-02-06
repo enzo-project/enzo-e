@@ -1,8 +1,14 @@
 .. include:: ../roles.incl
-	     
+
 *************************
 Enzo-E / Cello Parameters
 *************************
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+   :titlesonly:
+   :numbered:
 
 This page documents all current parameters implemented in Enzo-E /
 Cello.  Each parameter is summarized, its type or types are listed,
@@ -151,7 +157,6 @@ Mesh
 ----
 
 .. include:: mesh.incl
-
 
 ------
 Method

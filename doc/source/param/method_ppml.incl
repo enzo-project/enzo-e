@@ -1,0 +1,15 @@
+
+:p:`Method:ppml` parameters are used to initialize parameters for
+Enzo-E's PPML MHD methods. These include "ppml" (or "ppml_it") for the
+idealized solver, and "ppml_ig" for the adiabatic version.
+
+----
+
+.. par:parameter:: Method:ppml:dt_weight
+
+   :Summary: :s:`Timestep adjust for Strang splitting`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :z:`Enzo`
+
+   :e:`This parameter is used to implement Strang splitting to preserve the 2nd order of accurace of time integration of PPML when forcing and cooling/heating source terms are present. In that case dt_weight should be set to 0.5 and PPML called twice in the` :par:paramfmt:`Method:list` :e:` parameter list with methods implementing forcing terms between them. The default is not to use Strang splitting so dt_weight = 1.0`

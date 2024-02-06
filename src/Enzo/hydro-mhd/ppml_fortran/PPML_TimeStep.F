@@ -52,21 +52,6 @@ c     See LICENSE_PPML file for license and copyright information
       c0=0.8d0
       a2=1.0d0
 
-      dmin = 1.e36
-      dmax = -1e36
-      vxmin = 1.e36
-      vxmax = -1e36
-      vymin = 1.e36
-      vymax = -1e36
-      vzmin = 1.e36
-      vzmax = -1e36
-      bxmin = 1.e36
-      bxmax = -1e36
-      bymin = 1.e36
-      bymax = -1e36
-      bzmin = 1.e36
-      bzmax = -1e36
-
 !     Adjust array bounds for C / C++
 !     copies since original variables are call by reference
 

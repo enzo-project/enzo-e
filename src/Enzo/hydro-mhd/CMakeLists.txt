@@ -26,3 +26,4 @@ target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
 
 # STEP 2: define the riemann library
 add_subdirectory(riemann)
+add_subdirectory(ppml_ig)

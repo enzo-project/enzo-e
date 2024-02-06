@@ -125,12 +125,6 @@ void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 
     // Check NumberOfBaryonFields
 
-    if (NumberOfBaryonFields[in] > MAX_NUMBER_OF_BARYON_FIELDS) {
-      ERROR2 ("EnzoBlock::initialize",
-	      "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
-	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields[in] );
-    }
-
     DomainLeftEdge [in*3+0] = enzo_config->domain_lower[0];
     DomainLeftEdge [in*3+1] = enzo_config->domain_lower[1];
     DomainLeftEdge [in*3+2] = enzo_config->domain_lower[2];

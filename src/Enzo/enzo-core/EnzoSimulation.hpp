@@ -13,7 +13,7 @@ class CProxy_IoEnzoReader;
 class CProxy_IoEnzoWriter;
 
 #include "charm++.h"
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 
 
 class EnzoSimulation : public CBase_EnzoSimulation
@@ -23,6 +23,8 @@ class EnzoSimulation : public CBase_EnzoSimulation
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Simulation class for CHARM++ Enzo-E
 
+  friend class IoEnzoSimulation;
+  
 public: // functions
 
   /// CHARM++ Constructor
@@ -65,16 +67,25 @@ public: // functions
   /// EnzoMethodCheck
   void r_method_check_enter (CkReductionMsg *);
   void p_check_done();
-  void p_set_io_reader(CProxy_IoEnzoReader io_reader);
-  void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+  void p_set_io_reader(CProxy_IoEnzoReader proxy);
+  void p_set_io_writer(CProxy_IoEnzoWriter proxy);
+
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
+
   void p_io_reader_created();
 
   /// Read in and initialize the next refinement level from a checkpoint;
   /// or exit if done
   void p_restart_next_level();
   void p_restart_level_created();
+  void p_restart_get_io_simulation(int n, char * buffer);
+
+  /// Save or restore state for EnzoMethodTurbulenceOU for
+  /// checkpoint/restart (implementation in
+  /// enzo_EnzoMethodTurbulenceOU.cpp)
+  void get_turbou_state();
+  void put_turbou_state();
 
 public: // virtual functions
 
@@ -85,7 +96,6 @@ public: // virtual functions
   virtual const Factory * factory() const throw();
 
 private: // functions
-
 
 private: // virtual functions
 
@@ -103,8 +113,11 @@ private: // attributes
   /// Balance Method synchronization
   Sync sync_method_balance_;
   /// Current restart level
-  int restart_level_; 
-
+  int restart_level_;
+  /// Turbulence state for checkpoint/restart
+  /// (should be moved to a Simulation Scalar object)
+  std::vector<double> turbou_real_state_;
+  std::vector<int>    turbou_int_state_;
   /// MsgCheck objects for newly created Blocks on this process
   std::map<Index,EnzoMsgCheck *> msg_check_map_;
 };

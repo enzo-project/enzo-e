@@ -41,9 +41,11 @@ public: // interface
 
     Io::pup(p);
 
+    p | max_level_;
     PUParray(p,lower_,3);
     PUParray(p,upper_,3);
-    p | max_level_;
+    PUParray(p,root_size_,3);
+    PUParray(p,blocking_,3);
   }
 
 
@@ -58,9 +60,11 @@ public: // interface
 
 private: // attributes
 
+  int max_level_;
   double lower_[3];
   double upper_[3];
-  int max_level_;
+  int blocking_[3];
+  int root_size_[3];
 
 };
 

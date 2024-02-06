@@ -38,11 +38,11 @@ public: // interface
     block_array_()
   {
     for (int axis=0; axis<3; axis++) {
-      root_size_[axis] = 0;
       lower_[axis] = 0.0;
       upper_[axis] = 0.0;
       blocking_[axis] = 0;
       periodicity_[axis] = 0;
+      root_size_[axis] = 0;
     }
   }
   
@@ -65,11 +65,10 @@ public: // interface
 
   /// Set domain upper extent
   void set_upper(double x, double y, double z) throw ();
-  
-  /// Set root-level grid size
+  /// Set root-level grid size in cells
   void set_root_size(int nx, int ny, int nz) throw ();
 
-  /// Set root-level grid size
+  /// Set root-level grid size in blocks
   void set_blocking(int nbx, int nby, int nbz) throw ();
 
   //----------------------------------------------------------------------
@@ -197,13 +196,14 @@ public: // interface
   {  return num_zones_total_;  }
 
   CProxy_Block new_block_proxy (bool allocate_data) throw();
-  
+
   void create_block_array () throw();
 
   void create_subblock_array () throw();
 
   /// Return the number of root-level Blocks along each rank
-  void root_blocks (int * nbx, int * nby=0, int * nbz=0) const throw();
+  /// in the given level (default level is root)
+  void root_blocks (int * nbx, int * nby=0, int * nbz=0, int level=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
@@ -247,9 +247,6 @@ protected: // attributes
   /// Array of Blocks 
   CProxy_Block block_array_;
 
-  /// Size of the root grid
-  int root_size_[3];
-
   /// Lower extent of the hierarchy
   double lower_[3];
 
@@ -261,6 +258,9 @@ protected: // attributes
 
   /// Periodicity of boundary conditions on faces
   int periodicity_[3];
+
+  /// Size of the root grid
+  int root_size_[3];
 
 public: // static attributes
 

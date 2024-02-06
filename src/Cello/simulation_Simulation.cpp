@@ -23,8 +23,8 @@ Simulation::Simulation
  const char *   parameter_file,
  int            n
  )
-/// Initialize the Simulation object
-:
+  /// Initialize the Simulation object
+  :
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
   fp_debug_(NULL),
 #endif
@@ -345,9 +345,9 @@ void Simulation::refine_create_block(MsgRefine * msg)
     int v3[3];
     index.values(v3);
     ASSERT3 ("Simulation::p_refine_create_block",
-	    "index %08x %08x %08x is already in the msg_refine mapping",
-	    v3[0],v3[1],v3[2],
-	    (msg == NULL));
+             "index %08x %08x %08x is already in the msg_refine mapping",
+             v3[0],v3[1],v3[2],
+             (msg == NULL));
   }
 
   msg_refine_map_[index] = msg;
@@ -536,7 +536,7 @@ void Simulation::initialize_data_descr_() throw()
   int alignment = config_->field_alignment;
 
   ASSERT1 ("Simulation::initialize_data_descr_",
-	  "Illegal Field:alignment parameter value %d",
+           "Illegal Field:alignment parameter value %d",
 	   alignment,
 	   1 <= alignment );
 	  
@@ -711,6 +711,8 @@ void Simulation::initialize_hierarchy_() throw()
      config_->mesh_min_level,
      config_->mesh_max_level);
 
+  // Domain extents
+
   hierarchy_->set_lower
     (config_->domain_lower[0], 
      config_->domain_lower[1], 
@@ -745,8 +747,8 @@ void Simulation::initialize_hierarchy_() throw()
     boundary->periodicity(lp3);
   }
   int p3[3] = {lp3[0] ? root_blocks[0] : 0,
-               lp3[1] ? root_blocks[1] : 0,
-               lp3[2] ? root_blocks[2] : 0 };
+    lp3[1] ? root_blocks[1] : 0,
+    lp3[2] ? root_blocks[2] : 0 };
   hierarchy_->set_periodicity (p3[0],p3[1],p3[2]);
 }
 
@@ -1036,7 +1038,6 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
       const long long num_blocks_level = counters_reduce[m++]; // NL
       monitor()->print("performance","simulation num-blocks-level %d %lld",
                        i,num_blocks_level);
-
       num_total_blocks += num_blocks_level;
       // compute leaf blocks given number of blocks per level
       // (NOTE: num_blocks_level (i>0) is evenly divisible by num_children
@@ -1103,14 +1104,6 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 
     const double avg_proc_blocks = 1.0*num_blocks_total/CkNumPes();
     const double avg_node_blocks = 1.0*num_blocks_total/CkNumNodes();
-
-
-    // monitor()->print
-    //   ("Performance","simulation balance-blocks-core %f",
-    //    100.0*(max_proc_blocks / avg_proc_blocks - 1.0 ));
-    // monitor()->print
-    //   ("Performance","simulation balance-blocks-node %f",
-    //    100.0*(max_node_blocks / avg_node_blocks - 1.0 ));
 
     monitor()->print
       ("Performance","simulation balance-eff-blocks-core %f (%.0f/%lld)",

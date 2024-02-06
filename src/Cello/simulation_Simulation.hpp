@@ -585,7 +585,6 @@ protected: // attributes
   std::string restart_directory_;
   int         restart_num_files_;
   std::ifstream restart_stream_file_list_;
-
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

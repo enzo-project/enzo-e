@@ -7,7 +7,7 @@ c     See LICENSE_PPML file for license and copyright information
       Implicit NONE
 
       External Xmedian
-      
+
       Integer imd,md,nx,i,m
 
       ENZO_REAL q1(7),q2(7),q3(7),q4(7),q5(7)
@@ -19,7 +19,7 @@ c     See LICENSE_PPML file for license and copyright information
       ENZO_REAL dv1(nx),dv2(nx)
 
       ENZO_REAL uwl,uwr,vx1,vx2,vx3,vx4,vx5,vl1,vr1,dml
-      ENZO_REAL dmr,dwl,dwr,sjn,sjm,sjx,sjy,uvr,uvl,Xmedian 
+      ENZO_REAL dmr,dwl,dwr,sjn,sjm,sjx,sjy,uvr,uvl,Xmedian
 
       ENZO_REAL IS1,IS2,IS3,DELTA,WS1,WS2,WS3,WJ1,WJ2,WJ3
       ENZO_REAL AJ1,AJ2,AJ3,AJS,WM1,WM2,WM3
@@ -29,9 +29,9 @@ c     See LICENSE_PPML file for license and copyright information
       ENZO_REAL one
       parameter (one = 1.0)
 
-      o2 = 1.0E0 / 2.0E0
-      o4 = 1.0E0 / 4.0E0
-      o6 = 1.0E0 / 6.0E0
+      o2  = 1.0E0 /  2.0E0
+      o4  = 1.0E0 /  4.0E0
+      o6  = 1.0E0 /  6.0E0
       o12 = 1.0E0 / 12.0E0
 
 C     ENZO_REAL VP1,VP2,VP3,VP4,VP5
@@ -40,33 +40,33 @@ C     ENZO_REAL VP1,VP2,VP3,VP4,VP5
          Do m=1,7
             qxl(i,m)=0.
             qxr(i,m)=0.
-         Enddo                  
-      Enddo                  
+         Enddo
+      Enddo
 
-      Do i=3,Nx-2  
+      Do i=3,Nx-2
 
          Do m=1,7
-            Q1(m)=Qp(i-2,m)         
-            Q2(m)=Qp(i-1,m)         
-            Q3(m)=Qp(i,m)         
-            Q4(m)=Qp(i+1,m)         
-            Q5(m)=Qp(i+2,m)         
+            Q1(m)=Qp(i-2,m)
+            Q2(m)=Qp(i-1,m)
+            Q3(m)=Qp(i,  m)
+            Q4(m)=Qp(i+1,m)
+            Q5(m)=Qp(i+2,m)
          Enddo
 
          Do m=1,7
-            Qpl(m)=qm(i-1,m)         
-            Qpr(m)=qm(i,m)         
+            Qpl(m)=qm(i-1,m)
+            Qpr(m)=qm(i,  m)
          Enddo
          
          if(md.eq.1)CALL VECTLRx(q3,QL,QR,UV)
          if(md.eq.2)CALL VECTLRy(q3,QL,QR,UV)
          if(md.eq.3)CALL VECTLRz(q3,QL,QR,UV)
-         
-         CALL AMPLTD(QL,q1,u1)
-         CALL AMPLTD(QL,q2,u2)
-         CALL AMPLTD(QL,q3,u3)
-         CALL AMPLTD(QL,q4,u4)
-         CALL AMPLTD(QL,q5,u5)
+
+         CALL AMPLTD(QL, q1,u1)
+         CALL AMPLTD(QL, q2,u2)
+         CALL AMPLTD(QL, q3,u3)
+         CALL AMPLTD(QL, q4,u4)
+         CALL AMPLTD(QL, q5,u5)
          CALL AMPLTD(QL,qpl,c1)
          CALL AMPLTD(QL,qpr,c2)
 
@@ -75,7 +75,7 @@ c     c1(m)=(7.e0*(u2(m)+u3(m))-(u1(m)+u4(m)))*o12
 c     c2(m)=(7.e0*(u3(m)+u4(m))-(u2(m)+u5(m)))*o12
 c     enddo
 
-         Do m=1,7  
+         Do m=1,7
 
             uwl = Xmedian(u3(m),c1(m),u2(m))
             uwr = Xmedian(u3(m),c2(m),u4(m))
@@ -83,32 +83,32 @@ c     enddo
             b1(m) = Xmedian(u3(m),uwl,3.e0*u3(m)-2.e0*uwr)
             b2(m) = Xmedian(u3(m),uwr,3.e0*u3(m)-2.e0*uwl)
 
-         Enddo 
+         Enddo
 
          imd=0
 
-         Do m=1,7  
+         Do m=1,7
 
             if((b1(m)-c1(m))**2.gt.1e-12.or.(b2(m)-c2(m))**2.
      &             gt.1e-12) imd=1
             
          enddo
          
-         If(imd.eq.0)then          
+         If(imd.eq.0)then
 
             CALL AMPLTD(QR,c2,b2)
-            
-            Do m=1,7  
+
+            Do m=1,7
                qxr(i,m)=b2(m)
             enddo
 
             CALL AMPLTD(QR,c1,b1)
-            
-            Do m=1,7  
+
+            Do m=1,7
                qxl(i,m)=b1(m)
             enddo
 
-         Else 
+         Else
 
             do m=1,7
                
@@ -120,10 +120,10 @@ c     enddo
 
 C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                DELTA = ENZO_TINY
-               
+
                WS1 = 0.1E0
                WS2 = 0.6E0
-               WS3 = 0.3E0 
+               WS3 = 0.3E0
 
 
                WJ1 = (11.E0*VX3 - 7.E0*VX2 + 2.E0*VX1)*o6
@@ -160,22 +160,22 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                WM2 = AJ2*AJS
                WM3 = AJ3*AJS
 
-               VR1 = WM1*WJ1 + WM2*WJ2 + WM3*WJ3 
+               VR1 = WM1*WJ1 + WM2*WJ2 + WM3*WJ3
 
                WJ1 = (11.E0*VX3 - 7.E0*VX4 + 2.E0*VX5)*o6
                WJ2 = (2.E0 *VX2 + 5.E0*VX3 -      VX4)*o6
                WJ3 = (     -VX1 + 5.E0*VX2 + 2.E0*VX3)*o6
 
-               IS1 = 13.E0*o12*(VX3 - 2.E0*VX4 + VX5)**2 
+               IS1 = 13.E0*o12*(VX3 - 2.E0*VX4 + VX5)**2
      &                + (3.E0*VX3 - 4.E0*VX4 + VX5)**2*o4
                IS2 = 13.E0*o12*(VX2 - 2.E0*VX3 + VX4)**2 
      &                + (VX2 - VX4)**2*o4
-               IS3 = 13.E0*o12*(VX1 - 2.E0*VX2 + VX3)**2 
+               IS3 = 13.E0*o12*(VX1 - 2.E0*VX2 + VX3)**2
      &                + (VX1 - 4.E0*VX2 + 3.E0*VX3)**2*o4
 
-               AJ1 = WS1/(IS1+DELTA)**2   
-               AJ2 = WS2/(IS2+DELTA)**2   
-               AJ3 = WS3/(IS3+DELTA)**2   
+               AJ1 = WS1/(IS1+DELTA)**2
+               AJ2 = WS2/(IS2+DELTA)**2
+               AJ3 = WS3/(IS3+DELTA)**2
 
                AJS = 1.E0/(AJ1 + AJ2 +AJ3 )
 
@@ -184,11 +184,11 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                WM3 = AJ3*AJS
 
                AJ1 = WM1*(WS1 + WS1*WS1 - 3.E0*WS1*WM1 + WM1*WM1) /
-     $              (WS1*WS1 + WM1*(1.E0 - 2.E0*WS1)) 
+     $              (WS1*WS1 + WM1*(1.E0 - 2.E0*WS1))
                AJ2 = WM2*(WS2 + WS2*WS2 - 3.E0*WS2*WM2 + WM2*WM2) /
-     $              (WS2*WS2 + WM2*(1.E0 - 2.E0*WS2)) 
+     $              (WS2*WS2 + WM2*(1.E0 - 2.E0*WS2))
                AJ3 = WM3*(WS3 + WS3*WS3 - 3.E0*WS3*WM3 + WM3*WM3) /
-     $              (WS3*WS3 + WM3*(1.E0 - 2.E0*WS3)) 
+     $              (WS3*WS3 + WM3*(1.E0 - 2.E0*WS3))
 
                AJS = 1.E0/(AJ1 + AJ2 +AJ3 )
 
@@ -196,10 +196,10 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                WM2 = AJ2*AJS
                WM3 = AJ3*AJS
 
-               VL1 = WM1*WJ1 + WM2*WJ2 + WM3*WJ3 
+               VL1 = WM1*WJ1 + WM2*WJ2 + WM3*WJ3
 
-               vl(m)=vl1 
-               vr(m)=vr1 
+               vl(m)=vl1
+               vr(m)=vr1
 
             enddo
 
@@ -216,8 +216,8 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
 
                   uwl = Xmedian(u3(m),3.e0*u3(m)-2.e0*dwr,dml)
                   uwr = Xmedian(u3(m),3.e0*u3(m)-2.e0*dwl,dmr)
-                  
-                  c1(m) = Xmedian(uwl,dml,c1(m))         
+
+                  c1(m) = Xmedian(uwl,dml,c1(m))
                   c2(m) = Xmedian(uwr,dmr,c2(m))
 
                Else
@@ -266,15 +266,15 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
 
             CALL AMPLTD(QR,c1,b1)
 
-            Do m=1,7  
+            Do m=1,7
                qxl(i,m)=b1(m)
             enddo
 
-         Endif 
+         Endif
 
-         if(b1(1).lt.1.e-5) then 
+         if(b1(1).lt.1.e-5) then
 
-            Do m=1,7 
+            Do m=1,7
 
                uwl=q4(m)-q3(m)
                uwr=q3(m)-q2(m)
@@ -284,7 +284,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
 
             Enddo
             
-            Do m=1,7  
+            Do m=1,7
 
                qxl(i,m)=q3(m)-u1(m)*o2
 
@@ -292,7 +292,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
 
             if(abs(qxl(i,1)-q3(1)).ge.0.8e0*q3(1))then
 
-               Do m=1,7  
+               Do m=1,7
 
                   qxl(i,m)=q3(m)
 
@@ -304,7 +304,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
 
          If(b2(1).lt.1.0e-5) then 
 
-            Do m=1,7  
+            Do m=1,7
 
                uwl=q4(m)-q3(m)
                uwr=q3(m)-q2(m)
@@ -313,8 +313,8 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
      &                min(abs(uwl),abs(uwr))
 
             Enddo
-            
-            Do m=1,7  
+
+            Do m=1,7
 
                qxr(i,m)=q3(m)+u1(m)*o2
 
@@ -322,7 +322,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
 
             If(abs(qxr(i,1)-q3(1)).ge.0.8e0*q3(1))then
 
-               Do m=1,7  
+               Do m=1,7
 
                   qxr(i,m)=q3(m)
 
@@ -349,8 +349,8 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
             enddo
 
          endif
-         
-         
+
+
       Enddo
       
       Return

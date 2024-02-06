@@ -1,6 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
 //----------------------------------------------------------------------
+       #include <fenv.h>
 
 /// @file      enzo-e.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
@@ -49,8 +50,6 @@
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
 extern CProxy_Simulation     proxy_simulation;
-extern CProxy_IoEnzoWriter   proxy_io_enzo_writer;
-extern CProxy_IoEnzoReader   proxy_io_enzo_reader;
 
 //----------------------------------------------------------------------
 

@@ -60,7 +60,6 @@ class EnzoMethodGrackle;
 
 /// Namespace for Enzo global accessor functions
 namespace enzo {
-
   CProxy_EnzoBlock          block_array();
   EnzoBlock *               block ( Block * block);
   const EnzoConfig *        config();
