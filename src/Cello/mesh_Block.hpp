@@ -188,10 +188,10 @@ public:
    int nx, int ny, int nz,
    int num_field_blocks,
    int num_adapt_steps,
-   int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level,
-   Adapt * adapt);
+   const std::vector<int> & face_level,
+   Adapt * adapt,
+   State * state);
 
   /// Initialize Adapt class for neighbor connectivity
   void init_adapt_(Adapt * adapt_parent);
@@ -288,21 +288,10 @@ public:
   Method * method () throw();
 
   /// Start a new solver
-  void push_solver(int index_solver) throw()
-  {
-    index_solver_.push_back(index_solver);
-  }
+  void push_solver(int index_solver) throw();
 
   /// Return from a solver
-  int pop_solver() throw()
-  {
-    int index = index_solver();
-    ASSERT ("Block::pop_solver",
-	    "Trying to pop element off of empty Block::index_solver_ stack",
-	    index_solver_.size() > 0);
-    index_solver_.resize(index_solver_.size()-1);
-    return index;
-  }
+  int pop_solver() throw();
 
   /// Return the index of the current solver
   int index_solver() const throw()

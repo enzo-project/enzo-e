@@ -57,7 +57,6 @@ void Block::adapt_enter_()
 {
   TRACE_ADAPT("adapt_enter_",this);
   if ( do_adapt_()) {
-
     adapt_begin_();
 
   } else {
@@ -252,9 +251,28 @@ void Block::adapt_end_()
 /// @brief Return whether the adapt phase should be called this cycle.
 bool Block::do_adapt_()
 {
+  // Check adapt interval
   int adapt_interval = cello::config()->adapt_interval;
 
-  return ((adapt_interval && ((state_->cycle() % adapt_interval) == 0)));
+  // Check whether any methods supercycling (step != 0)
+  bool is_cycle_boundary = false;
+  for (int i=0; i<state()->num_methods(); i++) {
+    const auto & method_state = state()->method(i);
+    if (index_.is_root()) {
+      CkPrintf ("DEBUG_STATE method %d step %d num_steps %d\n",i,method_state.step(),method_state.num_steps());
+    }
+    bool method_cycle_boundary = (method_state.step() == 1); // method_state.num_steps()
+    is_cycle_boundary = is_cycle_boundary || method_cycle_boundary;
+  }
+
+  bool adapt_scheduled = ((adapt_interval && ((state_->cycle() % adapt_interval) == 0)));
+  if (index_.is_root()) {
+    CkPrintf ("DEBUG_STATE adapt_scheduled %d is_cycle_boundary %d adapt %d\n",adapt_scheduled ? 1 : 0,
+              is_cycle_boundary ? 1 : 0,
+              adapt_scheduled && is_cycle_boundary);
+  }
+
+  return adapt_scheduled && is_cycle_boundary;
 }
 
 //----------------------------------------------------------------------
@@ -386,6 +404,12 @@ void Block::adapt_refine_()
       char * array = 0;
       int num_field_data = 1;
 
+      std::vector<int> face_level;
+      face_level.resize(27);
+      const int o = 27*IC3(ic3);
+      for (int i=0; i<face_level.size(); i++) {
+        face_level[i] = child_face_level_curr_[o+i];
+      }
       factory->create_block
 	(
 	 data_msg,
@@ -393,11 +417,9 @@ void Block::adapt_refine_()
 	 nx,ny,nz,
 	 num_field_data,
 	 adapt_step_,
-	 state_->cycle(),state_->time(),state_->dt(),
 	 narray, array, refresh_fine,
-	 27,
-         &child_face_level_curr_.data()[27*IC3(ic3)],
-         &adapt_,
+         face_level,
+         &adapt_,state_.get(),
 	 cello::simulation());
 
       delete [] array;

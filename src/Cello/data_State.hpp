@@ -45,6 +45,42 @@ public: // component classes
     void set_num_steps(int num_steps) { num_steps_ = num_steps; }
     void set_step(int step) { step_ = step; }
 
+  //----------------------------------------------------------------------
+  /// Packing / unpacking
+  //----------------------------------------------------------------------
+
+    int data_size () const
+    {
+      int size = 0;
+      SIZE_SCALAR_TYPE(size,double,dt_);
+      SIZE_SCALAR_TYPE(size,double,time_);
+      SIZE_SCALAR_TYPE(size,int,num_steps_);
+      SIZE_SCALAR_TYPE(size,int,step_);
+      return size;
+    }
+
+    /// Serialize the object into the provided empty memory buffer.
+    char * save_data (char * buffer) const
+    {
+      char * pc = buffer;
+      SAVE_SCALAR_TYPE(pc,double,dt_);
+      SAVE_SCALAR_TYPE(pc,double,time_);
+      SAVE_SCALAR_TYPE(pc,int,num_steps_);
+      SAVE_SCALAR_TYPE(pc,int,step_);
+      return pc;
+    }
+
+    /// Restore the object from the provided initialized memory buffer data.
+    char * load_data (char * buffer)
+    {
+      char * pc = buffer;
+      LOAD_SCALAR_TYPE(pc,double,dt_);
+      LOAD_SCALAR_TYPE(pc,double,time_);
+      LOAD_SCALAR_TYPE(pc,int,num_steps_);
+      LOAD_SCALAR_TYPE(pc,int,step_);
+      return pc;
+    }
+
   protected:
     /// Method's timestep
     double dt_;
@@ -144,6 +180,53 @@ public: // interface
     return method_state_[index_method];
   }
 
+  int num_methods() const {
+    return method_state_.size();
+  }
+
+  //----------------------------------------------------------------------
+  /// Packing / unpacking
+  //----------------------------------------------------------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const
+  {
+    int size = 0;
+    SIZE_SCALAR_TYPE(size,int,cycle_);
+    SIZE_SCALAR_TYPE(size,double,time_);
+    SIZE_SCALAR_TYPE(size,double,dt_);
+    SIZE_SCALAR_TYPE(size,bool,stopping_);
+    SIZE_VECTOR_OBJECT_TYPE(size, MethodState, method_state_);
+    return size;
+  }
+
+  /// Serialize the object into the provided empty memory buffer.
+  char * save_data (char * buffer) const
+  {
+    char * pc = buffer;
+    SAVE_SCALAR_TYPE(pc,int,cycle_);
+    SAVE_SCALAR_TYPE(pc,double,time_);
+    SAVE_SCALAR_TYPE(pc,double,dt_);
+    SAVE_SCALAR_TYPE(pc,bool,stopping_);
+    SAVE_VECTOR_OBJECT_TYPE(pc, MethodState, method_state_);
+    return pc;
+  }
+
+  /// Restore the object from the provided initialized memory buffer data.
+  char * load_data (char * buffer)
+  {
+    char * pc = buffer;
+    LOAD_SCALAR_TYPE(pc,int,cycle_);
+    LOAD_SCALAR_TYPE(pc,double,time_);
+    LOAD_SCALAR_TYPE(pc,double,dt_);
+    LOAD_SCALAR_TYPE(pc,bool,stopping_);
+    LOAD_VECTOR_OBJECT_TYPE(pc, MethodState, method_state_);
+    return pc;
+  }
+
+  //----------------------------------------------------------------------
+  // Debugging
+  //----------------------------------------------------------------------
   void print(std::string msg)
   {
     CkPrintf ("State %s\n",msg.c_str());

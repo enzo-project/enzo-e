@@ -37,7 +37,9 @@ public: // interface
       order_(4),
       ir_exit_(-1),
       index_prolong_(0),
-      dt_max_(0.0)
+      dt_max_(0.0),
+      ipotential_curr_(-1),
+      ipotential_prev_(-1)
   {};
 
   /// Destructor
@@ -54,8 +56,9 @@ public: // interface
       order_(4),
       ir_exit_(-1),
       index_prolong_(0),
-      dt_max_(0.0)
-
+      dt_max_(0.0),
+      ipotential_curr_(-1),
+      ipotential_prev_(-1)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -75,6 +78,8 @@ public: // interface
     p | order_;
     p | dt_max_;
     p | ir_exit_;
+    p | ipotential_curr_;
+    p | ipotential_prev_;
 
   }
 
@@ -119,6 +124,10 @@ protected: // attributes
 
   /// Maximum timestep
   double dt_max_;
+
+  /// Temporary fields
+  int ipotential_curr_;
+  int ipotential_prev_;
 };
 
 

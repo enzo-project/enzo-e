@@ -105,6 +105,8 @@ public: // virtual functions
   void set_index(int index)
   { index_method_ = index; }
 
+  int index() const { return index_method_; }
+
   /// Access subcycling and supercycling limits
   int max_subcycle () const
   { return max_subcycle_; }

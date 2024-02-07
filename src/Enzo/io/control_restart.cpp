@@ -458,6 +458,11 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader, int ip)
   int cycle = state_->cycle();
   double time = state_->time();
   double dt = state_->dt();
+  std::vector<int> face_level;
+  face_level.resize(27*IC3(ic3));
+  for (int i=0; i<face_level.size(); i++) {
+    face_level[i] =child_face_level_curr_[i];
+  }
   factory->create_block
     (
      data_msg,
@@ -465,11 +470,9 @@ void EnzoBlock::p_restart_refine(int ic3[3],int io_reader, int ip)
      nx,ny,nz,
      num_field_data,
      adapt_step_,
-     cycle, time, dt,
      narray, array, refresh_fine,
-     27,
-     &child_face_level_curr_.data()[27*IC3(ic3)],
-     &adapt_,
+     face_level,
+     &adapt_, state_.get(),
      cello::simulation(),
      io_reader,
      ip);

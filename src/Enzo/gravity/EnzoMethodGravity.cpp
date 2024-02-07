@@ -5,7 +5,8 @@
 /// @date     2016-11-07
 /// @brief    Implements the EnzoMethodGravity class
 
-// #define TEST_FIELD_VALUES_TIME
+// #define TRACE_GRAVITY
+#define DEBUG_SUPERCYCLE
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -41,7 +42,13 @@ EnzoMethodGravity::EnzoMethodGravity
   if (rank >= 3) cello::define_field ("acceleration_z");
 
 
-  if (accumulate){
+  ipotential_prev_ = cello::field_descr()->insert_temporary();
+  ipotential_curr_ = cello::field_descr()->insert_temporary();
+
+  cello::define_field ("potential_curr");
+  cello::define_field ("potential_prev");
+
+    if (accumulate){
     cello::define_field ("density_particle");
     cello::define_field ("density_particle_accumulate");
   }
@@ -65,8 +72,8 @@ EnzoMethodGravity::EnzoMethodGravity
       cello::problem()->prolong(index_prolong_)->name();
 
     ASSERT1("EnzoMethodGravity::EnzoMethodGravity()",
-           "Requesting accumulated particle mass refresh: "
-           "rerun with parameter Method : %s : prolong = \"linear\"",
+            "Requesting accumulated particle mass refresh: "
+            "rerun with parameter Method : %s : prolong = \"linear\"",
             name().c_str(),
             (prolong_name != "enzo"));
 
@@ -89,6 +96,10 @@ EnzoMethodGravity::EnzoMethodGravity
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
+#ifdef TRACE_GRAVITY
+  CkPrintf ("TRACE_GRAVITY %s Enter\n",block->name().c_str());
+#endif
+
   if (enzo::simulation()->state()->cycle() == enzo::config()->initial_cycle) {
     // Check if the pm_deposit method is being used and precedes the
     // gravity method.
@@ -98,83 +109,128 @@ void EnzoMethodGravity::compute(Block * block) throw()
   }
   // Initialize the linear system
 
-  Field field = block->data()->field();
-  /// access problem-defining fields for eventual RHS and solution
-  const int ib  = field.field_id ("B");
-  const int id  = field.field_id("density");
-  const int idt = field.field_id("density_total");
-  const int idensity = (idt != -1) ? idt : id;
-  ASSERT ("EnzoMethodGravity::compute",
-          "modifying density in EnzoMethodGravity?",
-          idensity != id);
-  // Solve the linear system
-  int mx,my,mz;
-  int gx,gy,gz;
-  field.dimensions (0,&mx,&my,&mz);
-  field.ghost_depth(0,&gx,&gy,&gz);
-
-  const int m = mx*my*mz;
-  enzo_float * B = (enzo_float*) field.values (ib);
-
-  double time = block->state()->time();
-  enzo_float * D;
-  // default current time
-  D = (enzo_float*) field.values (idensity);
-
-  for (int i=0; i<m; i++) {
-    D[i] += B[i];
+#ifdef DEBUG_SUPERCYCLE
+  if (block->index().is_root()) {
+    const auto & method_state = block->state()->method(index());
+    CkPrintf ("DEBUG_SUPERCYCLE cycle %d step %d num_steps %d\n",
+              block->state()->cycle(),
+              method_state.step(),
+              method_state.num_steps());
   }
+#endif
 
-  // Add density_particle values to density_particle_accumulate ghosts
+  // Solve only if this method's current substep is 0
+  bool solve_this_step = (block->state()->method(index()).step() == 0);
 
-  if (block->is_leaf()) {
-    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    if (cosmology) {
-      int gx,gy,gz;
-      field.ghost_depth(0,&gx,&gy,&gz);
-      gx=gy=gz=0;
-      for (int iz=gz; iz<mz-gz; iz++) {
-	for (int iy=gy; iy<my-gy; iy++) {
-	  for (int ix=gx; ix<mx-gx; ix++) {
-	    int i = ix + mx*(iy + my*iz);
-	    // In cosmological simulations, density units are defined such that `rho_bar_m` is
-	    // 1.0, and time units are defined such that `4 * pi * G * rho_bar_m` is 1.0, where
-	    // `G` is the gravitational constant, and `rho_bar_m` is the mean matter density
-	    // of the universe. These choices of units result in Poisson's equation having a
-	    // much simplified form.
-	    D[i]=-(D[i]-1.0);
-	    B[i]  = D[i];
-	  }
-	}
-      }
-    } else {
-      const double scale = -4.0 * (cello::pi) * grav_const_;
-      for (int iz=0; iz<mz; iz++) {
-        for (int iy=0; iy<my; iy++) {
-          for (int ix=0; ix<mx; ix++) {
-            const int i = ix + mx*(iy + my*iz);
-            B[i] = scale * D[i];
+  if (solve_this_step) {
+
+#ifdef DEBUG_SUPERCYCLE
+    if (block->index().is_root()) { CkPrintf ("DEBUG_SUPERCYCLE cycle %d: solve\n",block->state()->cycle()); }
+#endif
+    Field field = block->data()->field();
+    /// access problem-defining fields for eventual RHS and solution
+    const int ib  = field.field_id ("B");
+    const int id  = field.field_id("density");
+    const int idt = field.field_id("density_total");
+    ASSERT ("EnzoMethodGravity::compute",
+            "missing required field density_total",
+            idt != -1);
+    // Solve the linear system
+    int mx,my,mz;
+    int gx,gy,gz;
+    field.dimensions (0,&mx,&my,&mz);
+    field.ghost_depth(0,&gx,&gy,&gz);
+
+    const int m = mx*my*mz;
+    enzo_float * B = (enzo_float*) field.values (ib);
+    enzo_float * DT = (enzo_float*) field.values (idt);
+
+    for (int i=0; i<m; i++) {
+      DT[i] += B[i];
+    }
+
+    // Add density_particle values to density_particle_accumulate ghosts
+
+    if (block->is_leaf()) {
+      EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+      if (cosmology) {
+        int gx,gy,gz;
+        field.ghost_depth(0,&gx,&gy,&gz);
+        gx=gy=gz=0;
+        for (int iz=gz; iz<mz-gz; iz++) {
+          for (int iy=gy; iy<my-gy; iy++) {
+            for (int ix=gx; ix<mx-gx; ix++) {
+              int i = ix + mx*(iy + my*iz);
+              // In cosmological simulations, density units are defined such that `rho_bar_m` is
+              // 1.0, and time units are defined such that `4 * pi * G * rho_bar_m` is 1.0, where
+              // `G` is the gravitational constant, and `rho_bar_m` is the mean matter density
+              // of the universe. These choices of units result in Poisson's equation having a
+              // much simplified form.
+              DT[i]=-(DT[i]-1.0);
+              B[i]  = DT[i];
+            }
+          }
+        }
+      } else {
+        const double scale = -4.0 * (cello::pi) * grav_const_;
+        for (int iz=0; iz<mz; iz++) {
+          for (int iy=0; iy<my; iy++) {
+            for (int ix=0; ix<mx; ix++) {
+              const int i = ix + mx*(iy + my*iz);
+              B[i] = scale * DT[i];
+            }
           }
         }
       }
+
+    } else {
+
+      for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
+
     }
+
+    Solver * solver = enzo::problem()->solver(index_solver_);
+
+    // May exit before solve is done...
+    solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
+
+    // Save previous potential
+
+    // enzo_float * potential_curr = (enzo_float*) field.values ("potential_curr");
+    // enzo_float * potential_prev = (enzo_float*) field.values ("potential_prev");
+    if (field.values (ipotential_curr_)==nullptr)
+      field.allocate_temporary(ipotential_curr_);
+    if (field.values (ipotential_prev_)==nullptr)
+      field.allocate_temporary(ipotential_prev_);
+
+    enzo_float * potential_curr = (enzo_float*) field.values (ipotential_curr_);
+    enzo_float * potential_prev = (enzo_float*) field.values (ipotential_prev_);
+
+    for (int i=0; i<m; i++) { potential_prev[i] = potential_curr[i]; }
+
+    // Solve for potential_curr
+    //    const int ix = field.field_id ("potential_curr");
+    int ix = ipotential_curr_;
+    std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
+    solver->set_field_x(ix);
+    solver->set_field_b(ib);
+    solver->apply (A, block);
 
   } else {
 
-    for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
-
+#ifdef DEBUG_SUPERCYCLE
+    if (block->index().is_root()) { CkPrintf ("DEBUG_SUPERCYCLE cycle %d: extrapolate\n",block->state()->cycle()); }
+#endif
+    // Skip solve; interpolate potential and compute accelerations
+    EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
+    if (enzo_block && enzo_block->is_leaf()) {
+      compute_accelerations(enzo_block);
+    }
+#ifdef TRACE_GRAVITY
+    CkPrintf ("TRACE_GRAVITY %s Done\n",block->name().c_str());
+#endif
+    enzo_block->compute_done();
   }
-
-  Solver * solver = enzo::problem()->solver(index_solver_);
-
-  // May exit before solve is done...
-  solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
-
-  const int ix = field.field_id ("potential");
-  std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
-  solver->set_field_x(ix);
-  solver->set_field_b(ib);
-  solver->apply (A, block);
 }
 
 //----------------------------------------------------------------------
@@ -215,13 +271,39 @@ void EnzoBlock::p_method_gravity_end()
 void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 {
 
+  // Extrapolate potential from previous based on step
+
   Field field = enzo_block->data()->field();
-  int gx,gy,gz;
+
+  if (field.values (ipotential_curr_)==nullptr)
+    field.allocate_temporary(ipotential_curr_);
+  if (field.values (ipotential_prev_)==nullptr)
+    field.allocate_temporary(ipotential_prev_);
+
+  enzo_float * potential_curr = (enzo_float*) field.values (ipotential_curr_);
+  enzo_float * potential_prev = (enzo_float*) field.values (ipotential_prev_);
+
+  enzo_float * potential      = (enzo_float*) field.values ("potential");
+
+  const auto & method_state = enzo_block->state()->method(index());
+  const double step = method_state.step();
+  const double num_steps = method_state.num_steps();
   int mx,my,mz;
-  field.ghost_depth(0,&gx,&gy,&gz);
   field.dimensions (0,&mx,&my,&mz);
   const int m = mx*my*mz;
-  enzo_float * potential = (enzo_float*) field.values ("potential");
+
+  if (step == 0) { // solve step: copy from potential_curr 
+    for (int i=0; i<m; i++) {
+      potential[i] = potential_curr[i];
+    }
+  } else { // extrapolate from previous and current
+    double cp = -step/num_steps;
+    double cc = 1.0 + step/num_steps;
+    for (int i=0; i<m; i++) {
+      potential[i] = cc*potential_curr[i] + cp*potential_prev[i];
+    }
+  }
+
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (cosmology) {
@@ -266,9 +348,7 @@ double EnzoMethodGravity::timestep_ (Block * block) throw()
   Field field = block->data()->field();
 
   int mx,my,mz;
-  int gx,gy,gz;
   field.dimensions (0,&mx,&my,&mz);
-  field.ghost_depth(0,&gx,&gy,&gz);
 
   enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
   enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
@@ -313,6 +393,9 @@ double EnzoMethodGravity::timestep_ (Block * block) throw()
   
   double a_mag_2_max = 0.0;
   double a_mag_2;
+
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx,&gy,&gz);
 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {

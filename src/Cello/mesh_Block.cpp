@@ -86,14 +86,19 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 {
   performance_start_(perf_block);
 
-  init_refine_ (msg->index_,
-	msg->nx_, msg->ny_, msg->nz_,
-	msg->num_field_blocks_,
-	msg->num_adapt_steps_,
-	msg->cycle_, msg->time_,  msg->dt_,
-	0, NULL, msg->refresh_type_,
-	msg->num_face_level_, msg->face_level_,
-        msg->adapt_parent_);
+  std::vector<int> face_level;
+  face_level.clear();
+
+  init_refine_
+    (msg->index_,
+     msg->nx_, msg->ny_, msg->nz_,
+     msg->num_field_blocks_,
+     msg->num_adapt_steps_,
+     0, nullptr,
+     msg->refresh_type_,
+     msg->face_level_,
+     msg->adapt_parent_,
+     msg->state_);
 
   init_adapt_(msg->adapt_parent_);
 
@@ -122,14 +127,20 @@ void Block::init_refine_
  int nx, int ny, int nz,
  int num_field_blocks,
  int num_adapt_steps,
- int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level,
- Adapt * adapt)
+ const std::vector<int> & face_level,
+ Adapt * adapt,
+ State * state)
 {
   index_ = index;
   state_->init_method(cello::problem()->num_methods());
-  state_->init(cycle,time,dt,false);
+  state_->init(state->cycle(),
+               state->time(),
+               state->dt(),
+               state->stopping());
+  for (int i=0; i<state->num_methods(); i++) {
+    state_->method(i) = state->method(i);
+  }
   adapt_step_ = num_adapt_steps;
   adapt_ready_ = false;
   adapt_balanced_ = false;
@@ -165,18 +176,13 @@ void Block::init_refine_
 
   child_data_ = NULL;
 
-  // Update state
-
-  state_->set_cycle(cycle);
-  state_->set_time(time);
-  state_->set_dt(dt);
 
   sync_coarsen_.reset();
   sync_coarsen_.set_stop(cello::num_children());
 
   // Initialize neighbor face levels
 
-  if (num_face_level == 0) {
+  if (face_level.size() == 0) {
 
     child_face_level_curr_.resize(cello::num_children()*27);
 
@@ -184,9 +190,9 @@ void Block::init_refine_
 
   } else {
 
-    child_face_level_curr_.resize(cello::num_children()*num_face_level);
+    child_face_level_curr_.resize(cello::num_children()*face_level.size());
 
-    adapt_.copy_face_level(Adapt::LevelType::curr,face_level);
+    adapt_.copy_face_level(Adapt::LevelType::curr,face_level.data());
 
   }
 
@@ -385,6 +391,25 @@ Initial * Block::initial () throw ()
   Problem * problem = cello::problem();
   Initial * initial = problem->initial(index_initial_);
   return initial;
+}
+
+//----------------------------------------------------------------------
+
+void Block::push_solver(int index_solver) throw()
+{
+  index_solver_.push_back(index_solver);
+}
+
+//----------------------------------------------------------------------
+
+int Block::pop_solver() throw()
+{
+  int index = this->index_solver();
+  ASSERT ("Block::pop_solver",
+          "Trying to pop element off of empty Block::index_solver_ stack",
+          index_solver_.size() > 0);
+  index_solver_.resize(index_solver_.size()-1);
+  return index;
 }
 
 //----------------------------------------------------------------------
