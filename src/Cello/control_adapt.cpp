@@ -18,6 +18,7 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define DEBUG_STATE
 // #define TRACE_ADAPT
 // #define TRACE_REFINE
 // #define TRACE_COARSEN
@@ -258,19 +259,23 @@ bool Block::do_adapt_()
   bool is_cycle_boundary = false;
   for (int i=0; i<state()->num_methods(); i++) {
     const auto & method_state = state()->method(i);
+#ifdef DEBUG_STATE
     if (index_.is_root()) {
       CkPrintf ("DEBUG_STATE method %d step %d num_steps %d\n",i,method_state.step(),method_state.num_steps());
     }
-    bool method_cycle_boundary = (method_state.step() == 1); // method_state.num_steps()
+#endif
+    bool method_cycle_boundary = (method_state.step() <= 1); // method_state.num_steps()
     is_cycle_boundary = is_cycle_boundary || method_cycle_boundary;
   }
 
   bool adapt_scheduled = ((adapt_interval && ((state_->cycle() % adapt_interval) == 0)));
+#ifdef DEBUG_STATE
   if (index_.is_root()) {
     CkPrintf ("DEBUG_STATE adapt_scheduled %d is_cycle_boundary %d adapt %d\n",adapt_scheduled ? 1 : 0,
               is_cycle_boundary ? 1 : 0,
               adapt_scheduled && is_cycle_boundary);
   }
+#endif
 
   return adapt_scheduled && is_cycle_boundary;
 }
