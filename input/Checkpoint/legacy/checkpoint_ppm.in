@@ -1,0 +1,29 @@
+# Problem: Legacy-Checkpoint-Restart PPM 2D Implosion Problem
+# Author: Matthew Abruzzo and James Bordner
+#
+# This is an input file for testing the legacy checkpoint-restart machinery
+# that is based on the charm++ machinery.
+#
+# In more detail, this mostly acts like a template-file that is used by the
+# testing tool. In practice, the testing tool will:
+# - provide a Stopping section and an Output section.
+# - use the contents of Field:list to determine which fields to compare before
+#   and after a restart
+# Details are provided on the website documentation about how you can see the
+# full parameter files that are generated in this test.
+#
+#
+# Note
+# ----
+# The precise problem-setup considered here is the 2D Implosion problem. These
+# conditions were adapted from an earlier parameter-file put together by James
+# Bordner for testing Checkpoint-Restart functionality
+
+include "input/PPM/ppm-implostion2D-NoTestingSection.incl"
+
+Mesh { root_blocks    = [2,2]; }
+
+include "input/Adapt/adapt_slope.incl"
+
+# the following section gets overwritten in the test
+Output { list = []; }

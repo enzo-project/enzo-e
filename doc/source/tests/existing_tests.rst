@@ -62,7 +62,7 @@ Currently, Enzo-e has the following test simulations in the input folder:
    vlct
    others
 
-Existing Answer Tests
+Existing pytest Tests
 =====================
 
 The answer test suite currently covers the following simulations:
@@ -72,3 +72,7 @@ The answer test suite currently covers the following simulations:
 
 .. toctree::
    grackle-pytest
+
+Other pytest-tests cover the following simulations:
+
+* :ref:`checkpoint-tests`
