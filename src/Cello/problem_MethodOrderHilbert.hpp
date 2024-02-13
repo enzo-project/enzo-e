@@ -4,7 +4,17 @@
 /// @author   John Brennan (john.brennnan@mu.ie)
 /// @date     2023-11-13
 /// @brief    [\ref Problem] Declaration of the MethodOrderHilbert class for
-///           generating the Hilbert ordering of blocks in the hierarchy
+///           generating the Hilbert ordering of blocks in the hierarchy. This
+///           method uses the same communication pattern as MethodOrderMorton
+///           and an iterative algorithm based on lookup tables to compute 
+///           order indices for blocks. The iterative algorithm is based on
+///           those presented in "Mengjuan Li et al 2023 (Efficient entry 
+///           point encoding and decoding algorithms on 2D Hilbert space 
+///           filling curve)" and "Lianyin Jia et al 2022 (Efficient 3D 
+///           Hilbert curve encoding and decoding algorithms)".
+///           Note: There are some typos in the lookup tables presented in
+///           papers cited above. The tables used by this method should be
+///           the corrected versions.
 
 #ifndef PROBLEM_METHOD_ORDER_HILBERT_HPP
 #define PROBLEM_METHOD_ORDER_HILBERT_HPP
@@ -83,14 +93,20 @@ private: // methods
   /// Write child blocks of the given block to the children array in the hilbert order.
   void hilbert_children(Block * block, int* children);
 
-  /// Return the hilbert state for the next recursive layer (ie for the child blocks of the given index)
-  int next_hilbert_state(Index index);
-
   /// Return the index appearing after the given index in the hilber order.
   Index hilbert_next (Index index, int rank, bool is_leaf, int min_level);
 
   /// Write, to the given states array, the recursive states of the given index up to level m. 
   void hilbert_states(Index index, int m, int* states);
+
+  /// Convert a zyx coordinate to the corresponding hilbert index for a given state
+  int coord_to_hilbert_ind(int state, int coord);
+
+  /// Convert a zyx coordinate to the next state for a given state
+  int coord_to_next_state(int state, int coord);
+
+  /// Convert a hilbert index to the corresponding zyx coordinate for a given state
+  int hilbert_ind_to_coord(int state, int hilbert_ind);
 
 private: // functions
 
@@ -118,11 +134,15 @@ private: // attributes
   int min_level_;
 
   /// Look up tables for encoding/decoding Hilbert indices
-  // TODO: update pup function
   static int HPM[12][8];
   static int HNM[12][8];
   static int PHM[12][8];
   static int PNM[12][8];
+
+  static int HCM[4][4];
+  static int HSM[4][4];
+  static int CHM[4][4];
+  static int CSM[4][4];
 };
 
 #endif /* PROBLEM_METHOD_ORDER_HILBERT_HPP */
