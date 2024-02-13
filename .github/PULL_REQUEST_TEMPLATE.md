@@ -19,12 +19,12 @@ detail.  Why is this change required?  What problem does it solve?-->
 <!--If your PR depends on another PR, please link to the PR here.-->
 
 <!--Is this a major change or addition?  If so, these PRs require two reviewers. Please check here.-->
-[ ] This is a major change or addition.  Will requires two reviewers.
+[ ] This is a major change or addition.  Will require two reviewers.
 
 ## PR Checklist
 
 <!-- Note that some of these check boxes may not apply to all pull requests -->
-- [ ] New features are documented, with docstrings and narrative docs.
+- [ ] New features are documented with narrative docs.
 - [ ] Adds a test for any bugs fixed. Adds tests for new features.
 
 <!--We understand that PRs can sometimes be overwhelming, especially as the
