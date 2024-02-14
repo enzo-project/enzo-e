@@ -234,7 +234,6 @@ void EnzoInitialMusic::enforce_block
       
     } else if (type_data == type_double) {
 
-      CkPrintf ("DEBUG_INITIAL_HDF5 %g\n",data_double[gx+mx*(gy+my*gz)]);
       copy_field_data_to_array_
 	(array,data_double,mx,my,mz,nx,ny,nz,gx,gy,gz,n4,IX,IY);
     }

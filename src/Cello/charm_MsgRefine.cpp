@@ -240,6 +240,10 @@ void MsgRefine::update (Data * data)
       ff->array_to_face(fa,field_dst);
     }
   }
+
+  // Update scalar data
+  data_msg_->update_scalars(data);
+
   if (! is_local_) {
     CkFreeMsg (buffer_);
     buffer_ = nullptr;

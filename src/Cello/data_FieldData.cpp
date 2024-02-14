@@ -1126,7 +1126,7 @@ char * FieldData::save_data (FieldDescr * field_descr,
     char * pc;
   };
 
-  pc = (char *) buffer;
+  pc = buffer;
 
   SAVE_ARRAY_TYPE(pc,int,size_,3);
   SAVE_VECTOR_TYPE(pc,char,array_permanent_);

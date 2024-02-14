@@ -212,7 +212,7 @@ void Block::stopping_update_method_state_(double min_reduce[], double dt_global)
     const double dt_method = min_reduce[k+1];
     const int max_super = problem->method(k)->max_supercycle();
     const double max_dt_method = dt_global*max_super;
-    const double ratio = max_dt_method / dt_global;
+    const double ratio = dt_method / dt_global;
     const int desired_super = int(std::floor(ratio));
     const int allowed_super = std::min(desired_super,max_super);
     State::MethodState & method_state = state_->method(k);

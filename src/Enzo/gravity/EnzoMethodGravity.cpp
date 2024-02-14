@@ -6,7 +6,7 @@
 /// @brief    Implements the EnzoMethodGravity class
 
 // #define TRACE_GRAVITY
-#define DEBUG_SUPERCYCLE
+#define TRACE_SUPERCYCLE
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -36,22 +36,24 @@ EnzoMethodGravity::EnzoMethodGravity
   cello::define_field ("density_total");
   cello::define_field ("B");
   cello::define_field ("potential");
+  cello::define_field ("potential_curr");
+  cello::define_field ("potential_prev");
+
   const int rank = cello::rank();
   if (rank >= 1) cello::define_field ("acceleration_x");
   if (rank >= 2) cello::define_field ("acceleration_y");
   if (rank >= 3) cello::define_field ("acceleration_z");
 
-
-  ipotential_prev_ = cello::field_descr()->insert_temporary();
-  ipotential_curr_ = cello::field_descr()->insert_temporary();
-
-  cello::define_field ("potential_curr");
-  cello::define_field ("potential_prev");
-
-    if (accumulate){
+  if (accumulate){
     cello::define_field ("density_particle");
     cello::define_field ("density_particle_accumulate");
   }
+
+  // Define Block scalars
+  
+  ScalarDescr * scalar_descr_double = cello::scalar_descr_double();
+  is_time_curr_ = scalar_descr_double->new_value(name()+"_time_curr");
+  is_time_prev_ = scalar_descr_double->new_value(name()+"_time_prev");
 
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
@@ -63,6 +65,10 @@ EnzoMethodGravity::EnzoMethodGravity
   refresh->add_field("acceleration_x");
   refresh->add_field("acceleration_y");
   refresh->add_field("acceleration_z");
+  if (max_supercycle_ > 1) {
+    refresh->add_field("potential_curr");
+    refresh->add_field("potential_next");
+  }
   // Accumulate is used when particles are deposited into density_total
 
   if (accumulate) {
@@ -88,6 +94,10 @@ EnzoMethodGravity::EnzoMethodGravity
   Refresh * refresh_exit = cello::refresh(ir_exit_);
   refresh_exit->set_prolong(index_prolong_);
   refresh_exit->add_field("potential");
+  if (max_supercycle_ > 1) {
+    refresh_exit->add_field("potential_curr");
+    refresh_exit->add_field("potential_prev");
+  }
 
   refresh_exit->set_callback(CkIndex_EnzoBlock::p_method_gravity_end());
 }
@@ -109,10 +119,10 @@ void EnzoMethodGravity::compute(Block * block) throw()
   }
   // Initialize the linear system
 
-#ifdef DEBUG_SUPERCYCLE
+#ifdef TRACE_SUPERCYCLE
   if (block->index().is_root()) {
     const auto & method_state = block->state()->method(index());
-    CkPrintf ("DEBUG_SUPERCYCLE cycle %d step %d num_steps %d\n",
+    CkPrintf ("TRACE_SUPERCYCLE cycle %d step %d num_steps %d\n",
               block->state()->cycle(),
               method_state.step(),
               method_state.num_steps());
@@ -124,8 +134,10 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   if (solve_this_step) {
 
-#ifdef DEBUG_SUPERCYCLE
-    if (block->index().is_root()) { CkPrintf ("DEBUG_SUPERCYCLE cycle %d: solve\n",block->state()->cycle()); }
+#ifdef TRACE_SUPERCYCLE
+    if (block->index().is_root()) {
+      CkPrintf ("TRACE_SUPERCYCLE cycle %d: solve\n",block->state()->cycle());
+    }
 #endif
     Field field = block->data()->field();
     /// access problem-defining fields for eventual RHS and solution
@@ -196,32 +208,39 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
     // Save previous potential
 
-    // enzo_float * potential_curr = (enzo_float*) field.values ("potential_curr");
-    // enzo_float * potential_prev = (enzo_float*) field.values ("potential_prev");
-    if (field.values (ipotential_curr_)==nullptr)
-      field.allocate_temporary(ipotential_curr_);
-    if (field.values (ipotential_prev_)==nullptr)
-      field.allocate_temporary(ipotential_prev_);
+    if (max_supercycle_ > 1) {
+      enzo_float * potential_curr = (enzo_float*) field.values ("potential_curr");
+      enzo_float * potential_prev = (enzo_float*) field.values ("potential_prev");
 
-    enzo_float * potential_curr = (enzo_float*) field.values (ipotential_curr_);
-    enzo_float * potential_prev = (enzo_float*) field.values (ipotential_prev_);
+      s_time_prev_(block) = s_time_curr_(block);
 
-    for (int i=0; i<m; i++) { potential_prev[i] = potential_curr[i]; }
+      if (potential_curr && potential_prev) {
+        for (int i=0; i<m; i++) { potential_prev[i] = potential_curr[i]; }
+      }
+    }
 
-    // Solve for potential_curr
-    //    const int ix = field.field_id ("potential_curr");
-    int ix = ipotential_curr_;
+    int ix = (max_supercycle_ > 1) ?
+      field.field_id("potential_curr") :
+      field.field_id("potential");
+
+    ASSERT("EnzoMethodGravity::compute()",
+           "max_supercycle > 1 but potential_curr field not defined",
+           (ix >= 0));
+
     std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
     solver->set_field_x(ix);
     solver->set_field_b(ib);
     solver->apply (A, block);
 
-  } else {
+  } else { // ( ! solve_this_step )
 
-#ifdef DEBUG_SUPERCYCLE
-    if (block->index().is_root()) { CkPrintf ("DEBUG_SUPERCYCLE cycle %d: extrapolate\n",block->state()->cycle()); }
+#ifdef TRACE_SUPERCYCLE
+    if (block->index().is_root()) {
+      CkPrintf ("TRACE_SUPERCYCLE cycle %d: extrapolate\n",block->state()->cycle());
+    }
 #endif
-    // Skip solve; interpolate potential and compute accelerations
+
+    // Skip solve; compute accelerations using extrapolated potential
     EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
     if (enzo_block && enzo_block->is_leaf()) {
       compute_accelerations(enzo_block);
@@ -244,7 +263,6 @@ void EnzoBlock::p_method_gravity_continue()
 
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->refresh_potential(this);
-
 }
 
 //----------------------------------------------------------------------
@@ -271,49 +289,64 @@ void EnzoBlock::p_method_gravity_end()
 void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 {
 
-  // Extrapolate potential from previous based on step
-
   Field field = enzo_block->data()->field();
-
-  if (field.values (ipotential_curr_)==nullptr)
-    field.allocate_temporary(ipotential_curr_);
-  if (field.values (ipotential_prev_)==nullptr)
-    field.allocate_temporary(ipotential_prev_);
-
-  enzo_float * potential_curr = (enzo_float*) field.values (ipotential_curr_);
-  enzo_float * potential_prev = (enzo_float*) field.values (ipotential_prev_);
-
   enzo_float * potential      = (enzo_float*) field.values ("potential");
 
-  const auto & method_state = enzo_block->state()->method(index());
-  const double step = method_state.step();
-  const double num_steps = method_state.num_steps();
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
   const int m = mx*my*mz;
 
-  if (step == 0) { // solve step: copy from potential_curr 
-    for (int i=0; i<m; i++) {
-      potential[i] = potential_curr[i];
-    }
-  } else { // extrapolate from previous and current
-    double cp = -step/num_steps;
-    double cc = 1.0 + step/num_steps;
-    for (int i=0; i<m; i++) {
-      potential[i] = cc*potential_curr[i] + cp*potential_prev[i];
+  // Extrapolate potential from "potential_curr" and "potential_prev"
+  // if supercycling and not a solve step
+
+  if (max_supercycle_ > 1) {
+
+    enzo_float * potential_curr = (enzo_float*) field.values ("potential_curr");
+    enzo_float * potential_prev = (enzo_float*) field.values ("potential_prev");
+
+    const auto & method_state = enzo_block->state()->method(index());
+    const double step = method_state.step();
+    const double num_steps = method_state.num_steps();
+
+    if (step == 0) {
+      // solve step: copy computed potential_curr to potential
+      for (int i=0; i<m; i++) {
+        potential[i] = potential_curr[i];
+      }
+      s_time_curr_(enzo_block) = enzo_block->state()->time();
+    } else {
+      // extrapolate step: extropolate potential from potential_prev and potential_curr
+      double tp = s_time_prev_(enzo_block);
+      double tc = s_time_curr_(enzo_block);
+      double t = enzo_block->state()->time();
+      ASSERT1("EnzoMethodGravity::compute_accelerations()",
+              "max_supercycle = %d != 1 but potential_curr field not defined",
+              max_supercycle_,
+              potential_curr);
+      ASSERT1("EnzoMethodGravity::compute_accelerations",
+              "max_supercycle = %d != 1 but potential_prev field not defined",
+              max_supercycle_,
+              potential_prev);
+
+      // compute extrapolation coefficients
+      const double cp = (tc - t) / (tc - tp);
+      const double cc = (t - tp) / (tc - tp);
+
+      // perform potential extrapolation
+      for (int i=0; i<m; i++) {
+        potential[i] = cc*potential_curr[i] + cp*potential_prev[i];
+      }
     }
   }
 
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (cosmology) {
-
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
     auto dt   = enzo_block->state()->dt();
     auto time = enzo_block->state()->time();
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
-    //    cosmology-> compute_expansion_factor (&a,&dadt,time);
     for (int i=0; i<m; i++) potential[i] /= cosmo_a;
   }
 

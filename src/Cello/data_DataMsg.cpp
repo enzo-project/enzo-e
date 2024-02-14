@@ -96,6 +96,30 @@ void DataMsg::set_coarse_array
 
 //----------------------------------------------------------------------
 
+void DataMsg::set_scalars ( Data * data)
+{
+  scalar_data_long_double_ = *data->scalar_data_long_double();
+  scalar_data_double_ = *data->scalar_data_double();
+  scalar_data_int_ = *data->scalar_data_int();
+  scalar_data_long_long_ = *data->scalar_data_long_long();
+  scalar_data_sync_ = *data->scalar_data_sync();
+  scalar_data_index_ = *data->scalar_data_index();
+}
+
+//----------------------------------------------------------------------
+
+void DataMsg::update_scalars ( Data * data)
+{
+  *data->scalar_data_long_double() = scalar_data_long_double_;
+  *data->scalar_data_double() = scalar_data_double_;
+  *data->scalar_data_int() = scalar_data_int_;
+  *data->scalar_data_long_long() = scalar_data_long_long_;
+  *data->scalar_data_sync() = scalar_data_sync_;
+  *data->scalar_data_index() = scalar_data_index_;
+}
+
+//----------------------------------------------------------------------
+
 int DataMsg::data_size () const
 {
   TRACE_DATA_MSG("size_data()");
@@ -155,6 +179,13 @@ int DataMsg::data_size () const
     size += 3*sizeof(int); // ifmr3_cf_
     size += 3*sizeof(int); // ifpr3_cf_
   }
+
+  SIZE_OBJECT_TYPE(size,scalar_data_long_double_);
+  SIZE_OBJECT_TYPE(size,scalar_data_double_);
+  SIZE_OBJECT_TYPE(size,scalar_data_int_);
+  SIZE_OBJECT_TYPE(size,scalar_data_long_long_);
+  SIZE_OBJECT_TYPE(size,scalar_data_sync_);
+  SIZE_OBJECT_TYPE(size,scalar_data_index_);
 
   return size;
 }
@@ -232,8 +263,14 @@ char * DataMsg::save_data (char * buffer) const
       (*pi++) = ifmr3_cf_[i];
       (*pi++) = ifpr3_cf_[i];
     }
-  
   }
+
+  SAVE_OBJECT_TYPE(pc,scalar_data_long_double_);
+  SAVE_OBJECT_TYPE(pc,scalar_data_double_);
+  SAVE_OBJECT_TYPE(pc,scalar_data_int_);
+  SAVE_OBJECT_TYPE(pc,scalar_data_long_long_);
+  SAVE_OBJECT_TYPE(pc,scalar_data_sync_);
+  SAVE_OBJECT_TYPE(pc,scalar_data_index_);
 
   ASSERT2 ("DataMsg::save_data()",
   	   "Expecting buffer size %d actual size %d",
@@ -322,6 +359,13 @@ char * DataMsg::load_data (char * buffer)
       ifpr3_cf_[i] = (*pi++);
     }
   }
+
+  LOAD_OBJECT_TYPE(pc,scalar_data_long_double_);
+  LOAD_OBJECT_TYPE(pc,scalar_data_double_);
+  LOAD_OBJECT_TYPE(pc,scalar_data_int_);
+  LOAD_OBJECT_TYPE(pc,scalar_data_long_long_);
+  LOAD_OBJECT_TYPE(pc,scalar_data_sync_);
+  LOAD_OBJECT_TYPE(pc,scalar_data_index_);
 
   return pc;
 }
@@ -423,7 +467,7 @@ void DataMsg::update (Data * data, bool is_local, bool is_kept)
       cello_float * coarse_buffer = coarse_field_buffer_.data() + i_f*na;
       cello_float * coarse_field =
         (cello_float *) field.coarse_values(index_field);
-      
+
       for (int kz=0; kz<na3[2]; kz++) {
         for (int ky=0; ky<na3[1]; ky++) {
           for (int kx=0; kx<na3[0]; kx++) {
@@ -439,8 +483,10 @@ void DataMsg::update (Data * data, bool is_local, bool is_kept)
 
 //----------------------------------------------------------------------
 
-void DataMsg::print (const char * message, FILE * fp_in) const
+void DataMsg::print (std::string message_str, FILE * fp_in) const
 {
+  const char * message = message_str.c_str();
+  
   FILE * fp = fp_in ? fp_in : stdout;
   
   fprintf (fp,"%s DATA_MSG %p\n",message,(void*)this);
@@ -486,4 +532,5 @@ void DataMsg::print (const char * message, FILE * fp_in) const
             message,ifmr3_cf_[0],ifmr3_cf_[1],ifmr3_cf_[2]);
   fprintf (fp,"%s DATA_MSG coarse ifpr3_cf_   = %d %d %d\n",
             message,ifpr3_cf_[0],ifpr3_cf_[1],ifpr3_cf_[2]);
+
 }

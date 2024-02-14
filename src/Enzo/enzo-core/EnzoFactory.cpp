@@ -238,7 +238,7 @@ void EnzoFactory::create_block
      io_reader);
 
   msg->set_data_msg(data_msg);
-  
+
   if (ip == -1) ip = CkMyPe();
 
   proxy_enzo_simulation[ip].p_refine_create_block (msg);

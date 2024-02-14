@@ -88,7 +88,6 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
   std::vector<int> face_level;
   face_level.clear();
-
   init_refine_
     (msg->index_,
      msg->nx_, msg->ny_, msg->nz_,
@@ -116,7 +115,8 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   CkPrintf ("TRACE_REFINE %s\n",name().c_str());
   fflush(stdout);
 #endif
-  delete msg;
+
+   delete msg;
 }
 
 //----------------------------------------------------------------------
@@ -569,7 +569,9 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
 #endif
   const bool is_first_cycle = (state_->cycle() == cello::config()->initial_cycle);
   if (! is_first_cycle) {
+
     msg->update(data());
+
   } else {
     TRACE("Block::apply_initial_()");
     const bool initial_new = cello::config()->initial_new;
