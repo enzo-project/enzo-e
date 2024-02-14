@@ -337,20 +337,20 @@ public: // interface
   Solver * solver () throw();
 
   /// Accessor functions for block ordering index and count 
-  void set_order (long long index, long long count)
+  void set_order (long long index, long long count, Index next)
   {
     order_index_ = index;
     order_count_ = count;
-  }
-  void set_order_next (Index next)
-  {
-    order_next_ = next;
+    order_next_  = next;
   }
 
-  void get_order (long long * index, long long * count, Index * next = 0) const
-  { *index = order_index_;
-    *count = order_count_;
-    if (next) *next  = order_next_;
+  void get_order (long long * index,
+                  long long * count = 0,
+                  Index *     next = 0) const
+  {
+    *index = order_index_;
+    if (count) *count = order_count_;
+    if (next)  *next  = order_next_;
   }
   
 protected: // methods

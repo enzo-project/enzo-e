@@ -36,7 +36,6 @@ public: // interface
     p | type_;
     p | is_index_;
     p | is_count_;
-    p | is_next_;
     p | is_windex_;
     p | is_wcount_;
     p | is_count_child_;
@@ -88,9 +87,6 @@ private: // methods
   /// Return the given Block's child weight
   double & wcount_child_(Block * block, int index);
 
-  /// Return the next block in the ordering
-  Index & next_(Block * block);
-
   /// Return the Block's ordering index
   Sync & sync_index_(Block * block);
 
@@ -112,7 +108,7 @@ private: // functions
             (i == child_order_(ic3)));
   }
 
-  void set_next_ (Block * block);
+  Index get_next_ (Block * block);
 
   inline double weight_(Block * block)
   { return 0.5; }
@@ -137,8 +133,6 @@ private: // attributes
   int is_count_child_;
   /// Block Scalar<double> child weight (array of size cello::num_children())
   int is_wcount_child_;
-  /// Block Scalar<Index> next Index in ordering
-  int is_next_;
   /// Block Scalar<Sync> sync counter for index (coarse->fine)
   int is_sync_index_;
   /// Block Scalar<sync> sync counter for count (fine->coarse)

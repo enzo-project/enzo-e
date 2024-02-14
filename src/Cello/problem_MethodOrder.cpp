@@ -43,7 +43,6 @@ MethodOrder::MethodOrder
     is_wcount_(-1),
     is_count_child_(-1),
     is_wcount_child_(-1),
-    is_next_(-1),
     is_sync_index_(-1),
     is_sync_count_(-1),
     min_level_(min_level)
@@ -70,7 +69,6 @@ MethodOrder::MethodOrder
   is_count_        = sd_ll->  new_value(ordering + ":count"); // number of participating blocks
   is_windex_       = sd_d->   new_value(ordering + ":windex"); // weighted index
   is_wcount_       = sd_d->   new_value(ordering + ":wcount"); // weighted count
-  is_next_         = sd_ind-> new_value(ordering + ":next"); // "next" index 
   // local scalars
   is_count_child_  = sd_ll->  new_value(ordering + ":count_child",n);
   is_wcount_child_ = sd_d->   new_value(ordering + ":wcount_child",n);
@@ -98,7 +96,6 @@ void MethodOrder::accum_count
   // set sync counter when available
   if (sync_stop != 0) {
     sync_count_(block).set_stop(sync_stop);
-    set_next_(block);
   } else {
     const int i = child_order_(ic3);
     count_child_(block,i) = count;
@@ -219,8 +216,9 @@ void MethodOrder::compute_complete_(Block * block)
 
   // Update Block's order variables
 
-  block->set_order(index_(block),count_(block));
-  block->set_order_next (next_(block));
+
+  Index next = get_next_(block);
+  block->set_order(index_(block),count_(block),next);
 
   ASSERT2("compute_complete","index %d is not between 0 and count %d\n",
           index_(block),count_(block),
@@ -263,11 +261,6 @@ double & MethodOrder::wcount_(Block * block)
 
 //----------------------------------------------------------------------
 
-Index & MethodOrder::next_(Block * block)
-{
-  return cello::scalar<Index>(block,is_next_);
-}
-
 Sync & MethodOrder::sync_index_(Block * block)
 {
   return cello::scalar<Sync>(block,is_sync_index_);
@@ -295,12 +288,12 @@ double & MethodOrder::wcount_child_(Block * block, int index)
 
 //----------------------------------------------------------------------
 
-void MethodOrder::set_next_(Block * block)
+Index MethodOrder::get_next_(Block * block)
 {
   const int rank = cello::rank();
   int na3[3];
   cello::simulation()->hierarchy()->root_blocks(na3,na3+1,na3+2);
-  next_(block) = block->index().next(rank,na3,block->is_leaf(),min_level_);
+  return block->index().next(rank,na3,block->is_leaf(),min_level_);
 }
 
 //----------------------------------------------------------------------

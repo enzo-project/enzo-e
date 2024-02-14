@@ -187,9 +187,8 @@ void IoBlock::save_to (void * v)
   b->cycle_ = cycle_;
   b->time_  = time_;
   b->dt_    = dt_;
-  b->set_order(order_index_, order_count_);
   Index order_next;
   order_next.set_values(order_next_);
-  b->set_order_next(order_next);
+  b->set_order(order_index_, order_count_,order_next);
 }
 

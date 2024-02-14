@@ -67,7 +67,10 @@ Block::Block ( MsgType msg_type )
     name_(""),
     index_method_(-1),
     index_solver_(),
-    refresh_()
+    refresh_(),
+    order_index_(0),
+    order_count_(0),
+    order_next_()
 {
 #ifdef TRACE_BLOCK
 
