@@ -225,6 +225,8 @@ Physics
 
 .. include:: physics.incl
 
+.. _schedule_param:
+
 --------
 schedule
 --------

@@ -18,6 +18,9 @@
 // SYSTEM INCLUDES
 //----------------------------------------------------------------------
 
+// (check CMakeLists.txt to check to see if headers in the associated
+//  precompiled header needs to change whenever any of these include statements
+//  are removed - the precompiled header should only contain a subset of them)
 #include <execinfo.h>
 #include <math.h>
 #include <stdio.h>
