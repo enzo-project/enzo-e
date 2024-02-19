@@ -5,7 +5,9 @@
 /// @date     2016-09-10
 /// @brief    Definition of the Soup class for "alphabet soup" test problem
 
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+
 #include <random>
 
 const int EnzoInitialSoup::position_[] = 
