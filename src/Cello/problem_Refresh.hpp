@@ -207,6 +207,8 @@ public: // interface
     particle_list_.push_back(id_particle);
   }
 
+  void add_particle(std::string particle_name);
+
   /// All particles types are refreshed
   void add_all_particles() {
     all_particles_ = true;

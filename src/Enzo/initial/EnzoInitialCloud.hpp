@@ -31,8 +31,9 @@ public: // interface
 		   double velocity_wind, double metal_mass_frac,
 		   bool initialize_uniform_bfield,
 		   const double uniform_bfield[3],
-		   double perturb_stddev, double truncate_dev,
-		   unsigned int perturb_seed)
+		   int perturb_Nwaves, double perturb_amplitude,
+                   double perturb_min_wavelength,
+                   double perturb_max_wavelength, unsigned int perturb_seed)
     : Initial(cycle,time),
       subsample_n_(subsample_n),
       cloud_radius_(cloud_radius),
@@ -46,8 +47,10 @@ public: // interface
       velocity_wind_(velocity_wind),
       metal_mass_frac_(metal_mass_frac),
       initialize_uniform_bfield_(initialize_uniform_bfield),
-      perturb_stddev_(perturb_stddev),
-      truncate_dev_(truncate_dev),
+      perturb_Nwaves_(perturb_Nwaves),
+      perturb_amplitude_(perturb_amplitude),
+      perturb_min_wavelength_(perturb_min_wavelength),
+      perturb_max_wavelength_(perturb_max_wavelength),
       perturb_seed_(perturb_seed)
   {
     for (int i = 0; i < 3; i++){ uniform_bfield_[i] = uniform_bfield[i]; }
@@ -74,9 +77,17 @@ public: // interface
 	   eint_wind>=0.);
     ASSERT("EnzoInitialCloud", "metal_mass_frac must be in [0,1]",
 	   metal_mass_frac >=0 && metal_mass_frac <=1);
-    ASSERT("EnzoInitialCloud", "perturb_stddev must be >= 0",
-	   perturb_stddev >=0);
-    ASSERT("EnzoInitialCloud", "truncate_dev must be >= 0", truncate_dev >=0);
+    if (perturb_Nwaves_ > 0){
+      ASSERT("EnzoInitialCloud",
+             "perturb_amplitude_ must be positive if perturb_Nwaves_>0",
+             perturb_amplitude > 0);
+      ASSERT("EnzoInitialCloud",
+             "perturb_min_wavelength_ must be positive if perturb_Nwaves_>0",
+             perturb_min_wavelength_ > 0);
+      ASSERT("EnzoInitialCloud",
+             "perturb_min_wavelength_ must be positive if perturb_Nwaves_>0",
+             perturb_max_wavelength_ > perturb_min_wavelength_);
+    }
   }
 
   /// CHARM++ PUP::able declaration
@@ -96,8 +107,10 @@ public: // interface
       velocity_wind_(0.),
       metal_mass_frac_(0.),
       initialize_uniform_bfield_(false),
-      perturb_stddev_(0),
-      truncate_dev_(0),
+      perturb_Nwaves_(0),
+      perturb_amplitude_(),
+      perturb_min_wavelength_(0.),
+      perturb_max_wavelength_(0.),
       perturb_seed_(0)
   {
     for (int i = 0; i < 3; i++){ uniform_bfield_[i] = 0.; }
@@ -123,8 +136,10 @@ public: // interface
     p | metal_mass_frac_;
     p | initialize_uniform_bfield_;
     PUParray(p, uniform_bfield_, 3);
-    p | perturb_stddev_;
-    p | truncate_dev_;
+    p | perturb_Nwaves_;
+    p | perturb_amplitude_;
+    p | perturb_min_wavelength_;
+    p | perturb_min_wavelength_;
     p | perturb_seed_;
   }
 
@@ -168,11 +183,19 @@ private: // attributes
   /// values of the uniform bfield
   double uniform_bfield_[3];
 
-  /// The stddev for normal distribution used to perturb cloud density
-  double perturb_stddev_;
 
-  /// Number of stddevs where normal distribution is truncated
-  double truncate_dev_;
+  /// The number of sinusoidal density waves to use for the perturbation.
+  int perturb_Nwaves_;
+
+  /// The amplitude of the perturbation wavelength. This is a fraction that is
+  /// multiplied by the cloud density
+  double perturb_amplitude_;
+
+  /// The minimum wavelength that the perturbations can have
+  double perturb_min_wavelength_;
+
+  /// The maximum wavelength that the perturbations can have
+  double perturb_max_wavelength_;
 
   /// The random seed used to seed the density perturbations
   unsigned int perturb_seed_;

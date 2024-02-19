@@ -367,7 +367,7 @@ void Block::adapt_refine_()
       Refresh * refresh = new Refresh;
       refresh->add_all_data();
       FieldFace * field_face = create_face
-	(if3,ic3,g3, refresh_fine, refresh, true);
+	(if3,ic3,g3, refresh_fine, refresh);
 
       // Create data message object to send
       DataMsg * data_msg = new DataMsg;
@@ -921,7 +921,7 @@ void Block::adapt_coarsen_()
   refresh->add_all_data();
 
   FieldFace * field_face = create_face
-    (if3, ic3, g3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh);
 
   const Index index_parent = index_.index_parent();
 
