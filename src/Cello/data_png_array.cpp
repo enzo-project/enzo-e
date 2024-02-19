@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <limits>
-#include "pngwriter.h"
+#include <algorithm> // std::min, std::max
+#include <cmath> // fabs
 
 // #define DEBUG_PNG
 
@@ -21,13 +22,11 @@ void png_array (const char * filename,
   //			   {1.0, 1.0, 1.0}};
   // const int nc = 4;
 
-#ifdef PLOT  
-  pngwriter * png;
+#ifdef PLOT
   if (px==0) px = 1;
   if (py==0) py = 1;
   px = (mx-2*gx)*px;
   py = (my-2*gy)*py;
-  png = new pngwriter(px, py,0,filename);
 #endif
   
   double min=std::numeric_limits<double>::max();
@@ -71,33 +70,29 @@ void png_array (const char * filename,
   printf ("DEBUG_PNG %s: sum_abs %20.15g\n",filename,sum_abs);
   printf ("DEBUG_PNG %s: sum2_real %20.15g sum2_ghost %20.15g\n",filename,sum2_real,sum2_ghost);
 #endif
-#ifdef PLOT  
-  double colormap[2][3] = {{ 0.0, 0.0, 0.0},
-			   { 1.0, 1.0, 1.0} };
+#ifdef PLOT
+
+  std::vector<float> colormap[3];
+  colormap[0] = {0.0, 1.0};
+  colormap[1] = {0.0, 1.0};
+  colormap[2] = {0.0, 1.0};
+
+  std::vector<double> sum_arr(px*py, 0.0);
   int nx=mx-2*gx;
   int ny=my-2*gy;
   for (int ky=0; ky<py; ky++) {
     int iy = 1.0*ky*ny/py+gy;
     for (int kx=0; kx<px; kx++) {
       int ix = 1.0*kx*nx/px+gx;
-      double sum = 0.0;
       for (int iz=gz; iz<mz-gz; iz++) {
 	int i=ix + mx*(iy + my*iz);
-	sum += scale*array[i];
+	sum_arr[kx + px *ky] += scale*array[i];
       }
-      size_t k = (nc-1)*(sum-min) / (max-min);
-      if (k > nc-2) k = nc-2;
-      double lo = min +  k   *(max-min)/(nc-1);
-      double hi = min + (k+1)*(max-min)/(nc-1);
-      double ratio = (sum - lo) / (hi-lo);
-      double r = (1-ratio)*colormap[k][0] + ratio*colormap[k+1][0];
-      double g = (1-ratio)*colormap[k][1] + ratio*colormap[k+1][1];
-      double b = (1-ratio)*colormap[k][2] + ratio*colormap[k+1][2];
-      png->plot(kx+1,ky+1,r,g,b);
     }
   }
-  png->close();
-  
-  delete png;
+
+  std::array<double, 2> min_max_arr = {min, max};
+  pngio::write(filename, sum_arr.data(), px, py, colormap,
+               pngio::ImgTransform::none, &min_max_arr);
 #endif
 }

@@ -243,7 +243,11 @@ target_link_libraries(data
 
 addCelloLib(disk "")
 # with minimal refactoring, we could make HDF5_C a privately linked library
-target_link_libraries(disk PUBLIC error HDF5_C)
+target_link_libraries(disk
+  PUBLIC HDF5_C
+  PRIVATE pngwriter
+  PUBLIC error
+)
 
 
 addCelloLib(error "")
@@ -255,8 +259,8 @@ target_link_libraries(error
 
 addCelloLib(io "")
 target_link_libraries(io
-  PUBLIC Boost::filesystem pngwriter # with minimal refactoring, we could make
-                                     # these into private dependencies
+  PUBLIC Boost::filesystem # with minimal refactoring, we could make
+                           # this into a private dependency
   PUBLIC cello_component charm_component parallel monitor performance error
          parameters disk problem compute mesh view data simulation
   PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
