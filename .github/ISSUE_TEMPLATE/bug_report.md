@@ -12,7 +12,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
-1. Run '...' test problem with this parameter file (link)
+1. Run '...' test problem with this parameter file. Upload parameter file as an attachment.
 2. After '...' cycles, it crashes
 3. Next step
 
@@ -29,7 +29,7 @@ The output produced by Enzo-E, which may be a screenshot, console output, etc.
 A clear and concise description of what you expected to happen.
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+If applicable, add screenshots as attachments to help explain your problem.
 
 **Version information (please complete the following information):**
  - OS: [e.g. macOS, Ubuntu]
@@ -37,7 +37,7 @@ If applicable, add screenshots to help explain your problem.
  - Compiler version:
  - Other libraries (if applicable):
 
-Please upload your cmake config file, e.g. `config/linux_gcc.cmake` somewhere accessible and provide a link below.
+Please upload your cmake config file, e.g. `config/linux_gcc.cmake`, as an attachment.
 
 **Additional context**
 Add any other context about the problem here.
