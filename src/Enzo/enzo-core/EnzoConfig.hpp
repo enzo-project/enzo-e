@@ -257,7 +257,6 @@ public: // interface
 
       // EnzoMethodCheck
       method_check_num_files(1),
-      method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
       method_check_include_ghosts(false),
@@ -441,7 +440,6 @@ public: // interface
 protected: // methods
 
   void read_adapt_(Parameters *);
-
   void read_field_(Parameters *);
 
   //--------------------
@@ -763,7 +761,6 @@ public: // attributes
 
   /// EnzoMethodCheck
   int                        method_check_num_files;
-  std::string                method_check_ordering;
   std::vector<std::string>   method_check_dir;
   int                        method_check_monitor_iter;
   bool                       method_check_include_ghosts;
@@ -890,7 +887,6 @@ public: // attributes
   double                     method_background_acceleration_center[3];
   double                     method_background_acceleration_angular_momentum[3];
   bool                       method_background_acceleration_apply_acceleration;
-
 
   /// EnzoMethodPmDeposit
 

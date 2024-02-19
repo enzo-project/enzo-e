@@ -270,7 +270,6 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
 		      static_cast<int>(p3[1]*shift),
 		      static_cast<int>(p3[2]*shift)};
 
-  int la3[3]={0},ra3[3]={0},lb3[3]={0},rb3[3]={0};
   int a = false;
   int ic = 0;
   for (int axis=0; axis<rank; axis++) {
@@ -279,10 +278,6 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
     const int r1 = left1[axis]+s1;
     const int r2 = left2[axis]+s2;
 
-    la3[axis]=l1;
-    ra3[axis]=r1;
-    lb3[axis]=l2;
-    rb3[axis]=r2;
     const bool in1 = (l1 <= l2 && r2 <= r1);
     const bool in2 = (l2 <= l1 && r1 <= r2);
     const int in = (in1 || in2) ? 1 : 0;
@@ -296,16 +291,6 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
     a = a || ie; // adjacent
     ic += in;    // count
   }
-#ifdef DEBUG_INDEX
-  CkPrintf ("DEBUG_INDEX [%d:%d) [%d:%d) [%d:%d) - [%d:%d) [%d:%d) [%d:%d)  (%d %d %d) : %d\n",
-            la3[0],ra3[0],
-            la3[1],ra3[1],
-            la3[2],ra3[2],
-            lb3[0],rb3[0],
-            lb3[1],rb3[1],
-            lb3[2],rb3[2],
-            ip3[0],ip3[1],ip3[2],(a ? -1 : ic));
-#endif
   return (a ? -1 : ic);
 }
 

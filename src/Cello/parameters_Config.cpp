@@ -131,6 +131,7 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_single_array;
   p | method_field_list;
   p | method_particle_list;
+  p | method_order_ordering;
   PUParray (p,method_output_blocking,3);
   p | method_output_all_blocks;
   p | method_prolong;
@@ -759,23 +760,32 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   //  Constraints on the block size based on the ghost depth
   if ( mesh_max_level > 0 ) {
-    if ( !(ax >= 2*field_ghost_depth[0] && ay >= 2*field_ghost_depth[1] && az >= 2*field_ghost_depth[2] ) ) {
-      ERROR3 ("Config::read", 
-		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth for AMR simulations: ", 
-		ax, ay, az);
-    }  
-    if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
+    if ( !(ax >= 2*field_ghost_depth[0] &&
+           ay >= 2*field_ghost_depth[1] &&
+           az >= 2*field_ghost_depth[2] ) ) {
       ERROR3 ("Config::read",
-  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even for AMR simulations" ,
-		      ax, ay, az);
-    }  
+              "Dimensions of the active zone on each block (%d, %d, %d) "
+              "must be at least double the size of the ghost depth for AMR simulations: ",
+              ax, ay, az);
+    }
+
+    ASSERT3 ("Config::read",
+             "Dimensions of the active zone on each block (%d, %d, %d) "
+             "must each be even for AMR simulations" ,
+             ax, ay, az,
+             ( ( ax%2 == 0) &&
+               ((ay%2 == 0) || mesh_root_rank < 2) &&
+               ((az%2 == 0) || mesh_root_rank < 3) ) );
   }
-  else if ( mesh_max_level == 0 ) {   
-    if ( !(ax >= field_ghost_depth[0] && ay >= field_ghost_depth[1] && az >= field_ghost_depth[2] ) ) {
+  else if ( mesh_max_level == 0 ) {
+    if ( !(ax >= field_ghost_depth[0] &&
+           ay >= field_ghost_depth[1] &&
+           az >= field_ghost_depth[2] ) ) {
       ERROR3 ("Config::read",
-  		      "Dimensions of the active zone on each block (%d, %d, %d) should be at least as large as the ghost depth",
-		      ax, ay, az);
-    }  
+              "Dimensions of the active zone on each block (%d, %d, %d) "
+              "should be at least as large as the ghost depth",
+              ax, ay, az);
+    }
   }
 }
 
@@ -804,6 +814,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_flux_correct_min_digits_values.resize(num_method);
   method_field_list.resize(num_method);
   method_particle_list.resize(num_method);
+  method_order_ordering.resize(num_method);
   method_output_blocking[0].resize(num_method);
   method_output_blocking[1].resize(num_method);
   method_output_blocking[2].resize(num_method);
@@ -937,6 +948,9 @@ void Config::read_method_ (Parameters * p) throw()
       method_particle_list[index_method][i] =
         p->list_value_string(i,full_name+":particle_list");
     }
+
+    method_order_ordering[index_method] =
+      p->value_string(full_name+":ordering","morton");
 
     for (int i=0; i<3; i++) {
       method_output_blocking[i][index_method] =
@@ -1179,7 +1193,7 @@ void Config::read_output_ (Parameters * p) throw()
             int color_rgb;
             if (name[0] == '#') {
               bool is_valid=true;
-              for (int i=1; i<name.size(); i++) {
+              for (size_t i=1; i<name.size(); i++) {
                 is_valid = is_valid && isxdigit(name[i]);
               }
               ASSERT1 ("Config::read_output()",

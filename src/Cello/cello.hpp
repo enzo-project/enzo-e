@@ -449,7 +449,7 @@ enum class MsgType { msg_refine, msg_check };
 #define SIZE_VECTOR_VECTOR_TYPE(COUNT,TYPE,VECTOR)              \
   {                                                             \
     (COUNT) += sizeof(int);                                     \
-    for (int i=0; i<(VECTOR).size(); i++) {                     \
+    for (size_t i=0; i<(VECTOR).size(); i++) {                     \
       SIZE_VECTOR_TYPE(COUNT,TYPE,(VECTOR)[i]);                 \
     }                                                           \
   }
@@ -458,7 +458,7 @@ enum class MsgType { msg_refine, msg_check };
     int size = (VECTOR).size();                         \
     memcpy(POINTER,&size, sizeof(int));                 \
     (POINTER) += sizeof(int);                           \
-    for (int i=0; i<(VECTOR).size(); i++) {             \
+    for (size_t i=0; i<(VECTOR).size(); i++) {             \
       SAVE_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
@@ -468,7 +468,7 @@ enum class MsgType { msg_refine, msg_check };
     memcpy(&size, POINTER, sizeof(int));                \
     (POINTER) += sizeof(int);                           \
     (VECTOR).resize(size);                              \
-    for (int i=0; i<(VECTOR).size(); i++) {             \
+    for (size_t i=0; i<(VECTOR).size(); i++) {             \
       LOAD_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
@@ -784,6 +784,9 @@ namespace cello {
   /// Return the ScalarDescr object defining Block index Scalar data values
   ScalarDescr *   scalar_descr_index();
 
+  template <class T>
+  T & scalar(Block *, int is, int i=0);
+
   /// Return the ith Output object
   Output *        output (int index);
   /// Return the ith Solver
@@ -793,6 +796,7 @@ namespace cello {
   /// Return the number of children each Block may have
   int             num_children();
   int             num_children(int rank);
+  int             num_children(Block * block);
   /// Return the number of Blocks on this process
   size_t          num_blocks_process();
   /// Return the cell volume at the given level relative to the root level
