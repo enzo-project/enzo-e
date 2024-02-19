@@ -449,7 +449,7 @@ enum class MsgType { msg_refine, msg_check };
 #define SIZE_VECTOR_VECTOR_TYPE(COUNT,TYPE,VECTOR)              \
   {                                                             \
     (COUNT) += sizeof(int);                                     \
-    for (int i=0; i<(VECTOR).size(); i++) {                     \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {             \
       SIZE_VECTOR_TYPE(COUNT,TYPE,(VECTOR)[i]);                 \
     }                                                           \
   }
@@ -458,7 +458,7 @@ enum class MsgType { msg_refine, msg_check };
     int size = (VECTOR).size();                         \
     memcpy(POINTER,&size, sizeof(int));                 \
     (POINTER) += sizeof(int);                           \
-    for (int i=0; i<(VECTOR).size(); i++) {             \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {     \
       SAVE_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
@@ -468,7 +468,7 @@ enum class MsgType { msg_refine, msg_check };
     memcpy(&size, POINTER, sizeof(int));                \
     (POINTER) += sizeof(int);                           \
     (VECTOR).resize(size);                              \
-    for (int i=0; i<(VECTOR).size(); i++) {             \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {     \
       LOAD_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
