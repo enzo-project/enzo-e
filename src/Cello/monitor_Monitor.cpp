@@ -109,11 +109,6 @@ void Monitor::header () const
 #else
   print ("Define","CONFIG_SMP_MODE     %s","no");
 #endif
-#ifdef BYPASS_CHARM_MEM_LEAK
-  print ("Define","BYPASS_CHARM_MEM_LEAK %s","Yes");
-#else
-  print ("Define","BYPASS_CHARM_MEM_LEAK %s","no");
-#endif
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());
 }

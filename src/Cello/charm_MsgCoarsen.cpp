@@ -20,9 +20,9 @@ MsgCoarsen::MsgCoarsen()
     is_local_(true),
     data_msg_(NULL),
     buffer_(NULL),
+    adapt_child_(nullptr),
     num_face_level_(0),
-    face_level_(NULL),
-    adapt_child_(nullptr)
+    face_level_(NULL)
 {
   ic3_[0] = ic3_[1] = ic3_[2] = -1;
   ++counter[cello::index_static()]; 
@@ -39,9 +39,9 @@ MsgCoarsen::MsgCoarsen
     is_local_(true),
     data_msg_(NULL),
     buffer_(NULL),
+    adapt_child_(adapt_child),
     num_face_level_(num_face_level),
-    face_level_(new int[num_face_level]),
-    adapt_child_(adapt_child)
+    face_level_(new int[num_face_level])
 {
 
   ++counter[cello::index_static()]; 
@@ -148,7 +148,7 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   // Adapt class
   SAVE_OBJECT_PTR_TYPE(pc,Adapt,msg->adapt_child_);
 
-  ASSERT2("MsgRefresh::pack()",
+  ASSERT2("MsgCoarsen::pack()",
 	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);

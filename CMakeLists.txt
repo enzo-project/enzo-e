@@ -19,8 +19,8 @@ endif()
 #Define project and languages
 project(Enzo-E VERSION 1.0.0 LANGUAGES C CXX Fortran)
 
-# We need C++11
-set(CMAKE_CXX_STANDARD 11)
+# We need C++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -81,6 +81,16 @@ if (USE_GRACKLE)
   endif()
 endif()
 
+# TODO: remove the dependency on boost::filesystem (since C++17 now offers
+# nearly identical functionality within the standard library). Initially, I
+# thought, it could make sense to keep using boost::filesystem in the
+# short-term since the clang compiler shipped on macOS didn't support this
+# library until version 11.0 of Xcode (requires macOS Mojave from 2018).
+# - Apple's clang compiler supports all new language features & the majority of
+#   new library features by version 10 (requires macOS High Sierra from 2017)
+# - For more info: https://en.cppreference.com/w/cpp/compiler_support/17
+# - After giving this some thought, this difference in support is probably not
+#   worth caring about
 find_package(Boost REQUIRED COMPONENTS filesystem)
 # Fix linking error to
 # /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x679e): undefined reference to `boost::system::generic_category()'
@@ -322,6 +332,9 @@ include(CTest)
 # convenience for now.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/External)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+option(USE_PRECOMPILED_HEADERS
+  "Use precompiled headers to speed up compilation" ON)
 
 add_subdirectory(src/Cello)
 add_subdirectory(src/Enzo)
