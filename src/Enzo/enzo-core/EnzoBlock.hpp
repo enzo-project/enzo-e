@@ -31,64 +31,6 @@ class EnzoBlock : public CBase_EnzoBlock
   friend class EnzoInitialImplosion2;
   friend class EnzoInitialSedovArray2;
 
-  //----------------------------------------------------------------------
-  // functions
-
-  static void initialize (const EnzoConfig * enzo_config);
-
-  //----------------------------------------------------------------------
-  // variables
-
-public:
-
-  // /// Cosmology
-
-  static int UseMinimumPressureSupport[CONFIG_NODE_SIZE];
-  static enzo_float MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-
-  // Chemistry
-
-  static int MultiSpecies[CONFIG_NODE_SIZE];
-
-  // Physics
-
-  static int PressureFree[CONFIG_NODE_SIZE];
-  static enzo_float GravitationalConstant[CONFIG_NODE_SIZE];
-
-  // Problem-specific
-
-  static int ProblemType[CONFIG_NODE_SIZE];
-
-  // Method PPM
-
-  static int PPMFlatteningParameter[CONFIG_NODE_SIZE];
-  static int PPMDiffusionParameter[CONFIG_NODE_SIZE];
-  static int PPMSteepeningParameter[CONFIG_NODE_SIZE];
-
-  // Parallel
-
-  //  static int ProcessorNumber;
-
-  // Numerics
-
-  static enzo_float InitialRedshift[CONFIG_NODE_SIZE];
-  static enzo_float InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
-
-  // Domain
-
-  static enzo_float DomainLeftEdge [3*CONFIG_NODE_SIZE];
-  static enzo_float DomainRightEdge[3*CONFIG_NODE_SIZE];
-
-  // PPM
-
-  static int GridRank[CONFIG_NODE_SIZE];
-
-  static int ghost_depth[3*CONFIG_NODE_SIZE];
-
-  // Fields
-
-  static int NumberOfBaryonFields[CONFIG_NODE_SIZE];  // active baryon fields
-
 public: // interface
 
   /// Initialize the EnzoBlock chare array
@@ -146,13 +88,20 @@ public: // interface
 
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
+                        enzo_float minimum_pressure_support_parameter,
                         bool comoving_coordinates);
 
   /// Solve the hydro equations using PPM
   int SolveHydroEquations ( enzo_float time,
                             enzo_float dt,
                             bool comoving_coordinates,
-                            bool single_flux_array);
+                            bool single_flux_array,
+                            bool diffusion,
+                            int flattening,
+                            bool pressure_free,
+                            bool steepening,
+                            bool use_minimum_pressure_support,
+                            enzo_float minimum_pressure_support_parameter );
 
   /// Solve the hydro equations using Enzo 3.0 PPM
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
