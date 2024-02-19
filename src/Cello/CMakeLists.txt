@@ -111,6 +111,44 @@ target_link_libraries(parallel
 add_library(view INTERFACE)
 target_link_libraries(view INTERFACE error monitor)
 
+
+# A brief segue: define a common target, cello_component_PCH, that is used to
+# propagate a precompiled header
+# - if USE_PRECOMPILED_HEADERS is OFF, then linking against this target does
+#   nothing!
+# - A precompiled header stores the contents of preparsed headers in a binary
+#   format. They can significantly reduce compilation times when they are used
+#   to define large headers that are included in MANY files.
+# - NOTE: there's still a compile-time cost to including unnecessary headers
+#   (For example, even when the <charm++.h> header is precompiled, a bunch of
+#   time is still spent instantiate functions)
+#
+# Using a precompiled header will forcibly include all preparsed headers
+# inside a source file. If care isn't taken, this can unintentionally lead to
+# a source file knowing about symbols that it hasn't properly included.
+# Obviously, we REALLY want to avoid that scenario.
+#
+# For that reason, we are going to do something simple, we are just going to
+# precompile some of the expensive external headers included by cello.hpp.
+# - we will only use this for targets for which ALL source files include the
+#   cello.hpp file (as a rule of thumb, this should just be used when the
+#   cello_component target, defined below, is a public dependency). This saves
+#   time parsing the <vector> and <charm++.h> headers.
+# - In the worst case scenario, we are limiting the symbols can know about
+#   (that it shouldn't) to stuff in the std:: namespace and stuff from charm++
+#
+# Because it's good practice to make precompiled headers opt-in (since a given
+# file can only use 1 precompiled header), all targets that link to this to
+# target use a PRIVATE dependence (to avoid transitive dependence)
+add_library(cello_component_PCH INTERFACE)
+if(USE_PRECOMPILED_HEADERS)
+  target_precompile_headers(cello_component_PCH INTERFACE
+    <random> # this takes a shockingly long time to compile (and really
+             # shouldn't be in cello.hpp)
+    <string> <vector> <charm++.h> "\"pup_stl.h\""
+  )
+endif()
+
 #===============================================
 # Defining Cello-Component Targets step 2 (of 3)
 #===============================================
@@ -138,10 +176,12 @@ target_link_libraries(view INTERFACE error monitor)
 # (and rely upon on CMake's ability to handle such transitive dependencies for
 # us). This might help speed up incremental re-compilation
 
+
 # first, we define 2 targets that have "special names"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # These names were chosen to minimize confusion (we have other targets that
 # share similar names)
+
 
 # note: in the near future, we may make a separate target called something like
 # CELLO_COMBINED to represent the complete library that is composed of the
@@ -154,7 +194,9 @@ target_link_libraries (cello_component
   PRIVATE Boost::filesystem
   PRIVATE charm_component error simulation # these private dependencies arise
                                            # from source files
+  PRIVATE cello_component_PCH # cello component-precompiled header
 )
+
 
 
 file(GLOB CHARM_COMP_SRC_FILES charm*.cpp *charm*.hpp)
@@ -179,6 +221,7 @@ addCelloLib(compute "")
 target_link_libraries(compute
   PUBLIC cello_component charm_component error performance monitor memory
          parallel disk io parameters problem mesh view data simulation
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -186,6 +229,7 @@ addCelloLib(control "")
 target_link_libraries(control
   PUBLIC cello_component charm_component
   PRIVATE simulation mesh # these arise from source files
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -194,12 +238,17 @@ addCelloLib(data  "field_face_store.F")
 target_link_libraries(data
   PUBLIC cello_component charm_component error memory performance monitor
          parallel disk problem mesh parameters io compute simulation view
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
 addCelloLib(disk "")
 # with minimal refactoring, we could make HDF5_C a privately linked library
-target_link_libraries(disk PUBLIC error HDF5_C)
+target_link_libraries(disk
+  PUBLIC HDF5_C
+  PRIVATE pngwriter
+  PUBLIC error
+)
 
 
 addCelloLib(error "")
@@ -211,10 +260,9 @@ target_link_libraries(error
 
 addCelloLib(io "")
 target_link_libraries(io
-  PUBLIC pngwriter # with minimal refactoring, we could convert this into a
-                   # private dependency
   PUBLIC cello_component charm_component parallel monitor performance error
          parameters disk problem compute mesh view data simulation
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -226,6 +274,7 @@ addCelloLib(mesh "")
 target_link_libraries(mesh
   PUBLIC cello_component charm_component performance monitor parallel disk
          parameters control io problem compute simulation view data
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 
@@ -259,6 +308,7 @@ addCelloLib(problem "")
 target_link_libraries(problem
   PUBLIC cello_component charm_component error performance monitor memory
          parallel disk io parameters compute control mesh view data simulation
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 addCelloLib(simulation "")
@@ -266,6 +316,7 @@ addCelloLib(simulation "")
 target_link_libraries(simulation
   PUBLIC cello_component charm_component error memory performance monitor
          parallel disk problem mesh view data parameters io compute
+  PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
 )
 
 

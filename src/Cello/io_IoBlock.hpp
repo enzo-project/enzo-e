@@ -48,6 +48,8 @@ public: // interface
     p | time_;
     p |  dt_;
     PUParray(p,array_,3);
+    p | index_order_;
+    p | count_order_;
   }
 
   /// Set block
@@ -64,10 +66,13 @@ public: // interface
     upper[2]=upper_[2];
   }
 
+  void get_order (long long * index_order, long long * count_order) const
+  { *index_order = index_order_; *count_order = count_order_; }
+
   void index(int index3[3]) { index3[0]=index_[0]; index3[1]=index_[1]; index3[2]=index_[2]; }
-  
+
   /// PACKING / UNPACKING
-  
+
   /// Return the number of bytes required to serialize the data object
   virtual int data_size () const;
 
@@ -101,6 +106,8 @@ public: // interface
     CkPrintf ("DEBUG_IO_BLOCK dt_             %g\n", dt_);
     CkPrintf ("DEBUG_IO_BLOCK array_          %d %d %d\n",
               array_[0], array_[1], array_[2]);
+    CkPrintf ("DEBUG_IO_BLOCK index_order_    %lld\n", index_order_);
+    CkPrintf ("DEBUG_IO_BLOCK count_order_    %lld\n", count_order_);
   }
 protected: // attributes
 
@@ -112,6 +119,8 @@ protected: // attributes
   double time_;
   double dt_;
   int array_[3];
+  long long index_order_;
+  long long count_order_;
 
 };
 

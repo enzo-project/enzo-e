@@ -163,7 +163,8 @@ void * MsgOutput::pack (MsgOutput * msg)
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
 
-  CkFreeMsg (msg);
+  delete msg;
+
   // Return the buffer
   return (void *) buffer;
 }

@@ -31,7 +31,7 @@ file(GLOB SRC_FILES CONFIGURE_DEPENDS
 
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
 
-set(External_LIBS "pngwriter;Boost::filesystem;PNG::PNG;HDF5_C")
+set(External_LIBS "Boost::filesystem;HDF5_C")
 if (USE_GRACKLE)
   LIST(APPEND External_LIBS "Grackle::Grackle")
 endif()
@@ -111,6 +111,28 @@ target_include_directories(enzo
 )
 target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
+
+# At the time of writing, cello.hpp is included in basically every source file
+# (it's either directly included, or included via enzo.hpp). Thus it's okay to
+# use these precompiled headers in all of the files.
+target_link_libraries(enzo PRIVATE cello_component_PCH)
+
+# At the time of wriing, enzo.hpp is included in just about every source file
+# compiled as part of the enzo-target. For that reason, using
+#     > if(USE_PRECOMPILED_HEADERS)
+#     >    target_precompile_headers(enzo PRIVATE enzo.hpp)
+#      > endif()
+# actually saves a lot of extra time.
+# - However, I'm VERY worried that future source files could get introduced
+#   that don't include enzo.hpp. In that case, the precompiled headers would
+#   allow the source file to access just about ANY in symbol in the entire
+#   codebase without an appropriate include-statement.
+# - While the same could still happen with the headers in cello_component_PCH,
+#   I'm much less concerned since those are standard library headers and
+#   charm++ headers
+# - Maybe we can revisit this if we can come up with a better automatic test
+#   for catching these cases (more helpful than the existing CI test). It could
+#   when/if we start subdividing the enzo-target into subtargets...
 
 #======================
 # Define Binary Targets
