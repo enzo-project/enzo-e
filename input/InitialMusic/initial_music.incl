@@ -232,9 +232,7 @@
        field_list = ["velocity_x"];
        image_size = [ 256,256];
        schedule { var =  "cycle"; step = 1;  }
-       colormap = [1.0, 0.0, 0.0,
-       		   0.0, 0.0, 0.0,
-		   0.0, 0.0, 1.0];
+       colormap = ["red", "black", "blue"];
     }
     vy {
        type = "image";
@@ -243,9 +241,7 @@
        field_list = ["velocity_y"];
        image_size = [ 256,256];
        schedule { var =  "cycle"; step = 1;  }
-       colormap = [1.0, 0.0, 0.0,
-       		   0.0, 0.0, 0.0,
-		   0.0, 0.0, 1.0];
+       colormap = ["red", "black", "blue"];
     }
     vz {
        type = "image";
@@ -254,9 +250,7 @@
        field_list = ["velocity_z"];
        image_size = [ 256,256];
        schedule { var =  "cycle"; step = 1;  }
-       colormap = [1.0, 0.0, 0.0,
-       		   0.0, 0.0, 0.0,
-		   0.0, 0.0, 1.0];
+       colormap = ["red", "black", "blue"];
     }
 
     dark {
