@@ -59,6 +59,9 @@ public: // interface
     return *this;
   }
 
+  /// Access the index_ element
+  Index index() { return index_; }
+
   /// Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
 

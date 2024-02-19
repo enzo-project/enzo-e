@@ -20,7 +20,13 @@ int EnzoBlock::SolveHydroEquations
  enzo_float time,
  enzo_float dt,
  bool comoving_coordinates,
- bool single_flux_array
+ bool single_flux_array,
+ bool diffusion,
+ int flattening,
+ bool pressure_free,
+ bool steepening,
+ bool use_minimum_pressure_support,
+ enzo_float minimum_pressure_support_parameter
  )
 {
   /* initialize */
@@ -116,7 +122,6 @@ int EnzoBlock::SolveHydroEquations
 
   /* Determine if Gamma should be a scalar or a field. */
 
-  const int in = cello::index_static();
   const EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
   enzo_float gamma = fluid_props->gamma();
 
@@ -128,11 +133,12 @@ int EnzoBlock::SolveHydroEquations
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if (UseMinimumPressureSupport[in] == TRUE) {
+  if (use_minimum_pressure_support) {
     if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
+                          minimum_pressure_support_parameter,
 			  comoving_coordinates) == ENZO_FAIL) {
       ERROR("EnzoBlock::SolveHydroEquations()",
-	    "Grid::SetMinimumSupport() returned ENZO_FAIL");
+	    "EnzoBlock::SetMinimumSupport() returned ENZO_FAIL");
     }
   }
 
@@ -323,6 +329,11 @@ int EnzoBlock::SolveHydroEquations
 
   int error = 0;
 
+  // convert the dtype of a couple of arguments:
+  int diffusion_int = diffusion;
+  int pressure_free_int = pressure_free;
+  int steepening_int = steepening;
+
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
@@ -335,10 +346,10 @@ int EnzoBlock::SolveHydroEquations
      CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
      &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,
-     &PPMFlatteningParameter[in],
-     &PressureFree[in],
+     &flattening,
+     &pressure_free_int,
      &iconsrec, &iposrec,
-     &PPMDiffusionParameter[in], &PPMSteepeningParameter[in],
+     &diffusion_int, &steepening_int,
      &idual, &dual_eta1, &dual_eta2,
      &NumberOfSubgrids, leftface, rightface,
      istart, iend, jstart, jend,

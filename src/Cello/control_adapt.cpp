@@ -367,7 +367,7 @@ void Block::adapt_refine_()
       Refresh * refresh = new Refresh;
       refresh->add_all_data();
       FieldFace * field_face = create_face
-	(if3,ic3,g3, refresh_fine, refresh, true);
+	(if3,ic3,g3, refresh_fine, refresh);
 
       // Create data message object to send
       DataMsg * data_msg = new DataMsg;
@@ -634,7 +634,7 @@ void Block::adapt_recv_level()
 
 void Block::adapt_check_messages_()
 {
-  for (int i=0; i<adapt_msg_list_.size(); i++) {
+  for (std::size_t i=0; i<adapt_msg_list_.size(); i++) {
     MsgAdapt * msg = adapt_msg_list_[i];
     adapt_recv_level (
                       msg->adapt_step_,
@@ -646,7 +646,7 @@ void Block::adapt_check_messages_()
                       msg->level_max_,
                       msg->can_coarsen_);
   }
-  for (int i=0; i<adapt_msg_list_.size(); i++) {
+  for (std::size_t i=0; i<adapt_msg_list_.size(); i++) {
     delete adapt_msg_list_[i];
   }
   adapt_msg_list_.clear();
@@ -667,7 +667,7 @@ void Block::adapt_recv_level
   bool changed = false;
   int level_min;
   performance_start_(perf_adapt_update);
-  for (int i=0; i<ofv[0].size(); i++) {
+  for (std::size_t i=0; i<ofv[0].size(); i++) {
 
     int if3[3] = {ofv[0][i],ofv[1][i],ofv[2][i]};
 #ifdef DEBUG_ADAPT
@@ -921,7 +921,7 @@ void Block::adapt_coarsen_()
   refresh->add_all_data();
 
   FieldFace * field_face = create_face
-    (if3, ic3, g3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh);
 
   const Index index_parent = index_.index_parent();
 
