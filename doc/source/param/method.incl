@@ -51,6 +51,11 @@
            }
         }
 
+   :e:`There are a subset of parameters that can be specified for all
+   methods.  For example, a` :ref:`schedule_param` :e:`subgroup can
+   be defined for any method object (to dictate when the method is
+   executed).`
+
    :e:`For more detailed documentation on Methods, see` :ref:`using-methods`
 
 ----
@@ -116,6 +121,12 @@ accretion
    :Scope:     :z:`Enzo`
 
    :e:`This parameter specifies the maximum fraction of mass which can be accreted from a cell in one timestep. This value of this parameter must be between 0 and 1.`
+
+
+check
+-----
+
+.. include:: method_check.incl
 
 feedback
 --------
