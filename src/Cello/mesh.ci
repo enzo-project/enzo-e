@@ -18,12 +18,13 @@ module mesh {
   initnode void mutex_init_initial_value();
   initnode void mutex_init_field_face();
 
-  readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgAdapt::counter[CONFIG_NODE_SIZE];
+  readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgInitial::counter[CONFIG_NODE_SIZE];
   readonly int MsgOutput::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
+  readonly int MsgState::counter[CONFIG_NODE_SIZE];
   readonly int DataMsg::counter[CONFIG_NODE_SIZE];
   readonly int FieldFace::counter[CONFIG_NODE_SIZE];
   readonly int ParticleData::counter[CONFIG_NODE_SIZE];
@@ -88,15 +89,12 @@ module mesh {
   message MsgOutput;
   message MsgRefine;
   message MsgRefresh;
+  message MsgState;
 
   array[Index] Block {
 
-#ifdef BYPASS_CHARM_MEM_LEAK
     entry Block (process_type ip_source,  MsgType msg_type);
     entry void p_set_msg_refine(MsgRefine * msg);
-#else
-    entry Block (MsgRefine * msg);
-#endif
     entry Block();
 
     //--------------------------------------------------

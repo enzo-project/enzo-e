@@ -34,10 +34,22 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
+EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections,
+                              bool diffusion,
+                              int flattening,
+                              bool pressure_free,
+                              bool steepening,
+                              bool use_minimum_pressure_support,
+                              enzo_float minimum_pressure_support_parameter)
   : Method(),
     comoving_coordinates_(enzo::config()->physics_cosmology),
-    store_fluxes_for_corrections_(store_fluxes_for_corrections)
+    store_fluxes_for_corrections_(store_fluxes_for_corrections),
+    diffusion_(diffusion),
+    flattening_(flattening),
+    pressure_free_(pressure_free),
+    steepening_(steepening),
+    use_minimum_pressure_support_(use_minimum_pressure_support),
+    minimum_pressure_support_parameter_(minimum_pressure_support_parameter)
 {
 
   // check compatability with EnzoPhysicsFluidProps
@@ -107,6 +119,12 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
   p | comoving_coordinates_;
   p | store_fluxes_for_corrections_;
+  p | diffusion_;
+  p | flattening_;
+  p | pressure_free_;
+  p | steepening_;
+  p | use_minimum_pressure_support_;
+  p | minimum_pressure_support_parameter_;
 }
 
 //----------------------------------------------------------------------
@@ -187,7 +205,10 @@ void EnzoMethodPpm::compute ( Block * block) throw()
     TRACE_PPM ("BEGIN SolveHydroEquations");
 
     enzo_block->SolveHydroEquations 
-      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array );
+      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array,
+        diffusion_, flattening_, pressure_free_, steepening_,
+        use_minimum_pressure_support_,
+        minimum_pressure_support_parameter_);
 
     TRACE_PPM ("END SolveHydroEquations");
 
@@ -239,7 +260,6 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 
   /* Compute the pressure. */
 
-  const int in = cello::index_static();
   enzo_float gamma = enzo::fluid_props()->gamma();
 
   EnzoComputePressure compute_pressure(gamma, comoving_coordinates_);
@@ -260,6 +280,8 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 
   /* calculate minimum timestep */
 
+  int pressure_free_int = pressure_free_;
+
   FORTRAN_NAME(calc_dt)(&rank,
 			enzo_block->GridDimension,
 			enzo_block->GridDimension+1,
@@ -273,7 +295,7 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 			&enzo_block->CellWidth[0],
 			&enzo_block->CellWidth[1],
 			&enzo_block->CellWidth[2],
-			&gamma, &EnzoBlock::PressureFree[in], &cosmo_a,
+			&gamma, &pressure_free_int, &cosmo_a,
 			density, pressure,
 			velocity_x,
 			velocity_y,

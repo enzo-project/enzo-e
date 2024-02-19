@@ -27,8 +27,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    particle_list_(),
     particles_are_copied_(false),
+    particle_list_(),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -57,8 +57,8 @@ public: // interface
       field_list_src_(),
       field_list_dst_(),
       all_particles_(false),
-      particle_list_(),
       particles_are_copied_(false),
+      particle_list_(),
       all_fluxes_(false),
       ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank),
@@ -85,8 +85,8 @@ public: // interface
     field_list_src_(),
     field_list_dst_(),
     all_particles_(false),
-    particle_list_(),
     particles_are_copied_(false),
+    particle_list_(),
     all_fluxes_(false),
     ghost_depth_(0),
     min_face_rank_(0),
@@ -206,6 +206,8 @@ public: // interface
     all_particles_ = false;
     particle_list_.push_back(id_particle);
   }
+
+  void add_particle(std::string particle_name);
 
   /// All particles types are refreshed
   void add_all_particles() {

@@ -167,7 +167,10 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
-#include "utils/EnzoEFltArrayMap.hpp"
+
+// TODO: remove this after factoring out other subcomponents OR after
+//       EnzoEFltArrayMap becomes an alias for a class template defined in the
+//       Cello-layer (GH PR #326)
 #include "utils/utils.hpp"
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
@@ -205,38 +208,14 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "enzo-core/EnzoBoundary.hpp"
 
-#include "initial/EnzoInitialBCenter.hpp"
-#include "initial/EnzoInitialCloud.hpp"
-#include "initial/EnzoInitialCollapse.hpp"
-#include "initial/EnzoInitialCosmology.hpp"
-#include "tests/EnzoInitialFeedbackTest.hpp"
-#include "tests/EnzoInitialGrackleTest.hpp"
+
 #include "io/EnzoInitialHdf5.hpp"
-#include "initial/EnzoInitialImplosion2.hpp"
-#include "initial/EnzoInitialInclinedWave.hpp"
 #include "io/EnzoInitialMusic.hpp"
 #include "obsolete/EnzoInitialPm.hpp"
-#include "tests/EnzoInitialPpmlTest.hpp"
-#include "initial/EnzoInitialSedovArray2.hpp"
-#include "initial/EnzoInitialSedovArray3.hpp"
-#include "initial/EnzoInitialSedovRandom.hpp"
-#include "initial/EnzoInitialShockTube.hpp"
-#include "initial/EnzoInitialSoup.hpp"
-#include "initial/EnzoInitialTurbulence.hpp"
-#include "initial/EnzoInitialIsolatedGalaxy.hpp"
-#include "initial/EnzoInitialBurkertBodenheimer.hpp"
-#include "tests/EnzoInitialMergeSinksTest.hpp"
-#include "tests/EnzoInitialAccretionTest.hpp"
-#include "initial/EnzoInitialShuCollapse.hpp"
-#include "tests/EnzoInitialBBTest.hpp"
-
-#include "mesh/EnzoRefineShock.hpp"
-#include "mesh/EnzoRefineParticleMass.hpp"
-#include "mesh/EnzoRefineMass.hpp"
 
 
 
-#include "utils/EnzoCenteredFieldRegistry.hpp"
+
 #include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
 #include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
 #include "hydro-mhd/EnzoPermutedCoordinates.hpp"
@@ -257,46 +236,23 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "hydro-mhd/EnzoBfieldMethod.hpp"
 #include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
-#include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "io/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
-#include "gravity/EnzoMethodGravity.hpp"
-#include "assorted/EnzoMethodHeat.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
 #include "hydro-mhd/EnzoMethodMHDVlct.hpp"
-#include "assorted/EnzoMethodM1Closure.hpp"
-#include "gravity/EnzoMethodPmDeposit.hpp"
 #include "hydro-mhd/EnzoMethodPpm.hpp"
 #include "hydro-mhd/EnzoMethodPpml.hpp"
-#include "assorted/EnzoMethodTurbulence.hpp"
 
-#include "gravity/matrix/EnzoMatrixDiagonal.hpp"
-#include "gravity/matrix/EnzoMatrixIdentity.hpp"
-#include "gravity/matrix/EnzoMatrixLaplace.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 
-#include "gravity/EnzoComputeAcceleration.hpp"
-#include "utils/EnzoComputeCicInterp.hpp"
 #include "fluid-props/EnzoComputePressure.hpp"
 #include "fluid-props/EnzoComputeTemperature.hpp"
 #include "chemistry/EnzoComputeCoolingTime.hpp"
 
-#include "gravity/solvers/EnzoSolverBiCgStab.hpp"
-#include "gravity/solvers/EnzoSolverCg.hpp"
-#include "gravity/solvers/EnzoSolverDd.hpp"
-#include "gravity/solvers/EnzoSolverDiagonal.hpp"
-#include "gravity/solvers/EnzoSolverJacobi.hpp"
-#include "gravity/solvers/EnzoSolverMg0.hpp"
-
 #include "enzo-core/EnzoStopping.hpp"
-
-#include "mesh/EnzoProlong.hpp"
-#include "mesh/EnzoProlongMC1.hpp"
-#include "mesh/EnzoProlongPoisson.hpp"
-#include "mesh/EnzoRestrict.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */
