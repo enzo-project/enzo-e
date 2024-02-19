@@ -106,7 +106,7 @@ public: // virtual functions
   /// @note
   /// In practice, this method performs a no-op. It's mostly useful in
   /// situations where we can write to a file in chunks. However, the current
-  /// implementation constructs the image in memory and the writes the image
+  /// implementation constructs the image in memory and then writes the image
   /// all in one shot. We may revisit this in the future if we elect to write
   /// the image in chunks.
   ///

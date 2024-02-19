@@ -32,7 +32,8 @@ namespace pngio{
              ImgTransform transform,
              const std::array<double,2>* min_max) noexcept;
 
-  /// reads data from a png file to create a mask
+  /// reads data from a png file to create a mask. The mask is true if any RGB
+  /// channel in the image is non-zero
   ///
   /// @param[in] fname the output filename
   /// @param[out] width, height The dimensions of the mask. The values in each
