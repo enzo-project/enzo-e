@@ -167,8 +167,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cloud_metal_mass_frac,
        enzo_config->initial_cloud_initialize_uniform_bfield,
        enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_stddev,
-       enzo_config->initial_cloud_trunc_dev,
+       enzo_config->initial_cloud_perturb_Nwaves,
+       enzo_config->initial_cloud_perturb_amplitude,
+       enzo_config->initial_cloud_perturb_min_wavelength,
+       enzo_config->initial_cloud_perturb_max_wavelength,
        enzo_config->initial_cloud_perturb_seed);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
@@ -585,7 +587,14 @@ Method * EnzoProblem::create_method_
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
 
-    method = new EnzoMethodPpm(store_fluxes_for_corrections);
+    method = new EnzoMethodPpm
+      (store_fluxes_for_corrections,
+       enzo_config->ppm_diffusion,
+       enzo_config->ppm_flattening,
+       enzo_config->ppm_pressure_free,
+       enzo_config->ppm_steepening,
+       enzo_config->ppm_use_minimum_pressure_support,
+       enzo_config->ppm_minimum_pressure_support_parameter);
 /*
   } else if (name == "hydro") {
 
@@ -643,9 +652,9 @@ Method * EnzoProblem::create_method_
 #endif /* CONFIG_USE_GRACKLE */
 
   } else if (name == "balance") {
-    
+
     method = new EnzoMethodBalance;
-    
+
   } else if (name == "turbulence") {
 
     method = new EnzoMethodTurbulence
@@ -752,7 +761,8 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_check_num_files,
        enzo_config->method_check_ordering,
        enzo_config->method_check_dir,
-       enzo_config->method_check_monitor_iter);
+       enzo_config->method_check_monitor_iter,
+       enzo_config->method_check_include_ghosts);
 
   } else if (name == "merge_sinks") {
 

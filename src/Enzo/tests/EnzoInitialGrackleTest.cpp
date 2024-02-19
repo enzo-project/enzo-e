@@ -231,7 +231,6 @@ void EnzoInitialGrackleTest::enforce_block
     compute_pressure.compute_(enzo_block,
                               pressure,
                               0,
-                              NULL,
                               &grackle_fields_);
   }
 
@@ -242,7 +241,7 @@ void EnzoInitialGrackleTest::enforce_block
     compute_temperature.compute_(enzo_block,
                                  temperature,
                                  false, // do not re-compute pressure field
-                                 NULL, &grackle_fields_
+                                 &grackle_fields_
                                  );
   }
 
