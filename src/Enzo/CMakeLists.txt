@@ -89,8 +89,13 @@ add_subdirectory(io)
 add_subdirectory(mesh)
 add_subdirectory(obsolete)
 add_subdirectory(particle)
-add_subdirectory(tests)
 add_subdirectory(utils)
+
+# note that the tests subdirectory introduces problem initializers that can
+# be used to setup test-problems. The BUILD_TESTING option has no impact on
+# what is built from this directory (it only affects whether binaries,
+# expressly used for unit-testing are built)
+add_subdirectory(tests)
 
 # Step 4: specify additional information about the Enzo library
 # (dependencies are only PUBLIC because of the way that all headers are
@@ -107,6 +112,28 @@ target_include_directories(enzo
 target_link_options(enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
 
+# At the time of writing, cello.hpp is included in basically every source file
+# (it's either directly included, or included via enzo.hpp). Thus it's okay to
+# use these precompiled headers in all of the files.
+target_link_libraries(enzo PRIVATE cello_component_PCH)
+
+# At the time of wriing, enzo.hpp is included in just about every source file
+# compiled as part of the enzo-target. For that reason, using
+#     > if(USE_PRECOMPILED_HEADERS)
+#     >    target_precompile_headers(enzo PRIVATE enzo.hpp)
+#      > endif()
+# actually saves a lot of extra time.
+# - However, I'm VERY worried that future source files could get introduced
+#   that don't include enzo.hpp. In that case, the precompiled headers would
+#   allow the source file to access just about ANY in symbol in the entire
+#   codebase without an appropriate include-statement.
+# - While the same could still happen with the headers in cello_component_PCH,
+#   I'm much less concerned since those are standard library headers and
+#   charm++ headers
+# - Maybe we can revisit this if we can come up with a better automatic test
+#   for catching these cases (more helpful than the existing CI test). It could
+#   when/if we start subdividing the enzo-target into subtargets...
+
 #======================
 # Define Binary Targets
 #======================
@@ -116,12 +143,14 @@ add_executable(enzo-e enzo-e.cpp)
 target_link_libraries(enzo-e PRIVATE enzo main_enzo ${External_LIBS})
 target_link_options(enzo-e PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 
-# define a unit test:
-#
-# consider removing the enzo-specific stuff from this test so that we can
-# define it entirely in the Cello layer
-add_executable(
-  test_class_size "${CMAKE_CURRENT_SOURCE_DIR}/../Cello/test_class_size.cpp"
-)
-target_link_libraries(test_class_size PRIVATE enzo mesh tester_mesh)
-target_link_options(test_class_size PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+if (BUILD_TESTING)
+  # define a unit test:
+  #
+  # consider removing the enzo-specific stuff from this test so that we can
+  # define it entirely in the Cello layer
+  add_executable(
+    test_class_size "${CMAKE_CURRENT_SOURCE_DIR}/../Cello/test_class_size.cpp"
+    )
+  target_link_libraries(test_class_size PRIVATE enzo mesh tester_mesh)
+  target_link_options(test_class_size PRIVATE ${Cello_TARGET_LINK_OPTIONS})
+endif()
