@@ -126,9 +126,9 @@ specify filenames (there are no paths).
 Enzo
 ----
 
-Over the last several years, the Enzo-layer has grown significantly (it
-is now comparable in size to Cello layer), and it is likely to continue
-growing. Due to the large (and increasing) size of the Enzo-layer, we
+Over the last several years, the Enzo layer has grown significantly (it
+is now comparable in size to the Cello layer), and it is likely to continue
+growing. Due to the large (and increasing) size of the Enzo layer, we
 take some steps to improve build-times.  We are in the midst of
 rolling-out an updated policy.
 
@@ -136,7 +136,7 @@ rolling-out an updated policy.
 Traditional Approach
 ~~~~~~~~~~~~~~~~~~~~
 
-Historically, the Enzo-layer was structured just like one of the
+Historically, the Enzo layer was structured just like one of the
 components in the Cello Layer in a flat structure. All individual
 header files were aggregated inside of the private
 ``src/Enzo/_enzo.hpp`` header and there was a public header called
@@ -149,12 +149,12 @@ Additionally, just about every source file started with:
    #include "cello.hpp"
    #include "enzo.hpp"
 
-While this approach has been **very** successful and there’s nothing wrong with it *per se*, it does trigger a full rebuild of the entire Enzo-layer any time any header file changes.
+While this approach has been **very** successful and there’s nothing wrong with it *per se*, it does trigger a full rebuild of the entire Enzo layer any time any header file changes.
 
 New Approach
 ~~~~~~~~~~~~
 
-Under our new approach, the contents of the Enzo-layer are now organized into subdirectories, which corresponds to a subcomponents.
+Under our new approach, the contents of the Enzo layer are now organized into subdirectories, which corresponds to a subcomponents.
 Each subcomponent has an aggregate header named after the component (e.g. the ``Enzo/mesh`` subcomponent should have an associated header called ``Enzo/mesh/mesh.hpp``).
 
 .. note::
@@ -197,7 +197,7 @@ To be self-contained, each public header needs to have the necessary include dir
 
    Ideally, each header would include just the headers defining other symbols (classes/types/functions) that it needs.
    Under this approach, inclusion order would become less problematic and it would further speed up incremental compilation.
-   Transitioning to this kind of approach all at once would be intractable since there are currently over 125 header files in the Enzo-layer.
+   Transitioning to this kind of approach all at once would be intractable since there are currently over 125 header files in the Enzo layer.
    However, this alternative approach is definitely worth exploring and could be implemented on a subcomponent-by-subcomponent basis in the future.
 
 What is actually necssary to include in a header file?
@@ -241,7 +241,7 @@ This practice has a tendency to introduce additional include-directives into a h
 For example, a handful of functions in Enzo-E make use of functionality defined in the ``<algorithm>``, ``<random>``, and ``<sstream>`` headers without needing to pass around types defined in these headers between functions.
 In these cases, by implementing such functions in ``.cpp`` files, we can directly include these headers in the ``.cpp`` source files and avoid including them in the header files (this can actually save a lot of time during compiling since standard library headers can be large).
 
-As we finish transitioning the Enzo-layer to using separate subcomponents, additional opportunities will arise for including headers in source files rather than inside of headers.
+As we finish transitioning the Enzo layer to using separate subcomponents, additional opportunities will arise for including headers in source files rather than inside of headers.
 For example, most times when you access instances of :cpp:class:`!EnzoPhysicsCosmology`, :cpp:class:`!EnzoPhysicsFluidProps`, or :cpp:class:`!GrackleChemistryData` in the method of a class, ``MyClass``, the header defining ``MyClass``, doesn't actually require knowledge about the definitions of these other classes.
 Often times, a method ``MyClass`` will simply use :cpp:expr:`!enzo::cosmology()`, :cpp:expr:`!enzo::fluid_props()`, or :cpp:expr:`!enzo::grackle_chemistry()` to retrieve an instance of one of these classes.
 Then the method will query a piece of information stored in the retrieved instance and it will never touch the instance again.
