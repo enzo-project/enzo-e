@@ -524,6 +524,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
   double munit = enzo_units->mass();
   double tunit = enzo_units->time();
+  double lunit = enzo_units->length();
 
   double current_time  = block->time();
 
@@ -615,6 +616,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   const int ia_c = particle.attribute_index (it, "creation_time");
   const int ia_mf = particle.attribute_index (it, "metal_fraction");
   const int ia_sn = particle.attribute_index (it, "number_of_sn"); // name change?
+  const int ia_lum = particle.attribute_index (it, "luminosity");
 
   const int dm = particle.stride(it, ia_m);
   const int dp = particle.stride(it, ia_x);
@@ -623,12 +625,13 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   const int dc = particle.stride(it, ia_c);
   const int dmf = particle.stride(it, ia_mf);
   const int dsn = particle.stride(it, ia_sn);
+  const int dlum = particle.stride(it, ia_lum);
 
   const int nb = particle.num_batches(it);
 
   for (int ib=0; ib<nb; ib++){
     enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
-    enzo_float *plifetime=0, *pcreation=0, *pmass=0, *pmetal=0, *psncounter=0;
+    enzo_float *plifetime=0, *pcreation=0, *pmass=0, *pmetal=0, *psncounter=0, *plum=0;
 
     pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
     pmetal = (enzo_float *) particle.attribute_array(it, ia_mf, ib);
@@ -645,6 +648,8 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
     psncounter = (enzo_float *) particle.attribute_array(it, ia_sn, ib);
 
+    plum = (enzo_float *) particle.attribute_array(it, ia_lum, ib);
+
     int np = particle.num_particles(it,ib);
 
     for (int ip=0; ip<np; ip++){
@@ -655,6 +660,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
       int ipdc = ip*dc; // creation time
       int ipdmf = ip*dmf; // metallicity
       int ipsn  = ip*dsn; // number of SNe counter
+      int ipdlum = ip*dlum; // particle luminosity counter
 
       double pmass_solar = pmass[ipdm] * munit/enzo_constants::mass_solar;
 
@@ -736,7 +742,21 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
         // windMass and SNMassEjected are in units of Msun
         pmass[ipdm] -= std::max(0.0,
                        (windMass + SNMassEjected) /
-                       (munit/enzo_constants::mass_solar)); 
+                       (munit/enzo_constants::mass_solar));
+
+
+        // ionizing radiation
+        if (enzo_config->method_feedback_radiation) {
+          double Psi_ion;
+          if (age < 3.5) {
+              Psi_ion = 500; // units of Lsun/Msun
+          }
+          if (age >= 3.5 && age <= 25){
+              Psi_ion = 60. * pow(age/3.5, -3.6) + 470 * pow(age/3.5, 0.045-1.82*std::log(age));
+          }
+          double lum_unit = munit * lunit * lunit / (tunit*tunit*tunit);
+          plum[ipdlum] = Psi_ion * pmass_solar * enzo_constants::luminosity_solar / lum_unit; // erg/s 
+        } // if radiation 
 
 
       } // if mass and lifetime > 0
