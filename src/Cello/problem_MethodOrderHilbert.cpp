@@ -307,7 +307,7 @@ void MethodOrderHilbert::hilbert_children(Block * block, int* children){
     int m = ARRAY_BITS + index.level();;
     int states[m+2];
     hilbert_states(index, m, states);
-    int T = states[m+1];
+    int T = states[m];
 
     for (int ic=0; ic<cello::num_children(); ic++) {
         int hilbert_ind = coord_to_hilbert_ind(T, ic);
@@ -323,11 +323,11 @@ Index MethodOrderHilbert::hilbert_next (Index index, int rank, bool is_leaf, int
     int m = ARRAY_BITS + level;
     int states[m+2];
     hilbert_states(index, m, states);
-    int T = states[m];
 
     // If the block has children then the first child (according to the hilbert order)
     // is the next index.
     if (! is_leaf) {
+        int T = states[m];
         int ic = hilbert_ind_to_coord(T, 0);
         index_next.push_child(ic & 1, (ic >> 1) & 1, (ic >> 2) & 1, min_level);
 
@@ -344,6 +344,7 @@ Index MethodOrderHilbert::hilbert_next (Index index, int rank, bool is_leaf, int
             zyx = (ic3[2] << 2) + (ic3[1] << 1) + (ic3[0]);
         }
 
+        int T = states[m];
         bool last = (level == min_level) || (coord_to_hilbert_ind(T, zyx) == 7);
 
         // NOTE: this loop walks up the tree until it finds an index where last isn't true.
@@ -362,6 +363,7 @@ Index MethodOrderHilbert::hilbert_next (Index index, int rank, bool is_leaf, int
         }
 
         if (level == min_level) {
+            int T = states[ARRAY_BITS + level + 1];
             zyx = (ic3[2] << 2) + (ic3[1] << 1) + (ic3[0]);
             int A_k = coord_to_hilbert_ind(T, zyx);
             A_k = (A_k + 1) % 8;
@@ -381,16 +383,20 @@ Index MethodOrderHilbert::hilbert_next (Index index, int rank, bool is_leaf, int
 void MethodOrderHilbert::hilbert_states(Index index, int m, int* states) {
     // Note: the length of the int array 'states' is expected to be m+2.
     int TOTAL_BITS = 32;
-    int x = index[0];
-    int y = index[1];
-    int z = index[2];
     int xi, yi, zi, zyxi, T = 0;
 
+    int array_bits[3] = {0, 0, 0}, tree_bits[3] = {0, 0, 0};
+    index.array(array_bits, array_bits+1, array_bits+2);
+    index.tree(tree_bits, tree_bits+1, tree_bits+2);
+    int x = ((array_bits[0] << 20) | tree_bits[0]) << 2;
+    int y = ((array_bits[1] << 20) | tree_bits[1]) << 2;
+    int z = ((array_bits[2] << 20) | tree_bits[2]) << 2;
+
     for (int i = 0; i <= m; i++) {
-        xi = (x >> (TOTAL_BITS-i)) & 1;
-        yi = (y >> (TOTAL_BITS-i)) & 1;
-        zi = (z >> (TOTAL_BITS-i)) & 1;
-        zyxi = (zi << 2) || (yi << 1) || xi;
+        xi = (x >> (TOTAL_BITS-i-1)) & 1;
+        yi = (y >> (TOTAL_BITS-i-1)) & 1;
+        zi = (z >> (TOTAL_BITS-i-1)) & 1;
+        zyxi = (zi << 2) | (yi << 1) | xi;
 
         states[i] = T;
         T = coord_to_next_state(T, zyxi);
