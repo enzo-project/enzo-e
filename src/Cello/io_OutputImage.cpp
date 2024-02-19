@@ -52,7 +52,6 @@ OutputImage::OutputImage(int index,
   use_min_max_(use_min_max),
   min_value_(min_value),
   max_value_(max_value),
-  png_(NULL),
   image_type_(image_type),
   face_rank_(face_rank),
   image_log_(image_log),
@@ -138,12 +137,9 @@ OutputImage::OutputImage(int index,
 
 OutputImage::~OutputImage() throw ()
 {
-  TRACE_MEMORY("delete png_",image_size_[0]*image_size_[1]);
   TRACE_MEMORY("delete image_data_",image_size_[0]*image_size_[1]*sizeof(double));
   TRACE_MEMORY("delete image_mesh_",image_size_[0]*image_size_[1]*sizeof(double));
 
-  delete png_;
-  png_ = NULL;
   delete [] image_data_;
   image_data_ = NULL;
   delete [] image_mesh_;
@@ -195,9 +191,6 @@ void OutputImage::pup (PUP::er &p)
   p | max_value_;
   PUParray(p,image_size_,2);
 
-  WARNING("OutputImage::pup","skipping png");
-  // p | *png_;
-  if (p.isUnpacking()) png_ = NULL;
   p | image_type_;
   p | face_rank_;
   p | image_log_;
@@ -228,35 +221,10 @@ void OutputImage::init () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::open () throw()
-{
-  // Open file if writing a single block
-
-  if (is_writer()) {
-
-    std::string file_name = expand_name_ (&file_name_,&file_args_);
-
-    std::string dir_name = directory();
-
-    // Create png object
-    Monitor::instance()->print ("Output","writing image file %s",
-				(dir_name + "/" + file_name).c_str());
-    png_create_(dir_name + "/" + file_name);
-    if (chmod (dir_name.c_str(),0755) == -1) {
-      ERROR2 ("OutputImage::open()",
-	      "chmod() return errno %d: error '%s'",
-	      errno,strerror(errno));
-    };
-  }
-}
-
-//----------------------------------------------------------------------
-
 void OutputImage::close () throw()
 {
   if (is_writer()) image_write_();
   image_close_();
-  png_close_();
 }
 
 //----------------------------------------------------------------------
@@ -690,30 +658,6 @@ bool OutputImage::is_active_ (const Block * block) const
 
 //----------------------------------------------------------------------
 
-void OutputImage::png_create_ (std::string filename) throw()
-{
-  if (is_writer()) {
-    const char * file_name = strdup(filename.c_str());
-    TRACE_MEMORY("new png_",image_size_[0]*image_size_[1]);
-    png_ = new pngwriter(image_size_[0], image_size_[1],0,file_name);
-    free ((void *)file_name);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void OutputImage::png_close_ () throw()
-{
-  if (is_writer()) {
-    png_->close();
-    TRACE_MEMORY("delete png_",image_size_[0]*image_size_[1]);
-    delete png_;
-    png_ = 0;
-  }
-}
-
-//----------------------------------------------------------------------
-
 void OutputImage::image_create_ () throw()
 {
   ASSERT("OutputImage::image_create_",
@@ -754,112 +698,71 @@ void OutputImage::image_create_ () throw()
 
 void OutputImage::image_write_ () throw()
 {
-  // simplified variable names
 
-  int mx = image_size_[0];
-  int my = image_size_[1];
-  int m  = mx*my;
+  if (!is_writer()){
+    ERROR("OutputImage::image_write_()",
+          "this method was called on a non-writer block");
+  }
 
-  double min = std::numeric_limits<double>::max();
-  double max = -std::numeric_limits<double>::max();
+  // fetch the pointer to the data that will be plotted
+  double* data = nullptr;
+  std::vector<double> buf(0);
 
-  // Compute min and max
+  if (type_is_mesh_() && type_is_data_()){
 
-  if (use_min_max_) {
+    const int m  = image_size_[0]*image_size_[1];
 
-    min = MIN(min,min_value_);
-    max = MAX(max,max_value_);
+    // wasteful to allocate memory on the heap, but it's probably fine
+    buf.resize(static_cast<std::size_t>(m));
 
+    for (int i=0; i<m; i++) buf[i] = (image_data_[i] + 0.2*image_mesh_[i])/1.2;
+    data = buf.data();
+
+  } else if (type_is_data_()){
+    data = image_data_;
+  } else if (type_is_mesh_()) {
+    data = image_mesh_;
   } else {
-
-    if (image_log_) {
-      for (int i=0; i<m; i++) {
-        min = MIN(min,log(fabs(data_(i))));
-        max = MAX(max,log(fabs(data_(i))));
-      }
-    } else if (image_abs_) {
-      for (int i=0; i<m; i++) {
-        min = MIN(min,fabs(data_(i)));
-        max = MAX(max,fabs(data_(i)));
-      }
-    } else { 
-      for (int i=0; i<m; i++) {
-        min = MIN(min,data_(i));
-        max = MAX(max,data_(i));
-      }
-    }
+    ERROR ("OutputImage::image_write_", "image_type is neither mesh nor data");
   }
 
-  size_t n = colormap_[0].size();
-
-  // loop over pixels (ix,iy)
-
-  for (int ix = 0; ix<mx; ix++) {
-
-    for (int iy = 0; iy<my; iy++) {
-
-      int i = ix + mx*iy;
-
-      double value = data_(i);
-
-      if (image_abs_) value = fabs(value);
-      if (image_log_) value = log(fabs(value));
-
-      double r=0.0,g=0.0,b=0.0;
-
-      if (value < min) value = min;
-      if (value > max) value = max;
-
-
-      if (min <= value && value <= max) {
-
-	// map v to lower colormap index
-	size_t k =  (n - 1)*(value - min) / (max-min);
-
-	// prevent k == colormap_[0].size()-1, which happens if value == max
-
-	if (k > n - 2) k = n-2;
-
-	// linear interpolate colormap values
-	double lo = min +  k   *(max-min)/(n-1);
-	double hi = min + (k+1)*(max-min)/(n-1);
-
-	double ratio = (value - lo) / (hi-lo);
-
-	r = (1-ratio)*colormap_[0][k] + ratio*colormap_[0][k+1];
-	g = (1-ratio)*colormap_[1][k] + ratio*colormap_[1][k+1];
-	b = (1-ratio)*colormap_[2][k] + ratio*colormap_[2][k+1];
-
-	png_->plot      (ix+1, iy+1, r,g,b);
-
-      } else {
-
-	// red if out of bounds
-	png_->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
-
-      }
-
-      // Plot pixel
-    }
+  // Determine how the values get transformed (when mapping to colors)
+  pngio::ImgTransform transform = pngio::ImgTransform::none;
+  if (image_log_) {
+    transform = pngio::ImgTransform::log;
+  } else if (image_abs_) {
+    transform = pngio::ImgTransform::abs;
   }
 
-}
-
-//----------------------------------------------------------------------
-
-double OutputImage::data_(int index) const
-{
-  if (type_is_mesh_() && type_is_data_())
-    return (image_data_[index] + 0.2*image_mesh_[index])/1.2;
-  else if (type_is_data_())
-    return image_data_[index];
-  else  if (type_is_mesh_())
-    return image_mesh_[index];
-  else {
-    ERROR ("OutputImage::data_()",
-	   "image_type is neither mesh nor data");
-    return 0.0;
+  // prepare the min_max argument
+  std::array<double, 2>* min_max_arg = nullptr;
+  std::array<double, 2> min_max_buf_;
+  if (use_min_max_){
+    min_max_buf_[0] = min_value_;
+    min_max_buf_[1] = max_value_;
+    min_max_arg = &min_max_buf_;
   }
+
+  // determine the output path
+  std::string file_name = expand_name_ (&file_name_,&file_args_);
+
+  // Out of caution, we store dir_name in a variable to avoid hypothetical
+  // lifetime issues during calls to c_str()
+  std::string dir_name = directory();
+
+  // change the permission bits of the output directory so that it is:
+  //   - readable/writable/executable by the owner
+  //   - readable/executable by all others
+  if (chmod (dir_name.c_str(),0755) == -1) {
+    ERROR2 ("OutputImage::image_write()",
+            "chmod() return errno %d: error '%s'",
+            errno,strerror(errno));
+  };
+
+  pngio::write(dir_name + "/" + file_name, data, 
+               image_size_[0], // = width
+               image_size_[1], // = height
+               colormap_, transform, min_max_arg);
 }
 
 //----------------------------------------------------------------------
