@@ -5,8 +5,9 @@
 /// @date     2014-10-27 22:37:41
 /// @brief    Implements the EnzoSolverJacobi class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_COPY
 // #define DEBUG_SOLVER

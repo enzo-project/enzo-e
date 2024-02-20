@@ -28,6 +28,7 @@
 
 #include "Enzo/enzo.hpp"
 #include "Enzo/assorted/assorted.hpp"
+#include "Enzo/gravity/gravity.hpp"
 #include "Enzo/initial/initial.hpp"
 #include "Enzo/mesh/mesh.hpp"
 #include "Enzo/tests/tests.hpp"
