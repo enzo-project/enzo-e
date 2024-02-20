@@ -5,9 +5,10 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the EnzoMethodHeat class
 
-#include "cello.hpp"
+#include "Enzo/assorted/assorted.hpp"
 
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------
 

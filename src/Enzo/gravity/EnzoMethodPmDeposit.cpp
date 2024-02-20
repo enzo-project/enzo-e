@@ -11,8 +11,9 @@
 /// particles (particles in the "is_gravitating" group, e.g. "dark" matter
 /// particles)
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_COLLAPSE
 

@@ -40,7 +40,7 @@ EnzoConfig::EnzoConfig() throw ()
   physics_fluid_props_fluid_floor_config(),
   physics_fluid_props_mol_weight(0.0),
   // Gravity
-  physics_gravity(false),
+  physics_gravity_grav_constant_codeU(-1.0),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
   // EnzoInitialBurkertBodenheimer
@@ -307,7 +307,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
   // EnzoMethodGravity
-  method_gravity_grav_const(0.0),
   method_gravity_solver(""),
   method_gravity_order(4),
   method_gravity_dt_max(0.0),
@@ -416,7 +415,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_fluid_props_fluid_floor_config;
   p | physics_fluid_props_mol_weight;
 
-  p | physics_gravity;
+  p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
 
@@ -696,7 +695,6 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_turbulence_edot;
 
-  p | method_gravity_grav_const;
   p | method_gravity_solver;
   p | method_gravity_order;
   p | method_gravity_dt_max;
@@ -1840,12 +1838,6 @@ void EnzoConfig::read_method_background_acceleration_(Parameters * p)
       (axis,"Method:background_acceleration:angular_momentum",0);
   }
 
-  // Not sure if I need. Seems this flag tells the hydo solver
-  // if gravity exists... so I would expect to need this... but Does
-  // not get triggered for self-gravity at the moment... so not sure
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "background_acceleration") physics_gravity=true;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -1877,9 +1869,6 @@ void EnzoConfig::read_method_vlct_(Parameters * p)
 
 void EnzoConfig::read_method_gravity_(Parameters * p)
 {
-  method_gravity_grav_const = p->value_float
-    ("Method:gravity:grav_const",6.67384e-8);
-
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","unknown");
 
@@ -2028,16 +2017,12 @@ void EnzoConfig::read_physics_(Parameters * p)
             "\"fluid_prop\" is a typo for \"fluid_props\"");
     }
 
-    if (physics_list[index_physics] == "gravity") {
-
-      physics_gravity = true;
-
-    }
   }
 
   // this is intentionally done outside of the for-loop (for
   // backwards-compatability purposes)
   read_physics_fluid_props_(p);
+  read_physics_gravity_(p);
 }
 
 //----------------------------------------------------------------------
@@ -2439,6 +2424,32 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
             "\"Method:ppm:mol_weight\" isn't valid since "
             "\"Physics:fluid_props:mol_weight\" is specified.");
     }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_physics_gravity_(Parameters * p)
+{
+  std::string legacy_parname = "Method:gravity:grav_const";
+  std::string actual_parname = "Physics:gravity:grav_const_codeU";
+
+  bool has_grav_method = std::find
+    (method_list.begin(), method_list.end(), "gravity") != method_list.end();
+  bool has_legacy_par = has_grav_method && (p->param(legacy_parname)!=nullptr);
+  bool has_actual_par = p->param(actual_parname) !=nullptr;
+
+  if (has_legacy_par && has_actual_par) {
+    ERROR2("EnzoConfig::read_physics_gravity_",
+           "\"%s\" isn't valid since \"%s\" is specified.",
+           legacy_parname.c_str(), actual_parname.c_str());
+  } else if (has_legacy_par) {
+    WARNING2("EnzoConfig::read_physics_gravity_",
+             "\"%s\" is a legacy parameter that will be replaced with \"%s\"",
+             legacy_parname.c_str(), actual_parname.c_str());
+    physics_gravity_grav_constant_codeU = p->value_float(legacy_parname, -1.0);
+  } else {
+    physics_gravity_grav_constant_codeU = p->value_float(actual_parname, -1.0);
   }
 }
 

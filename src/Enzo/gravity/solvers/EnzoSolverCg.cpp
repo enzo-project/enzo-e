@@ -5,8 +5,8 @@
 /// @date     2016-1-08
 /// @brief    Implements the CG Krylov iterative linear solver
 
-#include "enzo.hpp"
-#include "enzo.decl.h"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define COPY_FIELD
 

@@ -10,8 +10,10 @@
 ///     adapted from the algorithm described in Hopkins et al. 
 ///     (2018, MNRAS, 480, 800)
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
 #include <time.h>
 
 // #define DEBUG_SF_CRITERIA
@@ -348,7 +350,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #endif 
         
         //free fall time in code units
-        double tff = sqrt(3*cello::pi/(32*enzo_constants::grav_constant*density[i]*rhounit))/tunit;        
+        double tff = sqrt(3*cello::pi/(32*enzo::grav_constant_cgs()*density[i]*rhounit))/tunit;        
        /* Determine Mass of new particle
                 WARNING: this removes the mass of the formed particle from the
                          host cell.  If your simulation has very small (>15 Msun) baryon mass

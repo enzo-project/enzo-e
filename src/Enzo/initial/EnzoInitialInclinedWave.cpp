@@ -39,9 +39,9 @@
 
 #include <sstream> // std::stringstream
 
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
-#include "cello.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 
 //----------------------------------------------------------------------
@@ -786,8 +786,7 @@ HydroInitPack EnzoInitialInclinedWave::prepare_jeans_initializers_
   double wave_number = (2*cello::pi/lambda);
 
   // compute the gravitational constant in code units
-  EnzoUnits* enzo_units = enzo::units();
-  const double G_code = enzo::config()->method_gravity_grav_const;
+  const double G_code = enzo::grav_constant_codeU();
 
   // background properties:
   // -> density = 1.0
