@@ -7,9 +7,11 @@
 ///             the method described in Krumholz et al 2004, ApJ, 611, 399 and
 ///             Federrath et al 2010, ApJ, 713, 269.
 
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
 #include <random>
-#include "cello.hpp"
-#include "enzo.hpp"
 
 //-------------------------------------------------------------------
 

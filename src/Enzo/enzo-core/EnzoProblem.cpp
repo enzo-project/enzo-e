@@ -9,6 +9,18 @@
 
 #include "enzo.hpp"
 
+#include "Enzo/assorted/assorted.hpp" // misc. Method classes
+#include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
+                                    // EnzoMethodBackgroundAcceleration
+                                    // EnzoComputeAcceleration
+                                    // EnzoSolver* EnzoMatrix*
+#include "Enzo/initial/initial.hpp" // lots of initializers
+#include "Enzo/io/io.hpp" // EnzoMethodCheck, EnzoInitial{Hdf5,Music}
+#include "Enzo/mesh/mesh.hpp" // EnzoProlong, EnzoRefine*, EnzoRestrict*
+#include "Enzo/particle/particle.hpp"
+#include "Enzo/tests/tests.hpp" // EnzoInitial*Test
+#include "Enzo/utils/utils.hpp" // EnzoComputeCicInterp
+
 //----------------------------------------------------------------------
 
 EnzoProblem::EnzoProblem() throw ()

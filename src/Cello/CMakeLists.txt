@@ -248,7 +248,12 @@ target_link_libraries(disk
   PUBLIC HDF5_C
   PRIVATE pngwriter
   PUBLIC error
-)
+  )
+# the disk_utils functions requires that all linked libraries are all "linked"
+# against the view library (the disk library itself does not need to link
+# to the view library because none of the symbols defined in that library are
+# used within the disk library's source files)
+target_link_libraries(disk INTERFACE view)
 
 
 addCelloLib(error "")
@@ -403,6 +408,7 @@ endfunction(addUnitTestBinary)
 addUnitTestBinary(test_type "test_Type.cpp" cello_component tester_default)
 
 # tests of the disk component
+addUnitTestBinary(test_disk_utils "test_DiskUtils.cpp" disk tester_default)
 addUnitTestBinary(test_file_hdf5 "test_FileHdf5.cpp" disk tester_default)
 
 # tests of the error component

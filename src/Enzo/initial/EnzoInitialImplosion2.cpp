@@ -5,9 +5,9 @@
 /// @date     Tue Jan  4 19:30:35 PST 2011
 /// @brief    Implementation of Enzo 2D Implosion problem initialization
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 //----------------------------------------------------------------------
 

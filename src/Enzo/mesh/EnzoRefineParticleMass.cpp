@@ -5,7 +5,8 @@
 /// @date     2016-05-16
 /// @brief    Implementation of EnzoRefineParticleMass class
 
-#include "enzo.hpp"
+#include "Enzo/mesh/mesh.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------
 
