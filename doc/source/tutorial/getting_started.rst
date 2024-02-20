@@ -284,7 +284,7 @@ These options control compilation choices that can be used to facillitate profil
 Testing Options
 ^^^^^^^^^^^^^^^
 
-These options configure properties of parallel automated tests.
+These options configure properties of automated tests. These options currently just affect tests in the :ref:`ctest framework <ctest>` and don't affect tests in the :ref:`pytest framework <pytest>`.
 
 .. list-table:: Testing-Related Configuration
    :widths: 10 30 5
@@ -302,6 +302,10 @@ These options configure properties of parallel automated tests.
    * - ``PARALLEL_LAUNCHER_NPROC``
      - Number of processors to run parallel unit tests
      - 4
+   * - ``BUILD_TESTING``
+     - Whether to setup the CTest infrastructure and build unit test binaries (which are primarily built to be executed by the CTest infrastructure). This has no effect on the pytest infrastructure.
+     - "ON"
+
 
 Debugging Options
 ^^^^^^^^^^^^^^^^^
@@ -340,6 +344,22 @@ The following options are useful for debugging.
    * - ``verbose``
      - Trace main phases
      - OFF
+
+Misc Options
+^^^^^^^^^^^^
+
+The following options don't really belong in any other category
+
+.. list-table:: Misc Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_PRECOMPILED_HEADERS``
+     - Precompile headers to try to reduce compile time
+     - ON
 
 .. _how_to_specify_the_configuration:
 
@@ -498,7 +518,7 @@ Time = 0.10
 If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-E / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-E / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
 If you encounter any problems in getting Enzo-E to compile or run,
-please contact the Enzo-E / Cello community at cello-l@ucsd.edu or the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
+please contact the Enzo-E / Cello community at the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
 
 ----
 

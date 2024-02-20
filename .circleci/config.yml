@@ -23,6 +23,10 @@ commands:
   install-dependencies:
     description: "Install dependencies."
     steps:
+      - restore_cache:
+          name: "Restore dependencies cache."
+          key: dependencies-v3
+
       - run:
           name: "Install dependencies."
           command: |
@@ -56,6 +60,12 @@ commands:
             cd $HOME/yt
             export MAX_BUILD_CORES=2
             pip install -e .
+
+      - save_cache:
+          name: "Save dependencies cache"
+          key: dependencies-v3
+          paths:
+            - ~/local
 
   install-grackle:
     description: "Install grackle."
@@ -112,6 +122,13 @@ commands:
       usegrackle:
         type: boolean
         default: true
+      useprecompiledheaders:
+        type: boolean
+        default: true
+      setupCTests:
+        type: boolean
+        default: true
+        description: whether to build CTest machinery (has no effect on pytest framework)
     steps:
       - run:
           name: "Checkout target tag from enzo-e repository."
@@ -128,9 +145,6 @@ commands:
             source $BASH_ENV
             source $HOME/venv/bin/activate
 
-            # convert boolean parameter to an env var storing 0 or 1
-            USE_DOUBLE=$(( 0 <<# parameters.usedouble >> + 1 <</ parameters.usedouble >> ))
-            USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
             # remove build directory in case we've already compiled before
             rm -rf build
 
@@ -139,11 +153,12 @@ commands:
                     -GNinja \
                     -DUSE_DOUBLE_PREC=<< parameters.usedouble >> \
                     -DUSE_GRACKLE=<< parameters.usegrackle >> \
+                    -DUSE_PRECOMPILED_HEADERS=<< parameters.useprecompiledheaders >> \
+                    -DBUILD_TESTING=<< parameters.setupCTests >> \
                     -Bbuild \
                     -DPARALLEL_LAUNCHER_NPROC_ARG="++local;+p" \
                     -DPython3_FIND_VIRTUALENV=ONLY
               cmake --build build -j 4
-              source $HOME/venv/bin/activate
             fi
 
   run-ctests:
@@ -152,18 +167,12 @@ commands:
       skipfile:
         type: string
         default: notafile
-      skiptest:
-        type: boolean
-        default: false
     steps:
       - run:
           name: "Run the unit tests with ctest."
           command: |
             source $BASH_ENV
             source $HOME/venv/bin/activate
-
-            # convert boolean parameter to an env var storing 0 or 1
-            SKIP_TEST=$(( 0 <<# parameters.skiptest >> + 1 <</ parameters.skiptest >> ))
 
             if [ ! -f << parameters.skipfile >> ]; then
               source $HOME/venv/bin/activate
@@ -234,17 +243,20 @@ commands:
             python -m sphinx -M html "." "_build" -W
 
 jobs:
-  ctest-suite:
+  test-suite:
     parameters:
       usedouble:
         type: boolean
       usegrackle:
         type: boolean
-      skiptest:
-        type: boolean
+      testframework:
+        default: "neither"
+        type: enum
+        description: Specifies which sets of tests to run. Must be one of "neither", "ctest", "pytest".
+        enum: ["neither", "ctest", "pytest"]
 
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.10
 
     resource_class: large
 
@@ -253,18 +265,7 @@ jobs:
     steps:
       - checkout
       - set-env
-
-      - restore_cache:
-          name: "Restore dependencies cache."
-          key: dependencies-v3
-
-      - install-dependencies
-
-      - save_cache:
-          name: "Save dependencies cache"
-          key: dependencies-v3
-          paths:
-            - ~/local
+      - install-dependencies # (handles caching of dependencies too)
 
       - when:
           condition: << parameters.usegrackle >>
@@ -272,71 +273,133 @@ jobs:
             - install-grackle:
                 usedouble: << parameters.usedouble >>
 
+      - when:
+          condition:
+            equal: [ pytest, << parameters.testframework >> ]
+          steps:
+            - run: echo "starting steps for pytest answer generation"
+            - compile-enzoe:
+                usedouble: << parameters.usedouble >>
+                tag: gold-standard-004
+                skipfile: notafile
+                usegrackle: << parameters.usegrackle >>
+            - run-answer-tests:
+                usedouble: << parameters.usedouble >>
+                usegrackle: << parameters.usegrackle >>
+                generate: true
+            - run: echo "Completed steps for pytest answer generation"
+
       - compile-enzoe:
           usedouble: << parameters.usedouble >>
           tag: tip
           skipfile: notafile
           usegrackle: << parameters.usegrackle >>
+          setupCTests: true
 
-      - run-ctests:
-          skipfile: notafile
-          skiptest: << parameters.skiptest >>
+      - when:
+          condition:
+            equal: [ pytest, << parameters.testframework >> ]
+          steps:
+            - run-answer-tests:
+                usedouble: << parameters.usedouble >>
+                usegrackle: << parameters.usegrackle >>
+                generate: false
+            - run:
+                name:  PostFailure Verfication that answer-tests pass when compared to answers generated by the same version
+                when: on_fail
+                command: |
+                  # even if this step succeeds, the entire job will fail since
+                  # the previous step failed
 
-  answer-test-suite:
+                  echo "Following the failure of answer tests, we now confirm "
+                  echo "that the pytest code itself works in the currently "
+                  echo "checked out branch. We do this by regenerating the "
+                  echo "answer-test answers and confirming that the the tests "
+                  echo "pass while using those same answers"
+
+                  # we might want to factor out the following logic (and the
+                  # previous step into an external bash script since their's a
+                  # lot of reused code... There's no other way to do this while
+                  # having this test run on failure...)
+                  #
+                  # Alternatively, after we merge PR #318, we should be able to
+                  # significantly simplify these 2 steps
+
+                  source $BASH_ENV
+                  source $HOME/venv/bin/activate
+
+                  # do a little setup based on the value of usegrackle:
+                  # 1. convert the parameter to an env var storing 0 or 1
+                  # 2. if that var holds true, export GRACKLE_INPUT_DATA_DIR
+                  USE_GRACKLE=$(( 0 <<# parameters.usegrackle >> + 1 <</ parameters.usegrackle >> ))
+                  if [[ $USE_GRACKLE == 1 ]]; then
+                    export GRACKLE_INPUT_DATA_DIR="$HOME/grackle/grackle_data_files/input/"
+                  fi
+
+                  export TEST_RESULTS_DIR="~/enzoe_test_results-selfconsistency"
+                  export USE_DOUBLE=<< parameters.usedouble >>
+
+                  echo "generate the test results"
+                  export GENERATE_TEST_RESULTS="true"
+                  pytest test/answer_tests
+                  if [ $? -ne 0 ]; then exit 1; fi
+
+                  echo "rerunning the answer tests, & comparing against newly generated results"
+                  export GENERATE_TEST_RESULTS="false"
+                  pytest test/answer_tests
+
+      - when:
+         condition:
+            equal: [ ctest, << parameters.testframework >> ]
+         steps:
+            - run-ctests:
+                skipfile: notafile
+
+# the following case considers a few IMPORTANT compilation configurations
+# 1. no-grackle
+# 2. no-precompiled-headers
+  extra-compile-tests:
     parameters:
       usedouble:
-        type: boolean
-      usegrackle:
         type: boolean
 
     docker:
       - image: cimg/python:3.10
+
+    resource_class: large
 
     working_directory: ~/enzo-e
 
     steps:
       - checkout
       - set-env
+      - install-dependencies # (handles caching of dependencies too)
 
-      - restore_cache:
-          name: "Restore dependencies cache."
-          key: dependencies-v3
-
-      - install-dependencies
-
-      - save_cache:
-          name: "Save dependencies cache"
-          key: dependencies-v3
-          paths:
-            - ~/local
-
-      - when:
-          condition: << parameters.usegrackle >>
-          steps:
-            - install-grackle:
-                usedouble: << parameters.usedouble >>
-
-      - compile-enzoe:
-          usedouble: << parameters.usedouble >>
-          tag: gold-standard-004
-          skipfile: notafile
-          usegrackle: << parameters.usegrackle >>
-
-      - run-answer-tests:
-          usedouble: << parameters.usedouble >>
-          usegrackle: << parameters.usegrackle >>
-          generate: true
+      - run: echo "About to test compilation without grackle!"
 
       - compile-enzoe:
           usedouble: << parameters.usedouble >>
           tag: tip
           skipfile: notafile
-          usegrackle: << parameters.usegrackle >>
+          useprecompiledheaders: true
+          usegrackle: false
+          setupCTests: false
 
-      - run-answer-tests:
+      - run: echo "About to test compilation without precompiled headers"
+
+      - install-grackle:
+          usedouble: true
+
+      - compile-enzoe:
           usedouble: << parameters.usedouble >>
-          usegrackle: << parameters.usegrackle >>
-          generate: false
+          tag: tip
+          skipfile: notafile
+          useprecompiledheaders: false
+          usegrackle: true
+          setupCTests: false
+
+      # in the future, it may be worth considering running a test-suite here... But for now,
+      # this job is only intended to check whether things successfully compile
 
   docs-build:
     docker:
@@ -352,27 +415,27 @@ jobs:
 workflows:
    tests:
      jobs:
-       - ctest-suite:
+       - test-suite:
            name: ctest-suite_single-prec
            usedouble: false
            usegrackle: true
-           skiptest: false
-       - ctest-suite:
+           testframework: "ctest"
+       - test-suite:
            name: ctest-suite_double-prec
            usedouble: true
            usegrackle: true
-           skiptest: false
-       - docs-build
-       - ctest-suite:
-           name: build-no-grackle
-           usedouble: true
-           usegrackle: false
-           skiptest: true
-       - answer-test-suite:
+           testframework: "ctest"
+       - test-suite:
            name: answer-tests_single
            usedouble: false
            usegrackle: true
-       - answer-test-suite:
+           testframework: "pytest"
+       - test-suite:
            name: answer-tests_double
            usedouble: true
            usegrackle: true
+           testframework: "pytest"
+       - docs-build
+       - extra-compile-tests:
+           usedouble: true
+

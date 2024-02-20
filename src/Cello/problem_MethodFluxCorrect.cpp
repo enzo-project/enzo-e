@@ -236,7 +236,7 @@ static void flux_correct_helper_(cello_float * const field_array,
 {
   int ix,iy,iz;
 
-  int axis,face,level_face;
+  int axis,face;
 
   axis=0;
   // X axis
