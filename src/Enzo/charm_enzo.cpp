@@ -30,6 +30,8 @@
 #include "Enzo/assorted/assorted.hpp"
 #include "Enzo/gravity/gravity.hpp"
 #include "Enzo/initial/initial.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+#include "Enzo/hydro-mhd/toolkit/toolkit.hpp"
 #include "Enzo/io/io.hpp"
 #include "Enzo/mesh/mesh.hpp"
 #include "Enzo/particle/particle.hpp"

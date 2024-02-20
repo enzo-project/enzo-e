@@ -8,6 +8,8 @@
 ///
 
 #include "enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoMethodMHDVlct, EnzoMethodPpm,
+                                        // EnzoMethodPpml
 
 #include "Enzo/assorted/assorted.hpp" // misc. Method classes
 #include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity

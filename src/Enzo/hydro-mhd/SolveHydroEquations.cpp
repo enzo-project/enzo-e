@@ -5,9 +5,13 @@
 /// @date      November, 1994
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
-#include "cello.hpp"
-#include "enzo.hpp"
 #include <stdio.h>
+
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+
+#include "Enzo/hydro-mhd/ppm_fortran/ppm_fortran.hpp" // FORTRAN_NAME(ppm_de)
 
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
