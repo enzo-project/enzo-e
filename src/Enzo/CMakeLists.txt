@@ -87,7 +87,6 @@ add_subdirectory(enzo-core)
 add_subdirectory(chemistry)
 add_subdirectory(cosmology)
 add_subdirectory(fluid-props)
-add_subdirectory(io)
 add_subdirectory(obsolete)
 
 # define the Enzo::assorted target
@@ -101,6 +100,9 @@ add_subdirectory(hydro-mhd)
 
 # define the Enzo::initial target
 add_subdirectory(initial)
+
+# define the Enzo::io target
+add_subdirectory(io)
 
 # define the Enzo::mesh target
 add_subdirectory(mesh)
@@ -123,8 +125,8 @@ add_subdirectory(utils)
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC Enzo::assorted Enzo::gravity Enzo::initial Enzo::mesh Enzo::particle
-  PUBLIC Enzo::tests Enzo::utils
+  PUBLIC Enzo::assorted Enzo::gravity Enzo::initial Enzo::io Enzo::mesh
+  PUBLIC Enzo::particle Enzo::tests Enzo::utils
   PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )

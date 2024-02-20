@@ -30,13 +30,14 @@
 #include "Enzo/assorted/assorted.hpp"
 #include "Enzo/gravity/gravity.hpp"
 #include "Enzo/initial/initial.hpp"
+#include "Enzo/io/io.hpp"
 #include "Enzo/mesh/mesh.hpp"
+#include "Enzo/particle/particle.hpp"
 #include "Enzo/tests/tests.hpp"
 #include "Enzo/utils/utils.hpp"
 
 // next, make sure to include "charm_enzo.hpp" (which includes enzo.decl.h)
 #include "Enzo/charm_enzo.hpp"
-#include "Enzo/particle/particle.hpp"
 
 // finally, move on to include enzo.def.h
 

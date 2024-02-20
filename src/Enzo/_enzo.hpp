@@ -202,19 +202,9 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "enzo-core/EnzoBlock.hpp"
 
-#include "io/IoEnzoBlock.hpp"
-#include "io/IoEnzoReader.hpp"
-#include "io/IoEnzoWriter.hpp"
-
 #include "enzo-core/EnzoBoundary.hpp"
 
-
-#include "io/EnzoInitialHdf5.hpp"
-#include "io/EnzoInitialMusic.hpp"
 #include "obsolete/EnzoInitialPm.hpp"
-
-
-
 
 #include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
 #include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
@@ -237,7 +227,6 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
 #include "enzo-core/EnzoMethodBalance.hpp"
-#include "io/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
