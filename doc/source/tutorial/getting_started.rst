@@ -135,6 +135,8 @@ This can be done with the following commands:
 
 This is **NOT** a requirement for building and running Enzo-E, but it is used in some tests.
 
+.. _how-to_configure_build:
+
 Configuring/Building
 ====================
 
@@ -160,6 +162,7 @@ See the following subsection for more configuration options.
         -DEnzo-E_CONFIG=linux_gcc -DUSE_GRACKLE=OFF ..
   make -j4 # -j4 tells make to execute up to 4 commands in parallel
 
+To build on a Mac, you should only need to replace ``linux_gcc`` with ``darwin_clang``.
 
 Note, if ``ninja`` is installed, the ``ninja`` build system can be used for faster build times.
 This is done by adding ``-GNinja`` to the ``cmake`` command (before the ``..``) and calling ``ninja`` afterwards instead of ``make``.
@@ -281,7 +284,7 @@ These options control compilation choices that can be used to facillitate profil
 Testing Options
 ^^^^^^^^^^^^^^^
 
-These options configure properties of parallel automated tests.
+These options configure properties of automated tests. These options currently just affect tests in the :ref:`ctest framework <ctest>` and don't affect tests in the :ref:`pytest framework <pytest>`.
 
 .. list-table:: Testing-Related Configuration
    :widths: 10 30 5
@@ -299,6 +302,10 @@ These options configure properties of parallel automated tests.
    * - ``PARALLEL_LAUNCHER_NPROC``
      - Number of processors to run parallel unit tests
      - 4
+   * - ``BUILD_TESTING``
+     - Whether to setup the CTest infrastructure and build unit test binaries (which are primarily built to be executed by the CTest infrastructure). This has no effect on the pytest infrastructure.
+     - "ON"
+
 
 Debugging Options
 ^^^^^^^^^^^^^^^^^
@@ -337,6 +344,22 @@ The following options are useful for debugging.
    * - ``verbose``
      - Trace main phases
      - OFF
+
+Misc Options
+^^^^^^^^^^^^
+
+The following options don't really belong in any other category
+
+.. list-table:: Misc Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_PRECOMPILED_HEADERS``
+     - Precompile headers to try to reduce compile time
+     - ON
 
 .. _how_to_specify_the_configuration:
 
@@ -432,7 +455,7 @@ If errors like
     Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password,hostbased).
     Charmrun> Error 255 returned from remote shell (localhost:0)
 
-are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by add ``++local`` to ``charmrun``, e.g.:
+are displayed, a node local run (i.e., no "remote" connections even to the local host) could be used instead by adding ``++local`` to ``charmrun``, e.g.:
 
      ``~/Charm/bin/charmrun ++local +p4 bin/enzo-e input/HelloWorld/Hi.in``
 
@@ -495,7 +518,7 @@ Time = 0.10
 If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-E / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-E / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
 If you encounter any problems in getting Enzo-E to compile or run,
-please contact the Enzo-E / Cello community at cello-l@ucsd.edu or the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
+please contact the Enzo-E / Cello community at the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
 
 ----
 

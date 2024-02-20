@@ -9,6 +9,9 @@ simulation is run with two versions of ``enzo-e`` and their results are compared
 This is useful for testing problems with no analytical solution or generally
 verifying that results from commonly run simulations don't drift.
 
+It is also useful in for testing problems that do have analytic solutions (the answer test might quantify how close a simulation result is to the analytic expected solution).
+While such tests do exist in the ctest-framework, they often involve more boiler-plate code.
+
 `pytest <https://docs.pytest.org/>`__ is a Python-based framework for detecting
 and running a series of tests within a source code repository. When running
 ``pytest``, the user can provide a directory in which ``pytest`` will look for
@@ -41,6 +44,8 @@ other useful answer testing functionality are located in the source in
 `test/answer_tests/answer_testing.py`. All answer tests are located in the
 other files within the `test/answer_tests` directory.
 
+Some other functionality, that may be reused in other unrelated scripts provided in the Enzo-E repository, are provided in the ``test_utils`` subdirectory.
+
 Running the Answer Test Suite
 -----------------------------
 
@@ -60,16 +65,49 @@ To generate test answers, use the highest numbered gold standard tag.
 Configuring the Answer Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Before the answer tests can be run, a few environment variables must be set to
-configure behavior.
+The behavior of the test can be configured by passing command line arguments to ``pytest`` or by setting environment variables (or by mixing both).
 
- * ``TEST_RESULTS_DIR``: points to a directory in which answers will be stored
- * ``CHARM_PATH``: points to the directory in which ``charmrun`` is located
- * ``ENZO_PATH``: points to the ``enzo-e`` binary to use.
-   If this is not specified, this defaults to the ``<PATH/TO/ENZO-E/REPO>/build/bin/enzo-e``
- * ``GENERATE_TEST_RESULTS``: "true" to generate test results, "false" to compare with existing results.
- * ``GRACKLE_INPUT_DATA_DIR``: points to the directory where ``Grackle`` input files are installed.
-   If not specified, then all tests involving ``Grackle`` will be skipped.
+When invoking ``pytest``, the command line flags discussed here should be passed **after** the path to the `test/answer_tests` directory has been provided.
+For the sake of example (the meaning of flags are explained below), one might invoke:
+
+.. code-block:: bash
+
+   $ pytest test/answer_tests  \
+            --build-dir ./build \
+            --answer-store
+
+The following table lists command line flags, and where applicable, the environment variables that they are interchangable with.
+In cases where both are set, the command line argument is given precedence.
+
+.. list-table:: Configuring pytest behavior
+   :widths: 10 10 30
+   :header-rows: 1
+
+   * - flag
+     - env var
+     - description
+   * - ``--build-dir``
+     - N/A
+     - points to the build-directory where the target enzo-e binary was built (that binary has the path: BUILD_DIR/bin/enzo-e).
+       The path to the charmrun launcher will be inferred from the `BUILD_DIR/CMakeCache.txt` file, but can be overwritten by the ``--charm`` flag or the ``CHARM_PATH`` environment variable.
+       This precedence was chosen in case a user causes a change to relevant cached build-variables, but have not rebuilt Enzo-E (i.e. `CMakeCache.txt` may not be valid for the binary).
+       When this flag isn't specified, the test infrastructure searches for the enzo-e binary at ENZOE_ROOT/build/bin/enzo-e, but doesn't try to infer charmrun's location from `CMakeCache.txt`.
+   * - ``--local-dir``
+     - ``TEST_RESULTS_DIR``
+     - points to a directory in which answers will be stored/loaded
+   * - ``--charm``
+     - ``CHARM_PATH``
+     - points to the directory in which ``charmrun`` is located
+   * - ``--answer-store``
+     - ``GENERATE_TEST_RESULTS``
+     - When the command line flag is specified, test results are generated. Otherwise, results are compared against existing results (unless the environment variable is specified).
+       The environment variable can be be set to ``"true"`` to generate test results or ``"false"`` to compare with existing results.
+   * - ``--grackle-input-data-dir``
+     - ``GRACKLE_INPUT_DATA_DIR``
+     - points to the directory where ``Grackle`` input files are installed.
+       If not specified, then all tests involving ``Grackle`` will be skipped.
+
+Earlier versions of the tests also required the ``"USE_DOUBLE"`` environment variable to be set to ``"true"`` or ``"false"`` to indicate whether the code had been compiled in double or single precision.
 
 .. code-block:: bash
 
@@ -83,21 +121,16 @@ First, check out the highest numbered gold standard tag and compile ``enzo-e``.
 
 .. code-block:: bash
 
-   $ git checkout gold-standard-1
+   # in the future, you will need to subsitute 004 for a higher number
+   $ git checkout gold-standard-004
    $ ...compile enzo-e
 
-Then, configure the test suite to generate answers by setting 
-GENERATE_TEST_RESULTS to true.
+Then, run the test suite by calling ``pytest`` with the answer test directory (make sure to configure behavior correctly with command-line arguments or environment variables).
+In the following snippet, we assume you are currently at the root of the Enzo-E repository and that you will replace ``<build-dir>`` with the directory where you build enzo-e (this is commonly ``./build``)
 
 .. code-block:: bash
 
-   $ export GENERATE_TEST_RESULTS=true
-
-Finally, run the test suite by calling ``pytest`` with the answer test directory.
-
-.. code-block:: bash
-
-   $ pytest test/answer_tests
+   $ pytest test/answer_tests --local-dir=~/enzoe_tests --build-dir=<build-dir> --answer-store
    ========================== test session starts ===========================
    platform linux -- Python 3.9.13, pytest-7.1.2, pluggy-1.0.0
    rootdir: /home/circleci/enzo-e
@@ -116,19 +149,16 @@ Comparing Test Answers
 
 Once test answers have been generated, the above steps need not be repeated until
 the gold standard tag has been updated. Now, any later version of the code can be
-run with the test suite to check for problems. Set the GENERATE_TEST_RESULTS
-environment variable to false to configure the test suite to compare with existing
-answers.
+run with the test suite to check for problems. To configure the test suite to compare with existing answers, omit the ``--answer-store`` flag and ensure that the ``GENERATE_TEST_RESULTS`` variable is either unset or set to ``"false"``.
 
 .. code-block:: bash
 
    $ git checkout main
    $ ...compile enzo-e
-   $ export GENERATE_TEST_RESULTS=false
-   $ pytest test/answer_tests
+   $ pytest test/answer_tests --local-dir=~/enzoe_tests --build-dir=<build-dir>
 
-Getting More Output from Pytest
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Helpful Tips
+^^^^^^^^^^^^
 
 By default, most output printed by ``enzo-e`` or the test scripts will be swallowed
 by ``pytest``. When tests fail, the Python traceback may be shown, but not much
@@ -139,7 +169,18 @@ variables when this flag is given.
 
 .. code-block:: bash
 
-   $ pytest -s test/answer_tests
+   $ pytest -s test/answer_tests # other args...
+
+When debugging an issue it's sometimes helpful to force pytest to run a subset of tests.
+This can be accomplished with the ``-k`` flag.
+For example, to only run a subset of tests with ``"grackle"`` in the test name, one might execute
+
+.. code-block:: bash
+
+   $ pytest test/answer_tests -k "grackle" # other args...
+
+When investigating a failing test or prototyping a brand-new test, it can sometimes be helpful to run the tests against multiple versions of enzo-e.
+Rather than rebuilding Enzo-E each time you want to do that, you can instead build the different versions of Enzo-E in separate build-directories, and direct ``pytest`` to use the different builds with the ``--build-dir`` flag.
 
 Creating New Answer Tests
 -------------------------
@@ -290,6 +331,17 @@ in single or double precision, and adjust the tolerance on the tests accordingly
    @ytdataset_test(assert_array_rel_equal, decimals=decimals)
    def test_hllc_cloud(self):
        ...
+
+.. note::
+
+   The above code is primarily for the sake of example.
+   In practice, we now automatically detect the code's precision from the enzo-e executable.
+
+Alternatively, additional configuration options can be configured through new command-line flags, which are introduced and parsed by the `conftest.py` file in the `answer_test` directory.
+This is generally more robust than adding environment variables (since the flags are more easily discovered and are more explicit).
+But, in practice it's made slightly more complicated by the fact that flags are parsed with pytest hooks.
+Flags added in this way work best with ``pytest`` fixtures, while our tests mostly leverage features from `Python's unittest module <https://docs.python.org/3/library/unittest.html>`_.
+
 
 Caveats
 ^^^^^^^

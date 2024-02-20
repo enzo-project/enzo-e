@@ -3,7 +3,7 @@
 /// @file     _io.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-11-01
-/// @brief    Private include file for the \ref Io component 
+/// @brief    Private include file for the \ref Io component
 
 #ifndef _IO_HPP
 #define _IO_HPP
@@ -12,9 +12,8 @@
 // System includes
 //----------------------------------------------------------------------
 
+#include <cstring>
 #include <limits>
-#include <boost/filesystem.hpp>
-#include "pngwriter.h"
 
 //----------------------------------------------------------------------
 // Typedefs
@@ -52,8 +51,8 @@ namespace cello {
       file->file_write_meta(version_str, "version", type_char, length);
     }
   }
-}
 
+}
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
