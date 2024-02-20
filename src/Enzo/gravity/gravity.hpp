@@ -31,6 +31,7 @@
 // Component headers
 //----------------------------------------------------------------------
 
+#include "gravity/EnzoPhysicsGravity.hpp"
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "gravity/EnzoMethodGravity.hpp"
 #include "gravity/EnzoMethodPmDeposit.hpp"

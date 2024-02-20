@@ -15,6 +15,7 @@ refinement criteria, etc.
    initial
    adapt
    method
+   physics
    array
    hydro_infrastructure
    eos-fluidprops
