@@ -79,13 +79,19 @@ Another example includes the Gravitational Constant - this is important in self-
 General Tips
 ============
 
-The general advise is to implement a :cpp:class:`!Physics` class so that it is immutable (after construction the instance's state doesn't change).
-This makes the behavior of :cpp:class:`!Physics` classes much easier to reason about since a single PE only has one instance of a :cpp:class:`!Physics` given class, but is responsible for evolving one or more instances of :cpp:class:`EnzoBlock`.
+The general advice is to implement a :cpp:class:`!Physics` class so that it is immutable (after construction the instance's state doesn't change).
+
+This makes the behavior of :cpp:class:`!Physics` classes much easier to reason about because a single PE (processing element)
+
+  - only has one instance of a given :cpp:class:`!Physics` class
+  
+  - AND is responsible for evolving one or more instances of :cpp:class:`EnzoBlock`.
+
 
 Quirky Implementations
 ======================
 
-:cpp:class:`!EnzoPhysicsCosmology` currently tracks some mutable state.
+:cpp:class:`!EnzoPhysicsCosmology` currently tracks some mutable state (e.g. the current scale-factor, the current rate of expansions, current redshift).
 This is just something to be mindful of.
 
 It's worth noting that the initialization of :cpp:class:`!EnzoPhysicsFluidProps` and :cpp:class:`!EnzoPhysicsGravity` are a little quirky.

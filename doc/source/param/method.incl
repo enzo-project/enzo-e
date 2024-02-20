@@ -386,9 +386,14 @@ gravity
 
       This parameter is deprecated and will be removed in the future.
       The user should use :par:param:`Physics:gravity:grav_const_codeU`
-      instead. Thesen 2 parameters have identical behavior when using
+      instead. These 2 parameters have identical behavior when using
       the ``"gravity"`` method, but the new parameter influences other
-      gravity-related methods.
+      gravity-related calculations such as (but *NOT* limited to)
+
+        - calculation of acceleration from a static potential
+        - enforcement of minimum pressure support
+        - star formation
+        - certain initial conditions
 
 heat
 ----
