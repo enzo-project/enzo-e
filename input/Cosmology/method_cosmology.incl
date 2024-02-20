@@ -136,7 +136,6 @@
      }
      gravity {
      	solver = "cg";
-        grav_const = 1.0;
     }
  }
 
@@ -322,7 +321,7 @@
  }
 
  Physics {
-     list = [ "cosmology" ];
+     list = [ "cosmology", "gravity" ];
      cosmology {
         omega_baryon_now    = 0.0461;
         omega_cdm_now       = 0.2389;
@@ -334,6 +333,9 @@
         final_redshift      = 0.0;
 	comoving_box_size   = 32.0;
      }
+
+     # we explicitly avoid setting the gravitational constant since this is a
+     # cosmological simulation
  }
 
  Stopping {

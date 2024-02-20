@@ -9,9 +9,9 @@
 #include <limits>
 #include <array>
 
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
-#include "cello.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 
 // return random value drawn from a uniform distribution on the unit interval

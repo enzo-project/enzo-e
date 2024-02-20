@@ -10,9 +10,9 @@
 /// are used to define the initial values, and whether all blasts go
 /// at once or intermitently
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 //----------------------------------------------------------------------
 

@@ -5,17 +5,22 @@
 /// @date      November, 1998
 /// @brief     Set the energy to provide minimal pressure support
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
  
 //----------------------------------------------------------------------
  
 int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
+                                 enzo_float minimum_pressure_support_parameter,
 				 bool comoving_coordinates)
 {
   const int in = cello::index_static();
-  if (NumberOfBaryonFields[in] > 0) {
+
+  Field field = data()->field();
+  if (field.num_permanent() > 0) {  // TODO: revisit if-clause. This could be
+                                    // improved. (plus we probably want to
+                                    // report an error when false)
  
     /* Compute cosmology factors. */
  
@@ -34,12 +39,12 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     enzo_float CosmoFactor = 1.0/cosmo_a;
  
     /* Determine the size of the grids. */
+
+    const int GridRank = cello::rank();
  
     int dim, size = 1, i;
-    for (dim = 0; dim < GridRank[in]; dim++)
+    for (dim = 0; dim < GridRank; dim++)
       size *= GridDimension[dim];
- 
-    Field field = data()->field();
 
     enzo_float * density         = (enzo_float*) field.values("density");
     enzo_float * total_energy    = (enzo_float *)field.values("total_energy");
@@ -48,12 +53,34 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     enzo_float * velocity_y      = (enzo_float*) field.values("velocity_y");
     enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
 
-    /* Set minimum GE. */
+    // Set minimum specific internal energy (aka gas energy)
+    //
+    // minimum pressure support sets the specific thermal energy such that
+    //   lambda_J >= sqrt(K) * CellWidth
+    // where lambda_J is the Jeans length or c_s * sqrt(pi / (G * rho)) and K
+    // is MinimumPressureSupportParameter
+    //
+    // We can manipulate this inequality:
+    //   c_s * sqrt(pi / (G * rho)) >= sqrt(K) * CellWidth
+    //   c_s^2 *  pi / (G * rho) >= K * CellWidth^2
+    //   gamma * (gamma - 1) * eint * pi / (G * rho) >= K * CellWidth^2
+    //   eint >= G * K * CellWidth^2 * rho / (pi * gamma * (gamma - 1))
+    //   eint >= MinimumSupportEnergyCoefficient * rho
+    //
+    // I'm don't totally understand where the extra CosmoFactor comes in...
+    // that was here earlier
+
+    // TODO: check that CellWidth[0], CellWidth[1], and CellWidth[2] are
+    //       identical
+
+    // ToDo: figure out how to properly configure this variable. It used to be
+    // a static global variable of EnzoBlock, but it could never be configured
+    const enzo_float GravitationalConstant = 1.0;
 
     const enzo_float gamma = enzo::fluid_props()->gamma();
     MinimumSupportEnergyCoefficient =
-      GravitationalConstant[in]/(4.0*cello::pi) / (cello::pi * (gamma*(gamma-1.0))) *
-      CosmoFactor * MinimumPressureSupportParameter[in] *
+      enzo::grav_constant_codeU() / (cello::pi * (gamma*(gamma-1.0))) *
+      CosmoFactor * minimum_pressure_support_parameter *
       CellWidth[0] * CellWidth[0];
 
     /* PPM: set GE. */
@@ -77,7 +104,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
       for (i = 0; i < size; i++)
 	internal_energy[i] = MAX(internal_energy[i],
 				 MinimumSupportEnergyCoefficient*density[i]);
-      if (GridRank[in] != 3) return ENZO_FAIL;
+      if (GridRank != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
 	total_energy[i] = 
 	  MAX((enzo_float)
@@ -93,7 +120,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
       return ENZO_FAIL;
     }
  
-  } // end: if (NumberOfBaryonFields > 0)
+  } // end: if (field.num_permanent() > 0)
  
   return ENZO_SUCCESS;
 }

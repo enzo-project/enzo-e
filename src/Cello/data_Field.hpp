@@ -158,6 +158,10 @@ public: // interface
   int precision(int id) const throw()
   { return field_descr_->precision(id); }
 
+  /// Return the data type of a given field
+  int data_type(int id) const throw()
+  { return field_descr_->data_type(id); }
+
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id) const throw()
   { return field_descr_->bytes_per_element(id); }

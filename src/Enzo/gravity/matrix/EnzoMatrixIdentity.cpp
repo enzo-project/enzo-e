@@ -6,7 +6,8 @@
 /// @date     2015-04-02
 /// @brief    Implementation of the discrete Identity operator EnzoMatrixIdentity
 
-#include "enzo.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 //======================================================================
 
