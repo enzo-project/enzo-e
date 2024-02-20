@@ -243,7 +243,16 @@ target_link_libraries(data
 
 addCelloLib(disk "")
 # with minimal refactoring, we could make HDF5_C a privately linked library
-target_link_libraries(disk PUBLIC error HDF5_C)
+target_link_libraries(disk
+  PUBLIC HDF5_C
+  PRIVATE pngwriter
+  PUBLIC error
+  )
+# the disk_utils functions requires that all linked libraries are all "linked"
+# against the view library (the disk library itself does not need to link
+# to the view library because none of the symbols defined in that library are
+# used within the disk library's source files)
+target_link_libraries(disk INTERFACE view)
 
 
 addCelloLib(error "")
@@ -255,8 +264,8 @@ target_link_libraries(error
 
 addCelloLib(io "")
 target_link_libraries(io
-  PUBLIC Boost::filesystem pngwriter # with minimal refactoring, we could make
-                                     # these into private dependencies
+  PUBLIC Boost::filesystem # with minimal refactoring, we could make
+                           # this into a private dependency
   PUBLIC cello_component charm_component parallel monitor performance error
          parameters disk problem compute mesh view data simulation
   PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)
@@ -400,6 +409,7 @@ endfunction(addUnitTestBinary)
 addUnitTestBinary(test_type "test_Type.cpp" cello_component tester_default)
 
 # tests of the disk component
+addUnitTestBinary(test_disk_utils "test_DiskUtils.cpp" disk tester_default)
 addUnitTestBinary(test_file_hdf5 "test_FileHdf5.cpp" disk tester_default)
 
 # tests of the error component

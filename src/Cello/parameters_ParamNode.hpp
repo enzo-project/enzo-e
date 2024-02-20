@@ -24,30 +24,24 @@ public: // interface
   {};
 
   //----------------------------------------------------------------------
-  // Big Three
+  // Big Five
   //----------------------------------------------------------------------
 
   /// Destructor
   ~ParamNode() throw()
   {
-    for (auto it_param =  subnodes_.begin();
-	 it_param != subnodes_.end();
-	 ++it_param) {
-      delete it_param->second;
+    for (std::pair<const std::string, ParamNode*>& key_val : subnodes_) {
+      delete key_val.second;
     }
   };
 
-private: // No copy or assign
+  // No copy constructor or copy assignment:
+  ParamNode(const ParamNode&) = delete;
+  ParamNode & operator= (const ParamNode &) = delete;
 
-  /// Copy constructor
-  ParamNode(const ParamNode & param_node) throw()
-  {  }
-
-  /// Assignment operator
-  ParamNode & operator= (const ParamNode & param_node) throw()
-  {
-    return *this;
-  }
+  // force the compiler to generate move constructor and move assignment
+  ParamNode(ParamNode&&) = default;
+  ParamNode & operator= (ParamNode &&) = default;
 
 public: // interface
 
@@ -59,38 +53,25 @@ public: // interface
 
     p | name_;
 
-    // pup std::map<std::string,ParamNode*> subnodes_ using arrays
+    // pup std::map<std::string,ParamNode*> subnodes_
     
-    int n;
-    if (p.isPacking()) {
-      n = 0;
-      for(auto it=subnodes_.begin(); it != subnodes_.end(); it++) {
-	++n;
-      }
-      p | n;
-      for(auto it=subnodes_.begin(); it != subnodes_.end(); it++) {
-	std::string name = it->first;
-	int l = name.size();
-	char * array = new char[l];
-	strncpy(array,name.c_str(),l);
-	p | l;
-	delete [] array;
-	p | *it->second;
+    int n = this->size();
+    p | n;
+    if (!p.isUnpacking()) {
+      for (std::pair<const std::string, ParamNode*>& key_val : subnodes_) {
+        std::string name = key_val.first;
+        p | name;
+        ParamNode* subnode = key_val.second;
+        p | *subnode;
       }
     } else {
-      p | n;
       for (int i=0; i<n; i++) {
-	std::string name;
-	ParamNode * node;
-	int l;
-	p | l;
-	char * array = new char[l];
-	name = array;
-	delete [] array;
-	node = new ParamNode(name);
-	p | *node;
-	subnodes_[name] = node;
-      }	
+        std::string name;
+        p | name;
+	ParamNode * subnode = new ParamNode(name);
+        p | *subnode;
+        subnodes_[name] = subnode;
+      }
     }
   }
 
@@ -98,29 +79,13 @@ public: // interface
   std::string name() const {return name_;};
 
   /// Return the number of subgroups
-  int size()
-  {return subnodes_.size(); }
-
-  /// Return the ith subgroup
-  std::string subgroup (int group_index)
-  {
-    if (0 <= group_index && group_index < size()) {
-      int i = 0;
-      for (auto it_param =  subnodes_.begin();
-	   it_param != subnodes_.end();
-	   ++it_param,i++) {
-	if (group_index == i) {
-	  return it_param->first;
-	}
-      }
-    }
-    return "";
-  };
+  int size() const { return subnodes_.size(); }
 
   /// Return the given subnode, returning 0 if it doesn't exist
-  ParamNode * subnode(std::string subgroup)
+  const ParamNode * subnode(std::string subgroup) const
   {
-    return subnodes_[subgroup];
+    auto search = subnodes_.find(subgroup);
+    return (search != subnodes_.end()) ? search->second : nullptr;
   }
 
   /// Return the given subgroup, creating a new one if it doesn't exist

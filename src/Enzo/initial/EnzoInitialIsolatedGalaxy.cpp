@@ -27,8 +27,9 @@
 
 #include <fstream>
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 //----------------------------------------------------------------------
 #define DEBUG_PERFORMANCE
@@ -460,7 +461,7 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
             vcirc = (std::log(1.0 + conc*rx) - (conc*rx)/(1.0+conc*rx))/
                       (std::log(1.0 + conc) - (conc / (1.0 + conc))) / rx;
-            vcirc = std::sqrt(vcirc * enzo_constants::grav_constant * Mvir_cgs / rvir_cgs);
+            vcirc = std::sqrt(vcirc * enzo::grav_constant_cgs() * Mvir_cgs / rvir_cgs);
 
           } else {
             vcirc = this->InterpolateVcircTable(r_cyl);

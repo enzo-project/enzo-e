@@ -5,8 +5,11 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the EnzoMethodPpm class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+
+#include "Enzo/hydro-mhd/ppm_fortran/ppm_fortran.hpp" // FORTRAN_NAME(calc_dt)
 
 // #define DEBUG_PPM
 // #define COPY_FIELDS_TO_OUTPUT

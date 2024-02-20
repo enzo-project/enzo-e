@@ -6,7 +6,8 @@
 /// @date     2015-04-02
 /// @brief    Implementation of the discrete Laplace operator EnzoMatrixLaplace
 
-#include "enzo.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_MATRIX
 

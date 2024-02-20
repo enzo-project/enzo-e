@@ -12,6 +12,7 @@
 
      * :t:`"cosmology"` :e:`specifies cosmological constants.`
      * :t:`"fluid_props"` :e:`specifies parameters related to gas properties.`
+     * :t:`"gravity"` :e:`specifies parameters related to gravity.`
 
 cosmology
 ---------
@@ -255,3 +256,42 @@ For more details, see :ref:`using-fluid_props-floors`.
    by the` ``enzo_constants::metallicity_solar`` :e:`constant and the
    local value of the` ``"density"`` :e:`field to give the local floor
    for the` ``"metal_density"`` :e:`field`
+
+gravity
+-------
+
+----
+
+.. par:parameter:: Physics:gravity:grav_const_codeU
+
+   :Summary: :s:`The gravitational constant in code units`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:     :z:`Enzo`
+
+   :e:`When this parameter is not specified, the gravitational
+   constant is automatically taken to be the real-world
+   reference value` :math:`G\approx 6.67\times 10^{-8}\, {\rm cm}^3\,
+   {\rm g}^{-1} {\rm s}^{-2}` :e:`(the actual value used within the
+   codebase is not quoted here in case we ever update it). In this
+   case, the conversion between cgs units and code-units are
+   handled internally.`
+      
+
+   .. note::
+
+      In most cases, users should not need to specify this parameter
+      at all (so that the appropriate default value is used). This
+      parameter mostly exists to help simplify some test problems in
+      non-cosmological simulations.
+
+      Users are **NOT** allowed to specify this parameter in cosmological
+      simulations. This is because cosmological code-units are defined
+      such that :math:`4\pi G\bar{\rho}` has the value ``1.0``, where
+      :math:`\bar{\rho}` is the mean physical matter density of the
+      universe.
+
+      At the time of writing this documentation, users can force the
+      usage of the default value by assigning this parameter a non-positive
+      value. However this is an implementation-detail that may change in
+      the future (if it does change, an error will be raised).

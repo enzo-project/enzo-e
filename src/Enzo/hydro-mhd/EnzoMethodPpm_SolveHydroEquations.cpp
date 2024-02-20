@@ -15,9 +15,13 @@
 /// the one where this function was removed from the EnzoBlock class to make
 /// merge conflicts easier to address)
 
-#include "cello.hpp"
-#include "enzo.hpp"
 #include <stdio.h>
+
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+
+#include "Enzo/hydro-mhd/ppm_fortran/ppm_fortran.hpp" // FORTRAN_NAME(ppm_de)
 
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
@@ -144,9 +148,9 @@ int EnzoMethodPpm::SolveHydroEquations
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if (use_minimum_pressure_support) {
-    if (enzo::SetMinimumSupport(block,
-                                MinimumSupportEnergyCoefficient,
+  if ((cello::hierarchy()->max_level() == block.level()) &&
+      use_minimum_pressure_support) {
+    if (enzo::SetMinimumSupport(block, MinimumSupportEnergyCoefficient,
                                 minimum_pressure_support_parameter,
                                 comoving_coordinates) == ENZO_FAIL) {
       ERROR("EnzoMethodPpm::SolveHydroEquations()",

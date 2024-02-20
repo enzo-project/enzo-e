@@ -5,9 +5,9 @@
 /// @date      November, 1998
 /// @brief     Set the energy to provide minimal pressure support
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
  
 //----------------------------------------------------------------------
  
@@ -54,7 +54,25 @@ int enzo::SetMinimumSupport(EnzoBlock& block,
     enzo_float * velocity_y      = (enzo_float*) field.values("velocity_y");
     enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
 
-    /* Set minimum GE. */
+    // Set minimum specific internal energy (aka gas energy)
+    //
+    // minimum pressure support sets the specific thermal energy such that
+    //   lambda_J >= sqrt(K) * CellWidth
+    // where lambda_J is the Jeans length or c_s * sqrt(pi / (G * rho)) and K
+    // is MinimumPressureSupportParameter
+    //
+    // We can manipulate this inequality:
+    //   c_s * sqrt(pi / (G * rho)) >= sqrt(K) * CellWidth
+    //   c_s^2 *  pi / (G * rho) >= K * CellWidth^2
+    //   gamma * (gamma - 1) * eint * pi / (G * rho) >= K * CellWidth^2
+    //   eint >= G * K * CellWidth^2 * rho / (pi * gamma * (gamma - 1))
+    //   eint >= MinimumSupportEnergyCoefficient * rho
+    //
+    // I'm don't totally understand where the extra CosmoFactor comes in...
+    // that was here earlier
+
+    // TODO: check that CellWidth[0], CellWidth[1], and CellWidth[2] are
+    //       identical
 
     // ToDo: figure out how to properly configure this variable. It used to be
     // a static global variable of EnzoBlock, but it could never be configured
@@ -66,7 +84,7 @@ int enzo::SetMinimumSupport(EnzoBlock& block,
 
     const enzo_float gamma = enzo::fluid_props()->gamma();
     MinimumSupportEnergyCoefficient =
-      GravitationalConstant/(4.0*cello::pi) / (cello::pi * (gamma*(gamma-1.0))) *
+      enzo::grav_constant_codeU() / (cello::pi * (gamma*(gamma-1.0))) *
       CosmoFactor * minimum_pressure_support_parameter *
       block.CellWidth[0] * block.CellWidth[0];
 

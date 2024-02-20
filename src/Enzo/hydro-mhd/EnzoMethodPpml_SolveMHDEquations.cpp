@@ -27,9 +27,11 @@
 /// the one where this function was removed from the EnzoBlock class to make
 /// merge conflicts easier to address)
 
-#include "cello.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
-#include "enzo.hpp"
+#include "Enzo/hydro-mhd/ppml_fortran/ppml_fortran.hpp" // FORTRAN_NAME(ppml)
 
 int EnzoMethodPpml::SolveMHDEquations( EnzoBlock& block, enzo_float dt )
 {
