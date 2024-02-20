@@ -193,7 +193,7 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
   // Get gravitational constant in code units
   const double const_G =
-    enzo_constants::grav_constant * enzo::units()->density() *
+    enzo::grav_constant_cgs() * enzo::units()->density() *
     enzo::units()->time() * enzo::units()->time();
   
   // Get density threshold in code units for this cycle (value will change in

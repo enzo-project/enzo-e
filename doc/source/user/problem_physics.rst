@@ -10,7 +10,26 @@ This section decribes the Physics subgroups that can be specified in
 the ``Physics`` Group of the parameter file. Each subgroup directly
 maps to a different type of ``Physics`` object in the codebase. These
 objects hold information that needs to be accessible across different
-Enzo-E methods.
+Enzo-E methods and/or initializers.
+
+In a parameter file, a user currently needs to explicitly list the
+names of all of the physics objects that they are configuring within
+the :par:param:`Physics:list` parameter.
+
+.. note::
+
+   Currently, the ``"fluid_props"`` and ``"gravity"`` don't need to be
+   :par:param:`Physics:list` for Enzo-E to parse and make use of
+   parameters in the respective Physics subgroups. This choice is made
+   purely for the sake of backwards compatability (so that parameter
+   files designed for earlier versions of the code will continue to
+   work properly).
+
+   With that said, this is mostly just an implementation detail (that
+   is subject to change, especially as deprecated parameters are
+   eventually removed). At this time, Users should still explicitly
+   list these physics groups within the :par:param:`Physics:list`
+   parameter if they want to use/configure them.
 
 ``"cosmology"``
 ===============
@@ -190,3 +209,50 @@ Be mindful that unlike the other parameters, the :par:param:`~Physics:fluid_prop
    The ``"pressure"`` and ``"temperature"`` fields can be written to disk as derived quantities (if the fields are specified in the "derived" grouping).
    In these cases, these quantities are computed using ``EnzoComputePressure`` and ``EnzoComputeTemperature``, respectively.
    You may want to check these classes to see if/when the floors get applied.
+
+``"gravity"``
+=============
+
+Specifies the gravitational constant. In the future, additional
+gravity-related parameters could be introduced.
+
+.. list-table:: Physics ``gravity`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - :par:param:`~Physics:gravity:grav_const_codeU`
+     - `float`
+     - `-`
+     - The gravitational constant specified in code units. When not
+       specified, it's automatically computed from the real-world
+       reference value :math:`G\approx 6.67\times 10^{-8}\, {\rm
+       cm}^3\, {\rm g}^{-1} {\rm s}^{-2}` (see codebase for exact
+       value).
+
+In most cases, users should not specify
+:par:param:`~Physics:gravity:grav_const_codeU` at all (so that the
+appropriate default value is used). This parameter mostly exists to
+help simplify some test problems in non-cosmological simulations.
+
+Users are **NOT** allowed to specify
+:par:param:`~Physics:gravity:grav_const_codeU` parameter in
+cosmological simulations. This is because cosmological code-units are
+defined such that :math:`4\pi G\bar{\rho}` has the value ``1.0``,
+where :math:`\bar{\rho}` is the mean physical matter density of the
+universe.
+
+We generally advise users to include ``"gravity"`` within
+:par:param:`Physics:list` whenever they use any method involving
+gravity, event if they aren't explicitly assigning a value to
+:par:param:`Physics:gravity:grav_const_codeU`.
+
+.. note::
+
+   At the time of writing, if the user specifies both ``"cosmology"``
+   and ``"gravity"`` within :par:param:`Physics:list`, it's important
+   that ``"cosmology"`` comes first. In the future, we can hopefully
+   relax these requirements.

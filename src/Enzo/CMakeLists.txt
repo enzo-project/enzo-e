@@ -66,6 +66,7 @@ add_library(enzo STATIC ${SRC_FILES})
 add_library(main_enzo OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/../Cello/main_enzo.cpp)
 # TODO: we may want to reconsider the way that the code is structured so that
 # we aren't declaring targets with source files from the Cello layer
+
 target_include_directories (main_enzo
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Cello # for main.hpp
 )
@@ -95,7 +96,7 @@ add_subdirectory(assorted)
 # define the Enzo::gravity target
 add_subdirectory(gravity)
 
-# add files in hydro-mhd to enzo target and define the riemann library
+# define the Enzo::hydro-mhd target
 add_subdirectory(hydro-mhd)
 
 # define the Enzo::initial target
@@ -125,9 +126,9 @@ add_subdirectory(utils)
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC Enzo::assorted Enzo::gravity Enzo::initial Enzo::io Enzo::mesh
-  PUBLIC Enzo::particle Enzo::tests Enzo::utils
-  PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
+  PUBLIC Enzo::assorted Enzo::gravity Enzo::hydro-mhd Enzo::initial Enzo::io
+  PUBLIC Enzo::mesh Enzo::particle Enzo::tests Enzo::utils
+  PUBLIC ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
 target_include_directories(enzo

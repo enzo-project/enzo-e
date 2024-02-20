@@ -5,9 +5,13 @@
 /// @date      November, 1994
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
-#include "cello.hpp"
-#include "enzo.hpp"
 #include <stdio.h>
+
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+
+#include "Enzo/hydro-mhd/ppm_fortran/ppm_fortran.hpp" // FORTRAN_NAME(ppm_de)
 
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
@@ -133,7 +137,8 @@ int EnzoBlock::SolveHydroEquations
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if (use_minimum_pressure_support) {
+  if ((cello::hierarchy()->max_level() == this->level()) &&
+      use_minimum_pressure_support) {
     if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
                           minimum_pressure_support_parameter,
 			  comoving_coordinates) == ENZO_FAIL) {

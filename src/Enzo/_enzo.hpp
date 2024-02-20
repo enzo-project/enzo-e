@@ -172,6 +172,7 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 //       EnzoEFltArrayMap becomes an alias for a class template defined in the
 //       Cello-layer (GH PR #326)
 #include "utils/utils.hpp"
+#include "utils/EnzoPermutedCoordinates.hpp"
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
 
@@ -206,35 +207,11 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "obsolete/EnzoInitialPm.hpp"
 
-#include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
-#include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
-#include "hydro-mhd/EnzoPermutedCoordinates.hpp"
-#include "hydro-mhd/EnzoSourceGravity.hpp"
-#include "hydro-mhd/EnzoSourceInternalEnergy.hpp"
-
-#include "hydro-mhd/EnzoReconstructor.hpp"
-#include "hydro-mhd/EnzoReconstructorNN.hpp"
-#include "hydro-mhd/EnzoReconstructorPLM.hpp"
-
-// public header for the EnzoRiemann sub-library. This needs to be included
-// after the headers for:
-//     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
-// but before the header for EnzoMethodMHDVlct EnzoBfieldMethod and EnzoBfieldMethodCT
-#include "hydro-mhd/riemann/EnzoRiemann.hpp"
-
-// [order dependencies:]
-#include "hydro-mhd/EnzoBfieldMethod.hpp"
-#include "hydro-mhd/EnzoBfieldMethodCT.hpp"
-
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
-#include "hydro-mhd/EnzoMethodMHDVlct.hpp"
-#include "hydro-mhd/EnzoMethodPpm.hpp"
-#include "hydro-mhd/EnzoMethodPpml.hpp"
-
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 
