@@ -8,10 +8,11 @@
 ///     Derived star maker class that actually makes stars. This is
 ///     adapted after the star_maker_ssn method from Enzo
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include <time.h>
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
+#include <time.h>
 
 // #define DEBUG_SF
 

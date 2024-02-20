@@ -40,6 +40,35 @@ The Method:mhd_vlct:mhd_choice determines whether the method is used as a pure h
 
 ----
 
+.. par:parameter:: Method:mhd_vlct:courant
+
+   :Summary: :s:`Courant safety factor`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :z:`Enzo`
+
+   :e:`The method-specific courant safety factor. The method's minimum timestep is the minimum value of the following expression (which is computed for all cells):`
+
+   .. math:: C \times \min \left( \frac{\Delta x}{c_f + |v_x|} + \frac{\Delta y}{c_f + |v_y|} + \frac{\Delta z}{c_f + |v_z|} \right)
+
+   :e:`in which:`
+
+     * :math:`C` :e:`is the courant factor`
+     * :math:`c_f` :e:`is the local fast magnetosonic speed (it reduces to the local sound speed in the absence of magnetic fields)`
+     * :math:`v_x,\ v_y,\ v_z` :e:`are the velocity components`
+     * :math:`\Delta x,\ \Delta y,\ \Delta z` :e:`are cell widths`
+
+   :e:`A value of 0.5 or smaller is generally recommended.`
+
+   .. warning::
+
+      The way that parsing of the courant safety factor is currently
+      handled, the default value is fixed to 1.0 for all values (which is
+      too large for this method). Some near-term modifications are
+      planned that will resolve this issue.
+
+----
+
 .. par:parameter:: Method:mhd_vlct:riemann_solver
 
    :Summary: :s:`name of the Riemann solver to use`

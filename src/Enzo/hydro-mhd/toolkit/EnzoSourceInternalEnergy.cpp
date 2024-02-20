@@ -9,6 +9,8 @@
 #include "Enzo/enzo.hpp"
 #include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
+#include "Enzo/utils/utils.hpp"
+
 //----------------------------------------------------------------------
 
 void EnzoSourceInternalEnergy::calculate_source

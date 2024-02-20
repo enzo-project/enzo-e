@@ -1,13 +1,6 @@
 #ifndef ENZO_FORTRAN_HPP
 #define ENZO_FORTRAN_HPP
 
-extern "C" void FORTRAN_NAME(interpolate)
-  (int *rank, enzo_float *pfield, int pdim[],
-   int pis[], int pie[], int r[],
-   enzo_float *field, int dim[], int is[], enzo_float *work,
-   int *imethod, int *posflag,
-   int *ierror);
-
 extern "C" void FORTRAN_NAME(interp3d)
   (enzo_float * parent, enzo_float * work, 
    int *dim1, int *dim2, int *dim3, 
@@ -28,17 +21,5 @@ extern "C" void FORTRAN_NAME(expand_terms)(
    enzo_float *dold, enzo_float *eold, enzo_float *geold,
    enzo_float *uold, enzo_float *vold, enzo_float *wold,
    int *icr, enzo_float *ecr, enzo_float *ecrold);
-
-extern "C" void FORTRAN_NAME(turboinit)
-  (int *rank, int *nbox,
-   enzo_float *u, enzo_float *v, enzo_float *w,
-   int *in, int *jn, int *kn,
-   int *ig, int *jg, int *kg);
-
-extern "C" void FORTRAN_NAME(turboinit2d)
-  (int *rank, int *nbox,
-   enzo_float *u, enzo_float *v,
-   int *in, int *jn,
-   int *ig, int *jg);
 
 #endif /* ENZO_FORTRAN_HPP */
