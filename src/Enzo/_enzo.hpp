@@ -214,10 +214,7 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "obsolete/EnzoInitialPm.hpp"
 
 
-// [order dependencies:]
-#include "particle/formation/EnzoSinkParticle.hpp"
-#include "particle/formation/EnzoBondiHoyleSinkParticle.hpp"
-#include "particle/formation/EnzoFluxSinkParticle.hpp"
+
 
 #include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
 #include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
@@ -239,28 +236,15 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "hydro-mhd/EnzoBfieldMethod.hpp"
 #include "hydro-mhd/EnzoBfieldMethodCT.hpp"
 
-#include "particle/formation/EnzoMethodAccretion.hpp"
-#include "particle/formation/EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "io/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
-#include "particle/feedback/EnzoMethodDistributedFeedback.hpp"
-#include "particle/feedback/EnzoMethodFeedback.hpp"
-#include "particle/feedback/EnzoMethodFeedbackSTARSS.hpp"
-#include "particle/formation/EnzoMethodFluxAccretion.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
-#include "particle/formation/EnzoMethodMergeSinks.hpp"
 #include "hydro-mhd/EnzoMethodMHDVlct.hpp"
-#include "particle/EnzoMethodPmUpdate.hpp"
 #include "hydro-mhd/EnzoMethodPpm.hpp"
 #include "hydro-mhd/EnzoMethodPpml.hpp"
-#include "particle/formation/EnzoMethodSinkMaker.hpp"
-#include "particle/formation/EnzoMethodStarMaker.hpp"
-#include "particle/formation/EnzoMethodStarMakerSTARSS.hpp"
-#include "particle/formation/EnzoMethodStarMakerStochasticSF.hpp"
-#include "particle/formation/EnzoMethodThresholdAccretion.hpp"
 
 
 #include "enzo-core/EnzoMsgCheck.hpp"

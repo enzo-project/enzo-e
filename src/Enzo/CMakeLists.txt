@@ -84,14 +84,17 @@ target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 add_subdirectory(enzo-core)
 
 # add source files from other subdirectories to the enzo target
-add_subdirectory(assorted)
 add_subdirectory(chemistry)
 add_subdirectory(cosmology)
 add_subdirectory(fluid-props)
-add_subdirectory(gravity)
 add_subdirectory(io)
 add_subdirectory(obsolete)
-add_subdirectory(particle)
+
+# define the Enzo::assorted target
+add_subdirectory(assorted)
+
+# define the Enzo::gravity target
+add_subdirectory(gravity)
 
 # add files in hydro-mhd to enzo target and define the riemann library
 add_subdirectory(hydro-mhd)
@@ -102,8 +105,11 @@ add_subdirectory(initial)
 # define the Enzo::mesh target
 add_subdirectory(mesh)
 
+# define the Enzo::particle target
+add_subdirectory(particle)
+
 # define the Enzo::tests target
-# (note that the tests subdirectory introduces problem initializers that can
+# (note that the Enzo::tests target introduces problem initializers that can
 # be used to setup test-problems. The BUILD_TESTING option has no impact on
 # what is built from this directory. The option only affects whether binaries,
 # expressly used for unit-testing are built)
@@ -117,8 +123,8 @@ add_subdirectory(utils)
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC Enzo::assorted Enzo::gravity Enzo::initial Enzo::mesh Enzo::tests
-  PUBLIC Enzo::utils
+  PUBLIC Enzo::assorted Enzo::gravity Enzo::initial Enzo::mesh Enzo::particle
+  PUBLIC Enzo::tests Enzo::utils
   PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
