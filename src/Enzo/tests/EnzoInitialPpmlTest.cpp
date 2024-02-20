@@ -5,7 +5,9 @@
 /// @date     2017-06-12
 /// @brief    Definition of the PpmlTest class
 
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/tests/tests.hpp"
 
 //======================================================================
 

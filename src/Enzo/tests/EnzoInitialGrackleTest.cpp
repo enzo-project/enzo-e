@@ -5,8 +5,9 @@
 /// @date     Tue May 7 2019
 /// @brief    [\ref Enzo] Grackle chemistry/cooling library initial conditions
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/tests/tests.hpp"
 
 //----------------------------------------------------------------------
 

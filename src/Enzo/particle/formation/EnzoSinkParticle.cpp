@@ -8,8 +8,9 @@
 ///         as well as associated methods for computing accretion rates and
 ///         reading and writing to / from the particle attribute arrays.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 EnzoSinkParticle::EnzoSinkParticle
 (Block * block,
