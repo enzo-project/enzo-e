@@ -5,8 +5,9 @@
 ///
 ///
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 EnzoMethodFeedback::EnzoMethodFeedback
 ()

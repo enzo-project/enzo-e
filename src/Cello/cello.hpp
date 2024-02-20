@@ -18,6 +18,9 @@
 // SYSTEM INCLUDES
 //----------------------------------------------------------------------
 
+// (check CMakeLists.txt to check to see if headers in the associated
+//  precompiled header needs to change whenever any of these include statements
+//  are removed - the precompiled header should only contain a subset of them)
 #include <execinfo.h>
 #include <math.h>
 #include <stdio.h>
@@ -32,6 +35,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <type_traits> // std::remove_cv, std::is_same_v
 #include <vector>
 
 #include <charm++.h>
@@ -223,10 +227,7 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
-
-#ifdef BYPASS_CHARM_MEM_LEAK
 enum class MsgType { msg_refine, msg_check };
-#endif
 
 /// Length of hex message tags used for debugging
 #define TAG_LEN 8
@@ -449,7 +450,7 @@ enum class MsgType { msg_refine, msg_check };
 #define SIZE_VECTOR_VECTOR_TYPE(COUNT,TYPE,VECTOR)              \
   {                                                             \
     (COUNT) += sizeof(int);                                     \
-    for (int i=0; i<(VECTOR).size(); i++) {                     \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {             \
       SIZE_VECTOR_TYPE(COUNT,TYPE,(VECTOR)[i]);                 \
     }                                                           \
   }
@@ -458,7 +459,7 @@ enum class MsgType { msg_refine, msg_check };
     int size = (VECTOR).size();                         \
     memcpy(POINTER,&size, sizeof(int));                 \
     (POINTER) += sizeof(int);                           \
-    for (int i=0; i<(VECTOR).size(); i++) {             \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {     \
       SAVE_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
@@ -468,7 +469,7 @@ enum class MsgType { msg_refine, msg_check };
     memcpy(&size, POINTER, sizeof(int));                \
     (POINTER) += sizeof(int);                           \
     (VECTOR).resize(size);                              \
-    for (int i=0; i<(VECTOR).size(); i++) {             \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {     \
       LOAD_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
@@ -678,6 +679,13 @@ namespace cello {
   int is_precision_supported (precision_type);
   extern const char * precision_name[7];
 
+  /// converts a precision_enum to type_enum
+  ///
+  /// at present, this is a trivial operation. This primarily exists to make
+  /// the developer's intention clear
+  inline int convert_enum_precision_to_type(precision_type precision)
+  { return precision; }
+
   inline void hex_string(char str[], int length)
   {
     //hexadecimal characters
@@ -810,6 +818,69 @@ namespace cello {
   (const std::vector <std::string> * path_name,
    int counter, int cycle, double time, bool & already_exists);
 
+  //----------------------------------------------------------------------
+
+  // this is a common workaround used to raise a compile-time error in the
+  // elsebranch of a constexpr-if statement (as is down directly below
+  template<class> inline constexpr bool dummy_false_v_ = false;
+
+  /// returns the type_enum associated with the template type argument ``T``.
+  ///
+  /// @tparam T The type for which the enum value is returned. Any ``const`` or
+  //     ``volatile`` qualifiers are automatically shed from it.
+  /// @tparam unknown_on_fail When ``true``, the this returns ``type_unknown``
+  ///     when ``T`` isn't recognized. Otherwise, the program fails to compile
+  ///     (with a compile-time error), when ``T`` isn't recognized.
+  ///
+  /// @note
+  /// This will not return type_default
+  template<typename T, bool unknown_on_fail = false>
+  constexpr int get_type_enum() noexcept {
+    using T_ = typename std::remove_cv_t<T>;
+
+    if constexpr (std::is_same_v<T_,float>) {
+      return type_single;
+    } else if constexpr (std::is_same_v<T_, double>) {
+      return type_double;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==10)) {
+      return type_extended80;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==12)) {
+      return type_extended96;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==16)) {
+      return type_quadruple;
+    } else if constexpr (std::is_same_v<T_, char>) {
+      return type_char;
+    } else if constexpr (std::is_same_v<T_, short>) {
+      return type_short;
+    } else if constexpr (std::is_same_v<T_, int>) {
+      return type_int;
+    } else if constexpr (std::is_same_v<T_, long long>) {
+      return type_long_long;
+#if 0
+    // it's unclear to me at this time if the following is worth including.
+    // - On the one hand, fixed-width integer types are not guaranteed to be
+    //   defined on all systems.
+    // - On the other hand, we could probably provide custom definitions. In
+    //   the case where the smallest integer types can't be defined (b/c a
+    //   machine's definition of a byte exceeds 8 bits), we will encounter
+    //   other problems anyways...
+    } else if constexpr (std::is_same_v<T_, std::int8_t>){
+      return type_char;
+    } else if constexpr (std::is_same_v<T_, std::int16_t>){
+      return type_short;
+    } else if constexpr (std::is_same_v<T_, std::int32_t>){
+      return type_int;
+    } else if constexpr (std::is_same_v<T_, std::int64_t>){
+      return type_long_long;
+#endif
+    } else if constexpr (unknown_on_fail) {
+      return type_unknown;
+    } else {
+      static_assert(dummy_false_v_<T_>, "can't convert type!");
+    }
+  }
+
+  //----------------------------------------------------------------------
 
   inline int color_get_rgb (std::string color_name) {
     // CSS3 extended standard colors

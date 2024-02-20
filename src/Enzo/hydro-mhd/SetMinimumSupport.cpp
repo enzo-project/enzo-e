@@ -12,10 +12,15 @@
 //----------------------------------------------------------------------
  
 int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
+                                 enzo_float minimum_pressure_support_parameter,
 				 bool comoving_coordinates)
 {
   const int in = cello::index_static();
-  if (NumberOfBaryonFields[in] > 0) {
+
+  Field field = data()->field();
+  if (field.num_permanent() > 0) {  // TODO: revisit if-clause. This could be
+                                    // improved. (plus we probably want to
+                                    // report an error when false)
  
     /* Compute cosmology factors. */
  
@@ -34,12 +39,12 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     enzo_float CosmoFactor = 1.0/cosmo_a;
  
     /* Determine the size of the grids. */
+
+    const int GridRank = cello::rank();
  
     int dim, size = 1, i;
-    for (dim = 0; dim < GridRank[in]; dim++)
+    for (dim = 0; dim < GridRank; dim++)
       size *= GridDimension[dim];
- 
-    Field field = data()->field();
 
     enzo_float * density         = (enzo_float*) field.values("density");
     enzo_float * total_energy    = (enzo_float *)field.values("total_energy");
@@ -68,10 +73,14 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     // TODO: check that CellWidth[0], CellWidth[1], and CellWidth[2] are
     //       identical
 
+    // ToDo: figure out how to properly configure this variable. It used to be
+    // a static global variable of EnzoBlock, but it could never be configured
+    const enzo_float GravitationalConstant = 1.0;
+
     const enzo_float gamma = enzo::fluid_props()->gamma();
     MinimumSupportEnergyCoefficient =
       enzo::grav_constant_codeU() / (cello::pi * (gamma*(gamma-1.0))) *
-      CosmoFactor * MinimumPressureSupportParameter[in] *
+      CosmoFactor * minimum_pressure_support_parameter *
       CellWidth[0] * CellWidth[0];
 
     /* PPM: set GE. */
@@ -95,7 +104,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
       for (i = 0; i < size; i++)
 	internal_energy[i] = MAX(internal_energy[i],
 				 MinimumSupportEnergyCoefficient*density[i]);
-      if (GridRank[in] != 3) return ENZO_FAIL;
+      if (GridRank != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
 	total_energy[i] = 
 	  MAX((enzo_float)
@@ -111,7 +120,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
       return ENZO_FAIL;
     }
  
-  } // end: if (NumberOfBaryonFields > 0)
+  } // end: if (field.num_permanent() > 0)
  
   return ENZO_SUCCESS;
 }
