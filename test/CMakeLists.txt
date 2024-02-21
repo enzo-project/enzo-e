@@ -116,6 +116,7 @@ setup_test_unit(StringIndRdOnlyMap ViewComponent/StringIndRdOnlyMap test_string_
 
 setup_test_unit(CelloType Cello/Type test_type)
 
+setup_test_unit(DiskUtils DiskComponent/DiskUtils test_disk_utils)
 setup_test_unit(FileHDF5 DiskComponent/FileHDF5 test_file_hdf5)
 
 setup_test_unit(Error ErrorComponent/Error test_error)

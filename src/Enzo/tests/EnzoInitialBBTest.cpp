@@ -6,8 +6,9 @@
 /// @brief    Initializer for the "BB Test" problem as described
 ///           in Federrath et al 2010, ApJ, 713, 269.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/tests/tests.hpp"
 
 EnzoInitialBBTest::EnzoInitialBBTest
 (int cycle, double time,

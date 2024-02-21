@@ -17,21 +17,38 @@
 
 // Solve the MHD equations with the solver, saving the subgrid fluxes
 
-#include "cello.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
-#include "enzo.hpp"
+#include "Enzo/hydro-mhd/ppml_fortran/ppml_fortran.hpp" // FORTRAN_NAME(ppml)
 
 int EnzoBlock::SolveMHDEquations( enzo_float dt )
 {
 
   /* exit if not 3D */
 
-  // @@ assert GridRank == 3
-  //  if (GridRank != 3)
-  //    my_exit(EXIT_ENZO_FAILURE);
+  const int GridRank = cello::rank();
+  ASSERT("EnzoBlock::SolveMHDEquations",
+         "This function requires the domain's rank to be 3",
+         GridRank == 3);
 
-  const int in = cello::index_static();
-  if (NumberOfBaryonFields[in] > 0) {
+  Field field = data()->field();
+  if (field.num_permanent() > 0) { // TODO: revisit if-clause. This could be
+                                   // improved. (plus we probably want to
+                                   // report an error when false)
+
+    // load the position of the lower left edge of the grid.
+    //
+    // TODO: make DomainLeftEdge hold values in double precision (we don't
+    // currently do that to avoid breaking tests)
+    std::array<double,3> lo_arr_;
+    cello::hierarchy()->lower(&lo_arr_[0], &lo_arr_[1], &lo_arr_[2]);
+
+    const std::array<enzo_float, 3> DomainLeftEdge = {enzo_float(lo_arr_[0]),
+                                                      enzo_float(lo_arr_[1]),
+                                                      enzo_float(lo_arr_[2])};
+
 
     /* initialize */
 
@@ -41,13 +58,10 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     /* Compute size (in floats) of the current grid. */
 
     size = 1;
-    for (dim = 0; dim < GridRank[in]; dim++)
+    for (dim = 0; dim < GridRank; dim++)
       size *= GridDimension[dim];
 
     /* Get easy to handle pointers for each variable. */
-
-
-    Field field = data()->field();
 
     enzo_float *density    = (enzo_float *) field.values ("density");
     enzo_float *velox      = (enzo_float *) field.values ("velox");
@@ -135,14 +149,14 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
 
-     for (dim = 0; dim < GridRank[in]; dim++)
+     for (dim = 0; dim < GridRank; dim++)
        GridGlobalStart[dim] =
-     	NINT((GridLeftEdge[dim] - DomainLeftEdge[in*3+dim])/CellWidth[dim]) -
+     	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
      	GridStartIndex[dim];
 
     /* fix grid quantities so they are defined to at least 3 dims */
 
-    for (i = GridRank[in]; i < 3; i++) {
+    for (i = GridRank; i < 3; i++) {
       GridDimension[i]   = 1;
       GridStartIndex[i]  = 0;
       GridEndIndex[i]    = 0;
@@ -227,7 +241,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     //    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
 
     // for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
-    //   for (dim = 0; dim < GridRank[in]; dim++) {
+    //   for (dim = 0; dim < GridRank; dim++) {
 
         /* Set i,j dimensions of 2d flux slice (this works even if we
            are in 1 or 2d) the correspond to the dimensions of the global
@@ -313,7 +327,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     enzo_float a = 1.0;
     enzo_float CellWidthTemp[MAX_DIMENSION];
     for (dim = 0; dim < MAX_DIMENSION; dim++) {
-      if (dim < GridRank[in])
+      if (dim < GridRank)
 	CellWidthTemp[dim] = enzo_float(a*CellWidth[dim]);
       else
 	CellWidthTemp[dim] = 1.0;
@@ -354,7 +368,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 
     delete [] leftface;
 
-  }  // end: if (NumberOfBaryonFields > 0)
+  }  // end: if (field.num_permanent() > 0)
 
   return ENZO_SUCCESS;
  

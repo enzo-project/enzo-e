@@ -5,8 +5,9 @@
 /// @date     Mon May 6 2019
 /// @brief    [\ref Enzo] Implementation of EnzoBfieldMethodCT
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 //----------------------------------------------------------------------
 
@@ -18,8 +19,6 @@ namespace{
     for (std::size_t i = 0; i < 3; i++){ out[i] = arg[i]; }
     return out;
   }
-
-
 }
 
 

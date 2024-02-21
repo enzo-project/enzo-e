@@ -37,16 +37,10 @@ class Block : public CBase_Block
 
 public: // interface
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   /// create a Block whose MsgRefine is on the creating process
   Block ( process_type ip_source, MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-#else
-  /// create a Block with the given block count, lower extent, block
-  /// size, and number of field blocks
-  Block ( MsgRefine * msg );
-#endif
 
   /// Destructor
   virtual ~Block();
@@ -170,7 +164,7 @@ public: // interface
   /// Return the name of the block with the given index
   std::string name(Index index) const throw();
 
-  /// Return the size the Block array
+  /// Return the size of the Block array
   void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Compute the lower extent of the Block in the domain
@@ -335,6 +329,17 @@ public: // interface
   /// Return the currently-active Solver
   Solver * solver () throw();
 
+  /// Accessor functions for block ordering index and count 
+  void set_order (long long index, long long count)
+  {
+    index_order_ = index;
+    count_order_ = count;
+  }
+  void get_order (long long * index, long long * count) const
+  { *index = index_order_;
+    *count = count_order_;
+  }
+  
 protected: // methods
 
   Index neighbor_ (const int if3[3], Index * ind = 0) const;
@@ -809,7 +814,7 @@ public: // virtual functions
   (int if3[3], int ic3[3], int g3[3],
    int refresh_type,
    Refresh * refresh,
-   bool new_refresh) const;
+   bool new_refresh = true) const;
 
   virtual void print (FILE * fp = nullptr) const;
 
@@ -1016,6 +1021,9 @@ protected: // attributes
   std::vector < Sync > refresh_sync_list_;
   std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
 
+  /// Index and total count used for ordering blocks, e.g. for dynamic load balancing
+  long long index_order_;
+  long long count_order_;
 };
 
 #endif /* COMM_BLOCK_HPP */

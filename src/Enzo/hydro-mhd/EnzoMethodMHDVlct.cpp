@@ -5,10 +5,13 @@
 /// @date     Fri June 14 2019
 /// @brief    [\ref Enzo] Implementation of the EnzoMethodMHDVlct class
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
 #include <algorithm>    // std::copy
+
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp" // EnzoBlock,
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // stuff from toolkit subdirectory
+                                        // stuff from EnzoRiemann subdirectory
+
 
 //----------------------------------------------------------------------
 
