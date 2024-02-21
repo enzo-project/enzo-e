@@ -53,7 +53,7 @@ bool enzo_utils::consistent_cube_cellwidths(enzo_float dx, enzo_float dy,
 
   // in the following chunk of code, we search for 2 values:
   // 1. a value that is `N_ULP` smaller than median_cellwidth
-  // 2. a value that is `N_ULP` smaller than median_cellwidth
+  // 2. a value that is `N_ULP` larger than median_cellwidth
   //
   // To accomplish this:
   // -> we initialize the variables `lower_val` and `upper_val` and initially
