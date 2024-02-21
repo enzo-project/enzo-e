@@ -149,7 +149,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_in");
 #endif
 
-  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+  bool single_flux_array = true;
   if (store_fluxes_for_corrections_){
     Field field = block->data()->field();
 
