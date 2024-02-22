@@ -128,7 +128,6 @@ void Config::pup (PUP::er &p)
   p | method_flux_correct_enable;
   p | method_flux_correct_min_digits_fields;
   p | method_flux_correct_min_digits_values;
-  p | method_flux_correct_single_array;
   p | method_field_list;
   p | method_particle_list;
   PUParray (p,method_output_blocking,3);
@@ -950,9 +949,6 @@ void Config::read_method_ (Parameters * p) throw()
     } else if (p->param(min_digits_name) != nullptr){
       ERROR1("Config::read", "%s has an invalid type", min_digits_name.c_str());
     }
-
-    method_flux_correct_single_array =
-      p->value_logical (full_name + ":single_array",true);
 
     // Field and particle lists if needed by MethodRefresh
     int n = p->list_length(full_name + ":field_list");

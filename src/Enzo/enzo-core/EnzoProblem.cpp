@@ -717,8 +717,8 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodMHDVlct
       (enzo_config->method_vlct_riemann_solver,
-       enzo_config->method_vlct_half_dt_reconstruct_method,
-       enzo_config->method_vlct_full_dt_reconstruct_method,
+       enzo_config->method_vlct_time_scheme,
+       enzo_config->method_vlct_reconstruct_method,
        enzo_config->method_vlct_theta_limiter,
        enzo_config->method_vlct_mhd_choice,
        store_fluxes_for_corrections);

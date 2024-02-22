@@ -22,9 +22,10 @@ add_subdirectory(toolkit) # define Enzo::hydro-mhd_toolkit
 add_library(Enzo_hydro-mhd
   hydro-mhd.hpp
   EnzoMethodMHDVlct.cpp EnzoMethodMHDVlct.hpp
-  EnzoMethodPpml.cpp EnzoMethodPpml.hpp EnzoMethodPpml_SolveMHDEquations.cpp
   EnzoMethodPpm.cpp EnzoMethodPpm.hpp EnzoMethodPpm_SolveHydroEquations.cpp
-  SetMinimumSupport.hpp SetMinimumSupport.cpp
+  EnzoMethodPpml.cpp EnzoMethodPpml.hpp EnzoMethodPpml_SolveMHDEquations.cpp
+  EnzoMHDIntegratorStageCommands.cpp EnzoMHDIntegratorStageCommands.hpp
+  SetMinimumSupport.cpp SetMinimumSupport.hpp
 )
 add_library(Enzo::hydro-mhd ALIAS Enzo_hydro-mhd)
 
