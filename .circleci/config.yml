@@ -395,13 +395,11 @@ jobs:
           tag: tip
           skipfile: notafile
           useprecompiledheaders: false
-          usegrackle: << parameters.usegrackle >>
+          usegrackle: true
           setupCTests: false
 
-      - run-answer-tests:
-          usedouble: << parameters.usedouble >>
-          usegrackle: << parameters.usegrackle >>
-          generate: false
+      # in the future, it may be worth considering running a test-suite here... But for now,
+      # this job is only intended to check whether things successfully compile
 
   docs-build:
     docker:

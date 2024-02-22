@@ -50,7 +50,7 @@ public: // interface
       file_name_(""),
       rank_(0),
       rotate_(false),
-      png_(NULL),
+      png_mask_(NULL),
       density_(0.0),
       pressure_in_(0.0),
       pressure_out_(0.0),
@@ -114,8 +114,8 @@ private: // attributes
   // size of random perturbations to size
   double d_size_[3];
 
-  /// Current pngwriter
-  pngwriter * png_;
+  /// mask read from file_name_
+  bool * png_mask_;
 
   /// Image data
   bool data_[SOUP_IMAGE_NX*SOUP_IMAGE_NY];

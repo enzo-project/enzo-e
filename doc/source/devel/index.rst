@@ -15,8 +15,10 @@ refinement criteria, etc.
    initial
    adapt
    method
+   physics
    array
    hydro_infrastructure
    eos-fluidprops
+   debugging
    cmake_primer
    writing-docs

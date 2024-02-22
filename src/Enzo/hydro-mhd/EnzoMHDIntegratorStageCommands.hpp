@@ -8,6 +8,16 @@
 #ifndef ENZO_MHD_INTEGRATOR_STAGE_COMMANDS_HPP
 #define ENZO_MHD_INTEGRATOR_STAGE_COMMANDS_HPP
 
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/toolkit/toolkit.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemann.hpp"
+
+#include <array>
+#include <memory>
+#include <string>
+#include <vector>
+
 struct EnzoMHDIntegratorStageArgPack {
   /// @class    EnzoMHDIntegratorStageArgPack
   /// @ingroup  Enzo

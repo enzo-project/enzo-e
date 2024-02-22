@@ -5,12 +5,12 @@
 /// @date     Fri June 14 2019
 /// @brief    [\ref Enzo] Implementation of the EnzoMethodMHDVlct class
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
 #include <algorithm>    // std::copy
 
-#include "EnzoMHDIntegratorStageCommands.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp" // EnzoBlock,
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+#include "Enzo/hydro-mhd/EnzoMHDIntegratorStageCommands.hpp"
 
 //----------------------------------------------------------------------
 
@@ -317,10 +317,10 @@ static void allocate_FC_flux_buffer_(Block * block) throw()
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
-  int single_flux_array = enzo::config()->method_flux_correct_single_array;
 
   // this needs to be allocated every cycle
-  block->data()->flux_data()->allocate (nx,ny,nz,field_list,single_flux_array);
+  block->data()->flux_data()->allocate (nx,ny,nz,field_list,
+                                        true /* = single_flux_array */ );
 }
 
 //----------------------------------------------------------------------
