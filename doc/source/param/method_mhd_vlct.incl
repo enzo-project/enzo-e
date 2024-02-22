@@ -69,6 +69,31 @@ The Method:mhd_vlct:mhd_choice determines whether the method is used as a pure h
 
 ----
 
+.. par:parameter:: Method:mhd_vlct:time_scheme
+
+   :Summary: :s:`name of the time-integration scheme to use`
+   :Type:   :par:typefmt:`string`
+   :Default: :d:`vl`
+   :Scope:     :z:`Enzo`
+
+   :e:`Name of the time integration scheme to use. The recommended
+   choice is` ``"vl"``, :e:`which corresponds to the default 2-stage
+   predictor-corrector scheme. This should generally be used with a
+   courant factor satisfying` :math:`C \leq 0.5`.
+
+   :e:`At present, the only other option is` ``"euler"``, :e:`which just
+   updates the MHD fields in a single-stage. It is` **ONLY INTENDED FOR
+   TESTING PURPOSES** :e:`and at the time of writing this documentation, it
+   has not been rigorously tested. When using this choice, make sure to pass`
+   ``"nn"`` :e:`to the` :par:param:`~Method:mhd_vlct:reconstruct_method`
+   :e:`parameter. This scheme should generally be compatible with courant
+   factors satisfying` :math:`C \leq 1`.
+
+   :e:`In the future, we may add additional options to this parameter to
+   support higher order Runge-Kutta integration schemes.`
+
+----
+
 .. par:parameter:: Method:mhd_vlct:riemann_solver
 
    :Summary: :s:`name of the Riemann solver to use`
@@ -78,6 +103,39 @@ The Method:mhd_vlct:mhd_choice determines whether the method is used as a pure h
 
    :e:`Name of the Riemann solver to use. For a list of options, see`
    :ref:`using-vlct-riemann-solver`
+
+----
+
+.. par:parameter:: Method:mhd_vlct:reconstruct_method
+
+   :Summary: :s:`name of the reconstruction method`
+   :Type:   :par:typefmt:`string`
+   :Default: :d:`plm`
+   :Scope:     :z:`Enzo`
+
+   :e:`Name of the interpolation method used to reconstruct face-centered
+   primitives for computing the fluxes. For a list of options, see`
+   :ref:`using-vlct-reconstruction`
+
+   .. note::
+
+      When :par:param:`~Method:mhd_vlct:time_scheme` is ``"vl"``, this
+      has no effect on the predictor stage (aka the half-timestep); it
+      only affects the reconstruction method in the second stage. The
+      predictor stage **MUST** use nearest-neighbor reconstruction.
+
+----
+
+.. par:parameter:: Method:mhd_vlct:theta_limiter
+
+   :Summary: :s:`controls the dissipation of certain slope limiters.`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.5`
+   :Scope:     :z:`Enzo`
+
+   :e:`Modifies the disipation of the slope limiter of the`
+   ``"plm"``/``"plm_enzo"`` :e:`piecewise linear reconstruction
+   algorithm.  For more details, see` :ref:`using-vlct-reconstruction`
 
 ----
 
@@ -94,6 +152,16 @@ The Method:mhd_vlct:mhd_choice determines whether the method is used as a pure h
    :e:`are used). For a list of options, see`
    :ref:`using-vlct-reconstruction`
 
+   .. warning::
+
+      This parameter is deprecated and will be removed in a future version.
+      It only carried meaning while using the original predictor-corrector
+      time integration scheme.
+
+      Furthermore, this parameter only conveyed the illusion of choice. In
+      reality, the integrator ONLY worked when this was set to ``"nn"``. For
+      that reason, this parameter is not replaced.
+
 ----
 
 .. par:parameter:: Method:mhd_vlct:full_dt_reconstruct_method
@@ -107,18 +175,13 @@ The Method:mhd_vlct:mhd_choice determines whether the method is used as a pure h
    primitives for the full timestep. For a list of options, see`
    :ref:`using-vlct-reconstruction`
 
-----
+   
 
-.. par:parameter:: Method:mhd_vlct:theta_limiter
+   .. warning::
 
-   :Summary: :s:`controls the dissipation of certain slope limiters.`
-   :Type:   :par:typefmt:`float`
-   :Default: :d:`1.5`
-   :Scope:     :z:`Enzo`
-
-   :e:`Modifies the disipation of the slope limiter of the`
-   ``"plm"``/``"plm_enzo"`` :e:`piecewise linear reconstruction
-   algorithm.  For more details, see` :ref:`using-vlct-reconstruction`
+      This parameter is deprecated and will be removed in a future version.
+      The :par:param:`~Method:mhd_vlct:reconstruct_method` parameter is a
+      direct replacement.
 
 ----
 

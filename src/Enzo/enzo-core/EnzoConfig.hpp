@@ -372,8 +372,8 @@ public: // interface
       method_pm_update_max_dt(0.0),
       // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
-      method_vlct_half_dt_reconstruct_method(""),
-      method_vlct_full_dt_reconstruct_method(""),
+      method_vlct_time_scheme(""),
+      method_vlct_reconstruct_method(""),
       method_vlct_theta_limiter(0.0),
       method_vlct_mhd_choice(""),
       // EnzoMethodMergeSinks
@@ -901,8 +901,8 @@ public: // attributes
 
   /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;
-  std::string                method_vlct_half_dt_reconstruct_method;
-  std::string                method_vlct_full_dt_reconstruct_method;
+  std::string                method_vlct_time_scheme;
+  std::string                method_vlct_reconstruct_method;
   double                     method_vlct_theta_limiter;
   std::string                method_vlct_mhd_choice;
 
