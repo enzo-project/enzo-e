@@ -144,24 +144,6 @@ struct enzo_fluxes
 // Component class includes
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_GRACKLE
-#include <stdlib.h>
-extern "C" {
-  #define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
-  #include <grackle.h>
-}
-#else
-extern "C" { // declare the names of Grackle types so can reduce the usage of
-             // ifdef statements
-  struct chemistry_data;
-  struct chemistry_data_storage;
-  struct code_units;
-  struct grackle_field_data;
-}
-#endif
-
-//----------------------------------------------------------------------
-
 #include "fortran.h" /* included so scons knowns to install fortran.h */
 
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */

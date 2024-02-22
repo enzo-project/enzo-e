@@ -9,8 +9,23 @@
 #define ENZO_CHEMISTRY_CHEMISTRY_HPP
 
 // TODO: revisit this file in the future. We want to isolate <grackle.h> as a
-//       private dependency. Right now, it's included by the main
-//       "Enzo/enzo.hpp" header
+//       private dependency (that isn't included in this public header)
+
+#ifdef CONFIG_USE_GRACKLE
+#include <stdlib.h>
+extern "C" {
+  #define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
+  #include <grackle.h>
+}
+#else
+extern "C" { // declare the names of Grackle types so can reduce the usage of
+             // ifdef statements
+  struct chemistry_data;
+  struct chemistry_data_storage;
+  struct code_units;
+  struct grackle_field_data;
+}
+#endif
 
 //----------------------------------------------------------------------
 // System includes
@@ -30,7 +45,6 @@
 #include "Cello/view.hpp" // CelloView
 
 #include "Enzo/enzo.hpp" // enzo_float, EnzoBlock, EnzoEFltArrayMap
-                         // also includes <grackle.h>
 
 //----------------------------------------------------------------------
 // Component headers
