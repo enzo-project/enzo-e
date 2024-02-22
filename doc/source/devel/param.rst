@@ -11,8 +11,8 @@ Overview
 Most of the parsing work is handled by the :cpp:class:`!Parameters` class from the Cello layer and stored internally.
 All parameters are parsed after startup on a single process and then the parsed information is communicated between processes.
 
-We are currently in the process of migrating between approaches for accessing parsed parameters (and configuring.
-Given the large-scope of this transition, we decided to gradually migrate between the approaches, rather than try to do it one shot.
+We are currently in the process of migrating between approaches for accessing (and configuring) parsed parameters.
+Given the large scope of this transition, we decided to gradually migrate between the approaches, rather than try to do it one shot.
 
 * At the time of writing, we have migrated a large number of :cpp:class:`!Method` classes.
   
@@ -31,9 +31,9 @@ Parameter Files and Parameter-Paths
 
    Consider merging the content of this section into :ref:`parameter-file`\.
 
-As explained in :ref:`parameter-file`\, Enzo-E/Cello makes use of a hierarichal parameter file (this documentation assumes you are familiar with the basics from that section).
+As explained in :ref:`parameter-file`\, Enzo-E/Cello makes use of a hierarchical parameter file (this documentation assumes you are familiar with the basics from that section).
 
-Essentially, parameters are organized within groups and (possibly subgroups).
+Essentially, parameters are organized within groups (and possibly subgroups).
 In other words, the parameters can be thought of as leaf nodes in a tree-hierarchy of "groups".
 The following snippet illustrates the organization of parameters from a hypothetical parameter file:
 
@@ -54,14 +54,14 @@ The following snippet illustrates the organization of parameters from a hypothet
   }
 
 The organization of parameters in a group hierarchy is analogous to the organization of files in a directory hierarchy.
-Continuing this analogy, we have devised shorthand for naming parameters in the documentation (and throughout the codebase) that is similar to a file path.
+Continuing this analogy, we have devised a shorthand for naming parameters in the documentation (and throughout the codebase) that is similar to a file path.
 One can think of these names as a "parameter-path".
 
-- documentation refering to the parameters in the above snippet would mention :par:paramfmt:`Method:list`, :par:paramfmt:`Method:mhd_vlct:courant`, or :par:paramfmt:`Method:grackle:courant`.
+- Documentation refering to the parameters in the above snippet would mention :par:paramfmt:`Method:list`, :par:paramfmt:`Method:mhd_vlct:courant`, or :par:paramfmt:`Method:grackle:courant`.
 
 - in the codebase, one could see strings refering to ``"Method:list"``, ``"Method:mhd_vlct:courant"``, ``"Method:grackle:courant"`` (in practice, you may not see these particular strings).
 
-- to be clear, a parameter-path for a given parameter lists the names of ancestor "groups", separated by colons, and lists the name of the parameter at the end (i.e. the string that directly precedes an assignment).
+- In general, a parameter-path for a given parameter lists the names of ancestor "groups", separated by colons, and lists the name of the parameter at the end (i.e. the string that directly precedes an assignment).
 
 =========================================
 How to add a new parameter (new approach)
@@ -73,10 +73,10 @@ Instances of this class are commonly passed to the constructors of classes that 
 
 
 Let’s walk through an example where we want to introduce a new parameter to :cpp:class:`!EnzoMethodHeat`. 
-Suppose we want to add a new parameter to the called :par:param:`!my_param`.
+Suppose we want to add a new parameter called :par:param:`!my_param`.
 The full name of this parameter would be :par:param:`!Method:heat:my_param`.
 
-The steps are as-follows:
+The steps are as follows:
 
 1. Introduce a new member-variable (aka an attribute) to :cpp:class:`!EnzoMethodHeat` (in the ``EnzoMethodHeat.hpp`` file).
    For the sake of example, let's imagine that we want to directly store the value specified in the parameter-file in a member-variable (a.k.a. an attribute) named  ``my_param_``.
@@ -84,7 +84,7 @@ The steps are as-follows:
    - The convention is to declare all member-variables as ``private`` or ``protected`` (if the value of that attribute is needed outside of the class, you should define a ``public`` accessor-function).
 
    - Relatedly, the names of all ``private`` & ``protected`` member-variables or member-functions should generally be suffixed with an underscore.
-     An undersore should **NEVER** be the first character in the name of a member-variable or member-function.
+     An underscore should **NEVER** be the first character in the name of a member-variable or member-function.
 
    - **NOTE:** the value of the parameter doesn't necessarily need to initialize a variable with a matching name (or type), this is just a convenience in this example (although, it does make the code a little easier to follow)
 
@@ -110,7 +110,7 @@ The steps are as-follows:
 
     In some cases, parameter-values may be retrieved from the parameter-file in a static factory method, typically called ``from_parameters``, rather than in a constructor.
 
-    There are sometimes cases where the use of factory-method could be very useful (that should usually justified in a comment).
+    There are some cases where the use of factory-method could be very useful (that should usually be justified in a comment).
     But factory-methods are most commonly used in cases where it simplified the transition from the older parameter-parsing approach to this newer approach.
 
 
@@ -127,7 +127,7 @@ The main feature of the :cpp:class:`!ParameterAccessor` class is that it provide
 
 - The root parameter-path is specified during the construction of a :cpp:class:`!ParameterAccessor` instance and cannot be changed over the lifetime of the instance.
 
-  - The immutable nature of the root parameter-path this property is a feature: whenever a :cpp:class:`!ParameterAccessor` instance is passed to a function, you ALWAYS know that the root parameter-path is unchanged (without needing to check the helper function's implementation).
+  - The immutable nature of the root parameter-path is a feature: whenever a :cpp:class:`!ParameterAccessor` instance is passed to a function, you ALWAYS know that the root parameter-path is unchanged (without needing to check the helper function's implementation).
 
   - If a developer is ever tempted to mutate the root-path, they should just initialize a new :cpp:class:`!ParameterAccessor` (since the instances are lightweight)
 
@@ -183,7 +183,7 @@ An example code block is included here, to show what that the initialization mig
     }
 
 There is nothing wrong with the above snippet, and it will work in a lot of cases.
-However, we will encounter issues, when we want to setup a simulation that makes use of multiple :cpp:class:`!MethodOutput` instances.
+However, we will encounter issues when we want to set up a simulation that makes use of multiple :cpp:class:`!MethodOutput` instances.
 To illustrate how this is done in Enzo-E, see the following snippet from a hypothetical parameter file:
 
 .. COMMENT-BLOCK
@@ -281,8 +281,8 @@ Please, avoid using this "escape-hatch" unless it's truly necessary.
 
 .. todo::
 
-   Consider extending the analogy between a parameter-path and a file path.
-   For example, one could imagine interpretting a path that begins with a ``:`` as an absolute parameter-path and all other strings as relative parameter-paths.
+   We could consider extending the analogy between a parameter-path and a file path.
+   For example, one could imagine interpreting a path that begins with a ``:`` as an absolute parameter-path and all other strings as relative parameter-paths.
 
    This would probably streamline the documentation to some degree.
 
@@ -293,21 +293,21 @@ Hypothetical Question: How do I query the parameter of some other :cpp:class:`!M
 ------------------------------------------------------------------------------------------------
 
 The old approach encouraged a somewhat common programming-idiom, in which the configuration information of a primary :cpp:class:`!Method` subclass was accessed in a secondary location, by accessing the copy of the parameter-value stored as an attribute of the global :cpp:class:`!EnzoConfig` object.
-This secondary location is outside of the primary :cpp:class:`!Method` subclass; it could be within a different :cpp:class:`!Method` subclass, a :cpp:class:`!Compute` subclass, an :cpp:class:`!Initial` subclass, etc.
+This secondary location could be outside of the primary :cpp:class:`!Method` subclass; it might be within a different :cpp:class:`!Method` subclass, a :cpp:class:`!Compute` subclass, an :cpp:class:`!Initial` subclass, etc.
 
 Under the new approach, :cpp:class:`!EnzoConfig` will no longer hold a copy of each parameter-value, and this programming-idiom is no longer possible.
 We view this as a **feature** of the new-approach.
 
-There are 2 primary problems with this idiom:
+There are 2 primary problems with this "global" idiom:
 
 1. It makes refactoring of that parameter more difficult.
 
-2. It can lead to cases where you are trying to access parameter-values for :cpp:class:`!Method` subclasses (regardless of whether the subclass is being used in the simulation).
+2. It can lead to cases where you are trying to access parameter-values for :cpp:class:`!Method` subclasses regardless of whether the subclass is even being used in the simulation.
 
 Preferred alternatives to this idiom include either:
 
-1. introducing an accessor method to the primary :cpp:class:`!Method` subclass to directly query configuration-value that is stored as an attribute of that subclass
-2. alterinh the way in which the configuration value is specified and store it within a :cpp:class:`!Physics` class
+1. Introducing an accessor method to the primary :cpp:class:`!Method` subclass to directly query the configuration-value that is stored as an attribute of that subclass
+2. Altering the way in which the configuration value is specified and store it within a :cpp:class:`!Physics` class
 
 .. todo::
 
