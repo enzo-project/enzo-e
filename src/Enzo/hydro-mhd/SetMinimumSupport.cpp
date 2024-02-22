@@ -75,8 +75,9 @@ int enzo::SetMinimumSupport(EnzoBlock& block,
     ASSERT("EnzoBlock::SetMinimumSupport",
            "This function currently requires that cells are perfect cubes. "
            "The cell-widths are NOT all equal",
-           enzo_utils::consistent_cube_cellwidths(CellWidth[0], CellWidth[1],
-                                                  CellWidth[2]));
+           enzo_utils::consistent_cube_cellwidths(block.CellWidth[0],
+                                                  block.CellWidth[1],
+                                                  block.CellWidth[2]));
 
     // TODO: Consider what kind of assumptions are made right here about cell
     //       shapes (are we assuming that each side is the same length?)
