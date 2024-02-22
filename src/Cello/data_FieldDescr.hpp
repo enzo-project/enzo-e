@@ -198,6 +198,10 @@ public: // functions
     return (id_field >= 0) ? precision_.at(id_field) : precision_unknown;
   }
 
+  /// Return the data type of a given field
+  int data_type(int id_field) const throw()
+  { return cello::convert_enum_precision_to_type(precision(id_field)); }
+
   /// centering of given field
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
     throw();

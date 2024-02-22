@@ -5,15 +5,13 @@
 /// @date     Sun May 28 2023
 /// @brief    [\ref Enzo] Implementation of EnzoMHDIntegratorStageCommands
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
+#include "Enzo/hydro-mhd/EnzoMHDIntegratorStageCommands.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 #include <algorithm> // std::transform
 #include <cctype> // tolower
-
-// place this after #include "enzo.hpp"
-#include "EnzoMHDIntegratorStageCommands.hpp"
 
 //----------------------------------------------------------------------
 

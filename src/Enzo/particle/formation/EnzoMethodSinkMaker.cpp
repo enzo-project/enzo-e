@@ -7,9 +7,11 @@
 ///             the method described in Krumholz et al 2004, ApJ, 611, 399 and
 ///             Federrath et al 2010, ApJ, 713, 269.
 
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
 #include <random>
-#include "cello.hpp"
-#include "enzo.hpp"
 
 //-------------------------------------------------------------------
 
@@ -191,7 +193,7 @@ void EnzoMethodSinkMaker::compute_ ( Block *block) throw()
 
   // Get gravitational constant in code units
   const double const_G =
-    enzo_constants::grav_constant * enzo::units()->density() *
+    enzo::grav_constant_cgs() * enzo::units()->density() *
     enzo::units()->time() * enzo::units()->time();
   
   // Get density threshold in code units for this cycle (value will change in

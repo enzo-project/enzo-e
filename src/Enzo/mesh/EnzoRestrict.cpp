@@ -5,9 +5,9 @@
 /// @date     2013-05-10
 /// @brief    Implentation of Enzo's restriction operators
 
-#include "enzo.hpp"
-
-#include "cello.hpp"
+#include "Enzo/mesh/mesh.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 EnzoRestrict::EnzoRestrict(std::string restrict_type) throw()
   : Restrict ()

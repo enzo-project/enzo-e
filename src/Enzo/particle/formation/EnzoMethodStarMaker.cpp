@@ -12,8 +12,9 @@
 ///       will still require quite a bit of repeated code across
 ///       individual SF (the derived classes) routines... so not perfect...
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 //#define DEBUG_SF
 
@@ -260,7 +261,7 @@ int EnzoMethodStarMaker::check_self_gravitating(
   const double gamma = 5.0 / 3.0;
   cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
 
-  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * enzo_constants::grav_constant * density*rhounit);
+  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * enzo::grav_constant_cgs() * density*rhounit);
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- alpha = %f\n",alpha); 
   #endif
@@ -315,7 +316,7 @@ int EnzoMethodStarMaker::check_jeans_mass(
   double cs2 = (gamma * enzo_constants::kboltz * temperature) / mean_particle_mass;
 
   double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / 
-                   (pow(enzo_constants::grav_constant, 1.5) * sqrt(density*rhounit));
+                   (pow(enzo::grav_constant_cgs(), 1.5) * sqrt(density*rhounit));
 
   double m_jcrit = MAX(minimum_jeans_mass, m_jeans);
   #ifdef DEBUG_SF
@@ -367,7 +368,7 @@ int EnzoMethodStarMaker::check_cooling_time(const double &cooling_time,const dou
     return 1;
   }
 
-  double dynamical_time = pow(3.0*cello::pi/32.0/enzo_constants::grav_constant/(total_density*rhounit),0.5); //s
+  double dynamical_time = pow(3.0*cello::pi/32.0/enzo::grav_constant_cgs()/(total_density*rhounit),0.5); //s
   #ifdef DEBUG_SF
     CkPrintf("MethodStarMaker -- cooling_time = %f, dynamical_time = %f\n",cooling_time*tunit, dynamical_time); 
   #endif
