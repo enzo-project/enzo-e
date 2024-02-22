@@ -168,11 +168,10 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "enzo_constants.hpp"
 
-// TODO: remove this after factoring out other subcomponents OR after
-//       EnzoEFltArrayMap becomes an alias for a class template defined in the
-//       Cello-layer (GH PR #326)
+// TODO: remove this include statement (this may be easier to do once we have
+//       finished separating out the various subcomponents)
 #include "utils/utils.hpp"
-#include "utils/EnzoPermutedCoordinates.hpp"
+
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
 
@@ -188,7 +187,6 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 #include "enzo-core/EnzoUnits.hpp"
 
 // [order dependencies:]
-#include "utils/EnzoFieldAdaptor.hpp"
 #include "chemistry/GrackleChemistryData.hpp"
 #include "chemistry/GrackleFacade.hpp"
 
