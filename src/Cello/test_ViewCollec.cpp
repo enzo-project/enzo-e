@@ -9,7 +9,8 @@
 #include "test.hpp"
 #include "view.hpp"
 
-#include "test_ViewTestRoutines.hpp"
+#include "test_ViewTestRoutines.hpp" // assign_range_3Darray, range_3Darray,
+                                     // assert_allequal3D
 
 #include <array>
 #include <utility> // for std::pair
@@ -73,7 +74,6 @@ namespace {
     for (std::size_t i = 0; i < a.size(); i++){ assert_allequal3D(a[i], b[i]); }
   }
 
-
   template<typename T>
   void common_checks_(const char* test_name, ViewCollec<T>& collec,
                       std::size_t n_arrays, const std::array<int,3>& shape,
@@ -96,7 +96,7 @@ namespace {
     if (expect_contiguous){
         CelloView<T,4> backing_arr = collec.get_backing_array();
         ASSERT(test_name, "Unexpected backing_array() shape.",
-               (backing_arr.shape(0) == n_arrays) &
+               (backing_arr.shape(0) == (int)n_arrays) &
                (backing_arr.shape(1) == shape[0]) &
                (backing_arr.shape(2) == shape[1]) &
                (backing_arr.shape(3) == shape[2]));

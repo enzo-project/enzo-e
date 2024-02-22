@@ -5,9 +5,13 @@
 /// @date      November, 1994
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
-#include "cello.hpp"
-#include "enzo.hpp"
 #include <stdio.h>
+
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+
+#include "Enzo/hydro-mhd/ppm_fortran/ppm_fortran.hpp" // FORTRAN_NAME(ppm_de)
 
 // #define IE_ERROR_FIELD
 // #define DEBUG_PPM
@@ -20,7 +24,13 @@ int EnzoBlock::SolveHydroEquations
  enzo_float time,
  enzo_float dt,
  bool comoving_coordinates,
- bool single_flux_array
+ bool single_flux_array,
+ bool diffusion,
+ int flattening,
+ bool pressure_free,
+ bool steepening,
+ bool use_minimum_pressure_support,
+ enzo_float minimum_pressure_support_parameter
  )
 {
   /* initialize */
@@ -116,7 +126,6 @@ int EnzoBlock::SolveHydroEquations
 
   /* Determine if Gamma should be a scalar or a field. */
 
-  const int in = cello::index_static();
   const EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
   enzo_float gamma = fluid_props->gamma();
 
@@ -128,11 +137,13 @@ int EnzoBlock::SolveHydroEquations
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if (UseMinimumPressureSupport[in] == TRUE) {
+  if ((cello::hierarchy()->max_level() == this->level()) &&
+      use_minimum_pressure_support) {
     if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
+                          minimum_pressure_support_parameter,
 			  comoving_coordinates) == ENZO_FAIL) {
       ERROR("EnzoBlock::SolveHydroEquations()",
-	    "Grid::SetMinimumSupport() returned ENZO_FAIL");
+	    "EnzoBlock::SetMinimumSupport() returned ENZO_FAIL");
     }
   }
 
@@ -144,7 +155,20 @@ int EnzoBlock::SolveHydroEquations
 
   if (density_floor > 0.0) {
     for (int i=0; i<mx*my*mz; i++) {
-      density[i] = std::max(density[i], density_floor);
+
+      if (density[i] < density_floor) {
+          double d_pre = density[i];
+          density[i] = density_floor;
+          double density_ratio = density[i] / d_pre;
+
+          // rescale color fields to account for change in
+          // baryon mass from enforcing density floor
+          for (int ic = 0; ic < ncolor; ic++){
+            enzo_float * cfield = (enzo_float *)
+            field.values(field.groups()->item("color",ic));
+            cfield[i] *= density_ratio;
+          }
+      }
     }
   }
 
@@ -310,6 +334,11 @@ int EnzoBlock::SolveHydroEquations
 
   int error = 0;
 
+  // convert the dtype of a couple of arguments:
+  int diffusion_int = diffusion;
+  int pressure_free_int = pressure_free;
+  int steepening_int = steepening;
+
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
@@ -322,10 +351,10 @@ int EnzoBlock::SolveHydroEquations
      CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
      &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,
-     &PPMFlatteningParameter[in],
-     &PressureFree[in],
+     &flattening,
+     &pressure_free_int,
      &iconsrec, &iposrec,
-     &PPMDiffusionParameter[in], &PPMSteepeningParameter[in],
+     &diffusion_int, &steepening_int,
      &idual, &dual_eta1, &dual_eta2,
      &NumberOfSubgrids, leftface, rightface,
      istart, iend, jstart, jend,

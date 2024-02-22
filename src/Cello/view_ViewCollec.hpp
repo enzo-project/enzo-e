@@ -5,12 +5,13 @@
 /// @date     Fri Nov 26 2021
 /// @brief    Declaration and implementation of the ViewCollec class template
 //
-// This class is primarily intended to be used to help implement the ArrayMap
+// This class is primarily intended to be used to help implement the ViewMap
 
 #include <array>
 #include <limits>
 #include <memory> // std::shared_ptr, std::default_delete
-#include <utility> // std::swap
+#include <utility> // std::in_place_type_t
+#include <variant>
 #include <vector>
 
 #ifndef VIEW_C_ARR_COLLEC_HPP
@@ -65,12 +66,6 @@ namespace detail {
     T& operator[](std::size_t i) noexcept { return arr_.get()[i]; }
     std::size_t size() const noexcept {return length_;}
 
-    void swap(SharedBuffer_<T>& other) noexcept
-    {
-      this->arr_.swap(other.arr_);
-      std::swap(this->length_, other.length_);
-    }
-
   private:
     std::shared_ptr<T> arr_;
     std::size_t length_;
@@ -106,9 +101,6 @@ namespace detail {
       ERROR("ArrOfPtrsViewCollec_::get_backing_array",
             "This is an invalid method call");
     }
-
-    friend void swap(ArrOfPtrsViewCollec_<T>& a, ArrOfPtrsViewCollec_<T>& b)
-      noexcept { a.arrays_.swap(b.arrays_); }
 
     // There might be some benefit to not directly constructing subarrays and
     // lazily evaluating them later
@@ -154,10 +146,6 @@ namespace detail {
     const CelloView<T, 4> get_backing_array() const noexcept
     { return backing_array_; }
 
-    friend void swap(SingleAddressViewCollec_<T>& a,
-                     SingleAddressViewCollec_<T>& b) noexcept
-    { swap(a.backing_array_, b.backing_array_); }
-
     SingleAddressViewCollec_<T> subarray_collec(const CSlice &slc_z,
                                                 const CSlice &slc_y,
                                                 const CSlice &slc_x) const
@@ -190,18 +178,12 @@ class ViewCollec{
   ///           constant shape. While elements of these arrays can be mutated,
   ///           the arrays themselves can't be overwritten
   ///
-  /// This primarily exists to help implement an ArrayMap
+  /// This primarily exists to help implement a ViewMap
   ///
   /// This is a hybrid data-type that abstracts 2 separate implementations for
   /// collections of CelloViews. Under the hood, the arrays are either stored
-  /// in a single 4D Contiguous Array (see SingleAddressViewCollec_) or an
+  /// in a single 4D Contiguous View (see SingleAddressViewCollec_) or an
   /// array of 3D CelloViews (see ArrOfPtrsViewCollec_)
-  ///
-  /// The implementation of this hybrid data-structure is fairly crude. If we
-  /// decide that we want to support this hybrid data-type in the long-term,
-  /// we probably want to consider using boost::variant/a backport of
-  /// std::variant or take advantage of the fact that we can represent the
-  /// contents of a SingleAddressViewCollec_ with a ArrOfPtrsViewCollec_
 
 public: // interface
 
@@ -211,93 +193,26 @@ public: // interface
 
   friend class ViewCollec<const_value_type>;
 
-private:
-  // tags how the arrays are stored (whether they're stored in a single
-  // contiguous CelloView or stored like an array of pointers)
-  enum class Tag {CONTIG, ARR_OF_PTR};
-  Tag tag_;
 
-  union{
-    detail::SingleAddressViewCollec_<T> single_arr_;
-    detail::ArrOfPtrsViewCollec_<T> arr_of_ptr_;
-  };
+private: // attributes
 
-private: // helper methods:
-
-  /// default construct the active member
-  void activate_member_(Tag tag, bool currently_initialized = true){
-    if (currently_initialized) { dealloc_active_member_(); }
-    tag_ = tag;
-
-    switch (tag_){
-      case Tag::CONTIG: {
-        new(&single_arr_) detail::SingleAddressViewCollec_<T>;
-        break;
-      }
-      case Tag::ARR_OF_PTR: {
-        new(&arr_of_ptr_) detail::ArrOfPtrsViewCollec_<T>;
-        break;
-      }
-    }
-  }
-
-  // used in destructor and to help switch the active member of the enum
-  // need to explicitly call destructor because we use placement new
-  void dealloc_active_member_() noexcept{
-    // note, we need to use the full qualified names of destructors to avoid
-    // errors with the nvidia compiler
-    switch (tag_){
-      case Tag::CONTIG: {
-        single_arr_.detail::SingleAddressViewCollec_<T>::~SingleAddressViewCollec_();
-        break;
-      }
-      case Tag::ARR_OF_PTR: {
-        arr_of_ptr_.detail::ArrOfPtrsViewCollec_<T>::~ArrOfPtrsViewCollec_();
-        break;
-      }
-    }
-  }
+  std::variant<detail::SingleAddressViewCollec_<T>,
+               detail::ArrOfPtrsViewCollec_<T>> collec_;
 
 public: /// public interface
   /// default constructor
-  ViewCollec() noexcept { activate_member_(Tag::CONTIG, false); }
+  ViewCollec() = default;
 
   /// construct a container of arrays without wrapping existing arrays
-  ViewCollec(std::size_t n_arrays, const std::array<int,3>& shape) noexcept {
-    activate_member_(Tag::CONTIG, false);
-    single_arr_ = detail::SingleAddressViewCollec_<T>(n_arrays, shape);
-  }
+  ViewCollec(std::size_t n_arrays, const std::array<int,3>& shape) noexcept
+    : collec_(std::in_place_type_t<detail::SingleAddressViewCollec_<T>>(),
+              n_arrays, shape)
+  { }
 
   /// construct from vector of arrays
-  ViewCollec(const std::vector<CelloView<T, 3>>& v) noexcept{
-    activate_member_(Tag::ARR_OF_PTR, false);
-    arr_of_ptr_ = detail::ArrOfPtrsViewCollec_<T>(v);
-  }
-
-  /// copy constructor
-  ViewCollec(const ViewCollec& other) noexcept{
-    activate_member_(other.tag_, false);
-    switch (other.tag_){
-      case Tag::CONTIG:     { single_arr_ = other.single_arr_; break; }
-      case Tag::ARR_OF_PTR: { arr_of_ptr_ = other.arr_of_ptr_; break; }
-    }
-  }
-
-  /// copy assignment
-  ViewCollec& operator=(const ViewCollec &other) noexcept {
-    ViewCollec tmp(other);
-    swap(*this,tmp);
-    return *this;
-  }
-
-  /// move constructor
-  ViewCollec (ViewCollec&& other) noexcept : ViewCollec(){ swap(*this,other); }
-
-  /// move assignment
-  ViewCollec& operator=(ViewCollec&& other) noexcept {
-    swap(*this, other);
-    return *this;
-  }
+  ViewCollec(const std::vector<CelloView<T, 3>>& v) noexcept
+    : collec_(std::in_place_type_t<detail::ArrOfPtrsViewCollec_<T>>(), v)
+  { }
 
   /// conversion constructor that facilitates implicit casts from
   /// ViewCollec<nonconst_value_type> to ViewCollec<const_value_type>
@@ -309,75 +224,71 @@ public: /// public interface
   template<class = std::enable_if<std::is_same<T, const_value_type>::value>>
   ViewCollec(const ViewCollec<nonconst_value_type> &other) {
 
-    switch (other.tag_){
-      case ViewCollec<nonconst_value_type>::Tag::CONTIG: {
-        activate_member_(Tag::CONTIG, false);
-        CelloView<const_value_type,4> tmp = other.get_backing_array();
-        single_arr_ = detail::SingleAddressViewCollec_<const_value_type>(tmp);
-        break;
-      }
-      case ViewCollec<nonconst_value_type>::Tag::ARR_OF_PTR: {
-        // this performs heap-allocations (which is a little horrendous in the
-        // context of an implicit cast!)
-        //
-        // There currently isn't a great portable way to do this without
-        // somehow refactoring SharedBuffer_ and getting extremely clever with
-        // casting... (and maybe directly managing internals of CelloView)
-        // -> this would probably make life very difficult when it comes time
-        //    to start using Kokkos
-        //
-        // When we eventually bump the minimum required C++ version to C++17,
-        // (PR # 325), we can refactor this class to directly store,
-        // std::variant<SharedBuffer_<const_value_type>,
-        //              SharedBuffer_<nonconst_value_type>,
-        //              CelloView<T,4>>
-        // (since we are already branching, since we are already branching
-        // between backends, I highly doubt that this translates to a
-        // performance hit)
-        activate_member_(Tag::ARR_OF_PTR, false);
-        std::vector<CelloView<const_value_type,3>> tmp;
-        const std::size_t size = other.size();
-        tmp.reserve(size);
-        for (std::size_t i = 0; i < other.size(); i++) {
-          tmp.push_back(other[i]);
-        }
-        arr_of_ptr_ = detail::ArrOfPtrsViewCollec_<T>(tmp);
-        break;
-      }
+    using ContigT = detail::SingleAddressViewCollec_<nonconst_value_type>;
+    using ArrOfPtrsT = detail::ArrOfPtrsViewCollec_<nonconst_value_type>;
 
+    if (std::holds_alternative<ContigT>(other.collec_)) {
+      // first, we extract the 4D contiguous view
+      const CelloView<nonconst_value_type, 4> tmp =
+        std::get<ContigT>(other.collec_).get_backing_array();
+
+      // now, we cast that 4D view (to one holding the const-qualified type)
+      CelloView<const_value_type,4> casted_view = tmp;
+
+      // finally, we use the casted view to construct
+      // detail::SingleAddressViewCollec_ & store it inside this->collec_
+      // (it would be btter to use collec_.emplace, but I can't get it to work)
+      this->collec_ = detail::SingleAddressViewCollec_<const_value_type>
+        (casted_view);
+
+    } else if (std::holds_alternative<ArrOfPtrsT>(other.collec_)) {
+      // this performs heap-allocations (which is a little horrendous in the
+      // context of an implicit cast!)
+      //
+      // There currently isn't a great portable way to do this without
+      // somehow refactoring SharedBuffer_ and getting extremely clever with
+      // casting... (and maybe directly managing internals of CelloView)
+      // -> this would probably make life very difficult when it comes time
+      //    to start using Kokkos
+      //
+      // Now that we have bumped the minimum required C++ version to C++17,
+      // we can refactor this class to directly store,
+      // std::variant<SharedBuffer_<const_value_type>,
+      //              SharedBuffer_<nonconst_value_type>,
+      //              CelloView<T,4>>
+      // (since we are already branching, between backends, I highly doubt that
+      // this translates to a performance hit)
+
+      std::vector<CelloView<const_value_type,3>> tmp;
+      const std::size_t size = other.size();
+      tmp.reserve(size);
+      for (std::size_t i = 0; i < other.size(); i++) {
+        tmp.push_back(other[i]);
+      }
+      this->collec_ = detail::ArrOfPtrsViewCollec_<const_value_type>(tmp);
+
+    } else {
+      ERROR("ViewCollec()", "This should be unreachable");
     }
   }
 
   /// Destructor
-  ~ViewCollec(){dealloc_active_member_();}
+  ~ViewCollec() = default;
+
+  /// copy/move constructors & assignment operations
+  ViewCollec(const ViewCollec& other)  = default;
+  ViewCollec& operator=(const ViewCollec &other) = default;
+  ViewCollec (ViewCollec&& other) = default;
+  ViewCollec& operator=(ViewCollec&& other) = default;
 
   /// swaps the contents of `a` with `b`
   friend void swap(ViewCollec<T>& a, ViewCollec<T>& b) noexcept{
-    if (&a == &b) { return; }
-    if (a.tag_ == b.tag_){
-      switch (a.tag_){
-        case Tag::CONTIG:     { swap(a.single_arr_, b.single_arr_); break; }
-        case Tag::ARR_OF_PTR: { swap(a.arr_of_ptr_, b.arr_of_ptr_); break; }
-      }
-    } else if (a.tag_ == Tag::CONTIG){
-      detail::SingleAddressViewCollec_<T> temp_single_arr;
-      swap(temp_single_arr, a.single_arr_);
-      a.activate_member_(Tag::ARR_OF_PTR, true);
-      swap(a.arr_of_ptr_, b.arr_of_ptr_);
-      b.activate_member_(Tag::CONTIG, true);
-      swap(temp_single_arr, b.single_arr_);
-    } else {
-      swap(b,a);
-    }
+    a.collec_.swap(b.collec_);
   }
 
   /// Returns the number of arrays held in the collection
   std::size_t size() const noexcept {
-    switch (tag_){
-      case Tag::CONTIG:     { return single_arr_.size(); }
-      case Tag::ARR_OF_PTR: { return arr_of_ptr_.size(); }
-    }
-    ERROR("ViewCollec::size", "problem with exhaustive switch-statement");
+    return std::visit([](auto&& arg) { return arg.size(); }, collec_);
   }
 
   /// Returns a shallow copy of the specified array
@@ -386,22 +297,14 @@ public: /// public interface
     ASSERT2("ViewCollec::operator[]",
             "Can't retrieve value at %zu when size() is %zu",
             i, n_elements, i < n_elements);
-    switch (tag_){
-      case Tag::CONTIG:     { return single_arr_[i]; }
-      case Tag::ARR_OF_PTR: { return arr_of_ptr_[i]; }
-    }
-    ERROR("ViewCollec::operator[]", "problem with exhaustive switch-statement");
+    return std::visit([=](auto&& arg) { return arg[i]; }, collec_);
   }
 
   /// Indicates if the contained arrays are stored in a single 4D array
   /// (Alternatively they can be stored as an array of pointers)
   bool contiguous_items() const noexcept {
-    switch (tag_){
-      case Tag::CONTIG:     { return single_arr_.contiguous_items(); }
-      case Tag::ARR_OF_PTR: { return arr_of_ptr_.contiguous_items(); }
-    }
-    ERROR("ViewCollec::contiguous_items",
-          "problem with exhaustive switch-statement");
+    return std::visit([](auto&& arg) { return arg.contiguous_items(); },
+                      collec_);
   }
 
   /// Returns a shallow copy of the 4D array holding each contained array.
@@ -413,12 +316,8 @@ public: /// public interface
   /// The program will abort if this method is called on an object for which
   /// the `contiguous_items()` method returns `false`.
   const CelloView<T,4> get_backing_array() const noexcept {
-    switch (tag_){
-      case Tag::CONTIG:     { return single_arr_.get_backing_array(); }
-      case Tag::ARR_OF_PTR: { return arr_of_ptr_.get_backing_array(); }
-    }
-    ERROR("ViewCollec::get_backing_array",
-          "problem with exhaustive switch-statement");
+    return std::visit([](auto&& arg) { return arg.get_backing_array(); },
+                      collec_);
   }
 
   /// Returns the length along a given dimension of each contained array
@@ -436,10 +335,10 @@ public: /// public interface
     } else if (dim > 3) {
       ERROR("ViewCollec::array_shape", "invalid dimension");
     }
-    return (*this)[0].shape(dim); // could be optimized based on tag
+    return (*this)[0].shape(dim);
   }
 
-  /// Return a new collection of subsections of each array in the collection
+  /// Return a new collection of subsections of each view in the collection
   ///
   /// @param slc_z, slc_y, slc_x Instance of CSlice that specify that are
   ///    passed to the `subarray` method of each contained array.
@@ -447,23 +346,11 @@ public: /// public interface
                                 const CSlice &slc_y,
                                 const CSlice &slc_x) const noexcept
   {
-
-    // initialize out and activate the union member matching this->tag_.
     ViewCollec<T> out;
-    out.activate_member_(tag_, true);
-
-    switch (tag_){
-      case Tag::CONTIG: {
-        out.single_arr_ = single_arr_.subarray_collec(slc_z,slc_y,slc_x);
-        return out;
-      }
-      case Tag::ARR_OF_PTR: {
-        out.arr_of_ptr_ = arr_of_ptr_.subarray_collec(slc_z,slc_y,slc_x);
-        return out;
-      }
-    }
-    ERROR("ViewCollec::subarray_collec_",
-          "problem with exhaustive switch-statement");
+    auto fn = [&out, &slc_z, &slc_y, &slc_x](auto&& arg)
+      { out.collec_ = arg.subarray_collec(slc_z,slc_y,slc_x); };
+    std::visit(fn, collec_);
+    return out;
   }
 
 };
