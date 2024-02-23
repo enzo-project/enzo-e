@@ -112,7 +112,7 @@ public:
   {
     const int level = this->level();
     return (level >= min_level + 1 && index.level() >= min_level + 2) ?
-      (index_parent() == index.index_parent().index_parent()) : false;
+      (index_parent(min_level) == index.index_parent().index_parent(min_level)) : false;
   }
 
   /// Return the dimensionality of shared face (0 corner, 1 edge, 2

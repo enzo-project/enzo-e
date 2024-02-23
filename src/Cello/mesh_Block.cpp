@@ -180,6 +180,7 @@ void Block::init_refine_
   // Initialize neighbor face levels
 
   const int nc = cello::num_children();
+
   if (num_face_level == 0) {
 
     child_face_level_curr_.resize(nc*27);
@@ -194,17 +195,17 @@ void Block::init_refine_
 
   }
 
-  for (size_t i=0; i<child_face_level_curr_.size(); i++) {
-    child_face_level_curr_[i] = 0;
-  }
+  std::fill(child_face_level_curr_.begin(),
+            child_face_level_curr_.end(), 0);
 
   // Initialize face level counts
   child_face_level_curr_count_.resize(nc*27);
+  std::fill(child_face_level_curr_count_.begin(),
+            child_face_level_curr_count_.end(), -1);
+  
   child_face_level_next_count_.resize(nc*27);
-  for (size_t i=0; i<child_face_level_curr_.size(); i++) {
-    child_face_level_curr_count_[i] = -1;
-    child_face_level_next_count_[i] = -1;
-  }
+  std::fill(child_face_level_next_count_.begin(),
+            child_face_level_next_count_.end(), -1);
 
   initialize_child_face_levels_();
 
