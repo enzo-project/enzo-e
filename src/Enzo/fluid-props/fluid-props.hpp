@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     Enzo/io/io.hpp
+/// @file     Enzo/fluid-props/fluid-props.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     2023-05-30
 /// @brief    Include file for fluid-props subcomponent of the \ref Enzo layer

@@ -25,8 +25,7 @@
 #include <utility> // std::pair
 #include <vector>
 
-// unclear how necessary `extern "C"` is here
-extern "C" { struct chemistry_data; };
+#include "chemistry/chemistry_grackleincl.hpp"
 
 class GrackleChemistryData {
 

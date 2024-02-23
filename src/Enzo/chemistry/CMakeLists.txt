@@ -11,6 +11,7 @@
 # at rebuilds (especially after changing branches)
 add_library(Enzo_chemistry
   chemistry.hpp
+  chemistry_grackleincl.hpp
   EnzoComputeCoolingTime.cpp EnzoComputeCoolingTime.hpp
   EnzoMethodGrackle.cpp EnzoMethodGrackle.hpp
   GrackleChemistryData.cpp GrackleChemistryData.hpp
