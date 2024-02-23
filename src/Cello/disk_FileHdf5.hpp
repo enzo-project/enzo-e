@@ -52,7 +52,6 @@ public: // interface
     p | data_name_;
     p | data_type_;
     p | data_rank_;
-    PUParray(p,data_dims_,4);
     p | data_prop_;
     p | is_data_open_;
     p | compress_level_;
@@ -306,9 +305,6 @@ private: // attributes
 
   /// Dataset rank, 1 to 4
   int data_rank_;
-
-  /// Dataset size
-  int64_t data_dims_[4];
 
   /// HDF5 dataset property list
   hdf5_id data_prop_;
