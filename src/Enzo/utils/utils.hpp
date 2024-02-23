@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_utils.hpp
+/// @file     utils.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     2023-02-11
 /// @brief    Generic utility functions useful throughout the Enzo layer
@@ -46,6 +46,15 @@
 
 /// Namespace for global constants and functions
 namespace enzo_utils {
+
+  /// Checks whether the specified cell-widths are consistent with each other
+  ///
+  /// This is intended for use in calculations that require/assume that cells
+  /// are cubes. This function accounts for the fact that they may not match
+  /// exactly (roundoff error can occur since the cell-widths are computed from
+  /// the domain's extents)
+  bool consistent_cube_cellwidths(enzo_float dx, enzo_float dy, enzo_float dz)
+    noexcept;
 
   /// computes the squared magnitude of a 3D vector
   ///
