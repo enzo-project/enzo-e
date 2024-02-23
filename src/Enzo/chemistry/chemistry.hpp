@@ -8,6 +8,13 @@
 #ifndef ENZO_CHEMISTRY_CHEMISTRY_HPP
 #define ENZO_CHEMISTRY_CHEMISTRY_HPP
 
+// it's important to include this first
+// - eventually, it would be great to finish refactoring so that the grackle
+//   datatypes don't need to be declared in the headers
+// - the placement of this include statement will be less important after we
+//   stop including the this file in "_enzo.hpp"
+#include "chemistry/chemistry_grackleincl.hpp"
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
@@ -30,8 +37,6 @@
 //----------------------------------------------------------------------
 // Component headers
 //----------------------------------------------------------------------
-
-#include "chemistry/chemistry_grackleincl.hpp"
 
 #include "chemistry/GrackleChemistryData.hpp"
 #include "chemistry/GrackleFacade.hpp"
