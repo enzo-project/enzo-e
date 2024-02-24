@@ -1,18 +1,32 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# add source files related to gravity-solvers to the enzo target
+# create Enzo::gravity, which represents source files related to implementing
+# gravity.
+#
+# We explicitly list files (rather than use glob) since that makes CMake better
+# at rebuilds (especially after changing branches)
+add_library(Enzo_gravity
+  gravity.hpp
+  EnzoComputeAcceleration.cpp EnzoComputeAcceleration.hpp
+  EnzoMethodBackgroundAcceleration.cpp EnzoMethodBackgroundAcceleration.hpp
+  EnzoMethodGravity.cpp EnzoMethodGravity.hpp
+  EnzoMethodPmDeposit.cpp EnzoMethodPmDeposit.hpp
+  grid_cic.F
 
-# Get the list of source files in this directory
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp *.F
-  matrix/*.cpp matrix/*.hpp
-  solvers/*.cpp solvers/*.hpp
+  matrix/EnzoMatrixDiagonal.cpp matrix/EnzoMatrixDiagonal.hpp
+  matrix/EnzoMatrixIdentity.cpp matrix/EnzoMatrixIdentity.hpp
+  matrix/EnzoMatrixLaplace.cpp matrix/EnzoMatrixLaplace.hpp
+
+  solvers/EnzoSolverBiCgStab.cpp solvers/EnzoSolverBiCgStab.hpp
+  solvers/EnzoSolverCg.cpp solvers/EnzoSolverCg.hpp
+  solvers/EnzoSolverDd.cpp solvers/EnzoSolverDd.hpp
+  solvers/EnzoSolverDiagonal.cpp solvers/EnzoSolverDiagonal.hpp
+  solvers/EnzoSolverJacobi.cpp solvers/EnzoSolverJacobi.hpp
+  solvers/EnzoSolverMg0.cpp solvers/EnzoSolverMg0.hpp
 )
+add_library(Enzo::gravity ALIAS Enzo_gravity)
 
-target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
+# the following can be improved (it links more than is necessary)
+target_link_libraries(Enzo_gravity PUBLIC enzo ${CELLO_LIBS})
+target_include_directories(Enzo_gravity PUBLIC ${ROOT_INCLUDE_DIR})
+target_link_options(Enzo_gravity PRIVATE ${Cello_TARGET_LINK_OPTIONS})

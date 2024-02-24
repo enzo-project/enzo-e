@@ -228,30 +228,18 @@ protected:
   (const std::string * file_name,
    const std::vector<std::string> * file_args) const throw();
 
-  /// Return the path for this file group output.  Creates
-  /// the subdirectories if they don't exist
+  /// Return the path for this file group output. If a subdirectory is
+  /// specified, this function creates it if it doesn't already exist
   std::string directory () const
   {
-    std::string dir = ".";
     std::string name_dir = expand_name_(&dir_name_,&dir_args_);
 
-    // Create subdirectory if any
-    if (name_dir != "") {
-      dir = name_dir;
-      boost::filesystem::path directory(name_dir);
-
-      if (! boost::filesystem::is_directory(directory)) {
-
-        boost::filesystem::create_directory(directory);
-
-	ASSERT1 ("Output::directory()",
-		 "Error creating directory %s",
-		 name_dir.c_str(),
-                 boost::filesystem::is_directory(directory));
-      }
+    if (name_dir != "") { // the file group output is placed in a subdirectory
+      cello::ensure_directory_exists(name_dir);
+      return name_dir;
+    } else {
+      return "."; // the file group output is not in a subdirectory
     }
-
-    return dir;
   }
 
   /// write version metadata to disk

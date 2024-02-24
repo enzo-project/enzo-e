@@ -12,9 +12,8 @@
 // System includes
 //----------------------------------------------------------------------
 
+#include <cstring>
 #include <limits>
-#include <boost/filesystem.hpp>
-#include "pngwriter.h"
 
 //----------------------------------------------------------------------
 // Typedefs

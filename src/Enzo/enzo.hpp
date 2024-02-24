@@ -45,28 +45,32 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "_enzo.hpp"
-
 class CProxy_EnzoBlock;
+class EnzoBlock;
 class EnzoConfig;
 class EnzoFactory;
-class EnzoPhysicsCosmology;
 class EnzoProblem;
 class EnzoSimulation;
 class EnzoUnits;
 class GrackleChemistryData;
 
-/// Namespace for Enzo global constants and accessor functions
+class EnzoPhysicsCosmology;
+class EnzoPhysicsFluidProps;
+class EnzoMethodGrackle;
+
+/// Namespace for Enzo global accessor functions
 namespace enzo {
 
-
+  CProxy_EnzoBlock          block_array();
+  EnzoBlock *               block ( Block * block);
   const EnzoConfig *        config();
   const EnzoFactory *       factory();
   EnzoProblem *             problem();
   EnzoSimulation *          simulation();
+  EnzoUnits *               units();
+
   EnzoPhysicsCosmology *    cosmology();
   EnzoPhysicsFluidProps *   fluid_props();
-
   const EnzoMethodGrackle * grackle_method();
 
   /// Returns a pointer of GrackleChemistryData, if grackle is being used by
@@ -76,20 +80,26 @@ namespace enzo {
   /// `ret != nullptr` that `ret->get<int>("use_grackle") == 1`.
   const GrackleChemistryData * grackle_chemistry();
 
-  CProxy_EnzoBlock          block_array();
-  EnzoBlock *               block ( Block * block);
-  EnzoPhysicsCosmology *    cosmology();
-  EnzoProblem *             problem();
-  EnzoSimulation *          simulation();
-  EnzoUnits *               units();
-
-  /// Returns whether the dual energy formalism is in use.
+  /// returns the gravitational constant in code units
   ///
-  /// @param default_ret[in] The value to return if no hydro methods are used.
-  ///     The default value is false.
-  bool uses_dual_energy_formalism(bool default_ret = false);
+  /// @note
+  /// One might naively assume that the gravitational constant is
+  /// time-dependent when written in cosmological code units (since they are
+  /// comoving). However, the cosmological code units are explicitly defined so
+  /// that the gravitational constant is always fixed in code units
+  double grav_constant_codeU() noexcept;
 
+  /// returns the gravitational constant in cgs
+  ///
+  /// This is generally preferable to enzo_constants::standard_grav_constant
+  /// since this will return the user-customizable value of the gravitational
+  /// constant (the user can only customize the value in non-cosmological sims)
+  double grav_constant_cgs() noexcept;
 }
+
+// this include statement must follow the above function declarations, so that
+// they can be used within header files
+#include "_enzo.hpp"
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
 extern CProxy_IoEnzoWriter proxy_io_enzo_writer;

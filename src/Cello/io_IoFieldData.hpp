@@ -42,16 +42,18 @@ public: // interface
   void set_field_data (FieldData * field_data) throw()
   { field_data_ = field_data;};
 
+  void set_include_ghosts (bool include_ghosts)
+  { include_ghosts_ = include_ghosts; }
 
   /// Return the ith data item associated with the object
-  virtual void field_array 
+  virtual void field_array
   (void ** buffer, std::string * name, int * type,
-   int * nxd=0, int * nyd=0, int * nzd=0,
-   int * nx=0,  int * ny=0,  int * nz=0) throw();
+   int * pmx, int * pmy, int * pmz,
+   int * pnx, int * pny, int * pnz) throw();
 
   /// Return the ith metadata item associated with the object
-  virtual void meta_value 
-  (int index, 
+  virtual void meta_value
+  (int index,
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
@@ -66,7 +68,7 @@ protected: // functions
 
 private: // attributes
 
-
+  bool include_ghosts_;
 };
 
 #endif /* IO_IO_FIELD_DATA_HPP */

@@ -36,11 +36,11 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_final_redshift(0.0),
   // FluidProps
   physics_fluid_props_de_config(),
+  physics_fluid_props_eos_variant(),
   physics_fluid_props_fluid_floor_config(),
-  physics_fluid_props_gamma(0.0),
   physics_fluid_props_mol_weight(0.0),
   // Gravity
-  physics_gravity(false),
+  physics_gravity_grav_constant_codeU(-1.0),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
   // EnzoInitialBurkertBodenheimer
@@ -53,21 +53,23 @@ EnzoConfig::EnzoConfig() throw ()
   initial_burkertbodenheimer_rotating(true),
   initial_burkertbodenheimer_outer_velocity(-1),
   // EnzoInitialCloud
-  initial_cloud_subsample_n(0),
-  initial_cloud_radius(0.),
   initial_cloud_center_x(0.0),
   initial_cloud_center_y(0.0),
   initial_cloud_center_z(0.0),
   initial_cloud_density_cloud(0.0),
   initial_cloud_density_wind(0.0),
-  initial_cloud_velocity_wind(0.0),
-  initial_cloud_etot_wind(0.0),
   initial_cloud_eint_wind(0.0),
-  initial_cloud_metal_mass_frac(0.0),
+  initial_cloud_etot_wind(0.0),
   initial_cloud_initialize_uniform_bfield(false),
-  initial_cloud_perturb_stddev(0.0),
-  initial_cloud_trunc_dev(0.0),
+  initial_cloud_metal_mass_frac(0.0),
+  initial_cloud_perturb_Nwaves(0),
+  initial_cloud_perturb_amplitude(0.),
+  initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
+  initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
   initial_cloud_perturb_seed(0),
+  initial_cloud_radius(0.),
+  initial_cloud_subsample_n(0),
+  initial_cloud_velocity_wind(0.0),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -199,6 +201,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_check_ordering("order_morton"),
   method_check_dir(),
   method_check_monitor_iter(0),
+  method_check_include_ghosts(false),
   // EnzoInitialMergeSinksTest
   initial_merge_sinks_test_particle_data_filename(""),
   // EnzoInitialAccretionTest
@@ -305,7 +308,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
   // EnzoMethodGravity
-  method_gravity_grav_const(0.0),
   method_gravity_solver(""),
   method_gravity_order(4),
   method_gravity_dt_max(0.0),
@@ -328,8 +330,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_pm_update_max_dt(std::numeric_limits<double>::max()),
   /// EnzoMethodMHDVlct
   method_vlct_riemann_solver(""),
-  method_vlct_half_dt_reconstruct_method(""),
-  method_vlct_full_dt_reconstruct_method(""),
+  method_vlct_time_scheme(""),
+  method_vlct_reconstruct_method(""),
   method_vlct_theta_limiter(0.0),
   method_vlct_mhd_choice(""),
   /// EnzoMethodMergeSinks
@@ -422,11 +424,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_final_redshift;
 
   p | physics_fluid_props_de_config;
+  ::pup(p, physics_fluid_props_eos_variant);
   p | physics_fluid_props_fluid_floor_config;
-  p | physics_fluid_props_gamma;
   p | physics_fluid_props_mol_weight;
 
-  p | physics_gravity;
+  p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
 
@@ -443,8 +445,10 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_cloud_metal_mass_frac;
   p | initial_cloud_initialize_uniform_bfield;
   PUParray(p,initial_cloud_uniform_bfield,3);
-  p | initial_cloud_perturb_stddev;
-  p | initial_cloud_trunc_dev;
+  p | initial_cloud_perturb_Nwaves;
+  p | initial_cloud_perturb_amplitude;
+  p | initial_cloud_perturb_min_wavelength;
+  p | initial_cloud_perturb_max_wavelength;
   p | initial_cloud_perturb_seed;
 
   p | initial_cosmology_temperature;
@@ -598,6 +602,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_ordering;
   p | method_check_dir;
   p | method_check_monitor_iter;
+  p | method_check_include_ghosts;
 
   PUParray(p,initial_accretion_test_sink_position,3);
   PUParray(p,initial_accretion_test_sink_velocity,3);
@@ -704,7 +709,6 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_turbulence_edot;
 
-  p | method_gravity_grav_const;
   p | method_gravity_solver;
   p | method_gravity_order;
   p | method_gravity_dt_max;
@@ -728,8 +732,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_pm_update_max_dt;
 
   p | method_vlct_riemann_solver;
-  p | method_vlct_half_dt_reconstruct_method;
-  p | method_vlct_full_dt_reconstruct_method;
+  p | method_vlct_time_scheme;
+  p | method_vlct_reconstruct_method;
   p | method_vlct_theta_limiter;
   p | method_vlct_mhd_choice;
 
@@ -1184,36 +1188,50 @@ void EnzoConfig::read_initial_bcenter_(Parameters * p)
 void EnzoConfig::read_initial_cloud_(Parameters * p)
 {
   // Cloud Crush Initialization
-  initial_cloud_subsample_n     = p->value_integer
+  initial_cloud_subsample_n            = p->value_integer
     ("Initial:cloud:subsample_n",0);
-  initial_cloud_radius          = p->value_float
+  initial_cloud_radius                 = p->value_float
     ("Initial:cloud:cloud_radius",0.0);
-  initial_cloud_center_x        = p->value_float
+  initial_cloud_center_x               = p->value_float
     ("Initial:cloud:cloud_center_x",0.0);
-  initial_cloud_center_y        = p->value_float
+  initial_cloud_center_y               = p->value_float
     ("Initial:cloud:cloud_center_y",0.0);
-  initial_cloud_center_z        = p->value_float
+  initial_cloud_center_z               = p->value_float
     ("Initial:cloud:cloud_center_z",0.0);
-  initial_cloud_density_cloud   = p->value_float
+  initial_cloud_density_cloud          = p->value_float
     ("Initial:cloud:cloud_density",0.0);
-  initial_cloud_density_wind    = p->value_float
+  initial_cloud_density_wind           = p->value_float
     ("Initial:cloud:wind_density",0.0);
-  initial_cloud_velocity_wind   = p->value_float
+  initial_cloud_velocity_wind          = p->value_float
     ("Initial:cloud:wind_velocity",0.0);
-  initial_cloud_etot_wind       = p->value_float
+  initial_cloud_etot_wind              = p->value_float
     ("Initial:cloud:wind_total_energy",0.0);
-  initial_cloud_eint_wind       = p->value_float
+  initial_cloud_eint_wind              = p->value_float
     ("Initial:cloud:wind_internal_energy",0.0);
-  initial_cloud_metal_mass_frac = p->value_float
+  initial_cloud_metal_mass_frac        = p->value_float
     ("Initial:cloud:metal_mass_fraction",0.0);
-  initial_cloud_perturb_stddev  = p->value_float
-    ("Initial:cloud:perturb_standard_deviation",0.0);
-  initial_cloud_trunc_dev       = p->value_float
-    ("Initial:cloud:perturb_truncation_deviation",0.0);
-  int init_cloud_perturb_seed_  = p->value_integer
+  initial_cloud_perturb_Nwaves         = p->value_integer
+    ("Initial:cloud:perturb_Nwaves", 0);
+  initial_cloud_perturb_amplitude      = p->value_float
+    ("Initial:cloud:perturb_amplitude", 0.);
+  initial_cloud_perturb_min_wavelength = p->value_float
+    ("Initial:cloud:perturb_min_lambda", std::numeric_limits<double>::min());
+  initial_cloud_perturb_max_wavelength = p->value_float
+    ("Initial:cloud:perturb_max_lambda", std::numeric_limits<double>::min());
+  if (initial_cloud_perturb_Nwaves > 0){
+    if (initial_cloud_perturb_max_wavelength
+        == std::numeric_limits<double>::min() ){
+      initial_cloud_perturb_max_wavelength = initial_cloud_radius;
+    }
+  }
+
+
+  int init_cloud_perturb_seed_         = p->value_integer
     ("Initial:cloud:perturb_seed",0);
-  ASSERT("EnzoConfig::read()", "Initial:cloud:perturb_seed must be >=0",
-	 init_cloud_perturb_seed_ >= 0);
+  ASSERT("EnzoConfig::read()",
+         "Initial:cloud:perturb_seed must be a 32-bit unsigned integer",
+	 (init_cloud_perturb_seed_ >= 0) &&
+         (init_cloud_perturb_seed_ <= 4294967295L));
   initial_cloud_perturb_seed = (unsigned int) init_cloud_perturb_seed_;
 
   int initial_cloud_uniform_bfield_length = p->list_length
@@ -1496,6 +1514,7 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
 
   // Defaults alert PUP::er() to ignore
   if (method_grackle_use_grackle) {
+
     method_grackle_use_cooling_timestep = p->value_logical
       ("Method:grackle:use_cooling_timestep", false);
 
@@ -1563,7 +1582,14 @@ void EnzoConfig::read_method_grackle_(Parameters * p)
                                       method_grackle_use_grackle);
 
     // 3. Copy over parameters from Enzo-E to Grackle
-    method_grackle_chemistry.set<double>("Gamma", physics_fluid_props_gamma);
+    if (physics_fluid_props_eos_variant.holds_alternative<EnzoEOSIdeal>()) {
+      method_grackle_chemistry.set<double>
+        ("Gamma", physics_fluid_props_eos_variant.get<EnzoEOSIdeal>().gamma);
+    } else {
+      ERROR("EnzoConfig::read_method_grackle_",
+            "Grackle currently can't be used when Enzo-E is configured to use "
+            "an equation of state other than the ideal gas law");
+    }
 
     // In the future, we may want to manually set use_radiative_transfer based
     // on an Enzo-E parameter for turning RT on / off:
@@ -1839,12 +1865,6 @@ void EnzoConfig::read_method_background_acceleration_(Parameters * p)
       (axis,"Method:background_acceleration:angular_momentum",0);
   }
 
-  // Not sure if I need. Seems this flag tells the hydo solver
-  // if gravity exists... so I would expect to need this... but Does
-  // not get triggered for self-gravity at the moment... so not sure
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "background_acceleration") physics_gravity=true;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -1853,32 +1873,75 @@ void EnzoConfig::read_method_vlct_(Parameters * p)
 {
   method_vlct_riemann_solver = p->value_string
     ("Method:mhd_vlct:riemann_solver","hlld");
-  method_vlct_half_dt_reconstruct_method = p->value_string
-    ("Method:mhd_vlct:half_dt_reconstruct_method","nn");
-  method_vlct_full_dt_reconstruct_method = p->value_string
-    ("Method:mhd_vlct:full_dt_reconstruct_method","plm");
   method_vlct_theta_limiter = p->value_float
     ("Method:mhd_vlct:theta_limiter", 1.5);
 
-  // we should raise an error if mhd_choice is not specified
+  // determine whether we're actually using vl+ct (for error-checking and
+  // handling backwards compatability)
   bool uses_vlct = false;
   for (size_t i=0; i<method_list.size(); i++) {
     if (method_list[i] == "mhd_vlct") uses_vlct=true;
   }
+
+  // raise an error if mhd_choice is not specified
   method_vlct_mhd_choice = p->value_string
     ("Method:mhd_vlct:mhd_choice", "");
-  if (uses_vlct && (method_vlct_mhd_choice == "")){
-    ERROR("EnzoConfig::read", "Method:mhd_vlct:mhd_choice was not specified");
+  if (uses_vlct && (p->param("Method:mhd_vlct:mhd_choice") == nullptr)) {
+    ERROR("EnzoConfig::read_method_vlct_",
+          "Method:mhd_vlct:mhd_choice was not specified");
   }
+
+  // these parameters affect backwards compatability
+  std::string pname_time_scheme = "Method:mhd_vlct:time_scheme";
+  std::string pname_reconstruct = "Method:mhd_vlct:reconstruct_method";
+
+  method_vlct_time_scheme = p->value_string(pname_time_scheme, "vl");
+  method_vlct_reconstruct_method = p->value_string(pname_reconstruct, "plm");
+
+  // backwards compatibilty: deprecated half/full_dt_reconstruct_method params
+  std::string pname_half_recon = "Method:mhd_vlct:half_dt_reconstruct_method";
+  std::string pname_full_recon = "Method:mhd_vlct:full_dt_reconstruct_method";
+  bool specified_half_dt_recon = (p->param(pname_half_recon) != nullptr);
+  bool specified_full_dt_recon = (p->param(pname_full_recon) != nullptr);
+  if (uses_vlct && (specified_half_dt_recon || specified_full_dt_recon)) {
+
+    if ((p->param(pname_time_scheme) != nullptr) ||
+        (p->param(pname_reconstruct) != nullptr)) {
+      ERROR4("EnzoConfig::read_method_vlct_",
+             "The deprecated parameters, \"%s\" and \"%s\", can't be "
+             "specified when \"%s\" or \"%s\" is specified.",
+             pname_half_recon.c_str(), pname_full_recon.c_str(),
+             pname_time_scheme.c_str(), pname_reconstruct.c_str());
+    }
+
+    if (p->value_string(pname_half_recon, "nn") != "nn") {
+      // it never made ANY sense to allow the half timestep of the VL+CT
+      // algorithm to use anything other than the "nn" choice. (The only reason
+      // it was ever an option was due to a misunderstanding early on)
+      ERROR1("EnzoConfig::read_method_vlct_",
+             "The deprecated parameter, \"%s\", can't have any value other "
+             "than \"nn\"",
+             pname_half_recon.c_str());
+    }
+
+    if (specified_full_dt_recon) {
+      method_vlct_reconstruct_method = p->value_string(pname_full_recon,"plm");
+    }
+
+    WARNING3("EnzoConfig::read_method_vlct_",
+             "\"%s\" and \"%s\" are deprecated and they will be removed in "
+             "the future. The former can't have any value other than \"nn\"; "
+             "it won't be replaced. Use \"%s\" instead of the latter.",
+             pname_half_recon.c_str(), pname_full_recon.c_str(),
+             pname_reconstruct.c_str());
+  }
+
 }
 
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_method_gravity_(Parameters * p)
 {
-  method_gravity_grav_const = p->value_float
-    ("Method:gravity:grav_const",6.67384e-8);
-
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","unknown");
 
@@ -1918,7 +1981,8 @@ void EnzoConfig::read_method_check_(Parameters * p)
       method_check_dir[i] = p->list_value_string(i,"dir","");
     }
   }
-  method_check_monitor_iter = p->value_integer("monitor_iter",0);
+  method_check_monitor_iter   = p->value_integer("monitor_iter",0);
+  method_check_include_ghosts = p->value_logical("include_ghosts",false);
 }
 
 //----------------------------------------------------------------------
@@ -2072,16 +2136,12 @@ void EnzoConfig::read_physics_(Parameters * p)
             "\"fluid_prop\" is a typo for \"fluid_props\"");
     }
 
-    if (physics_list[index_physics] == "gravity") {
-
-      physics_gravity = true;
-
-    }
   }
 
   // this is intentionally done outside of the for-loop (for
   // backwards-compatability purposes)
   read_physics_fluid_props_(p);
+  read_physics_gravity_(p);
 }
 
 //----------------------------------------------------------------------
@@ -2173,7 +2233,7 @@ namespace{
 
     // look for dual energy parameters specified within the hydro solver (for
     // backwards compatibility)
-    if (hydro_type != ""){
+    if ((hydro_type != "") && (hydro_type != "ppml")) {
       std::string legacy_de_param = "Method:" + hydro_type + ":dual_energy";
       bool legacy_param_exists = p->param(legacy_de_param) != nullptr;
 
@@ -2199,6 +2259,145 @@ namespace{
       }
     }
     return out;
+  }
+
+  //----------------------------------------------------------------------
+
+  EnzoEOSVariant parse_eos_choice_(Parameters * p,
+                                   const std::string& hydro_type)
+  {
+    // Prior to the creation of the EnzoEOSVariant class, Enzo-E effectively
+    // assumed at a global level that an ideal EOS was in use and stored gamma
+    // at a global level.
+    //
+    // - gamma's value was originally parsed from "Field:gamma" and later from
+    //   "Physics:fluid_props:eos:gamma". As an aside, while it was always the
+    //   plan to have the ``EnzoPhysicsFluidProps`` class track the EOS type,
+    //   the ability to track EOS type was added a while after the fact (in the
+    //   same PR that introduced ``EnzoEOSVariant``).
+    // - gamma's default value has always been 5/3.
+    // - when the Ppml solver was used, it simply ignored the value of gamma
+    //   and internally used an Isothermal EOS.
+    // - technically, extension points were put into place within the vl+ct
+    //   solver to support other types of solvers, but those were never used.
+
+
+    // get the name of EnzoEOSIdeal (useful since it's the default eos type)
+    const std::string ideal_name = EnzoEOSIdeal::name();
+
+    // check whether the legacy parameter was specified
+    const bool legacy_gamma_specified = p->param("Field:gamma") != nullptr;
+
+    // fetch names of parameters in Physics:fluid_props:eos
+    p->group_set(0, "Physics");
+    p->group_set(1, "fluid_props");
+    p->group_set(2, "eos");
+    std::vector<std::string> names = p->leaf_parameter_names();
+
+    const bool missing_eos_config = names.size() == 0;
+
+    if (legacy_gamma_specified && !missing_eos_config) {
+      ERROR("parse_eos_choice_",
+            "\"Field:gamma\" isn't valid since parameters are specified "
+            "within the \"Physics:fluid_props:eos\" parameter group");
+
+    } else if (!missing_eos_config) {
+      // this branch does the main work of the function
+
+      // STEP 1: define some useful variables
+      const std::string prefix = "Physics:fluid_props:eos:";
+      const bool is_type_specified = p->param(prefix + "type") != nullptr;
+      // following variable is used for maintaining backwards compatability
+      const bool is_gamma_specified = p->param(prefix + "gamma") != nullptr;
+
+      // STEP 2: determine the eos-type
+      std::string type;
+      if (is_type_specified) {
+        type = p->value(prefix + "type","");
+      } else if (is_gamma_specified) {
+        WARNING1("parse_eos_choice_",
+                 "Going forward, \"Physics:fluid_props:eos:type\" must be set "
+                 "when there are other parameters in the subgroup. For "
+                 "backwards compatability, this is being set to \"%s\" since "
+                 "the only other parameter in that group is \"gamma\"",
+                 ideal_name.c_str());
+        type = ideal_name;
+      } else {
+        ERROR("parse_eos_choice_",
+              "\"Physics:fluid_props:eos:type\" must be set when there are "
+              "other parameters in the subgroup.");
+      }
+
+      // STEP 3: actually build the EOS object and return it
+      if (type == ideal_name) { // EnzoEOSIdeal
+
+        // this case is a little funky, since we allow type to not actually be
+        // a parameter (for backwards compatability purposes).
+        std::size_t num_params = (1 + (std::size_t)(is_type_specified));
+        ASSERT1("parse_eos_choice_",
+                "the only allowed parameters are \"type\" and \"gamma\" in "
+                "the \"Physics:fluid_props:eos\" parameter group when making "
+                "an \"%s\" eos", type.c_str(),
+                (num_params == names.size()) && is_gamma_specified);
+        double gamma = p->value_float(prefix+"gamma", -1.0);
+        return EnzoEOSVariant(EnzoEOSIdeal::construct(gamma));
+
+      } else if ( type == EnzoEOSIsothermal::name() ){
+
+        ASSERT1("parse_eos_choice_",
+                "when building an \"%s\" eos, \"type\" is the only parameter "
+                "allowed in the \"Physics:fluid_props:eos\" parameter group ",
+                type.c_str(), (names.size() == 1) && is_type_specified);
+        return EnzoEOSVariant(EnzoEOSIsothermal());
+
+      } else {
+        ERROR1("parse_eos_choice_",
+               "there's no support for building an eos of type \"%s\".",
+               type.c_str());
+      }
+    }
+
+
+    if (legacy_gamma_specified) {
+      double gamma = p->value_float("Field:gamma", -1.0);
+      if (gamma <= 1.0) {
+        std::string isothermal_name = EnzoEOSIsothermal::name();
+        ERROR2("parse_eos_choice_",
+               "\"Field:gamma\" is a legacy parameter that will be removed. "
+               "It has an invalid value of 1 or smaller. If you want to "
+               "initialize an \"%s\" EOS, you should delete this parameter & "
+               "assign Physics:fluid_props:eos:type a value of \"%s\"",
+               isothermal_name.c_str(), isothermal_name.c_str());
+      }
+      WARNING1("parse_eos_choice_",
+               "\"Field:gamma\" is a legacy parameter that will be removed. "
+               "It is being used to configure an \"%s\" EOS. Going forward, "
+               "set parameters in the \"Physics:fluid_props:eos\" parameter "
+               "group instead.",
+               ideal_name.c_str());
+      return EnzoEOSVariant(EnzoEOSIdeal::construct(gamma));
+
+    } else if (hydro_type == "ppml") {
+      std::string type = EnzoEOSIsothermal::name();
+      WARNING1("parse_eos_choice_",
+               "Defaulting to \"%s\" EOS since for backwards compatability "
+               "since the PPML solver is in use and no parameters were set "
+               "in the \"Physics:fluid_props:eos\" parameter group. In the "
+               "future, this behavior will be dropped.",
+               type.c_str());
+      return EnzoEOSVariant(EnzoEOSIsothermal());
+
+    } else {
+      const double default_gamma = 5.0/3.0;
+      WARNING2("parse_eos_choice_",
+               "No parameters specified in the \"Physics:fluid_props:eos\" "
+               "parameter group. Defaulting to an \"%s\" eos with gamma = "
+               "%#.16g.",
+               ideal_name.c_str(), default_gamma);
+      return EnzoEOSVariant(EnzoEOSIdeal::construct(default_gamma));
+
+    }
+
   }
 
   //----------------------------------------------------------------------
@@ -2285,6 +2484,7 @@ namespace{
     return {density_floor, pressure_floor, temperature_floor,
             metal_mass_frac_floor};
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -2295,14 +2495,18 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
   // look for.
   const std::vector<std::string>& mlist = this->method_list;
   bool has_ppm = std::find(mlist.begin(), mlist.end(), "ppm") != mlist.end();
+  bool has_ppml = std::find(mlist.begin(), mlist.end(), "ppml") != mlist.end();
   bool has_vlct = std::find(mlist.begin(), mlist.end(),
                             "mhd_vlct") != mlist.end();
   std::string hydro_type = "";
-  if (has_ppm & has_vlct){
+  if ((int(has_ppm) + int(has_ppml) + int(has_vlct)) > 1){
     ERROR("EnzoConfig::read_physics_fluid_props_",
-          "a simulation can't use ppm and vlct solvers at once");
+          "a given simulation can only use up to 1 of the following solvers: "
+          "{\"ppm\", \"ppml\", \"mhd_vlct\"}");
   } else if (has_ppm){
     hydro_type = "ppm";
+  } else if (has_ppml){
+    hydro_type = "ppml";
   } else if (has_vlct){
     hydro_type = "mhd_vlct";
   }
@@ -2316,25 +2520,9 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
   physics_fluid_props_fluid_floor_config =
     parse_fluid_floor_config_(p, hydro_type, has_grackle);
 
-  // determine adiabatic index (in the future, this logic will be revisited)
-  {
-    double default_val = 5.0/3.0;
-    double legacy_value = p->value_float("Field:gamma", -1);
-    double actual_value = p->value_float("Physics:fluid_props:eos:gamma", -1);
-
-    if (legacy_value == -1) {
-      if (actual_value == -1) { actual_value = default_val; }
-      physics_fluid_props_gamma = actual_value;
-    } else if (actual_value == -1) {
-      WARNING("EnzoConfig::read_physics_fluid_props_",
-              "\"Field:gamma\" is a legacy parameter that will be removed.");
-      physics_fluid_props_gamma = legacy_value;
-    } else {
-      ERROR("EnzoConfig::read_physics_fluid_props_",
-            "\"Field:gamma\" isn't valid since "
-            "\"Physics:fluid_props:eos:gamma\" is specified.");
-    }
-  }
+  // determine the nominal choice of the EOS (the EOS is currently independent
+  // of the molecular weight)
+  physics_fluid_props_eos_variant = parse_eos_choice_(p, hydro_type);
 
   // determine molecular weight
   {
@@ -2355,6 +2543,32 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
             "\"Method:ppm:mol_weight\" isn't valid since "
             "\"Physics:fluid_props:mol_weight\" is specified.");
     }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_physics_gravity_(Parameters * p)
+{
+  std::string legacy_parname = "Method:gravity:grav_const";
+  std::string actual_parname = "Physics:gravity:grav_const_codeU";
+
+  bool has_grav_method = std::find
+    (method_list.begin(), method_list.end(), "gravity") != method_list.end();
+  bool has_legacy_par = has_grav_method && (p->param(legacy_parname)!=nullptr);
+  bool has_actual_par = p->param(actual_parname) !=nullptr;
+
+  if (has_legacy_par && has_actual_par) {
+    ERROR2("EnzoConfig::read_physics_gravity_",
+           "\"%s\" isn't valid since \"%s\" is specified.",
+           legacy_parname.c_str(), actual_parname.c_str());
+  } else if (has_legacy_par) {
+    WARNING2("EnzoConfig::read_physics_gravity_",
+             "\"%s\" is a legacy parameter that will be replaced with \"%s\"",
+             legacy_parname.c_str(), actual_parname.c_str());
+    physics_gravity_grav_constant_codeU = p->value_float(legacy_parname, -1.0);
+  } else {
+    physics_gravity_grav_constant_codeU = p->value_float(actual_parname, -1.0);
   }
 }
 

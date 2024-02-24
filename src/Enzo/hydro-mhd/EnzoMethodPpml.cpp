@@ -7,9 +7,11 @@
 
 //----------------------------------------------------------------------
 
-#include "cello.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
-#include "enzo.hpp"
+#include "Enzo/hydro-mhd/ppml_fortran/ppml_fortran.hpp" // FORTRAN_NAME(calc_dt_ppml)
 
 //----------------------------------------------------------------------
 
@@ -28,6 +30,14 @@ EnzoMethodPpml::EnzoMethodPpml()
   const EnzoDualEnergyConfig& de_config = fluid_props->dual_energy_config();
   ASSERT("EnzoMethodPpml::EnzoMethodPpml",
          "incompatible with dual energy formalism", de_config.is_disabled());
+
+  // technically, the PPML solver doesn't directly use any of the functionality
+  // implemented by EnzoEOSIsothermal, (it implements the required
+  // functionality in fortran), but this check is here to ensure that the EOS
+  // is handled consistently by different Methods in a given Enzo-E simulation
+  ASSERT("EnzoMethodPpml::EnzoMethodPpml",
+         "PPML solver is currently incompatible with a non-isothermal EOS",
+         fluid_props->eos_variant().holds_alternative<EnzoEOSIsothermal>());
 }
 
 //----------------------------------------------------------------------
@@ -98,9 +108,11 @@ double EnzoMethodPpml::timestep (Block * block) throw()
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
-  const int in = cello::index_static();
 
-  if (EnzoBlock::NumberOfBaryonFields[in] > 0) {
+  Field field = enzo_block->data()->field();
+  if (field.num_permanent() > 0) { // TODO: revisit if-clause. This could be
+                                   // improved. (plus we probably want to
+                                   // report an error when false)
  
     /* Find fields: density, total energy, velocity1-3. */
  
@@ -129,8 +141,6 @@ double EnzoMethodPpml::timestep (Block * block) throw()
     // }
 
     /* Call fortran routine to do calculation. */
- 
-    Field field = enzo_block->data()->field();
 
     enzo_float * d  = (enzo_float *) field.values("density");
     enzo_float * vx = (enzo_float *) field.values("velox");
