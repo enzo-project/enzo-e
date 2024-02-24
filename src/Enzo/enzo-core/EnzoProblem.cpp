@@ -8,14 +8,16 @@
 ///
 
 #include "enzo.hpp"
-#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoMethodMHDVlct, EnzoMethodPpm,
-                                        // EnzoMethodPpml
 
 #include "Enzo/assorted/assorted.hpp" // misc. Method classes
+#include "Enzo/chemistry/chemistry.hpp" // EnzoComputeCoolingTime, EnzoMethodGrackle
+#include "Enzo/fluid-props/fluid-props.hpp" // EnzoPhysicsFluidProps, EnzoCompute{Temperature,Pressure}
 #include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
                                     // EnzoMethodBackgroundAcceleration
                                     // EnzoComputeAcceleration
                                     // EnzoSolver* EnzoMatrix*
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoMethodMHDVlct, EnzoMethodPpm,
+                                        // EnzoMethodPpml
 #include "Enzo/initial/initial.hpp" // lots of initializers
 #include "Enzo/io/io.hpp" // EnzoMethodCheck, EnzoInitial{Hdf5,Music}
 #include "Enzo/mesh/mesh.hpp" // EnzoProlong, EnzoRefine*, EnzoRestrict*

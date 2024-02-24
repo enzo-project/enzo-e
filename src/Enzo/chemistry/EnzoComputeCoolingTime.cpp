@@ -5,8 +5,9 @@
 /// @date     2019-05-07
 /// @brief    Implements the EnzoComputeCoolingTime class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/chemistry/chemistry.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------
 

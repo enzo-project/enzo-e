@@ -6,9 +6,9 @@
 /// @date     2019-05-07
 /// @brief    Implements the EnzoComputeTemperature class
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/fluid-props/fluid-props.hpp"
 
 //----------------------------------------------------------------------
 

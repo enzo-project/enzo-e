@@ -1,21 +1,26 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# add source files related to heating and cooling to the enzo target
+# create Enzo::chemistry
 #
-# in the near future, it's my intention to make most of the contents in this
-# directory into their own library and make it the only part of Enzo-E that
-# depends on Grackle (this will make incremental rebuilds that turn Grackle
-# on/off a lot faster)
-
-# Get the list of source files in this directory
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp
+# NOTE: in the long-term, the goal is to isolate Grackle as a private
+#       dependency of this target. By doing that, we can rebuild Enzo
+#       with/without linking against Grackle without needing to recompile any
+#       source files other than the ones used in this target.
+#
+# We explicitly list files (rather than use glob) since that makes CMake better
+# at rebuilds (especially after changing branches)
+add_library(Enzo_chemistry
+  chemistry.hpp
+  chemistry_grackleincl.hpp
+  EnzoComputeCoolingTime.cpp EnzoComputeCoolingTime.hpp
+  EnzoMethodGrackle.cpp EnzoMethodGrackle.hpp
+  GrackleChemistryData.cpp GrackleChemistryData.hpp
+  GrackleFacade.cpp GrackleFacade.hpp
 )
 
-target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
+add_library(Enzo::chemistry ALIAS Enzo_chemistry)
+
+# the following can be improved (it links more than is necessary)
+target_link_libraries(Enzo_chemistry PUBLIC enzo ${CELLO_LIBS})
+target_include_directories(Enzo_chemistry PUBLIC ${ROOT_INCLUDE_DIR})
+target_link_options(Enzo_chemistry PRIVATE ${Cello_TARGET_LINK_OPTIONS})

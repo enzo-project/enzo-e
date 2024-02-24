@@ -9,6 +9,9 @@
 #ifndef ENZO_ENZO_COMPUTE_PRESSURE_HPP
 #define ENZO_ENZO_COMPUTE_PRESSURE_HPP
 
+// this is to get the proper grackle-related declarations
+#include "Enzo/chemistry/chemistry.hpp"
+
 class EnzoComputePressure : public Compute {
 
   /// @class    EnzoComputePressure

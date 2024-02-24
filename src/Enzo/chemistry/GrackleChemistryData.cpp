@@ -5,9 +5,9 @@
 /// @date     Feb 6 2023
 /// @brief    [\ref Enzo] Implementation of the GrackleChemistryData class
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Enzo/chemistry/chemistry.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 #include <cstring> // std::memcpy
 #include <iterator> // std::input_iterator_tag

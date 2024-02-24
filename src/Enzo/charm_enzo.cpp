@@ -28,6 +28,8 @@
 
 #include "Enzo/enzo.hpp"
 #include "Enzo/assorted/assorted.hpp"
+#include "Enzo/chemistry/chemistry.hpp"
+#include "Enzo/fluid-props/fluid-props.hpp"
 #include "Enzo/gravity/gravity.hpp"
 #include "Enzo/initial/initial.hpp"
 #include "Enzo/hydro-mhd/hydro-mhd.hpp"
