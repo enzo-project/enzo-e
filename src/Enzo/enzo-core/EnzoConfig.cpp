@@ -98,7 +98,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_minimum_H_number_density(0.1),
   initial_grackle_test_minimum_metallicity(1.0E-4),
   initial_grackle_test_minimum_temperature(10.0),
-  initial_grackle_test_reset_energies(0),
   // EnzoInitialHdf5
   initial_hdf5_max_level(),
   initial_hdf5_format(),
@@ -467,7 +466,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_maximum_temperature;
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
-  p | initial_grackle_test_reset_energies;
 
   p | initial_inclinedwave_alpha;
   p | initial_inclinedwave_beta;
@@ -932,8 +930,6 @@ void EnzoConfig::read_initial_grackle_(Parameters * p)
     p->value_float("Initial:grackle_test:minimum_metallicity", 1.0E-4);
   initial_grackle_test_maximum_metallicity =
     p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
-  initial_grackle_test_reset_energies =
-    p->value_integer("Initial:grackle_test:reset_energies",0);
 }
 
 //----------------------------------------------------------------------

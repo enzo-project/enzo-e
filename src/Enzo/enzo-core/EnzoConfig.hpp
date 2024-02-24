@@ -140,7 +140,6 @@ public: // interface
       initial_grackle_test_minimum_H_number_density(0.1),
       initial_grackle_test_minimum_metallicity(1.0E-4),
       initial_grackle_test_minimum_temperature(10.0),
-      initial_grackle_test_reset_energies(0),
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
@@ -591,7 +590,6 @@ public: // attributes
   double                     initial_grackle_test_minimum_H_number_density;
   double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_minimum_temperature;
-  int                        initial_grackle_test_reset_energies;
 
   /// EnzoInitialHdf5
 
