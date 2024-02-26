@@ -476,7 +476,7 @@ void Problem::initialize_method
     ASSERT("Problem::create_method_", "Something is wrong",
            cello::simulation());
     ParameterGroup p_group(*(cello::simulation()->parameters()), root_path);
-    method_list_.push_back(MethodNull::from_parameters(p_group));
+    method_list_.push_back(new MethodNull(p_group));
   }
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
@@ -915,9 +915,9 @@ Method * Problem::create_method_
   Method * method = nullptr;
 
   if (name == "trace") {
-    method = MethodTrace::from_parameters(p_group);
+    method = new MethodTrace(p_group);
   } else if (name == "null") {
-    method = MethodNull::from_parameters(p_group);
+    method = new MethodNull(p_group);
   } else if (name == "flux_correct") {
     method = MethodFluxCorrect::from_parameters(p_group);
   } else if (name == "output") {
