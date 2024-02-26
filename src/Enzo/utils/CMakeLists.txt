@@ -6,7 +6,7 @@
 # We explicitly list files (rather than use glob) since that makes CMake better
 # at rebuilds (especially after changing branches)
 add_library(Enzo_utils
-  utils.hpp
+  utils.hpp utils.cpp
   EnzoCenteredFieldRegistry.cpp EnzoCenteredFieldRegistry.hpp
   EnzoComputeCicInterp.cpp EnzoComputeCicInterp.hpp
   EnzoEFltArrayMap.cpp EnzoEFltArrayMap.hpp

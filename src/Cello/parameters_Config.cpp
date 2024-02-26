@@ -116,7 +116,6 @@ void Config::pup (PUP::er &p)
   p | method_list;
   p | method_schedule_index;
   p | method_courant;
-  p | method_flux_correct_single_array;
   p | method_prolong;
   p | method_type;
 
@@ -831,10 +830,6 @@ void Config::read_method_ (Parameters * p) throw()
 
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
-
-    // leaving this temporarily (not actually used in MethodFluxCorrect)
-    method_flux_correct_single_array =
-      p->value_logical (full_name + ":single_array",true);
 
     method_prolong[index_method] =
       p->value_string(full_name+":prolong","linear");

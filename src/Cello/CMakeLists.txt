@@ -191,6 +191,7 @@ add_library(cello_component ${CELLO_COMP_SRC_FILES})
 setupCelloLibHelper(cello_component)
 target_link_libraries (cello_component
   PUBLIC CHARM::CHARM_HEADERS # charm++.h included in public header
+  PRIVATE Boost::filesystem
   PRIVATE charm_component error simulation # these private dependencies arise
                                            # from source files
   PRIVATE cello_component_PCH # cello component-precompiled header
@@ -242,9 +243,8 @@ target_link_libraries(data
 
 
 addCelloLib(disk "")
-# with minimal refactoring, we could make HDF5_C a privately linked library
 target_link_libraries(disk
-  PUBLIC HDF5_C
+  PRIVATE HDF5_C
   PRIVATE pngwriter
   PUBLIC error
   )
@@ -264,8 +264,6 @@ target_link_libraries(error
 
 addCelloLib(io "")
 target_link_libraries(io
-  PUBLIC Boost::filesystem # with minimal refactoring, we could make
-                           # this into a private dependency
   PUBLIC cello_component charm_component parallel monitor performance error
          parameters disk problem compute mesh view data simulation
   PRIVATE cello_component_PCH # (b/c cello.hpp included in ALL source files)

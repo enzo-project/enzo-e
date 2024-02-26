@@ -26,6 +26,7 @@ add_library(Enzo_hydro-mhd
   SetMinimumSupport.cpp
   SolveMHDEquations.cpp
   SolveHydroEquations.cpp
+  EnzoMHDIntegratorStageCommands.cpp EnzoMHDIntegratorStageCommands.hpp
   EnzoMethodPpm.cpp EnzoMethodPpm.hpp
 )
 add_library(Enzo::hydro-mhd ALIAS Enzo_hydro-mhd)
