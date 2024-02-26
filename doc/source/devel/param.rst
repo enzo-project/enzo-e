@@ -68,7 +68,7 @@ How to add a new parameter (new approach)
 =========================================
 
 As mentioned above, the nitty-gritty details of parsing are handled by Enzo-E automatically.
-Values associated with parameter names can be queried by invoking methods on an instance of the :cpp:class:`!ParameterAccessor` class.
+Values associated with parameter names can be queried by invoking methods on an instance of the :cpp:class:`!ParameterGroup` class.
 Instances of this class are commonly passed to the constructors of classes that inherit from Cello class-hierarchy.
 
 
@@ -91,7 +91,7 @@ The steps are as follows:
 2. Modify the pup routine of :cpp:class:`!EnzoMethodHeat` and the ``PUP::able`` migration constructor to properly handle the newly added member-variable
 
 3. Modify the main constructor of :cpp:class:`!EnzoMethodHeat` to initialize ``my_param_`` based on the value parsed from the parameter file.
-   The constructor of :cpp:class:`!EnzoMethodHeat` is passed a copy of an instance of :cpp:class:`!ParameterAccessor`, in an argument ``p``.
+   The constructor of :cpp:class:`!EnzoMethodHeat` is passed a copy of an instance of :cpp:class:`!ParameterGroup`, in an argument ``p``.
    To access the value specified in the parameter-file, you would probably invoke one of the following expressions (based on the expected type of the parameter):
 
    - ``p.value_logical("my_param", false)`` if the parameter is expected to specify a boolean value and if it defaults to a value of ``false`` when the parameter is not specified.
@@ -118,30 +118,30 @@ The steps are as follows:
 Design Overview (new approach)
 ==============================
 
-Our new approach revolves around the usage of the :cpp:class:`!ParameterAccessor` class for accessing/querying parameters stored in an instance of the :cpp:class:`Parameters` class.
-Instances of the :cpp:class:`!ParameterAccessor` class are light-weight and are expected to have a short-lifetime (akin to :cpp:class:`!Field` or :cpp:class:`!Particle`).
+Our new approach revolves around the usage of the :cpp:class:`!ParameterGroup` class for accessing/querying parameters stored in an instance of the :cpp:class:`Parameters` class.
+Instances of the :cpp:class:`!ParameterGroup` class are light-weight and are expected to have a short-lifetime (akin to :cpp:class:`!Field` or :cpp:class:`!Particle`).
 
-**As illustrated above, instances of the** :cpp:class:`!ParameterAccessor` **class are expected to be passed to the constructor (or factory-method) of classes that inherit from Cello class-hierarchy.**
+**As illustrated above, instances of the** :cpp:class:`!ParameterGroup` **class are expected to be passed to the constructor (or factory-method) of classes that inherit from Cello class-hierarchy.**
 
-The main feature of the :cpp:class:`!ParameterAccessor` class is that it provides methods for querying/accessing parameters with parameter-paths that share a common root.
+The main feature of the :cpp:class:`!ParameterGroup` class is that it provides methods for querying/accessing parameters with parameter-paths that share a common root.
 
-- The root parameter-path is specified during the construction of a :cpp:class:`!ParameterAccessor` instance and cannot be changed over the lifetime of the instance.
+- The root parameter-path is specified during the construction of a :cpp:class:`!ParameterGroup` instance and cannot be changed over the lifetime of the instance.
 
-  - The immutable nature of the root parameter-path is a feature: whenever a :cpp:class:`!ParameterAccessor` instance is passed to a function, you ALWAYS know that the root parameter-path is unchanged (without needing to check the helper function's implementation).
+  - The immutable nature of the root parameter-path is a feature: whenever a :cpp:class:`!ParameterGroup` instance is passed to a function, you ALWAYS know that the root parameter-path is unchanged (without needing to check the helper function's implementation).
 
-  - If a developer is ever tempted to mutate the root-path, they should just initialize a new :cpp:class:`!ParameterAccessor` (since the instances are lightweight)
+  - If a developer is ever tempted to mutate the root-path, they should just initialize a new :cpp:class:`!ParameterGroup` (since the instances are lightweight)
 
-  - The root path can be queried with :cpp:expr:`ParameterAccessor::get_root_parpath()`
+  - The root path can be queried with :cpp:expr:`ParameterGroup::get_root_parpath()`
 
 - When a string is passed to one of the accessor methods, that string is internally appended to the root pararameter-path and the result represents the full name of the queried parameter.
   (You can think of this string as specifying the relative path to the parameter).
-  You can use :cpp:expr:`ParameterAccessor::full_name(s)` to see the full parameter name that a string, ``s``, maps to.
+  You can use :cpp:expr:`ParameterGroup::full_name(s)` to see the full parameter name that a string, ``s``, maps to.
 
 
-Why do we even need :cpp:class:`!ParameterAccessor`?
+Why do we even need :cpp:class:`!ParameterGroup`?
 ----------------------------------------------------
 
-To motivate the existence of the :cpp:class:`!ParameterAccessor` class, it's useful to consider alternative approaches.
+To motivate the existence of the :cpp:class:`!ParameterGroup` class, it's useful to consider alternative approaches.
 The most obvious option is to simply pass instances of the :cpp:class:`!Parameters` class to constructors and static-factory methods of other classes.
 
 To flesh out this alternative case more, let's consider the following snippet of a hypothetical parameter file.
@@ -233,7 +233,7 @@ As you can see from the above snippet, a parameter-subgroup carrying the configu
 **Importantly,** the absolute paths of the parameters that are used to initialize the :cpp:class:`!MethodOutput` instances are different in the second parameter file compared to the first.
 The main difference is in the the root-path to the subgroup.
 
-To gracefully handle both scenarios, we now make use of the of the :cpp:class:`!ParameterAccessor` class.
+To gracefully handle both scenarios, we now make use of the of the :cpp:class:`!ParameterGroup` class.
 A code snippet using our new approach is shown below:
 
 .. code-block:: c++
@@ -241,7 +241,7 @@ A code snippet using our new approach is shown below:
     // NOTE: MethodOutput is a special case. At least historically, its factory
     // method needed to accept an argument other than just the parameters
 
-    MethodOutput* MethodOutput::from_parameters(/* ... */, ParameterAccessor &p)
+    MethodOutput* MethodOutput::from_parameters(/* ... */, ParameterGroup &p)
     {
       std::string file_name = p.value_string("file_name", "");
       bool all_fields = p.value_logical("all_fields", false);
@@ -258,7 +258,7 @@ A code snippet using our new approach is shown below:
    Historically, the :cpp:class:`!Parameters` class has also had the capability to track a common root-path.
    However, the code was not very explicit about whether that capability was being used or not (although, most of the time you could safely assume that the feature wasn't being)
 
-   It's our intention to eventually remove this capability from the :cpp:class:`!Parameters` class, since the :cpp:class:`!ParameterAccessor` class can be used for the same purpose (and it's more explict)
+   It's our intention to eventually remove this capability from the :cpp:class:`!Parameters` class, since the :cpp:class:`!ParameterGroup` class can be used for the same purpose (and it's more explict)
 
 
 .. note::
@@ -267,16 +267,16 @@ A code snippet using our new approach is shown below:
    However, this is mostly unavoidable if we want to gracefully accomodate initialization of multiple instances of the same :cpp:class:`!Method` subclass.
    Hopefully, this page of documentation will help to offset this disadvantage.
 
-   The *only* other alternative is have :cpp:class:`!ParameterAccessor` instances "auto-magically" redirect absolute parameter-paths, but I think that will generally be more confusing. 
+   The *only* other alternative is have :cpp:class:`!ParameterGroup` instances "auto-magically" redirect absolute parameter-paths, but I think that will generally be more confusing. 
 
 Benefit: Discourage Usage of scattered parameters
 -------------------------------------------------
 
-A benefit to the :cpp:expr:`ParameterAccessor::wrapped_Parameters_ref()` class is that it restricts access to parameters within the associated root-path.
+A benefit to the :cpp:expr:`ParameterGroup::wrapped_Parameters_ref()` class is that it restricts access to parameters within the associated root-path.
 This discourages the design of classes that are configured by parameters scattered throughout the parameter file.
 
 In rare cases (e.g. during refactoring when we convert a previously Method-specific parameter to a Physics parameter and want to retain backwards compatability), exceptions need to be made.
-Thus, an "escape-hatch" is provided to directly access the wrapped Parameters object: call the :cpp:expr:`ParameterAccessor::wrapped_Parameters_ref()` method.
+Thus, an "escape-hatch" is provided to directly access the wrapped Parameters object: call the :cpp:expr:`ParameterGroup::wrapped_Parameters_ref()` method.
 Please, avoid using this "escape-hatch" unless it's truly necessary.
 
 .. todo::
@@ -287,7 +287,7 @@ Please, avoid using this "escape-hatch" unless it's truly necessary.
    This would probably streamline the documentation to some degree.
 
    If we were to do that, we would need to modify the code to recognize this convention.
-   We would probably also want to modify the various parameter-accessor methods of the :cpp:class:`!ParameterAccessor` to continue to restrict access to parameters within the common root-path that a :cpp:class:`!ParameterAccessor` is configured with.
+   We would probably also want to modify the various parameter-accessor methods of the :cpp:class:`!ParameterGroup` to continue to restrict access to parameters within the common root-path that a :cpp:class:`!ParameterGroup` is configured with.
 
 Hypothetical Question: How do I query the parameter of some other :cpp:class:`!Method` subclass?
 ------------------------------------------------------------------------------------------------
