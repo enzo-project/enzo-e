@@ -58,9 +58,7 @@ The organization of parameters in a group hierarchy is analogous to the organiza
 Continuing this analogy, we have devised a shorthand for naming parameters in the documentation (and throughout the codebase) that is similar to a file path.
 One can think of these names as a "parameter-path".
 
-- Documentation refering to the parameters in the above snippet would mention :par:paramfmt:`Method:list`, :par:paramfmt:`Method:mhd_vlct:courant`, or :par:paramfmt:`Method:grackle:courant`.
-
-- in the codebase, one could see strings refering to ``"Method:list"``, ``"Method:mhd_vlct:courant"``, ``"Method:grackle:courant"`` (in practice, you may not see these particular strings).
+- The parameter-paths associated with the above snippet (that you would see in the documentation or as strings in the codebase) would include :par:paramfmt:`Method:list`, :par:paramfmt:`Method:mhd_vlct:courant`, or :par:paramfmt:`Method:grackle:courant`. Please note: you might not find these precise parameters.
 
 - In general, a parameter-path for a given parameter lists the names of ancestor "groups", separated by colons, and lists the name of the parameter at the end (i.e. the string that directly precedes an assignment).
 
@@ -107,13 +105,6 @@ The steps are as follows:
    We will discuss this down below in more detail, but for the sake of this example, it's generally expanded to ``"Method:heat:my_param"``.
    Alternative logic may be needed to the above expressions in slightly more sophisticated cases (for example if the parameter expects a list of values or if you want to abort the program if the parameter can't be found).
 
-.. note::
-
-    In some cases, parameter-values may be retrieved from the parameter-file in a static factory method, typically called ``from_parameters``, rather than in a constructor.
-
-    There are some cases where the use of factory-method could be very useful (that should usually be justified in a comment).
-    But factory-methods are most commonly used in cases where it simplified the transition from the older parameter-parsing approach to this newer approach.
-
 
 ==============================
 Design Overview (new approach)
@@ -143,7 +134,7 @@ Why do we even need :cpp:class:`!ParameterGroup`?
 -------------------------------------------------
 
 To motivate the existence of the :cpp:class:`!ParameterGroup` class, it's useful to consider alternative approaches.
-The most obvious option is to simply pass instances of the :cpp:class:`!Parameters` class to constructors and static-factory methods of other classes.
+The most obvious option is to simply pass instances of the :cpp:class:`!Parameters` class to constructors (insteading of passing a :cpp:class:`!ParameterGroup` instance).
 
 To flesh out this alternative case more, let's consider the following snippet of a hypothetical parameter file.
 
@@ -163,16 +154,17 @@ To flesh out this alternative case more, let's consider the following snippet of
          }
        }
 
-This particular snippet can easily be parsed if we pass a reference to the :cpp:class:`!Parameters` object to the constructor of :cpp:class:`!MethodOutput`.
-An example code block is included here, to show (roughly) what that the initialization might look like:
+This particular snippet can easily be parsed if we pass a reference to the :cpp:class:`!Parameters` object to :cpp:class:`!MethodOutput`\'s constructor.
+An example code block is included here, to show (roughly) what that constructor might look like:
 
 .. code-block:: c++
 
-    // NOTE: MethodOutput is a special case. At least historically, its factory
-    // method needed to accept an argument other than just the parameters
-
-    // We have made a number of simplifications here compared to what the
-    // source code actually looks like...
+    // NOTE:
+    // - MethodOutput is a special case. Historically, it has needed to accept
+    //   an argument other than just the parameters
+    // - a delegating constructor is only used as a matter of convenience
+    // - We have made a number of simplifications here compared to what the
+    //   source code actually looks like...
 
     MethodOutput::MethodOutput(/* ... */, Parameters &p)
       : MethodOutput(/* ... */,
@@ -238,11 +230,12 @@ A code snippet using our new approach is shown below:
 
 .. code-block:: c++
 
-    // NOTE: MethodOutput is a special case. At least historically, its factory
-    // method needed to accept an argument other than just the parameters
-
-    // We have made a number of simplifications here compared to what the
-    // source code actually looks like...
+    // NOTE:
+    // - MethodOutput is a special case. Historically, it has needed to accept
+    //   an argument other than just the parameters
+    // - a delegating constructor is only used as a matter of convenience
+    // - We have made a number of simplifications here compared to what the
+    //   source code actually looks like...
 
     MethodOutput::MethodOutput(/* ... */, ParameterGroup p)
       : MethodOutput(/* ... */,
@@ -285,16 +278,16 @@ Experience tells us it is usually an anti-pattern to directly access that parame
 2. It can lead to cases where you are trying to access parameter-values for :cpp:class:`!Method` subclasses regardless of whether the subclass is even being used in the simulation.
 
 
-Preferred alternatives to doing this include:
+Preferred alternatives to include:
 
-1. Introducing an accessor method to access the special parameter-value from the the :cpp:class:`!Method` subclass, :cpp:class:`!Compute` subclass, an :cpp:class:`!Initial` subclass, etc. that the parameter is associated with.
+1. Introducing an accessor method to access the special parameter-value from the :cpp:class:`!Method` subclass (or :cpp:class:`!Compute` subclass or :cpp:class:`!Initial` subclass or etc.) that the parameter is associated with.
 
 2. Altering the way in which the parameter is specified and store it within a :cpp:class:`!Physics` class.
 
 The tradeoffs of these approaches are discussed in greater detail :ref:`here <how-to-store-global-data>`.
 
-In rare cases (e.g. during refactoring when we convert a previously Method-specific parameter to a Physics parameter and want to retain backwards compatability), exceptions need to be made.
-Thus, an "escape-hatch" is provided to directly access the global Parameters object: call the :cpp:expr:`cello::parameters()`.
+In rare cases (e.g. during refactoring when we convert a previously Method-specific parameter to a Physics parameter and want to retain backwards compatability), exceptions to this philosophy need to be made.
+Thus, an "escape-hatch" is provided to directly access the global :cpp:class:`!Parameter` object: call the :cpp:expr:`cello::parameters()`.
 Please, avoid using this "escape-hatch" unless it's truly necessary.
 
 .. todo::
