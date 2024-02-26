@@ -20,8 +20,9 @@ Given the large scope of this transition, we decided to gradually migrate betwee
   Ultimately we would like to remove the :cpp:class:`!Config` and :cpp:class:`!EnzoConfig` classes.
 
 First, we briefly review properties of Enzo-E/Cello parameters and talk about the idea of a "parameter-path"
-Next, we talk through an example of how you might add a new parameter using the new approach.
-Then, we provide some more details about the design of the new-approach.
+Next, we describe how to actually access a parameter value (using the new approach).
+Then, we talk through an example of how you might add a new parameter (using the new approach).
+Afterwards, we provide some more details about the design of the new-approach.
 Finally, we briefly discuss the older approach (and some of its shortcomings).
 
 ===================================
@@ -58,17 +59,135 @@ The organization of parameters in a group hierarchy is analogous to the organiza
 Continuing this analogy, we have devised a shorthand for naming parameters in the documentation (and throughout the codebase) that is similar to a file path.
 One can think of these names as a "parameter-path".
 
-- The parameter-paths associated with the above snippet (that you would see in the documentation or as strings in the codebase) would include :par:paramfmt:`Method:list`, :par:paramfmt:`Method:mhd_vlct:courant`, or :par:paramfmt:`Method:grackle:courant`. Please note: you might not find these precise parameters.
+- The parameter-paths associated with the above snippet (that you would see in the documentation or as strings in the codebase) would include :par:paramfmt:`Method:list`, :par:paramfmt:`Method:mhd_vlct:courant`, or :par:paramfmt:`Method:grackle:courant`. Please note: precise parameter names are subject to change over time.
 
 - In general, a parameter-path for a given parameter lists the names of ancestor "groups", separated by colons, and lists the name of the parameter at the end (i.e. the string that directly precedes an assignment).
+
+=====================================
+How To Access Parsed Parameter Values
+=====================================
+As mentioned above, the nitty-gritty details of parsing are handled by Enzo-E automatically and the results are stored within an instance of the :cpp:class:`!Parameters` class.
+
+Values associated with parameters can be queried by invoking methods directly provided by the :cpp:class:`!Parameters` class or :cpp:class:`!ParametersGroup` class.
+
+ - a :cpp:class:`!Parameters` instance provides access to **all** parameters
+ - a :cpp:class:`!ParametersGroup` instance is a light-weight object that provides access to parameters within a particular group
+
+.. _basic-parameter-access-api:
+
+Basic API for Accessing Parameters
+----------------------------------
+   
+Both classes define a common set of methods for querying the values associated with the parameters.
+We'll now describe some of the most commonly used methods.
+Consider a reference to a :cpp:class:`!Parameters` instance or a :cpp:class:`!ParametersGroup` instance called ``p``.
+To access the value associated with a parameter ``s`` one might invoke one of the following methods (based on the expected type of ``s``):
+
+   - ``p.value_logical(s, false)`` if the parameter is expected to specify a boolean value and if it defaults to a value of ``false`` when the parameter is not specified.
+
+   - ``p.value_integer(s, 7)`` if the parameter is expected to be an integer and if it defaults to a value of ``7`` when the parameter is not specified.
+
+   - ``p.value_float(s, 2.0)`` if the parameter is expected to be a floating-point value and if it defaults to a value of ``2.0`` when the parameter is not specified.
+
+   - ``p.value_string(s, "N/A")`` if the parameter is expected to be a string and if it defaults to a value of ``"N/A"`` when the parameter is not specified.
+
+If the user specified the desired parameter, but with an unexpected type, the program will abort with an error message (another function is provided to query the parameter type)
+
+In each of these snippets, ``s`` is **always** a parameter path, but the precise interpretation depends on how ``p`` is defined.
+When ``p`` references a :cpp:class:`!Parameters` instance, ``s`` must specify an absolute parameter-path.
+In contrast, when ``p`` references a :cpp:class:`!ParameterGroup` instance, ``s`` must specify the path relative to a 
+
+
+For completeness, consider the following parameter-file snippet:
+
+ ::
+
+  Physics {
+    fluid_props {
+      eos    {  gamma = 1.6666666666666667; }
+      floors {  density  = 1.0e-10;         }
+    }
+  }
+
+We will now highlight what the choices of ``s`` that specify is :par:paramfmt:`Physics:fluid_props:eos:gamma` for different choices of ``p``.
+
++--------------------------------------------+-------------------------------------+
+| if ``p`` is a refers to a                  | then ``s`` is                       |
++============================================+=====================================+
+| :cpp:class:`!Parameter` instance           | ``"Physics:fluid_props:eos:gamma"`` |
++--------------------------------------------+-------------------------------------+
+| :cpp:class:`!ParameterGroup` instance      | ``"eos:gamma"``                     |
+| associated with                            |                                     |
+| :par:paramfmt:`Physics:fluid_props`        |                                     |
++--------------------------------------------+-------------------------------------+
+| :cpp:class:`!ParameterGroup` instance      | ``"gamma"``                         |
+| instance associated with                   |                                     |
+| :par:paramfmt:`Physics:fluid_props:eos`    |                                     |
++--------------------------------------------+-------------------------------------+
+| :cpp:class:`!ParameterGroup` instance      | unable to specify the desired       |
+| associated with                            | parameter                           |
+| :par:paramfmt:`Physics:fluid_props:floors` |                                     |
++--------------------------------------------+-------------------------------------+
+
+Common Patterns in the Codebase
+-------------------------------
+
+Enzo-E and Cello define many classes descended from the Cello-class-hierarchy (e.g. :cpp:class:`!Method` subclasses) that are directly initialized from the parameters in a single parameter-group.
+These classes are commonly initialized with a constructor that accepts a :cpp:class:`!ParametersGroup` instance (associated with the appropriate parameter-group) as an argument.
+
+.. COMMENT-BLOCK
+
+    In the future, we may want to swap out the example-case to something other that a
+    Method class (once we start using directly passing ParameterGroup to other types)
+
+For the sake of example, let's consider the :cpp:class:`!EnzoMethodHeat` class.
+This class is configured by parameters like the ones in the :par:paramfmt:`Method:heat` group from the following parameter-file snippet:
+
+ ::
+
+  Method {
+     list = [ "heat"];
+
+     heat {
+        alpha = 0.6;
+        courant = 0.3;
+     }
+  }
+
+Here's we present (a heavily editted) example of what the class's constructor might look like:
+
+.. code-block:: c++
+
+   EnzoMethodHeat::EnzoMethodHeat (ParameterGroup p)
+    : Method(),
+      alpha_(p.value_float("alpha",0.7)) // access alpha param & use it to initialize
+                                         // this->alpha_ (for the sake of example,
+                                         // it defaults to 0.7 if not specified) 
+   {
+     // parse the courant value
+     double parsed_courant_val = p.value_float("courant", 1.0);
+     this->set_courant(parsed_courant_val); // <- this a convenience method provided by
+                                            //    the Method base class
+
+     // for debugging purposes or for printing out informative error messages:
+     //   - you can use p.get_group_path() to get the current the std::string
+     //     specifying the parameter-group's path that p is associated with.
+     //   - you can use the p.full_name(s) to get the absolute path for a parameter
+     //     (s is the parameter-path relative to the current group)
+     //   - when initializing the class from the above parameter-file snippet
+     //       - p.get_group_path()   would return std::string("Method:heat")
+     //       - p.full_name("alpha") would return std::string("Method:heat:alpha")
+
+     // we have omitted a bunch of other code that is required for initialing a Method
+     // class...
+   }
+
+
+**PLEASE NOTE:** that adding a new parameter to Cello/Enzo-E involves a few additional steps beyond just modifying the constructor. These steps are described in the next section.
 
 ==========================
 How to add a new parameter
 ==========================
-
-As mentioned above, the nitty-gritty details of parsing are handled by Enzo-E automatically.
-Values associated with parameter names can be queried by invoking methods on an instance of the :cpp:class:`!ParameterGroup` class.
-Instances of this class are commonly passed to the constructors of classes that inherit from Cello class-hierarchy.
 
 
 Let’s walk through an example where we want to introduce a new parameter to :cpp:class:`!EnzoMethodHeat`. 
@@ -90,21 +209,12 @@ The steps are as follows:
 2. Modify the pup routine of :cpp:class:`!EnzoMethodHeat` and the ``PUP::able`` migration constructor to properly handle the newly added member-variable
 
 3. Modify the main constructor of :cpp:class:`!EnzoMethodHeat` to initialize ``my_param_`` based on the value parsed from the parameter file.
-   The constructor of :cpp:class:`!EnzoMethodHeat` is passed a copy of an instance of :cpp:class:`!ParameterGroup`, in an argument ``p``.
-   To access the value specified in the parameter-file, you would probably invoke one of the following expressions (based on the expected type of the parameter):
+   
+   - The constructor of :cpp:class:`!EnzoMethodHeat` is passed a copy of an instance of :cpp:class:`!ParameterGroup`, in an argument ``p``.
 
-   - ``p.value_logical("my_param", false)`` if the parameter is expected to specify a boolean value and if it defaults to a value of ``false`` when the parameter is not specified.
+   - In the simplest case, you might use one of the methods described :ref:`here <basic-parameter-access-api>` to access the value specified in the parameter-file, and store the result in ``my_param_``.
 
-   - ``p.value_integer("my_param", 7)`` if the parameter is expected to be an integer and if it defaults to a value of ``7`` when the parameter is not specified.
-
-   - ``p.value_float("my_param", 2.0)`` if the parameter is expected to be a floating-point value and if it defaults to a value of ``2.0`` when the parameter is not specified.
-
-   - ``p.value_string("my_param", "N/A")`` if the parameter is expected to be a string and if it defaults to a value of ``"N/A"`` when the parameter is not specified.
-
-   In all of these cases, ``"my_param"`` is internally understood to be the last part of a full parameter-name.
-   We will discuss this down below in more detail, but for the sake of this example, it's generally expanded to ``"Method:heat:my_param"``.
-   Alternative logic may be needed to the above expressions in slightly more sophisticated cases (for example if the parameter expects a list of values or if you want to abort the program if the parameter can't be found).
-
+   - Alternative methods of ``p`` or more advanced logic (than a simple assignment) may be needed in slightly more sophisticated cases (for example if the parameter expects a list of values or if you want to abort the program if the parameter can't be found).
 
 ==============================
 Design Overview (new approach)
