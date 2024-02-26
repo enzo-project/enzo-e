@@ -25,9 +25,8 @@ class MethodOutput : public Method
 
 public: // interface
 
-  /// factory method
-  static MethodOutput* from_parameters(const Factory * factory,
-                                       ParameterGroup p);
+  /// Create a new MethodOutput
+  MethodOutput(const Factory * factory, ParameterGroup p) noexcept;
 
   /// Create a new MethodOutput
   MethodOutput
@@ -43,7 +42,7 @@ public: // interface
    bool all_blocks,
    int blocking_x,
    int blocking_y,
-   int blocking_z);
+   int blocking_z) noexcept;
 
   /// Destructor
   virtual ~MethodOutput() throw();

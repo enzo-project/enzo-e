@@ -922,7 +922,7 @@ Method * Problem::create_method_
     method = new MethodFluxCorrect(p_group);
   } else if (name == "output") {
     // we probably don't have to directly pass factory...
-    method = MethodOutput::from_parameters(factory, p_group);
+    method = new MethodOutput(factory, p_group);
   } else if (name == "order_morton") {
 
     // TODO: refactor to use a factory method/default constructor

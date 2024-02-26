@@ -13,52 +13,56 @@
 
 // #define BYPASS_BLOCK_TRACE
 
-MethodOutput* MethodOutput::from_parameters(const Factory * factory,
-                                            ParameterGroup p)
+//----------------------------------------------------------------------
+
+// this is a commonly occuring operation that should probably be directly
+// supported by ParameterGroup
+static std::vector<std::string> read_str_vec_(ParameterGroup p,
+                                              std::string name) noexcept
 {
-  using str_vec_t = std::vector<std::string>;
-
-  // TODO: add a method to ParameterGroup to encapsulate the following
-  auto read_strlist = [&p](std::string p_name) {
-    int len = p.list_length(p_name);
-    str_vec_t out(len);
-    for (int i=0; i<len; i++) { out[i] = p.list_value_string(i, p_name, ""); }
-    return out;
-  };
-
-  auto read_path_param = [&p, &read_strlist](std::string p_name) -> str_vec_t {
-    const std::string root_path = p.get_group_path();
-    if (p.type(p_name) == parameter_string) {
-      return { p.value_string(p_name,"") };
-    } else if (p.type(p_name) == parameter_list) {
-      str_vec_t out = read_strlist(p_name);
-      if (out.size() == 0){
-        ERROR2("MethodOutput::from_parameters", "%s:%s is empty",
-               root_path.c_str(), p_name.c_str());
-      }
-      return out;
-    } else {
-      ERROR2("MethodOutput::from_parameters",
-             "%s:%s must be a string or a list of strings",
-             root_path.c_str(), p_name.c_str());
-    }
-  };
-
-  return new MethodOutput
-    (factory,
-     read_path_param("file_name"),
-     read_path_param("path_name"),
-     read_strlist("field_list"),
-     read_strlist("particle_list"),
-     p.value_integer("ghost_depth",0),
-     p.value_integer("min_face_rank",0), // default 0 all faces
-     p.value_logical("all_fields", false),
-     p.value_logical("all_particles", false),
-     p.value_logical("all_blocks", true),
-     p.list_value_integer(0,"blocking",1),
-     p.list_value_integer(1,"blocking",1),
-     p.list_value_integer(2,"blocking",1));
+  int length = p.list_length(name);
+  std::vector<std::string> out(length);
+  for (int i = 0; i < length; i++) { out[i] = p.list_value_string(i, name); }
+  return out;
 }
+
+//----------------------------------------------------------------------
+
+static std::vector<std::string> read_path_param_(ParameterGroup p,
+                                                 std::string name) noexcept
+{
+  const std::string root_path = p.get_group_path();
+  if (p.type(name) == parameter_string) {
+    return { p.value_string(name,"") };
+  } else if (p.type(name) == parameter_list) {
+    std::vector<std::string> out = read_str_vec_(p, name);
+    if (out.size() == 0){
+      ERROR2("read_path_param_", "%s:%s is empty",
+             root_path.c_str(), name.c_str());
+    }
+    return out;
+  }
+  ERROR2("read_path_param_", "%s:%s must be a string or a list of strings",
+         root_path.c_str(), name.c_str());
+}
+
+//----------------------------------------------------------------------
+
+MethodOutput::MethodOutput(const Factory * factory, ParameterGroup p) noexcept
+  : MethodOutput(factory,
+                 read_path_param_(p, "file_name"),
+                 read_path_param_(p, "path_name"),
+                 read_str_vec_(p, "field_list"),
+                 read_str_vec_(p, "particle_list"),
+                 p.value_integer("ghost_depth",0),
+                 p.value_integer("min_face_rank",0), // default 0 all faces
+                 p.value_logical("all_fields", false),
+                 p.value_logical("all_particles", false),
+                 p.value_logical("all_blocks", true),
+                 p.list_value_integer(0,"blocking",1),
+                 p.list_value_integer(1,"blocking",1),
+                 p.list_value_integer(2,"blocking",1))
+{ }
 
 //----------------------------------------------------------------------
 
@@ -75,7 +79,7 @@ MethodOutput::MethodOutput
    bool all_blocks,
    int blocking_x,
    int blocking_y,
-   int blocking_z)
+   int blocking_z) noexcept
     : Method(),
       file_name_(file_name),
       path_name_(path_name),
