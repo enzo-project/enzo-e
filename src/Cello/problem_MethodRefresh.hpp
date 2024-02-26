@@ -18,8 +18,8 @@ class MethodRefresh : public Method
 
 public: // interface
 
-  /// factory method
-  static MethodRefresh* from_parameters(ParameterGroup p);
+  /// create a new MethodRefresh from a ParameterGroup
+  MethodRefresh(ParameterGroup p) noexcept;
 
   /// Create a new MethodRefresh
   MethodRefresh
@@ -28,7 +28,7 @@ public: // interface
    int ghost_depth,
    int min_face_rank,
    bool all_fields,
-   bool all_particles);
+   bool all_particles) noexcept;
 
   /// Destructor
   virtual ~MethodRefresh() throw()

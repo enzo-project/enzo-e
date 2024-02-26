@@ -931,7 +931,7 @@ Method * Problem::create_method_
     method = new MethodOrderMorton(config->mesh_min_level);
 
   } else if (name == "refresh") {
-    method = MethodRefresh::from_parameters(p_group);
+    method = new MethodRefresh(p_group);
   } else if (name == "debug") {
 
     // TODO: refactor to use MethodDebug's constructor
@@ -945,7 +945,7 @@ Method * Problem::create_method_
        p_group.value_logical("ghost",false));
 
   } else if (name == "close_files") {
-    method = MethodCloseFiles::from_parameters(p_group);
+    method = new MethodCloseFiles(p_group);
   }
   return method;
 }
