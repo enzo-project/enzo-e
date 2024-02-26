@@ -47,7 +47,10 @@ extern const char * parameter_type_name [];
 #include "parameters_Param.hpp"
 #include "parameters_ParamNode.hpp"
 #include "parameters_Parameters.hpp"
-#include "parameters_ParameterAccessor.hpp"
+#include "parameters_ParameterGroup.hpp"
+
+// this is temporary while we rename ParameterAccessor -> ParameterGroup
+typedef ParameterGroup ParameterAccessor;
 
 #endif /* _PARAMETERS_HPP */
 

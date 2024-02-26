@@ -27,7 +27,7 @@ MethodOutput* MethodOutput::from_parameters(const Factory * factory,
   };
 
   auto read_path_param = [&p, &read_strlist](std::string p_name) -> str_vec_t {
-    const std::string root_path = p.get_root_parpath();
+    const std::string root_path = p.get_group_path();
     if (p.type(p_name) == parameter_string) {
       return { p.value_string(p_name,"") };
     } else if (p.type(p_name) == parameter_list) {

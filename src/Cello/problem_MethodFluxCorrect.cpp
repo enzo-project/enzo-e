@@ -25,7 +25,7 @@ MethodFluxCorrect* MethodFluxCorrect::from_parameters(ParameterAccessor p)
     // load pairs of fields and min_digits
     const int list_length = p.list_length(min_digits_name);
 
-    std::string root_name = p.get_root_parpath();
+    std::string root_name = p.get_group_path();
     ASSERT2("MethodFluxCorrect::from_parameters",
             "The list assigned to %s:%s must have a non-negative, even length",
             root_name.c_str(), min_digits_name.c_str(),
