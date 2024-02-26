@@ -236,25 +236,33 @@ makes the introuduction of optional fields that are related to active
 advection somewhat difficult (e.g. cosmic ray energy/fluxes, internal
 energy for dual energy formalism, phi for dedner divergence cleaning).
 Instead, our toolkit largely operates on maps/dictionaries containing
-``EFlt3DArray`` instances (stored in ``EnzoEFltArrayMap``).
+``CelloView<enzo_float, 3>`` instances (stored in ``ViewMap<enzo_float>``).
 
-Use of ``EnzoEFltArrayMap``
----------------------------
+Use of ``ViewMap<enzo_float>``
+------------------------------
 
 The basic unit that get's operated on by these operation classes are
-instances of the ``EnzoEFltArrayMap`` class. As the name may suggest,
+instances of the ``ViewMap<enzo_float>`` class. As the name may suggest,
 these classes serve as a map/dictionary of instances of
-``EFlt3DArray`` (or equivalently, instances of
-``CelloView<enzo_float,3>``). For more details about how to use
-``EnzoEFltArrayMap``, see :ref:`EnzoEFltArrayMap-Description`
+``CelloView<enzo_float, 3>`` (or equivalently, instances of
+``CelloView<enzo_float,3>``). More details are provided :ref:`here <ViewMap-Description>` about how to use ``ViewMap``.
 
-In the context of this toolkit, the keys of an ``EnzoEFltArrayMap``
+.. note::
+
+    Throughout this documentation and the codebase, there are some
+    scattered references to ``EnzoEFltArrayMap`` and
+    ``EFlt3DArray``. These are aliases of ``ViewMap<enzo_float>`` and
+    ``CelloView<enzo_float,3>``, respectively. These names are mostly
+    historical. They should not be used in new code or new
+    documentation.
+
+In the context of this toolkit, the keys of a ``ViewMap<enzo_float>``
 are usually the names of a scalar quantity (like ``"density"``) or
 component of a vector quantity (like ``"velocity_x"``). Each key is
-paired with an instance of ``EFlt3DArray`` that stores associated
+paired with an instance of ``CelloView<enzo_float,3>`` that stores associated
 data. To simplify logic, arrays are not aliased between separate maps.
 Below, we provide a description of the main uses of
-``EnzoEFltArrayMap`` by the provided operation classes:
+``ViewMap<enzo_float>`` by the provided operation classes:
 
   1. Map of cell-centered integration quantities.
 
@@ -296,7 +304,7 @@ Below, we provide a description of the main uses of
 
   4. Map of reconstructed left/right primitive quantites
 
-     * 2 instances of ``EnzoEFltArrayMap`` are used to respectively
+     * 2 instances of ``ViewMap<enzo_float>`` are used to respectively
        hold the reconstructed left and right interface primitive
        quantities. This should share have the same keys that are
        described for the second category of maps.
@@ -325,7 +333,7 @@ Below, we provide a description of the main uses of
        (e.g. the map will hold a "velocity_x" key even though the associated
        array stores the x-component of the momentum density flux).
 
-In general, the use of ``EnzoEFltArrayMap`` objects with common sets
+In general, the use of ``ViewMap<enzo_float>`` objects with common sets
 of keys helps simplify the implementation of various methods (e.g. the
 cell-centered array associated with "density" is used to reconstruct
 values that are stored in the fields of the "density"

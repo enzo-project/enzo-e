@@ -47,7 +47,8 @@ The functionality described in this subsection are only defined as methods of :c
 In the future, it might make sense to move them around.
 
 It's important that none of these functions actually mutate the contents of :cpp:class:`!EnzoPhysicsFluidProps`.
-As in the Hydro/MHD Infrastructure section, many of these function operations act on the contents of :cpp:class:`!EnzoEFltArrayMap` rather than directly on :cpp:class:`!Block` objects for additional flexibility.
+As in the Hydro/MHD Infrastructure section, many of these function operations act on the contents of :cpp:class:`!ViewMap` rather than directly on :cpp:class:`!Block` objects for additional flexibility.
+As an aside, the signatures of these methods actually use :cpp:type:`!EnzoEFltArrayMap`, which is an alias of :cpp:class:`!ViewMap<enzo_float>` (for historic reasons).
 
 .. cpp:function:: void EnzoPhysicsFluidProps::primitive_from_integration \
                   (const EnzoEFltArrayMap &integration_map, \

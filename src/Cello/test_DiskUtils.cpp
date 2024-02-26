@@ -11,7 +11,7 @@
 #include "view.hpp"
 #include "disk.hpp"
 
-#include "test_ViewTestTools.hpp" // range_3Darray, assert_allequal3D
+#include "test_ViewTestRoutines.hpp" // range_3Darray, assert_allequal3D
 
 
 namespace{ // anonymous namespace defines things that are only used locally

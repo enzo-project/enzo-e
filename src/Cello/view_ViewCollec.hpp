@@ -5,7 +5,7 @@
 /// @date     Fri Nov 26 2021
 /// @brief    Declaration and implementation of the ViewCollec class template
 //
-// This class is primarily intended to be used to help implement the ArrayMap
+// This class is primarily intended to be used to help implement the ViewMap
 
 #include <array>
 #include <limits>
@@ -157,6 +157,13 @@ namespace detail {
       return out;
     }
 
+
+    /// This is primarily intended to help implement casts from ViewCollec<T>
+    /// to ViewCollec<const T>
+    SingleAddressViewCollec_(CelloView<T, 4> backing_array)
+      : backing_array_(backing_array)
+    { }
+
   private:
     /// this holds the individual array elements
     CelloView<T, 4> backing_array_;
@@ -171,12 +178,21 @@ class ViewCollec{
   ///           constant shape. While elements of these arrays can be mutated,
   ///           the arrays themselves can't be overwritten
   ///
-  /// This primarily exists to help implement an ArrayMap
+  /// This primarily exists to help implement a ViewMap
   ///
   /// This is a hybrid data-type that abstracts 2 separate implementations for
   /// collections of CelloViews. Under the hood, the arrays are either stored
-  /// in a single 4D Contiguous Array (see SingleAddressViewCollec_) or an
+  /// in a single 4D Contiguous View (see SingleAddressViewCollec_) or an
   /// array of 3D CelloViews (see ArrOfPtrsViewCollec_)
+
+public: // interface
+
+  typedef T value_type;
+  typedef typename std::add_const<T>::type const_value_type;
+  typedef typename std::remove_const<T>::type nonconst_value_type;
+
+  friend class ViewCollec<const_value_type>;
+
 
 private: // attributes
 
@@ -197,6 +213,64 @@ public: /// public interface
   ViewCollec(const std::vector<CelloView<T, 3>>& v) noexcept
     : collec_(std::in_place_type_t<detail::ArrOfPtrsViewCollec_<T>>(), v)
   { }
+
+  /// conversion constructor that facilitates implicit casts from
+  /// ViewCollec<nonconst_value_type> to ViewCollec<const_value_type>
+  ///
+  /// @note
+  /// This is only defined for instances of ViewCollec for which T is const-
+  /// qualified. If it were defined in cases where T is not const-qualified,
+  /// then it would duplicate the copy-constructor.
+  template<class = std::enable_if<std::is_same<T, const_value_type>::value>>
+  ViewCollec(const ViewCollec<nonconst_value_type> &other) {
+
+    using ContigT = detail::SingleAddressViewCollec_<nonconst_value_type>;
+    using ArrOfPtrsT = detail::ArrOfPtrsViewCollec_<nonconst_value_type>;
+
+    if (std::holds_alternative<ContigT>(other.collec_)) {
+      // first, we extract the 4D contiguous view
+      const CelloView<nonconst_value_type, 4> tmp =
+        std::get<ContigT>(other.collec_).get_backing_array();
+
+      // now, we cast that 4D view (to one holding the const-qualified type)
+      CelloView<const_value_type,4> casted_view = tmp;
+
+      // finally, we use the casted view to construct
+      // detail::SingleAddressViewCollec_ & store it inside this->collec_
+      // (it would be btter to use collec_.emplace, but I can't get it to work)
+      this->collec_ = detail::SingleAddressViewCollec_<const_value_type>
+        (casted_view);
+
+    } else if (std::holds_alternative<ArrOfPtrsT>(other.collec_)) {
+      // this performs heap-allocations (which is a little horrendous in the
+      // context of an implicit cast!)
+      //
+      // There currently isn't a great portable way to do this without
+      // somehow refactoring SharedBuffer_ and getting extremely clever with
+      // casting... (and maybe directly managing internals of CelloView)
+      // -> this would probably make life very difficult when it comes time
+      //    to start using Kokkos
+      //
+      // Now that we have bumped the minimum required C++ version to C++17,
+      // we can refactor this class to directly store,
+      // std::variant<SharedBuffer_<const_value_type>,
+      //              SharedBuffer_<nonconst_value_type>,
+      //              CelloView<T,4>>
+      // (since we are already branching, between backends, I highly doubt that
+      // this translates to a performance hit)
+
+      std::vector<CelloView<const_value_type,3>> tmp;
+      const std::size_t size = other.size();
+      tmp.reserve(size);
+      for (std::size_t i = 0; i < other.size(); i++) {
+        tmp.push_back(other[i]);
+      }
+      this->collec_ = detail::ArrOfPtrsViewCollec_<const_value_type>(tmp);
+
+    } else {
+      ERROR("ViewCollec()", "This should be unreachable");
+    }
+  }
 
   /// Destructor
   ~ViewCollec() = default;

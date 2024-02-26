@@ -9,8 +9,8 @@
 #include "test.hpp"
 #include "view.hpp"
 
-#include "test_ViewTestTools.hpp" // assign_range_3Darray, range_3Darray,
-                                  // assert_allequal3D
+#include "test_ViewTestRoutines.hpp" // assign_range_3Darray, range_3Darray,
+                                     // assert_allequal3D
 
 #include <array>
 #include <utility> // for std::pair
@@ -63,6 +63,16 @@ namespace {
   private:
     bool single_array_;
   };
+
+  // the contents of a and b don't need to be aliases to pass this assertion
+  template<typename T>
+  void assert_allequal_array_elem(const ViewCollec<T>& a,
+                                  const ViewCollec<T>& b) {
+    ASSERT("assert_allequal_array_elem",
+           "The size of the collections are not the same.",
+           a.size() == b.size());
+    for (std::size_t i = 0; i < a.size(); i++){ assert_allequal3D(a[i], b[i]); }
+  }
 
   template<typename T>
   void common_checks_(const char* test_name, ViewCollec<T>& collec,
@@ -190,8 +200,8 @@ private:
     ViewCollec<double>* collec_ptr = nullptr; // initialize for later use
 
     // initialize the reference values
-    CelloView<double, 3> ref0 = range_3Darray(5, 4, 3,  1.0, 1.0);
-    CelloView<double, 3> ref1 = range_3Darray(5, 4, 3, -1.0,-1.0);
+    CelloView<double, 3> ref0 = range_3Darray<double>(5, 4, 3,  1.0, 1.0);
+    CelloView<double, 3> ref1 = range_3Darray<double>(5, 4, 3, -1.0,-1.0);
     auto check_array_elem_values = [&ref0, &ref1](ViewCollec<double>& collec)
       {
         assert_allequal3D(collec[0], ref0);
