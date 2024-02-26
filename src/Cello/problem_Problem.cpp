@@ -919,7 +919,7 @@ Method * Problem::create_method_
   } else if (name == "null") {
     method = new MethodNull(p_group);
   } else if (name == "flux_correct") {
-    method = MethodFluxCorrect::from_parameters(p_group);
+    method = new MethodFluxCorrect(p_group);
   } else if (name == "output") {
     // we probably don't have to directly pass factory...
     method = MethodOutput::from_parameters(factory, p_group);
