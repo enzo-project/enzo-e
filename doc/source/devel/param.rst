@@ -64,9 +64,9 @@ One can think of these names as a "parameter-path".
 
 - In general, a parameter-path for a given parameter lists the names of ancestor "groups", separated by colons, and lists the name of the parameter at the end (i.e. the string that directly precedes an assignment).
 
-=========================================
-How to add a new parameter (new approach)
-=========================================
+==========================
+How to add a new parameter
+==========================
 
 As mentioned above, the nitty-gritty details of parsing are handled by Enzo-E automatically.
 Values associated with parameter names can be queried by invoking methods on an instance of the :cpp:class:`!ParameterGroup` class.
@@ -140,7 +140,7 @@ The main feature of the :cpp:class:`!ParameterGroup` class is that it provides m
 
 
 Why do we even need :cpp:class:`!ParameterGroup`?
-----------------------------------------------------
+-------------------------------------------------
 
 To motivate the existence of the :cpp:class:`!ParameterGroup` class, it's useful to consider alternative approaches.
 The most obvious option is to simply pass instances of the :cpp:class:`!Parameters` class to constructors and static-factory methods of other classes.
@@ -158,30 +158,29 @@ To flesh out this alternative case more, let's consider the following snippet of
            file_name = # ...
            all_fields = true;
            all_particles = true;
-           # ...
+           # other parameters ...
 
          }
        }
 
-This particular snippet can easily be parsed if we pass a reference to the :cpp:class:`!Parameters` object to the static factory method of :cpp:class:`!MethodOutput`.
-An example code block is included here, to show what that the initialization might look like:
+This particular snippet can easily be parsed if we pass a reference to the :cpp:class:`!Parameters` object to the constructor of :cpp:class:`!MethodOutput`.
+An example code block is included here, to show (roughly) what that the initialization might look like:
 
 .. code-block:: c++
 
     // NOTE: MethodOutput is a special case. At least historically, its factory
     // method needed to accept an argument other than just the parameters
 
-    MethodOutput* MethodOutput::from_parameters(/* ... */, Parameters &p)
-    {
-      std::string file_name = p.value_string("Method:output:file_name", "");
-      bool all_fields = p.value_logical("Method:output:all_fields", false);
-      bool all_particles = p.value_logical("Method:output:all_particles", false);
+    // We have made a number of simplifications here compared to what the
+    // source code actually looks like...
 
-      // parse other parameters...
-
-      return new MethodOutput( /* pass file_name, all_fields, all_particles,
-                                  and other values */ );
-    }
+    MethodOutput::MethodOutput(/* ... */, Parameters &p)
+      : MethodOutput(/* ... */,
+                     p.value_string("Method:output:file_name", ""),
+                     p.value_logical("Method:output:all_fields", false),
+                     p.value_logical("Method:output:all_particles", false),
+                     /* ... */)
+    { }
 
 There is nothing wrong with the above snippet, and it will work in a lot of cases.
 However, we will encounter issues when we want to set up a simulation that makes use of multiple :cpp:class:`!MethodOutput` instances.
@@ -207,7 +206,7 @@ To illustrate how this is done in Enzo-E, see the following snippet from a hypot
             file_name = # ...
             all_fields = true;
             all_particles = false;
-            # parse other parameters ...
+            # other parameters ...
 
             type = "output";
           }
@@ -216,7 +215,7 @@ To illustrate how this is done in Enzo-E, see the following snippet from a hypot
             file_name = # ...
             all_fields = false;
             all_particles = true;
-            # parse other parameters ...
+            # other parameters ...
 
             type = "output";
           }
@@ -242,17 +241,16 @@ A code snippet using our new approach is shown below:
     // NOTE: MethodOutput is a special case. At least historically, its factory
     // method needed to accept an argument other than just the parameters
 
-    MethodOutput* MethodOutput::from_parameters(/* ... */, ParameterGroup &p)
-    {
-      std::string file_name = p.value_string("file_name", "");
-      bool all_fields = p.value_logical("all_fields", false);
-      bool all_particles = p.value_logical("all_particles", false);
+    // We have made a number of simplifications here compared to what the
+    // source code actually looks like...
 
-      // parse other parameters...
-
-      return new MethodOutput( /* pass file_name, all_fields, all_particles,
-                                  and other values */ );
-    }
+    MethodOutput::MethodOutput(/* ... */, ParameterGroup p)
+      : MethodOutput(/* ... */,
+                     p.value_string("file_name", ""),
+                     p.value_logical("all_fields", false),
+                     p.value_logical("all_particles", false),
+                     /* ... */)
+    { }
 
 .. note::
 
@@ -270,14 +268,33 @@ A code snippet using our new approach is shown below:
 
    The *only* other alternative is have :cpp:class:`!ParameterGroup` instances "auto-magically" redirect absolute parameter-paths, but I think that will generally be more confusing. 
 
-Benefit: Discourage Usage of scattered parameters
--------------------------------------------------
+Hypothetical Question: How do I used :cpp:class:`!ParameterGroup` to query the parameter specified to configure some other :cpp:class:`!Method` subclass?
+---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-A benefit to the :cpp:class:`!ParameterGroup` class is that it restricts access to parameters within the associated root-path.
-This discourages the design of classes that are configured by parameters scattered throughout the parameter file.
+The short answer is "you don't". The :cpp:class:`!ParameterGroup` class is designed to restrict access to parameters within the associated parameter-group/root-path.
+This is a **feature** that discourages the design of classes that are configured by parameters scattered throughout the parameter file.
+
+
+Let's be more concrete: let's imagine that while configuring an instance of a class called :cpp:class:`!MethodX`, and we want to access a special parameter value stored outside of :cpp:class:`!MethodX`\'s associated parameter-group.
+That special parameter might instead be part of a parameter-group associated with a different :cpp:class:`!Method` subclass, a :cpp:class:`!Compute` subclass, an :cpp:class:`!Initial` subclass, etc.
+
+Experience tells us it is usually an anti-pattern to directly access that parameter value (via :cpp:class:`!ParameterGroup` or :cpp:class:`!Parameter` instance). This problems with this kind of code include:
+
+1. It makes refactoring of that parameter much more difficult.
+
+2. It can lead to cases where you are trying to access parameter-values for :cpp:class:`!Method` subclasses regardless of whether the subclass is even being used in the simulation.
+
+
+Preferred alternatives to doing this include:
+
+1. Introducing an accessor method to access the special parameter-value from the the :cpp:class:`!Method` subclass, :cpp:class:`!Compute` subclass, an :cpp:class:`!Initial` subclass, etc. that the parameter is associated with.
+
+2. Altering the way in which the parameter is specified and store it within a :cpp:class:`!Physics` class.
+
+The tradeoffs of these approaches are discussed in greater detail :ref:`here <how-to-store-global-data>`.
 
 In rare cases (e.g. during refactoring when we convert a previously Method-specific parameter to a Physics parameter and want to retain backwards compatability), exceptions need to be made.
-Thus, an "escape-hatch" is provided to directly access the wrapped Parameters object: call the :cpp:expr:`ParameterGroup::wrapped_Parameters_ref()` method.
+Thus, an "escape-hatch" is provided to directly access the global Parameters object: call the :cpp:expr:`cello::parameters()`.
 Please, avoid using this "escape-hatch" unless it's truly necessary.
 
 .. todo::
@@ -289,28 +306,6 @@ Please, avoid using this "escape-hatch" unless it's truly necessary.
 
    If we were to do that, we would need to modify the code to recognize this convention.
    We would probably also want to modify the various parameter-accessor methods of the :cpp:class:`!ParameterGroup` to continue to restrict access to parameters within the common root-path that a :cpp:class:`!ParameterGroup` is configured with.
-
-Hypothetical Question: How do I query the parameter of some other :cpp:class:`!Method` subclass?
-------------------------------------------------------------------------------------------------
-
-The old approach encouraged a somewhat common programming-idiom, in which the configuration information of a primary :cpp:class:`!Method` subclass was accessed in a secondary location, by accessing the copy of the parameter-value stored as an attribute of the global :cpp:class:`!EnzoConfig` object.
-This secondary location could be outside of the primary :cpp:class:`!Method` subclass; it might be within a different :cpp:class:`!Method` subclass, a :cpp:class:`!Compute` subclass, an :cpp:class:`!Initial` subclass, etc.
-
-Under the new approach, :cpp:class:`!EnzoConfig` will no longer hold a copy of each parameter-value, and this programming-idiom is no longer possible.
-We view this as a **feature** of the new-approach.
-
-There are 2 primary problems with this "global" idiom:
-
-1. It makes refactoring of that parameter more difficult.
-
-2. It can lead to cases where you are trying to access parameter-values for :cpp:class:`!Method` subclasses regardless of whether the subclass is even being used in the simulation.
-
-Preferred alternatives to this idiom include either:
-
-1. Introducing an accessor method to the primary :cpp:class:`!Method` subclass to directly query the configuration-value that is stored as an attribute of that subclass
-2. Altering the way in which the configuration value is specified and store it within a :cpp:class:`!Physics` class
-
-The tradeoffs of these approaches are discussed in greater detail :ref:`here <how-to-store-global-data>`.
 
 =================
 Historic Approach
