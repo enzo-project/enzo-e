@@ -19,7 +19,7 @@ class MethodRefresh : public Method
 public: // interface
 
   /// factory method
-  static MethodRefresh* from_parameters(ParameterAccessor p);
+  static MethodRefresh* from_parameters(ParameterGroup p);
 
   /// Create a new MethodRefresh
   MethodRefresh

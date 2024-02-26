@@ -20,7 +20,7 @@ class MethodTrace : public Method
 public: // interface
 
   /// factory method
-  static MethodTrace* from_parameters(ParameterAccessor& p){
+  static MethodTrace* from_parameters(ParameterGroup p){
     return new MethodTrace
       (p.value_float("courant",1.0),
        p.value_float("timestep", std::numeric_limits<double>::max()),

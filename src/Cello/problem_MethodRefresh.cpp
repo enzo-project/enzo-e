@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-MethodRefresh* MethodRefresh::from_parameters(ParameterAccessor p)
+MethodRefresh* MethodRefresh::from_parameters(ParameterGroup p)
 {
   // Read the field list
   int n_fields = p.list_length("field_list");

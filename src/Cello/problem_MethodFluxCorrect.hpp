@@ -19,7 +19,7 @@ class MethodFluxCorrect : public Method
 public: // interface
 
   /// factory method
-  static MethodFluxCorrect* from_parameters(ParameterAccessor p);
+  static MethodFluxCorrect* from_parameters(ParameterGroup p);
 
   /// Create a new MethodFluxCorrect
   MethodFluxCorrect

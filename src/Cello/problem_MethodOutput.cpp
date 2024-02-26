@@ -14,11 +14,11 @@
 // #define BYPASS_BLOCK_TRACE
 
 MethodOutput* MethodOutput::from_parameters(const Factory * factory,
-                                            ParameterAccessor &p)
+                                            ParameterGroup p)
 {
   using str_vec_t = std::vector<std::string>;
 
-  // TODO: add a method to ParameterAccessor to encapsulate the following
+  // TODO: add a method to ParameterGroup to encapsulate the following
   auto read_strlist = [&p](std::string p_name) {
     int len = p.list_length(p_name);
     str_vec_t out(len);

@@ -21,7 +21,7 @@ class EnzoMethodSinkMaker : public Method {
 public:
 
   // factory method
-  static EnzoMethodSinkMaker* from_parameters(ParameterAccessor& p) noexcept;
+  static EnzoMethodSinkMaker* from_parameters(ParameterGroup p) noexcept;
 
   // Constructor
   EnzoMethodSinkMaker

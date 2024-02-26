@@ -468,14 +468,15 @@ void Problem::initialize_method
 
   Method::courant_global = config->method_courant_global;
 
-  // todo: clean the following up
+  // in the future, it might be nice to refactor Problem::create_method_ so
+  // that we can use it to construct this first MethodNull object. (But that
+  // may be somewhat involved)
   {
     const std::string root_path = "Method:null";
     ASSERT("Problem::create_method_", "Something is wrong",
            cello::simulation());
-    ParameterAccessor p_accessor(*(cello::simulation()->parameters()),
-                                 root_path);
-    method_list_.push_back(MethodNull::from_parameters(p_accessor));
+    ParameterGroup p_group(*(cello::simulation()->parameters()), root_path);
+    method_list_.push_back(MethodNull::from_parameters(p_group));
   }
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
@@ -908,20 +909,20 @@ Method * Problem::create_method_
   Parameters* parameters = cello::simulation()->parameters();
   const std::string root_path =
     ("Method:" + parameters->list_value_string(index_method, "Method:list"));
-  ParameterAccessor p_accessor(*parameters, root_path);
+  ParameterGroup p_group(*parameters, root_path);
 
   // No default method
   Method * method = nullptr;
 
   if (name == "trace") {
-    method = MethodTrace::from_parameters(p_accessor);
+    method = MethodTrace::from_parameters(p_group);
   } else if (name == "null") {
-    method = MethodNull::from_parameters(p_accessor);
+    method = MethodNull::from_parameters(p_group);
   } else if (name == "flux_correct") {
-    method = MethodFluxCorrect::from_parameters(p_accessor);
+    method = MethodFluxCorrect::from_parameters(p_group);
   } else if (name == "output") {
     // we probably don't have to directly pass factory...
-    method = MethodOutput::from_parameters(factory, p_accessor);
+    method = MethodOutput::from_parameters(factory, p_group);
   } else if (name == "order_morton") {
 
     // TODO: refactor to use a factory method/default constructor
@@ -930,21 +931,21 @@ Method * Problem::create_method_
     method = new MethodOrderMorton(config->mesh_min_level);
 
   } else if (name == "refresh") {
-    method = MethodRefresh::from_parameters(p_accessor);
+    method = MethodRefresh::from_parameters(p_group);
   } else if (name == "debug") {
 
-    // TODO: refactor to use a factory method
+    // TODO: refactor to use MethodDebug's constructor
     //   - as an aside, the number of fields and particles specified in the
     //     parameter file may be inaccurate. We probably don't want to do that
     method = new MethodDebug
       (config->num_fields,
        config->num_particles,
-       p_accessor.value_logical("print",false),
-       p_accessor.value_logical("coarse",false),
-       p_accessor.value_logical("ghost",false));
+       p_group.value_logical("print",false),
+       p_group.value_logical("coarse",false),
+       p_group.value_logical("ghost",false));
 
   } else if (name == "close_files") {
-    method = MethodCloseFiles::from_parameters(p_accessor);
+    method = MethodCloseFiles::from_parameters(p_group);
   }
   return method;
 }

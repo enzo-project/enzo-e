@@ -27,7 +27,7 @@ public: // interface
 
   /// factory method
   static MethodOutput* from_parameters(const Factory * factory,
-                                       ParameterAccessor &p);
+                                       ParameterGroup p);
 
   /// Create a new MethodOutput
   MethodOutput

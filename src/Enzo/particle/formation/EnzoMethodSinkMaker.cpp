@@ -15,7 +15,7 @@
 
 //-------------------------------------------------------------------
 
-EnzoMethodSinkMaker* EnzoMethodSinkMaker::from_parameters(ParameterAccessor& p)
+EnzoMethodSinkMaker* EnzoMethodSinkMaker::from_parameters(ParameterGroup p)
   noexcept
 {
   int offset_seed_shift_input = p.value_integer("offset_seed_shift",0);

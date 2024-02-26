@@ -592,19 +592,19 @@ Method * EnzoProblem::create_method_
   Method * method = 0;
 
   // historically, this method would always call method->set_courant after
-  // building a new method object. But, with this new p_accessor approach, each
+  // building a new method object. But, with this new p_group approach, each
   // method objects should opt out of this approach (so that they can set
   // appropriate default courant factors)
   // - in cases where the courant factor is not used, we may not explicitly set
   //   this variable to true (since it doesn't really matter)
   bool skip_auto_courant = false;
 
-  // move creation of p_accessor up the call stack?
+  // move creation of p_group up the call stack?
   ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
   Parameters* parameters = cello::simulation()->parameters();
   const std::string root_path =
     ("Method:" + parameters->list_value_string(index_method, "Method:list"));
-  ParameterAccessor p_accessor(*parameters, root_path);
+  ParameterGroup p_group(*parameters, root_path);
 
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -650,20 +650,20 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "ppml") {
 
-    method = new EnzoMethodPpml(p_accessor);
+    method = new EnzoMethodPpml(p_group);
     skip_auto_courant = true;
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit (p_accessor);
+    method = new EnzoMethodPmDeposit (p_group);
 
   } else if (name == "pm_update") {
 
-    method = new EnzoMethodPmUpdate(p_accessor);
+    method = new EnzoMethodPmUpdate(p_group);
 
   } else if (name == "heat") {
 
-    method = new EnzoMethodHeat(p_accessor);
+    method = new EnzoMethodHeat(p_group);
     skip_auto_courant = true;
 
 #ifdef CONFIG_USE_GRACKLE
@@ -834,7 +834,7 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = EnzoMethodSinkMaker::from_parameters(p_accessor);
+    method = EnzoMethodSinkMaker::from_parameters(p_group);
 
   } else {
 

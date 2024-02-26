@@ -15,7 +15,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml(ParameterAccessor p)
+EnzoMethodPpml::EnzoMethodPpml(ParameterGroup p)
   : Method(),
     comoving_coordinates_(enzo::cosmology() != nullptr)
 {

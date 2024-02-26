@@ -12,7 +12,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHeat::EnzoMethodHeat (ParameterAccessor p)
+EnzoMethodHeat::EnzoMethodHeat (ParameterGroup p)
   : Method(),
     alpha_(p.value_float("alpha",1.0))
 {

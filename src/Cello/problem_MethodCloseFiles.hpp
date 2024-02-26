@@ -17,7 +17,7 @@ class MethodCloseFiles : public Method {
 public: // interface
 
   /// factory method
-  static MethodCloseFiles* from_parameters(ParameterAccessor& p){
+  static MethodCloseFiles* from_parameters(ParameterGroup p){
     return new MethodCloseFiles
       (p.value_float("seconds_stagger",0.0),
        p.value_float("seconds_delay",0.0),

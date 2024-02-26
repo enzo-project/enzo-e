@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-MethodFluxCorrect* MethodFluxCorrect::from_parameters(ParameterAccessor p)
+MethodFluxCorrect* MethodFluxCorrect::from_parameters(ParameterGroup p)
 {
   std::vector<std::string> min_digits_fields;
   std::vector<double> min_digits_values;

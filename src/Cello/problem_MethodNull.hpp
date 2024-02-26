@@ -19,7 +19,7 @@ class MethodNull : public Method {
 public: // interface
 
   /// factory method
-  static MethodNull* from_parameters(ParameterAccessor& p)
+  static MethodNull* from_parameters(ParameterGroup p)
   {
     return new MethodNull
       ( p.value_float("dt", std::numeric_limits<double>::max()) );
