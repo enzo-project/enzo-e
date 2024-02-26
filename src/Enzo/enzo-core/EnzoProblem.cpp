@@ -834,7 +834,7 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = EnzoMethodSinkMaker::from_parameters(p_group);
+    method = new EnzoMethodSinkMaker(p_group);
 
   } else {
 
