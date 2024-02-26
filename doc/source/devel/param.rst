@@ -11,17 +11,18 @@ Overview
 Most of the parsing work is handled by the :cpp:class:`!Parameters` class from the Cello layer and stored internally.
 All parameters are parsed after startup on a single process and then the parsed information is communicated between processes.
 
-We are currently in the process of migrating between approaches for accessing (and configuring) parsed parameters.
+We are currently in the process of migrating between approaches for accessing the parsed parameters in order to use them to configure Enzo-E/Cello classes.
 Given the large scope of this transition, we decided to gradually migrate between the approaches, rather than try to do it one shot.
 
 * At the time of writing, we have migrated a large number of :cpp:class:`!Method` classes.
   
-* Our intention is to eventually migrate as much as possible to this new approach (e.g. all :cpp:class:`!Method` classes, all :cpp:class:`!Physics` classes, all :cpp:class:`!Initial` classes, etc.), to stop ultimately get rid of the :cpp:class:`!Config` and :cpp:class:`!EnzoConfig` classes.
+* Our intention is to eventually migrate as much as possible to this new approach (e.g. all :cpp:class:`!Method` classes, all :cpp:class:`!Physics` classes, all :cpp:class:`!Initial` classes, etc.).
+  Ultimately we would like to remove the :cpp:class:`!Config` and :cpp:class:`!EnzoConfig` classes.
 
-First, we briefly review properties of an Enzo-E/Cello parameters and talk about the idea of a "parameter-path"
+First, we briefly review properties of Enzo-E/Cello parameters and talk about the idea of a "parameter-path"
 Next, we talk through an example of how you might add a new parameter using the new approach.
 Then, we provide some more details about the design of the new-approach.
-Finally, we briefly discuss the older approach (and some of its problems shortcomings).
+Finally, we briefly discuss the older approach (and some of its shortcomings).
 
 ===================================
 Parameter Files and Parameter-Paths
@@ -121,7 +122,7 @@ Design Overview (new approach)
 Our new approach revolves around the usage of the :cpp:class:`!ParameterGroup` class for accessing/querying parameters stored in an instance of the :cpp:class:`Parameters` class.
 Instances of the :cpp:class:`!ParameterGroup` class are light-weight and are expected to have a short-lifetime (akin to :cpp:class:`!Field` or :cpp:class:`!Particle`).
 
-**As illustrated above, instances of the** :cpp:class:`!ParameterGroup` **class are expected to be passed to the constructor (or factory-method) of classes that inherit from Cello class-hierarchy.**
+**As illustrated above, instances of the** :cpp:class:`!ParameterGroup` **class are expected to be passed to the constructor of classes that inherit from Cello class-hierarchy.**
 
 The main feature of the :cpp:class:`!ParameterGroup` class is that it provides methods for querying/accessing parameters with parameter-paths that share a common root.
 
@@ -131,7 +132,7 @@ The main feature of the :cpp:class:`!ParameterGroup` class is that it provides m
 
   - If a developer is ever tempted to mutate the root-path, they should just initialize a new :cpp:class:`!ParameterGroup` (since the instances are lightweight)
 
-  - The root path can be queried with :cpp:expr:`ParameterGroup::get_root_parpath()`
+  - The root path can be queried with :cpp:expr:`ParameterGroup::get_group_path()`
 
 - When a string is passed to one of the accessor methods, that string is internally appended to the root pararameter-path and the result represents the full name of the queried parameter.
   (You can think of this string as specifying the relative path to the parameter).
@@ -272,7 +273,7 @@ A code snippet using our new approach is shown below:
 Benefit: Discourage Usage of scattered parameters
 -------------------------------------------------
 
-A benefit to the :cpp:expr:`ParameterGroup::wrapped_Parameters_ref()` class is that it restricts access to parameters within the associated root-path.
+A benefit to the :cpp:class:`!ParameterGroup` class is that it restricts access to parameters within the associated root-path.
 This discourages the design of classes that are configured by parameters scattered throughout the parameter file.
 
 In rare cases (e.g. during refactoring when we convert a previously Method-specific parameter to a Physics parameter and want to retain backwards compatability), exceptions need to be made.
@@ -309,9 +310,7 @@ Preferred alternatives to this idiom include either:
 1. Introducing an accessor method to the primary :cpp:class:`!Method` subclass to directly query the configuration-value that is stored as an attribute of that subclass
 2. Altering the way in which the configuration value is specified and store it within a :cpp:class:`!Physics` class
 
-.. todo::
-
-   After GitHub PR #340 is merged, direct readers to the discussion about different ways to store global configuration information (this discusses when it's a good time to store information within a :cpp:class:`!Method` subclass or within a :cpp:class:`!Physics` subclass).
+The tradeoffs of these approaches are discussed in greater detail :ref:`here <how-to-store-global-data>`.
 
 =================
 Historic Approach
