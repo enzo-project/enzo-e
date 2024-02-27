@@ -327,12 +327,8 @@ void Config::read_adapt_ (Parameters * p) throw()
       (p->type(prefix+"schedule:var") != parameter_unknown);
 
     if (adapt_scheduled) {
-      p->group_set(0,"Adapt");
-      p->group_push(adapt_list[ia]);
-      p->group_push("schedule");
-      adapt_schedule_index[ia] = read_schedule_(p, prefix);
-      p->group_pop();
-      p->group_pop();
+      ParameterGroup p_group(*p, prefix + "schedule");
+      adapt_schedule_index[ia] = read_schedule_(p_group);
     } else {
       adapt_schedule_index[ia] = -1;
     }
@@ -360,10 +356,8 @@ void Config::read_balance_ (Parameters * p) throw()
     (p->type("Balance:schedule:var") != parameter_unknown);
 
   if (balance_scheduled) {
-    p->group_set(0,"Balance");
-    p->group_push("schedule");
-    balance_schedule_index = read_schedule_(p, "Balance");
-    p->group_pop();
+    ParameterGroup p_group(*p, "Balance:schedule");
+    balance_schedule_index = read_schedule_(p_group);
   } else {
     balance_schedule_index = -1;
   }
@@ -787,16 +781,12 @@ void Config::read_method_ (Parameters * p) throw()
     method_list[index_method] = name;
 
     // Read schedule for the Method object if any
-      
     const bool method_scheduled = 
       (p->type(full_name + ":schedule:var") != parameter_unknown);
 
     if (method_scheduled) {
-      p->group_set(0,"Method");
-      p->group_push(name);
-      p->group_push("schedule");
-      method_schedule_index[index_method] = read_schedule_(p, name);
-      p->group_pop();
+      ParameterGroup p_group(*p, full_name + ":schedule");
+      method_schedule_index[index_method] = read_schedule_(p_group);
     } else {
       method_schedule_index[index_method] = -1;
     }
@@ -938,11 +928,10 @@ void Config::read_output_ (Parameters * p) throw()
     }
 
     // Read schedule for the Output object
-      
-    p->group_push("schedule");
-    output_schedule_index[index_output] = 
-      read_schedule_(p, output_list[index_output]);
-    p->group_pop();
+
+    ParameterGroup p_group
+      (*p, "Output:" + output_list[index_output] + ":schedule");
+    output_schedule_index[index_output] = read_schedule_(p_group);
 
     // Image 
     
@@ -1290,16 +1279,12 @@ void Config::read_performance_ (Parameters * p) throw()
   int i_off = -1;
   
   if (p->type("Performance:projections:schedule_on:var") != parameter_unknown) {
-    p->group_set(0,"Performance");
-    p->group_push("projections");
-    p->group_push("schedule_on");
-    i_on = read_schedule_(p,"projections_on");
+    ParameterGroup p_group(*p, "Performance:projections:schedule_on");
+    i_on = read_schedule_(p_group);
   }
   if (p->type("Performance:projections:schedule_off:var") != parameter_unknown) {
-    p->group_set(0,"Performance");
-    p->group_push("projections");
-    p->group_push("schedule_off");
-    i_off = read_schedule_(p,"projections_off");
+    ParameterGroup p_group(*p, "Performance:projections:schedule_off");
+    i_off = read_schedule_(p_group);
   }
   p->group_clear();
 
@@ -1478,8 +1463,9 @@ void Config::read_testing_ (Parameters * p) throw()
 
 //======================================================================
 
-int Config::read_schedule_(Parameters * p, const std::string group)
+int Config::read_schedule_(ParameterGroup p)
 {
+  const std::string group_name = p.get_group_path();
   int index = index_schedule;
 
   schedule_list.resize(index+1);
@@ -1489,7 +1475,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   schedule_stop.resize(index+1);
   schedule_step.resize(index+1);
   
-  std::string var = p->value_string("var","none");
+  std::string var = p.value_string("var","none");
 
   schedule_var[index] = var;
 
@@ -1504,12 +1490,12 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",
-	    schedule_var[index].c_str(),group.c_str());
+	    schedule_var[index].c_str(),group_name.c_str());
   }
 
   // Determine the schedule type (interval or list)
 
-  const bool type_is_list = (p->type("list") != parameter_unknown);
+  const bool type_is_list = (p.type("list") != parameter_unknown);
   const bool type_is_interval = ! type_is_list;
 
   if (type_is_interval) schedule_type[index] = "interval";
@@ -1520,35 +1506,36 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 
   if (type_is_interval) {
     if (var_is_int) {
-      schedule_start[index] = p->value("start",0);
-      schedule_step[index]  = p->value("step",1);
-      schedule_stop[index]  = p->value("stop",max_int);
+      schedule_start[index] = p.value("start",0);
+      schedule_step[index]  = p.value("step",1);
+      schedule_stop[index]  = p.value("stop",max_int);
     } else {
-      schedule_start[index] = p->value("start",0.0);
-      schedule_step[index]  = p->value("step",1.0);
-      schedule_stop[index]  = p->value("stop",max_double);
+      schedule_start[index] = p.value("start",0.0);
+      schedule_step[index]  = p.value("step",1.0);
+      schedule_stop[index]  = p.value("stop",max_double);
     }
   } else if (type_is_list) {
-    int n = p->list_length("list");
+    int n = p.list_length("list");
     if (n == 0) {
+      std::string full_name = group_name + ":list";
       ERROR1 ("Config::read",
 	      "Schedule variable %s has length 0",
-	      (group + ":list").c_str());
+	      (full_name).c_str());
     }
     schedule_list[index].resize(n);
     if (var_is_int) {
       for (int i=0; i<n; i++) {
-	schedule_list[index][i] = p->value(i,"list",0);
+	schedule_list[index][i] = p.value(i,"list",0);
       }
     } else {
       for (int i=0; i<n; i++) {
-	schedule_list[index][i] = p->value(i,"list",0.0);
+	schedule_list[index][i] = p.value(i,"list",0.0);
       }
     }
   } else {
     ERROR2 ("Config::read_schedule_",
 	    "Schedule type %s is not recognized for parameter group %s",
-	    schedule_type[index].c_str(),group.c_str());
+	    schedule_type[index].c_str(), group_name.c_str());
   }
 
   return index_schedule++;
