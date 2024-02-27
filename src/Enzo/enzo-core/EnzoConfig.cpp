@@ -920,28 +920,27 @@ void EnzoConfig::read_initial_bb_test_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_check_(Parameters * p)
+void EnzoConfig::read_method_check_(Parameters * all_p)
 {
-  p->group_set(0,"Method");
-  p->group_push("check");
+  ParameterGroup p(*all_p, "Method:check");
 
-  method_check_num_files = p->value_integer
+  method_check_num_files = p.value_integer
     ("num_files",1);
-  method_check_ordering = p->value_string
+  method_check_ordering = p.value_string
     ("ordering","order_morton");
 
-  if (p->type("dir") == parameter_string) {
+  if (p.type("dir") == parameter_string) {
     method_check_dir.resize(1);
-    method_check_dir[0] = p->value_string("dir","");
-  } else if (p->type("dir") == parameter_list) {
-    int size = p->list_length("dir");
+    method_check_dir[0] = p.value_string("dir","");
+  } else if (p.type("dir") == parameter_list) {
+    int size = p.list_length("dir");
     if (size > 0) method_check_dir.resize(size);
     for (int i=0; i<size; i++) {
-      method_check_dir[i] = p->list_value_string(i,"dir","");
+      method_check_dir[i] = p.list_value_string(i,"dir","");
     }
   }
-  method_check_monitor_iter   = p->value_integer("monitor_iter",0);
-  method_check_include_ghosts = p->value_logical("include_ghosts",false);
+  method_check_monitor_iter   = p.value_integer("monitor_iter",0);
+  method_check_include_ghosts = p.value_logical("include_ghosts",false);
 }
 
 //----------------------------------------------------------------------
