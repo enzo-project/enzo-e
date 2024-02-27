@@ -1047,10 +1047,8 @@ namespace{
     EnzoDualEnergyConfig out = EnzoDualEnergyConfig::build_disabled();
 
     // fetch names of parameters in Physics:fluid_props:dual_energy
-    p->group_set(0, "Physics");
-    p->group_set(1, "fluid_props");
-    p->group_set(2, "dual_energy");
-    std::vector<std::string> names = p->leaf_parameter_names();
+    std::vector<std::string> names = p->leaf_parameter_names
+      ("Physics:fluid_props:dual_energy");
 
     const bool missing_de_config = names.size() == 0;
     if (!missing_de_config){ // parse Physics:fluid_props:dual_energy
@@ -1157,10 +1155,8 @@ namespace{
     const bool legacy_gamma_specified = p->param("Field:gamma") != nullptr;
 
     // fetch names of parameters in Physics:fluid_props:eos
-    p->group_set(0, "Physics");
-    p->group_set(1, "fluid_props");
-    p->group_set(2, "eos");
-    std::vector<std::string> names = p->leaf_parameter_names();
+    std::vector<std::string> names = p->leaf_parameter_names
+      ("Physics:fluid_props:eos");
 
     const bool missing_eos_config = names.size() == 0;
 
@@ -1291,10 +1287,8 @@ namespace{
 
     // fetch names of parameters in Physics:fluid_props:floors. If any of them
     // exist, let's parse them
-    p->group_set(0, "Physics");
-    p->group_set(1, "fluid_props");
-    p->group_set(2, "floors");
-    std::vector<std::string> floor_l = p->leaf_parameter_names();
+    std::vector<std::string> floor_l = p->leaf_parameter_names
+      ("Physics:fluid_props:floors");
 
     const bool no_legacy = (floor_l.size() > 0);
     if (no_legacy){
