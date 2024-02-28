@@ -1288,39 +1288,26 @@ void FieldData::set_history_(const FieldDescr * field_descr)
 //----------------------------------------------------------------------
 
 namespace{
+  // functions within an anonymous namespace are local functions
 
   template<class T>
   bool verify_type_(const FieldDescr * field_descr, int id_field) throw()
   {
-    using nonconst_T = typename std::remove_cv<T>::type;
-    switch (field_descr->precision(id_field)) {
-    case precision_single:
-      if (!std::is_same<nonconst_T, float>::value){
-	ERROR1("verify_type_",
-	       "type template parameter is wrong. It should be `float` "
-	       "for field_id %d",
-	       id_field);
-      }
-      break;
-    case precision_double:
-      if (!std::is_same<nonconst_T, double>::value){
-	ERROR1("verify_type_",
-	       "type template parameter is wrong. It should be `double` "
-	       "for field_id %d",
-	       id_field);
-      }
-      break;
-    case precision_quadruple:
-      if (!std::is_same<nonconst_T, long double>::value){
-	ERROR1("verify_type_",
-	       "type template parameter is wrong. It should be `long double` "
-	       "for field_id %d",
-	       id_field);
-      }
-      break;
-    default:
-      ERROR2("verify_type_", "Unknown precision %d for field id %d",
-	     field_descr->precision(id_field),id_field);
+    int field_dtype = field_descr->data_type(id_field);
+
+    if (field_dtype == type_unknown){
+      ERROR1("verify_type_", "Unknown type for field id %d", id_field);
+    } else if (field_dtype != cello::get_type_enum<T>()){
+      // note: cello::get_type_enum takes care of removing any const-qualifiers
+      //       from the type template parameter T
+
+      // note: it might be useful to inform the user of the type that should be
+      //       used as a template argument (especially in the cases of
+      //       type_extended80, type_extended96, type_quadruple)
+      ERROR2("verify_type_",
+	     "type template parameter is wrong. Field_id %d stores values as "
+             "a \"%s\" data type.",
+	     id_field, cello::type_name[field_dtype]);
     }
     return true;
   }
@@ -1330,7 +1317,7 @@ namespace{
 //----------------------------------------------------------------------
 
 template<class T>
-CelloArray<T, 3> FieldData::make_view_
+CelloView<T, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history,  bool coarse) throw()
@@ -1391,21 +1378,21 @@ CelloArray<T, 3> FieldData::make_view_
   if (ptr == nullptr){
     const char* field_type = (coarse) ? "coarse field" : "field";
     ERROR2("data_view_", "There is no %s with id %d", field_type, id_field);
-    // alternatively, we could just return CelloArray<T,3>()
+    // alternatively, we could just return CelloView<T,3>()
   }
 
-  return CelloArray<T, 3>(reinterpret_cast<T*>(ptr), mz, my, mx);
+  return CelloView<T, 3>(reinterpret_cast<T*>(ptr), mz, my, mx);
 }
 
-template CelloArray<float, 3> FieldData::make_view_
+template CelloView<float, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
-template CelloArray<double, 3> FieldData::make_view_
+template CelloView<double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();
-template CelloArray<long double, 3> FieldData::make_view_
+template CelloView<long double, 3> FieldData::make_view_
 (const FieldDescr * field_descr,
  int id_field, ghost_choice choice,
  int index_history, bool coarse) throw();

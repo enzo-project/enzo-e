@@ -130,7 +130,6 @@ Adapt {
  Method {
      gravity {
          accumulate = true;
-         grav_const = 1.000000000000000;
          order = 2;
          solver = "cg";
      };
@@ -208,7 +207,7 @@ Adapt {
          type = "image";
      };
      dark {
-         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+         colormap = [ "black", "red", "yellow", "white" ];
          dir = [ "COSMO_CG_%04d", "cycle" ];
          image_ghost = false;
          image_size = [ 512, 512 ];
@@ -222,7 +221,7 @@ Adapt {
          type = "image";
      };
      mesh {
-         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         colormap = [ "black", "blue", "cyan", "lime", "yellow", "red" ];
          dir = [ "COSMO_CG_%04d", "cycle" ];
          image_reduce_type = "max";
          image_size = [ 513, 513 ];
@@ -305,7 +304,10 @@ Adapt {
          omega_lambda_now = 0.7000000000000000;
          omega_matter_now = 0.3000000000000000;
      };
-     list = [ "cosmology" ];
+     list = [ "cosmology", "gravity" ];
+
+     # we explicitly avoid setting the gravitational constant since this is a
+     # cosmological simulation
  }
 
  Stopping {

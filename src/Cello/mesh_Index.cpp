@@ -266,9 +266,24 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
   const int s2 = 1<<(LM-L2);
 
   const size_t shift = (1<<LM);
-  const int ip3[3] = {p3[0]*shift,p3[1]*shift,p3[2]*shift};
+  const int ip3[3] = {static_cast<int>(p3[0]*shift),
+		      static_cast<int>(p3[1]*shift),
+		      static_cast<int>(p3[2]*shift)};
 
-  int la3[3]={0},ra3[3]={0},lb3[3]={0},rb3[3]={0};
+  // After GH PR #325 is merged delete the follow ifdef statement and replace
+  // all occurences of MARK_MAYBE_UNUSED with [[maybe_unused]]
+#if __cplusplus >= 201703L
+  #define MARK_MAYBE_UNUSED [[maybe_unused]]
+#elif defined(__GNUC__)
+  #define MARK_MAYBE_UNUSED [[gnu::unused]]
+#else
+  #define MARK_MAYBE_UNUSED /* .. */
+#endif
+  
+  MARK_MAYBE_UNUSED int la3[3]={0};
+  MARK_MAYBE_UNUSED int ra3[3]={0};
+  MARK_MAYBE_UNUSED int lb3[3]={0};
+  MARK_MAYBE_UNUSED int rb3[3]={0};
   int a = false;
   int ic = 0;
   for (int axis=0; axis<rank; axis++) {

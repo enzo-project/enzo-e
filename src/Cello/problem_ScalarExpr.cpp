@@ -55,9 +55,9 @@ void ScalarExpr::evaluate (T * value, double t,
 
   if ((!param_) && (!mask)) {
     // fast-path that avoid heap allocations - relevant for inflow conditions
-    for (int ix=0; ix<nx; ix++) {
+    for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
-	for (int iz=0; iz<nz; iz++) {
+	for (int ix=0; ix<nx; ix++) {
           value[ix + ndx*(iy + ndy*iz)] = (T)value_;
         }
       }
@@ -101,9 +101,9 @@ void ScalarExpr::evaluate (T * value, double t,
   }
 
   if (mask) {
-    for (int ix=0; ix<nx; ix++) {
+    for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
-	for (int iz=0; iz<nz; iz++) {
+	for (int ix=0; ix<nx; ix++) {
 	  int i=ix + nx*(iy + ny*iz);
 	  int id=ix + ndx*(iy + ndy*iz);
 	  value[id] = mv[i] ? (T) value_temp[i] : deflt[id];
@@ -111,9 +111,9 @@ void ScalarExpr::evaluate (T * value, double t,
       }
     }
   } else {
-    for (int ix=0; ix<nx; ix++) {
+    for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
-	for (int iz=0; iz<nz; iz++) {
+        for (int ix=0; ix<nx; ix++) {
 	  int i=ix + nx*(iy + ny*iz);
 	  int id=ix + ndx*(iy + ndy*iz);
 	  value[id] = (T) (value_temp[i]);
@@ -158,7 +158,7 @@ std::string ScalarExpr::expr_to_string() const throw()
     return param_->value_to_string(param_write_monitor);
   } else {
     char buffer[25] = "";
-    sprintf(buffer, "%#.16g", value_);
+    std::snprintf(buffer, 25, "%#.16g", value_);
     return std::string(buffer);
   }
 }

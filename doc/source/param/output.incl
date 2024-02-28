@@ -37,12 +37,16 @@
 .. par:parameter:: Output:<file_set>:colormap
 
    :Summary: :s:`Color map for image output`
-   :Type:    :par:typefmt:`list ( float )`
-   :Default: :d:`[]`
+   :Type:    :par:typefmt:`list` ( float | string )
+   :Default: :d:`["black", "white"]`
    :Scope:     :c:`Cello`
    :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
-   :e:`For the "image" output type, a list of the form` [r\ :sub:`0`\, g\ :sub:`0`\, b\ :sub:`0`\, r\ :sub:`1`\, g\ :sub:`1`\, b\ :sub:`1`\, ...], :e:`where` 0.0 ≤ r\ :sub:`i`\,g\ :sub:`i`\,b\ :sub:`i`\ ≤ :e:`1.0 are RGB values.`
+:e:`For the` :t:`"image"` :e:`output type, this parameter defines the colormap as a list of RGB values, such that the minimum field value is assigned the first color in the list, the maximum the last, and linear interpolated color values in between. If` :t:`image_min` :e:`or` :t:`image_max` :e:`parameters are defined, those are used instead for the respective min and max field values. The list must contain at least two colors, and the default is` :t:`"black"` :e:`and` :t:`"white".`
+
+:e:`RGB values are specified in one of several ways. The original (and depreciated) way is as a triad of floating point numbers between 0.0 and 1.0, such that` :t:`1.0, 0.0, 0.0` :e:`represents red,` :t:`0.5, 0.5, 0.5` :e:`represents gray, etc. Another preferred way is named colors, e.g.` :t:`"black"` :e:`,` :t:`"white"` :e:`,` :t:`"azure"`:e:`, etc. Any CSS3 extended color name should be accepted (lower-case).  See` `CSS3 Extended Color list <https://www.w3.org/wiki/CSS3/Color/Extended_color_keywords>`_ :e:`for a list of accepted color names. Also accepted are color specifications of the form #rrggbb, e.g.` :t:`"#000000"` :e:`for black,` :t:`"#ffffff"` :e:`for white, etc. (case independent).`
+
+:e:`RGB values in a given colormap can mix-and-match color representations; for example,` :t:`["black", 0.5, 0.5, 0.5, "#Abacab"]` :e:`is a valid colormap.`
 
 ----
 
