@@ -95,7 +95,7 @@ If the user specified the desired parameter, but with an unexpected type, the pr
 
 In each of these snippets, ``s`` is **always** a parameter path, but the precise interpretation depends on how ``p`` is defined.
 When ``p`` references a :cpp:class:`!Parameters` instance, ``s`` must specify an absolute parameter-path.
-In contrast, when ``p`` references a :cpp:class:`!ParameterGroup` instance, ``s`` must specify the path relative to a 
+In contrast, when ``p`` references a :cpp:class:`!ParameterGroup` instance, ``s`` must specify the path relative to the group associated with the :cpp:class:`!ParameterGroup`.
 
 
 For completeness, consider the following parameter-file snippet:
@@ -410,9 +410,9 @@ Please, avoid using this "escape-hatch" unless it's truly necessary.
    If we were to do that, we would need to modify the code to recognize this convention.
    We would probably also want to modify the various parameter-accessor methods of the :cpp:class:`!ParameterGroup` to continue to restrict access to parameters within the common root-path that a :cpp:class:`!ParameterGroup` is configured with.
 
-=================
+===================
 Historical Approach
-=================
+===================
 
 Historically, all parameters were parsed shortly after startup and then the results were stored as variables in the :cpp:class:`!Config` and :cpp:class:`!EnzoConfig` classes.
 However, this approach had a number of warts:
