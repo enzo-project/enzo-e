@@ -8,8 +8,9 @@
 /// This problem is designed for scaling studies of the Gravity
 /// solver.  Each block contains a spherical collapse problem.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 //----------------------------------------------------------------------
 

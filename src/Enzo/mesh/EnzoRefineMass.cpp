@@ -7,9 +7,9 @@
 
 // #define DEBUG_REFINE
 
-#include "enzo.hpp"
-#include "charm_simulation.hpp"
-#include "enzo.hpp"
+#include "Enzo/mesh/mesh.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/charm_simulation.hpp"
 #include "enzo.decl.h"
 
 //----------------------------------------------------------------------

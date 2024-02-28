@@ -7,19 +7,19 @@
 
 #include <string>
 #include <algorithm>
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 // public header:
-#include "EnzoRiemann.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemann.hpp"
 
 // private headers:
-#include "EnzoRiemannLUT.hpp"
-#include "EnzoRiemannUtils.hpp"
-#include "EnzoRiemannImpl.hpp"
-#include "EnzoRiemannHLL.hpp"
-#include "EnzoRiemannHLLC.hpp"
-#include "EnzoRiemannHLLD.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemannLUT.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemannUtils.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemannImpl.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemannHLL.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemannHLLC.hpp"
+#include "Enzo/hydro-mhd/riemann/EnzoRiemannHLLD.hpp"
 
 //----------------------------------------------------------------------
 

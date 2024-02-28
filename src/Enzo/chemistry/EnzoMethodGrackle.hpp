@@ -147,8 +147,6 @@ protected: // methods
 
   void compute_( Block * block) throw();
 
-  void ResetEnergies ( Block * block) throw();
-
 protected: // attributes
   /// the GrackleFacade instance provides an interface to all operations in the
   /// Grackle library and stores the current configuration. You can assume that

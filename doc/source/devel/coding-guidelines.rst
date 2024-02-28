@@ -187,6 +187,203 @@ residing on a different processing element in a different memory
 space.  So it's important to name entry methods in a way that they are
 obviously entry methods!  See the Charm++ manual for more details.
 
+=============================
+Headers and File Organization
+=============================
+
+The Cello and Enzo layers of the codebase are both organized into subcomponents, but there are slightly different guidelines dictating the file organization.
+
+Cello
+-----
+
+The files are all organized in a flat directory structure. Every file
+is prefixed by the name of the component that it belongs to. Individual
+headers are not intended to be used. Instead, each component defines 2
+standard header files.
+
+1. ``_``\ *component*\ ``.hpp``: This is a private header that is used
+   to aggregate the headers for all functions/classes defined as part
+   of the component.
+
+2. *component*\ ``.hpp``: This is the public header. It contains
+   includes the ``_``\ *component*\ ``.hpp``. It also contains all of
+   the necessary include statements for the headers from other
+   components that are necessary for the declarations/definitions
+   present in the current headers (usually it includes the
+   ``_``-prefixed header).
+
+Because the directory structure is flat all include-directives just
+specify filenames (there are no paths).
+
+Enzo
+----
+
+Over the last several years, the Enzo layer has grown significantly (it
+is now comparable in size to the Cello layer), and it is likely to continue
+growing. Due to the large (and increasing) size of the Enzo layer, we
+take some steps to improve build-times.  We are in the midst of
+rolling-out an updated policy.
+
+
+Traditional Approach
+~~~~~~~~~~~~~~~~~~~~
+
+Historically, the Enzo layer was structured just like one of the
+components in the Cello Layer in a flat structure. All individual
+header files were aggregated inside of the private
+``src/Enzo/_enzo.hpp`` header and there was a public header called
+``src/Enzo/enzo.hpp``. The files were also originally organized in a
+flat directory structure, but that is no longer the case.
+Additionally, just about every source file started with:
+
+.. code-block:: c++
+
+   #include "cello.hpp"
+   #include "enzo.hpp"
+
+While this approach has been **very** successful and there’s nothing wrong with it *per se*, it does trigger a full rebuild of the entire Enzo layer any time any header file changes.
+
+New Approach
+~~~~~~~~~~~~
+
+Under our new approach, the contents of the Enzo layer are now organized into subdirectories, which corresponds to a subcomponents.
+Each subcomponent has an aggregate header named after the component (e.g. the ``Enzo/mesh`` subcomponent should have an associated header called ``Enzo/mesh/mesh.hpp``).
+
+.. note::
+
+   Nested subdirectories are handled on a case-by-case basis.  In some
+   cases, each nested subdirectory is treated as a separate
+   subcomponent. In other cases, nested subdirectories are only used
+   for organization-purposes.
+
+**Unlike with the Cello layer,** there is currently no distinction between a private and public header: the aggregate header **is** the public header.
+Each public header file should be self-contained.
+In other words, the header should compile on its own, without requiring it to be included alongside other header files (or requiring a particular order of include-directives).
+
+To be self-contained, each public header needs to have the necessary include directives so that all of the other aggregated headers within the public header have access to the necessary symbols.
+
+* Within the enzo-layer, all include-directives should specify paths to relative to the ``src`` directory.
+  Thus the include directives may look like:
+
+  .. code-block:: c++
+
+     #include "Cello/cello.hpp"
+     #include "Cello/mesh.hpp"
+     #include "Enzo/enzo.hpp"
+
+  This ensures that there is no ambiguity if there are similarly named subcomponents in the Enzo- and Cello-layers.
+
+* A public header in a given subcomponent should generally only include the public headers from other subcomponents.
+  Because including the public header from another component exposes symbols beyond what is strictly necessary, we recommend adding a comment next to the include directive that specifies the name of the symbol (e.g. a class, type, function)that is required from the header.
+  By doing this, future developers can more easily remove unnecessary ``#include`` directives if a particular dependency is no longer necessary OR is moved
+
+* It is important to be mindful that include-directives introduce transitive dependencies, and any time a header file changes, all ``.cpp`` files that depend on that header (whether directly or transitively) needs to be recompiled.
+
+* Do your best to ensure that the public header files only include what is necessary and avoid unnecessary include statements (to keep compile-times shorter).
+  With that said, it's better to explicitly write out include-directives to other headers, even if that header would transitively be included by some other unrelated header.
+
+
+.. note::
+
+   In the long-term, it may make sense to make each individual header self-contained, which is the recommended strategy by the `Google C++ Style Guidelines <https://google.github.io/styleguide/cppguide.html#Header_Files>`_
+
+   Ideally, each header would include just the headers defining other symbols (classes/types/functions) that it needs.
+   Under this approach, inclusion order would become less problematic and it would further speed up incremental compilation.
+   Transitioning to this kind of approach all at once would be intractable since there are currently over 125 header files in the Enzo layer.
+   However, this alternative approach is definitely worth exploring and could be implemented on a subcomponent-by-subcomponent basis in the future.
+
+What is actually necssary to include in a header file?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is useful to have a brief discussion about what is actually necessary to include in a header file.
+
+As noted in the `Mozilla Style-Guide <MozillaStyleHeaders_>`_, a full definition of a type is required for the type to be used
+
+* as a Base class,
+* as a member/local variable
+* in a function declaration, where an instance of the type is passed as an argument, by-value, OR is returned from the function, by value.
+* with ``delete`` or ``new``
+* as a template argument (in certain cases)
+* if it refers to a non-scoped enum type (in all cases)
+* when refering to the values of a scoped enum
+
+The `Mozilla Style-Guide <MozillaStyleHeaders_>`_ also notes that a forward declarations of a type will suffice when the type is used
+
+* for declaring a member/local variable that holds a reference or pointer to that type.
+* in a function declaration that accepts reference or pointer to that type as an argument or returns a reference or pointer to that type.
+* in the definition of a type-alias.
+
+.. note::
+
+   In general, there is a difference of opinion about whether forward declarations should be used.
+   For example, the `Mozilla Style-Guide <MozillaStyleHeaders_>`_ and the `LLVM Style Guide <https://llvm.org/docs/CodingStandards.html#include-as-little-as-possible>`_ generally encourage usage of forward declarations.
+   In contrast, the `Google Style Guide <https://google.github.io/styleguide/cppguide.html#Forward_Declarations>`_ discourages this practice.
+
+   We don't currently take a strong position on this.
+   In the codebase's current state, there are definitely cases where using forward declarations is **VERY** useful (it may be helpful to leave a comment explaining why its useful/necessary in a particular case).
+
+   If we do shift to making **all** header-files self-contained, it may make the codebase more readable if we avoided forward declarations in the future.
+   But, we can cross that bridge, when we get to it.
+
+Finally, it's worth noting that there is a large temptation to implement functions or a class's member-functions (aka methods) inside of the header where they are declared.
+Sometimes this is unavoidable - it's necessary when defining templates and sometimes it's necessary for performance-purposes (to facilitate inlining of a function called within a tight for-loop).
+However, in a lot of cases (especially when implementing a ``virtual`` method), this can and should be avoided.
+This practice has a tendency to introduce additional include-directives into a header file that could otherwise just be located within a source file.
+
+For example, a handful of functions in Enzo-E make use of functionality defined in the ``<algorithm>``, ``<random>``, and ``<sstream>`` headers without needing to pass around types defined in these headers between functions.
+In these cases, by implementing such functions in ``.cpp`` files, we can directly include these headers in the ``.cpp`` source files and avoid including them in the header files (this can actually save a lot of time during compiling since standard library headers can be large).
+
+As we finish transitioning the Enzo layer to using separate subcomponents, additional opportunities will arise for including headers in source files rather than inside of headers.
+For example, most times when you access instances of :cpp:class:`!EnzoPhysicsCosmology`, :cpp:class:`!EnzoPhysicsFluidProps`, or :cpp:class:`!GrackleChemistryData` in the method of a class, ``MyClass``, the header defining ``MyClass``, doesn't actually require knowledge about the definitions of these other classes.
+Often times, a method ``MyClass`` will simply use :cpp:expr:`!enzo::cosmology()`, :cpp:expr:`!enzo::fluid_props()`, or :cpp:expr:`!enzo::grackle_chemistry()` to retrieve an instance of one of these classes.
+Then the method will query a piece of information stored in the retrieved instance and it will never touch the instance again.
+
+
+.. _MozillaStyleHeaders: https://firefox-source-docs.mozilla.org/code-quality/coding-style/coding_style_cpp.html#header-files
+
+
+
+Questions and Answers about introducing new files to the Enzo Layer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**How do I add a new file to the Enzo Layer?**
+
+Usually you will introduce a header (``.hpp``) and source (``.cpp``) file at the same time.
+
+1. Find an appropriate subdirectory to put the new file in.
+2. *Identify the relevant aggregate header file.*
+   First, check for a header file that shares the name of the current subdirectory (with a ``.hpp`` suffix).
+   If that doesn't exist, check for the aggregate header file in the parent directory.
+   Repeat the process until you find subdirectory has an aggregate header file (you should only really need to go up 1 level).
+3. Once you find the appropriate aggregate header file, add an include statement to your header file (if there aren't include-statements to other header files in the same subdirectory, you're probably in the wrong place).
+4. *Identify the relevant* ``CMakeLists.txt`` *file for other files in the current subdirectory.*
+   First, check for this file in the subdirectory where you have placed your new files.
+   If it doesn't exist, check the parent directory.
+   Repeat the process until you find it.
+5. Add the paths to your new header and source file to the existing list of other files that are located in the same subdirectory as your new files.
+   (If no such list exists, but you see something about ``GLOB``, you may not need to do anything).
+
+**How do I delete a file from the Enzo Layer?**
+
+This is pretty self-explanatory.
+Just make sure to delete entries in the aggregate header file and (if applicable) the ``CMakeLists.txt`` file that specify the path(s) to your deleted file.
+
+**How do I move files between subdirectories in the Enzo Layer??**
+
+This is also pretty easy.
+Just make sure to delete the old paths from the aggregate header and the ``CMakeLists.txt`` files where they were originally listed.
+And, make sure to add the new paths to the appropriate aggregate header and the ``CMakeLists.txt`` files.
+
+Enzo Header Guards
+------------------
+
+To avoid issues with a header being included multiple times (i.e. if it is a transitive dependency of another header), we make use of ``#define`` header guards in every header. In general, the header guard symbol looks something like ``ENZO_<PATH>_<FILE>_HPP``, where ``<PATH>`` is replaced by the path to the file and ``<FILE>`` is the filename (excluding the ``.hpp`` suffix).
+
+.. note::
+
+   A number of headers have guard symbols that are unchanged from before the Enzo subdirectory was reorganized.
+   As an example, ``EnzoMethodPpm`` was previously defined in ``src/Enzo/enzo_EnzoMethodPpm.hpp`` and had a header guard symbol called ``ENZO_ENZO_METHOD_PPM_HPP`` (the underscore was used as a separator between Camel-Case separated words and in place of the period``.
+
 ========================
 General Coding Practices
 ========================

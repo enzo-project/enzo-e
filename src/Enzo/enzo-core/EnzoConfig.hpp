@@ -65,7 +65,7 @@ public: // interface
       physics_fluid_props_fluid_floor_config(),
       physics_fluid_props_mol_weight(0.0),
       // Gravity
-      physics_gravity(false),
+      physics_gravity_grav_constant_codeU(-1.0),
 
       //--------------------
       // INITIAL [sorted]
@@ -140,7 +140,6 @@ public: // interface
       initial_grackle_test_minimum_H_number_density(0.1),
       initial_grackle_test_minimum_metallicity(1.0E-4),
       initial_grackle_test_minimum_temperature(10.0),
-      initial_grackle_test_reset_energies(0),
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
@@ -350,7 +349,6 @@ public: // interface
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
       // EnzoMethodGravity
-      method_gravity_grav_const(0.0),
       method_gravity_solver(""),
       method_gravity_order(4),
       method_gravity_dt_max(1.0e10),
@@ -373,8 +371,8 @@ public: // interface
       method_pm_update_max_dt(0.0),
       // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
-      method_vlct_half_dt_reconstruct_method(""),
-      method_vlct_full_dt_reconstruct_method(""),
+      method_vlct_time_scheme(""),
+      method_vlct_reconstruct_method(""),
       method_vlct_theta_limiter(0.0),
       method_vlct_mhd_choice(""),
       // EnzoMethodMergeSinks
@@ -491,6 +489,7 @@ protected: // methods
   
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
+  void read_physics_gravity_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
 
@@ -537,7 +536,7 @@ public: // attributes
   double                     physics_fluid_props_mol_weight;
 
   /// Gravity
-  bool                       physics_gravity;
+  double                     physics_gravity_grav_constant_codeU;
 
   /// EnzoInitialBCenter;
   bool                       initial_bcenter_update_etot;
@@ -591,7 +590,6 @@ public: // attributes
   double                     initial_grackle_test_minimum_H_number_density;
   double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_minimum_temperature;
-  int                        initial_grackle_test_reset_energies;
 
   /// EnzoInitialHdf5
 
@@ -869,7 +867,6 @@ public: // attributes
   double                     method_grackle_radiation_redshift;
 
   /// EnzoMethodGravity
-  double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
   int                        method_gravity_order;
   double                     method_gravity_dt_max;
@@ -902,8 +899,8 @@ public: // attributes
 
   /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;
-  std::string                method_vlct_half_dt_reconstruct_method;
-  std::string                method_vlct_full_dt_reconstruct_method;
+  std::string                method_vlct_time_scheme;
+  std::string                method_vlct_reconstruct_method;
   double                     method_vlct_theta_limiter;
   std::string                method_vlct_mhd_choice;
 

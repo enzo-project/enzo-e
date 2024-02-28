@@ -5,10 +5,12 @@
 /// @date     2202-02-12
 /// @brief    Implements the EnzoMethodCheck class
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "charm.hpp"
-#include "charm_enzo.hpp"
+#include "Cello/cello.hpp"
+#include <charm.hpp>
+#include "Enzo/enzo.hpp"
+#include "Enzo/charm_enzo.hpp"
+#include "Enzo/io/io.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <iomanip>
