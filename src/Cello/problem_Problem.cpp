@@ -143,9 +143,18 @@ void Problem::initialize_boundary(Config * config,
 
     Boundary * boundary = create_boundary_(type,index,config,parameters);
 
-    ASSERT1("Problem::initialize_boundary",
-	  "Boundary type %s not recognized",
-	  type.c_str(),  boundary != nullptr);
+    if (boundary == nullptr) {
+      // the default err_prefix assumes a single boundary (and Boundary::list)
+      // wasn't used
+      std::string err_prefix = "";
+      if (config->boundary_list[index].find('#') == std::string::npos){
+        err_prefix = "\"Boundary:" + config->boundary_list[index] + "\" has ";
+      }
+
+      ERROR2("Problem::initialize_boundary",
+             "%sunrecognized Boundary type: \"%s\"",
+             err_prefix.c_str(), type.c_str());
+    }
 
     boundary_list_.push_back(boundary);
   }
@@ -577,30 +586,22 @@ Boundary * Problem::create_boundary_
 
   if (type == "inflow") {
 
-    std::string param_str = 
-      "Boundary:" + config->boundary_list[index] + ":value";
-
-    int param_type = parameters->type(param_str);
-
-    if (! (param_type == parameter_list ||
-	   param_type == parameter_float ||
-	   param_type == parameter_float_expr)) {
-      ERROR2("Problem::create_boundary_()",
-	     "Parameter %s is of incorrect type %d",
-	     param_str.c_str(),param_type);
-    }
-
-    Value * value = new Value (parameters, param_str);
-
     axis_enum axis = (axis_enum) config->boundary_axis[index];
     face_enum face = (face_enum) config->boundary_face[index];
 
-    return new BoundaryValue (axis,face,value,
-			      config->boundary_field_list[index]);
+    return new BoundaryValue (*parameters,
+                              "Boundary:" + config->boundary_list[index],
+                              axis, face);
 
   } else if (type == "periodic") {
 
     axis_enum axis = (axis_enum) config->boundary_axis[index];
+    face_enum face = (face_enum) config->boundary_face[index];
+
+    // the following check probably belongs elsewhere... (not sure where)
+    ASSERT("Problem::create_boundary_",
+           "Periodic boundary must act on both faces of a given axis",
+           face == face_all);
 
     return new BoundaryPeriodic(axis);
 
