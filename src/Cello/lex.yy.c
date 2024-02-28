@@ -1284,7 +1284,7 @@ case 74:
 /* rule 74 can match eol */
 YY_RULE_SETUP
 #line 172 "build/Cello/parse.l"
-{ lineno++; strncpy (linebuf,yytext+1,sizeof(linebuf));
+{ lineno++; strncpy (linebuf,yytext+1,sizeof(linebuf)); linebuf[sizeof(linebuf)-1] = '\0';
 yyless(1);
 }
 	YY_BREAK

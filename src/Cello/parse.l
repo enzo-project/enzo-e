@@ -169,7 +169,7 @@ include[ \t]*[\"<] { BEGIN IFILE; }
 
 . {  }
 
-\n.* { lineno++; strncpy (linebuf,yytext+1,sizeof(linebuf));
+\n.* { lineno++; strncpy (linebuf,yytext+1,sizeof(linebuf)); linebuf[sizeof(linebuf)-1] = '\0';
 yyless(1);
 }
 
