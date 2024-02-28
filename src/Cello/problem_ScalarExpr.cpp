@@ -17,25 +17,8 @@ ScalarExpr::ScalarExpr (Param * param) throw()
 {
   if (param_->type() == parameter_float) {
     value_ = param_->get_float();
-    param_ = 0;
+    param_ = nullptr;
   }
-}
-
-//----------------------------------------------------------------------
-
-ScalarExpr::~ScalarExpr() throw()
-{
-  delete param_;
-  param_ = NULL;
-}
-
-//----------------------------------------------------------------------
-
-void ScalarExpr::copy_(const ScalarExpr & scalar_expr) throw()
-{
- 
-  param_ = (scalar_expr.param_) ? new Param(*scalar_expr.param_) : 0;
-  value_ = scalar_expr.value_;
 }
 
 //----------------------------------------------------------------------
@@ -69,6 +52,18 @@ void ScalarExpr::evaluate (T * value, double t,
 	  "value dimension (%d %d %d) needs to be at least (%d %d %d)",
 	  ndx,ndy,ndz,nx,ny,nz,
 	  (ndx >= nx) && (ndy >= ny) && (ndz >= nz));
+
+  if ((!param_) && (!mask)) {
+    // fast-path that avoid heap allocations - relevant for inflow conditions
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int ix=0; ix<nx; ix++) {
+          value[ix + ndx*(iy + ndy*iz)] = (T)value_;
+        }
+      }
+    }
+    return;
+  }
 
   bool * mv = 0;
   if (mask) {
@@ -106,9 +101,9 @@ void ScalarExpr::evaluate (T * value, double t,
   }
 
   if (mask) {
-    for (int ix=0; ix<nx; ix++) {
+    for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
-	for (int iz=0; iz<nz; iz++) {
+	for (int ix=0; ix<nx; ix++) {
 	  int i=ix + nx*(iy + ny*iz);
 	  int id=ix + ndx*(iy + ndy*iz);
 	  value[id] = mv[i] ? (T) value_temp[i] : deflt[id];
@@ -116,9 +111,9 @@ void ScalarExpr::evaluate (T * value, double t,
       }
     }
   } else {
-    for (int ix=0; ix<nx; ix++) {
+    for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
-	for (int iz=0; iz<nz; iz++) {
+        for (int ix=0; ix<nx; ix++) {
 	  int i=ix + nx*(iy + ny*iz);
 	  int id=ix + ndx*(iy + ndy*iz);
 	  value[id] = (T) (value_temp[i]);
@@ -155,3 +150,15 @@ template void ScalarExpr::evaluate
  int ndz, int nz, double * z, 
  std::shared_ptr<Mask> mask, long double * deflt) const;
 
+//----------------------------------------------------------------------
+
+std::string ScalarExpr::expr_to_string() const throw()
+{
+  if (param_){
+    return param_->value_to_string(param_write_monitor);
+  } else {
+    char buffer[25] = "";
+    std::snprintf(buffer, 25, "%#.16g", value_);
+    return std::string(buffer);
+  }
+}
