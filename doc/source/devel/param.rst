@@ -109,7 +109,7 @@ For completeness, consider the following parameter-file snippet:
     }
   }
 
-We will now highlight what the choices of ``s`` that specify is :par:paramfmt:`Physics:fluid_props:eos:gamma` for different choices of ``p``.
+The table below clarifies the value of ``s`` that should be used to specify :par:paramfmt:`Physics:fluid_props:eos:gamma` for different choices of ``p``.
 
 +--------------------------------------------+-------------------------------------+
 | if ``p`` is a refers to a                  | then ``s`` is                       |
@@ -154,7 +154,7 @@ This class is configured by parameters like the ones in the :par:paramfmt:`Metho
      }
   }
 
-Here's we present (a heavily editted) example of what the class's constructor might look like:
+Here's we present (an edited) example of what the class's constructor might look like:
 
 .. code-block:: c++
 
@@ -411,7 +411,7 @@ Please, avoid using this "escape-hatch" unless it's truly necessary.
    We would probably also want to modify the various parameter-accessor methods of the :cpp:class:`!ParameterGroup` to continue to restrict access to parameters within the common root-path that a :cpp:class:`!ParameterGroup` is configured with.
 
 =================
-Historic Approach
+Historical Approach
 =================
 
 Historically, all parameters were parsed shortly after startup and then the results were stored as variables in the :cpp:class:`!Config` and :cpp:class:`!EnzoConfig` classes.
