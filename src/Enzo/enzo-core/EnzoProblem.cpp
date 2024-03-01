@@ -701,7 +701,8 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate,
        index_prolong,
-       enzo_config->method_gravity_dt_max);
+       enzo_config->method_gravity_dt_max,
+       enzo_config->method_gravity_type_super);
 
   } else if (name == "mhd_vlct") {
 

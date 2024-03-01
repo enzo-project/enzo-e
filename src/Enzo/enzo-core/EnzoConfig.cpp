@@ -322,6 +322,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_gravity_order(4),
   method_gravity_dt_max(0.0),
   method_gravity_accumulate(false),
+  method_gravity_type_super(),
   /// EnzoMethodBackgroundAcceleration
   method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
@@ -733,6 +734,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_order;
   p | method_gravity_dt_max;
   p | method_gravity_accumulate;
+  p | method_gravity_type_super;
 
   p | method_background_acceleration_flavor;
   p | method_background_acceleration_mass;
@@ -1940,6 +1942,9 @@ void EnzoConfig::read_method_gravity_(Parameters * p)
 
   method_gravity_accumulate = p->value_logical
     ("Method:gravity:accumulate",true);
+
+  method_gravity_type_super = p->value_string
+    ("Method:gravity:type_super","accelerations");
 
   method_gravity_dt_max = p->value_float
     ("Method:gravity:dt_max",1.0e10);

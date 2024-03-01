@@ -10,6 +10,10 @@
 #ifndef ENZO_ENZO_METHOD_GRAVITY_HPP
 #define ENZO_ENZO_METHOD_GRAVITY_HPP
 
+enum TypeSuper {
+  super_type_potential = 0,
+  super_type_accelerations = 1 };
+
 class EnzoMethodGravity : public Method {
 
   /// @class    EnzoMethodGravity
@@ -29,7 +33,8 @@ public: // interface
 		    int order,
 		    bool accumulate,
 		    int index_prolong,
-		    double dt_max);
+		    double dt_max,
+                    std::string type_super);
 
   EnzoMethodGravity()
     : index_solver_(-1),
@@ -41,7 +46,8 @@ public: // interface
       ipotential_curr_(-1),
       ipotential_prev_(-1),
       is_time_curr_(-1),
-      is_time_prev_(-1)
+      is_time_prev_(-1),
+      type_super_(super_type_potential)
   {};
 
   /// Destructor
@@ -62,7 +68,8 @@ public: // interface
       ipotential_curr_(-1),
       ipotential_prev_(-1),
       is_time_curr_(-1),
-      is_time_prev_(-1)
+      is_time_prev_(-1),
+      type_super_(super_type_potential)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -86,6 +93,7 @@ public: // interface
     p | ipotential_prev_;
     p | is_time_curr_;
     p | is_time_prev_;
+    p | type_super_;
 
   }
 
@@ -116,6 +124,13 @@ public: // interface
   double & s_time_prev_(Block * block)
   { return *block->data()->scalar_double().value(is_time_prev_); }
 
+  void refresh_add_potentials_(Refresh *);
+  void refresh_add_accelerations_(Refresh *);
+  void super_save_potential_(EnzoBlock * );
+  void super_save_accelerations_(EnzoBlock * );
+  void super_extrapolate_potential_(EnzoBlock * );
+  void super_extrapolate_accelerations_(EnzoBlock * );
+
 protected: // attributes
 
   /// Solver index for the linear solver used to compute the potential
@@ -144,6 +159,9 @@ protected: // attributes
   /// Scalars
   int is_time_curr_;
   int is_time_prev_;
+
+  /// Type of super-cycling (if any): 0 potential 1:accelerations
+  int type_super_;
 };
 
 
