@@ -281,10 +281,6 @@ public: // interface
       method_feedback_NEvents(-1),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
-
-      // EnzoMethodHeat
-      method_heat_alpha(0.0),
-
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -365,10 +361,6 @@ public: // interface
       method_background_acceleration_stellar_scale_height_r(0.0),
       method_background_acceleration_stellar_scale_height_z(0.0),
       method_background_acceleration_apply_acceleration(true),
-      // EnzoMethodPmDeposit
-      method_pm_deposit_alpha(0.5),
-      // EnzoMethodPmUpdate
-      method_pm_update_max_dt(0.0),
       // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
       method_vlct_time_scheme(""),
@@ -382,14 +374,6 @@ public: // interface
       method_accretion_flavor(""),
       method_accretion_physical_density_threshold_cgs(0.0),
       method_accretion_max_mass_fraction(0.0),
-      // EnzoMethodSinkMaker
-      method_sink_maker_jeans_length_resolution_cells(0.0),
-      method_sink_maker_physical_density_threshold_cgs(0.0),
-      method_sink_maker_check_density_maximum(false),
-      method_sink_maker_max_mass_fraction(0.0),
-      method_sink_maker_min_sink_mass_solar(0.0),
-      method_sink_maker_max_offset_cell_fraction(0.0),
-      method_sink_maker_offset_seed_shift(0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -476,12 +460,8 @@ protected: // methods
   void read_method_feedback_(Parameters *);
   void read_method_grackle_(Parameters *);
   void read_method_gravity_(Parameters *);
-  void read_method_heat_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
-  void read_method_pm_deposit_(Parameters *);
-  void read_method_pm_update_(Parameters *);
   void read_method_ppm_(Parameters *);
-  void read_method_sink_maker_(Parameters *);
   void read_method_star_maker_(Parameters *);
   void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
@@ -769,9 +749,6 @@ public: // attributes
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
 
-  /// EnzoMethodHeat
-  double                     method_heat_alpha;
-
   /// EnzoMethodHydro
   std::string                method_hydro_method;
   bool                       method_hydro_dual_energy;
@@ -888,15 +865,6 @@ public: // attributes
   double                     method_background_acceleration_angular_momentum[3];
   bool                       method_background_acceleration_apply_acceleration;
 
-
-  /// EnzoMethodPmDeposit
-
-  double                     method_pm_deposit_alpha;
-
-  /// EnzoMethodPmUpdate
-
-  double                     method_pm_update_max_dt;
-
   /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;
   std::string                method_vlct_time_scheme;
@@ -912,15 +880,6 @@ public: // attributes
   std::string                method_accretion_flavor;
   double                     method_accretion_physical_density_threshold_cgs;
   double                     method_accretion_max_mass_fraction;
-
-  /// EnzoMethodSinkMaker
-  double                     method_sink_maker_jeans_length_resolution_cells;
-  double                     method_sink_maker_physical_density_threshold_cgs;
-  bool                       method_sink_maker_check_density_maximum;
-  double                     method_sink_maker_max_mass_fraction;
-  double                     method_sink_maker_min_sink_mass_solar;
-  double                     method_sink_maker_max_offset_cell_fraction;
-  uint64_t                   method_sink_maker_offset_seed_shift;
   
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;

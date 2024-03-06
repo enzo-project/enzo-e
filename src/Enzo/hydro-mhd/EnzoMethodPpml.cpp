@@ -15,9 +15,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml() 
+EnzoMethodPpml::EnzoMethodPpml(ParameterGroup p)
   : Method(),
-    comoving_coordinates_(enzo::config()->physics_cosmology)
+    comoving_coordinates_(enzo::cosmology() != nullptr)
 {
   // Initialize the default Refresh object
   cello::simulation()->refresh_set_name(ir_post_,name());
@@ -38,6 +38,8 @@ EnzoMethodPpml::EnzoMethodPpml()
   ASSERT("EnzoMethodPpml::EnzoMethodPpml",
          "PPML solver is currently incompatible with a non-isothermal EOS",
          fluid_props->eos_variant().holds_alternative<EnzoEOSIsothermal>());
+
+  this->set_courant(p.value_float("courant",1.0));
 }
 
 //----------------------------------------------------------------------

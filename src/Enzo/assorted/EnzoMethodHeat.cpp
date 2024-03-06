@@ -12,10 +12,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant)
+EnzoMethodHeat::EnzoMethodHeat (ParameterGroup p)
   : Method(),
-    alpha_(alpha),
-    courant_(courant)
+    alpha_(p.value_float("alpha",1.0))
 {
 
   cello::define_field ("temperature");
@@ -26,6 +25,7 @@ EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant)
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_field("temperature");
 
+  this->set_courant(p.value_float("courant",1.0));
 }
 
 //----------------------------------------------------------------------
@@ -40,7 +40,6 @@ void EnzoMethodHeat::pup (PUP::er &p)
   Method::pup(p);
 
   p | alpha_;
-  p | courant_;
 }
 
 //----------------------------------------------------------------------

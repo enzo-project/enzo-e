@@ -80,33 +80,9 @@ public: // interface
     method_courant_global(1.0),
     method_list(),
     method_schedule_index(),
-    method_file_name(),
-    method_path_name(),
-    method_close_files_seconds_stagger(),
-    method_close_files_seconds_delay(),
-    method_close_files_group_size(),
     method_courant(),
-    method_debug_print(),
-    method_debug_coarse(),
-    method_debug_ghost(),
-    method_flux_correct_group(),
-    method_flux_correct_enable(),
-    method_flux_correct_min_digits_fields(),
-    method_flux_correct_min_digits_values(),
-    method_field_list(),
-    method_particle_list(),
-    method_output_blocking(),
-    method_output_all_blocks(),
     method_prolong(),
-    method_ghost_depth(),
-    method_min_face_rank(),
-    method_all_fields(),
-    method_all_particles(),
-    method_timestep(),
-    method_trace_name(),
     method_type(),
-  // MethodNull
-    method_null_dt(0.0),
     monitor_debug(false),
     monitor_verbose(false),
     num_output(0),
@@ -255,32 +231,9 @@ public: // interface
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
-      method_file_name(),
-      method_path_name(),
-      method_close_files_seconds_stagger(),
-      method_close_files_seconds_delay(),
-      method_close_files_group_size(),
       method_courant(),
-      method_debug_print(),
-      method_debug_coarse(),
-      method_debug_ghost(),
-      method_flux_correct_group(),
-      method_flux_correct_enable(),
-      method_flux_correct_min_digits_fields(),
-      method_flux_correct_min_digits_values(),
-      method_field_list(),
-      method_particle_list(),
-      method_output_blocking(),
-      method_output_all_blocks(),
       method_prolong(),
-      method_ghost_depth(),
-      method_min_face_rank(),
-      method_all_fields(),
-      method_all_particles(),
-      method_timestep(),
-      method_trace_name(),
       method_type(),
-      method_null_dt(0.0),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),
@@ -478,39 +431,10 @@ public: // attributes
   int                        num_method;
   double                     method_courant_global;
   std::vector<std::string>   method_list;
-
   std::vector<int>           method_schedule_index;
-
-  std::vector< std::vector< std::string > > method_file_name;
-  std::vector< std::vector< std::string > > method_path_name;
-
-  std::vector<double>        method_close_files_seconds_stagger;
-  std::vector<double>        method_close_files_seconds_delay;
-  std::vector<int>           method_close_files_group_size;
   std::vector<double>        method_courant;
-  std::vector<bool>          method_debug_print;
-  std::vector<bool>          method_debug_coarse;
-  std::vector<bool>          method_debug_ghost;
-
-  std::vector<std::string>   method_flux_correct_group;
-  std::vector<bool>          method_flux_correct_enable;
-  std::vector<std::vector<std::string>> method_flux_correct_min_digits_fields;
-  std::vector<std::vector<double>> method_flux_correct_min_digits_values;
-
-  std::vector< std::vector< std::string > > method_field_list;
-  std::vector< std::vector< std::string > > method_particle_list;
-  std::vector< int >         method_output_blocking[3];
-  std::vector< bool >        method_output_all_blocks;
   std::vector<std::string>   method_prolong;
-  std::vector<int>           method_ghost_depth;
-  std::vector<int>           method_min_face_rank;
-  std::vector<int>           method_all_fields;
-  std::vector<int>           method_all_particles;
-
-  std::vector<double>        method_timestep;
-  std::vector<std::string>   method_trace_name;
   std::vector<std::string>   method_type;
-  double                     method_null_dt;
 
 
   // Monitor

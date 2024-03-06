@@ -591,6 +591,21 @@ Method * EnzoProblem::create_method_
 {
   Method * method = 0;
 
+  // historically, this method would always call method->set_courant after
+  // building a new method object. But, with this new p_group approach, each
+  // method objects should opt out of this approach (so that they can set
+  // appropriate default courant factors)
+  // - in cases where the courant factor is not used, we may not explicitly set
+  //   this variable to true (since it doesn't really matter)
+  bool skip_auto_courant = false;
+
+  // move creation of p_group up the call stack?
+  ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
+  Parameters* parameters = cello::simulation()->parameters();
+  const std::string root_path =
+    ("Method:" + parameters->list_value_string(index_method, "Method:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   const EnzoConfig * enzo_config = enzo::config();
 
   // The following 2 lines may need to be updated in the future
@@ -635,22 +650,21 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "ppml") {
 
-    method = new EnzoMethodPpml;
+    method = new EnzoMethodPpml(p_group);
+    skip_auto_courant = true;
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
+    method = new EnzoMethodPmDeposit (p_group);
 
   } else if (name == "pm_update") {
 
-    method = new EnzoMethodPmUpdate
-      (enzo_config->method_pm_update_max_dt);
+    method = new EnzoMethodPmUpdate(p_group);
 
   } else if (name == "heat") {
 
-    method = new EnzoMethodHeat
-      (enzo_config->method_heat_alpha,
-       config->method_courant[index_method]);
+    method = new EnzoMethodHeat(p_group);
+    skip_auto_courant = true;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -820,15 +834,8 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = new EnzoMethodSinkMaker(
-			enzo_config->method_sink_maker_jeans_length_resolution_cells,
-			enzo_config->method_sink_maker_physical_density_threshold_cgs,
-			enzo_config->method_sink_maker_check_density_maximum,
-			enzo_config->method_sink_maker_max_mass_fraction,
-			enzo_config->method_sink_maker_min_sink_mass_solar,
-			enzo_config->method_sink_maker_max_offset_cell_fraction,
-			enzo_config->method_sink_maker_offset_seed_shift
-				     );
+    method = new EnzoMethodSinkMaker(p_group);
+
   } else {
 
     // Fallback to Cello method's
@@ -840,7 +847,9 @@ Method * EnzoProblem::create_method_
   if (method) {
 
     // set the method's courant safety factor
-    method->set_courant(config->method_courant[index_method]);
+    if (!skip_auto_courant){
+      method->set_courant(config->method_courant[index_method]);
+    }
 
     ASSERT2("EnzoProblem::create_method",
 	    "Method created %s does not match method requested %s",
