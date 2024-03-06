@@ -15,6 +15,7 @@ refinement criteria, etc.
    initial
    adapt
    method
+   param
    physics
    array
    hydro_infrastructure

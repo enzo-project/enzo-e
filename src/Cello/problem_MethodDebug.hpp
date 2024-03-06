@@ -13,8 +13,6 @@ class MethodDebug : public Method
   /// @class    MethodDebug
   /// @ingroup  MethodDebug
   /// @brief    [\ref MethodDebug] Declaration of MethodDebug
-  ///
-  /// Correct fluxes of conserved fields at AMR refinement level jumps
 
 public: // interface
 

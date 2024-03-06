@@ -17,6 +17,8 @@ documentation on specific parameters in Enzo-E / Cello, please see the
 `Enzo-E / Cello parameter reference
 <../param/index.html>`_ page.
 
+.. _parameter-group:
+
 Groups
 ******
 

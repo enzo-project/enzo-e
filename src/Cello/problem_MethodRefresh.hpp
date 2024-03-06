@@ -18,6 +18,9 @@ class MethodRefresh : public Method
 
 public: // interface
 
+  /// create a new MethodRefresh from a ParameterGroup
+  MethodRefresh(ParameterGroup p) noexcept;
+
   /// Create a new MethodRefresh
   MethodRefresh
   (std::vector< std::string > field_list,
@@ -25,7 +28,7 @@ public: // interface
    int ghost_depth,
    int min_face_rank,
    bool all_fields,
-   bool all_particles);
+   bool all_particles) noexcept;
 
   /// Destructor
   virtual ~MethodRefresh() throw()

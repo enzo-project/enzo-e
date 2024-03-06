@@ -26,6 +26,9 @@ class MethodOutput : public Method
 public: // interface
 
   /// Create a new MethodOutput
+  MethodOutput(const Factory * factory, ParameterGroup p) noexcept;
+
+  /// Create a new MethodOutput
   MethodOutput
   (const Factory * factory,
    std::vector< std::string > file_name,
@@ -39,7 +42,7 @@ public: // interface
    bool all_blocks,
    int blocking_x,
    int blocking_y,
-   int blocking_z);
+   int blocking_z) noexcept;
 
   /// Destructor
   virtual ~MethodOutput() throw();
