@@ -174,6 +174,7 @@ void MethodOrderHilbert::send_index
       ic3[2] = (children[i] >> 2) & 1;
       Index index_child = block->index().index_child(ic3,min_level_);
       cello::block_array()[index_child].p_method_order_hilbert_index(index,count);
+
       index += *pweight_child_(block, children[i]);
     }
   }
@@ -305,7 +306,7 @@ void MethodOrderHilbert::hilbert_children(Block * block, int* children){
     Index index = block->index();
     int ARRAY_BITS = 10;
     int m = ARRAY_BITS + index.level();;
-    int states[m+2];
+    int states[m+1];
     hilbert_states(index, m, states);
     int T = states[m];
 
@@ -321,7 +322,7 @@ Index MethodOrderHilbert::hilbert_next (Index index, int rank, bool is_leaf, int
     int level = index.level();
     int ARRAY_BITS = 10;
     int m = ARRAY_BITS + level;
-    int states[m+2];
+    int states[m+1];
     hilbert_states(index, m, states);
 
     // If the block has children then the first child (according to the hilbert order)
@@ -344,11 +345,12 @@ Index MethodOrderHilbert::hilbert_next (Index index, int rank, bool is_leaf, int
             zyx = (ic3[2] << 2) + (ic3[1] << 1) + (ic3[0]);
         }
 
-        int T = states[m];
-        bool last = (level == min_level) || (coord_to_hilbert_ind(T, zyx) == 7);
+        int T = states[ARRAY_BITS + level - 1];
+        bool last = (level == min_level) || is_last_child(T, zyx);
 
         // NOTE: this loop walks up the tree until it finds an index where last isn't true.
         while (level > min_level && last) {
+
             // NOTE: this repeats the same logic as above but for the parent index.
             index_next = index_next.index_parent(min_level);
             level = index_next.level();
@@ -358,41 +360,38 @@ Index MethodOrderHilbert::hilbert_next (Index index, int rank, bool is_leaf, int
                 zyx = (ic3[2] << 2) + (ic3[1] << 1) + (ic3[0]);
             }
 
-            T = states[ARRAY_BITS + level];
-            bool last = (level == min_level) || (coord_to_hilbert_ind(T, zyx) == 7);
+            T = states[ARRAY_BITS + level - 1];
+            last = (level == min_level) || is_last_child(T, zyx);
         }
 
-        if (level == min_level) {
-            int T = states[ARRAY_BITS + level + 1];
-            zyx = (ic3[2] << 2) + (ic3[1] << 1) + (ic3[0]);
-            int A_k = coord_to_hilbert_ind(T, zyx);
-            A_k = (A_k + 1) % 8;
-            zyx = hilbert_ind_to_coord(T, A_k);
-        } else {
-            zyx = 0;
-        }
+        T = states[ARRAY_BITS + level - 1];
+        zyx = (ic3[2] << 2) + (ic3[1] << 1) + (ic3[0]);
+        int A_k = coord_to_hilbert_ind(T, zyx);
+        A_k = (A_k + 1) % 8;
+        zyx = hilbert_ind_to_coord(T, A_k);
     
         ic3[2] = (zyx >> 2) & 1;
         ic3[1] = (zyx >> 1) & 1;
-        ic3[0] = zyx & 1;
+        ic3[0] = (zyx >> 0) & 1;
         index_next.set_child(level, ic3[0], ic3[1], ic3[2], min_level);
     }
     return index_next;
 }
 
 void MethodOrderHilbert::hilbert_states(Index index, int m, int* states) {
-    // Note: the length of the int array 'states' is expected to be m+2.
+    // Note: the length of the int array 'states' is expected to be m+1.
     int TOTAL_BITS = 32;
     int xi, yi, zi, zyxi, T = 0;
 
     int array_bits[3] = {0, 0, 0}, tree_bits[3] = {0, 0, 0};
     index.array(array_bits, array_bits+1, array_bits+2);
     index.tree(tree_bits, tree_bits+1, tree_bits+2);
-    int x = ((array_bits[0] << 20) | tree_bits[0]) << 2;
-    int y = ((array_bits[1] << 20) | tree_bits[1]) << 2;
-    int z = ((array_bits[2] << 20) | tree_bits[2]) << 2;
+    int shift = index.level() < 0 ? -1 * index.level() : 0;
+    int x = ((array_bits[0] << (20 + shift)) | tree_bits[0]) << 2;
+    int y = ((array_bits[1] << (20 + shift)) | tree_bits[1]) << 2;
+    int z = ((array_bits[2] << (20 + shift)) | tree_bits[2]) << 2;
 
-    for (int i = 0; i <= m; i++) {
+    for (int i = 0; i < m; i++) {
         xi = (x >> (TOTAL_BITS-i-1)) & 1;
         yi = (y >> (TOTAL_BITS-i-1)) & 1;
         zi = (z >> (TOTAL_BITS-i-1)) & 1;
@@ -401,19 +400,30 @@ void MethodOrderHilbert::hilbert_states(Index index, int m, int* states) {
         states[i] = T;
         T = coord_to_next_state(T, zyxi);
     }
-    states[m+1] = T;
+    states[m] = T;
 }
 
 //========== Hilbert lookup functions ==========
+
+bool MethodOrderHilbert::is_last_child(int T, int coord) {
+    int rank = cello::rank();
+    int last_ind = 1;
+    if (rank == 3) {
+      last_ind = 7;
+    } else if (rank == 2) {
+      last_ind = 3;
+    }
+    return coord_to_hilbert_ind(T, coord) == last_ind;
+}
 
 int MethodOrderHilbert::coord_to_hilbert_ind(int state, int coord) {
     int rank = cello::rank();
     int hilbert_ind;
 
     if (rank == 3) {
-        hilbert_ind = PHM[state & 7][coord & 7];
+        hilbert_ind = PHM[state][coord & 7];
     } else if (rank == 2) {
-        hilbert_ind = CHM[state & 3][coord & 3];
+        hilbert_ind = CHM[state][coord & 3];
     } else if (rank == 1) {
         hilbert_ind = coord & 1;
     }
@@ -426,9 +436,9 @@ int MethodOrderHilbert::coord_to_next_state(int state, int coord) {
     int next_state;
 
     if (rank == 3) {
-        next_state = PNM[state & 7][coord & 7];
+        next_state = PNM[state][coord & 7];
     } else if (rank == 2) {
-        next_state = CSM[state & 3][coord & 3];
+        next_state = CSM[state][coord & 3];
     } else if (rank == 1) {
         next_state = 0;
     }
@@ -441,9 +451,9 @@ int MethodOrderHilbert::hilbert_ind_to_coord(int state, int hilbert_ind) {
     int coord;
 
     if (rank == 3) {
-        coord = HPM[state & 7][hilbert_ind & 7];
+        coord = HPM[state][hilbert_ind & 7];
     } else if (rank == 2) {
-        coord = HCM[state & 3][hilbert_ind & 3];
+        coord = HCM[state][hilbert_ind & 3];
     } else if (rank == 1) {
         coord = hilbert_ind & 1;
     }
@@ -517,28 +527,28 @@ int MethodOrderHilbert::PNM[12][8] = {
 
 //========== 2D Hilbert lookup tables ==========
 
-// Point to Hilbert ind to Coord Map
+// Hilbert ind to Coord Map
 int MethodOrderHilbert::HCM[4][4] = {
     {0, 1, 3, 2},
     {0, 2, 3, 1},
     {3, 2, 0, 1},
     {3, 1, 0, 2}};
 
-// Point to Hilbert ind to State Map
+// Hilbert ind to State Map
 int MethodOrderHilbert::HSM[4][4] = {
     {1, 0, 0, 3},
     {0, 1, 1, 2},
     {3, 2, 2, 1},
     {2, 3, 3, 0}};
 
-// Point to Coord to Hilbert ind Map
+// Coord to Hilbert ind Map
 int MethodOrderHilbert::CHM[4][4] = {
     {0, 1, 3, 2},
     {0, 3, 1, 2},
     {2, 3, 1, 0},
     {2, 1, 3, 0}};
 
-// Point to Coord to State Map
+// Coord to State Map
 int MethodOrderHilbert::CSM[4][4] = {
     {1, 0, 3, 0},
     {0, 2, 1, 1},

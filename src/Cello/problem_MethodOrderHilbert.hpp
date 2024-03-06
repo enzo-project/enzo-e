@@ -99,13 +99,16 @@ private: // methods
   /// Write, to the given states array, the recursive states of the given index up to level m. 
   void hilbert_states(Index index, int m, int* states);
 
-  /// Convert a zyx coordinate to the corresponding hilbert index for a given state
+  /// Check if the given coordinate is the last in the hilbert order with state T. 
+  bool is_last_child(int T, int coord);
+
+  /// Convert a zyx coordinate to the corresponding hilbert index for a given state.
   int coord_to_hilbert_ind(int state, int coord);
 
-  /// Convert a zyx coordinate to the next state for a given state
+  /// Convert a zyx coordinate to the next state for a given state.
   int coord_to_next_state(int state, int coord);
 
-  /// Convert a hilbert index to the corresponding zyx coordinate for a given state
+  /// Convert a hilbert index to the corresponding zyx coordinate for a given state.
   int hilbert_ind_to_coord(int state, int hilbert_ind);
 
 private: // functions
