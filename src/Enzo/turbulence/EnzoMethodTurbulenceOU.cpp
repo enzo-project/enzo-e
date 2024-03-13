@@ -833,19 +833,32 @@ void EnzoMethodTurbulenceOU::compute_reductions_(EnzoBlock * enzo_block)
 
   compute_temperature.compute(enzo_block);
 
+  const bool using_ppml = (field.values("bfieldx") != nullptr);
+
+  // default PPML fields
   enzo_float * d  = (enzo_float *) field.values("density");
-  enzo_float * vx = (enzo_float *) field.values("velox");
-  enzo_float * vy = (enzo_float *) field.values("veloy");
-  enzo_float * vz = (enzo_float *) field.values("veloz");
   enzo_float * ax = (enzo_float *) field.values("acceleration_x");
   enzo_float * ay = (enzo_float *) field.values("acceleration_y");
   enzo_float * az = (enzo_float *) field.values("acceleration_z");
+  enzo_float * vx = (enzo_float *) field.values("velocity_x");
+  enzo_float * vy = (enzo_float *) field.values("velocity_y");
+  enzo_float * vz = (enzo_float *) field.values("velocity_z");
   enzo_float * t  = (enzo_float *) field.values("temperature");
-  enzo_float * bx = (enzo_float *) field.values("bfieldx");
-  enzo_float * by = (enzo_float *) field.values("bfieldy");
-  enzo_float * bz = (enzo_float *) field.values("bfieldz");
   enzo_float * e  = (enzo_float *) field.values("energy"); // turbAcc(4)
   enzo_float * p  = (enzo_float *) field.values("pressure");
+  enzo_float * bx = nullptr;
+  enzo_float * by = nullptr;
+  enzo_float * bz = nullptr;
+
+  if (using_ppml) {
+    // update field names if using PPML
+    vx = (enzo_float *) field.values("velox");
+    vy = (enzo_float *) field.values("veloy");
+    vz = (enzo_float *) field.values("veloz");
+    bx = (enzo_float *) field.values("bfieldx");
+    by = (enzo_float *) field.values("bfieldy");
+    bz= (enzo_float *) field.values("bfieldz");
+  }
 
   int nx,ny,nz;
   int gx,gy,gz;
@@ -932,24 +945,26 @@ void EnzoMethodTurbulenceOU::compute_reductions_(EnzoBlock * enzo_block)
           g[15] += cvx*cvx+cvy*cvy+cvz*cvz;
           // g[16] += p[i];
           // g[17] += p[i]/d[i]
-          g[18] += bx[i];
-          g[19] += by[i];
-          g[20] += bz[i];
-          const double b2 = bx[i]*bx[i] + by[i]*by[i] + bz[i]*bz[i];
-          g[21] += b2;
-          g[22] += b2*di;
-          // compute bfield curl components
-          const double dbxdx = 0.5*(bx[i+dx] - bx[i-dx])*hxi;
-          const double dbydy = 0.5*(by[i+dy] - by[i-dy])*hyi;
-          const double dbzdz = 0.5*(bz[i+dz] - bz[i-dz])*hzi;
-          g[23] += abs(dbxdx) + abs(dbydy) + abs(dbzdz);
-          // or is it g[23] += abs(dbxdx+dbydy+dbzdz) ?
-          g[24] += e[i];
-          g[25] += v2/c2;
-          g[26] += p[i]*vdiv;
-          g[27] += p[i]*vdiv*vdiv;
-          g[28] += hx*hy*hz;
-          g[29] += dbxdx + dbydy + dbzdz;
+          if (using_ppml) {
+            g[18] += bx[i];
+            g[19] += by[i];
+            g[20] += bz[i];
+            const double b2 = bx[i]*bx[i] + by[i]*by[i] + bz[i]*bz[i];
+            g[21] += b2;
+            g[22] += b2*di;
+            // compute bfield curl components
+            const double dbxdx = 0.5*(bx[i+dx] - bx[i-dx])*hxi;
+            const double dbydy = 0.5*(by[i+dy] - by[i-dy])*hyi;
+            const double dbzdz = 0.5*(bz[i+dz] - bz[i-dz])*hzi;
+            g[23] += abs(dbxdx) + abs(dbydy) + abs(dbzdz);
+            // or is it g[23] += abs(dbxdx+dbydy+dbzdz) ?
+            g[24] += e[i];
+            g[25] += v2/c2;
+            g[26] += p[i]*vdiv;
+            g[27] += p[i]*vdiv*vdiv;
+            g[28] += hx*hy*hz;
+            g[29] += dbxdx + dbydy + dbzdz;
+          } 
 	}
       }
     }
