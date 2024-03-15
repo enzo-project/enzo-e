@@ -20,11 +20,21 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Error");
   //----------------------------------------------------------------------
-  PARALLEL_PRINTF ("Warning message:\n");
+  PARALLEL_PRINTF ("old-style Warning message:\n");
 
   char warning_message[ERROR_LENGTH];
   snprintf (warning_message,sizeof(warning_message),"Warning message test");
   WARNING("main",warning_message);
+
+  unit_func("WARNING");
+  unit_assert (true);
+
+  //----------------------------------------------------------------------
+  PARALLEL_PRINTF ("new-style Warning message:\n");
+
+  char warning_message2[ERROR_LENGTH];
+  snprintf (warning_message2,sizeof(warning_message2),"Warning message test");
+  CELLO_WARN("%s", warning_message2);
 
   unit_func("WARNING");
   unit_assert (true);
