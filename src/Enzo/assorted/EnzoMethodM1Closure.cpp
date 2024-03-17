@@ -19,9 +19,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodM1Closure::EnzoMethodM1Closure(ParameterAccessor p)
+EnzoMethodM1Closure::EnzoMethodM1Closure(ParameterGroup p)
   : Method(),
-    // the following get initialized straight from the parameter file
+    // the following attributes get initialized straight from the parameter file
     N_groups_(p.value_integer("N_groups",1)),
     flux_function_(p.value_string("flux_function","GLF")),
     hll_file_(p.value_string("hll_file","hll_evals.list")),
@@ -36,10 +36,10 @@ EnzoMethodM1Closure::EnzoMethodM1Closure(ParameterAccessor p)
     recombination_radiation_(p.value_logical("recombination_radiation",false)),
     H2_photodissociation_(p.value_logical("H2_photodissociation",false)),
     lyman_werner_background_(p.value_logical("lyman_werner_background",false)),
-    LWB_J21_(p.value_float("Method:m1_closure:LWB_J21", -1.0)),
+    LWB_J21_(p.value_float("LWB_J21", -1.0)),
     cross_section_calculator_(p.value_string("cross_section_calculator",
                                              "vernier")),
-    // the following batch gets initialized shortly
+    // the following batch of attributes get initialized shortly
     SED_(),
     energy_lower_(),
     energy_upper_(),

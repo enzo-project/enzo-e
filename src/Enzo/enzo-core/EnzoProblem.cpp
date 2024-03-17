@@ -779,7 +779,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "m1_closure") {
 
-    method = new EnzoMethodM1Closure(p_accessor);
+    method = new EnzoMethodM1Closure(p_group);
     skip_auto_courant = true;
 
   } else if (name == "check") {

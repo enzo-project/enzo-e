@@ -48,7 +48,7 @@ class EnzoMethodM1Closure : public Method {
 public: // interface
 
   /// Create a new EnzoMethodM1Closure object
-  EnzoMethodM1Closure(ParameterAccessor p);
+  EnzoMethodM1Closure(ParameterGroup p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodM1Closure );
