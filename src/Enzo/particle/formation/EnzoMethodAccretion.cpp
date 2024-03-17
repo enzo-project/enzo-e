@@ -9,11 +9,12 @@
 ///         momentum, and energy from the gas, and add mass and
 ///         momentum to the sink particle.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 EnzoMethodAccretion::EnzoMethodAccretion
-(ParameterAccessor &p)
+(ParameterGroup p)
   : Method(),
     accretion_radius_cells_(p.value_float("accretion_radius_cells", 4.0)),
     physical_density_threshold_cgs_(p.value_float

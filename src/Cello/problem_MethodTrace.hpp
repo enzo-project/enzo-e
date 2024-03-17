@@ -19,18 +19,8 @@ class MethodTrace : public Method
 
 public: // interface
 
-  /// factory method
-  static MethodTrace* from_parameters(ParameterAccessor& p){
-    return new MethodTrace
-      (p.value_float("courant",1.0),
-       p.value_float("timestep", std::numeric_limits<double>::max()),
-       p.value_string("name", "trace"));
-  }
-
   /// Create a new MethodTrace
-  MethodTrace (double courant,
-	       double timestep,
-	       std::string name) throw() ;
+  MethodTrace (ParameterGroup p) noexcept;
 
   /// Destructor
   virtual ~MethodTrace() throw()

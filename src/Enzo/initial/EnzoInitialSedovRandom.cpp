@@ -10,9 +10,9 @@
 /// Optionally, about half the blocks can be made empty to increase load
 /// imbalance between blocks.
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 #include <random>
 

@@ -8,9 +8,7 @@
 #ifndef ENZO_ENZO_RECONSTRUCTOR_HPP
 #define ENZO_ENZO_RECONSTRUCTOR_HPP
 
-#include <pup_stl.h>
-
-class EnzoReconstructor : public PUP::able
+class EnzoReconstructor
 {
   /// @class    EnzoReconstructor
   /// @ingroup  Enzo
@@ -41,21 +39,6 @@ public: // interface
   /// Virtual destructor
   virtual ~EnzoReconstructor()
   {  }
-
-  /// CHARM++ PUP::able declaration
-  PUPable_abstract(EnzoReconstructor);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoReconstructor (CkMigrateMessage *m)
-    : PUP::able(m)  
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    PUP::able::pup(p);
-    p|active_key_names_;
-  }
 
   /// Reconstructs the interface values
   ///

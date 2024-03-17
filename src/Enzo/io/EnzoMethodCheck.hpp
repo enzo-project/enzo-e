@@ -20,7 +20,8 @@ public: // interface
   EnzoMethodCheck
   (int num_files, std::string ordering,
    std::vector<std::string> directory,
-   int monitor_iter);
+   int monitor_iter,
+   bool include_ghosts);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodCheck);
@@ -55,6 +56,9 @@ protected: // attributes
 
   /// Disk directory for writing checkpoint files
   std::vector<std::string> directory_;
+
+  /// Whether to include ghosts zones
+  bool include_ghosts_;
 };
 
 #endif /* ENZO_ENZO_METHOD_CHECK_HPP */

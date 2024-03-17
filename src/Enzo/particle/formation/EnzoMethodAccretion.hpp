@@ -24,7 +24,7 @@ class EnzoMethodAccretion : public Method {
 public:
 
   // Constructor
-  EnzoMethodAccretion(ParameterAccessor &p);
+  EnzoMethodAccretion(ParameterGroup p);
 
   /// Destructor
   virtual ~EnzoMethodAccretion() throw() {};

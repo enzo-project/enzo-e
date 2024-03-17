@@ -15,7 +15,7 @@ class EnzoMethodFluxAccretion : public EnzoMethodAccretion {
 public:
 
   // Constructor
-  EnzoMethodFluxAccretion(ParameterAccessor &p);
+  EnzoMethodFluxAccretion(ParameterGroup p);
 
   // Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodFluxAccretion);

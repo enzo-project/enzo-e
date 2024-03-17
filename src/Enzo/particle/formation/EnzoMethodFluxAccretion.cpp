@@ -6,13 +6,14 @@
 /// @brief      Computes accretion rates according to "Flux Accretion" method, as
 ///             described in Section 5.3 of Bleuler, A & Teyssier, R 2004; MNRAS, 445, 4015-4036
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 //------------------------------------------------------------------
 
 EnzoMethodFluxAccretion::EnzoMethodFluxAccretion
-(ParameterAccessor &p)
+(ParameterGroup p)
   : EnzoMethodAccretion(p)
 {
   // The number of cell widths within the accretion radius cannot be larger than

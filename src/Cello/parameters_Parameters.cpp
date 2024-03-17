@@ -19,7 +19,7 @@ Parameters::Parameters(Monitor * monitor)
   throw()
   : current_group_(),
     parameter_map_(),
-    parameter_tree_(new ParamNode("Cello")),
+    parameter_tree_("Cello"),
     monitor_(monitor),
     lmonitor_(true)
 {
@@ -31,13 +31,8 @@ Parameters::Parameters(Monitor * monitor)
 Parameters::Parameters(const char * file_name,
 		       Monitor * monitor) 
   throw()
-  : current_group_(),
-    parameter_map_(),
-    parameter_tree_(new ParamNode("Cello")),
-    monitor_(monitor),
-    lmonitor_(true)
+  : Parameters(monitor)
 {
-  if (! monitor_) lmonitor_ = false;
   read(file_name);
 }
 
@@ -58,8 +53,7 @@ Parameters::~Parameters()
             (it_param->first).c_str(), (it_param->second != nullptr));
     delete it_param->second;
   }
-#endif  
-  delete parameter_tree_;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -70,6 +64,7 @@ void Parameters::pup (PUP::er &p)
 
   p | current_group_;
 
+  // pup parameter_map_:
   int n = 0;
   if (!p.isUnpacking()) {
     // Figure out size
@@ -101,6 +96,13 @@ void Parameters::pup (PUP::er &p)
       parameter_map_[name] = param;
     }
   }
+
+  // previously we didn't pup parameter_tree_. That was probably because
+  // ParamNode::pup had bugs (they should be fixed now)
+  p | parameter_tree_;
+
+  // this method assumes that the monitor_ and lmonitor_ methods are already
+  // correctly initialized
 }
 
 //----------------------------------------------------------------------
@@ -800,6 +802,38 @@ void Parameters::list_evaluate_logical
 
 //----------------------------------------------------------------------
 
+std::vector<std::string> Parameters::value_full_strlist
+(const std::string& parameter, bool coerce_string_to_list,
+ bool suppress_err) throw()
+{
+  int type = this->type(parameter);
+
+  if (this->param(parameter) == nullptr){
+    return {};
+  } else if (type == parameter_list) {
+    const int len = this->list_length(parameter);
+    if (len == 0) return {};
+
+    std::vector<std::string> out(len);
+    for (int i=0; i<len; i++) { out[i] = this->value(i, parameter, "none"); }
+    return out;
+
+  } else if ((type == parameter_string) && coerce_string_to_list) {
+    return { this->value_string(parameter,"none") };
+  } else if (suppress_err) {
+    return {};
+  }
+
+  const char* type_description = (coerce_string_to_list) ?
+    "single string or list of strings" : "list of strings";
+  ERROR3("Parameters::value_full_strlist",
+         ("Parameter \"%s\" expects to be assigned a %s; it was instead "
+          "assigned a value of type %d"),
+         parameter.c_str(), type_description, type);
+}
+
+//----------------------------------------------------------------------
+
 std::string Parameters::group(int i) const throw()
 {
   return (i < (int) current_group_.size()) ? current_group_[i] : "";
@@ -817,7 +851,7 @@ int Parameters::group_depth() const throw()
 int Parameters::group_count() const throw()
 {
   // Find the parameter node for the current list of groups
-  ParamNode * param_node = parameter_tree_;
+  const ParamNode * param_node = &parameter_tree_;
   for (size_t i=0; i<current_group_.size(); i++) {
     if (param_node->subnode(current_group_[i]) != 0) {
       param_node = param_node->subnode(current_group_[i]);
@@ -1167,7 +1201,7 @@ void Parameters::new_param_
 
   int num_groups = extract_groups_(full_parameter,groups);
 
-  ParamNode * param_node = parameter_tree_;
+  ParamNode * param_node = &parameter_tree_;
   for (int i=0; i<num_groups; i++) {
     param_node = param_node->new_subnode(groups[i]);
   }

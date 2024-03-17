@@ -6,8 +6,9 @@
 /// @brief    Initializer for the Shu Collapse problem as described
 ///           in Federrath et al 2010, ApJ, 713, 269.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 EnzoInitialShuCollapse::EnzoInitialShuCollapse
 (int cycle, double time,
@@ -240,7 +241,7 @@ void EnzoInitialShuCollapse::enforce_block
   std::fill_n(specific_te,m,specific_ke + specific_ie);
 
   // Now to initialise the density field
-  const double const_G  = enzo_constants::grav_constant * enzo::units()->density() *
+  const double const_G  = enzo::grav_constant_cgs() * enzo::units()->density() *
     enzo::units()->time() * enzo::units()->time();
 
   const double density_profile_factor =

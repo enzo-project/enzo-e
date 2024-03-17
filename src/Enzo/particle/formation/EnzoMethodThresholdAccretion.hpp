@@ -17,7 +17,7 @@ class EnzoMethodThresholdAccretion : public EnzoMethodAccretion {
 public:
 
   // Constructor
-  EnzoMethodThresholdAccretion(ParameterAccessor& p);
+  EnzoMethodThresholdAccretion(ParameterGroup p);
 
   /// Charm++ Pup::able declarations
   PUPable_decl(EnzoMethodThresholdAccretion);

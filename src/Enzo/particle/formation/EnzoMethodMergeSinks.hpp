@@ -19,7 +19,7 @@ class EnzoMethodMergeSinks : public Method {
 public:
 
   // Create a new MergeSinks object
-  EnzoMethodMergeSinks(ParameterAccessor &p);
+  EnzoMethodMergeSinks(ParameterGroup p);
 
   /// Destructor
   virtual ~EnzoMethodMergeSinks() throw() {};

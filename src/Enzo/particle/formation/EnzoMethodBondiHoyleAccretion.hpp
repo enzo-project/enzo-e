@@ -16,7 +16,7 @@ class EnzoMethodBondiHoyleAccretion : public EnzoMethodAccretion {
 public:
   
   // Constructor
-  EnzoMethodBondiHoyleAccretion(ParameterAccessor &p);
+  EnzoMethodBondiHoyleAccretion(ParameterGroup p);
 
   // Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodBondiHoyleAccretion);

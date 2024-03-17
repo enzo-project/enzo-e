@@ -6,7 +6,8 @@
 /// @date     2015-04-02
 /// @brief    Implementation of the discrete Diagonal operator EnzoMatrixDiagonal
 
-#include "enzo.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 //======================================================================
 

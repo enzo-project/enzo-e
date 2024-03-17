@@ -6,8 +6,9 @@
 /// @brief    [\ref Enzo] Implementation of the BfieldMethod abstract base
 ///           class.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 //----------------------------------------------------------------------
 
@@ -23,24 +24,6 @@ EnzoBfieldMethod::EnzoBfieldMethod(int num_partial_timesteps)
     ERROR("EnzoConstrainedTransport",
           "This machinery hasn't been tested for cases when "
           "num_partial_timesteps!=2.");
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBfieldMethod::pup (PUP::er &p)
-{
-  PUP::able::pup(p);
-
-  p|num_partial_timesteps_;
-  if (p.isUnpacking()){
-    target_block_ = nullptr;
-    // set partial_timestep_index_ to -1 to indicate need for reallocating
-    // scratch space
-    partial_timestep_index_ = -1;
-  } else if (target_block_ != nullptr){
-    ERROR("EnzoBfieldMethod::pup",
-          "target_block_ is expected to be a nullptr while packing up data");
   }
 }
 

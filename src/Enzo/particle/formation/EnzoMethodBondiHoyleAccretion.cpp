@@ -8,13 +8,14 @@
 ///             See Krumholz+ 2004, ApJ, 611, 399 for details.
 ///
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 //------------------------------------------------------------------
 
 EnzoMethodBondiHoyleAccretion::EnzoMethodBondiHoyleAccretion
-(ParameterAccessor &p)
+(ParameterGroup p)
   : EnzoMethodAccretion(p)
 {
 
@@ -77,7 +78,7 @@ void EnzoMethodBondiHoyleAccretion::compute_(Block * block)
 
     // Get gravitational constant in code units
     const double const_G =
-      enzo_constants::grav_constant * enzo::units()->density() *
+      enzo::grav_constant_cgs() * enzo::units()->density() *
       enzo::units()->time() * enzo::units()->time();
 
     // Also need the field dimensions

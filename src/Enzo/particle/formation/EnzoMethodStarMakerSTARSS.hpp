@@ -17,7 +17,7 @@ class EnzoMethodStarMakerSTARSS : public EnzoMethodStarMaker {
 
 public:
   // Create new EnzoStarMakerSTARSS object
-  EnzoMethodStarMakerSTARSS(ParameterAccessor& p);
+  EnzoMethodStarMakerSTARSS(ParameterGroup p);
 
   // Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodStarMakerSTARSS);

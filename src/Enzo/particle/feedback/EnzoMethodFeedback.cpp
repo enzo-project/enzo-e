@@ -5,11 +5,12 @@
 ///
 ///
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 EnzoMethodFeedback::EnzoMethodFeedback
-(ParameterAccessor &p)
+(ParameterGroup p)
   : Method()
 {
   cello::particle_descr()->check_particle_attribute("star","mass");

@@ -24,7 +24,7 @@ class EnzoMethodStarMaker : public Method {
 public:
 
   // Create a new StarMaker object
-  EnzoMethodStarMaker(ParameterAccessor& p);
+  EnzoMethodStarMaker(ParameterGroup p);
 
   /// Destructor
   virtual ~EnzoMethodStarMaker() throw() {};

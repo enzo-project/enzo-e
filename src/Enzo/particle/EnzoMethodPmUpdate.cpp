@@ -6,8 +6,8 @@
 /// @brief    Implements the EnzoMethodPmUpdate class
 
 
-#include "charm_simulation.hpp"
-#include "enzo.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 // #define DEBUG_UPDATE
 
@@ -22,7 +22,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodPmUpdate::EnzoMethodPmUpdate
-( ParameterAccessor& p )
+( ParameterGroup p )
   : Method(),
     // load value from Method:pm_update:max_dt
     max_dt_(p.value_float("max_dt", std::numeric_limits<double>::max()))
