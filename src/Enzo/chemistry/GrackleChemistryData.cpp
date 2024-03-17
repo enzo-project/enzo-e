@@ -442,7 +442,7 @@ bool GrackleChemistryData::try_set_str_(const std::string& field,
 //----------------------------------------------------------------------
 
 GrackleChemistryData GrackleChemistryData::from_parameters
-(ParameterAccessor p,
+(ParameterGroup p,
  const std::unordered_set<std::string>& forbid_leaf_names,
  const std::unordered_set<std::string>& ignore_leaf_names) noexcept
 {
@@ -450,7 +450,7 @@ GrackleChemistryData GrackleChemistryData::from_parameters
   ERROR("GrackleChemistryData::from_parameters", "Grackle isn't linked");
 #else
 
-  const std::string& parameter_group_ = p.get_root_parpath();
+  const std::string& parameter_group_ = p.get_group_path();
   std::size_t pgrp_len = parameter_group_.size();
   ASSERT("GrackleChemistryData::from_parameters", "parameter_group is \"\"",
          pgrp_len > 0);

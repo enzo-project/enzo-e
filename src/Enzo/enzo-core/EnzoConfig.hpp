@@ -65,7 +65,7 @@ public: // interface
       physics_fluid_props_fluid_floor_config(),
       physics_fluid_props_mol_weight(0.0),
       // Gravity
-      physics_gravity(false),
+      physics_gravity_grav_constant_codeU(-1.0),
 
       //--------------------
       // INITIAL [sorted]
@@ -104,11 +104,13 @@ public: // interface
       initial_cloud_etot_wind(0.0),
       initial_cloud_initialize_uniform_bfield(false),
       initial_cloud_metal_mass_frac(0.0),
+      initial_cloud_perturb_Nwaves(0),
+      initial_cloud_perturb_amplitude(0.0),
+      initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
+      initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
       initial_cloud_perturb_seed(0),
-      initial_cloud_perturb_stddev(0.0),
       initial_cloud_radius(0.),
       initial_cloud_subsample_n(0),
-      initial_cloud_trunc_dev(0.0),
       initial_cloud_velocity_wind(0.0),
       // EnzoInitialCollapse
       initial_collapse_mass(0.0),
@@ -138,7 +140,6 @@ public: // interface
       initial_grackle_test_minimum_H_number_density(0.1),
       initial_grackle_test_minimum_metallicity(1.0E-4),
       initial_grackle_test_minimum_temperature(10.0),
-      initial_grackle_test_reset_energies(0),
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
@@ -258,6 +259,7 @@ public: // interface
       method_check_ordering("order_morton"),
       method_check_dir(),
       method_check_monitor_iter(0),
+      method_check_include_ghosts(false),
       /// EnzoMethodFeedback
       method_feedback_ejecta_mass(0.0),
       method_feedback_ejecta_metal_fraction(0.0),
@@ -273,14 +275,12 @@ public: // interface
       method_feedback_supernovae(true),
       method_feedback_unrestricted_sn(true),
       method_feedback_stellar_winds(true),
-      method_feedback_radiation(true),
       method_feedback_min_level(0),
       method_feedback_analytic_SNR_shell_mass(true),
       method_feedback_fade_SNR(true),
       method_feedback_NEvents(-1),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
-
       // EnzoMethodHydro
       method_hydro_method(""),
       method_hydro_dual_energy(false),
@@ -290,7 +290,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -341,7 +340,6 @@ public: // interface
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
       // EnzoMethodGravity
-      method_gravity_grav_const(0.0),
       method_gravity_solver(""),
       method_gravity_order(4),
       method_gravity_dt_max(1.0e10),
@@ -360,8 +358,8 @@ public: // interface
       method_background_acceleration_apply_acceleration(true),
       // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
-      method_vlct_half_dt_reconstruct_method(""),
-      method_vlct_full_dt_reconstruct_method(""),
+      method_vlct_time_scheme(""),
+      method_vlct_reconstruct_method(""),
       method_vlct_theta_limiter(0.0),
       method_vlct_mhd_choice(""),
       // EnzoMethodMergeSinks
@@ -465,6 +463,7 @@ protected: // methods
   
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
+  void read_physics_gravity_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
 
@@ -511,7 +510,7 @@ public: // attributes
   double                     physics_fluid_props_mol_weight;
 
   /// Gravity
-  bool                       physics_gravity;
+  double                     physics_gravity_grav_constant_codeU;
 
   /// EnzoInitialBCenter;
   bool                       initial_bcenter_update_etot;
@@ -528,22 +527,24 @@ public: // attributes
   double                     initial_burkertbodenheimer_outer_velocity;
 
   /// EnzoInitialCloud;
-  int                        initial_cloud_subsample_n;
-  double                     initial_cloud_radius;
   double                     initial_cloud_center_x;
   double                     initial_cloud_center_y;
   double                     initial_cloud_center_z;
   double                     initial_cloud_density_cloud;
   double                     initial_cloud_density_wind;
-  double                     initial_cloud_velocity_wind;
-  double                     initial_cloud_etot_wind;
   double                     initial_cloud_eint_wind;
-  double                     initial_cloud_metal_mass_frac;
+  double                     initial_cloud_etot_wind;
   bool                       initial_cloud_initialize_uniform_bfield;
   double                     initial_cloud_uniform_bfield[3];
-  double                     initial_cloud_perturb_stddev;
-  double                     initial_cloud_trunc_dev;
+  double                     initial_cloud_metal_mass_frac;
+  int                        initial_cloud_perturb_Nwaves;
+  double                     initial_cloud_perturb_amplitude;
+  double                     initial_cloud_perturb_min_wavelength;
+  double                     initial_cloud_perturb_max_wavelength;
   unsigned int               initial_cloud_perturb_seed;
+  double                     initial_cloud_radius;
+  int                        initial_cloud_subsample_n;
+  double                     initial_cloud_velocity_wind;
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
@@ -563,7 +564,6 @@ public: // attributes
   double                     initial_grackle_test_minimum_H_number_density;
   double                     initial_grackle_test_minimum_metallicity;
   double                     initial_grackle_test_minimum_temperature;
-  int                        initial_grackle_test_reset_energies;
 
   /// EnzoInitialHdf5
 
@@ -738,6 +738,7 @@ public: // attributes
   std::string                method_check_ordering;
   std::vector<std::string>   method_check_dir;
   int                        method_check_monitor_iter;
+  bool                       method_check_include_ghosts;
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
@@ -753,7 +754,6 @@ public: // attributes
   std::string                method_hydro_riemann_solver;
 
   /// EnzoMethodFeedback
-
   std::string               method_feedback_flavor;
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
@@ -767,7 +767,6 @@ public: // attributes
 
   
   /// EnzoMethodFeedbackSTARSS
-  
   bool                       method_feedback_supernovae;
   bool                       method_feedback_unrestricted_sn;
   bool                       method_feedback_stellar_winds;
@@ -776,9 +775,8 @@ public: // attributes
   bool                       method_feedback_analytic_SNR_shell_mass;
   bool                       method_feedback_fade_SNR;
   int                        method_feedback_NEvents;
- 
-  /// EnzoMethodStarMaker
 
+  /// EnzoMethodStarMaker
   std::string               method_star_maker_flavor;
   bool                      method_star_maker_use_altAlpha;
   bool                      method_star_maker_use_density_threshold;
@@ -834,7 +832,6 @@ public: // attributes
   double                     method_turbulence_mach_number;
 
   /// EnzoMethodGravity
-  double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
   int                        method_gravity_order;
   double                     method_gravity_dt_max;
@@ -858,8 +855,8 @@ public: // attributes
 
   /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;
-  std::string                method_vlct_half_dt_reconstruct_method;
-  std::string                method_vlct_full_dt_reconstruct_method;
+  std::string                method_vlct_time_scheme;
+  std::string                method_vlct_reconstruct_method;
   double                     method_vlct_theta_limiter;
   std::string                method_vlct_mhd_choice;
 

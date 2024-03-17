@@ -345,6 +345,22 @@ The following options are useful for debugging.
      - Trace main phases
      - OFF
 
+Misc Options
+^^^^^^^^^^^^
+
+The following options don't really belong in any other category
+
+.. list-table:: Misc Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_PRECOMPILED_HEADERS``
+     - Precompile headers to try to reduce compile time
+     - ON
+
 .. _how_to_specify_the_configuration:
 
 Specifying Configuration Options
@@ -502,7 +518,7 @@ Time = 0.10
 If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-E / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-E / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
 If you encounter any problems in getting Enzo-E to compile or run,
-please contact the Enzo-E / Cello community at cello-l@ucsd.edu or the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
+please contact the Enzo-E / Cello community at the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
 
 ----
 

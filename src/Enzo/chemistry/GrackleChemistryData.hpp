@@ -81,7 +81,7 @@ public: // public interface (implementation is tied to Grackle details)
   /// function is VERY aggressive about reporting any unexpected parameters as
   /// an error.
   GrackleChemistryData static from_parameters
-    (ParameterAccessor p,
+    (ParameterGroup p,
      const std::unordered_set<std::string>& forbid_leaf_names,
      const std::unordered_set<std::string>& ignore_leaf_names) noexcept;
 

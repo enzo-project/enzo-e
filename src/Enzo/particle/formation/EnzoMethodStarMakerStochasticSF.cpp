@@ -8,10 +8,11 @@
 ///     Derived star maker class that actually makes stars. This is
 ///     adapted after the star_maker_ssn method from Enzo
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include <time.h>
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
+#include <time.h>
 
 // #define DEBUG_SF
 
@@ -199,7 +200,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
         if (! this->check_mass(mass)) continue;
 
-        double tdyn = sqrt(3.0 * cello::pi / 32.0 / enzo_constants::grav_constant /
+        double tdyn = sqrt(3.0 * cello::pi / 32.0 / enzo::grav_constant_cgs() /
                       (density[i] * enzo_units->density()));
 
         //

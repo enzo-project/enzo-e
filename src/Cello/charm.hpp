@@ -23,3 +23,4 @@
 #include "charm_MsgOutput.hpp"
 #include "charm_MsgRefine.hpp"
 #include "charm_MsgRefresh.hpp"
+#include "charm_MsgState.hpp"

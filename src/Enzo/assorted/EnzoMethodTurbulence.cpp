@@ -6,11 +6,12 @@
 /// @date     Wed Jul 23 00:31:04 UTC 2014
 /// @brief    Implements the EnzoMethodTurbulence class
 
-#include "cello.hpp"
+#include "Enzo/assorted/assorted.hpp"
 
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
-#include "enzo.decl.h"
+//#include "enzo.decl.h"
 
 // #define DEBUG_TURBULENCE
 

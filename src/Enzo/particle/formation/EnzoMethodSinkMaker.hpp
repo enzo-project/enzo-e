@@ -20,18 +20,8 @@ class EnzoMethodSinkMaker : public Method {
 
 public:
 
-  // factory method
-  static EnzoMethodSinkMaker* from_parameters(ParameterAccessor& p) noexcept;
-
   // Constructor
-  EnzoMethodSinkMaker
-  (double   jeans_length_resolution_cells,
-   double   physical_density_threshold_cgs,
-   bool     check_density_maximum,
-   double   max_mass_fraction,
-   double   min_sink_mass_solar,
-   double   max_offset_cell_fraction,
-   uint64_t offset_seed_shift);
+  EnzoMethodSinkMaker(ParameterGroup p) noexcept;
 
   /// Destructor
   virtual ~EnzoMethodSinkMaker() throw() {};
