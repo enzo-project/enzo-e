@@ -3,6 +3,7 @@
 /// @file     enzo_EnzoMethodGrackle.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 ///           Andrew Emerick (aemerick11@gmail.com)
+///           Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Tues May  7
 /// @brief    Implements the EnzoMethodGrackle class
 
@@ -12,20 +13,13 @@
 
 //----------------------------------------------------------------------------
 
-EnzoMethodGrackle* EnzoMethodGrackle::from_parameters
-(
- ParameterGroup p,
- const double physics_cosmology_initial_redshift,
- const double time
-)
+namespace { // anonymous namespace
+
+// items within this namespace are just local to this file
+
+GrackleChemistryData parse_chemistry(ParameterGroup p)
 {
-
-  bool use_cooling_timestep = p.value_logical("use_cooling_timestep", false);
-
-  // for when not using cosmology - redshift of UVB
-  double radiation_redshift = p.value_float("radiation_redshift", -1.0);
-
-  // Now, we will initialize GrackleChemistryData
+  // Initialize GrackleChemistryData
   // - we do this with a factory method that directly examines the parameter
   //   values within the "Method:grackle:*" group.
   // - Because Grackle has so many parameter values, it's very easy to make a
@@ -99,31 +93,30 @@ EnzoMethodGrackle* EnzoMethodGrackle::from_parameters
   // on an Enzo-E parameter for turning RT on / off:
   // my_chemistry.set<int>("use_radiative_transfer", ENZO_E_PARAMETER_NAME);
 
-  EnzoMethodGrackle* method = new EnzoMethodGrackle
-    (std::move(my_chemistry), use_cooling_timestep, radiation_redshift,
-     physics_cosmology_initial_redshift, time);
-
-  // courant is only meaningful when use_cooling_timestep is true
-  method->set_courant(p.value_float("courant", 1.0));
-
-  return method;
+  return my_chemistry;
 }
+
+} // anonymous namespace
 
 //----------------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
- GrackleChemistryData my_chemistry,
- bool use_cooling_timestep,
- const double radiation_redshift,
+ ParameterGroup p,
  const double physics_cosmology_initial_redshift,
  const double time
 )
   : Method(),
-    grackle_facade_(std::move(my_chemistry), radiation_redshift,
-                    physics_cosmology_initial_redshift, time),
-    use_cooling_timestep_(use_cooling_timestep)
+    grackle_facade_(std::move(parse_chemistry(p)),
+                    // for when not using cosmology - redshift of UVB
+                    p.value_float("radiation_redshift", -1.0),
+                    // the next parameter is relevant when using cosmology
+                    physics_cosmology_initial_redshift,
+                    time),
+    use_cooling_timestep_(p.value_logical("use_cooling_timestep", false))
 {
+  // courant is only meaningful when use_cooling_timestep is true
+  this->set_courant(p.value_float("courant", 1.0));
 
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
