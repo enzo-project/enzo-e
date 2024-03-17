@@ -7,9 +7,9 @@
 
 // #define DEBUG_CIC_INTERP
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Enzo/utils/utils.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------
 

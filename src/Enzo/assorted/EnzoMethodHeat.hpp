@@ -20,7 +20,7 @@ class EnzoMethodHeat : public Method {
 public: // interface
 
   /// Create a new EnzoMethodHeat object
-  EnzoMethodHeat(ParameterAccessor p);
+  EnzoMethodHeat(ParameterGroup p);
 
   EnzoMethodHeat()
     : Method(),

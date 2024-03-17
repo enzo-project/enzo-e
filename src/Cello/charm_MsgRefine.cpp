@@ -223,11 +223,7 @@ void * MsgRefine::pack (MsgRefine * msg)
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
 
-#ifdef DEBUG_MSG_REFINE  
-  //  CkPrintf ("%s:%d DEBUG_MSG_REFINE CkFreeMsg (%p)\n",__FILE__,__LINE__,msg);
-#endif
-  CkFreeMsg (msg);
-  //  CkFreeMsg(msg);
+  delete msg;
 
   // Return the buffer
 

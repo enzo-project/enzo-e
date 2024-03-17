@@ -143,9 +143,18 @@ void Problem::initialize_boundary(Config * config,
 
     Boundary * boundary = create_boundary_(type,index,config,parameters);
 
-    ASSERT1("Problem::initialize_boundary",
-	  "Boundary type %s not recognized",
-	  type.c_str(),  boundary != nullptr);
+    if (boundary == nullptr) {
+      // the default err_prefix assumes a single boundary (and Boundary::list)
+      // wasn't used
+      std::string err_prefix = "";
+      if (config->boundary_list[index].find('#') == std::string::npos){
+        err_prefix = "\"Boundary:" + config->boundary_list[index] + "\" has ";
+      }
+
+      ERROR2("Problem::initialize_boundary",
+             "%sunrecognized Boundary type: \"%s\"",
+             err_prefix.c_str(), type.c_str());
+    }
 
     boundary_list_.push_back(boundary);
   }
@@ -468,14 +477,15 @@ void Problem::initialize_method
 
   Method::courant_global = config->method_courant_global;
 
-  // todo: clean the following up
+  // in the future, it might be nice to refactor Problem::create_method_ so
+  // that we can use it to construct this first MethodNull object. (But that
+  // may be somewhat involved)
   {
     const std::string root_path = "Method:null";
     ASSERT("Problem::create_method_", "Something is wrong",
            cello::simulation());
-    ParameterAccessor p_accessor(*(cello::simulation()->parameters()),
-                                 root_path);
-    method_list_.push_back(MethodNull::from_parameters(p_accessor));
+    ParameterGroup p_group(*(cello::simulation()->parameters()), root_path);
+    method_list_.push_back(new MethodNull(p_group));
   }
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
@@ -585,30 +595,22 @@ Boundary * Problem::create_boundary_
 
   if (type == "inflow") {
 
-    std::string param_str = 
-      "Boundary:" + config->boundary_list[index] + ":value";
-
-    int param_type = parameters->type(param_str);
-
-    if (! (param_type == parameter_list ||
-	   param_type == parameter_float ||
-	   param_type == parameter_float_expr)) {
-      ERROR2("Problem::create_boundary_()",
-	     "Parameter %s is of incorrect type %d",
-	     param_str.c_str(),param_type);
-    }
-
-    Value * value = new Value (parameters, param_str);
-
     axis_enum axis = (axis_enum) config->boundary_axis[index];
     face_enum face = (face_enum) config->boundary_face[index];
 
-    return new BoundaryValue (axis,face,value,
-			      config->boundary_field_list[index]);
+    return new BoundaryValue (*parameters,
+                              "Boundary:" + config->boundary_list[index],
+                              axis, face);
 
   } else if (type == "periodic") {
 
     axis_enum axis = (axis_enum) config->boundary_axis[index];
+    face_enum face = (face_enum) config->boundary_face[index];
+
+    // the following check probably belongs elsewhere... (not sure where)
+    ASSERT("Problem::create_boundary_",
+           "Periodic boundary must act on both faces of a given axis",
+           face == face_all);
 
     return new BoundaryPeriodic(axis);
 
@@ -908,20 +910,20 @@ Method * Problem::create_method_
   Parameters* parameters = cello::simulation()->parameters();
   const std::string root_path =
     ("Method:" + parameters->list_value_string(index_method, "Method:list"));
-  ParameterAccessor p_accessor(*parameters, root_path);
+  ParameterGroup p_group(*parameters, root_path);
 
   // No default method
   Method * method = nullptr;
 
   if (name == "trace") {
-    method = MethodTrace::from_parameters(p_accessor);
+    method = new MethodTrace(p_group);
   } else if (name == "null") {
-    method = MethodNull::from_parameters(p_accessor);
+    method = new MethodNull(p_group);
   } else if (name == "flux_correct") {
-    method = MethodFluxCorrect::from_parameters(p_accessor);
+    method = new MethodFluxCorrect(p_group);
   } else if (name == "output") {
     // we probably don't have to directly pass factory...
-    method = MethodOutput::from_parameters(factory, p_accessor);
+    method = new MethodOutput(factory, p_group);
   } else if (name == "order_morton") {
 
     // TODO: refactor to use a factory method/default constructor
@@ -930,21 +932,21 @@ Method * Problem::create_method_
     method = new MethodOrderMorton(config->mesh_min_level);
 
   } else if (name == "refresh") {
-    method = MethodRefresh::from_parameters(p_accessor);
+    method = new MethodRefresh(p_group);
   } else if (name == "debug") {
 
-    // TODO: refactor to use a factory method
+    // TODO: refactor to use MethodDebug's constructor
     //   - as an aside, the number of fields and particles specified in the
     //     parameter file may be inaccurate. We probably don't want to do that
     method = new MethodDebug
       (config->num_fields,
        config->num_particles,
-       p_accessor.value_logical("print",false),
-       p_accessor.value_logical("coarse",false),
-       p_accessor.value_logical("ghost",false));
+       p_group.value_logical("print",false),
+       p_group.value_logical("coarse",false),
+       p_group.value_logical("ghost",false));
 
   } else if (name == "close_files") {
-    method = MethodCloseFiles::from_parameters(p_accessor);
+    method = new MethodCloseFiles(p_group);
   }
   return method;
 }

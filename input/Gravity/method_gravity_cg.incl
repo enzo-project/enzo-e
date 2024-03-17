@@ -37,9 +37,7 @@ Method {
     list = ["pm_deposit", "gravity", "ppm"]; 
 
     gravity {
-       solver = "cg";    	    
-#       grav_const = 6.67384e-8;
-#       grav_const = 1.0e-1;
+       solver = "cg";
        accumulate = false; # NOT IMPLEMENTED YET
     }
 
@@ -95,6 +93,14 @@ Initial {
        R = 0.0;
        X = 0.0;
    }
+}
+
+Physics {
+   list = ["gravity"];
+
+   # if we wanted to adjust the gravitational constant, assign the value to
+   # Physics:gravity:grav_const_codeU (Since we have omitted the parameter, it
+   # is automatically computed from the standard real-world value)
 }
 
 Boundary {

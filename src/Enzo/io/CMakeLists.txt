@@ -2,15 +2,29 @@
 
 # add source files for code involving enzo-specific io to the enzo target
 
-# Get the list of source files in this directory
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp
+# create Enzo::io, which includes source files enzo-specific io
+#
+# We explicitly list files (rather than use glob) since that makes CMake better
+# at rebuilds (especially after changing branches)
+add_library(Enzo_io
+  io.hpp
+
+  control_restart.cpp
+  EnzoInitialHdf5.cpp
+  EnzoInitialHdf5.hpp
+  EnzoInitialMusic.cpp
+  EnzoInitialMusic.hpp
+  EnzoMethodCheck.cpp
+  EnzoMethodCheck.hpp
+  IoEnzoBlock.cpp
+  IoEnzoBlock.hpp
+  IoEnzoReader.hpp
+  IoEnzoWriter.hpp
 )
 
-target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
+add_library(Enzo::io ALIAS Enzo_io)
+
+# the following can be improved (it links more than is necessary)
+target_link_libraries(Enzo_io PUBLIC enzo ${CELLO_LIBS})
+target_include_directories(Enzo_io PUBLIC ${ROOT_INCLUDE_DIR})
+target_link_options(Enzo_io PRIVATE ${Cello_TARGET_LINK_OPTIONS})
