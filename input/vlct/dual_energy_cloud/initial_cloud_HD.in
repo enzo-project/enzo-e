@@ -69,10 +69,7 @@
  }
 
  Boundary {
-     list = ["downwind", "density_upwind", "metal_density_upwind",
-             "velocity_x_upwind", "transverse_velocity_upwind",
-             "etot_upwind", "eint_upwind",
-             "cloud_dye_upwind", "yedge", "zedge"];
+     list = ["downwind", "hydro_upwind", "yedge", "zedge"];
 
      # These are the conditions used by Gronke & Oh (2018)
      downwind {
@@ -81,68 +78,33 @@
          face = "upper";
      };
 
-     density_upwind {
+     hydro_upwind {
          type = "inflow";
          axis = "x";
          face = "lower";
-         field_list = "density";
-	 value = 8.944866290871940e-02;
-     };
 
-     metal_density_upwind {
-         type = "inflow";
-         axis = "x";
-         face = "lower";
-         field_list = "metal_density";
-	 value = 8.944866290871940e-02 * 0.01295;
-     };
+	 value {
+             density = 8.944866290871940e-02;
+             velocity_x = 1.341500614584355e+01;
+             velocity_y = 0.0;
+             velocity_z = 0.0;
+             total_energy = 1.619661509037183e+02;
+             internal_energy = 7.198495595720811e+01;
 
-     velocity_x_upwind {
-         type = "inflow";
-         axis = "x";
-         face = "lower";
-         field_list = "velocity_x";
-         value = 1.341500614584355e+01;
-     };
-
-     transverse_velocity_upwind {
-         type = "inflow";
-         axis = "x";
-	  face = "lower";
-         field_list = ["velocity_y","velocity_z"];
-         value = 0.;
-     };
-
-     etot_upwind{
-         type = "inflow";
-         axis = "x";
-         face = "lower";
-         field_list = "total_energy";
-         value = 1.619661509037183e+02;
-     };
-
-     eint_upwind{
-         type = "inflow";
-         axis = "x";
-         face = "lower";
-         field_list = "internal_energy";
-         value = 7.198495595720811e+01;
-     };
-
-     cloud_dye_upwind{
-         type = "inflow";
-         axis = "x";
-         face = "lower";
-         field_list = "cloud_dye";
-         value = 0.0;
+             # passively advected scalars:
+             metal_density = 8.944866290871940e-02 * 0.01295;
+             cloud_dye = 0.0;
+         }
      };
 
      yedge {
          type = "outflow";
+         axis = "y";
      };
 
      zedge {
          type = "outflow";
+         axis = "z";
      };
  }
 

@@ -9,8 +9,9 @@
 ///         momentum, and energy from the gas, and add mass and
 ///         momentum to the sink particle.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 EnzoMethodAccretion::EnzoMethodAccretion
 (double accretion_radius_cells,

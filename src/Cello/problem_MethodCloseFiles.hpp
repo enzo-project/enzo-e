@@ -16,18 +16,8 @@ class MethodCloseFiles : public Method {
 
 public: // interface
 
-  /// factory method
-  static MethodCloseFiles* from_parameters(ParameterAccessor& p){
-    return new MethodCloseFiles
-      (p.value_float("seconds_stagger",0.0),
-       p.value_float("seconds_delay",0.0),
-       p.value_integer("group_size", std::numeric_limits<int>::max()));
-  }
-
   /// Constructor
-  MethodCloseFiles(double seconds_stagger,
-		   double seconds_delay,
-		   int group_size) throw();
+  MethodCloseFiles(ParameterGroup p) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(MethodCloseFiles);

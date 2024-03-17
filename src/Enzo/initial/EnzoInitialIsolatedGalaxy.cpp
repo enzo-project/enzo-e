@@ -27,8 +27,9 @@
 
 #include <fstream>
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 //----------------------------------------------------------------------
 #define DEBUG_PERFORMANCE

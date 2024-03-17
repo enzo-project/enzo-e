@@ -67,9 +67,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_feedback,
   enzo_sync_id_method_radiative_transfer,
-#ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
-#endif
   enzo_sync_id_method_gravity,
   enzo_sync_id_method_gravity_continue,
   enzo_sync_id_method_heat,
@@ -149,7 +147,16 @@ struct enzo_fluxes
 #ifdef CONFIG_USE_GRACKLE
 #include <stdlib.h>
 extern "C" {
+  #define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
   #include <grackle.h>
+}
+#else
+extern "C" { // declare the names of Grackle types so can reduce the usage of
+             // ifdef statements
+  struct chemistry_data;
+  struct chemistry_data_storage;
+  struct code_units;
+  struct grackle_field_data;
 }
 #endif
 
@@ -160,8 +167,12 @@ extern "C" {
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
-#include "utils/EnzoEFltArrayMap.hpp"
+
+// TODO: remove this after factoring out other subcomponents OR after
+//       EnzoEFltArrayMap becomes an alias for a class template defined in the
+//       Cello-layer (GH PR #326)
 #include "utils/utils.hpp"
+#include "utils/EnzoPermutedCoordinates.hpp"
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
 
@@ -174,11 +185,13 @@ extern "C" {
 #include "fluid-props/EnzoFluidFloorConfig.hpp"
 #include "fluid-props/EnzoPhysicsFluidProps.hpp"
 
-#include "gravity/EnzoPhysicsGravity.hpp"
-
-#include "chemistry/GrackleChemistryData.hpp"
-
 #include "enzo-core/EnzoUnits.hpp"
+
+// [order dependencies:]
+#include "utils/EnzoEFltArrayMap.hpp"
+#include "utils/EnzoFieldAdaptor.hpp"
+#include "chemistry/GrackleChemistryData.hpp"
+#include "chemistry/GrackleFacade.hpp"
 
 #include "enzo-core/EnzoFactory.hpp"
 
@@ -190,124 +203,22 @@ extern "C" {
 
 #include "enzo-core/EnzoBlock.hpp"
 
-#include "io/IoEnzoBlock.hpp"
-#include "io/IoEnzoReader.hpp"
-#include "io/IoEnzoWriter.hpp"
-
 #include "enzo-core/EnzoBoundary.hpp"
 
-#include "initial/EnzoInitialBCenter.hpp"
-#include "initial/EnzoInitialCloud.hpp"
-#include "initial/EnzoInitialCollapse.hpp"
-#include "initial/EnzoInitialCosmology.hpp"
-#include "tests/EnzoInitialFeedbackTest.hpp"
-#include "tests/EnzoInitialGrackleTest.hpp"
-#include "io/EnzoInitialHdf5.hpp"
-#include "initial/EnzoInitialImplosion2.hpp"
-#include "initial/EnzoInitialInclinedWave.hpp"
-#include "io/EnzoInitialMusic.hpp"
 #include "obsolete/EnzoInitialPm.hpp"
-#include "tests/EnzoInitialPpmlTest.hpp"
-#include "initial/EnzoInitialSedovArray2.hpp"
-#include "initial/EnzoInitialSedovArray3.hpp"
-#include "initial/EnzoInitialSedovRandom.hpp"
-#include "initial/EnzoInitialShockTube.hpp"
-#include "initial/EnzoInitialSoup.hpp"
-#include "initial/EnzoInitialTurbulence.hpp"
-#include "initial/EnzoInitialIsolatedGalaxy.hpp"
-#include "initial/EnzoInitialBurkertBodenheimer.hpp"
-#include "tests/EnzoInitialMergeSinksTest.hpp"
-#include "tests/EnzoInitialAccretionTest.hpp"
-#include "initial/EnzoInitialShuCollapse.hpp"
-#include "tests/EnzoInitialBBTest.hpp"
 
-#include "mesh/EnzoRefineShock.hpp"
-#include "mesh/EnzoRefineParticleMass.hpp"
-#include "mesh/EnzoRefineMass.hpp"
-
-// [order dependencies:]
-#include "particle/formation/EnzoSinkParticle.hpp"
-#include "particle/formation/EnzoBondiHoyleSinkParticle.hpp"
-#include "particle/formation/EnzoFluxSinkParticle.hpp"
-
-#include "utils/EnzoCenteredFieldRegistry.hpp"
-#include "utils/EnzoFieldAdaptor.hpp"
-#include "hydro-mhd/EnzoIntegrationQuanUpdate.hpp"
-#include "hydro-mhd/EnzoLazyPassiveScalarFieldList.hpp"
-#include "hydro-mhd/EnzoPermutedCoordinates.hpp"
-#include "hydro-mhd/EnzoSourceGravity.hpp"
-#include "hydro-mhd/EnzoSourceInternalEnergy.hpp"
-
-#include "hydro-mhd/EnzoReconstructor.hpp"
-#include "hydro-mhd/EnzoReconstructorNN.hpp"
-#include "hydro-mhd/EnzoReconstructorPLM.hpp"
-
-// public header for the EnzoRiemann sub-library. This needs to be included
-// after the headers for:
-//     EnzoEFltArrayMap, EnzoCenteredFieldRegistry, & EnzoEquationOfState
-// but before the header for EnzoMethodMHDVlct EnzoBfieldMethod and EnzoBfieldMethodCT
-#include "hydro-mhd/riemann/EnzoRiemann.hpp"
-
-// [order dependencies:]
-#include "hydro-mhd/EnzoBfieldMethod.hpp"
-#include "hydro-mhd/EnzoBfieldMethodCT.hpp"
-
-#include "particle/formation/EnzoMethodAccretion.hpp"
-#include "gravity/EnzoMethodBackgroundAcceleration.hpp"
-#include "particle/formation/EnzoMethodBondiHoyleAccretion.hpp"
 #include "enzo-core/EnzoMethodBalance.hpp"
-#include "io/EnzoMethodCheck.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
-#include "particle/feedback/EnzoMethodDistributedFeedback.hpp"
-#include "particle/feedback/EnzoMethodFeedback.hpp"
-#include "particle/feedback/EnzoMethodFeedbackSTARSS.hpp"
-#include "particle/formation/EnzoMethodFluxAccretion.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
-#include "gravity/EnzoMethodGravity.hpp"
-#include "assorted/EnzoMethodHeat.hpp"
 #include "obsolete/EnzoMethodHydro.hpp"
-#include "particle/formation/EnzoMethodMergeSinks.hpp"
-#include "hydro-mhd/EnzoMethodMHDVlct.hpp"
-#include "assorted/EnzoMethodM1Closure.hpp"
-#include "gravity/EnzoMethodPmDeposit.hpp"
-#include "particle/EnzoMethodPmUpdate.hpp"
-#include "hydro-mhd/EnzoMethodPpm.hpp"
-#include "hydro-mhd/EnzoMethodPpml.hpp"
-#include "particle/formation/EnzoMethodSinkMaker.hpp"
-#include "particle/formation/EnzoMethodStarMaker.hpp"
-#include "particle/formation/EnzoMethodStarMakerSTARSS.hpp"
-#include "particle/formation/EnzoMethodStarMakerStochasticSF.hpp"
-#include "particle/formation/EnzoMethodThresholdAccretion.hpp"
-#include "assorted/EnzoMethodTurbulence.hpp"
-
-#include "gravity/matrix/EnzoMatrixDiagonal.hpp"
-#include "gravity/matrix/EnzoMatrixIdentity.hpp"
-#include "gravity/matrix/EnzoMatrixLaplace.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 
-#include "gravity/EnzoComputeAcceleration.hpp"
-#include "utils/EnzoComputeCicInterp.hpp"
 #include "fluid-props/EnzoComputePressure.hpp"
 #include "fluid-props/EnzoComputeTemperature.hpp"
-
-#ifdef CONFIG_USE_GRACKLE
-  #include "chemistry/EnzoComputeCoolingTime.hpp"
-#endif
-
-#include "gravity/solvers/EnzoSolverBiCgStab.hpp"
-#include "gravity/solvers/EnzoSolverCg.hpp"
-#include "gravity/solvers/EnzoSolverDd.hpp"
-#include "gravity/solvers/EnzoSolverDiagonal.hpp"
-#include "gravity/solvers/EnzoSolverJacobi.hpp"
-#include "gravity/solvers/EnzoSolverMg0.hpp"
+#include "chemistry/EnzoComputeCoolingTime.hpp"
 
 #include "enzo-core/EnzoStopping.hpp"
-
-#include "mesh/EnzoProlong.hpp"
-#include "mesh/EnzoProlongMC1.hpp"
-#include "mesh/EnzoProlongPoisson.hpp"
-#include "mesh/EnzoRestrict.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */

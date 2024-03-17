@@ -8,6 +8,20 @@
 ///
 
 #include "enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoMethodMHDVlct, EnzoMethodPpm,
+                                        // EnzoMethodPpml
+
+#include "Enzo/assorted/assorted.hpp" // misc. Method classes
+#include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
+                                    // EnzoMethodBackgroundAcceleration
+                                    // EnzoComputeAcceleration
+                                    // EnzoSolver* EnzoMatrix*
+#include "Enzo/initial/initial.hpp" // lots of initializers
+#include "Enzo/io/io.hpp" // EnzoMethodCheck, EnzoInitial{Hdf5,Music}
+#include "Enzo/mesh/mesh.hpp" // EnzoProlong, EnzoRefine*, EnzoRestrict*
+#include "Enzo/particle/particle.hpp"
+#include "Enzo/tests/tests.hpp" // EnzoInitial*Test
+#include "Enzo/utils/utils.hpp" // EnzoComputeCicInterp
 
 //----------------------------------------------------------------------
 
@@ -167,8 +181,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cloud_metal_mass_frac,
        enzo_config->initial_cloud_initialize_uniform_bfield,
        enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_stddev,
-       enzo_config->initial_cloud_trunc_dev,
+       enzo_config->initial_cloud_perturb_Nwaves,
+       enzo_config->initial_cloud_perturb_amplitude,
+       enzo_config->initial_cloud_perturb_min_wavelength,
+       enzo_config->initial_cloud_perturb_max_wavelength,
        enzo_config->initial_cloud_perturb_seed);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
@@ -576,19 +592,19 @@ Method * EnzoProblem::create_method_
   Method * method = 0;
 
   // historically, this method would always call method->set_courant after
-  // building a new method object. But, with this new p_accessor approach, each
+  // building a new method object. But, with this new p_group approach, each
   // method objects should opt out of this approach (so that they can set
   // appropriate default courant factors)
   // - in cases where the courant factor is not used, we may not explicitly set
   //   this variable to true (since it doesn't really matter)
   bool skip_auto_courant = false;
 
-  // move creation of p_accessor up the call stack?
+  // move creation of p_group up the call stack?
   ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
   Parameters* parameters = cello::simulation()->parameters();
   const std::string root_path =
     ("Method:" + parameters->list_value_string(index_method, "Method:list"));
-  ParameterAccessor p_accessor(*parameters, root_path);
+  ParameterGroup p_group(*parameters, root_path);
 
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -600,7 +616,14 @@ Method * EnzoProblem::create_method_
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
 
-    method = new EnzoMethodPpm(store_fluxes_for_corrections);
+    method = new EnzoMethodPpm
+      (store_fluxes_for_corrections,
+       enzo_config->ppm_diffusion,
+       enzo_config->ppm_flattening,
+       enzo_config->ppm_pressure_free,
+       enzo_config->ppm_steepening,
+       enzo_config->ppm_use_minimum_pressure_support,
+       enzo_config->ppm_minimum_pressure_support_parameter);
 /*
   } else if (name == "hydro") {
 
@@ -627,20 +650,20 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "ppml") {
 
-    method = new EnzoMethodPpml(p_accessor);
+    method = new EnzoMethodPpml(p_group);
     skip_auto_courant = true;
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit (p_accessor);
+    method = new EnzoMethodPmDeposit (p_group);
 
   } else if (name == "pm_update") {
 
-    method = new EnzoMethodPmUpdate(p_accessor);
+    method = new EnzoMethodPmUpdate(p_group);
 
   } else if (name == "heat") {
 
-    method = new EnzoMethodHeat(p_accessor);
+    method = new EnzoMethodHeat(p_group);
     skip_auto_courant = true;
 
 #ifdef CONFIG_USE_GRACKLE
@@ -657,9 +680,9 @@ Method * EnzoProblem::create_method_
 #endif /* CONFIG_USE_GRACKLE */
 
   } else if (name == "balance") {
-    
+
     method = new EnzoMethodBalance;
-    
+
   } else if (name == "turbulence") {
 
     method = new EnzoMethodTurbulence
@@ -684,7 +707,7 @@ Method * EnzoProblem::create_method_
     // the presence of this extra logic here is undesirable, but it appears
     // somewhat unavoidable
 
-    std::string solver_name = p_accessor.value_string("solver","unknown");
+    std::string solver_name = p_group.value_string("solver","unknown");
 
     int index_solver = enzo_config->solver_index.at(solver_name);
 
@@ -694,19 +717,19 @@ Method * EnzoProblem::create_method_
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
     Prolong * prolong = create_prolong_
-      (p_accessor.value_string("prolong","linear"),config);
+      (p_group.value_string("prolong","linear"),config);
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
 
-    method = new EnzoMethodGravity(p_accessor, index_solver, index_prolong);
+    method = new EnzoMethodGravity(p_group, index_solver, index_prolong);
 
   } else if (name == "mhd_vlct") {
 
     method = new EnzoMethodMHDVlct
       (enzo_config->method_vlct_riemann_solver,
-       enzo_config->method_vlct_half_dt_reconstruct_method,
-       enzo_config->method_vlct_full_dt_reconstruct_method,
+       enzo_config->method_vlct_time_scheme,
+       enzo_config->method_vlct_reconstruct_method,
        enzo_config->method_vlct_theta_limiter,
        enzo_config->method_vlct_mhd_choice,
        store_fluxes_for_corrections);
@@ -762,7 +785,8 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_check_num_files,
        enzo_config->method_check_ordering,
        enzo_config->method_check_dir,
-       enzo_config->method_check_monitor_iter);
+       enzo_config->method_check_monitor_iter,
+       enzo_config->method_check_include_ghosts);
 
   } else if (name == "merge_sinks") {
 
@@ -807,7 +831,7 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = EnzoMethodSinkMaker::from_parameters(p_accessor);
+    method = new EnzoMethodSinkMaker(p_group);
 
   } else {
 

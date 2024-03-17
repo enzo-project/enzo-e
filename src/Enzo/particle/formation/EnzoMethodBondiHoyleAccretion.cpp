@@ -8,8 +8,9 @@
 ///             See Krumholz+ 2004, ApJ, 611, 399 for details.
 ///
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 //------------------------------------------------------------------
 

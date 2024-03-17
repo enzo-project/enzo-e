@@ -10,8 +10,10 @@
 ///     adapted from the algorithm described in Hopkins et al. 
 ///     (2018, MNRAS, 480, 800)
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
 #include <time.h>
 
 // #define DEBUG_SF_CRITERIA
@@ -269,7 +271,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double mean_particle_mass = mu * enzo_constants::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
-        double cell_mass  = density[i] * cell_volume;
+        double cell_mass  = density[i] * cell_volume; // code units
         double metallicity = (metal) ? metal[i]/density[i]/enzo_constants::metallicity_solar : 0.0;
 
         //

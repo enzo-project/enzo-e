@@ -4,6 +4,36 @@ Enzo-E's PPM hydrodynamics method.
 
 ----
 
+.. par:parameter:: Method:ppm:courant
+
+   :Summary: :s:`Courant safety factor`
+   :Type:   :par:typefmt:`float`
+   :Default: :d:`1.0`
+   :Scope:     :z:`Enzo`
+
+   :e:`The method-specific courant safety factor. The method's minimum timestep is the minimum value of the following expression (which is computed for all cells):`
+
+   .. math:: C \times \left( \frac{c_s + |v_x|}{a\, \Delta x} + \frac{c_s + |v_y|}{a\, \Delta y} + \frac{c_s + |v_z|}{a\, \Delta z} \right)^{-1}
+
+   :e:`in which:`
+
+     * :math:`C` :e:`is the courant factor`
+     * :math:`a` :e:`is the cosmological scale factor`
+     * :math:`c_s` :e:`is the local sound speed`
+     * :math:`v_x,\ v_y,\ v_z` :e:`are the velocity components`
+     * :math:`\Delta x,\ \Delta y,\ \Delta z` :e:`are cell widths`
+
+   :e:`A value of 0.8 or smaller is generally recommended.`
+
+   .. warning::
+
+      The way that parsing of the courant safety factor is currently
+      handled, the default value is fixed to 1.0 for all values (which is
+      too large for this method). Some near-term modifications are
+      planned that will resolve this issue.
+
+----
+
 .. par:parameter:: Method:ppm:diffusion
 
    :Summary: :s:`PPM diffusion parameter`
