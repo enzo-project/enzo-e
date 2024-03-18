@@ -5,8 +5,8 @@ Getting Started: Frontera
 
 ..  code-block:: bash
 
-  # Assuming the default Intel stack is loaded only boost and hdf5 modules are required
-  module load boost hdf5
+  # Assuming the default Intel stack is loaded, only the hdf5 module is required
+  module load hdf5
 
   # Build Grackle (optional)
   # Following https://grackle.readthedocs.io/en/latest/Installation.html
