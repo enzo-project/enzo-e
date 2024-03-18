@@ -78,12 +78,9 @@ void EnzoComputeTemperature::compute ( Block * block, enzo_float * t) throw()
 
 void EnzoComputeTemperature::compute_(Block * block,
                                       enzo_float * t,
-                                      bool recompute_pressure /* true */
-#ifdef CONFIG_USE_GRACKLE
-                                    , code_units * grackle_units /* NULL */ ,
+                                      bool recompute_pressure, /* true */
                                       grackle_field_data * grackle_fields /* NULL */
-#endif
-                                    )
+                                      )
 {
   EnzoBlock * enzo_block = enzo::block(block);
 
@@ -91,18 +88,11 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   const enzo_float gamma = enzo::fluid_props()->gamma();
 
-  if (enzo::config()->method_grackle_use_grackle){
+  const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
 
-#ifdef CONFIG_USE_GRACKLE
-    const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
+  if (grackle_method != nullptr){
     grackle_method->calculate_temperature(EnzoFieldAdaptor(block, i_hist_), t,
-                                          0, grackle_units, grackle_fields);
-#else
-    ERROR("EnzoComputeTemperature::compute_()",
-          "Attempting to compute temperature with method Grackle "
-          "but Enzo-E has not been compiled with Grackle (set use_grackle = 1) \n");
-#endif
-
+                                          0, grackle_fields);
   } else {
 
     EnzoUnits * enzo_units = enzo::units();

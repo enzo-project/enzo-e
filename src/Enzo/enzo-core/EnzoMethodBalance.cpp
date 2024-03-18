@@ -41,6 +41,8 @@ void EnzoMethodBalance::compute ( Block * block) throw()
 {
 #ifdef TRACE_BALANCE
   CkPrintf ("TRACE_SELF_BALANCE %s\n",block->name().c_str());
+  CkPrintf ("TRACE_BALANCE 1 compute() %s process %d counter %lld\n",
+            block->name().c_str(),CkMyPe(),MsgRefresh::counter[CkMyPe()]);
 #endif
   // Output that we're calling the load balancer
   Monitor * monitor = cello::monitor();
@@ -52,9 +54,11 @@ void EnzoMethodBalance::compute ( Block * block) throw()
   const int is_index = sd->index("order_morton:index");  
   Scalar<long long> scalar(cello::scalar_descr_long_long(),
                      block->data()->scalar_data_long_long());
-  long long count = *scalar.value(is_count);
-  long long index = *scalar.value(is_index);
-  long long ip_next = CkNumPes()*index/count;
+
+  int count = *scalar.value(is_count);
+  int index = *scalar.value(is_index);
+  int ip_next = (long long) CkNumPes()*index/count;
+
   block->set_ip_next(ip_next);
 #ifdef TRACE_BALANCE
   CkPrintf ("self_balance %d %d %d %d\n", count, index,ip_next,CkMyPe());
@@ -99,6 +103,10 @@ void EnzoBlock::p_method_balance_migrate()
 
 void EnzoMethodBalance::do_migrate(EnzoBlock * enzo_block)
 {
+#ifdef TRACE_BALANCE
+  CkPrintf ("TRACE_BALANCE 2 migrate() %s process %d counter %lld\n",
+            enzo_block->name().c_str(),CkMyPe(),MsgRefresh::counter[CkMyPe()]);
+#endif
   int ip_next = enzo_block->ip_next();
   if (ip_next != CkMyPe()) {
 #ifdef TRACE_BALANCE
@@ -116,10 +124,11 @@ void EnzoSimulation::p_method_balance_check()
 #ifdef TRACE_BALANCE
   CkPrintf ("TRACE_MIGRATE p_method_balance_check()\n");
 #endif
-  if (sync_method_balance_.next()) {
 #ifdef TRACE_BALANCE
-    CkPrintf ("TRACE_MIGRATE done_migrating\n");
+  CkPrintf ("TRACE_BALANCE 3 check() process %d counter %lld\n",
+            CkMyPe(),MsgRefresh::counter[CkMyPe()]);
 #endif
+  if (sync_method_balance_.next()) {
     enzo::block_array().doneInserting();
     enzo::block_array().p_method_balance_done();
   }
@@ -133,7 +142,8 @@ void EnzoBlock::p_method_balance_done()
 void EnzoMethodBalance::done(EnzoBlock * enzo_block)
 {
 #ifdef TRACE_BALANCE
-  CkPrintf ("TRACE_BALANCE done() %s process %d\n",enzo_block->name().c_str(),CkMyPe());
+  CkPrintf ("TRACE_BALANCE 4 done() %s process %d counter %lld\n",
+            enzo_block->name().c_str(),CkMyPe(),MsgRefresh::counter[CkMyPe()]);
 #endif
   enzo_block->set_ip_next(-1);
   enzo_block->compute_done();

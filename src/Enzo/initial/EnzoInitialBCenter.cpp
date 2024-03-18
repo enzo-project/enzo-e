@@ -4,7 +4,11 @@
 /// @date     Wed Jul 3 2019
 /// @brief    [\ref Problem] VLCT Bfield initialization method implementation
 
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+
+// do not put the following into the public header
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoBfieldMethodCT
 
 //======================================================================
 

@@ -4,7 +4,10 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2021-05-13
 /// @brief    Read initial conditions from HDF5
-#include "enzo.hpp"
+
+#include "Enzo/enzo.hpp"
+#include "Enzo/io/io.hpp"
+
 #include <chrono>
 #include <thread>
 

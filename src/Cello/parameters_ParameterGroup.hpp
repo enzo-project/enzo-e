@@ -1,26 +1,30 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parameters_ParameterAccessor.hpp
+/// @file     parameters_ParameterGroup.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Jan 17 2023
-/// @brief    [\ref Parameters] Declaration for the ParameterAccessor class
+/// @brief    [\ref Parameters] Declaration for the ParameterGroup class
 
 #ifndef PARAMETERS_PARAMETER_ACCESSOR_HPP
 #define PARAMETERS_PARAMETER_ACCESSOR_HPP
 
-class ParameterAccessor {
+class ParameterGroup {
 
-  /// @class    ParameterAccessor
+  /// @class    ParameterGroup
   /// @ingroup  Parameters
   /// @brief    [\ref Parameters] Acts as an interface for accessing parameters
+  ///           within a parameter group.
   ///
   /// A lightweight wrapper around a Parameters object that provides methods
-  /// for accessing parameters, which share a common root "parameter_path"
-  /// (defined below), that are stored within the wrapped object. The common
-  /// root "parameter_path" is specified when an instance of this object is
-  /// initialized. When a string is passed to one of the accessor methods, the
-  /// string is internally appended to the end of the root "parameter_path" and
-  /// the result represents the full name of the queried parameter.
+  /// for accessing parameters in a parameter group, that are stored within the
+  /// wrapped object.
+  ///
+  /// All parameters in a group, all share a common root "parameter_path"
+  /// (defined below). The common root "parameter_path" is specified when an
+  /// instance of this object is initialized. When a string is passed to one of
+  /// the accessor methods, the string is internally appended to the end of the
+  /// root "parameter_path" and the result represents the full name of the
+  /// queried parameter.
   ///
   /// Instances of this class are intended to be used when initializing objects
   /// in other software components (an instance of this class should be passed
@@ -44,12 +48,11 @@ class ParameterAccessor {
   ///          initialized from parameters where the last section(s) of the
   ///          parameter-paths are unchanged, but the root path differs.
   ///     3. We do NOT allow the common root-path to be mutated. Thus, if
-  ///        the parameter-accessor is passed to a helper function, you can
-  ///        always be confident that the root-path is unchanged by the
-  ///        function (without needing to check the implementation of that
-  ///        function). If we are ever tempted to mutate the root-path, we
-  ///        should just initialize a new ParameterAccessor (since they are
-  ///        lightweight)
+  ///        an instance is passed to a helper function, you can always be
+  ///        confident that the root-path is unchanged by the helper function
+  ///        (without needing to check the implementation of that function).
+  ///        If we are ever tempted to mutate the root-path, we should just
+  ///        initialize a new ParameterGroup (since they are lightweight)
   ///
   /// @par "parameter_path"
   /// Cello uses a "hierarchical" parameter file: the parameters themselves are
@@ -59,37 +62,41 @@ class ParameterAccessor {
   /// names of ancestor "groups", separated by colons, and lists the name
   /// of the parameter at the end. An example parameter_path is
   /// ``"Method:null:dt"``
-  ///
-  /// @note
-  /// alternative names for this class include ParameterClient, ParameterView,
-  /// ParameterTerminal... They reflect the fact that the class provides access
-  /// to the parameters held in a centralized Parameters object
+
 public:
 
-  /// construct a new ParameterAccessor object
-  ParameterAccessor(Parameters &p, const std::string& root_parameter_path)
+  /// construct a new ParameterGroup object
+  ParameterGroup(Parameters &p, const std::string& root_parameter_path)
     : wrapped_p_(p),
       root_parameter_path_(root_parameter_path)
   {
-    ASSERT("ParameterAccessor::ParameterAccessor",
+    ASSERT("ParameterGroup::ParameterGroup",
            "root_parameter_path must not have a trailing colon",
            root_parameter_path.back() != ':');
   }
 
   // default implementations of copy and move constructors
-  // (maybe we should delete these/make the private to prevent users from
-  // storing them)
-  ParameterAccessor(const ParameterAccessor&) = default;
-  ParameterAccessor(ParameterAccessor&&) = default;
+  ParameterGroup(const ParameterGroup&) = default;
+  ParameterGroup(ParameterGroup&&) = default;
 
   // the following operations are deleted (because the class holds a reference
   // and a const member as attributes)
-  ParameterAccessor() = delete;
-  ParameterAccessor& operator=(const ParameterAccessor&) = delete;
-  ParameterAccessor& operator=(ParameterAccessor&&) = delete;
+  ParameterGroup() = delete;
+  ParameterGroup& operator=(const ParameterGroup&) = delete;
+  ParameterGroup& operator=(ParameterGroup&&) = delete;
 
-  /// query the root parameter path
-  const std::string& get_root_parpath() const noexcept
+  /// query the path for the represented group of parameters
+  ///
+  /// For the sake of clarity, we highlight a few examples:
+  /// - if ``*this`` represents the group containing the parameters with paths
+  ///   "foo:bar:par_1" and "foo:bar:par_2", then this method would return
+  ///   ``"foo:bar``".
+  /// - if ``*this`` represents the group containing the parameters with paths
+  ///   "foo:par_A" and "foo:par_B", then this method would return ``"foo"``
+  /// - if ``*this`` represents the group containing the parameters with paths
+  ///   "par_alpha" and "par_beta", then this method would return ``""``
+  ///   (Note: by convention, parameters are never actually put in this group)
+  const std::string& get_group_path() const noexcept
   {return root_parameter_path_;}
 
   int value (std::string s, int deflt) noexcept
@@ -142,9 +149,6 @@ public:
   std::string full_name(const std::string& parameter) const noexcept
   { return root_parameter_path_ + ":" + parameter; }
 
-  /// Only use in case of emergencies
-  Parameters& wrapped_Parameters_ref() noexcept { return wrapped_p_; }
-
   /// Returns a vector holding the names of all leaf parameters that share the
   /// root parameter path encapsulated by this object
   std::vector<std::string> leaf_parameter_names() const noexcept
@@ -174,13 +178,14 @@ private: // attributes
   /// holding this reference
   Parameters &wrapped_p_;
 
-  /// The associated root parameter path.
+  /// The associated root parameter path. All parameters in a given group share
+  /// this path
   ///
   /// This will never have a trailing colon.
   ///
   /// An invariant of this class is that this will NOT change. If we're ever
   /// tempted to allow this attribute to change, we should prefer creation of a
-  /// new ParameterAccessor instance (since they are light)
+  /// new ParameterGroup instance (since they are light)
   const std::string root_parameter_path_;
 };
 

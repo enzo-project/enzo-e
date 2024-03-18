@@ -24,8 +24,9 @@
 //       & Woodward (93) and Stone et al. (08) indicate that the left state has 
 //       a pressure of 0.95 and the right state has a pressure of 1.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 #include <math.h> // ceil
 
 static std::vector<std::string> shock_tube_setups{"rj2a","sod"};

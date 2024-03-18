@@ -8,8 +8,9 @@
 ///         computing accretion rates according to the method described in
 ///         Bleuler, A & Teyssier, R 2004; MNRAS, 445, 4015-4036
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 //-------------------------------------------------------------------------------
 

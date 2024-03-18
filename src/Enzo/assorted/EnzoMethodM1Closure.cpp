@@ -5,9 +5,10 @@
 /// @date     Mon Aug 16 17:05:23 PDT 2021
 /// @brief    Implements the EnzoMethodM1Closure class
 
-#include "cello.hpp"
+#include "Enzo/assorted/assorted.hpp"
 
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 //#define DEBUG_PRINT_REDUCED_VARIABLES
 //#define DEBUG_PRINT_GROUP_PARAMETERS

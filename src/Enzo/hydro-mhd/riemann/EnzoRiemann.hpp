@@ -13,6 +13,20 @@
 #ifndef ENZO_ENZO_RIEMANN_HPP
 #define ENZO_ENZO_RIEMANN_HPP
 
+//----------------------------------------------------------------------
+// System includes
+//----------------------------------------------------------------------
+
+#include <string>
+#include <vector>
+
+//----------------------------------------------------------------------
+// Component dependencies
+//----------------------------------------------------------------------
+
+#include "Cello/view.hpp" // CelloView
+#include "Enzo/enzo.hpp" // enzo_float, EFltArrayMap
+
 
 // The conventional approach of having EnzoRiemann inherit from PUP::able
 // (and making this library into a charm++ module) complicates the build-system

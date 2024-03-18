@@ -11,31 +11,27 @@
 
 //----------------------------------------------------------------------
 
-MethodRefresh* MethodRefresh::from_parameters(ParameterAccessor p)
+// this is a commonly occuring operation that should probably be directly
+// supported by ParameterGroup
+static std::vector<std::string> parse_str_vec_(ParameterGroup p,
+                                               std::string name)
 {
-  // Read the field list
-  int n_fields = p.list_length("field_list");
-  std::vector<std::string> field_list(n_fields);
-  for (int i=0; i<n_fields; i++) {
-    field_list[i] = p.list_value_string(i, "field_list");
-  }
-
-  // Read the particle list
-  int n_particles = p.list_length("particle_list");
-  std::vector<std::string> particle_list(n_particles);
-  for (int i=0; i<n_particles; i++) {
-    particle_list[i] = p.list_value_string(i,"particle_list");
-  }
-
-  int ghost_depth = p.value_integer("ghost_depth", 0);
-  int min_face_rank = p.value_integer
-    ("Method:refresh:min_face_rank",0); // default 0 all faces
-  bool all_fields = p.value_logical("all_fields", false);
-  bool all_particles = p.value_logical("all_particles", false);
-
-  return new MethodRefresh(field_list, particle_list, ghost_depth,
-                           min_face_rank, all_fields, all_particles);
+  int length = p.list_length(name);
+  std::vector<std::string> out(length);
+  for (int i = 0; i < length; i++) { out[i] = p.list_value_string(i, name); }
+  return out;
 }
+
+//----------------------------------------------------------------------
+
+MethodRefresh::MethodRefresh(ParameterGroup p) noexcept
+  : MethodRefresh(parse_str_vec_(p, "field_list"),
+                  parse_str_vec_(p, "particle_list"),
+                  p.value_integer("ghost_depth", 0),
+                  p.value_integer("min_face_rank",0), // default 0 all faces
+                  p.value_logical("all_fields", false),
+                  p.value_logical("all_particles", false))
+{ }
 
 //----------------------------------------------------------------------
 
@@ -45,7 +41,7 @@ MethodRefresh::MethodRefresh
  int ghost_depth,
  int min_face_rank,
  bool all_fields,
- bool all_particles)
+ bool all_particles) noexcept
   : Method(),
     field_list_(),
     particle_list_(),

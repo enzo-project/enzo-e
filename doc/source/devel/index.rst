@@ -16,8 +16,10 @@ refinement criteria, etc.
    adapt
    method
    param
+   physics
    array
    hydro_infrastructure
    eos-fluidprops
+   debugging
    cmake_primer
    writing-docs

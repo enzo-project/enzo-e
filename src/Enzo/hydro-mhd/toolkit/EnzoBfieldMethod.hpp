@@ -9,7 +9,7 @@
 
 #ifndef ENZO_ENZO_BFIELDMETHOD_HPP
 #define ENZO_ENZO_BFIELDMETHOD_HPP
-class EnzoBfieldMethod : public PUP::able
+class EnzoBfieldMethod
 {
   /// @class    EnzoBfieldMethod
   /// @ingroup  Enzo
@@ -65,19 +65,6 @@ public: // interface
   /// Virtual destructor
   virtual ~EnzoBfieldMethod()
   {}
-
-  /// CHARM++ PUP::able declaration
-  PUPable_abstract(EnzoBfieldMethod);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoBfieldMethod (CkMigrateMessage *m)
-    : PUP::able(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  ///
-  /// Subclasses shouldn't PUP scratch arrays.
-  void pup (PUP::er &p);
 
   // State machine Methods:
 

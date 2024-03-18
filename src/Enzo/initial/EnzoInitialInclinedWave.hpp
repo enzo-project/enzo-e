@@ -11,6 +11,8 @@
 #ifndef ENZO_ENZO_INITIAL_INCLINED_WAVE_HPP
 #define ENZO_ENZO_INITIAL_INCLINED_WAVE_HPP
 
+#include <memory>
+
 // classes for initializing initial conditions
 class ScalarInit;
 class VectorInit;
