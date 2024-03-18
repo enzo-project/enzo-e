@@ -17,9 +17,11 @@
 
 // Solve the MHD equations with the solver, saving the subgrid fluxes
 
-#include "cello.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
-#include "enzo.hpp"
+#include "Enzo/hydro-mhd/ppml_fortran/ppml_fortran.hpp" // FORTRAN_NAME(ppml)
 
 int EnzoBlock::SolveMHDEquations( enzo_float dt )
 {

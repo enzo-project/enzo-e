@@ -5,7 +5,9 @@
 /// @date     2016-09-10
 /// @brief    Definition of the Soup class for "alphabet soup" test problem
 
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+
 #include <random>
 
 const int EnzoInitialSoup::position_[] = 
@@ -30,7 +32,7 @@ EnzoInitialSoup::EnzoInitialSoup
     file_name_(filename),
     rank_(rank),
     rotate_(rotate),
-    png_(NULL),
+    png_mask_(NULL),
     density_(density),
     pressure_in_(pressure_in),
     pressure_out_(pressure_out)
@@ -45,12 +47,9 @@ EnzoInitialSoup::EnzoInitialSoup
   d_size_[1] = dsy;
   d_size_[2] = dsz;
 
-  png_ = new pngwriter;
-    
-  png_->readfromfile(file_name_.c_str());
 
-  int nx = png_->getwidth();
-  int ny = png_->getheight();
+  int nx, ny;
+  png_mask_ = pngio::read_as_mask(file_name_, nx, ny);
 
   ASSERT3 ("EnzoInitialSoup::EnzoInitialSoup()",
 	   "Error reading input PNG file %s: size must be %d x %d",
@@ -78,10 +77,8 @@ EnzoInitialSoup::EnzoInitialSoup
 
 EnzoInitialSoup::~EnzoInitialSoup() throw ()
 {
-  delete png_;
-  png_ = NULL;
+  delete [] png_mask_;
   delete [] letter_;
-  letter_ = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -192,9 +189,7 @@ void EnzoInitialSoup::enforce_block
 	      int lx = lxm + 1.0*(lxp-lxm)/(2.0*rx)*(x - cx + rx);
 	      bool in_range_x = (lxm <= lx && lx <= lxp);
 	      if ( in_range_x && in_range_y && in_range_z) {
-		if (png_->read(lx+1,ly+1,1) +
-		    png_->read(lx+1,ly+1,2) +
-		    png_->read(lx+1,ly+1,3) > 0.0) {
+		if (png_mask_[lx + SOUP_IMAGE_NX * ly]){
 		  te[i] = te_in;
 		}
 	      }

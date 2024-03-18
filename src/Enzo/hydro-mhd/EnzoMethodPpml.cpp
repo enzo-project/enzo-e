@@ -7,13 +7,15 @@
 
 //----------------------------------------------------------------------
 
-#include "cello.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
-#include "enzo.hpp"
+#include "Enzo/hydro-mhd/ppml_fortran/ppml_fortran.hpp" // FORTRAN_NAME(calc_dt_ppml)
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml(ParameterAccessor p)
+EnzoMethodPpml::EnzoMethodPpml(ParameterGroup p)
   : Method(),
     comoving_coordinates_(enzo::cosmology() != nullptr)
 {

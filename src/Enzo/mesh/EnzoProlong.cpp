@@ -5,9 +5,9 @@
 /// @date     2013-05-09
 /// @brief    Implentation of Enzo's prolongation
 
-#include "enzo.hpp"
-
-#include "cello.hpp"
+#include "Enzo/mesh/mesh.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 // #define TRACE_PROLONG
 // #define DEBUG_ENZO_PROLONG

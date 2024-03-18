@@ -1,16 +1,20 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# add uncategorized source files to the enzo target
+# add  to the enzo target
 
-# Get the list of source files in this directory
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp
+# create Enzo::assorted, which is built from uncategorized source files.
+#
+# We explicitly list files (rather than use glob) since that makes CMake better
+# at rebuilds (especially after changing branches)
+add_library(Enzo_assorted
+  assorted.hpp
+  EnzoMethodHeat.cpp EnzoMethodHeat.hpp
+  EnzoMethodM1Closure.cpp EnzoMethodM1Closure.hpp
+  EnzoMethodTurbulence.cpp EnzoMethodTurbulence.hpp
 )
+add_library(Enzo::assorted ALIAS Enzo_assorted)
 
-target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
+# the following can be improved (it links more than is necessary)
+target_link_libraries(Enzo_assorted PUBLIC enzo ${CELLO_LIBS})
+target_include_directories(Enzo_assorted PUBLIC ${ROOT_INCLUDE_DIR})
+target_link_options(Enzo_assorted PRIVATE ${Cello_TARGET_LINK_OPTIONS})
