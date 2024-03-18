@@ -35,12 +35,86 @@ static str_vec_t concat_str_vec_(const str_vec_t& vec1, const str_vec_t& vec2){
 
 //----------------------------------------------------------------------
 
-EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
-				      std::string time_scheme,
-                                      std::string recon_name,
-				      double theta_limiter,
-				      std::string mhd_choice,
-				      bool store_fluxes_for_corrections)
+static std::pair<std::string, EnzoMHDIntegratorStageArgPack*>
+parse_mhdchoice_pack_pair_(ParameterGroup p)
+{
+  // is_defined is a function that indicates if a user defined a parameter
+  auto is_defined = [&](const std::string& param_name) -> bool
+  { return p.param(param_name) != nullptr; };
+
+  // parse time-scheme & reconstruct-method (they affect backwards compat.)
+  const std::string time_scheme = p.value_string("time_scheme", "vl");
+  std::vector<std::string> recon_names;
+  if (time_scheme == "euler") {
+    recon_names = {p.value_string("reconstruct_method", "plm")};
+    WARNING("parse_mhdchoice_pack_pair_",
+            "\"euler\" temporal integration exists for debugging purposes. It "
+            "has not been rigorously tested. USE WITH CAUTION");
+  } else if (time_scheme == "vl") {
+    // ALWAYS use nearest-neighbor reconstruction for partial timestep!
+    recon_names = {"nn", p.value_string("reconstruct_method", "plm")};
+  } else {
+    ERROR1("parse_mhdchoice_pack_pair_",
+           "\"%s:time_scheme\" must be \"vl\" or \"euler\"",
+           p.get_group_path());
+  }
+
+  // backwards compatibilty: deprecated half/full_dt_reconstruct_method params
+  if (is_defined("half_dt_reconstruct_method") ||
+      is_defined("full_dt_reconstruct_method")) {
+
+    if (is_defined("time_scheme") || is_defined("reconstruct_method")) {
+      ERROR1("parse_mhdchoice_pack_pair_",
+             "In the \"%s\" parameter-group, the deprecated parameters, "
+             "\"half_dt_reconstruct_method\" & \"full_dt_reconstruct_method\", "
+             "can't be specified when \"time_scheme\" or "
+             "\"reconstruct_method\" is specified.",
+             p.get_group_path().c_str());
+    }
+
+    if (p.value_string("half_dt_reconstruct_method", "nn") != "nn") {
+      // it never made ANY sense to allow the half timestep of the VL+CT
+      // algorithm to use anything other than the "nn" choice. (The only reason
+      // it was ever an option was due to a misunderstanding early on)
+      ERROR1("parse_mhdchoice_pack_pair_",
+             "The deprecated parameter, \"%s:half_dt_reconstruct_method\", "
+             "can't have any value other than \"nn\"",
+             p.get_group_path().c_str());
+    }
+
+    if (is_defined("full_dt_reconstruct_method")) {
+      recon_names[1] = p.value_string("full_dt_reconstruct_method", "plm");
+    }
+
+    WARNING1("parse_mhdchoice_pack_pair_",
+             "In the \"%s\" parameter-group, \"half_dt_reconstruct_method\" & "
+             "\"full_dt_reconstruct_method\" are deprecated, and they will be "
+             "removed in the future. The former can't have any value other "
+             "than \"nn\"; it won't be replaced. Use \"reconstruct_method\" "
+             "instead of the latter.",
+             p.get_group_path().c_str());
+  }
+
+  // allocate and initialize argpack-ptr
+
+  if (!is_defined("mhd_choice")) {
+    std::string name = p.full_name("mhd_choice");
+    ERROR1("parse_mhdchoice_pack_pair_", "%s wasn't specified", name.c_str());
+  }
+
+  EnzoMHDIntegratorStageArgPack *argpack_ptr =
+    new EnzoMHDIntegratorStageArgPack {p.value_string("riemann_solver","hlld"),
+                                       recon_names,
+                                       p.value_float("theta_limiter", 1.5),
+                                       p.value_string("mhd_choice", "")};
+
+  return {time_scheme, argpack_ptr};
+}
+
+//----------------------------------------------------------------------
+
+EnzoMethodMHDVlct::EnzoMethodMHDVlct (ParameterGroup p,
+                                      bool store_fluxes_for_corrections)
   : Method()
 {
 #ifdef CONFIG_USE_GRACKLE
@@ -54,27 +128,17 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   }
 #endif /* CONFIG_USE_GRACKLE */
 
-  time_scheme_ = time_scheme;
+  std::pair<std::string, EnzoMHDIntegratorStageArgPack*> pair
+    = parse_mhdchoice_pack_pair_(p);
 
-  std::vector<std::string> recon_names;
-  if (time_scheme == "euler") {
-    recon_names = {recon_name};
-    WARNING("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-            "\"euler\" temporal integration exists for debugging purposes. It "
-            "has not been rigorously tested. USE WITH CAUTION");
-  } else if (time_scheme == "vl") {
-    // ALWAYS use nearest-neighbor reconstruction for partial timestep!
-    recon_names = {"nn", recon_name};
-  } else {
-    ERROR("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-          "time_scheme must be \"vl\" or \"euler\"");
-  }
+  time_scheme_ = pair.first;
+  integrator_arg_pack_ = pair.second;
+  const double dflt_courant = (time_scheme_ == "vl") ? 0.3 : 1.0;
+  this->set_courant(p.value_float("courant",dflt_courant));
 
-  int nstages = static_cast<int>(recon_names.size());
+  int nstages = static_cast<int>(integrator_arg_pack_->recon_names.size());
 
   // initialize the integrator
-  integrator_arg_pack_ = new EnzoMHDIntegratorStageArgPack {rsolver, recon_names,
-                                                 theta_limiter, mhd_choice};
   integrator_ = new EnzoMHDIntegratorStageCommands(*integrator_arg_pack_);
 
   // Determine the lists of fields that are required to hold the integration
