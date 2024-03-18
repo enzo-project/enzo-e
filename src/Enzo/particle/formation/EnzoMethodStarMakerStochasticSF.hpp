@@ -17,7 +17,7 @@ class EnzoMethodStarMakerStochasticSF : public EnzoMethodStarMaker {
 
 public:
   // Create new EnzoStarMakerStochasticSF object
-  EnzoMethodStarMakerStochasticSF();
+  EnzoMethodStarMakerStochasticSF(ParameterGroup p);
 
   // Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodStarMakerStochasticSF);
