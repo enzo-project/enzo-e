@@ -645,7 +645,7 @@ static void setup_fluid_(Block *block, HydroInitPack hydro_init_pack,
 //----------------------------------------------------------------------
 
 EnzoInitialInclinedWave::EnzoInitialInclinedWave(int cycle, double time,
-                                                 ParameterAccessor &p) throw()
+                                                 ParameterGroup p) throw()
   : Initial (cycle,time),
     alpha_(p.value_float("alpha",0.0)),
     beta_(p.value_float("beta",0.0)),

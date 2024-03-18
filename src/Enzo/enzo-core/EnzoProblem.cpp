@@ -104,7 +104,7 @@ Initial * EnzoProblem::create_initial_
   // move creation of p_accessor up the call stack?
   const std::string root_path =
     ("Initial:" + parameters->list_value_string(index, "Initial:list"));
-  ParameterAccessor p_accessor(*parameters, root_path);
+  ParameterGroup p_group(*parameters, root_path);
 
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
@@ -207,7 +207,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
-    initial = new EnzoInitialInclinedWave(cycle, time, p_accessor);
+    initial = new EnzoInitialInclinedWave(cycle, time, p_group);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,
@@ -226,7 +226,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
-    initial = new EnzoInitialShockTube(cycle, time, p_accessor);
+    initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup

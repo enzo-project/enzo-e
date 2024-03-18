@@ -20,7 +20,7 @@ class EnzoInitialShockTube : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialShockTube(int cycle, double time, ParameterAccessor &p);
+  EnzoInitialShockTube(int cycle, double time, ParameterGroup p);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialShockTube);

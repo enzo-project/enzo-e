@@ -102,7 +102,7 @@ std::string vector_to_string_(std::vector<std::string> &vec)
 //----------------------------------------------------------------------
 
 EnzoInitialShockTube::EnzoInitialShockTube(int cycle, double time,
-					   ParameterAccessor &p)
+					   ParameterGroup p)
   : Initial(cycle, time),
     setup_name_(p.value_string("setup_name","")),
     aligned_ax_(0),
