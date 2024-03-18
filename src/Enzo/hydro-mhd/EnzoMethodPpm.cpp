@@ -38,7 +38,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections,
-                              ParameterAccessor &p)
+                              ParameterGroup p)
   : Method(),
     comoving_coordinates_(enzo::cosmology() != nullptr),
     store_fluxes_for_corrections_(store_fluxes_for_corrections),

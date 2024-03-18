@@ -616,7 +616,7 @@ Method * EnzoProblem::create_method_
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
 
-    method = new EnzoMethodPpm(store_fluxes_for_corrections, p_accessor);
+    method = new EnzoMethodPpm(store_fluxes_for_corrections, p_group);
     skip_auto_courant = true;
 
 /*

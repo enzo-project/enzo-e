@@ -17,7 +17,7 @@ class EnzoMethodPpm : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPpm object
-  EnzoMethodPpm(bool store_fluxes_for_corrections, ParameterAccessor &p);
+  EnzoMethodPpm(bool store_fluxes_for_corrections, ParameterGroup p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);
