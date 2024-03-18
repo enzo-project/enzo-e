@@ -280,7 +280,7 @@ jobs:
             - run: echo "starting steps for pytest answer generation"
             - compile-enzoe:
                 usedouble: << parameters.usedouble >>
-                tag: gold-standard-004
+                tag: gold-standard-005
                 skipfile: notafile
                 usegrackle: << parameters.usegrackle >>
             - run-answer-tests:
