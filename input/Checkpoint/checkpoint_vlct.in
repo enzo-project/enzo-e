@@ -24,8 +24,8 @@
          courant = 0.4;
          mhd_choice = "no_bfield";
          riemann_solver = "hllc";
-         half_dt_reconstruct_method = "nn";
-         full_dt_reconstruct_method = "plm";
+         time_scheme = "vl";
+         reconstruct_method = "plm";
          theta_limiter = 2.;
          density_floor = 1.e-30;
          pressure_floor = 1.e-30;

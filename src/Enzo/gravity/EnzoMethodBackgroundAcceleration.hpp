@@ -19,7 +19,7 @@ class EnzoMethodBackgroundAcceleration : public Method {
 public: // interface
 
   /// Create a new EnzoMethodBackgroundAcceleration object
-  EnzoMethodBackgroundAcceleration(ParameterAccessor &p);
+  EnzoMethodBackgroundAcceleration(ParameterGroup p);
 
   /// Destructor
   virtual ~EnzoMethodBackgroundAcceleration() throw() {}

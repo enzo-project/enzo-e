@@ -39,9 +39,9 @@
 
 #include <sstream> // std::stringstream
 
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
-#include "cello.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 
 //----------------------------------------------------------------------

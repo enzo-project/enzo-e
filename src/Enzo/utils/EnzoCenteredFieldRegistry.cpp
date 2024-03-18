@@ -7,9 +7,10 @@
 
 //----------------------------------------------------------------------
 
-#include "cello.hpp"
+#include "Enzo/utils/utils.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
-#include "enzo.hpp"
 #include <algorithm>
 
 //----------------------------------------------------------------------

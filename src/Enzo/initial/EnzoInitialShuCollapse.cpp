@@ -6,8 +6,9 @@
 /// @brief    Initializer for the Shu Collapse problem as described
 ///           in Federrath et al 2010, ApJ, 713, 269.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 EnzoInitialShuCollapse::EnzoInitialShuCollapse
 (int cycle, double time,

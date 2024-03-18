@@ -1,5 +1,7 @@
 #include "enzo.hpp"
 
+#include "Enzo/gravity/gravity.hpp"
+
 namespace enzo {
 
   EnzoSimulation * simulation()

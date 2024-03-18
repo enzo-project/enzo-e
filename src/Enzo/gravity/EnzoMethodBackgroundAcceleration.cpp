@@ -5,9 +5,9 @@
 /// @date     2018-05
 /// @brief    Implements the EnzoMethodBackgroundAcceleration class
 
-
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 //---------------------------------------------------------------------
 
@@ -311,7 +311,7 @@ void compute_accel_(const T functor,
 //---------------------------------------------------------------------
 
 EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
-(ParameterAccessor &p)
+(ParameterGroup p)
  : Method(),
    zero_acceleration_(false),
    potential_center_xyz_{}, // fills array with zeros

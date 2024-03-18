@@ -7,49 +7,32 @@
 ///             the method described in Krumholz et al 2004, ApJ, 611, 399 and
 ///             Federrath et al 2010, ApJ, 713, 269.
 
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
 #include <random>
-#include "cello.hpp"
-#include "enzo.hpp"
 
 //-------------------------------------------------------------------
 
-EnzoMethodSinkMaker* EnzoMethodSinkMaker::from_parameters(ParameterAccessor& p)
-  noexcept
-{
-  int offset_seed_shift_input = p.value_integer("offset_seed_shift",0);
-  ASSERT("EnzoMethodSinkMaker::from_parameters",
-         "Method:sink_maker:offset_seed_shift must be >=0",
-	 offset_seed_shift_input >= 0);
-
-  return new EnzoMethodSinkMaker
-    (p.value_float("jeans_length_resolution_cells", 4.0),
-     p.value_float("physical_density_threshold_cgs",1.0e-24),
-     p.value_logical("check_density_maximum",true),
-     p.value_float("max_mass_fraction", 0.25),
-     p.value_float("min_sink_mass_solar",0.0),
-     p.value_float("max_offset_cell_fraction",0.0),
-     static_cast<uint64_t>(offset_seed_shift_input));
-}
-
-//-------------------------------------------------------------------
-
-EnzoMethodSinkMaker::EnzoMethodSinkMaker
-(double   jeans_length_resolution_cells,
- double   physical_density_threshold_cgs,
- bool     check_density_maximum,
- double   max_mass_fraction,
- double   min_sink_mass_solar,
- double   max_offset_cell_fraction,
- uint64_t offset_seed_shift)
+EnzoMethodSinkMaker::EnzoMethodSinkMaker(ParameterGroup p) noexcept
   : Method(),
-    jeans_length_resolution_cells_(jeans_length_resolution_cells),
-    physical_density_threshold_cgs_(physical_density_threshold_cgs),
-    check_density_maximum_(check_density_maximum),
-    max_mass_fraction_(max_mass_fraction),
-    min_sink_mass_solar_(min_sink_mass_solar),
-    max_offset_cell_fraction_(max_offset_cell_fraction),
-    offset_seed_shift_(offset_seed_shift)
+    jeans_length_resolution_cells_
+      (p.value_float("jeans_length_resolution_cells", 4.0)),
+    physical_density_threshold_cgs_
+      (p.value_float("physical_density_threshold_cgs",1.0e-24)),
+    check_density_maximum_(p.value_logical("check_density_maximum",true)),
+    max_mass_fraction_(p.value_float("max_mass_fraction", 0.25)),
+    min_sink_mass_solar_(p.value_float("min_sink_mass_solar",0.0)),
+    max_offset_cell_fraction_(p.value_float("max_offset_cell_fraction",0.0)),
+    offset_seed_shift_(0)
 {
+  int tmp_offset_seed_shift_input = p.value_integer("offset_seed_shift",0);
+  ASSERT("EnzoMethodSinkMaker",
+         "Method:sink_maker:offset_seed_shift must be >=0",
+	 tmp_offset_seed_shift_input >= 0);
+  offset_seed_shift_ = static_cast<uint64_t>(tmp_offset_seed_shift_input);
+
   // Check that we have 3 spatial dimensions.
   ASSERT("EnzoMethodSinkMaker::EnzoMethodSinkMaker()",
 	 "Cannot use sink_maker method with rank < 3",
@@ -449,12 +432,6 @@ bool EnzoMethodSinkMaker::flow_is_converging_(Block * block,
   block->cell_width(&hx, &hy, &hz);
   double xm, ym, zm;
   block->lower(&xm,&ym,&zm);
-
-  bool print_cell_info =
-    (xm == 0.0) && (ym == 0.0) && (zm == 0.0) &&
-    (ix > 8) && (ix < 16) &&
-    (iy > 8) && (iy < 16) &&
-    (iz > 8) && (iz < 16);
 
   // Get pointers to velocity fields
   enzo_float * vx           = (enzo_float *) field.values("velocity_x");

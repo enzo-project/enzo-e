@@ -8,6 +8,12 @@
 #ifndef DISK_FILE_HDF5_HPP
 #define DISK_FILE_HDF5_HPP
 
+//----------------------------------------------------------------------
+/// @typedef hdf5_id
+/// @brief  Define a type to hold an HDF5 "hid_t" to localize dependencies
+
+typedef int64_t hdf5_id;
+
 class FileHdf5 : public File {
 
   /// @class    FileHdf5
@@ -46,7 +52,6 @@ public: // interface
     p | data_name_;
     p | data_type_;
     p | data_rank_;
-    PUParray(p,data_dims_,4);
     p | data_prop_;
     p | is_data_open_;
     p | compress_level_;
@@ -200,16 +205,16 @@ public: // functions
 protected: // functions
 
   virtual void write_meta_
-  ( hid_t id, const void * buffer, std::string name, int type,
+  ( hdf5_id id, const void * buffer, std::string name, int type,
     int n1=1, int n2=0, int n3=0, int n4=0) throw();
 
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
-  hid_t scalar_to_hdf5_(int type) const throw();
+  hdf5_id scalar_to_hdf5_(int type) const throw();
 
   /// Convert the scalar type to an HDF5 datatype
-  int hdf5_to_scalar_(hid_t type) const throw();
+  int hdf5_to_scalar_(hdf5_id type) const throw();
 
   /// Convert a relative path to an absolute path
   std::string relative_to_absolute_
@@ -217,37 +222,37 @@ private: // functions
 
   /// Get output extents
   void get_extents_
-  ( hid_t space_id, int * n1, int * n2=0, int * n3=0, int * n4=0) throw();
+  ( hdf5_id space_id, int * n1, int * n2=0, int * n3=0, int * n4=0) throw();
 
   /// create the space for the array on disk
 
   /// create data spaces for memory or disk data
-  hid_t space_create_
+  hdf5_id space_create_
   (int m1, int m2, int m3, int m4,
    int n1, int n2, int n3, int n4,
    int o1, int o2, int o3, int o4) throw();
 
   /// given a space, select a slice
-  hid_t space_slice_
-  (hid_t space_id,
+  hdf5_id space_slice_
+  (hdf5_id space_id,
    int m1, int m2, int m3, int m4,
    int n1, int n2, int n3, int n4,
    int o1, int o2, int o3, int o4) throw();
   
   /// Close the given dataspace
-  void space_close_ (hid_t space_id) throw();
+  void space_close_ (hdf5_id space_id) throw();
 
   /// Return the space for the given dataset
-  hid_t get_data_space_(hid_t dataset_id, std::string name) throw ();
+  hdf5_id get_data_space_(hdf5_id dataset_id, std::string name) throw ();
 
   /// Close the given memspace
-  void close_mem_space_ (hid_t space_id) throw();
+  void close_mem_space_ (hdf5_id space_id) throw();
 
   /// Return the space for the given attribute
-  hid_t get_attr_space_(hid_t dataset_id, std::string name) throw ();
+  hdf5_id get_attr_space_(hdf5_id dataset_id, std::string name) throw ();
 
   /// Open the dataset
-  hid_t open_dataset_ (hid_t group, std::string name) throw();
+  hdf5_id open_dataset_ (hdf5_id group, std::string name) throw();
 
   /// Close the dataset
   void close_dataset_ () throw();
@@ -260,34 +265,34 @@ public: // static attributes
 private: // attributes
 
   /// HDF5 file descriptor
-  hid_t file_id_;
+  hdf5_id file_id_;
 
   /// Whether file is open or closed
   bool  is_file_open_;
 
 
   /// HDF5 dataset descriptor
-  hid_t data_id_;
+  hdf5_id data_id_;
 
   /// HDF5 dataspace descriptor
-  hid_t data_space_id_;
+  hdf5_id data_space_id_;
 
   /// HDF5 memory space descriptor
-  hid_t mem_space_id_;
+  hdf5_id mem_space_id_;
 
 
   /// HDF5 attribute descriptor
-  hid_t attribute_id_;
+  hdf5_id attribute_id_;
 
 
   /// HDF5 group descriptor
-  hid_t group_id_;
+  hdf5_id group_id_;
 
   /// Group name 
   std::string group_name_;
 
   /// HDF5 group property list
-  hid_t group_prop_;
+  hdf5_id group_prop_;
 
   /// Whether a group is open or closed
   bool is_group_open_;
@@ -301,11 +306,8 @@ private: // attributes
   /// Dataset rank, 1 to 4
   int data_rank_;
 
-  /// Dataset size
-  hsize_t data_dims_[4];
-
   /// HDF5 dataset property list
-  hid_t data_prop_;
+  hdf5_id data_prop_;
 
   /// Whether a dataset is open or closed
   bool  is_data_open_;

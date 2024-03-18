@@ -65,7 +65,7 @@ struct EnzoPotentialConfigGalaxy {
   /// core radius (default units of kpc)
   double rcore;
 
-  static EnzoPotentialConfigGalaxy from_parameters(ParameterAccessor &p) {
+  static EnzoPotentialConfigGalaxy from_parameters(ParameterGroup p) {
     double DM_mass = p.value_float("DM_mass",-1.0);
     double DM_mass_radius = p.value_float("DM_mass_radius", 0.0);
     double stellar_r = p.value_float("stellar_scale_height_r", 1.0E-10);
@@ -131,7 +131,7 @@ struct EnzoPotentialConfigPointMass {
   /// core-radius (default units of cm)
   double rcore;
 
-  static EnzoPotentialConfigPointMass from_parameters(ParameterAccessor &p) {
+  static EnzoPotentialConfigPointMass from_parameters(ParameterGroup p) {
     return {p.value_float("mass",0.0),
             p.value_float("core_radius", 1.0E-10)};
   }

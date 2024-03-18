@@ -17,7 +17,7 @@ class EnzoMethodPmUpdate : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmUpdate object
-  EnzoMethodPmUpdate(ParameterAccessor& p);
+  EnzoMethodPmUpdate(ParameterGroup p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmUpdate);
