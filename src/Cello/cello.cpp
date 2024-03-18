@@ -1,6 +1,9 @@
-// we explicitly avoid including <boost/filesystem> inside of a separate header
-// because it is a large header that takes a long time to read (~0.4 seconds)
-#include <boost/filesystem.hpp>
+// back when we used boost::filesystem, we explicitly avoided including the
+// associated header because it was a large header that took a long time to
+// read (~0.4 seconds).
+// -> we continue to do this with <filesystem>, but it's not clear how much
+//    this does for us
+#include <filesystem>
 
 #include "cello.hpp"
 #include "error.hpp"
@@ -533,15 +536,15 @@ namespace cello {
 
   bool ensure_directory_exists(const std::string& dir_name)
   {
-    boost::filesystem::path directory(dir_name);
+    std::filesystem::path directory(dir_name);
 
-    if (boost::filesystem::is_directory(directory)) {
+    if (std::filesystem::is_directory(directory)) {
       return true;
     } else {
-      boost::filesystem::create_directory(directory);
+      std::filesystem::create_directory(directory);
       ASSERT1 ("cello::ensure_directory_exists()",
                "Error creating directory %s",
-               dir_name.c_str(), boost::filesystem::is_directory(directory));
+               dir_name.c_str(), std::filesystem::is_directory(directory));
       return false;
     }
   }
