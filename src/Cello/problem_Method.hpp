@@ -31,7 +31,6 @@ public: // interface
       courant_(1.0),
       ir_post_(-1),
       neighbor_type_(neighbor_leaf),
-      max_subcycle_(1),
       max_supercycle_(1),
       index_method_(-1)
   { }
@@ -95,24 +94,16 @@ public: // virtual functions
   void set_courant(double courant) throw ()
   { courant_ = courant; }
 
-  /// Initialize subcycling, supercycling, and index_method
-  void set_max_subcycle (int max_subcycle)
-  { max_subcycle_ = max_subcycle; }
-
   void set_max_supercycle (int max_supercycle)
   { max_supercycle_ = max_supercycle; }
+
+  int max_supercycle () const
+  { return max_supercycle_; }
 
   void set_index(int index)
   { index_method_ = index; }
 
   int index() const { return index_method_; }
-
-  /// Access subcycling and supercycling limits
-  int max_subcycle () const
-  { return max_subcycle_; }
-
-  int max_supercycle () const
-  { return max_supercycle_; }
 
 protected: // functions
 
@@ -145,8 +136,7 @@ protected: // attributes
   /// Default refresh type
   int neighbor_type_;
 
-  /// Minimum and maximum allowed sub- and super-cycling
-  int max_subcycle_;
+  /// Maximum allowed super-cycling
   int max_supercycle_;
 
   /// Index of this Method in Problem

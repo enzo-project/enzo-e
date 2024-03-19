@@ -432,7 +432,6 @@ public: // attributes
   double                     method_courant_global;
   std::vector<std::string>   method_list;
 
-  std::vector<int>           method_max_subcycle;
   std::vector<int>           method_max_supercycle;
 
   std::vector<int>           method_schedule_index;

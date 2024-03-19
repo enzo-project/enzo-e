@@ -136,12 +136,10 @@ void Block::compute_update_method_state_(int index_method)
   const int step_method = method_state.step();
   const int num_step_method = method_state.num_steps();
   const int max_supercycle = method()->max_supercycle();
-  const int max_subcycle = method()->max_subcycle();
-  if (max_subcycle == 1) { // if not subcycling
-    // update method time with dt_global, which may be less than dt_method if supercycling
-    method_state.set_time(time_method + dt_global);
-    method_state.set_step(step_method + 1);
-  }
+
+  method_state.set_time(time_method + dt_global);
+  method_state.set_step(step_method + 1);
+
 }
 
 //----------------------------------------------------------------------

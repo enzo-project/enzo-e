@@ -114,7 +114,6 @@ void Config::pup (PUP::er &p)
   p | num_method;
   p | method_courant_global;
   p | method_list;
-  p | method_max_subcycle;
   p | method_max_supercycle;
   p | method_schedule_index;
   p | method_courant;
@@ -778,7 +777,6 @@ void Config::read_method_ (Parameters * p) throw()
   num_method = p->list_length("Method:list");
 
   method_list.   resize(num_method);
-  method_max_subcycle.resize(num_method);
   method_max_supercycle.resize(num_method);
   method_courant.resize(num_method);
   method_schedule_index.resize(num_method);
@@ -799,8 +797,6 @@ void Config::read_method_ (Parameters * p) throw()
     // Read minimum number of super-cycles allowed, and maximum number of
     // sub-cycles allowed.
 
-    method_max_subcycle[index_method] = p->value_integer
-      (full_name+":max_subcycle", 1);
     method_max_supercycle[index_method] = p->value_integer
       (full_name+":max_supercycle", 1);
 

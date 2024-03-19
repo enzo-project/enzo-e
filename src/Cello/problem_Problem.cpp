@@ -505,7 +505,6 @@ void Problem::initialize_method
 			     config->schedule_step[index_schedule],
 			     config->schedule_list[index_schedule]));
       }
-      method->set_max_subcycle(config->method_max_subcycle[index_method]);
       method->set_max_supercycle(config->method_max_supercycle[index_method]);
       method->set_index(method_list_.size() - 1);
 
