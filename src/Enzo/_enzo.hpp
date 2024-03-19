@@ -29,14 +29,6 @@
 
 //----------------------------------------------------------------------
 
-enum mass_type {
-  mass_unknown,
-  mass_dark,
-  mass_baryon
-};
-
-//----------------------------------------------------------------------
-
 enum {
   index_turbulence_vad,
   index_turbulence_aad,
@@ -116,22 +108,6 @@ enum return_enum {
   return_diverged,
   return_error,
   return_bypass
-};
-
-//----------------------------------------------------------------------
-
-const int field_undefined = -1;
-
-//----------------------------------------------------------------------
-
-struct enzo_fluxes
-{
-  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
-  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
-  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
 };
 
 //----------------------------------------------------------------------
