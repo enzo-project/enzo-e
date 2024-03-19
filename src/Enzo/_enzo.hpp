@@ -29,29 +29,6 @@
 
 //----------------------------------------------------------------------
 
-enum {
-  index_turbulence_vad,
-  index_turbulence_aad,
-  index_turbulence_vvdot,
-  index_turbulence_vvot,
-  index_turbulence_vvd,
-  index_turbulence_vv,
-  index_turbulence_dd,
-  index_turbulence_d,
-  index_turbulence_dax,
-  index_turbulence_day,
-  index_turbulence_daz,
-  index_turbulence_dvx,
-  index_turbulence_dvy,
-  index_turbulence_dvz,
-  index_turbulence_dlnd,
-  index_turbulence_zones,
-  index_turbulence_mind,
-  index_turbulence_maxd,
-  max_turbulence_array };
-
-//----------------------------------------------------------------------
-
 enum enzo_sync_id {
   enzo_sync_id_cg = sync_id_last,
   enzo_sync_id_comoving_expansion,
