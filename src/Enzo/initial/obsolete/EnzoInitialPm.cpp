@@ -5,8 +5,9 @@
 /// @date     2016-04-29
 /// @brief    Implementation of EnzoInitialPm for initializing the PM method
 
-#include "enzo.hpp"
+#include "Enzo/enzo.hpp"
 #include <random>
+#include "Enzo/initial/initial.hpp"
 
 //----------------------------------------------------------------------
 

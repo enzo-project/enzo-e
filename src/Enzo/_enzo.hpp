@@ -205,13 +205,10 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "enzo-core/EnzoBoundary.hpp"
 
-#include "obsolete/EnzoInitialPm.hpp"
-
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
-#include "obsolete/EnzoMethodHydro.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 
