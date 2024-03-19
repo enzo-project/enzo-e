@@ -5,9 +5,9 @@
 /// @date     2017-03-01
 /// @brief    Diagonal preconditioner: return X = B\diag(A)
 
-#include "enzo.hpp"
-
-#include "charm_enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_SOLVER
 

@@ -11,15 +11,62 @@
 
 //----------------------------------------------------------------------
 
+// helper function used to construct the min_digits_map from a ParameterGroup
+static std::map<std::string,double> parse_min_digit_map_(ParameterGroup p)
+{
+
+  std::string min_digits_name = "min_digits";
+  if (p.type(min_digits_name) == parameter_float){
+    // backwards compatibility
+    return { {"density", p.value_float(min_digits_name, 0.0)} };
+  } else if (p.type(min_digits_name) == parameter_list){
+    // load pairs of fields and min_digits
+    const int list_length = p.list_length(min_digits_name);
+
+    std::string root_name = p.get_group_path();
+    ASSERT2("parse_min_digit_map_",
+            "The list assigned to %s:%s must have a non-negative, even length",
+            root_name.c_str(), min_digits_name.c_str(),
+            (list_length >= 0) && (list_length % 2 == 0));
+
+    std::map<std::string,double> out;
+    for (int i =0; i < list_length; i+=2){
+      std::string field = p.list_value_string(i, min_digits_name);
+
+      ASSERT3("parse_min_digit_map_",
+              "The \"%s\" field is listed more than once in %s:%s",
+              field.c_str(), root_name.c_str(), min_digits_name.c_str(),
+              out.find(field) == out.end());
+
+      out[field] = p.list_value_float(i+1,min_digits_name,0.0);
+    }
+    return out;
+  } else if (p.param(min_digits_name) == nullptr) {
+    return {}; // return an empty map
+  }
+
+  ERROR1("MethodRefresh::from_parameters", "%s has an invalid type",
+         min_digits_name.c_str());
+}
+
+//----------------------------------------------------------------------
+
+MethodFluxCorrect::MethodFluxCorrect(ParameterGroup p) noexcept
+  : MethodFluxCorrect(p.value_string("group","conserved"),
+                      p.value_logical("enable",true),
+                      parse_min_digit_map_(p))
+{ }
+
+//----------------------------------------------------------------------
+
 MethodFluxCorrect::MethodFluxCorrect
 (std::string group, bool enable,
- const std::vector<std::string>& min_digits_fields,
- const std::vector<double>& min_digits_vals) throw() 
+ std::map<std::string, double> min_digits_map) noexcept
   : Method (),
     ir_pre_(-1),
     group_(group),
     enable_(enable),
-    min_digits_map_(),
+    min_digits_map_(min_digits_map),
     field_sum_(),
     field_sum_0_(),
     scratch_()
@@ -48,17 +95,13 @@ MethodFluxCorrect::MethodFluxCorrect
     refresh_pre->add_field(groups->item(group_,i_f));
   }
 
-  // Set up min_digits_pairs_
-  ASSERT("MethodFluxCorrect::MethodFluxCorrect",
-         "min_digits_fields and min_digits_values must have the same length",
-         min_digits_fields.size() == min_digits_vals.size());
-  for (std::size_t i = 0; i < min_digits_fields.size(); i++){
-    const std::string& field = min_digits_fields[i];
+  // check min_digits_pairs_
+  for (const auto& key_value_pair : this->min_digits_map_) {
+    const std::string& field = key_value_pair.first;
     ASSERT2("MethodFluxCorrect::MethodFluxCorrect",
             ("Can't check conserved digits for the \"%s\" field since it's "
              "not in the field group \"%s\"."),
             field.c_str(), group_.c_str(), groups->is_in(field,group_));
-    min_digits_map_[field] = min_digits_vals[i];
   }
 
   // sum mass, momentum, energy
@@ -236,7 +279,7 @@ static void flux_correct_helper_(cello_float * const field_array,
 {
   int ix,iy,iz;
 
-  int axis,face,level_face;
+  int axis,face;
 
   axis=0;
   // X axis

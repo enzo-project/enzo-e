@@ -5,7 +5,8 @@
 /// @date     2011-10-06
 /// @brief    Implementation of the IoEnzoBlock class
 
-#include "enzo.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/io/io.hpp"
 
 //----------------------------------------------------------------------
 

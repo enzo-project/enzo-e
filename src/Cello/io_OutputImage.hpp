@@ -72,7 +72,6 @@ public: // functions
       axis_(axis_all),
       min_value_(std::numeric_limits<double>::max()),
       max_value_(-std::numeric_limits<double>::max()),
-      png_(NULL),
       image_type_(""),
       face_rank_(0),
       image_log_(false),
@@ -103,9 +102,28 @@ public: // virtual functions
   virtual void init () throw();
 
   /// Open (or create) a file for IO
-  virtual void open () throw();
+  ///
+  /// @note
+  /// In practice, this method performs a no-op. It's mostly useful in
+  /// situations where we can write to a file in chunks. However, the current
+  /// implementation constructs the image in memory and then writes the image
+  /// all in one shot. We may revisit this in the future if we elect to write
+  /// the image in chunks.
+  ///
+  /// @note
+  /// In general, writing a PNG file in chunks is non-trivial since the file
+  /// organizes data in full scanlines. Moreover, the fact that we need to know
+  /// the minimum and maximum values that we want to map to colors before we
+  /// write anything to disk significantly limits the contexts where it would
+  /// be useful to write the file in chunks
+  virtual void open () throw()
+  { /* EMPTY */ }
 
   /// Close file for IO
+  ///
+  /// @note
+  /// In practice this opens the output file, writes the image (that is already
+  /// assembled in memory) to the file and then closes the file
   virtual void close () throw();
 
   /// Cleanup after output
@@ -146,12 +164,6 @@ private: // functions
 
   bool is_active_ (const Block * block) const;
 
-  /// Create the png file object
-  void png_create_ (std::string filename) throw();
-
-  /// Delete the png object
-  void png_close_() throw();
-
   /// Create the image data object
   void image_create_ () throw();
 
@@ -175,8 +187,6 @@ private: // functions
 		   double value, reduce_type reduce, double alpha=1.0);
   void reduce_box_filled_(double * data, int ixm, int ixp, int iym, int iyp, 
 		    double value, double alpha=1.0);
-
-  double data_(int i) const ;
 
 private: // attributes
 
@@ -211,9 +221,6 @@ private: // attributes
 
   /// Current image size in pixels
   int image_size_[2];
-  
-  /// Current pngwriter
-  pngwriter * png_;
 
   /// Image type: data or mesh
   std::string image_type_;

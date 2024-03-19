@@ -24,10 +24,7 @@
  }
 
  Boundary {
-     list = ["downwind", "density_upwind", "metal_density_upwind",
-             "velocity_x_upwind", "transverse_velocity_upwind",
-             "etot_upwind", "eint_upwind", "bfield_upwind",
-             "cloud_dye_upwind", "yedge", "zedge"];
+     list += ["bfield_upwind"];
 
      bfield_upwind{
          type = "inflow";

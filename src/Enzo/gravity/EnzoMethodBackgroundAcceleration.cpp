@@ -5,17 +5,9 @@
 /// @date     2018-05
 /// @brief    Implements the EnzoMethodBackgroundAcceleration class
 
-
-#include "cello.hpp"
-#include "enzo.hpp"
-
-// What are these defs and do I need them?
-//#include "enzo.decl.h"
-//
-//
-// #define CK_TEMPLATES_ONLY
-// #include "enzo.def.h"
-// #undef CK_TEMPLATES_ONLY
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 //---------------------------------------------------------------------
 
@@ -29,7 +21,7 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
    hx_(0), hy_(0), hz_(0)
 {
 
-  this->G_four_pi_ = 4.0 * cello::pi * enzo_constants::grav_constant;
+  this->G_four_pi_ = 4.0 * cello::pi * enzo::grav_constant_cgs();
 
   FieldDescr * field_descr = cello::field_descr();
 
@@ -228,7 +220,7 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
 //  double G = this->G_four_pi_ *
 //             enzo_units->density() * enzo_units->time() * enzo_units->time();
-  double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
+  double G_code = enzo::grav_constant_cgs() * enzo_units->density() * enzo_units->time() * enzo_units->time();
 
   double rcore = enzo_config->method_background_acceleration_core_radius *
                  enzo_constants::kpc_cm / enzo_units->length();

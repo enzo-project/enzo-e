@@ -5,7 +5,10 @@
 /// @date     2017-06-23
 /// @brief    Read initial conditions from HDF5
 ///           (multi-scale cosmological initial conditions)
-#include "enzo.hpp"
+
+#include "Enzo/enzo.hpp"
+#include "Enzo/io/io.hpp"
+
 #include <chrono>
 #include <thread>
 

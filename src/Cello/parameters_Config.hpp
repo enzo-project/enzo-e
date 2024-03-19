@@ -22,7 +22,149 @@ public: // interface
 
   /// empty constructor for charm++ pup()
   Config() throw() 
-  : PUP::able()
+  : PUP::able(),
+    num_adapt(0),
+    adapt_list(),
+    adapt_interval(0),
+    adapt_min_face_rank(0),
+    adapt_type(),
+    adapt_field_list(),
+    adapt_min_refine(),
+    adapt_max_coarsen(),
+    adapt_min_refine2(),
+    adapt_max_coarsen2(),
+    adapt_max_level(),
+    adapt_level_exponent(),
+    adapt_include_ghosts(),
+    adapt_output(),
+    adapt_schedule_index(),
+    balance_schedule_index(0),
+    balance_type(),
+    num_boundary(0),
+    boundary_list(),
+    boundary_type(),
+    boundary_axis(),
+    boundary_face(),
+    boundary_mask(),
+    boundary_field_list(),
+    num_fields(0),
+    field_list(),
+    field_alignment(0),
+    field_padding(0),
+    field_history(0),
+    field_precision(0),
+    field_prolong(""),
+    field_restrict(""),
+    field_group_list(),
+    num_initial(0),
+    initial_new(false),
+    initial_list(),
+    initial_cycle(0),
+    initial_time(0.0),
+    initial_restart(false),
+    initial_restart_dir(""),
+    initial_trace_name(""),
+    initial_trace_field(""),
+    initial_trace_mpp(0.0),
+    initial_trace_dx(0),
+    initial_trace_dy(0),
+    initial_trace_dz(0),
+    memory_active(false),
+    memory_warning_mb(0.0),
+    memory_limit_gb(0.0),
+    mesh_root_rank(0),
+    mesh_min_level(0),
+    mesh_max_level(0),
+    mesh_max_initial_level(0),
+    num_method(0),
+    method_courant_global(1.0),
+    method_list(),
+    method_schedule_index(),
+    method_courant(),
+    method_prolong(),
+    method_type(),
+    monitor_debug(false),
+    monitor_verbose(false),
+    num_output(0),
+    output_list(),
+    output_type(),
+    output_axis(),
+    output_image_lower(),
+    output_image_upper(),
+    output_colormap(),
+    output_image_type(),
+    output_image_log(),
+    output_image_abs(),
+    output_image_mesh_color(),
+    output_image_mesh_order(),
+    output_image_color_particle_attribute(),
+    output_image_size(),
+    output_image_reduce_type(),
+    output_image_ghost(),
+    output_image_face_rank(),
+    output_image_min(),
+    output_image_max(),
+    output_schedule_index(),
+    output_max_level(),
+    output_min_level(),
+    output_leaf_only(),
+    output_dir(),
+    output_stride_write(),
+    output_stride_wait(),
+    output_field_list(),
+    output_particle_list(),
+    output_name(),
+    index_schedule(0),
+    schedule_list(),
+    schedule_type(),
+    schedule_var(),
+    schedule_start(),
+    schedule_stop(),
+    schedule_step(),
+    num_particles(0),
+    particle_list(),
+    particle_index(),
+    particle_interleaved(),
+    particle_constant_name(),
+    particle_constant_type(),
+    particle_constant_value(),
+    particle_attribute_name(),
+    particle_attribute_type(),
+    particle_batch_size(0),
+    particle_group_list(),
+    performance_papi_counters(),
+    performance_projections_on_at_start(true),
+    performance_warnings(false),
+    performance_on_schedule_index(-1),
+    performance_off_schedule_index(-1),
+    num_physics(0),
+    physics_list(),
+    num_solvers(),
+    solver_list(),
+    solver_index(),
+    solver_type(),
+    solver_solve_type(),
+    solver_iter_max(),
+    solver_res_tol(),
+    solver_diag_precon(),
+    solver_monitor_iter(),
+    solver_restrict(),
+    solver_prolong(),
+    solver_min_level(),
+    solver_max_level(),
+    solver_field_x(),
+    solver_field_b(),
+    stopping_cycle(0),
+    stopping_time(0.0),
+    stopping_seconds(0.0),
+    stopping_interval(0),
+    units_mass(1.0),
+    units_density(1.0),
+    units_length(1.0),
+    units_time(1.0),
+    testing_cycle_final(0),
+    testing_time_final(),
+    testing_time_tolerance(0.0)
   { }
 
   /// CHARM++ PUP::able declaration
@@ -31,7 +173,150 @@ public: // interface
   /// CHARM++ migration constructor for PUP::able
 
   Config (CkMigrateMessage *m)
-    :PUP::able(m)
+    : PUP::able(m),
+      num_adapt(0),
+      adapt_list(),
+      adapt_interval(0),
+      adapt_min_face_rank(0),
+      adapt_type(),
+      adapt_field_list(),
+      adapt_min_refine(),
+      adapt_max_coarsen(),
+      adapt_min_refine2(),
+      adapt_max_coarsen2(),
+      adapt_max_level(),
+      adapt_level_exponent(),
+      adapt_include_ghosts(),
+      adapt_output(),
+      adapt_schedule_index(),
+      balance_schedule_index(-1),
+      balance_type(),
+      num_boundary(0),
+      boundary_list(),
+      boundary_type(),
+      boundary_axis(),
+      boundary_face(),
+      boundary_mask(),
+      boundary_field_list(),
+      num_fields(0),
+      field_list(),
+      field_alignment(0),
+      field_padding(0),
+      field_history(0),
+      field_precision(0),
+      field_prolong(""),
+      field_restrict(""),
+      field_group_list(),
+      num_initial(0),
+      initial_new(false),
+      initial_list(),
+      initial_cycle(0),
+      initial_time(0.0),
+      initial_restart(false),
+      initial_restart_dir(""),
+      initial_trace_name(""),
+      initial_trace_field(""),
+      initial_trace_mpp(0.0),
+      initial_trace_dx(0),
+      initial_trace_dy(0),
+      initial_trace_dz(0),
+      memory_active(false),
+      memory_warning_mb(0.0),
+      memory_limit_gb(0.0),
+      mesh_root_rank(0),
+      mesh_min_level(0),
+      mesh_max_level(0),
+      mesh_max_initial_level(0),
+      num_method(0),
+      method_courant_global(1.0),
+      method_list(),
+      method_schedule_index(),
+      method_courant(),
+      method_prolong(),
+      method_type(),
+      monitor_debug(false),
+      monitor_verbose(false),
+      num_output(0),
+      output_list(),
+      output_type(),
+      output_axis(),
+      output_image_lower(),
+      output_image_upper(),
+      output_colormap(),
+      output_image_type(),
+      output_image_log(),
+      output_image_abs(),
+      output_image_mesh_color(),
+      output_image_mesh_order(),
+      output_image_color_particle_attribute(),
+      output_image_size(),
+      output_image_reduce_type(),
+      output_image_ghost(),
+      output_image_face_rank(),
+      output_image_min(),
+      output_image_max(),
+      output_schedule_index(),
+      output_max_level(),
+      output_min_level(),
+      output_leaf_only(),
+      output_dir(),
+      output_stride_write(),
+      output_stride_wait(),
+      output_field_list(),
+      output_particle_list(),
+      output_name(),
+      index_schedule(-1),
+      schedule_list(),
+      schedule_type(),
+      schedule_var(),
+      schedule_start(),
+      schedule_stop(),
+      schedule_step(),
+      num_particles(0),
+      particle_list(),
+      particle_index(),
+      particle_interleaved(),
+      particle_constant_name(),
+      particle_constant_type(),
+      particle_constant_value(),
+      particle_attribute_name(),
+      particle_attribute_type(),
+      particle_batch_size(0),
+      particle_group_list(),
+      performance_papi_counters(),
+      performance_projections_on_at_start(true),
+      performance_warnings(false),
+      performance_on_schedule_index(-1),
+      performance_off_schedule_index(-1),
+      num_physics(0),
+      physics_list(),
+      num_solvers(),
+      solver_list(),
+      solver_index(),
+      solver_type(),
+      solver_solve_type(),
+      solver_iter_max(),
+      solver_res_tol(),
+      solver_diag_precon(),
+      solver_monitor_iter(),
+      solver_restrict(),
+      solver_prolong(),
+      solver_min_level(),
+      solver_max_level(),
+      solver_field_x(),
+      solver_field_b(),
+      stopping_cycle(0),
+      stopping_time(0.0),
+      stopping_seconds(0.0),
+      stopping_interval(0),
+      // Units
+      units_mass(1.0),
+      units_density(1.0),
+      units_length(1.0),
+      units_time(1.0),
+      testing_cycle_final(0),
+      testing_time_final(),
+      testing_time_tolerance(0.0)
   {
     for (int axis=0; axis<3; axis++) {
       domain_lower[axis] = 0.0;
@@ -146,42 +431,14 @@ public: // attributes
   int                        num_method;
   double                     method_courant_global;
   std::vector<std::string>   method_list;
+
   std::vector<int>           method_max_subcycle;
   std::vector<int>           method_max_supercycle;
 
   std::vector<int>           method_schedule_index;
-
-  std::vector< std::vector< std::string > > method_file_name;
-  std::vector< std::vector< std::string > > method_path_name;
-
-  std::vector<double>        method_close_files_seconds_stagger;
-  std::vector<double>        method_close_files_seconds_delay;
-  std::vector<int>           method_close_files_group_size;
   std::vector<double>        method_courant;
-  std::vector<bool>          method_debug_print;
-  std::vector<bool>          method_debug_coarse;
-  std::vector<bool>          method_debug_ghost;
-
-  std::vector<std::string>   method_flux_correct_group;
-  std::vector<bool>          method_flux_correct_enable;
-  std::vector<std::vector<std::string>> method_flux_correct_min_digits_fields;
-  std::vector<std::vector<double>> method_flux_correct_min_digits_values;
-  bool                       method_flux_correct_single_array;
-
-  std::vector< std::vector< std::string > > method_field_list;
-  std::vector< std::vector< std::string > > method_particle_list;
-  std::vector< int >         method_output_blocking[3];
-  std::vector< bool >        method_output_all_blocks;
   std::vector<std::string>   method_prolong;
-  std::vector<int>           method_ghost_depth;
-  std::vector<int>           method_min_face_rank;
-  std::vector<int>           method_all_fields;
-  std::vector<int>           method_all_particles;
-
-  std::vector<double>        method_timestep;
-  std::vector<std::string>   method_trace_name;
   std::vector<std::string>   method_type;
-  double                     method_null_dt;
 
 
   // Monitor
@@ -202,8 +459,7 @@ public: // attributes
   std::vector < char >        output_image_log;
   std::vector < char >        output_image_abs;
   std::vector < std::string > output_image_mesh_color;
-  std::vector < std::string > output_image_mesh_scalar;
-  std::vector < int >         output_image_mesh_scalar_index;
+  std::vector < std::string > output_image_mesh_order;
   std::vector < std::string > output_image_color_particle_attribute;
   std::vector < std::vector <int> > output_image_size;
   std::vector < std::string>  output_image_reduce_type;

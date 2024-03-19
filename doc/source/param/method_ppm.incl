@@ -63,7 +63,10 @@ Enzo-E's PPM hydrodynamics method.
    :Default: :d:`100`
    :Scope:     :z:`Enzo`
 
-   :e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
+   :e:`Enzo's` MinimumPressureSupportParameter :e:`parameter. This is
+   meaningless unless`
+   :par:param:`~Method:ppm:use_minimum_pressure_support` :e:`is set
+   to` ``true``.
 
 ----
 
@@ -97,6 +100,33 @@ Enzo-E's PPM hydrodynamics method.
    :Scope:     :z:`Enzo`
 
    :e:`Enzo's` UseMinimumPressureSupport :e:`parameter.`
+
+   :e:`When radiative cooling is turned on, and objects are allowed to
+   collapse to very small sizes so that their Jeans length is no
+   longer resolved, they may undergo artificial fragmentation and
+   angular momentum non-conservation. This parameter can be used to
+   turn on a very simple fudge described in` `Machacek, Bryan & Abel
+   (2001) <https://adsabs.harvard.edu/abs/2001ApJ...548..509M>`_
+   :e:`in order to alleviate this problem.`
+
+   :e:`When using minimum-pressure support, a floor is applied to the
+   specific internal energy (or equivalently, temperature) to blocks
+   with a refinement level equivalent to`
+   :par:param:`Adapt:max_level`.  :e:`A floor is applied in order to
+   satisfy the inequality:` :math:`\lambda_J \geq \sqrt{K}\, \Delta x`,
+   :e:`where`:
+
+     * :math:`\lambda_J = c_s \sqrt{\pi / (G \rho)}` is the Jeans-length
+
+     * :math:`K` :e:`encodes the value assigned to`
+       :par:param:`~Method:ppm:minimum_pressure_support_parameter`
+
+     * :math:`\Delta x` encodes the cell-width.
+
+   :e:`In other words, the minimum pressure-support ensures
+   that the Jeans length is larger than the cell-width by a factor
+   that is at least the square-root of`
+   :par:param:`~Method:ppm:minimum_pressure_support_parameter`.
 
 ----
 

@@ -29,9 +29,9 @@
 /// LINE 16:     P = R + beta * (P - omega * V)
 /// LINE 17:  end for
 
-#include "cello.hpp"
-#include "charm_simulation.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_COPY_X0
 // #define DEBUG_COPY_R

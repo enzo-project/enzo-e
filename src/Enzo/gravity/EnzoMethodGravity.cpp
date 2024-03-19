@@ -6,18 +6,21 @@
 /// @brief    Implements the EnzoMethodGravity class
 
 
-#define TRACE_SUPERCYCLE
+#define NEW_TIMESTEP
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
-#include "charm_enzo.hpp"
+// #define DEBUG_COPY_B
+// #define DEBUG_COPY_DENSITIES
+// #define DEBUG_COPY_POTENTIAL
+// #define DEBUG_COPY_ACCELERATION
 
 //----------------------------------------------------------------------
 
 EnzoMethodGravity::EnzoMethodGravity
 (int index_solver,
- double grav_const,
  int order,
  bool accumulate,
  int index_prolong,
@@ -25,7 +28,6 @@ EnzoMethodGravity::EnzoMethodGravity
  std::string type_super)
   : Method(),
     index_solver_(index_solver),
-    grav_const_(grav_const),
     order_(order),
     ir_exit_(-1),
     index_prolong_(index_prolong),
@@ -216,6 +218,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
     field.dimensions (0,&mx,&my,&mz);
     field.ghost_depth(0,&gx,&gy,&gz);
 
+
     const int m = mx*my*mz;
     enzo_float * B = (enzo_float*) field.values (ib);
     enzo_float * DT = (enzo_float*) field.values (idt);
@@ -224,43 +227,33 @@ void EnzoMethodGravity::compute(Block * block) throw()
       DT[i] += B[i];
     }
 
-    // Add density_particle values to density_particle_accumulate ghosts
+    // Prepare right-hand side vector B
+
+    for (int i=0; i<m; i++) B[i] = 0.0;
 
     if (block->is_leaf()) {
+
       EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+
       if (cosmology) {
-        int gx,gy,gz;
-        field.ghost_depth(0,&gx,&gy,&gz);
-        gx=gy=gz=0;
-        for (int iz=gz; iz<mz-gz; iz++) {
-          for (int iy=gy; iy<my-gy; iy++) {
-            for (int ix=gx; ix<mx-gx; ix++) {
-              int i = ix + mx*(iy + my*iz);
-              // In cosmological simulations, density units are defined such that `rho_bar_m` is
-              // 1.0, and time units are defined such that `4 * pi * G * rho_bar_m` is 1.0, where
-              // `G` is the gravitational constant, and `rho_bar_m` is the mean matter density
-              // of the universe. These choices of units result in Poisson's equation having a
-              // much simplified form.
-              DT[i]=-(DT[i]-1.0);
-              B[i]  = DT[i];
-            }
-          }
+        for (int i=0; i<m; i++) {
+          // In cosmological simulations, density units are defined such that `rho_bar_m` is
+          // 1.0, and time units are defined such that `4 * pi * G * rho_bar_m` is 1.0, where
+          // `G` is the gravitational constant, and `rho_bar_m` is the mean matter density
+          // of the universe. These choices of units result in Poisson's equation having a
+          // much simplified form.
+          DT[i] = - (DT[i] - 1.0);
+          B[i]  = DT[i];
         }
-      } else {
-        const double scale = -4.0 * (cello::pi) * grav_const_;
-        for (int iz=0; iz<mz; iz++) {
-          for (int iy=0; iy<my; iy++) {
-            for (int ix=0; ix<mx; ix++) {
-              const int i = ix + mx*(iy + my*iz);
-              B[i] = scale * DT[i];
-            }
-          }
+
+      } else { // ! cosmology
+
+        const double scale = -4.0 * (cello::pi) * (enzo::grav_constant_codeU());
+        for (int i=0; i<m; i++) {
+          B[i] = scale * DT[i];
         }
+
       }
-
-    } else {
-
-      for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
 
     }
 

@@ -79,6 +79,22 @@ namespace enzo {
   /// For a returnd value, `ret`, it's safe to assume that when
   /// `ret != nullptr` that `ret->get<int>("use_grackle") == 1`.
   const GrackleChemistryData * grackle_chemistry();
+
+  /// returns the gravitational constant in code units
+  ///
+  /// @note
+  /// One might naively assume that the gravitational constant is
+  /// time-dependent when written in cosmological code units (since they are
+  /// comoving). However, the cosmological code units are explicitly defined so
+  /// that the gravitational constant is always fixed in code units
+  double grav_constant_codeU() noexcept;
+
+  /// returns the gravitational constant in cgs
+  ///
+  /// This is generally preferable to enzo_constants::standard_grav_constant
+  /// since this will return the user-customizable value of the gravitational
+  /// constant (the user can only customize the value in non-cosmological sims)
+  double grav_constant_cgs() noexcept;
 }
 
 // this include statement must follow the above function declarations, so that

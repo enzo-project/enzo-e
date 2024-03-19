@@ -218,8 +218,12 @@ public: // interface
 
    */
 
+    // we explicitly use enzo_constants::standard_grav_constant here instead of
+    // enzo::grav_constant_cgs() since they are guaranteed to be identical in a
+    // cosmological simulation
+
     return (3.0 / (8.0 * cello::pi)) * enzo_constants::H0_over_h * enzo_constants::H0_over_h /
-      enzo_constants::grav_constant * omega_matter_now_ *
+      enzo_constants::standard_grav_constant * omega_matter_now_ *
       hubble_constant_now_ * hubble_constant_now_ *
       (1 + current_redshift_) * (1 + current_redshift_) * (1 + current_redshift_);
   }

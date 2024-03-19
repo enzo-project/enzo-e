@@ -28,26 +28,32 @@
         # default is hlle. Options are hll, hlle, hllc, and hlld
         riemann_solver = "hllc";
 
+        # specify the temporal integrator. Options include:
+        #    - "vl": the default scheme. This is a predictor-corrector scheme
+        #    - "euler": a single-step scheme (FOR TESTING PURPOSES)
+        time_scheme = "vl";
+
         # Reconstruction algorithms choices are:
-        # for full time step. Options are:
         #    - "nn" Nearest Neighbor
         #    - "plm"/"plm_enzo" Piecewise Linear Method with Enzo's slope
         #      limiter. The "theta_limiter" value affects the diffusiveness
         #      of the limiter.
         #    - "plm_athena" Piecewise Linear method with Athena's slope limiter
+        #
+        # Recommendations vary based on the value assigned to time_scheme:
+        #    - "euler": you should ALWAYS use "nn"
+        #    - "vl": you can choose whatever you want. Note that the predictor
+        #            step (aka the half-timestep) always uses "nn". This choice
+        #            only affects reconstruction for the full timestep.
 
-        # Reconstructor algorithm for half time step. (default is "nn")
-        half_dt_reconstruct_method = "nn";
+        reconstruct_method = "plm"; # (this is the default)
 
-        # Reconstructor algorithm for full time step (default is "plm")
-        full_dt_reconstruct_method = "plm";
-
-        # modifies the slope enzo slope limiter used in piecewise linear
-        # reconstruction. If "plm" or "plm_enzo" is not used, then this
-        # parameter is meainingless. This should have a value in the range
-        # [1.,2.]. A value of 1. is most dissipative and is the same as the
-        # minmod limiter. A value of 2. is least dissipative and is the same as
-        # the MC limiter. The default value is 1.5.
+        # modifies slope limiter used in piecewise linear reconstruction. If
+        # "plm" or "plm_enzo" is not used, then this parameter is meainingless.
+        # This should have a value in the range [1.,2.]. A value of 1. is most
+        # dissipative and is the same as the minmod limiter. A value of 2. is
+        # least dissipative and is the same as the MC limiter. The default
+        # value is 1.5.
         theta_limiter = 2.;
       };
    }

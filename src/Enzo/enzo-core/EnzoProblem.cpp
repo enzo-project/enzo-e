@@ -8,6 +8,20 @@
 ///
 
 #include "enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoMethodMHDVlct, EnzoMethodPpm,
+                                        // EnzoMethodPpml
+
+#include "Enzo/assorted/assorted.hpp" // misc. Method classes
+#include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
+                                    // EnzoMethodBackgroundAcceleration
+                                    // EnzoComputeAcceleration
+                                    // EnzoSolver* EnzoMatrix*
+#include "Enzo/initial/initial.hpp" // lots of initializers
+#include "Enzo/io/io.hpp" // EnzoMethodCheck, EnzoInitial{Hdf5,Music}
+#include "Enzo/mesh/mesh.hpp" // EnzoProlong, EnzoRefine*, EnzoRestrict*
+#include "Enzo/particle/particle.hpp"
+#include "Enzo/tests/tests.hpp" // EnzoInitial*Test
+#include "Enzo/utils/utils.hpp" // EnzoComputeCicInterp
 
 //----------------------------------------------------------------------
 
@@ -576,6 +590,21 @@ Method * EnzoProblem::create_method_
 {
   Method * method = 0;
 
+  // historically, this method would always call method->set_courant after
+  // building a new method object. But, with this new p_group approach, each
+  // method objects should opt out of this approach (so that they can set
+  // appropriate default courant factors)
+  // - in cases where the courant factor is not used, we may not explicitly set
+  //   this variable to true (since it doesn't really matter)
+  bool skip_auto_courant = false;
+
+  // move creation of p_group up the call stack?
+  ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
+  Parameters* parameters = cello::simulation()->parameters();
+  const std::string root_path =
+    ("Method:" + parameters->list_value_string(index_method, "Method:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   const EnzoConfig * enzo_config = enzo::config();
 
   // The following 2 lines may need to be updated in the future
@@ -585,50 +614,32 @@ Method * EnzoProblem::create_method_
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
-
-    method = new EnzoMethodPpm(store_fluxes_for_corrections);
-/*
-  } else if (name == "hydro") {
-
-    method = new EnzoMethodHydro
-      (enzo_config->method_hydro_method,
-       enzo::fluid_props()->gamma(),
-       enzo_config->physics_gravity,
-       enzo_config->physics_cosmology,
-       enzo_config->method_hydro_dual_energy,
-       enzo_config->method_hydro_dual_energy_eta_1,
-       enzo_config->method_hydro_dual_energy_eta_2,
-       enzo_config->method_hydro_reconstruct_method,
-       enzo_config->method_hydro_reconstruct_conservative,
-       enzo_config->method_hydro_reconstruct_positive,
-       enzo_config->ppm_density_floor,
-       enzo_config->ppm_pressure_floor,
-       enzo_config->ppm_pressure_free,
+    method = new EnzoMethodPpm
+      (store_fluxes_for_corrections,
        enzo_config->ppm_diffusion,
        enzo_config->ppm_flattening,
+       enzo_config->ppm_pressure_free,
        enzo_config->ppm_steepening,
-       enzo_config->method_hydro_riemann_solver
-       );
-*/
+       enzo_config->ppm_use_minimum_pressure_support,
+       enzo_config->ppm_minimum_pressure_support_parameter);
 
   } else if (name == "ppml") {
 
-    method = new EnzoMethodPpml;
+    method = new EnzoMethodPpml(p_group);
+    skip_auto_courant = true;
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
+    method = new EnzoMethodPmDeposit (p_group);
 
   } else if (name == "pm_update") {
 
-    method = new EnzoMethodPmUpdate
-      (enzo_config->method_pm_update_max_dt);
+    method = new EnzoMethodPmUpdate(p_group);
 
   } else if (name == "heat") {
 
-    method = new EnzoMethodHeat
-      (enzo_config->method_heat_alpha,
-       config->method_courant[index_method]);
+    method = new EnzoMethodHeat(p_group);
+    skip_auto_courant = true;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -697,7 +708,6 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodGravity
       (
        enzo_config->solver_index.at(solver_name),
-       enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate,
        index_prolong,
@@ -708,8 +718,8 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodMHDVlct
       (enzo_config->method_vlct_riemann_solver,
-       enzo_config->method_vlct_half_dt_reconstruct_method,
-       enzo_config->method_vlct_full_dt_reconstruct_method,
+       enzo_config->method_vlct_time_scheme,
+       enzo_config->method_vlct_reconstruct_method,
        enzo_config->method_vlct_theta_limiter,
        enzo_config->method_vlct_mhd_choice,
        store_fluxes_for_corrections);
@@ -811,15 +821,8 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = new EnzoMethodSinkMaker(
-			enzo_config->method_sink_maker_jeans_length_resolution_cells,
-			enzo_config->method_sink_maker_physical_density_threshold_cgs,
-			enzo_config->method_sink_maker_check_density_maximum,
-			enzo_config->method_sink_maker_max_mass_fraction,
-			enzo_config->method_sink_maker_min_sink_mass_solar,
-			enzo_config->method_sink_maker_max_offset_cell_fraction,
-			enzo_config->method_sink_maker_offset_seed_shift
-				     );
+    method = new EnzoMethodSinkMaker(p_group);
+
   } else {
 
     // Fallback to Cello method's
@@ -831,7 +834,9 @@ Method * EnzoProblem::create_method_
   if (method) {
 
     // set the method's courant safety factor
-    method->set_courant(config->method_courant[index_method]);
+    if (!skip_auto_courant){
+      method->set_courant(config->method_courant[index_method]);
+    }
 
     ASSERT2("EnzoProblem::create_method",
 	    "Method created %s does not match method requested %s",
@@ -903,6 +908,25 @@ Physics * EnzoProblem::create_physics_
        enzo_config->physics_fluid_props_mol_weight
        );
 
+  } else if (type == "gravity") {
+
+    // note: it may make sense to convert EnzoProblem::initialize_physics into
+    // a virtual method and provide a custom implementation that reorders the
+    // physics object initialization to avoid the following problem
+    // - unlike things such as methods, initializers, boundaries, or refinement
+    //   criteria, ordering of physics object shouldn't matter to a user
+    // - if we did that, we could consolidate that method with the
+    //   initialize_physics_coda_ method
+
+    for (std::size_t i = index; i < enzo_config->physics_list.size(); i++) {
+      ASSERT("EnzoProblem::create_physics_",
+             "a \"cosmology\" physics object MUST NOT follow a \"gravity\" "
+             "object (it's okay if it comes before the \"gravity\" object)",
+             enzo_config->physics_list[i] != "cosmology");
+    }
+    physics = new EnzoPhysicsGravity
+      (enzo_config->physics_gravity_grav_constant_codeU);
+
   } else {
 
     physics = Problem::create_physics_
@@ -918,21 +942,20 @@ Physics * EnzoProblem::create_physics_
 void EnzoProblem::initialize_physics_coda_(Config * config,
                                            Parameters * parameters) throw()
 {
-  // if EnzoPhysicsFluidProps doesn't already exist, initialize it
-  if (physics("fluid_props") == nullptr){
-    physics_list_.push_back(create_physics_("fluid_props",
-                                            physics_list_.size(),
+  // if EnzoPhysicsFluidProps or EnzoPhysicsGravity don't already exist,
+  // initialize them (this is required for backwards compatability)
+  const std::vector<std::string> required = {"fluid_props", "gravity"};
+  for (const std::string& name: required) {
+    if (physics(name) != nullptr) { continue; }
+    physics_list_.push_back(create_physics_(name, physics_list_.size(),
                                             config, parameters));
   }
 
   // in the future, we might want to move the following snippet from
-  // EnzoSimulation::r_startup_begun to this function:
-  //   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-  //     problem()->physics("cosmology");
-  //  if (cosmology) {
-  //    EnzoUnits * units = (EnzoUnits *) problem()->units();
-  //    units->set_cosmology(cosmology);
-  //  }
+  // EnzoInitialCosmology::EnzoInitialCosmology to this function:
+  //  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+  //  this->physics("cosmology");
+  //  if (cosmology != nullptr) { enzo::units()->set_cosmology(cosmology); }
   // Doing this could resolve some issues encountered in EnzoMethodGrackle more
   // elegantly that the existing work-around
 }

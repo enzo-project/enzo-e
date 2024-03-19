@@ -436,47 +436,26 @@ void Block::print (FILE * fp_in) const
   fprintf (fp,"%d %s PRINT_BLOCK child_data_ = %p\n",
            ip,name_.c_str(),(void*)child_data_);
   int v3[3];index().values(v3);
-  fprintf (fp,"%d %s PRINT_BLOCK index_ = %0x %0x %0x\n",
-           ip,name_.c_str(),v3[0],v3[1],v3[2]);
-  fprintf (fp,"%d %s PRINT_BLOCK array_ = %d %d %d\n",
-           ip,name_.c_str(),array_[0],array_[1],array_[2]);
-  fprintf (fp,"%d %s PRINT_BLOCK level_next_ = %d\n",
-           ip,name_.c_str(),level_next_);
-  fprintf (fp,"%d %s PRINT_BLOCK cycle_ = %d\n",
-           ip,name_.c_str(),state_->cycle());
-  fprintf (fp,"%d %s PRINT_BLOCK time_ = %f\n",
-           ip,name_.c_str(),state_->time());
-  fprintf (fp,"%d %s PRINT_BLOCK dt_ = %f\n",
-           ip,name_.c_str(),state_->dt());
-  fprintf (fp,"%d %s PRINT_BLOCK stop_ = %d\n",
-           ip,name_.c_str(),state_->stopping());
-  fprintf (fp,"%d %s PRINT_BLOCK index_initial_ = %d\n",
-           ip,name_.c_str(),index_initial_);
-  fprintf (fp,"%d %s PRINT_BLOCK children_.size() = %lu\n",
-           ip,name_.c_str(),children_.size());
-  fprintf (fp,"%d %s PRINT_BLOCK child_face_level_curr_.size() = %lu\n",
-           ip,name_.c_str(),child_face_level_curr_.size());
-  for (int i=0; i<child_face_level_curr_.size(); i++) {
-    fprintf (fp,"%d ",child_face_level_curr_[i]);
-  }
-  fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK index_ = %0x %0x %0x\n",CkMyPe(),name_.c_str(),v3[0],v3[1],v3[2]);
+  fprintf (fp,"%d %s PRINT_BLOCK array_ = %d %d %d\n",CkMyPe(),name_.c_str(),array_[0],array_[1],array_[2]);
+  fprintf (fp,"%d %s PRINT_BLOCK level_next_ = %d\n",CkMyPe(),name_.c_str(),level_next_);
+  fprintf (fp,"%d %s PRINT_BLOCK cycle_ = %d\n",CkMyPe(),name_.c_str(),state_->cycle());
+  fprintf (fp,"%d %s PRINT_BLOCK time_ = %f\n",CkMyPe(),name_.c_str(),state_->time());
+  fprintf (fp,"%d %s PRINT_BLOCK dt_ = %f\n",CkMyPe(),name_.c_str(),state_->dt());
+  fprintf (fp,"%d %s PRINT_BLOCK stop_ = %d\n",CkMyPe(),name_.c_str(),state_->stopping());
+  fprintf (fp,"%d %s PRINT_BLOCK index_initial_ = %d\n",CkMyPe(),name_.c_str(),index_initial_);
+  fprintf (fp,"%d %s PRINT_BLOCK children_.size() = %lu\n",CkMyPe(),name_.c_str(),children_.size());
+  fprintf (fp,"%d %s PRINT_BLOCK child_face_level_curr_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_curr_.size());
+  for (std::size_t i=0; i<child_face_level_curr_.size(); i++) {fprintf (fp,"%d ",child_face_level_curr_[i]);} fprintf (fp,"\n");
   sync_coarsen_.print("PRINT_BLOCK",fp);
-  fprintf (fp,"%d %s PRINT_BLOCK sync_count_ %d: ",sync_count_.size());
-  for (int i=0; i<sync_count_.size(); i++) {
-    fprintf (fp,"%d ",sync_count_[i]);
-  }
-  fprintf (fp,"\n");
-  fprintf (fp,"%d %s PRINT_BLOCK sync_max_ %d: ",sync_max_.size());
-  for (int i=0; i<sync_max_.size(); i++) {
-    fprintf (fp,"%d ",sync_max_[i]);
-  }
-  fprintf (fp,"\n");
-  fprintf (fp,"%d %s PRINT_BLOCK child_face_level_next_.size() = %lu\n",
-           ip,name_.c_str(),child_face_level_next_.size());
-  for (int i=0; i<child_face_level_next_.size(); i++) {
-    fprintf (fp,"%d ",child_face_level_next_[i]);
-  }
-  fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK sync_count_ %d: ",
+           CkMyPe(), name_.c_str(), (int)sync_count_.size());
+  for (std::size_t i=0; i<sync_count_.size(); i++) {fprintf (fp,"%d ",sync_count_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK sync_max_ %d: ",
+           CkMyPe(), name_.c_str(), (int)sync_max_.size());
+  for (std::size_t i=0; i<sync_max_.size(); i++) {fprintf (fp,"%d ",sync_max_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK child_face_level_next_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_next_.size());
+  for (std::size_t i=0; i<child_face_level_next_.size(); i++) {fprintf (fp,"%d ",child_face_level_next_[i]);} fprintf (fp,"\n");
 
   fprintf (fp,"%d %s PRINT_BLOCK count_coarsen_ = %d\n",
            ip,name_.c_str(),count_coarsen_);
@@ -502,7 +481,7 @@ void Block::print (FILE * fp_in) const
            ip,name_.c_str(),index_solver_.size());
   adapt_.print(std::string("Adapt-")+name_,this,fp);
 
-  for (int i=0; i<refresh_.size(); i++) { refresh_[i]->print(fp); }
+  for (std::size_t i=0; i<refresh_.size(); i++) { refresh_[i]->print(fp); }
 
   if (fp_in == nullptr) {
     fclose (fp);

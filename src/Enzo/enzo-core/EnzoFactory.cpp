@@ -9,6 +9,8 @@
 
 #include "charm_enzo.hpp"
 
+#include "Enzo/io/io.hpp" // IoEnzoBlock
+
 // #define TRACE_FACTORY
 
 //----------------------------------------------------------------------

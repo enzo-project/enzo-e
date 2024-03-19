@@ -12,8 +12,9 @@
 ///         MechStars methods in Enzo, adapted for Enzo-E.
 
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 #include <time.h>
 
@@ -476,8 +477,9 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
 
           // Here, te_dep_a and ge_dep_a are carrying "energy density" (not specific energy)
           // and vx_dep_a, vy_dep_a, and vy_dep_a are carrying velocity of the shell (not momentum density)
-          te[i] = te[i] / M_scale_tot + te_dep_a[i] * inv_dens_new; 
-          ge[i] = ge[i] / M_scale_tot + ge_dep_a[i] * inv_dens_new;
+ 
+          te[i] = te[i] / M_scale_tot + std::max( (double) te_dep_a[i], 0.0) * inv_dens_new; 
+          ge[i] = ge[i] / M_scale_tot + std::max( (double) ge_dep_a[i], 0.0) * inv_dens_new;
           vx[i] += vx_dep_a[i] * M_scale_shell;
           vy[i] += vy_dep_a[i] * M_scale_shell;
           vz[i] += vz_dep_a[i] * M_scale_shell;
@@ -486,7 +488,7 @@ void EnzoMethodFeedbackSTARSS::add_accumulate_fields(EnzoBlock * enzo_block) thr
           EnzoMethodStarMaker::rescale_densities(enzo_block, i, M_scale_tot);
           // undo rescaling of metal_density field
           mf[i] /= M_scale_tot;
-    
+
          }        
         
       }
@@ -741,7 +743,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
         // windMass and SNMassEjected are in units of Msun
         pmass[ipdm] -= std::max(0.0,
                        (windMass + SNMassEjected) /
-                       (munit/enzo_constants::mass_solar)); 
+                       (munit/enzo_constants::mass_solar));
 
 
         // ionizing radiation
@@ -755,7 +757,8 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
           }
           double lum_unit = munit * lunit * lunit / (tunit*tunit*tunit);
           plum[ipdlum] = Psi_ion * pmass_solar * enzo_constants::luminosity_solar / lum_unit; // erg/s 
-        } // if radiation
+        } // if radiation 
+
 
       } // if mass and lifetime > 0
 
@@ -923,7 +926,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float CloudParticleVectorX[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0,  0, 0,  0,  0,  0,  0, 1, 1,  1, 1,  1,  1,  1,  1, 1};
   enzo_float CloudParticleVectorY[] = { 1,  1,  1,  0,  0, -1, -1, -1,  0, 1, 1,  1, 0,  0, -1, -1, -1, 1, 1,  1, 0,  0, -1, -1, -1, 0};
   enzo_float CloudParticleVectorZ[] = { 1,  0, -1,  1, -1,  1,  0, -1,  0, 1, 0, -1, 1, -1,  1,  0, -1, 1, 0, -1, 1, -1,  1,  0, -1, 0};
-  enzo_float weightsVector[nCouple];
 
   enzo_float CloudParticlePositionX[nCouple];
   enzo_float CloudParticlePositionY[nCouple];
@@ -932,32 +934,20 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   for (int cpInd = 0; cpInd < nCouple; cpInd++)
   {
       double norm = sqrt(CloudParticleVectorX[cpInd] * CloudParticleVectorX[cpInd] +
-                        CloudParticleVectorY[cpInd] * CloudParticleVectorY[cpInd] +
-                        CloudParticleVectorZ[cpInd] * CloudParticleVectorZ[cpInd]);
+                         CloudParticleVectorY[cpInd] * CloudParticleVectorY[cpInd] +
+                         CloudParticleVectorZ[cpInd] * CloudParticleVectorZ[cpInd]);
       double inv_norm = 1.0 / norm;
       double xbaMag = A * A * norm * norm;
+
       // get position 
-      CloudParticlePositionX[cpInd] = xp + CloudParticleVectorX[cpInd]*inv_norm * A;
-      CloudParticlePositionY[cpInd] = yp + CloudParticleVectorY[cpInd]*inv_norm * A;
-      CloudParticlePositionZ[cpInd] = zp + CloudParticleVectorZ[cpInd]*inv_norm * A;
-      weightsVector[cpInd] = 1.0; 
-      /* turn the vectors back into unit-vectors */
+      CloudParticlePositionX[cpInd] = xp + CloudParticleVectorX[cpInd] * A;
+      CloudParticlePositionY[cpInd] = yp + CloudParticleVectorY[cpInd] * A;
+      CloudParticlePositionZ[cpInd] = zp + CloudParticleVectorZ[cpInd] * A;
+
+      /* turn the vectors into unit-vectors */
       CloudParticleVectorZ[cpInd] *= inv_norm;
       CloudParticleVectorY[cpInd] *= inv_norm;
       CloudParticleVectorX[cpInd] *= inv_norm;
-  }
-  float weightsSum = 0.0;
-  for (int wind = 0; wind < nCouple; wind++)
-  {
-      weightsSum += weightsVector[wind];
-  }
-  for (int wind = 0; wind < nCouple; wind++)
-  {
-      weightsVector[wind] /= weightsSum;
-      if (weightsVector[wind] == 0 || isnan(weightsVector[wind]))
-      {
-          ERROR("EnzoMethodFeedbackSTARSS::deposit_feedback()","NaN weight Vector!")
-      }
   }
 
      /* 
@@ -1015,7 +1005,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   Z_mean *= 1/(27 * enzo_constants::metallicity_solar); // Zsun
   mu_mean /= 27;
   d_mean *= rhounit/27; // g/cm^3
-  n_mean = d_mean / (enzo_constants::mass_hydrogen/mu_mean);
+  n_mean = d_mean / (enzo_constants::mass_hydrogen*mu_mean);
 
   #ifdef DEBUG_FEEDBACK_STARSS
     CkPrintf("STARSS_FB: Zmean = %e Dmean = %e (%e) mu_mean = %e ", Z_mean, d_mean, d_mean / rhounit, mu_mean);
@@ -1026,7 +1016,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double fz = std::min(2.0, pow(std::max(Z_Zsun,0.01),-0.14));
 
   // Cooling radius as in Hopkins, but as an average over cells
-  double CoolingRadius = 28.4 * pow(std::max(0.1, n_mean), -3.0 / 7.0) * pow(ejectaEnergy / 1.0e51, 2.0 / 7.0) * fz; // pc
+  double CoolingRadius = 28.4 * pow(std::max(0.01, n_mean), -3.0 / 7.0) * pow(ejectaEnergy / 1.0e51, 2.0 / 7.0) * fz; // pc
   double coupledEnergy = ejectaEnergy;
   double cellwidth_pc = hx*lunit / enzo_constants::pc_cm; // pc
   double dxRatio = cellwidth_pc / CoolingRadius;
@@ -1037,8 +1027,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   */
 
  
-  // if we resolve free expansion, all energy is thermally coupled
-  double p_free = sqrt(2*ejectaMass*enzo_constants::mass_solar*ejectaEnergy) / enzo_constants::mass_solar/1e5;
+  // if we resolve free expansion, energy is mostly thermally coupled
+  double p_free = 1.73e4*sqrt(ejectaMass * ejectaEnergy/1e51 / 3.0); 
   double r_free = 2.75*pow(ejectaMass / 3 / n_mean, 1.0/3); // free expansion radius eq. 2
   
   double t3_sedov = pow(std::max(r_free, std::max(cellwidth_pc, r_free)) * enzo_constants::pc_cm / 
@@ -1058,12 +1048,12 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   double pTerminal;
   if (Z_Zsun > 0.01) {
-    // Thornton, 1998, M_s * V_s, eqs 22, 23, 33, 34
-    pTerminal = 1.6272e5 * pow(ejectaEnergy/1e51, 13./14.) * pow(n_mean, -0.25) * pow(Z_Zsun, -0.36);
+    // Thornton, 1998, sqrt(2 * M_R * E_R), eqs 15, 21, 26, 32
+    pTerminal = 2.7298e5 * pow(ejectaEnergy/1e51, 13./14.) * pow(n_mean, -0.12) * pow(Z_Zsun, -0.14); // Msun km/s
   }
 
   else {
-    pTerminal = 8.3619e5 * pow(ejectaEnergy/1e51, 13./14.) * pow(n_mean, -0.25);
+    pTerminal = 8.5721e5 * pow(ejectaEnergy/1e51, 13./14.) * pow(n_mean, -0.12);
   } 
 
   // compute the temperature (returns temperature in Kelvin)
@@ -1074,7 +1064,9 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   double T = temperature[index];
 
-  double cSound = sqrt(enzo_constants::kboltz*T/(mu_mean*enzo_constants::mass_hydrogen)) / 1e5; // km/s
+  double gamma = 5.0/3.0;
+  double cSound = sqrt(gamma * 
+                       enzo_constants::kboltz*T/(mu_mean*enzo_constants::mass_hydrogen)) / 1e5; // km/s
 
   // fading radius of a supernova, using gas energy of the host cell and ideal gas approximations
   double r_fade = std::max(66.0*pow(ejectaEnergy/1e51, 0.32)*pow(n_mean, -0.37)*pow(cSound/10, -2.0/5.0), 
@@ -1100,7 +1092,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   shellVelocity *=  ratio_pds > 1 ? pow(dx_eff, -7.0 / 3.0) : 1; //km/s
 
-  float beta =  std::max( 1.0, shellVelocity / std::max(1.0, cSound));
+  float beta =  std::min(70.0, std::max( 1.0, shellVelocity / std::max(1.0, cSound)));
 
   // critical density to skip snowplough (remnant combines with ISM before radiative phase); eq 4.9 cioffi 1988
   float nCritical = 0.0038 *(pow(n_mean * T / 1e4, 7.0/9.0) 
@@ -1123,15 +1115,18 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
         // free-expansion phase
         if (cw_eff < r_free){
-          coupledMomenta = 0.0;// Thermal coupling only at free expansion limit.
+          // Most of the energy should be deposited as thermal here. Using
+          // Sedov momentum multiplied by dx/R_free for a smooth transition between the two phases.
+          // In the limit of dx = R_free, coupledMomenta(free expansion) = coupledMomenta(sedov).
+          coupledMomenta = std::min(p_sedov, pTerminal * dx_eff) * cw_eff/r_free;
           #ifdef DEBUG_FEEDBACK_STARSS
-            CkPrintf("STARSS_FB: modifying free phase: p = %e\n", coupledMomenta);
+            CkPrintf("STARSS_FB: Coupling Free Expansion phase: p = %e\n", coupledMomenta);
           #endif
         }
  
         // Sedov phase
         if (r_free < cw_eff && dx_eff <= 1){
-          coupledMomenta = std::min(p_sedov, pTerminal*dx_eff);
+          coupledMomenta = std::min(p_sedov, pTerminal * dx_eff);
           #ifdef DEBUG_FEEDBACK_STARSS       
             CkPrintf("STARSS_FB: Coupling Sedov-Terminal phase: p = %e (ps = %e, pt = %e, dxe = %e)\n", 
                       coupledMomenta, p_sedov, pTerminal, dx_eff);
@@ -1139,16 +1134,21 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         }
 
         // terminal phase
-        if (dx_eff > 1){   
-          coupledMomenta = pTerminal/ sqrt(std::min(1.5, dx_eff));
+        if (dx_eff > 1){
+          // Scaling pTerminal by tanh(dx/R_cool) here to account for error in determining where exactly
+          // the terminal phase begins. If we're straddling the edge between Sedov and terminal phases
+          // (i.e. when dx_eff = R_cool approximately), there could be some extra pressure-driven
+          // expansion even though the algorithm detects that we're in the terminal phase.
+          // tanh(dx/R_cool) -> 1 as dx increases
+          coupledMomenta = pTerminal * tanh(dx_eff);
           #ifdef DEBUG_FEEDBACK_STARSS
             CkPrintf("STARSS_FB: Coupling Terminal phase: p = %e; dx_eff = %e\n", coupledMomenta, dx_eff);
           #endif
         }
 
         // fading phase
-        if (fader > 1 && enzo_config->method_feedback_fade_SNR){ 
-          coupledMomenta = pTerminal * (1.0 - tanh(pow(fader * merger, 2.5)));
+        if (faded && enzo_config->method_feedback_fade_SNR){ 
+          coupledMomenta *= (1.0 - tanh(pow(1.25*fader, 2)));
           #ifdef DEBUG_FEEDBACK_STARSS 
             CkPrintf("STARSS_FB: Coupling Fading phase: p = %e\n", coupledMomenta);
           #endif
@@ -1161,19 +1161,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
                   pow(ejectaEnergy/1e51, 1.0/9.0), pow(fz, 1.0/3.0), 
                   shellVelocity , cSound, beta, r_merge);
         #endif
-
-        if (n_mean <= 10.0 * nCritical){  // in high-pressure, low nb, p_t doesn't hold since there is essentially no radiative phase.
-                                          // thermal energy dominates the evolution (Tang, 2005, doi 10.1086/430875 )
-                                          // We inject 100% thermal energy to simulate this recombining with the ISM
-                                          // and rely on the hydro and the thermal radiation to arrive at the right solution
-          coupledMomenta = coupledMomenta * (1.0-tanh(pow(1.45*nCritical/n_mean, 6.5)));
-
-          #ifdef DEBUG_FEEDBACK_STARSS
-            CkPrintf("STARSS_FB: Adjusting for high-pressure low-n phase (thermal coupling: Nc = %e): p = %e\n", 
-                     nCritical, coupledMomenta);
-          #endif
-        }
-            
+           
         if (T > 1e6 && coupledMomenta > 1e5) {
           #ifdef DEBUG_FEEDBACK_STARSS
             CkPrintf("STARSS_FB: Coupling high momenta to very hot gas!! (p= %e, T= %e, n_c = %e)\n", coupledMomenta, T, nCritical);
@@ -1205,7 +1193,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
    
   if (coupledEnergy > 0 && AnalyticSNRShellMass && !winds) 
   {
-    if (dx_eff < 1)
+    if (dx_eff < 1) // free expansion
        shellMass = 4*cello::pi/3 * d_mean * pow(cw_eff*enzo_constants::pc_cm,3) / enzo_constants::mass_solar; 
 
     else if (dx_eff > 1) {
@@ -1222,28 +1210,37 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         for (int iy_ = iy-1; iy_ <= iy+1; iy_++) {
           for (int iz_ = iz-1; iz_ <= iz+1; iz_++) {
             int flat = INDEX(ix_,iy_,iz_,mx,my);
-            centralMass += d[flat];
-            centralMetals += mf[flat];
+
+            // cell left edges for CiC (starting from ghost zones)
+            double xcell = xm + (ix_+0.5 - gx)*hx; 
+            double ycell = ym + (iy_+0.5 - gy)*hy;
+            double zcell = zm + (iz_+0.5 - gz)*hz;
+
+            double window = Window(xp-xcell, yp-ycell, zp-zcell, hx); // CiC fraction
+
+            if (window <= 0.0) continue;
+
+            centralMass += window * d[flat];
+            centralMetals += window * mf[flat];
           }
         }
       } // endfor ix_
       
       centralMass *= rho_to_m; // Mass in Msun
- 
+      centralMetals *= rho_to_m;
+
       // Can't let host cells evacuate completely! 
       // Enforce maximum shellMass 
-      if (shellMass > maxEvacFraction * centralMass) {
-        #ifdef DEBUG_FEEDBACK_STARSS
-          CkPrintf("STARSS: Shell mass too high for host cells: Rescaling %e -> %e\n", 
-                   shellMass, maxEvacFraction * centralMass);
-        #endif
-        shellMass = maxEvacFraction * centralMass;
-      }  
-    } // endif shellMass > 0
+      shellMass = std::min(shellMass, maxEvacFraction*centralMass);
+
+     } // endif shellMass > 0
       
   } // endif coupledEnergy >0 && AnalyticSNRShellMass && !winds
   
-  double shellMetals = std::min(maxEvacFraction*centralMetals * rho_to_m, 
+  double coupledMass = shellMass + ejectaMass;
+  eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass)) * enzo_constants::mass_solar * 1e10;
+  
+  double shellMetals = std::min(maxEvacFraction*centralMetals, 
                                 Z_Zsun * enzo_constants::metallicity_solar * shellMass); //Msun
 
 #ifdef DEBUG_FEEDBACK_STARSS
@@ -1252,24 +1249,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
              shellMass, shellMetals, shellVelocity, coupledMomenta, centralMass);    
   }  
 #endif
-
-  double coupledMass = shellMass + ejectaMass;
  
-  eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass)) * enzo_constants::mass_solar * 1e10;
-  if (eKinetic > coupledEnergy && !winds){
-
-    #ifdef DEBUG_FEEDBACK_STARSS
-      CkPrintf("STARSS_FB: Rescaling high kinetic energy %e -> ", eKinetic);
-    #endif
-
-    coupledMomenta = sqrt(2.0 * (coupledMass*enzo_constants::mass_solar) * ejectaEnergy)/enzo_constants::mass_solar/1e5;
-    eKinetic = coupledMomenta * coupledMomenta / (2.0 *(coupledMass) * enzo_constants::mass_solar) * enzo_constants::mass_solar * 1e10;
-
-    #ifdef DEBUG_FEEDBACK_STARSS        
-      CkPrintf("STARSS_FB:  %e; new p = %e\n", eKinetic, coupledMomenta);
-    #endif
-    }
-    
   #ifdef DEBUG_FEEDBACK_STARSS
     CkPrintf("STARSS_FB: Ekinetic = %e Mass = %e\n",
              eKinetic, d_mean * pow(lunit * hx, 3) / enzo_constants::mass_solar);
@@ -1341,10 +1321,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
           double dpre = d[flat];
           double zpre = mf[flat];
           double pre_z_frac = zpre / dpre;
-          #ifdef DEBUG_FEEDBACK_STARSS
-            CkPrintf("STARSS: Baryon Prior: d_Msun = %e, mc = %e, ms = %e, m_z = %e, z = %e\n",
-                     d[flat] * rho_to_m, centralMass, shellMass, shellMetals, pre_z_frac);
-          #endif
 
           // subtract values from the "deposit" fields
           d_dep[flat] -= std::min(window * remainMass, maxEvacFraction*dpre);
@@ -1356,6 +1332,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
           minusZ      += -1*mf_dep[flat];
           zsubtracted += -1*mf_dep[flat];
+
         } // endfor iz_
       } // endfor iy_
     } // endfor ix_
@@ -1399,6 +1376,12 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   coupledEnergy += coupledGasEnergy;
 
+  #ifdef DEBUG_FEEDBACK_STARSS
+      CkPrintf("STARSS_FB: Depositing -- Total Energy = %1.4e; Gas Energy = %1.4e;"
+               " Mass = %1.4e; Metal Mass = %1.4e; Momentum = %1.4e\n",
+               coupledEnergy, coupledGasEnergy, coupledMass, coupledMetals, coupledMomenta);
+  #endif
+
   // put everything back into code units before CIC
   // these values correspond to TOTAL (energy, mass, momentum)
   // over all the coupling particles.
@@ -1414,7 +1397,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   enzo_float coupledMass_list[nCouple], coupledMetals_list[nCouple];
   enzo_float coupledMomenta_x[nCouple], coupledMomenta_y[nCouple], coupledMomenta_z[nCouple];
   enzo_float coupledEnergy_list[nCouple], coupledGasEnergy_list[nCouple];
-
   for (int n=0; n<nCouple; n++)
   {
     coupledMass_list[n] = coupledMass/nCouple;
@@ -1425,7 +1407,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     coupledEnergy_list[n] = coupledEnergy/nCouple;
     coupledGasEnergy_list[n] = coupledGasEnergy/nCouple;
   }
-
   enzo_float left_edge[3] = {xm-gx*hx, ym-gy*hy, zm-gz*hz};
 
   // CiC deposit mass/energy/momentum
@@ -1437,17 +1418,17 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   FORTRAN_NAME(cic_deposit)
   (&CloudParticlePositionX, &CloudParticlePositionY,
    &CloudParticlePositionZ, &rank, &nCouple, &coupledMomenta_x, vx_dep, &left_edge,
-   &mx, &my, &mz, &hx, &A);
+   &mx, &my, &mz, &hx, &hx);
 
   FORTRAN_NAME(cic_deposit)
   (&CloudParticlePositionX, &CloudParticlePositionY,
    &CloudParticlePositionZ, &rank, &nCouple, &coupledMomenta_y, vy_dep, &left_edge,
-   &mx, &my, &mz, &hx, &A);
+   &mx, &my, &mz, &hx, &hx);
 
   FORTRAN_NAME(cic_deposit)
   (&CloudParticlePositionX, &CloudParticlePositionY,
    &CloudParticlePositionZ, &rank, &nCouple, &coupledMomenta_z, vz_dep, &left_edge,
-   &mx, &my, &mz, &hx, &A);
+   &mx, &my, &mz, &hx, &hx);
 
   FORTRAN_NAME(cic_deposit)
   (&CloudParticlePositionX, &CloudParticlePositionY,
@@ -1469,10 +1450,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
    &CloudParticlePositionZ, &rank, &nCouple, &coupledMass_list, d_shell, &left_edge,
    &mx, &my, &mz, &hx, &A);
 
-
   // copy deposited quantites to original fields
   for (int i=0; i<size; i++){
-
     double d_old = d[i]; 
     d[i] += d_dep[i];
     double d_new = d[i];
@@ -1483,12 +1462,12 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     mf[i] += mf_dep[i]; 
 
     // need to rescale specific energies to account for added mass
-    te[i] = te[i]/M_scale + te_dep[i] * cell_volume_code/cell_mass;
-    ge[i] = ge[i]/M_scale + ge_dep[i] * cell_volume_code/cell_mass;
+    te[i] = te[i]/M_scale + te_dep[i]/d_new;
+    ge[i] = ge[i]/M_scale + ge_dep[i]/d_new;
+
     vx[i] += vx_dep[i];
     vy[i] += vy_dep[i];
     vz[i] += vz_dep[i];
-     
     // Rescale color fields to account for new densities.
     // Don't need to rescale metal_density because we already deposited
     // into the metal_density field.
@@ -1506,9 +1485,8 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
     ge_dep_tot[i] += ge_dep[i];
     vx_dep_tot[i] += vx_dep[i];
     vy_dep_tot[i] += vy_dep[i];
-    vz_dep_tot[i] += vz_dep[i];  
+    vz_dep_tot[i] += vz_dep[i];
   }
-
   // transform velocities back to "lab" frame
   // convert velocity (actually momentum density at the moment) field back to velocity 
   this->transformComovingWithStar(d,vx,vy,vz,up,vp,wp,mx,my,mz, -1);

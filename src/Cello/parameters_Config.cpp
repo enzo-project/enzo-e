@@ -117,34 +117,9 @@ void Config::pup (PUP::er &p)
   p | method_max_subcycle;
   p | method_max_supercycle;
   p | method_schedule_index;
-  p | method_file_name;
-  p | method_path_name;
-  p | method_close_files_seconds_stagger;
-  p | method_close_files_seconds_delay;
-  p | method_close_files_group_size;
   p | method_courant;
-  p | method_debug_print;
-  p | method_debug_coarse;
-  p | method_debug_ghost;
-  p | method_flux_correct_group;
-  p | method_flux_correct_enable;
-  p | method_flux_correct_min_digits_fields;
-  p | method_flux_correct_min_digits_values;
-  p | method_flux_correct_single_array;
-  p | method_field_list;
-  p | method_particle_list;
-  PUParray (p,method_output_blocking,3);
-  p | method_output_all_blocks;
   p | method_prolong;
-  p | method_ghost_depth;
-  p | method_min_face_rank;
-  p | method_all_fields;
-  p | method_all_particles;
-
-  p | method_timestep;
-  p | method_trace_name;
   p | method_type;
-  p | method_null_dt;
 
   // Monitor
 
@@ -164,8 +139,7 @@ void Config::pup (PUP::er &p)
   p | output_image_log;
   p | output_image_abs;
   p | output_image_mesh_color;
-  p | output_image_mesh_scalar;
-  p | output_image_mesh_scalar_index;
+  p | output_image_mesh_order;
   p | output_image_color_particle_attribute;
   p | output_image_size;
   p | output_image_reduce_type;
@@ -326,21 +300,7 @@ void Config::read_adapt_ (Parameters * p) throw()
 
     std::string param_str = prefix + "field_list";
 
-    int type = p->type(param_str);
-
-    if (type == parameter_list) {
-      const int n = p->list_length(param_str);
-      adapt_field_list[ia].resize(n);
-      for (int index=0; index<n; index++) {
-	adapt_field_list[ia][index] = p->value(index,param_str,"none");
-      }
-    } else if (type == parameter_string) {
-      adapt_field_list[ia].resize(1);
-      adapt_field_list[ia][0] = p->value_string (param_str,"none");
-    } else if (type != parameter_unknown) {
-      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      type,param_str.c_str());
-    }
+    adapt_field_list[ia] = p->value_full_strlist(prefix+"field_list", true);
 
     //--------------------------------------------------
 
@@ -442,8 +402,14 @@ void Config::read_boundary_ (Parameters * p) throw()
 
   for (int ib=0; ib<num_boundary; ib++) {
 
-    boundary_list[ib] = multi_boundary ?
-      p->list_value_string(ib,"Boundary:list","unknown") : "boundary";
+    if (!multi_boundary){
+      boundary_list[ib] = "#boundary#";
+    } else {
+      boundary_list[ib] = p->list_value_string(ib,"Boundary:list","unknown");
+      ASSERT("Config::read_boundary_()",
+             "'#' character can't appear in any strings in Boundary:list",
+             boundary_list[ib].find('#') == std::string::npos);
+    }
 
     std::string prefix = "Boundary:";
 
@@ -474,25 +440,8 @@ void Config::read_boundary_ (Parameters * p) throw()
     boundary_mask[ib] = (p->type(prefix+"mask") 
 			 == parameter_logical_expr);
 
-    std::string param_str = prefix+"field_list";
-    int field_list_type = p->type(param_str);
-    if (field_list_type == parameter_list) {
-      const int n = p->list_length(param_str);
-      boundary_field_list[ib].resize(n);
-      for (int index=0; index<n; index++) {
-	boundary_field_list[ib][index] = p->list_value_string 
-	  (index,param_str);
-      }
-    } else if (field_list_type == parameter_string) {
-      boundary_field_list[ib].resize(1);
-      boundary_field_list[ib][0] = p->value_string(param_str);
-    } else if (field_list_type != parameter_unknown) {
-      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      field_list_type,param_str.c_str());
-    }
-	
+    boundary_field_list[ib] = p->value_full_strlist(prefix+"field_list", true);
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -704,6 +653,16 @@ void Config::read_memory_ (Parameters * p) throw()
 
 //----------------------------------------------------------------------
 
+// format mesh shape str for error messages (it's okay that it's inefficient)
+static std::string format_mesh_dims_(int rank, const int* dims) {
+  std::string out = "{" + std::to_string(dims[0]);
+  if (rank > 1) out += (", " + std::to_string(dims[1]));
+  if (rank > 2) out += (", " + std::to_string(dims[2]));
+  return out + "}";
+}
+
+//----------------------------------------------------------------------
+
 void Config::read_mesh_ (Parameters * p) throw()
 {
   //--------------------------------------------------
@@ -712,6 +671,10 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   TRACE("Parameters: Mesh");
   mesh_root_rank = p->value_integer("Mesh:root_rank",0);
+
+  if ((mesh_root_rank < 0) && (mesh_root_rank > 3)) {
+    ERROR("Config::read_mesh_", "Mesh:root_rank must be set to 1, 2, or 3");
+  }
 
   // Adjust ghost zones for unused ranks
   if (mesh_root_rank < 2) field_ghost_depth[1] = 0;
@@ -751,38 +714,54 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   if ( mesh_min_level > 0 ) {
     ERROR1 ("Config::read", 
-		    "The value of mesh_min_level: %d should be less than or equal to zero", 
-		    mesh_min_level);
+            "Adapt:min_level has invalid value, %d. It should be less than or "
+            "equal to 0", 
+            mesh_min_level);
   }
 
-  // Handle 1D and 2D simulations by adjusting the number of cells along the extra dimensions
+  // Handle 1D and 2D simulations by adjusting the number of cells along the
+  // extra dimensions
   if (mesh_root_rank < 2) mesh_root_size[1] = 1;
   if (mesh_root_rank < 3) mesh_root_size[2] = 1;
 
   // Dimensions of the active zone on each block along each axis
-  int ax = mesh_root_size[0] / mesh_root_blocks[0]; 
-  int ay = mesh_root_size[1] / mesh_root_blocks[1];
-  int az = mesh_root_size[2] / mesh_root_blocks[2];
+  const std::array<int,3> az_shape = {mesh_root_size[0] / mesh_root_blocks[0], 
+                                      mesh_root_size[1] / mesh_root_blocks[1],
+                                      mesh_root_size[2] / mesh_root_blocks[2]};
 
   //  Constraints on the block size based on the ghost depth
   if ( mesh_max_level > 0 ) {
-    if ( !(ax >= 2*field_ghost_depth[0] && ay >= 2*field_ghost_depth[1] && az >= 2*field_ghost_depth[2] ) ) {
-      ERROR3 ("Config::read", 
-		"Dimensions of the active zone on each block (%d, %d, %d) should be at least double the size of the ghost depth for AMR simulations: ", 
-		ax, ay, az);
-    }  
-    if ( (ax%2 != 0) || (ay%2 != 0) && (az%2 != 0) ) {
-      ERROR3 ("Config::read",
-  		      "Dimensions of the active zone on each block (%d, %d, %d) should each be even for AMR simulations" ,
-		      ax, ay, az);
-    }  
-  }
-  else if ( mesh_max_level == 0 ) {   
-    if ( !(ax >= field_ghost_depth[0] && ay >= field_ghost_depth[1] && az >= field_ghost_depth[2] ) ) {
-      ERROR3 ("Config::read",
-  		      "Dimensions of the active zone on each block (%d, %d, %d) should be at least as large as the ghost depth",
-		      ax, ay, az);
-    }  
+    if ( (az_shape[0] < 2*field_ghost_depth[0]) ||
+         (az_shape[1] < 2*field_ghost_depth[1]) ||
+         (az_shape[2] < 2*field_ghost_depth[2]) ) {
+      // the above condition should work even in 1D or 2D
+      std::string az_str = format_mesh_dims_(mesh_root_rank, az_shape.data());
+      std::string gd_str = format_mesh_dims_(mesh_root_rank,
+                                             field_ghost_depth);
+      ERROR2 ("Config::read", 
+	      "Dimensions of the active zone on each block, currently %s, "
+              "should be at least double the ghost depth for AMR simulations. "
+              "Ghost depth is currently %s.", 
+              az_str.c_str(), gd_str.c_str());
+    } else if ( (az_shape[0]%2 != 0) ||
+                ((mesh_root_rank > 1) && (az_shape[1]%2 != 0)) ||
+                ((mesh_root_rank > 2) && (az_shape[2]%2 != 0)) ) {
+      std::string az_str = format_mesh_dims_(mesh_root_rank, az_shape.data());
+      ERROR1 ("Config::read",
+              "Dimensions of the active zone on each block, currently %s, "
+              "should each be even for AMR simulations" ,
+              az_str.c_str());
+    }
+  } else if ( mesh_max_level == 0 ) {   
+    if ( (az_shape[0] < field_ghost_depth[0]) ||
+         (az_shape[1] < field_ghost_depth[1]) ||
+         (az_shape[2] < field_ghost_depth[2]) ) {
+      std::string az_str = format_mesh_dims_(mesh_root_rank, az_shape.data());
+      ERROR1 ("Config::read",
+              "Dimensions of the active zone on each block, currently %s, "
+              "should be at least as large as the ghost depth",
+              az_str);
+    }
   }
 }
 
@@ -802,32 +781,8 @@ void Config::read_method_ (Parameters * p) throw()
   method_max_subcycle.resize(num_method);
   method_max_supercycle.resize(num_method);
   method_courant.resize(num_method);
-  method_file_name.resize(num_method);
-  method_path_name.resize(num_method);
-  method_debug_print.resize(num_method);
-  method_debug_coarse.resize(num_method);
-  method_debug_ghost.resize(num_method);
-  method_flux_correct_group.resize(num_method);
-  method_flux_correct_enable.resize(num_method);
-  method_flux_correct_min_digits_fields.resize(num_method);
-  method_flux_correct_min_digits_values.resize(num_method);
-  method_field_list.resize(num_method);
-  method_particle_list.resize(num_method);
-  method_output_blocking[0].resize(num_method);
-  method_output_blocking[1].resize(num_method);
-  method_output_blocking[2].resize(num_method);
-  method_output_all_blocks.resize(num_method);
-  method_prolong.resize(num_method);
-  method_ghost_depth.resize(num_method);
-  method_min_face_rank.resize(num_method);
-  method_all_fields.resize(num_method);
-  method_all_particles.resize(num_method);
-  method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
-  method_close_files_seconds_stagger.resize(num_method);
-  method_close_files_seconds_delay.resize(num_method);
-  method_close_files_group_size.resize(num_method);
-  method_trace_name.resize(num_method);
+  method_prolong.resize(num_method);
   method_type.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
@@ -864,129 +819,15 @@ void Config::read_method_ (Parameters * p) throw()
       method_schedule_index[index_method] = -1;
     }
 
-    // Read method file_name
-    if (p->type(full_name+":file_name") == parameter_string) {
-      method_file_name[index_method].push_back
-        (p->value_string(full_name+":file_name",""));
-    } else if (p->type(full_name+":file_name") == parameter_list) {
-      int size = p->list_length(full_name+":file_name");
-      if (size > 0) method_file_name[index_method].resize(size);
-      for (int i=0; i<size; i++) {
-        method_file_name[index_method][i] =
-          p->list_value_string(i,full_name+":file_name","");
-      }
-    }
-
-    // Read method path_name
-    if (p->type(full_name+":path_name") == parameter_string) {
-      method_path_name[index_method].push_back
-        (p->value_string(full_name+":path_name",""));
-    } else if (p->type(full_name+":path_name") == parameter_list) {
-      int size = p->list_length(full_name+":path_name");
-      if (size > 0) method_path_name[index_method].resize(size);
-      for (int i=0; i<size; i++) {
-        method_path_name[index_method][i] =
-          p->list_value_string(i,full_name+":path_name","");
-      }
-    }
-
-    // Read throttling parameters for MethodCloseFiles
-    method_close_files_seconds_stagger[index_method] = p->value_float
-      (full_name + ":seconds_stagger",0.0);
-    method_close_files_seconds_delay[index_method] = p->value_float
-      (full_name + ":seconds_delay",0.0);
-    method_close_files_group_size[index_method] = p->value_integer
-      (full_name + ":group_size",std::numeric_limits<int>::max());
-
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
-
-    // Read any MethodDebug parameters
-    method_debug_print[index_method] = p->value_logical
-      (full_name + ":print",false);
-    method_debug_coarse[index_method] = p->value_logical
-      (full_name + ":coarse",false);
-    method_debug_ghost[index_method] = p->value_logical
-      (full_name + ":ghost",false);
-
-    // Read field group for flux correction
-    method_flux_correct_group[index_method] =
-      p->value_string (full_name + ":group","conserved");
-    method_flux_correct_enable[index_method] =
-      p->value_logical (full_name + ":enable",true);
-
-    std::string min_digits_name = full_name + ":min_digits";
-    if (p->type(min_digits_name) == parameter_float){
-      // backwards compatibility
-      method_flux_correct_min_digits_fields[index_method] = {"density"};
-      method_flux_correct_min_digits_values[index_method].push_back
-        (p->value_float (min_digits_name, 0.0));
-    } else if (p->type(min_digits_name) == parameter_list){
-      // load pairs of fields and min_digits
-      int list_length = p->list_length(min_digits_name);
-      ASSERT1("Config::read",
-              "The list assigned to %s must have a non-negative, even length",
-              min_digits_name.c_str(),
-              (list_length >= 0) && (list_length % 2 == 0));
-      for (int i =0; i < list_length; i+=2){
-        method_flux_correct_min_digits_fields[index_method].push_back
-          (p->list_value_string(i, min_digits_name));
-        method_flux_correct_min_digits_values[index_method].push_back
-          (p->list_value_float (i+1, min_digits_name, 0.0));
-      }
-    } else if (p->param(min_digits_name) != nullptr){
-      ERROR1("Config::read", "%s has an invalid type", min_digits_name.c_str());
-    }
-
-    method_flux_correct_single_array =
-      p->value_logical (full_name + ":single_array",true);
-
-    // Field and particle lists if needed by MethodRefresh
-    int n = p->list_length(full_name + ":field_list");
-    method_field_list[index_method].resize(n);
-    for (int i=0; i<n; i++) {
-      method_field_list[index_method][i] =
-        p->list_value_string(i,full_name+":field_list");
-    }
-    n = p->list_length(full_name + ":particle_list");
-    method_particle_list[index_method].resize(n);
-    for (int i=0; i<n; i++) {
-      method_particle_list[index_method][i] =
-        p->list_value_string(i,full_name+":particle_list");
-    }
-
-    for (int i=0; i<3; i++) {
-      method_output_blocking[i][index_method] =
-        p->list_value_integer(i,full_name+":blocking",1);
-    }
-    method_output_all_blocks[index_method] =
-      p->value_logical(full_name+":all_blocks",true);
 
     method_prolong[index_method] =
       p->value_string(full_name+":prolong","linear");
 
-    // Read refresh method parameters
-    method_ghost_depth[index_method] =
-      p->value_integer(full_name+":ghost_depth",0);
-    method_min_face_rank[index_method] =
-      p->value_integer(full_name+":min_face_rank",0); // default 0 all faces
-    method_all_fields[index_method] =
-      p->value_logical(full_name+":all_fields",false);
-    method_all_particles[index_method] =
-      p->value_logical(full_name+":all_particles",false);
-
-    // Read specified timestep, if any (for MethodTrace)
-    method_timestep[index_method] = p->value_float
-      (full_name + ":timestep",std::numeric_limits<double>::max());
-
-    method_trace_name[index_method] = p->value_string
-      (full_name + ":name", "trace");
-
     method_type[index_method] = p->value_string
       (full_name + ":type", name);
   }
-  method_null_dt = p->value_float
-    ("Method:null:dt",std::numeric_limits<double>::max());
 
 }
 
@@ -1025,8 +866,7 @@ void Config::read_output_ (Parameters * p) throw()
   output_image_log.resize(num_output);
   output_image_abs.resize(num_output);
   output_image_mesh_color.resize(num_output);
-  output_image_mesh_scalar.resize(num_output);
-  output_image_mesh_scalar_index.resize(num_output);
+  output_image_mesh_order.resize(num_output);
   output_image_color_particle_attribute.resize(num_output);
   output_image_size.resize(num_output);
   output_image_reduce_type.resize(num_output);
@@ -1152,10 +992,8 @@ void Config::read_output_ (Parameters * p) throw()
 
       output_image_mesh_color[index_output] = 
 	p->value_string("image_mesh_color","level");
-      output_image_mesh_scalar[index_output] = 
-	p->value_string("image_mesh_scalar","none");
-      output_image_mesh_scalar_index[index_output] = 
-	p->value_integer("image_mesh_scalar_index",0);
+      output_image_mesh_order[index_output] =
+	p->value_string("image_mesh_order","none");
 
       output_image_color_particle_attribute[index_output] = 
 	p->value_string("image_color_particle_attribute","");
@@ -1199,7 +1037,7 @@ void Config::read_output_ (Parameters * p) throw()
             int color_rgb;
             if (name[0] == '#') {
               bool is_valid=true;
-              for (int i=1; i<name.size(); i++) {
+              for (std::size_t i=1; i<name.size(); i++) {
                 is_valid = is_valid && isxdigit(name[i]);
               }
               ASSERT1 ("Config::read_output()",

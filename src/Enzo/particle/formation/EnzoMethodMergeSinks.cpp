@@ -12,9 +12,12 @@
 ///         iterative procedure to merge particles together, so that no
 ///         two particles are within a 'merging radius' of each other.
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "../FofLib.hpp" // should this be in "enzo.hpp"?
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
+#include "Enzo/particle/FofLib.hpp"
+
 #include <time.h>
 
 //#define DEBUG_MERGESINKS

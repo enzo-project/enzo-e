@@ -1,16 +1,20 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# add utility source files (used in multiple other components) to enzo target
-
-# Get the list of source files in this directory
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp
+# create Enzo::tests, which represents defines source files for initializers
+# that explicitly exist for testing purposes
+#
+# We explicitly list files (rather than use glob) since that makes CMake better
+# at rebuilds (especially after changing branches)
+add_library(Enzo_utils
+  utils.hpp utils.cpp
+  EnzoCenteredFieldRegistry.cpp EnzoCenteredFieldRegistry.hpp
+  EnzoComputeCicInterp.cpp EnzoComputeCicInterp.hpp
+  EnzoEFltArrayMap.cpp EnzoEFltArrayMap.hpp
+  EnzoFieldAdaptor.cpp EnzoFieldAdaptor.hpp
 )
+add_library(Enzo::utils ALIAS Enzo_utils)
 
-target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
+# the following can be improved (it links more than is necessary)
+target_link_libraries(Enzo_utils PUBLIC enzo ${CELLO_LIBS})
+target_include_directories(Enzo_utils PUBLIC ${ROOT_INCLUDE_DIR})
+target_link_options(Enzo_utils PRIVATE ${Cello_TARGET_LINK_OPTIONS})

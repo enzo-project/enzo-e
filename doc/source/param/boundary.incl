@@ -32,7 +32,9 @@
    :Default: :d:`"undefined"`
    :Scope:     :c:`Cello`
 
-   :e:`Boundary conditions in Enzo-E include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`inflow` :e:`and` :p:`field_list` :e:`parameters.`
+   :e:`Boundary conditions in Enzo-E include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`
+
+   :t:`"inflow"` :e:`boundary conditions additionally require the` :par:param:`~Boundary:<condition>:value` :e:`parameter or subgroup and, in certain cases, the` :par:param:`~Boundary:<condition>:field_list` :e:`parameter.`
 
 ----
 
@@ -80,7 +82,7 @@
 
 ----
 
-.. par:parameter:: Boundary:<condition>:inflow
+.. par:parameter:: Boundary:<condition>:value
 
    :Summary:    :s:`Value for inflow boundary conditions`
    :Type:    :par:typefmt:`float`
@@ -89,23 +91,47 @@
    :Default: :d:`[]`
    :Scope:     :c:`Cello`
 
-   :e:`The` :p:`inflow` :e:`parameter is used to specify field values for` :p:`inflow` :e:`type boundary conditions.  The` :p:`inflow` :e:`parameter is used in conjunction with the` :p:`field_list` :e:`parameter.` :p:`inflow` :e:`may be of type` :t:`float`, :t:`float-expr`, :e:`or a list of alternating` :t:`float-expr` :e:`and` :t:`logical-expr` :e:`types`.  :t:`float-expr` :e:`may be a function of x, y, z, and t.  When a list is specified, the` :t:`logical-expr` :e:`is treated as a mask, similar to an 'if-then-else' clause`
+   :e:`For` :p:`inflow` :e:`type boundary conditions, there are 2 ways to specify field values. In both cases, the parameter(s) are assigned "value-expressions", which may be of type` :par:typefmt:`float`, :par:typefmt:`float-expr`, :e:`or a list of alternating` :par:typefmt:`float-expr` :e:`and` :par:typefmt:`logical-expr` :e:`types. Both` :par:typefmt:`float-expr` :e:`and` :par:typefmt:`logical-expr` :e:`may be functions of x, y, z, and t.  When a list is specified, the` :par:typefmt:`logical-expr` :e:`is treated as a mask, similar to an 'if-then-else' clause.`
 
-      ::
+   :e:`The two approaches include:`
 
-          Boundary {
-             ...
-             VELOCITY_Y {
-                type = "inflow";
-                field_list = "velocity_y";
-                inflow = [ -8.25*0.5,
-                           ((x <= 0.166667) && (y <= 0.0) ) ||
-                            (x <= 0.0) ||
-                            ((x < 0.744017 + 11.547*t) && (y >= 1.0))
-                         ];
-              }
-          }
+     1. :e:`Under the historic approach,` :par:param:`!Boundary:<condition>:value` :e:`is a parameter that is directly assigned a "value-expression". This "value-expression" specifies the value enforced by this boundary for all fields in the` :par:param:`~Boundary:<condition>:field_list` :e:`parameter.`
 
+        ::
+
+            Boundary {
+               ...
+               VELOCITY_Y {
+                  type = "inflow";
+                  field_list = "velocity_y";
+                  value = [ -8.25*0.5,
+                             ((x <= 0.166667) && (y <= 0.0) ) ||
+                              (x <= 0.0) ||
+                              ((x < 0.744017 + 11.547*t) && (y >= 1.0)),
+                             0.0
+                          ];
+               }
+            }
+
+     2. :e:`Under the second approach,` :par:param:`!Boundary:<condition>:value` :e:`is a parameter-subgroup. Within the parameter-subgroup, "value-expressions" are assigned to parameters that are named after the fields that the "value-expressions" apply to. Under this approach, it is an error for the` :par:param:`~Boundary:<condition>:field_list` :e:`parameter to be specified. This approach bears a lot of similarities to the way values are specified in the` :ref:`"value" problem initializer. <value-initializer-param-ref>`
+
+        ::
+
+            Boundary {
+               ...
+               x_upstream {
+                  type = "inflow";
+                  axis = "x";
+                  face = "lower";
+                  value {
+                     density    = [ 0.1, (y <= 0.5), 0.1 * (y - 0.5) ];
+                     velocity_x = 10.0;
+                     velocity_y = 0.0;
+                     velocity_z = 0.0;
+                     total_energy = 75.0;
+                  }
+               }
+            }
 
 ----
 
@@ -116,4 +142,4 @@
    :Default: :d:`[]`
    :Scope:     :c:`Cello`
 
-   :e:`The` :p:`field_list` :e:`parameter is used to restrict boundary conditions to the specified fields.  An empty list, which is the default, is used to specify all fields.`
+   :e:`The` :par:param:`!field_list` :e:`parameter is used to restrict boundary conditions to the specified fields.  An empty list, which is the default, is used to specify all fields.`

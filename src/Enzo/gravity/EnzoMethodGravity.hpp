@@ -29,7 +29,6 @@ public: // interface
 
   /// Create a new EnzoMethodGravity object
   EnzoMethodGravity(int index_solver,
-		    double grav_const,
 		    int order,
 		    bool accumulate,
 		    int index_prolong,
@@ -38,7 +37,6 @@ public: // interface
 
   EnzoMethodGravity()
     : index_solver_(-1),
-      grav_const_(0.0),
       order_(4),
       ir_exit_(-1),
       index_prolong_(0),
@@ -60,7 +58,6 @@ public: // interface
   EnzoMethodGravity (CkMigrateMessage *m)
     : Method (m),
       index_solver_(-1),
-      grav_const_(0.0),
       order_(4),
       ir_exit_(-1),
       index_prolong_(0),
@@ -85,7 +82,6 @@ public: // interface
     Method::pup(p);
 
     p | index_solver_;
-    p | grav_const_;
     p | order_;
     p | dt_max_;
     p | ir_exit_;
@@ -135,9 +131,6 @@ protected: // attributes
 
   /// Solver index for the linear solver used to compute the potential
   int index_solver_;
-
-  /// Gravity constant, e.g. 6.67384e-8 (cgs)
-  double grav_const_;
 
   /// Order of Laplacian and acceleration computation: 2 or 4
   /// (Note EnzoMatrixLaplacian supports order=6 as well)
