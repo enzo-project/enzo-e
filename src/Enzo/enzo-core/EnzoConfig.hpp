@@ -281,15 +281,6 @@ public: // interface
       method_feedback_NEvents(-1),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
-      // EnzoMethodHydro
-      method_hydro_method(""),
-      method_hydro_dual_energy(false),
-      method_hydro_dual_energy_eta_1(0.0),
-      method_hydro_dual_energy_eta_2(0.0),
-      method_hydro_reconstruct_method(""),
-      method_hydro_reconstruct_conservative(false),
-      method_hydro_reconstruct_positive(false),
-      method_hydro_riemann_solver(""),
       /// EnzoMethodStarMaker
       method_star_maker_flavor(""),
       method_star_maker_use_density_threshold(false),           // check above density threshold before SF
@@ -742,16 +733,6 @@ public: // attributes
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
-
-  /// EnzoMethodHydro
-  std::string                method_hydro_method;
-  bool                       method_hydro_dual_energy;
-  double                     method_hydro_dual_energy_eta_1;
-  double                     method_hydro_dual_energy_eta_2;
-  std::string                method_hydro_reconstruct_method;
-  bool                       method_hydro_reconstruct_conservative;
-  bool                       method_hydro_reconstruct_positive;
-  std::string                method_hydro_riemann_solver;
 
   /// EnzoMethodFeedback
   std::string               method_feedback_flavor;
