@@ -71,10 +71,6 @@ public: // interface
   inline double volume() const
   { return length()*length()*length(); }
 
-  /// Return density units scaling factor (derived)
-  inline double density() const
-  { return mass() / volume(); }
-
   /// Return acceleration units scaling factor (derived)
   inline double acceleration() const
   { return length() / time() / time(); }
@@ -98,8 +94,20 @@ public: // virtual methods
   { return length_; }
 
   /// Return velocity units scaling factor (derived)
+  ///
+  /// @note
+  /// If a subclass overrides this method, it is the subclass's responsibility
+  /// to ensure it is consistent with the `mass` and `volume` methods
   virtual double velocity() const
   { return length() / time(); }
+
+  /// Return density units scaling factor (derived)
+  ///
+  /// @note
+  /// If a subclass overrides this method, it is the subclass's responsibility
+  /// to ensure it is consistent with the `mass` and `volume` methods
+  virtual double density() const
+  { return mass() / volume(); }
 
 private: // attributes
 
