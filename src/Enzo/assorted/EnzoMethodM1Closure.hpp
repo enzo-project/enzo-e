@@ -16,7 +16,7 @@ class M1Tables {
 //   relevant to EnzoMethodM1Closure
 
 public:
-  M1Tables();
+  M1Tables(std::string hll_file) { read_hll_eigenvalues(hll_file); }
 
   int hll_table_f     (int i, int j) const throw() { return hll_table_f_[100*i+j]; }
   int hll_table_theta (int i, int j) const throw() { return hll_table_theta_[100*i+j]; }
@@ -48,21 +48,45 @@ class EnzoMethodM1Closure : public Method {
 public: // interface
 
   /// Create a new EnzoMethodM1Closure object
-
-  EnzoMethodM1Closure(const int N_groups);
+  EnzoMethodM1Closure(ParameterGroup p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodM1Closure );
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodM1Closure (CkMigrateMessage *m)
-    : Method (m)
-    , N_groups_(0)
-    , ir_injection_(-1)
+    : Method (m),
+      N_groups_(0),
+      flux_function_(""),
+      hll_file_(""),
+      clight_frac_(1.0),
+      photon_escape_fraction_(1.0),
+      radiation_spectrum_(""),
+      temperature_blackbody_(0.0),
+      particle_luminosity_(-1.0),
+      min_photon_density_(0.0),
+      attenuation_(true),
+      thermochemistry_(true),
+      recombination_radiation_(false),
+      H2_photodissociation_(false),
+      lyman_werner_background_(false),
+      LWB_J21_(-1.0),
+      cross_section_calculator_(""),
+      SED_(),
+      energy_lower_(),
+      energy_upper_(),
+      energy_mean_(),
+      sigmaN_(),
+      sigmaE_(),
+      ir_injection_(-1),
+      M1_tables(nullptr)
   { }
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) ;
+  void pup (PUP::er &p);
+
+  ~EnzoMethodM1Closure()
+  { if (M1_tables != nullptr) { delete M1_tables; } }
   
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
@@ -81,8 +105,8 @@ public: // interface
   //    get_photoionization_and_heating_rates 
 
 
- /// calls inject_photons(), sets the groups' mean cross sections & energies,
-  /// then launches a refresh
+  /// calls to inject_photons(), sets the groups' mean cross sections &
+  /// energies, then launches a refresh
   ///
   /// @note
   /// When the cross section calculation method is "vernier_average", this
@@ -231,12 +255,55 @@ protected: // methods
   void get_photoionization_and_heating_rates (EnzoBlock * enzo_block, double clight) throw();
 
 protected: // attributes
+
+  /// # of frequency bins
   int N_groups_;
 
-  // Refresh id's
+  /// which flux function to use
+  std::string flux_function_;
+
+  /// path to hll eigenvalue table
+  std::string hll_file_;
+
+  /// fraction of speed of light value to use
+  double clight_frac_;
+
+  double photon_escape_fraction_;
+
+  /// Type of radiation spectrum to use for star particles
+  std::string radiation_spectrum_;
+
+  /// requires radiation_spectrum="blackbody"
+  double temperature_blackbody_;
+
+  /// specify emission rate from sources
+  double particle_luminosity_;
+
+  double min_photon_density_;
+  bool attenuation_;
+  bool thermochemistry_;
+  bool recombination_radiation_;
+  bool H2_photodissociation_;
+  bool lyman_werner_background_;
+  double LWB_J21_;
+
+  /// what type of cross section calculator to use
+  std::string cross_section_calculator_;
+
+  /// list of emission rates for all groups (if radiation_spectrum_=="custom")
+  std::vector<double> SED_;
+  std::vector<double> energy_lower_;
+  std::vector<double> energy_upper_;
+  std::vector<double> energy_mean_;
+
+  /// user-defined cross sections (needs cross_section_calculator_== "custom")
+  std::vector<double> sigmaN_;
+  std::vector<double> sigmaE_;
+
+  /// Refresh id's
   int ir_injection_;
 
-  // Tables relevant to M1 closure method
+  /// Tables relevant to M1 closure method
   M1Tables * M1_tables;
 };
 
