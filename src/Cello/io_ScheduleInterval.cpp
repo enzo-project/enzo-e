@@ -72,6 +72,22 @@ void ScheduleInterval::set_seconds_interval
 
 //----------------------------------------------------------------------
 
+namespace { // functions in anonymous namespace are local to this file
+
+int steps_to_time_or_before_(double time, double time_start, double time_step) {
+  // implicit assumption that time_start < time and time_step > 0
+  int nsteps = int(std::trunc((time - time_start) / time_step));
+  if ((nsteps * time_step + time_start) > time){
+    return nsteps - 1;
+  } else {
+    return nsteps;
+  }
+}
+
+};
+
+//----------------------------------------------------------------------
+
 bool ScheduleInterval::write_this_cycle ( int cycle, double time) throw()
 {
 #ifdef DEBUG_SCHEDULE
@@ -92,9 +108,21 @@ bool ScheduleInterval::write_this_cycle ( int cycle, double time) throw()
   case schedule_type_time:
     {
       const bool in_range  = (time_start_ <= time && time <= time_stop_);
-      const bool below_tol = (cello::err_abs(time_next(), time) < tol);
 
-      result = in_range && below_tol;
+      if (in_range >= 0){
+        int nsteps = steps_to_time_or_before_(time, time_start_, time_step_);
+        double min_err_abs =
+          std::min(cello::err_abs(nsteps * time_step_ + time_start_, time),
+                   cello::err_abs((nsteps+1) * time_step_ + time_start_, time));
+        result = min_err_abs < tol;
+      } else {
+        result = false;
+      }
+      // the above if-statement is a crude workaround to make this method
+      // return the correct answer in the scenario when last_ isn't up-to-date.
+      // It replaced the following code:
+      //   const bool below_tol = (cello::err_abs(time_next(), time) < tol);
+      //   result = in_range && below_tol;
 
     }
 
@@ -151,9 +179,14 @@ double ScheduleInterval::update_timestep ( double time, double dt)
 
       if (in_range) {
 
-	double time_next = this->time_next();
+        int nsteps = 1 + steps_to_time_or_before_(time, time_start_,
+                                                  time_step_);
+        double time_next = nsteps * time_step_ + time_start_;
+        // the abrove 3 lines implement a crude-workaround to the following to
+        // ensure correct behavior when last_ isn't properly updated...
+	//double time_next = this->time_next();
 
-	if (time < time_next && time_next < time + dt) {
+	if (time < time_next && time_next < (time + dt)) {
 	  new_dt = time_next - time;
 	}
       }
