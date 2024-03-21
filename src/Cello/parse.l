@@ -1,7 +1,7 @@
 /* See LICENSE_CELLO file for license and copyright information */
 
 %option noyywrap
-
+%option nounput
 
 %x IFILE
 
@@ -169,8 +169,28 @@ include[ \t]*[\"<] { BEGIN IFILE; }
 
 . {  }
 
-\n.* { lineno++; strncpy (linebuf,yytext+1,sizeof(linebuf));
-yyless(1);
+\n.* { lineno++;
+       strncpy (linebuf,yytext+1,sizeof(linebuf));
+       /* check if current line is longer than sizeof(linebuf)
+        * - if the current line is shorter, then strncpy automatically fills
+        *   the remainder of the destination with '\0' characters until it has
+        *   written a total of `sizeof(linebuf)` characters
+        * - unlike strncat & strndup, strncpy does NOT automatically add a null
+        *   to the destination if the source string has more than
+        *   `sizeof(linebuf) characters
+        */
+       if (linebuf[sizeof(linebuf)-1] != '\0') {
+         fprintf(stderr,
+                 "\nWARNING: line %d is too long. We continue parsing under "
+                 "under the assumption that the remainder of the line is "
+                 "whitespace.\n",
+                 lineno-1);
+       }
+       /* we that the buffer is null-terminated in both cases in order to
+        * ensure that we ALWAYS satisfy the compiler */
+       linebuf[sizeof(linebuf)-1] = '\0';
+
+       yyless(1);
 }
 
 %%
