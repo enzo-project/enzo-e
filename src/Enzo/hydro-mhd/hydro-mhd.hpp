@@ -42,5 +42,6 @@
 #include "Enzo/hydro-mhd/EnzoMethodMHDVlct.hpp"
 #include "Enzo/hydro-mhd/EnzoMethodPpm.hpp"
 #include "Enzo/hydro-mhd/EnzoMethodPpml.hpp"
+#include "Enzo/hydro-mhd/SetMinimumSupport.hpp"
 
 #endif /* ENZO_HYDROMHD_HYDROMHD_HPP */
