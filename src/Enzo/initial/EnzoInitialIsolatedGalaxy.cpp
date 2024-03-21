@@ -31,6 +31,8 @@
 #include "Enzo/enzo.hpp"
 #include "Cello/cello.hpp"
 
+#include "Enzo/gravity/gravity.hpp"
+
 //----------------------------------------------------------------------
 #define DEBUG_PERFORMANCE
 //----------------------------------------------------------------------
@@ -451,10 +453,26 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
           double vcirc = 0.0;
           if (this->analytic_velocity_){
-            double rcore_cgs = enzo_config->method_background_acceleration_core_radius * enzo_constants::kpc_cm;
-            double rvir_cgs = enzo_config->method_background_acceleration_DM_mass_radius * enzo_constants::kpc_cm;
-            double Mvir_cgs = enzo_config->method_background_acceleration_DM_mass * enzo_constants::mass_solar;
-            ASSERT1("Enzo::InitialIsolatedGalaxy", "DM halo mass (=%e g) must be positive and in units of solar masses", Mvir_cgs, (Mvir_cgs > 0));
+            EnzoMethodBackgroundAcceleration* bkg_accel_method =
+              (EnzoMethodBackgroundAcceleration*) enzo::problem()->method
+              ("background_acceleration");
+
+            ASSERT("EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution",
+                   "the \"background_acceleration\" method isn't being used",
+                   bkg_accel_method != nullptr);
+            const EnzoPotentialConfigGalaxy* potential_conf =
+              bkg_accel_method->try_get_config_galaxy();
+
+            ASSERT("EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution",
+                   "the \"background_acceleration\" method isn't being used "
+                   "with a galaxy-potential",
+                   potential_conf != nullptr);
+
+            double rcore_cgs = potential_conf->rcore * enzo_constants::kpc_cm;
+            double rvir_cgs =
+              potential_conf->DM_mass_radius * enzo_constants::kpc_cm;
+            double Mvir_cgs =
+              potential_conf->DM_mass * enzo_constants::mass_solar;
 
             double conc = rvir_cgs  / rcore_cgs;
             double   rx = r_cyl / rvir_cgs;

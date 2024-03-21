@@ -8,6 +8,7 @@
 add_library(Enzo_gravity
   gravity.hpp
   EnzoComputeAcceleration.cpp EnzoComputeAcceleration.hpp
+  EnzoPotentialConfig.hpp
   EnzoMethodBackgroundAcceleration.cpp EnzoMethodBackgroundAcceleration.hpp
   EnzoMethodGravity.cpp EnzoMethodGravity.hpp
   EnzoMethodPmDeposit.cpp EnzoMethodPmDeposit.hpp
