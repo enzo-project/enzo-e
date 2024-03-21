@@ -3,6 +3,7 @@
 /// @file     enzo_EnzoMethodGrackle.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 ///           Andrew Emerick (aemerick11@gmail.com)
+///           Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Tues May 7
 /// @brief    [\ref Enzo] Declaration of EnzoMethodGrackle class
 ///
@@ -29,9 +30,7 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(GrackleChemistryData my_chemistry,
-                    bool use_cooling_timestep,
-                    const double radiation_redshift,
+  EnzoMethodGrackle(ParameterGroup p,
                     const double physics_cosmology_initial_redshift,
                     const double time);
 
