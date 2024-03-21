@@ -112,14 +112,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
-  // EnzoInitialInclinedWave
-  initial_inclinedwave_alpha(0.0),
-  initial_inclinedwave_beta(0.0),
-  initial_inclinedwave_amplitude(0.0),
-  initial_inclinedwave_lambda(0.0),
-  initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
-  initial_inclinedwave_positive_vel(true),
-  initial_inclinedwave_wave_type(""),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -156,12 +148,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_pressure_out(0.0),
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
-  // EnzoInitialShockTube
-  initial_shock_tube_setup_name(""),
-  initial_shock_tube_aligned_ax(""),
-  initial_shock_tube_axis_velocity(0.0),
-  initial_shock_tube_trans_velocity(0.0),
-  initial_shock_tube_flip_initialize(false),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -444,14 +430,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
 
-  p | initial_inclinedwave_alpha;
-  p | initial_inclinedwave_beta;
-  p | initial_inclinedwave_amplitude;
-  p | initial_inclinedwave_lambda;
-  p | initial_inclinedwave_parallel_vel;
-  p | initial_inclinedwave_positive_vel;
-  p | initial_inclinedwave_wave_type;
-
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
   p | initial_sedov_radius_relative;
@@ -556,12 +534,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_bulge;
   p | initial_IG_stellar_disk;
   p | initial_IG_use_gas_particles;
-
-  p | initial_shock_tube_setup_name;
-  p | initial_shock_tube_aligned_ax;
-  p | initial_shock_tube_axis_velocity;
-  p | initial_shock_tube_trans_velocity;
-  p | initial_shock_tube_flip_initialize;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -767,14 +739,12 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_feedback_test_(p);
   read_initial_grackle_(p);
   read_initial_hdf5_(p);
-  read_initial_inclined_wave_(p);
   read_initial_isolated_galaxy_(p);
   read_initial_merge_sinks_test_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
-  read_initial_shock_tube_(p);
   read_initial_shu_collapse_(p);
   read_initial_soup_(p);
   read_initial_turbulence_(p);
@@ -1036,31 +1006,6 @@ void EnzoConfig::read_initial_burkertbodenheimer_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_initial_inclined_wave_(Parameters * p)
-{
-
-  // InitialInclinedWave initialization
-
-  initial_inclinedwave_alpha          = p->value_float
-    ("Initial:inclined_wave:alpha",0.0);
-  initial_inclinedwave_beta           = p->value_float
-    ("Initial:inclined_wave:beta",0.0);
-  initial_inclinedwave_amplitude      = p->value_float
-    ("Initial:inclined_wave:amplitude",1.e-6);
-  initial_inclinedwave_lambda         = p->value_float
-    ("Initial:inclined_wave:lambda",1.0);
-  // The default vaue for parallel_vel is known by EnzoInitialInclinedWave
-  // to mean that a value was not specified
-  initial_inclinedwave_parallel_vel   = p->value_float
-    ("Initial:inclined_wave:parallel_vel", std::numeric_limits<double>::min());
-  initial_inclinedwave_positive_vel   = p->value_logical
-    ("Initial:inclined_wave:positive_vel",true);
-  initial_inclinedwave_wave_type      = p->value_string
-    ("Initial:inclined_wave:wave_type","alfven");
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_initial_sedov_(Parameters * p)
 {
   initial_sedov_rank = p->value_integer ("Initial:sedov:rank",0);
@@ -1106,23 +1051,6 @@ void EnzoConfig::read_initial_sedov_random_(Parameters * p)
     p->value_float   ("Initial:sedov_random:density",1.0);
   initial_sedov_random_te_multiplier =
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_shock_tube_(Parameters * p)
-{
-  // Shock Tube Initialization
-  initial_shock_tube_setup_name = p->value_string
-    ("Initial:shock_tube:setup_name","");
-  initial_shock_tube_aligned_ax = p->value_string
-    ("Initial:shock_tube:aligned_ax","x");
-  initial_shock_tube_axis_velocity = p->value_float
-    ("Initial:shock_tube:axis_velocity",0.0);
-  initial_shock_tube_trans_velocity = p->value_float
-    ("Initial:shock_tube:transverse_velocity",0.0);
-  initial_shock_tube_flip_initialize = p -> value_logical
-    ("Initial:shock_tube:flip_initialize", false);
 }
 
 //----------------------------------------------------------------------
