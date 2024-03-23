@@ -171,26 +171,7 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialBCenter(parameters, cycle, time,
 				     enzo_config->initial_bcenter_update_etot);
   } else if (type == "cloud") {
-    initial = new EnzoInitialCloud
-      (cycle,time,
-       enzo_config->initial_cloud_subsample_n,
-       enzo_config->initial_cloud_radius,
-       enzo_config->initial_cloud_center_x,
-       enzo_config->initial_cloud_center_y,
-       enzo_config->initial_cloud_center_z,
-       enzo_config->initial_cloud_density_cloud,
-       enzo_config->initial_cloud_density_wind,
-       enzo_config->initial_cloud_etot_wind,
-       enzo_config->initial_cloud_eint_wind,
-       enzo_config->initial_cloud_velocity_wind,
-       enzo_config->initial_cloud_metal_mass_frac,
-       enzo_config->initial_cloud_initialize_uniform_bfield,
-       enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_Nwaves,
-       enzo_config->initial_cloud_perturb_amplitude,
-       enzo_config->initial_cloud_perturb_min_wavelength,
-       enzo_config->initial_cloud_perturb_max_wavelength,
-       enzo_config->initial_cloud_perturb_seed);
+    initial = new EnzoInitialCloud(cycle,time, p_group);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
