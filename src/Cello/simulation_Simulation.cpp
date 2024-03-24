@@ -1139,8 +1139,8 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
             m,num_sum,num_max,
             (m == 2+num_sum+num_max) );
   }
+#ifdef TRACE_PROCESS_MEMORY
   Memory * memory = Memory::instance();
-#ifdef TRACE_PROCESS_MEMORY  
   CkPrintf ("TRACE_PERF proc %d cycle %d bytes curr %lld high %lld highest %lld\n",
             CkMyPe(),cycle_,memory->bytes(),memory->bytes_high(), memory->bytes_highest());
 #endif
