@@ -78,19 +78,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
-  // EnzoInitialFeedbackTest
-  initial_feedback_test_density(),
-  initial_feedback_test_HI_density(),
-  initial_feedback_test_HII_density(),
-  initial_feedback_test_HeI_density(),
-  initial_feedback_test_HeII_density(),
-  initial_feedback_test_HeIII_density(),
-  initial_feedback_test_e_density(),
-  initial_feedback_test_star_mass(),
-  initial_feedback_test_temperature(),
-  initial_feedback_test_from_file(),
-  initial_feedback_test_metal_fraction(0.01),
-  initial_feedback_test_luminosity(),
   // EnzoInitialGrackleTest
   initial_grackle_test_maximum_H_number_density(1000.0),
   initial_grackle_test_maximum_metallicity(1.0),
@@ -112,14 +99,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
-  // EnzoInitialInclinedWave
-  initial_inclinedwave_alpha(0.0),
-  initial_inclinedwave_beta(0.0),
-  initial_inclinedwave_amplitude(0.0),
-  initial_inclinedwave_lambda(0.0),
-  initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
-  initial_inclinedwave_positive_vel(true),
-  initial_inclinedwave_wave_type(""),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -156,12 +135,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_pressure_out(0.0),
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
-  // EnzoInitialShockTube
-  initial_shock_tube_setup_name(""),
-  initial_shock_tube_aligned_ax(""),
-  initial_shock_tube_axis_velocity(0.0),
-  initial_shock_tube_trans_velocity(0.0),
-  initial_shock_tube_flip_initialize(false),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -357,7 +330,6 @@ EnzoConfig::EnzoConfig() throw ()
     method_background_acceleration_center[i] = 0.5;
     method_background_acceleration_angular_momentum[i] = 0;
 
-    initial_feedback_test_position[i] = 0.5;
   }
 
   method_background_acceleration_angular_momentum[2] = 1;
@@ -444,14 +416,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
 
-  p | initial_inclinedwave_alpha;
-  p | initial_inclinedwave_beta;
-  p | initial_inclinedwave_amplitude;
-  p | initial_inclinedwave_lambda;
-  p | initial_inclinedwave_parallel_vel;
-  p | initial_inclinedwave_positive_vel;
-  p | initial_inclinedwave_wave_type;
-
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
   p | initial_sedov_radius_relative;
@@ -518,20 +482,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_burkertbodenheimer_rotating;
   p | initial_burkertbodenheimer_temperature;
 
-  PUParray(p, initial_feedback_test_position,3);
-  p | initial_feedback_test_luminosity;
-  p | initial_feedback_test_density;
-  p | initial_feedback_test_e_density;
-  p | initial_feedback_test_from_file;
-  p | initial_feedback_test_HeI_density;
-  p | initial_feedback_test_HeII_density;
-  p | initial_feedback_test_HeIII_density;
-  p | initial_feedback_test_HI_density;
-  p | initial_feedback_test_HII_density;
-  p | initial_feedback_test_metal_fraction;
-  p | initial_feedback_test_star_mass;
-  p | initial_feedback_test_temperature;
-
   PUParray(p, initial_IG_center_position,3);
   PUParray(p, initial_IG_bfield,3);
   p | initial_IG_analytic_velocity;
@@ -556,12 +506,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_bulge;
   p | initial_IG_stellar_disk;
   p | initial_IG_use_gas_particles;
-
-  p | initial_shock_tube_setup_name;
-  p | initial_shock_tube_aligned_ax;
-  p | initial_shock_tube_axis_velocity;
-  p | initial_shock_tube_trans_velocity;
-  p | initial_shock_tube_flip_initialize;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -764,17 +708,14 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_cloud_(p);
   read_initial_collapse_(p);
   read_initial_cosmology_(p);
-  read_initial_feedback_test_(p);
   read_initial_grackle_(p);
   read_initial_hdf5_(p);
-  read_initial_inclined_wave_(p);
   read_initial_isolated_galaxy_(p);
   read_initial_merge_sinks_test_(p);
   read_initial_music_(p);
   read_initial_pm_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
-  read_initial_shock_tube_(p);
   read_initial_shu_collapse_(p);
   read_initial_soup_(p);
   read_initial_turbulence_(p);
@@ -1036,31 +977,6 @@ void EnzoConfig::read_initial_burkertbodenheimer_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_initial_inclined_wave_(Parameters * p)
-{
-
-  // InitialInclinedWave initialization
-
-  initial_inclinedwave_alpha          = p->value_float
-    ("Initial:inclined_wave:alpha",0.0);
-  initial_inclinedwave_beta           = p->value_float
-    ("Initial:inclined_wave:beta",0.0);
-  initial_inclinedwave_amplitude      = p->value_float
-    ("Initial:inclined_wave:amplitude",1.e-6);
-  initial_inclinedwave_lambda         = p->value_float
-    ("Initial:inclined_wave:lambda",1.0);
-  // The default vaue for parallel_vel is known by EnzoInitialInclinedWave
-  // to mean that a value was not specified
-  initial_inclinedwave_parallel_vel   = p->value_float
-    ("Initial:inclined_wave:parallel_vel", std::numeric_limits<double>::min());
-  initial_inclinedwave_positive_vel   = p->value_logical
-    ("Initial:inclined_wave:positive_vel",true);
-  initial_inclinedwave_wave_type      = p->value_string
-    ("Initial:inclined_wave:wave_type","alfven");
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_initial_sedov_(Parameters * p)
 {
   initial_sedov_rank = p->value_integer ("Initial:sedov:rank",0);
@@ -1106,23 +1022,6 @@ void EnzoConfig::read_initial_sedov_random_(Parameters * p)
     p->value_float   ("Initial:sedov_random:density",1.0);
   initial_sedov_random_te_multiplier =
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_shock_tube_(Parameters * p)
-{
-  // Shock Tube Initialization
-  initial_shock_tube_setup_name = p->value_string
-    ("Initial:shock_tube:setup_name","");
-  initial_shock_tube_aligned_ax = p->value_string
-    ("Initial:shock_tube:aligned_ax","x");
-  initial_shock_tube_axis_velocity = p->value_float
-    ("Initial:shock_tube:axis_velocity",0.0);
-  initial_shock_tube_trans_velocity = p->value_float
-    ("Initial:shock_tube:transverse_velocity",0.0);
-  initial_shock_tube_flip_initialize = p -> value_logical
-    ("Initial:shock_tube:flip_initialize", false);
 }
 
 //----------------------------------------------------------------------
@@ -1315,49 +1214,6 @@ void EnzoConfig::read_initial_isolated_galaxy_(Parameters * p)
 }
 
 //----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_feedback_test_(Parameters * p)
-{
-  for (int axis=0; axis<3; axis++){
-    initial_feedback_test_position[axis] = p->list_value_float
-      (axis, "Initial:feedback_test:position", 0.5);
-  }
-  initial_feedback_test_luminosity = p->value_float
-    ("Initial:feedback_test:luminosity", 0.0);
-
-  initial_feedback_test_density = p->value_float
-    ("Initial:feedback_test:density", 1.0E-24);
-
-  initial_feedback_test_HI_density = p->value_float
-    ("Initial:feedback_test:HI_density", 1.0E-24);
-
-  initial_feedback_test_HII_density = p->value_float
-    ("Initial:feedback_test:HII_density", 1.0E-100);
-
-  initial_feedback_test_HeI_density = p->value_float
-    ("Initial:feedback_test:HeI_density", 1.0E-100);
-
-  initial_feedback_test_HeII_density = p->value_float
-    ("Initial:feedback_test:HeII_density", 1.0E-100);
-
-  initial_feedback_test_HeIII_density = p->value_float
-    ("Initial:feedback_test:HeIII_density", 1.0E-100);
-
-  initial_feedback_test_e_density = p->value_float
-    ("Initial:feedback_test:e_density", 1.0E-100);
-
-  initial_feedback_test_star_mass = p->value_float
-    ("Initial:feedback_test:star_mass", 1000.0);
-
-  initial_feedback_test_temperature = p->value_float
-    ("Initial:feedback_test:temperature", 1.0E4);
-
-  initial_feedback_test_from_file = p->value_logical
-    ("Initial:feedback_test:from_file", false);
-
-  initial_feedback_test_metal_fraction = p->value_float
-    ("Initial:feedback_test:metal_fraction", 0.01);
-}
 
 void EnzoConfig::read_initial_merge_sinks_test_(Parameters * p)
 {
