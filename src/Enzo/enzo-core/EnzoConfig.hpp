@@ -94,24 +94,6 @@ public: // interface
       initial_burkertbodenheimer_rank(0),
       initial_burkertbodenheimer_rotating(true),
       initial_burkertbodenheimer_temperature(0.0),
-      // EnzoInitialCloud
-      initial_cloud_center_x(0.0),
-      initial_cloud_center_y(0.0),
-      initial_cloud_center_z(0.0),
-      initial_cloud_density_cloud(0.0),
-      initial_cloud_density_wind(0.0),
-      initial_cloud_eint_wind(0.0),
-      initial_cloud_etot_wind(0.0),
-      initial_cloud_initialize_uniform_bfield(false),
-      initial_cloud_metal_mass_frac(0.0),
-      initial_cloud_perturb_Nwaves(0),
-      initial_cloud_perturb_amplitude(0.0),
-      initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
-      initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
-      initial_cloud_perturb_seed(0),
-      initial_cloud_radius(0.),
-      initial_cloud_subsample_n(0),
-      initial_cloud_velocity_wind(0.0),
       // EnzoInitialCollapse
       initial_collapse_mass(0.0),
       initial_collapse_particle_ratio(0.0),
@@ -179,14 +161,6 @@ public: // interface
       initial_IG_stellar_bulge(false),
       initial_IG_stellar_disk(false),
       initial_IG_use_gas_particles(false),       //
-      // EnzoInitialInclinedWave
-      initial_inclinedwave_alpha(0.0),
-      initial_inclinedwave_amplitude(0.0),
-      initial_inclinedwave_beta(0.0),
-      initial_inclinedwave_lambda(0.0),
-      initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
-      initial_inclinedwave_positive_vel(true),
-      initial_inclinedwave_wave_type(""),
       // EnzoInitialMergeSinksTest
       initial_merge_sinks_test_particle_data_filename(""),
       // EnzoInitialMusic
@@ -225,12 +199,6 @@ public: // interface
       initial_sedov_random_radius_relative(0.0),
       initial_sedov_random_te_multiplier(0),
       initial_sedov_rank(0),
-      // EnzoInitialShockTube
-      initial_shock_tube_aligned_ax(""),
-      initial_shock_tube_axis_velocity(0.0),
-      initial_shock_tube_flip_initialize(false),
-      initial_shock_tube_setup_name(""),
-      initial_shock_tube_trans_velocity(0.0),
       // EnzoInitialShuCollapse
       initial_shu_collapse_central_sink_exists(false),
       initial_shu_collapse_central_sink_mass(0.0),
@@ -386,7 +354,6 @@ public: // interface
 
   {
     for (int axis=0; axis<3; axis++) {
-      initial_cloud_uniform_bfield[axis] = 0;
       initial_sedov_array[axis] = 0;
       initial_sedov_random_array[axis] = 0;
       initial_soup_array[axis] = 0;
@@ -424,20 +391,17 @@ protected: // methods
   void read_initial_bb_test_(Parameters *);
   void read_initial_bcenter_(Parameters *);
   void read_initial_burkertbodenheimer_(Parameters *);
-  void read_initial_cloud_(Parameters *);
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
   void read_initial_feedback_test_(Parameters *);
   void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
-  void read_initial_inclined_wave_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
-  void read_initial_shock_tube_(Parameters *);
   void read_initial_shu_collapse_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
@@ -523,26 +487,6 @@ public: // attributes
   bool                       initial_burkertbodenheimer_rotating;
   double                     initial_burkertbodenheimer_outer_velocity;
 
-  /// EnzoInitialCloud;
-  double                     initial_cloud_center_x;
-  double                     initial_cloud_center_y;
-  double                     initial_cloud_center_z;
-  double                     initial_cloud_density_cloud;
-  double                     initial_cloud_density_wind;
-  double                     initial_cloud_eint_wind;
-  double                     initial_cloud_etot_wind;
-  bool                       initial_cloud_initialize_uniform_bfield;
-  double                     initial_cloud_uniform_bfield[3];
-  double                     initial_cloud_metal_mass_frac;
-  int                        initial_cloud_perturb_Nwaves;
-  double                     initial_cloud_perturb_amplitude;
-  double                     initial_cloud_perturb_min_wavelength;
-  double                     initial_cloud_perturb_max_wavelength;
-  unsigned int               initial_cloud_perturb_seed;
-  double                     initial_cloud_radius;
-  int                        initial_cloud_subsample_n;
-  double                     initial_cloud_velocity_wind;
-
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
 
@@ -577,15 +521,6 @@ public: // attributes
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
-
-  /// EnzoInitialInclinedWave
-  double                     initial_inclinedwave_alpha;
-  double                     initial_inclinedwave_beta;
-  double                     initial_inclinedwave_amplitude;
-  double                     initial_inclinedwave_lambda;
-  double                     initial_inclinedwave_parallel_vel;
-  bool                       initial_inclinedwave_positive_vel;
-  std::string                initial_inclinedwave_wave_type;
 
   /// EnzoInitialMusic
 
@@ -629,13 +564,6 @@ public: // attributes
   double                     initial_sedov_random_pressure_out;
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
-
-  /// EnzoInitialShockTube
-  std::string                initial_shock_tube_setup_name;
-  std::string                initial_shock_tube_aligned_ax;
-  double                     initial_shock_tube_axis_velocity;
-  double                     initial_shock_tube_trans_velocity;
-  bool                       initial_shock_tube_flip_initialize;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;

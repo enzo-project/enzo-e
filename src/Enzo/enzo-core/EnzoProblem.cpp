@@ -101,6 +101,11 @@ Initial * EnzoProblem::create_initial_
 
   Initial * initial = 0;
 
+  // move creation of p_accessor up the call stack?
+  const std::string root_path =
+    ("Initial:" + parameters->list_value_string(index, "Initial:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
 
@@ -166,26 +171,7 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialBCenter(parameters, cycle, time,
 				     enzo_config->initial_bcenter_update_etot);
   } else if (type == "cloud") {
-    initial = new EnzoInitialCloud
-      (cycle,time,
-       enzo_config->initial_cloud_subsample_n,
-       enzo_config->initial_cloud_radius,
-       enzo_config->initial_cloud_center_x,
-       enzo_config->initial_cloud_center_y,
-       enzo_config->initial_cloud_center_z,
-       enzo_config->initial_cloud_density_cloud,
-       enzo_config->initial_cloud_density_wind,
-       enzo_config->initial_cloud_etot_wind,
-       enzo_config->initial_cloud_eint_wind,
-       enzo_config->initial_cloud_velocity_wind,
-       enzo_config->initial_cloud_metal_mass_frac,
-       enzo_config->initial_cloud_initialize_uniform_bfield,
-       enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_Nwaves,
-       enzo_config->initial_cloud_perturb_amplitude,
-       enzo_config->initial_cloud_perturb_min_wavelength,
-       enzo_config->initial_cloud_perturb_max_wavelength,
-       enzo_config->initial_cloud_perturb_seed);
+    initial = new EnzoInitialCloud(cycle,time, p_group);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
@@ -202,16 +188,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
-    initial = new EnzoInitialInclinedWave
-      (cycle, time,
-       enzo_config->initial_inclinedwave_alpha,
-       enzo_config->initial_inclinedwave_beta,
-       enzo::fluid_props()->gamma(),
-       enzo_config->initial_inclinedwave_amplitude,
-       enzo_config->initial_inclinedwave_lambda,
-       enzo_config->initial_inclinedwave_parallel_vel,
-       enzo_config->initial_inclinedwave_positive_vel,
-       enzo_config->initial_inclinedwave_wave_type);
+    initial = new EnzoInitialInclinedWave(cycle, time, p_group);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,
@@ -230,14 +207,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
-    initial = new EnzoInitialShockTube
-      (enzo::fluid_props()->gamma(),
-       cycle, time,
-       enzo_config->initial_shock_tube_setup_name,
-       enzo_config->initial_shock_tube_aligned_ax,
-       enzo_config->initial_shock_tube_axis_velocity,
-       enzo_config->initial_shock_tube_trans_velocity,
-       enzo_config->initial_shock_tube_flip_initialize);
+    initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
