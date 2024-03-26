@@ -426,9 +426,7 @@ void Simulation::initialize_performance_() throw()
   p->new_region(perf_stopping,           "stopping");
   p->new_region(perf_block,              "block");
   p->new_region(perf_exit,               "exit");
-#ifdef CONFIG_USE_GRACKLE
   p->new_region(perf_grackle,            "grackle");
-#endif
 
   timer_.start();
 

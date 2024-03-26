@@ -23,9 +23,7 @@ module enzo {
   PUPable GrackleFacade;
 
   // EnzoInitial
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
-#endif
   PUPable EnzoInitialAccretionTest;
   PUPable EnzoInitialBBTest;
   PUPable EnzoInitialBCenter;
