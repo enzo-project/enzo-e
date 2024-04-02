@@ -754,7 +754,7 @@ void Config::read_mesh_ (Parameters * p) throw()
       ERROR1 ("Config::read",
               "Dimensions of the active zone on each block, currently %s, "
               "should be at least as large as the ghost depth",
-              az_str);
+              az_str.c_str());
     }
   }
 }
