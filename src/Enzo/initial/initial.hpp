@@ -64,4 +64,6 @@ extern "C" void FORTRAN_NAME(turboinit2d)
 #include "Enzo/initial/EnzoInitialBurkertBodenheimer.hpp"
 #include "Enzo/initial/EnzoInitialShuCollapse.hpp"
 
+#include "Enzo/initial/obsolete/EnzoInitialPm.hpp"
+
 #endif /* ENZO_INITIAL_INITIAL_HPP */
