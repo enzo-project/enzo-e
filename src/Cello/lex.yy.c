@@ -1,5 +1,5 @@
 
-#line 3 "<stdout>"
+#line 3 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -590,7 +590,7 @@ char linebuf[500];
   int cello_pop_file ();
     
 
-#line 594 "<stdout>"
+#line 594 "lex.yy.c"
 /* double foo (double) */
 /* int foo (double) */
 /* int    ilogb(double); */
@@ -606,7 +606,7 @@ char linebuf[500];
 /* double jn(int, double); */
 /* double ldexp(double, int); */
 /* double yn(int, double); */
-#line 610 "<stdout>"
+#line 610 "lex.yy.c"
 
 #define INITIAL 0
 #define IFILE 1
@@ -667,8 +667,6 @@ extern int yywrap ( void );
 #endif
 
 #ifndef YY_NO_UNPUT
-    
-    static void yyunput ( int c, char *buf_ptr  );
     
 #endif
 
@@ -831,7 +829,7 @@ YY_DECL
 
 
 
-#line 835 "<stdout>"
+#line 833 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1284,16 +1282,36 @@ case 74:
 /* rule 74 can match eol */
 YY_RULE_SETUP
 #line 172 "build/Cello/parse.l"
-{ lineno++; strncpy (linebuf,yytext+1,sizeof(linebuf));
-yyless(1);
+{ lineno++;
+       strncpy (linebuf,yytext+1,sizeof(linebuf));
+       /* check if current line is longer than sizeof(linebuf)
+        * - if the current line is shorter, then strncpy automatically fills
+        *   the remainder of the destination with '\0' characters until it has
+        *   written a total of `sizeof(linebuf)` characters
+        * - unlike strncat & strndup, strncpy does NOT automatically add a null
+        *   to the destination if the source string has more than
+        *   `sizeof(linebuf) characters
+        */
+       if (linebuf[sizeof(linebuf)-1] != '\0') {
+         fprintf(stderr,
+                 "\nWARNING: line %d is too long. We continue parsing under "
+                 "under the assumption that the remainder of the line is "
+                 "whitespace.\n",
+                 lineno-1);
+       }
+       /* we that the buffer is null-terminated in both cases in order to
+        * ensure that we ALWAYS satisfy the compiler */
+       linebuf[sizeof(linebuf)-1] = '\0';
+
+       yyless(1);
 }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 176 "build/Cello/parse.l"
+#line 196 "build/Cello/parse.l"
 ECHO;
 	YY_BREAK
-#line 1297 "<stdout>"
+#line 1315 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1627,43 +1645,6 @@ static int yy_get_next_buffer (void)
 }
 
 #ifndef YY_NO_UNPUT
-
-    static void yyunput (int c, char * yy_bp )
-{
-	char *yy_cp;
-    
-    yy_cp = (yy_c_buf_p);
-
-	/* undo effects of setting up yytext */
-	*yy_cp = (yy_hold_char);
-
-	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-		{ /* need to shift things up to make room */
-		/* +2 for EOB chars. */
-		int number_to_move = (yy_n_chars) + 2;
-		char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
-					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		char *source =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
-
-		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
-			*--dest = *--source;
-
-		yy_cp += (int) (dest - source);
-		yy_bp += (int) (dest - source);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = (int) YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
-
-		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-			YY_FATAL_ERROR( "flex scanner push-back overflow" );
-		}
-
-	*--yy_cp = (char) c;
-
-	(yytext_ptr) = yy_bp;
-	(yy_hold_char) = *yy_cp;
-	(yy_c_buf_p) = yy_cp;
-}
 
 #endif
 
@@ -2299,7 +2280,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 176 "build/Cello/parse.l"
+#line 196 "build/Cello/parse.l"
 
 
 void yyerror(char *s)

@@ -96,9 +96,7 @@ void EnzoMethodCheck::compute ( Block * block) throw()
 {
   TRACE_CHECK_BLOCK("[2] EnzoMethodCheck::compute()",block);
 
-  const auto cycle_simulation = cello::simulation()->state()->cycle();
-  const auto cycle_initial    = cello::simulation()->initial_cycle();
-  if (! (cycle_simulation == cycle_initial)) {
+  if (!cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
                         proxy_enzo_simulation);
     block->contribute(callback);

@@ -257,10 +257,10 @@ void Block::initialize()
   fflush(stdout);
 #endif
 
-  const bool initial_new    = cello::config()->initial_new;
+  const bool initial_new = cello::config()->initial_new;
+
   if (! initial_new) {
-    const bool is_first_cycle = (state_->cycle() == cello::config()->initial_cycle);
-    if (is_first_cycle && level() <= 0) {
+    if (cello::is_initial_cycle(state_->cycle(),InitCycleKind::fresh) && level() <= 0) {
       CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
       contribute(0,0,CkReduction::concat,callback);
     }
@@ -546,11 +546,8 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
   CkPrintf ("TRACE_BLOCK %s apply_initial()\n",name().c_str());
   fflush(stdout);
 #endif
-  const bool is_first_cycle = (state_->cycle() == cello::config()->initial_cycle);
-  if (! is_first_cycle) {
-
+  if (! cello::is_initial_cycle(state_->cycle(),InitCycleKind::fresh)) {
     msg->update(data());
-
   } else {
     TRACE("Block::apply_initial_()");
     const bool initial_new = cello::config()->initial_new;
@@ -707,10 +704,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
   adapt_.set_periodicity(p3);
   adapt_.set_valid(true);
 
-  const bool initial_cycle =
-    (cello::simulation()->state()->cycle() == cello::config()->initial_cycle);
-
-  if ( (level <= 0) && initial_cycle ) {
+  if ( (level <= 0) && cello::is_initial_cycle(state_->cycle(),InitCycleKind::fresh) ) {
     // If root-level (or below) block in first simulation cycle,
     // initialize neighbors to be all adjacent root-level blocks
     int nb3[3],np3[3],ib3[3];

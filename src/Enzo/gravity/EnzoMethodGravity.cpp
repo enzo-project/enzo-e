@@ -172,11 +172,9 @@ void EnzoMethodGravity::refresh_add_accelerations_(Refresh * refresh)
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
-    EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
 
-    if (enzo::simulation()->state()->cycle() == enzo::config()->initial_cycle) {
-    // Check if the pm_deposit method is being used and precedes the
-    // gravity method.
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     ASSERT("EnzoMethodGravity",
            "Error: pm_deposit method must precede gravity method.",
            enzo::problem()->method_precedes("pm_deposit", "gravity"));
