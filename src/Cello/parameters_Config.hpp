@@ -556,8 +556,6 @@ public: // attributes
   std::vector<double>        testing_time_final;
   double                     testing_time_tolerance;
 
-  std::vector<std::string>   timestep_adapt_type;
-
 protected: // functions
 
   void read_adapt_       ( Parameters * ) throw();
@@ -577,7 +575,6 @@ protected: // functions
   void read_solver_      ( Parameters * ) throw();
   void read_stopping_    ( Parameters * ) throw();
   void read_testing_     ( Parameters * ) throw();
-  void read_timestep_    ( Parameters * ) throw();
   void read_units_       ( Parameters * ) throw();
 
   int read_schedule_( Parameters * ,

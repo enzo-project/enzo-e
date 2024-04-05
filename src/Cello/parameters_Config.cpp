@@ -226,9 +226,6 @@ void Config::pup (PUP::er &p)
   p | testing_time_final;
   p | testing_time_tolerance;
 
-  // Timestep
-  p | timestep_adapt_type;
-
 }
 
 //----------------------------------------------------------------------
@@ -253,7 +250,6 @@ void Config::read(Parameters * p) throw()
   read_physics_(p);
   read_stopping_(p);
   read_testing_(p);
-  read_timestep_(p);
   read_units_(p);
 
   TRACE("END   Config::read()");
@@ -1491,40 +1487,6 @@ void Config::read_testing_ (Parameters * p) throw()
     testing_time_final[0]  = p->value_float  ("Testing:time_final", 0.0);
   }
   testing_time_tolerance = p->value_float  ("Testing:time_tolerance", 1e-6);
-}
-
-//======================================================================
-
-void Config::read_timestep_ (Parameters * p) throw()
-{
-  const std::string parameter = "Timestep:adapt_type";
-
-  if (p->type(parameter) == parameter_list) {
-    const int length = p->list_length(parameter);
-    for (int i=0; i<length; i++) {
-      if (p->list_type(i,parameter) == parameter_string) {
-        const std::string value = p->list_value_string (i,parameter,"default");
-        if (value == "method" || value == "block" || value == "none")
-          timestep_adapt_type.push_back(value);
-        else
-          ERROR2("Config::read_timestep_",
-                 "Timestep : adapt_type[%d] = %s; "
-                 "allowed values are a string or list of \"none\", "
-                 "\"method\", or \"block\" ",
-                 i,value.c_str());
-      } else {
-        ERROR("Config::read_timestep_",
-              "Timestep : adapt_type must be a string or list of strings");
-      }
-    }
-  } else if (p->type(parameter) == parameter_string) {
-    const std::string value = p->value_string (parameter,"default");
-    if (value == "method" || value == "block" || value == "none")
-      timestep_adapt_type.push_back(value);
-  } else if (p->type(parameter) != parameter_unknown){
-    ERROR("Config::read_timestep_",
-          "Timestep : adapt_type must be a string or list of strings");
-  }
 }
 
 //======================================================================
