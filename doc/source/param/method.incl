@@ -407,6 +407,26 @@ gravity
         - star formation
         - certain initial conditions
 
+----
+
+.. par:parameter:: Method:gravity:type_super
+
+   :Summary: :s:`How supercycling is performed with gravity: by extrapolating gravitational potential or extrapolating accelerations`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"accelerations"`
+   :Scope:     :c:`Cello`
+
+   :e:`This parameter selects one of two approaches to how gravity is
+   handled in non-solve super-cycle cycles: by extrapolating previously
+   saved gravitational potentials` :p:`(\"potential\")` :e:`or
+   previously saved accelerations` :p:`(\"accelerations\").` :e:`While
+   extrapolating potentials only requires two saved fields instead of
+   six (or four for 2D problems), extrapolating potentials can lead to
+   noticeable grid effects in the computed accelerations along
+   resolution level boundaries. For this reason, the default value of`
+   :p:`\"accelerations\"` :e:`is preferred. See` :ref:`Adaptive Time-Step Design` :e:`for more information about super-cycling gravity.`
+
+
 heat
 ----
 
