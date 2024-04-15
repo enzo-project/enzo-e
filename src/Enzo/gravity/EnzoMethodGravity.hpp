@@ -33,6 +33,7 @@ public: // interface
 		    bool accumulate,
 		    int index_prolong,
 		    double dt_max,
+                    int max_supercycle,
                     std::string type_super);
 
   EnzoMethodGravity()
@@ -46,7 +47,7 @@ public: // interface
       is_time_curr_(-1),
       is_time_prev_(-1),
       type_super_(super_type_potential)
-  {};
+  {}
 
   /// Destructor
   virtual ~EnzoMethodGravity() throw() {}
@@ -122,11 +123,11 @@ public: // interface
 
   void refresh_add_potentials_(Refresh *);
   void refresh_add_accelerations_(Refresh *);
-  void super_save_potential_(EnzoBlock * );
-  void super_save_accelerations_(EnzoBlock * );
-  void super_extrapolate_potential_(EnzoBlock * );
-  void super_extrapolate_accelerations_(EnzoBlock * );
-
+  bool is_supercycle_potential()
+  { return (is_supercycle() && type_super_ == super_type_potential); }
+  bool is_supercycle_accelerations()
+  { return (is_supercycle() && type_super_ == super_type_accelerations); }
+    
 protected: // attributes
 
   /// Solver index for the linear solver used to compute the potential

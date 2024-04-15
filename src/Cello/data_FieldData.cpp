@@ -102,9 +102,9 @@ void FieldData::pup(PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void FieldData::dimensions
+int FieldData::dimensions
 (const FieldDescr * field_descr, int id_field,
- int * mx, int * my, int * mz ) const throw()
+ int * pmx, int * pmy, int * pmz ) const throw()
 {
   int nx,ny,nz;
   int gx,gy,gz;
@@ -113,9 +113,19 @@ void FieldData::dimensions
   field_descr->ghost_depth (id_field,&gx,&gy,&gz);
   field_descr->centering (id_field,&cx,&cy,&cz);
 
-  if (mx) (*mx) = (nx > 1) ? (nx + 2*gx + cx) : 1;
-  if (my) (*my) = (ny > 1) ? (ny + 2*gy + cy) : 1;
-  if (mz) (*mz) = (nz > 1) ? (nz + 2*gz + cz) : 1;
+  const int mx = (nx + 2*gx + cx);
+  const int my = (ny + 2*gy + cy);
+  const int mz = (nz + 2*gz + cz);
+
+  // Return axis sizes
+
+  if (pmx) (*pmx) = (nx > 1) ? mx : 1;
+  if (pmy) (*pmy) = (ny > 1) ? my : 1;
+  if (pmz) (*pmz) = (nz > 1) ? mz : 1;
+
+  // Return total size
+
+  return mx*my*mz;
 }
 
 //----------------------------------------------------------------------

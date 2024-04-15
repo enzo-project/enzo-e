@@ -244,8 +244,8 @@ public: // interface
   /// Return dimensions of fields on the data, without assuming that it is
   /// cell-centered. This always includes ghost zones (regardless of whether
   /// they've been allocated).
-  void dimensions(int id_field,int * mx, int * my = 0, int * mz = 0) const throw()
-  { field_data_->dimensions(field_descr_,id_field, mx,my,mz); }
+  int dimensions(int id_field,int * mx = 0, int * my = 0, int * mz = 0) const throw()
+  { return field_data_->dimensions(field_descr_,id_field, mx,my,mz); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated

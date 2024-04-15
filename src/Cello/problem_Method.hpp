@@ -94,18 +94,47 @@ public: // virtual functions
   void set_courant(double courant) throw ()
   { courant_ = courant; }
 
+  /// Set maximum cycles for super-cycling
   void set_max_supercycle (int max_supercycle)
   { max_supercycle_ = max_supercycle; }
 
+  /// Return maximum cycles for super-cycling
   int max_supercycle () const
   { return max_supercycle_; }
 
-  void set_index(int index)
+  /// Whether super-cycling is enabled
+  bool is_supercycle() const
+  { return (max_supercycle_ > 1); }
+
+  /// Define a field and its two previously saved values for use
+  /// in super-cycling, and return id_super identifying the values
+  int super_define_fields_
+  (std::string field,
+   std::string field_curr,
+   std::string field_prev);
+
+  /// Save (curr = latest) or shift (prev = curr) the computed
+  /// field(s) to use for extrapolating to get approximation in
+  /// non-active cycles when super-cycling
+  void super_save_fields_(Block * );
+  void super_shift_fields_(Block * );
+
+  /// Extrapolate using saved fields to get approximation at
+  /// given time in non-active cycles when super-cycling
+  void super_extrapolate_fields_(Block * block, double time );
+
+  void super_update_time_(Block * block, double time);
+
+void set_index(int index)
   { index_method_ = index; }
 
-  int index() const { return index_method_; }
+  int index() const
+  { return index_method_; }
 
 protected: // functions
+
+  /// Whether this is a "solve-cycle" when supercycling
+  bool is_solve_cycle_(Block * block);
 
   /// Perform vector copy X <- Y
   template <class T>
@@ -141,6 +170,15 @@ protected: // attributes
 
   /// Index of this Method in Problem
   int index_method_;
+
+  /// Field ID's used in super-cycling
+  std::vector<int> super_field_;
+  std::vector<int> super_field_curr_;
+  std::vector<int> super_field_prev_;
+  /// Scalars for times of saved fields
+  int is_time_curr_;
+  int is_time_prev_;
+
 };
 
 #endif /* PROBLEM_METHOD_HPP */
