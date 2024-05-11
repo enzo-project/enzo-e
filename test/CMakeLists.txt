@@ -293,3 +293,6 @@ add_custom_target(process_test_results
                   pandoc -s -o TEST_RESULTS.html --metadata title="Enzo-E Test Results" TEST_RESULTS.md
                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
+# Load Balance
+#setup_test_parallel(LoadBalance-1 LoadBalance/morton-1  input/LoadBalance/test_balance-on-bcg.in)
+setup_test_parallel(LoadBalance-2 LoadBalance/hilbert-1  input/LoadBalance/test_hilbert-balance-on-bcg.in)
