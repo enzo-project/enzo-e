@@ -179,14 +179,6 @@ public: // interface
       initial_IG_stellar_bulge(false),
       initial_IG_stellar_disk(false),
       initial_IG_use_gas_particles(false),       //
-      // EnzoInitialInclinedWave
-      initial_inclinedwave_alpha(0.0),
-      initial_inclinedwave_amplitude(0.0),
-      initial_inclinedwave_beta(0.0),
-      initial_inclinedwave_lambda(0.0),
-      initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
-      initial_inclinedwave_positive_vel(true),
-      initial_inclinedwave_wave_type(""),
       // EnzoInitialMergeSinksTest
       initial_merge_sinks_test_particle_data_filename(""),
       // EnzoInitialMusic
@@ -225,12 +217,6 @@ public: // interface
       initial_sedov_random_radius_relative(0.0),
       initial_sedov_random_te_multiplier(0),
       initial_sedov_rank(0),
-      // EnzoInitialShockTube
-      initial_shock_tube_aligned_ax(""),
-      initial_shock_tube_axis_velocity(0.0),
-      initial_shock_tube_flip_initialize(false),
-      initial_shock_tube_setup_name(""),
-      initial_shock_tube_trans_velocity(0.0),
       // EnzoInitialShuCollapse
       initial_shu_collapse_central_sink_exists(false),
       initial_shu_collapse_central_sink_mass(0.0),
@@ -330,11 +316,6 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
-      // EnzoMethodGravity
-      method_gravity_solver(""),
-      method_gravity_order(4),
-      method_gravity_dt_max(1.0e10),
-      method_gravity_accumulate(false),
       // EnzoMethodBackgroundAcceleration
       method_background_acceleration_flavor(""),
       method_background_acceleration_mass(0.0),
@@ -425,14 +406,12 @@ protected: // methods
   void read_initial_feedback_test_(Parameters *);
   void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
-  void read_initial_inclined_wave_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
-  void read_initial_shock_tube_(Parameters *);
   void read_initial_shu_collapse_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
@@ -444,7 +423,6 @@ protected: // methods
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
   void read_method_feedback_(Parameters *);
-  void read_method_gravity_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_ppm_(Parameters *);
   void read_method_star_maker_(Parameters *);
@@ -572,15 +550,6 @@ public: // attributes
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
 
-  /// EnzoInitialInclinedWave
-  double                     initial_inclinedwave_alpha;
-  double                     initial_inclinedwave_beta;
-  double                     initial_inclinedwave_amplitude;
-  double                     initial_inclinedwave_lambda;
-  double                     initial_inclinedwave_parallel_vel;
-  bool                       initial_inclinedwave_positive_vel;
-  std::string                initial_inclinedwave_wave_type;
-
   /// EnzoInitialMusic
 
   std::vector < std::string > initial_music_field_files;
@@ -623,13 +592,6 @@ public: // attributes
   double                     initial_sedov_random_pressure_out;
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
-
-  /// EnzoInitialShockTube
-  std::string                initial_shock_tube_setup_name;
-  std::string                initial_shock_tube_aligned_ax;
-  double                     initial_shock_tube_axis_velocity;
-  double                     initial_shock_tube_trans_velocity;
-  bool                       initial_shock_tube_flip_initialize;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;
@@ -811,12 +773,6 @@ public: // attributes
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
-
-  /// EnzoMethodGravity
-  std::string                method_gravity_solver;
-  int                        method_gravity_order;
-  double                     method_gravity_dt_max;
-  bool                       method_gravity_accumulate;
 
   /// EnzoMethodBackgroundAcceleration
 
