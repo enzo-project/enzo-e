@@ -10,6 +10,22 @@
 
 #include "io.hpp"
 
+#include <sys/wait.h>
+
+static void sleep_for_2_sec() {
+  // the compiler may produce warnings if we don't properly handle the exit code
+  int status = system("sleep 2");
+
+  if (status == -1) {
+    ERROR("sleep_for_2_sec", "THERE WAS SOME KIND OF PROBLEM");
+  } else if (WIFEXITED(status) == 0) {
+    ERROR("sleep_for_2_sec", "The sleep call didn't terminate properly");
+  } else if (WEXITSTATUS(status) != 0) {
+    ERROR("sleep_for_2_sec",
+          "The sleep command encountered some kind of error: %d.");
+  }
+}
+
 PARALLEL_MAIN_BEGIN
 {
 
@@ -128,7 +144,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
 
-    system("sleep 2");
+    sleep_for_2_sec();
 
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);
@@ -136,7 +152,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
     unit_assert(schedule->write_this_cycle (0,  0.0) == false);
 
-    system("sleep 2");
+    sleep_for_2_sec();
 
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);
     unit_assert(schedule->write_this_cycle (0,  0.0) == true);

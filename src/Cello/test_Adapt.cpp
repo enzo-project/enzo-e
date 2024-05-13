@@ -114,7 +114,6 @@ PARALLEL_MAIN_BEGIN
       // initialize level bounds
       int min = level_want[i0];
       int now = level_curr[i0];
-      int max = level_curr[i0] + 1;
       adapt[i0]->initialize_self (index[i0],min, now);
       if (im >= 0) {
         adapt[i0]->insert_neighbor (index[im],(i0%2==1));
