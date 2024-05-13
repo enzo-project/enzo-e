@@ -12,6 +12,7 @@ Unlike other classes in the Enzo-E layer that descend from the Cello class-hiera
 In practice, :cpp:class:`!Physics` classes are commonly used to store problem-specific configuration information that needs to be accessed by multiple different :cpp:class:`!Method` classes and/or initializers.
 Some functions that make use of this information are also sometimes introduced to these classes.
 
+.. _how-to-store-global-data:
 
 When to write a ``Physics`` class
 =================================

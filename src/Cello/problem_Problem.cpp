@@ -477,7 +477,16 @@ void Problem::initialize_method
 
   Method::courant_global = config->method_courant_global;
 
-  method_list_.push_back(new MethodNull(config->method_null_dt)); 
+  // in the future, it might be nice to refactor Problem::create_method_ so
+  // that we can use it to construct this first MethodNull object. (But that
+  // may be somewhat involved)
+  {
+    const std::string root_path = "Method:null";
+    ASSERT("Problem::create_method_", "Something is wrong",
+           cello::simulation());
+    ParameterGroup p_group(*(cello::simulation()->parameters()), root_path);
+    method_list_.push_back(new MethodNull(p_group));
+  }
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
@@ -896,80 +905,48 @@ Method * Problem::create_method_
 {
   TRACE1("Problem::create_method %s",name.c_str());
 
+  // move creation of p_access up the call stack?
+  ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
+  Parameters* parameters = cello::simulation()->parameters();
+  const std::string root_path =
+    ("Method:" + parameters->list_value_string(index_method, "Method:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   // No default method
   Method * method = nullptr;
 
   if (name == "trace") {
-    method = new MethodTrace(config->method_courant[index_method],
-			     config->method_timestep[index_method],
-			     config->method_trace_name[index_method]);
+    method = new MethodTrace(p_group);
   } else if (name == "null") {
-
-    method = new MethodNull
-      (config->method_null_dt);
-
+    method = new MethodNull(p_group);
   } else if (name == "flux_correct") {
-
-    method = new MethodFluxCorrect
-      (config->method_flux_correct_group[index_method],
-       config->method_flux_correct_enable[index_method],
-       config->method_flux_correct_min_digits_fields[index_method],
-       config->method_flux_correct_min_digits_values[index_method]);
-
+    method = new MethodFluxCorrect(p_group);
   } else if (name == "output") {
-
-    ASSERT("Problem::create_method_()",
-           "MethodOutput must have 'file_name' parameter set",
-           config->method_file_name[index_method].size() > 0);
-    ASSERT("Problem::create_method_()",
-           "MethodOutput must have 'path_name' parameter set",
-           config->method_path_name[index_method].size() > 0);
-
-    method = new MethodOutput
-      ( factory,
-        config->method_file_name[index_method],
-        config->method_path_name[index_method],
-        config->method_field_list[index_method],
-        config->method_particle_list[index_method],
-        config->method_ghost_depth[index_method],
-        config->method_min_face_rank[index_method],
-        config->method_all_fields[index_method],
-        config->method_all_particles[index_method],
-        config->method_output_all_blocks[index_method],
-        config->method_output_blocking[0][index_method],
-        config->method_output_blocking[1][index_method],
-        config->method_output_blocking[2][index_method]);
-
+    // we probably don't have to directly pass factory...
+    method = new MethodOutput(factory, p_group);
   } else if (name == "order_morton") {
 
+    // TODO: refactor to use a factory method/default constructor
+    //   - can we look up mesh_min_level from an existing object? Like Adapt or
+    //     Hierarchy?
     method = new MethodOrderMorton(config->mesh_min_level);
 
   } else if (name == "refresh") {
-
-    method = new MethodRefresh
-      (config->method_field_list[index_method],
-       config->method_particle_list[index_method],
-       config->method_ghost_depth[index_method],
-       config->method_min_face_rank[index_method],
-       config->method_all_fields[index_method],
-       config->method_all_particles[index_method]);
-
+    method = new MethodRefresh(p_group);
   } else if (name == "debug") {
 
+    // TODO: refactor to use MethodDebug's constructor
+    //   - as an aside, the number of fields and particles specified in the
+    //     parameter file may be inaccurate. We probably don't want to do that
     method = new MethodDebug
       (config->num_fields,
        config->num_particles,
-       config->method_debug_print[index_method],
-       config->method_debug_coarse[index_method],
-       config->method_debug_ghost[index_method]);
+       p_group.value_logical("print",false),
+       p_group.value_logical("coarse",false),
+       p_group.value_logical("ghost",false));
 
   } else if (name == "close_files") {
-
-    method = new MethodCloseFiles
-      (config->method_close_files_seconds_stagger[index_method],
-       config->method_close_files_seconds_delay[index_method],
-       config->method_close_files_group_size[index_method]);
-      
+    method = new MethodCloseFiles(p_group);
   }
   return method;
 }

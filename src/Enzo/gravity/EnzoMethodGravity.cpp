@@ -19,19 +19,17 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodGravity::EnzoMethodGravity
-(int index_solver,
- int order,
- bool accumulate,
- int index_prolong,
- double dt_max)
+EnzoMethodGravity::EnzoMethodGravity(ParameterGroup p, int index_solver,
+                                     int index_prolong)
   : Method(),
     index_solver_(index_solver),
-    order_(order),
+    order_(p.value_integer("order",4)),
     ir_exit_(-1),
     index_prolong_(index_prolong),
-    dt_max_(dt_max)
+    dt_max_(p.value_float("dt_max",1.0e10))
 {
+  const bool accumulate = p.value_logical("accumulate",true);
+
   // Change this if fields used in this routine change
   // declare required fields
   cello::define_field ("density");
@@ -109,9 +107,7 @@ EnzoMethodGravity::EnzoMethodGravity
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
-  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle) {
-    // Check if the pm_deposit method is being used and precedes the
-    // gravity method.
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     ASSERT("EnzoMethodGravity",
            "Error: pm_deposit method must precede gravity method.",
            enzo::problem()->method_precedes("pm_deposit", "gravity"));

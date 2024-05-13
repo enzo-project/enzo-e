@@ -23,20 +23,6 @@ public: // interface
     : EnzoReconstructor(active_key_names)
   { }
 
-  /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoReconstructorNN);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoReconstructorNN (CkMigrateMessage *m)
-    : EnzoReconstructor(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    EnzoReconstructor::pup(p);
-  };
-
   void reconstruct_interface
   (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,
    EnzoEFltArrayMap &primr_map, const int dim, const int stale_depth,
