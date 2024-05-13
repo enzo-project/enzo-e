@@ -100,8 +100,9 @@ void EnzoMethodSinkMaker::pup (PUP::er &p)
 
 void EnzoMethodSinkMaker::compute ( Block *block) throw()
 {
-  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     do_checks_(block);
+  }
 
   // Only call compute_ if block is on maximum refinement level.
   if (block->level() == enzo::config()->mesh_max_level){
