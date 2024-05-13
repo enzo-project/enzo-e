@@ -183,9 +183,6 @@ public: // interface
   };
 
   /// Return the index for the block corresponding to the given global coordinates.
-  Index index_from_global(int ix, int iy, int iz, 
-                          int nx, int ny, int nz,
-                          int ax, int ay, int az);
   Index index_from_global(int ix, int iy, int iz, int level, int min_level);
 
   /// Create child blocks during initialization.

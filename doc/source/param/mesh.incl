@@ -31,21 +31,56 @@
 
 ----
 
-:Parameter:  :p:`Mesh` : :p:`level_n_lower`
+:Parameter:  :p:`Mesh` : :p:`level_`:g:`<n>`:p:`_lower`
 :Summary: :s:`The lower coordinates of a region in level n-1 to refine in order to create the mesh at level n.`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`[ 1, 1, 1 ]`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the coordinates of a block in level n-1 of the array of octrees. This block is taken as the lower block defining a region of block in level n-1 to be refined in order to create level n.`
+:e:`This parameter specifies the coordinates of a block in level n-1 of the array of octrees. This block is taken as the lower block defining a region of blocks in level n-1 to be refined in order to create level n. The example below illustrates how to refine a central region in both the root level grid and the first level.`
 
+     ::
+
+         Mesh {
+            root_blocks = [ 4, 4, 4 ];
+            root_rank = 3;
+            root_size = [ 32, 32, 32 ];
+     
+            # To create blocks on level 1, we identify
+            # a rectangular region of blocks on level 0 to refine. 
+            level_1_lower = [ 1, 1, 1 ];    # This line defines the lower corner of the region.
+            level_1_upper = [ 3, 3, 3 ];
+     
+            # To create blocks on level 2, we identify
+            # a rectangular region of blocks on level 1 to refine. 
+            level_2_lower = [ 3, 3, 3 ];    # This line defines the lower corner of the region.
+            level_2_upper = [ 5, 5, 5 ];
+         }
 
 ----
 
-:Parameter:  :p:`Mesh` : :p:`level_n_upper`
+:Parameter:  :p:`Mesh` : :p:`level_`:g:`<n>`:p:`_upper`
 :Summary: :s:`The upper coordinates of a region in level n-1 to refine in order to create the mesh at level n.`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`[ 1, 1, 1 ]`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the coordinates of a block in level n-1 of the array of octrees. This block is taken as the upper block defining a region of block in level n-1 to be refined in order to create level n.` 
+:e:`This parameter specifies the coordinates of a block in level n-1 of the array of octrees. This block is taken as the upper block defining a region of blocks in level n-1 to be refined in order to create level n. The example below illustrates how to refine a central region in both the root level grid and the first level.` 
+
+     ::
+
+         Mesh {
+            root_blocks = [ 4, 4, 4 ];
+            root_rank = 3;
+            root_size = [ 32, 32, 32 ];
+     
+            # To create blocks on level 1, we identify
+            # a rectangular region of blocks on level 0 to refine. 
+            level_1_lower = [ 1, 1, 1 ];
+            level_1_upper = [ 3, 3, 3 ];    # This line defines the upper corner of the region.
+     
+            # To create blocks on level 2, we identify
+            # a rectangular region of blocks on level 1 to refine. 
+            level_2_lower = [ 3, 3, 3 ];
+            level_2_upper = [ 5, 5, 5 ];    # This line defines the upper corner of the region.
+         }

@@ -933,15 +933,6 @@ void Block::index_global
 
 //----------------------------------------------------------------------
 
-Index Block::index_from_global(int ix, int iy, int iz, 
-                               int nx, int ny, int nz,
-                               int ax, int ay, int az)
-{
-  int min_level = - static_cast<int>(log2(ax));
-  int level = static_cast<int>(log2(1.0 * nx / ax));
-  return index_from_global(ix, iy, iz,level, min_level);
-}
-
 Index Block::index_from_global(int ix, int iy, int iz, int level, int min_level)
 {
   Index index;
