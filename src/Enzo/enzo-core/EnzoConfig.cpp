@@ -269,11 +269,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
-  // EnzoMethodGravity
-  method_gravity_solver(""),
-  method_gravity_order(4),
-  method_gravity_dt_max(0.0),
-  method_gravity_accumulate(false),
   /// EnzoMethodBackgroundAcceleration
   method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
@@ -619,11 +614,6 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_turbulence_edot;
 
-  p | method_gravity_solver;
-  p | method_gravity_order;
-  p | method_gravity_dt_max;
-  p | method_gravity_accumulate;
-
   p | method_background_acceleration_flavor;
   p | method_background_acceleration_mass;
   p | method_background_acceleration_DM_mass;
@@ -730,7 +720,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_check_(p);
   read_method_feedback_(p);
   read_method_grackle_(p);
-  read_method_gravity_(p);
   read_method_merge_sinks_(p);
   read_method_ppm_(p);
   read_method_m1_closure_(p);
@@ -1743,27 +1732,6 @@ void EnzoConfig::read_method_vlct_(Parameters * p)
              pname_reconstruct.c_str());
   }
 
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_gravity_(Parameters * p)
-{
-  method_gravity_solver = p->value_string
-    ("Method:gravity:solver","unknown");
-
-  //--------------------------------------------------
-  // Physics
-  //--------------------------------------------------
-
-  method_gravity_order = p->value_integer
-    ("Method:gravity:order",4);
-
-  method_gravity_accumulate = p->value_logical
-    ("Method:gravity:accumulate",true);
-
-  method_gravity_dt_max = p->value_float
-    ("Method:gravity:dt_max",1.0e10);
 }
 
 //----------------------------------------------------------------------
