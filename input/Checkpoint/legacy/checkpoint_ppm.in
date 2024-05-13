@@ -19,7 +19,7 @@
 # conditions were adapted from an earlier parameter-file put together by James
 # Bordner for testing Checkpoint-Restart functionality
 
-include "input/PPM/ppm-implostion2D-NoTestingSection.incl"
+include "input/PPM/ppm-implosion2D-NoTestingSection.incl"
 
 Mesh { root_blocks    = [2,2]; }
 

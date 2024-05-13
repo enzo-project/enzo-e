@@ -8,7 +8,7 @@
 # simple 2D implosion problem with the PPM method.
 
 # Most content that was historically in this file was relocated to:
-include "input/PPM/ppm-implostion2D-NoTestingSection.incl"
+include "input/PPM/ppm-implosion2D-NoTestingSection.incl"
 
 # however, the following parameters are still explicitly defined here:
 

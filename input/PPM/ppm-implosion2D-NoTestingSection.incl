@@ -1,6 +1,11 @@
-# File:    ppm-implostion2D-NoTestingSection.incl
+# File:    ppm-implosion2D-NoTestingSection.incl
 # Problem: 2D Implosion problem
 # Author:  James Bordner (jobordner@ucsd.edu)
+
+# this file and ppm.incl were originally a single file. However, the presence
+# of the `Testing` parameter-section (and to a lesser extent, the presence of
+# the `Stopping` parameter-section) made it difficult to reuse these initial
+# conditions in Checkpoint-Restart tests.
 
    # Domain is the two dimensional box 0 < x,y < 1.0
 
