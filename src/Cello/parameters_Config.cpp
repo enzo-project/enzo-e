@@ -116,7 +116,6 @@ void Config::pup (PUP::er &p)
   p | method_list;
   p | method_schedule_index;
   p | method_courant;
-  p | method_prolong;
   p | method_type;
 
   // Monitor
@@ -754,7 +753,7 @@ void Config::read_mesh_ (Parameters * p) throw()
       ERROR1 ("Config::read",
               "Dimensions of the active zone on each block, currently %s, "
               "should be at least as large as the ghost depth",
-              az_str);
+              az_str.c_str());
     }
   }
 }
@@ -774,7 +773,6 @@ void Config::read_method_ (Parameters * p) throw()
   method_list.   resize(num_method);
   method_courant.resize(num_method);
   method_schedule_index.resize(num_method);
-  method_prolong.resize(num_method);
   method_type.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
@@ -805,9 +803,6 @@ void Config::read_method_ (Parameters * p) throw()
 
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
-
-    method_prolong[index_method] =
-      p->value_string(full_name+":prolong","linear");
 
     method_type[index_method] = p->value_string
       (full_name + ":type", name);

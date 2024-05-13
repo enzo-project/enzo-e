@@ -107,7 +107,12 @@ void IoFieldData::field_array
   if ((! include_ghosts_) && (field_data_->ghosts_allocated())) {
 
     // adjust buffer pointer to start of non-ghost values
-    if (buffer) (*buffer) += type_size*(gx+mx*(gy+my*gz));
+    if (buffer) {
+      // we can't directly perform pointer arithmetic on buffer, since a void*
+      // is a pointer to an unknown type. Consequently, we cast to char*
+      char* tmp_ptr = (char*)(*buffer);
+      *buffer = (void*)(tmp_ptr + type_size*(gx+mx*(gy+my*gz)));
+    }
     if (pnx) (*pnx) = nx + cx;
     if (pny) (*pny) = ny + cy;
     if (pnz) (*pnz) = nz + cz;

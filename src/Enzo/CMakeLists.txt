@@ -88,7 +88,6 @@ add_subdirectory(enzo-core)
 add_subdirectory(chemistry)
 add_subdirectory(cosmology)
 add_subdirectory(fluid-props)
-add_subdirectory(obsolete)
 
 # define the Enzo::assorted target
 add_subdirectory(assorted)

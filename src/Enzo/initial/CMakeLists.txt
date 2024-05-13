@@ -21,6 +21,7 @@ add_library(Enzo_initial
   EnzoInitialShuCollapse.cpp EnzoInitialShuCollapse.hpp
   EnzoInitialSoup.cpp EnzoInitialSoup.hpp
   EnzoInitialTurbulence.cpp EnzoInitialTurbulence.hpp
+  obsolete/EnzoInitialPm.cpp obsolete/EnzoInitialPm.hpp
   turboinit.F
   turboinit2d.F
 )
