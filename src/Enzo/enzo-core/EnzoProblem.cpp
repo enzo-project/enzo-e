@@ -650,7 +650,10 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "gravity") {
 
-    std::string solver_name = enzo_config->method_gravity_solver;
+    // the presence of this extra logic here is undesirable, but it appears
+    // somewhat unavoidable
+
+    std::string solver_name = p_group.value_string("solver","unknown");
 
     int index_solver = enzo_config->solver_index.at(solver_name);
 
@@ -660,18 +663,12 @@ Method * EnzoProblem::create_method_
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
     Prolong * prolong = create_prolong_
-      (config->method_prolong[index_method],config);
+      (p_group.value_string("prolong","linear"),config);
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
 
-    method = new EnzoMethodGravity
-      (
-       enzo_config->solver_index.at(solver_name),
-       enzo_config->method_gravity_order,
-       enzo_config->method_gravity_accumulate,
-       index_prolong,
-       enzo_config->method_gravity_dt_max);
+    method = new EnzoMethodGravity(p_group, index_solver, index_prolong);
 
   } else if (name == "mhd_vlct") {
 
