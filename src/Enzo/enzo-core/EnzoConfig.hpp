@@ -114,19 +114,6 @@ public: // interface
       initial_collapse_temperature(0.0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
-      // EnzoInitialFeedbackTest
-      initial_feedback_test_density(),
-      initial_feedback_test_e_density(),
-      initial_feedback_test_from_file(),
-      initial_feedback_test_HeI_density(),
-      initial_feedback_test_HeII_density(),
-      initial_feedback_test_HeIII_density(),
-      initial_feedback_test_HI_density(),
-      initial_feedback_test_HII_density(),
-      initial_feedback_test_metal_fraction(),
-      initial_feedback_test_star_mass(),
-      initial_feedback_test_temperature(),
-      initial_feedback_test_luminosity(),
       // EnzoGrackleTest
       initial_grackle_test_maximum_H_number_density(1000.0),
       initial_grackle_test_maximum_metallicity(1.0),
@@ -374,8 +361,6 @@ public: // interface
       initial_accretion_test_sink_velocity[axis] = 0.0;
       method_background_acceleration_center[axis] = 0.5;
       method_background_acceleration_angular_momentum[axis] = 0;
-
-      initial_feedback_test_position[axis] = 0.5;
     }
     method_background_acceleration_angular_momentum[2] = 1;
   }
@@ -402,7 +387,6 @@ protected: // methods
   void read_initial_cloud_(Parameters *);
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
-  void read_initial_feedback_test_(Parameters *);
   void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
@@ -598,22 +582,6 @@ public: // attributes
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
-
-  /// EnzoInitialFeedbackTest
-
-  double                     initial_feedback_test_position[3];
-  double                     initial_feedback_test_luminosity;
-  double                     initial_feedback_test_density;
-  double                     initial_feedback_test_HI_density;
-  double                     initial_feedback_test_HII_density;
-  double                     initial_feedback_test_HeI_density;
-  double                     initial_feedback_test_HeII_density;
-  double                     initial_feedback_test_HeIII_density;
-  double                     initial_feedback_test_e_density;
-  double                     initial_feedback_test_star_mass;
-  double                     initial_feedback_test_temperature;
-  bool                       initial_feedback_test_from_file;
-  double                     initial_feedback_test_metal_fraction;
 
   /// EnzoInitialIsolatedGalaxy
   bool                       initial_IG_analytic_velocity;
