@@ -9,10 +9,6 @@
 #include "main.hpp"
 #include "enzo.hpp"
 
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -68,5 +64,3 @@ PARALLEL_MAIN_BEGIN
 
 
 PARALLEL_MAIN_END
-#include "enzo.def.h"
-

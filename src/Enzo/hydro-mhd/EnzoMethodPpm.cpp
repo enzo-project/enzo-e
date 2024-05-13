@@ -5,8 +5,11 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the EnzoMethodPpm class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/hydro-mhd/hydro-mhd.hpp"
+
+#include "Enzo/hydro-mhd/ppm_fortran/ppm_fortran.hpp" // FORTRAN_NAME(calc_dt)
 
 // #define DEBUG_PPM
 // #define COPY_FIELDS_TO_OUTPUT
@@ -34,11 +37,22 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections)
+EnzoMethodPpm::EnzoMethodPpm (bool store_fluxes_for_corrections,
+                              ParameterGroup p)
   : Method(),
-    comoving_coordinates_(enzo::config()->physics_cosmology),
-    store_fluxes_for_corrections_(store_fluxes_for_corrections)
+    comoving_coordinates_(enzo::cosmology() != nullptr),
+    store_fluxes_for_corrections_(store_fluxes_for_corrections),
+    diffusion_(p.value_logical("diffusion", false)),
+    flattening_(p.value_integer("flattening", 3)),
+    pressure_free_(p.value_logical("pressure_free", false)),
+    steepening_(p.value_logical("steepening", false)),
+    use_minimum_pressure_support_(p.value_logical
+                                  ("use_minimum_pressure_support",false)),
+    minimum_pressure_support_parameter_(p.value_integer
+                                        ("minimum_pressure_support_parameter",
+                                         100))
 {
+  this->set_courant(p.value_float("courant",1.0));
 
   // check compatability with EnzoPhysicsFluidProps
   EnzoPhysicsFluidProps* fluid_props = enzo::fluid_props();
@@ -107,6 +121,12 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
   p | comoving_coordinates_;
   p | store_fluxes_for_corrections_;
+  p | diffusion_;
+  p | flattening_;
+  p | pressure_free_;
+  p | steepening_;
+  p | use_minimum_pressure_support_;
+  p | minimum_pressure_support_parameter_;
 }
 
 //----------------------------------------------------------------------
@@ -128,7 +148,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_in");
 #endif
 
-  int single_flux_array = enzo::config()->method_flux_correct_single_array;
+  bool single_flux_array = true;
   if (store_fluxes_for_corrections_){
     Field field = block->data()->field();
 
@@ -187,7 +207,10 @@ void EnzoMethodPpm::compute ( Block * block) throw()
     TRACE_PPM ("BEGIN SolveHydroEquations");
 
     enzo_block->SolveHydroEquations 
-      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array );
+      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array,
+        diffusion_, flattening_, pressure_free_, steepening_,
+        use_minimum_pressure_support_,
+        minimum_pressure_support_parameter_);
 
     TRACE_PPM ("END SolveHydroEquations");
 
@@ -239,7 +262,6 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 
   /* Compute the pressure. */
 
-  const int in = cello::index_static();
   enzo_float gamma = enzo::fluid_props()->gamma();
 
   EnzoComputePressure compute_pressure(gamma, comoving_coordinates_);
@@ -260,6 +282,8 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 
   /* calculate minimum timestep */
 
+  int pressure_free_int = pressure_free_;
+
   FORTRAN_NAME(calc_dt)(&rank,
 			enzo_block->GridDimension,
 			enzo_block->GridDimension+1,
@@ -273,7 +297,7 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 			&enzo_block->CellWidth[0],
 			&enzo_block->CellWidth[1],
 			&enzo_block->CellWidth[2],
-			&gamma, &EnzoBlock::PressureFree[in], &cosmo_a,
+			&gamma, &pressure_free_int, &cosmo_a,
 			density, pressure,
 			velocity_x,
 			velocity_y,

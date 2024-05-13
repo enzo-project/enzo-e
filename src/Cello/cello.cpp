@@ -1,3 +1,7 @@
+// we explicitly avoid including <boost/filesystem> inside of a separate header
+// because it is a large header that takes a long time to read (~0.4 seconds)
+#include <boost/filesystem.hpp>
+
 #include "cello.hpp"
 #include "error.hpp"
 #include "charm_simulation.hpp"
@@ -527,6 +531,23 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
+  bool ensure_directory_exists(const std::string& dir_name)
+  {
+    boost::filesystem::path directory(dir_name);
+
+    if (boost::filesystem::is_directory(directory)) {
+      return true;
+    } else {
+      boost::filesystem::create_directory(directory);
+      ASSERT1 ("cello::ensure_directory_exists()",
+               "Error creating directory %s",
+               dir_name.c_str(), boost::filesystem::is_directory(directory));
+      return false;
+    }
+  }
+
+  //----------------------------------------------------------------------
+
   std::string create_directory
   (
    const std::vector<std::string> * path_format,
@@ -536,33 +557,48 @@ namespace cello {
    bool & already_exists
    )
   {
-    std::string dir = ".";
+    // if path_format expands to a directory name, ensure it exists. Otherwise
+    // return a single dot, to indicate that it specifies the local directory
     std::string name_dir = expand_name(path_format,counter, cycle, time);
-
-    // Create subdirectory if any
     if (name_dir != "") {
-
-      dir = name_dir;
-
-      boost::filesystem::path directory(name_dir);
-
-      if (boost::filesystem::is_directory(directory)) {
-
-        already_exists = true;
-
-      } else {
-
-        boost::filesystem::create_directory(directory);
-
-        ASSERT1 ("cello::create_directory()",
-                 "Error creating directory %s",
-                 name_dir.c_str(),
-                 boost::filesystem::is_directory(directory));
-      }
+      already_exists = ensure_directory_exists(name_dir);
+      return name_dir;
     }
-
-    return dir;
+    return ".";
   }
 
   //----------------------------------------------------------------------
+
+  bool is_initial_cycle(InitCycleKind kind) noexcept {
+    Simulation * sim = cello::simulation();
+    ASSERT("cello::is_first_cycle(InitCycleKind)",
+           "cello::simulation() returned nullptr", sim != nullptr);
+    return cello::is_initial_cycle(sim->cycle(), kind);
+  }
+
+  //----------------------------------------------------------------------
+
+  bool is_initial_cycle(int cycle, InitCycleKind kind) noexcept {
+    switch (kind) {
+    case InitCycleKind::fresh:
+      {
+        const Config * config = cello::config();
+        ASSERT("cello::is_initial_cycle(int, InitCycleKind)",
+               "cello::config() returned nullptr", config != nullptr);
+        return cycle == config->initial_cycle;
+      }
+    case InitCycleKind::charmrestart:
+      ERROR("cello::is_initial_cycle(int, InitCycleKind)",
+            "can't currently provide any details about whether a charm-based "
+            "restart just occured.");
+    case InitCycleKind::fresh_or_noncharm_restart:
+      {
+        const Simulation * sim = cello::simulation();
+        ASSERT("cello::is_initial_cycle(int, InitCycleKind)",
+               "cello::simulation() returned nullptr", sim != nullptr);
+        return cycle == sim->initial_cycle();
+      }
+    }
+  }
+
 }

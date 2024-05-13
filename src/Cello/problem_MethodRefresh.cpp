@@ -11,13 +11,37 @@
 
 //----------------------------------------------------------------------
 
+// this is a commonly occuring operation that should probably be directly
+// supported by ParameterGroup
+static std::vector<std::string> parse_str_vec_(ParameterGroup p,
+                                               std::string name)
+{
+  int length = p.list_length(name);
+  std::vector<std::string> out(length);
+  for (int i = 0; i < length; i++) { out[i] = p.list_value_string(i, name); }
+  return out;
+}
+
+//----------------------------------------------------------------------
+
+MethodRefresh::MethodRefresh(ParameterGroup p) noexcept
+  : MethodRefresh(parse_str_vec_(p, "field_list"),
+                  parse_str_vec_(p, "particle_list"),
+                  p.value_integer("ghost_depth", 0),
+                  p.value_integer("min_face_rank",0), // default 0 all faces
+                  p.value_logical("all_fields", false),
+                  p.value_logical("all_particles", false))
+{ }
+
+//----------------------------------------------------------------------
+
 MethodRefresh::MethodRefresh
 (std::vector< std::string > field_list,
  std::vector< std::string > particle_list,
  int ghost_depth,
  int min_face_rank,
  bool all_fields,
- bool all_particles)
+ bool all_particles) noexcept
   : Method(),
     field_list_(),
     particle_list_(),

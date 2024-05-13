@@ -3,6 +3,7 @@
 #
 # This is an input file for testing the new-style checkpoint-restart machinery
 #
+
 # In more detail, this mostly acts like a template-file that is used by the
 # testing tool. In practice, the testing tool will:
 # - provide a Stopping section and an Output section.

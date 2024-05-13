@@ -27,7 +27,6 @@ long MsgInitial::counter[CONFIG_NODE_SIZE] = {0};
 MsgInitial::MsgInitial()
   : CMessage_MsgInitial(),
     is_local_(true),
-    buffer_(nullptr),
     data_type_(),
     data_name_(),
     data_attribute_(),
@@ -36,6 +35,7 @@ MsgInitial::MsgInitial()
     data_values_(nullptr),
     data_delete_(true),
     count_(false),
+    buffer_(nullptr),
     tag_(),
     n4_(),
     h4_(),
@@ -124,7 +124,7 @@ void * MsgInitial::pack (MsgInitial * msg)
           (pc - (char*)buffer),size,
           (pc - (char*)buffer) == size);
 
-  CkFreeMsg (msg);
+  delete msg;
   // Return the buffer
   return (void *) buffer;
 }

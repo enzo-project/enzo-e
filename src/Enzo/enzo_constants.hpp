@@ -50,10 +50,16 @@ namespace enzo_constants {
   // speed of light in CGS
   const double clight = 29979245800.0;
 
-  // Gravitational constant in CGS
-  // Note: in non-cosmological simulations, the Gravity solver uses the value specified by 
-  // Method:gravity:grav_constant
-  const double grav_constant = 6.67384E-8;
+  /// standard real-world value of the Gravitational constant in CGS
+  ///
+  /// @note
+  /// This does not necessarily correspond to the value of the gravitational
+  /// constant that is used in a simulation; users are allowed to specify an
+  /// arbitrary value in non-cosmological sims. The actual value is accessed by
+  /// calling enzo::grav_constant_cgs() or enzo::grav_constant_codeU().
+  /// For that reason, developers should generally prefer to call those
+  /// functions instead of using this function.
+  const double standard_grav_constant = 6.67384E-8;
 
   // year in seconds
   const double yr_s = 3.1556952E7;
