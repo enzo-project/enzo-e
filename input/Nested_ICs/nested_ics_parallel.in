@@ -422,7 +422,6 @@
          # gravity solver
 
          accumulate = true;
-         grav_const = 1.000000000000000;
          order = 2;
          solver = "dd"; 
      };
