@@ -101,6 +101,11 @@ Initial * EnzoProblem::create_initial_
 
   Initial * initial = 0;
 
+  // move creation of p_accessor up the call stack?
+  const std::string root_path =
+    ("Initial:" + parameters->list_value_string(index, "Initial:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
 
@@ -202,16 +207,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
-    initial = new EnzoInitialInclinedWave
-      (cycle, time,
-       enzo_config->initial_inclinedwave_alpha,
-       enzo_config->initial_inclinedwave_beta,
-       enzo::fluid_props()->gamma(),
-       enzo_config->initial_inclinedwave_amplitude,
-       enzo_config->initial_inclinedwave_lambda,
-       enzo_config->initial_inclinedwave_parallel_vel,
-       enzo_config->initial_inclinedwave_positive_vel,
-       enzo_config->initial_inclinedwave_wave_type);
+    initial = new EnzoInitialInclinedWave(cycle, time, p_group);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,
@@ -230,14 +226,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
-    initial = new EnzoInitialShockTube
-      (enzo::fluid_props()->gamma(),
-       cycle, time,
-       enzo_config->initial_shock_tube_setup_name,
-       enzo_config->initial_shock_tube_aligned_ax,
-       enzo_config->initial_shock_tube_axis_velocity,
-       enzo_config->initial_shock_tube_trans_velocity,
-       enzo_config->initial_shock_tube_flip_initialize);
+    initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
@@ -619,30 +608,6 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodPpm(store_fluxes_for_corrections, p_group);
     skip_auto_courant = true;
 
-/*
-  } else if (name == "hydro") {
-
-    method = new EnzoMethodHydro
-      (enzo_config->method_hydro_method,
-       enzo::fluid_props()->gamma(),
-       enzo_config->physics_gravity,
-       enzo_config->physics_cosmology,
-       enzo_config->method_hydro_dual_energy,
-       enzo_config->method_hydro_dual_energy_eta_1,
-       enzo_config->method_hydro_dual_energy_eta_2,
-       enzo_config->method_hydro_reconstruct_method,
-       enzo_config->method_hydro_reconstruct_conservative,
-       enzo_config->method_hydro_reconstruct_positive,
-       enzo_config->ppm_density_floor,
-       enzo_config->ppm_pressure_floor,
-       enzo_config->ppm_pressure_free,
-       enzo_config->ppm_diffusion,
-       enzo_config->ppm_flattening,
-       enzo_config->ppm_steepening,
-       enzo_config->method_hydro_riemann_solver
-       );
-*/
-
   } else if (name == "ppml") {
 
     method = new EnzoMethodPpml(p_group);
@@ -699,7 +664,10 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "gravity") {
 
-    std::string solver_name = enzo_config->method_gravity_solver;
+    // the presence of this extra logic here is undesirable, but it appears
+    // somewhat unavoidable
+
+    std::string solver_name = p_group.value_string("solver","unknown");
 
     int index_solver = enzo_config->solver_index.at(solver_name);
 
@@ -709,18 +677,12 @@ Method * EnzoProblem::create_method_
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
     Prolong * prolong = create_prolong_
-      (config->method_prolong[index_method],config);
+      (p_group.value_string("prolong","linear"),config);
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
 
-    method = new EnzoMethodGravity
-      (
-       enzo_config->solver_index.at(solver_name),
-       enzo_config->method_gravity_order,
-       enzo_config->method_gravity_accumulate,
-       index_prolong,
-       enzo_config->method_gravity_dt_max);
+    method = new EnzoMethodGravity(p_group, index_solver, index_prolong);
 
   } else if (name == "mhd_vlct") {
 
