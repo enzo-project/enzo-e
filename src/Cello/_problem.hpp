@@ -41,8 +41,6 @@ extern void method_close_files_mutex_init();
 #include <limits>
 #include <algorithm>
 
-#include "pngwriter.h"
-
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------

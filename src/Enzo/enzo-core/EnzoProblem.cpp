@@ -604,14 +604,9 @@ Method * EnzoProblem::create_method_
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
-    method = new EnzoMethodPpm
-      (store_fluxes_for_corrections,
-       enzo_config->ppm_diffusion,
-       enzo_config->ppm_flattening,
-       enzo_config->ppm_pressure_free,
-       enzo_config->ppm_steepening,
-       enzo_config->ppm_use_minimum_pressure_support,
-       enzo_config->ppm_minimum_pressure_support_parameter);
+
+    method = new EnzoMethodPpm(store_fluxes_for_corrections, p_group);
+    skip_auto_courant = true;
 
   } else if (name == "ppml") {
 
