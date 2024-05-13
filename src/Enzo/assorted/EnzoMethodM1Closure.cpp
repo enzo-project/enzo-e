@@ -1536,9 +1536,9 @@ void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21)
   double Nbackground = 4*cello::pi * JLW/(energy_cgs*enzo_constants::clight) * dnu / Nunit;
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
-  
-  bool is_first_cycle = (enzo_block->cycle() == enzo::config()->initial_cycle);
-  double Nbackground_previous = is_first_cycle ? 0.0 : *(scalar.value(scalar.index("N_LWB")));
+
+  double Nbackground_previous = cello::is_initial_cycle(InitCycleKind::fresh)
+    ? 0.0 : *(scalar.value(scalar.index("N_LWB")));
  
   for (int i=0; i<mx*my*mz; i++) {
     // subtract the background from the previous timestep and add the new
