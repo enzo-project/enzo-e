@@ -178,12 +178,9 @@ struct enzo_fluxes
 
 #include "enzo-core/EnzoBoundary.hpp"
 
-#include "obsolete/EnzoInitialPm.hpp"
-
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
-#include "obsolete/EnzoMethodHydro.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 

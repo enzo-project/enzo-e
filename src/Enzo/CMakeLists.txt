@@ -84,9 +84,12 @@ target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 # add files in enzo-core to enzo target (and define a unit test)
 add_subdirectory(enzo-core)
 
-# add source files from other subdirectories to the enzo target
+# add source files from the cosmology subdirectory to the enzo target
+# todo: create a distinct Enzo::cosmology target
 add_subdirectory(cosmology)
-add_subdirectory(obsolete)
+
+# in the following lines all introduce targets (aka libraries) that are distinct
+# from the primary enzo target (later on, they are all linked to the enzo target)
 
 # define the Enzo::assorted target
 add_subdirectory(assorted)

@@ -177,6 +177,31 @@ public: // interface
    )    
     throw();
 
+  /// utility for parsing a parameter that is expected to always be a list
+  /// containing strings. An empty vector is returned if the parameter does not
+  /// exist or was assigned an empty list. If the parameter was assigned a
+  /// value with a different type, or a list entry is not a string, the program
+  /// will abort with an error.
+  ///
+  /// When ``coerce_string_to_list`` is ``false``, the program will abort with
+  /// an error if the parameter was assigned a string value. Otherwise, the
+  /// string will be coerced to a 1-element vector.
+  ///
+  /// When suppress_err is true, the method returns an empty vector, even in
+  /// the case of an error.
+  ///
+  /// @note
+  /// Overhead from returning a vector is minimal. The compiler will know it
+  /// it can implicitly move contents into another vector
+  ///
+  /// @note
+  /// This method encapsulates a parameter-parsing parameter that comes up a
+  /// lot! But, this may not be the best place to put this functionality
+  std::vector<std::string> value_full_strlist(const std::string& parameter,
+                                              bool coerce_string_to_list,
+                                              bool suppress_err = false)
+    throw();
+
   //--------------------------------------------------
   // PARAMETER GROUPS
 
