@@ -110,7 +110,10 @@ protected: // methods
       block_lower_[i]    = msg_output.block_lower_[i];
       block_upper_[i]    = msg_output.block_upper_[i];
     }
-    strncpy(tag_,msg_output.tag_,TAG_LEN);
+    // this looks a little funny, but it's correct. The last arg needs to be
+    // TAG_LEN+1 because this->tag is an array of TAG_LEN+1 characters
+    strncpy(tag_,msg_output.tag_,TAG_LEN+1);
+    tag_[TAG_LEN] = '\0'; // for extra safety
   }
 
 protected: // attributes
