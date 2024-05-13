@@ -17,12 +17,6 @@ EnzoConfig g_enzo_config;
 EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
-  ppm_diffusion(false),
-  ppm_flattening(0),
-  ppm_minimum_pressure_support_parameter(0),
-  ppm_pressure_free(false),
-  ppm_steepening(false),
-  ppm_use_minimum_pressure_support(false),
   field_uniform_density(1.0),
   physics_cosmology(false),
   physics_cosmology_hubble_constant_now(0.0),
@@ -356,13 +350,6 @@ void EnzoConfig::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
 
   p | adapt_mass_type;
-
-  p | ppm_diffusion;
-  p | ppm_flattening;
-  p | ppm_minimum_pressure_support_parameter;
-  p | ppm_pressure_free;
-  p | ppm_steepening;
-  p | ppm_use_minimum_pressure_support;
 
   p | field_uniform_density;
 
@@ -737,7 +724,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_check_(p);
   read_method_feedback_(p);
   read_method_merge_sinks_(p);
-  read_method_ppm_(p);
   read_method_m1_closure_(p);
   read_method_star_maker_(p);
   read_method_turbulence_(p);
@@ -1744,26 +1730,6 @@ void EnzoConfig::read_method_accretion_(Parameters * p)
   method_accretion_max_mass_fraction = p->value_float
     ("Method:accretion:max_mass_fraction",0.25);
 
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_ppm_(Parameters * p)
-{
-  double floor_default = 1e-6;
-
-  ppm_diffusion = p->value_logical
-    ("Method:ppm:diffusion", false);
-  ppm_flattening = p->value_integer
-    ("Method:ppm:flattening", 3);
-  ppm_minimum_pressure_support_parameter = p->value_integer
-    ("Method:ppm:minimum_pressure_support_parameter",100);
-  ppm_pressure_free = p->value_logical
-    ("Method:ppm:pressure_free",false);
-  ppm_steepening = p->value_logical
-    ("Method:ppm:steepening", false);
-  ppm_use_minimum_pressure_support = p->value_logical
-    ("Method:ppm:use_minimum_pressure_support",false);
 }
 
 //----------------------------------------------------------------------

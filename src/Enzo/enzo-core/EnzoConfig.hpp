@@ -41,12 +41,6 @@ public: // interface
   EnzoConfig(CkMigrateMessage *m)
     : Config (m),
       adapt_mass_type(),
-      ppm_diffusion(0),
-      ppm_flattening(0),
-      ppm_minimum_pressure_support_parameter(0),
-      ppm_pressure_free(false),
-      ppm_steepening(false),
-      ppm_use_minimum_pressure_support(false),
       field_uniform_density(1.0),
       // Cosmology
       physics_cosmology(false),
@@ -424,7 +418,6 @@ protected: // methods
   void read_method_check_(Parameters *);
   void read_method_feedback_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
-  void read_method_ppm_(Parameters *);
   void read_method_star_maker_(Parameters *);
   void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
@@ -448,15 +441,6 @@ public: // attributes
   /// Refine
 
   std::vector <std::string>  adapt_mass_type;
-
-  /// EnzoMethodPpm
-
-  bool                       ppm_diffusion;
-  int                        ppm_flattening;
-  int                        ppm_minimum_pressure_support_parameter;
-  bool                       ppm_pressure_free;
-  bool                       ppm_steepening;
-  bool                       ppm_use_minimum_pressure_support;
 
   double                     field_uniform_density;
 
