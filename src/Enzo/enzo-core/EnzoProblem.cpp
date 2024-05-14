@@ -230,22 +230,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
-      (cycle, time,
-       enzo_config->initial_soup_file,
-       rank,
-       enzo_config->initial_soup_rotate,
-       enzo_config->initial_soup_array[0],
-       enzo_config->initial_soup_array[1],
-       enzo_config->initial_soup_array[2],
-       enzo_config->initial_soup_d_pos[0],
-       enzo_config->initial_soup_d_pos[1],
-       enzo_config->initial_soup_d_pos[2],
-       enzo_config->initial_soup_d_size[0],
-       enzo_config->initial_soup_d_size[1],
-       enzo_config->initial_soup_d_size[2],
-       enzo_config->initial_soup_density,
-       enzo_config->initial_soup_pressure_in,
-       enzo_config->initial_soup_pressure_out);
+      (cycle, time, p_group);
   } else if (type == "burkertbodenheimer") {
     initial = new EnzoInitialBurkertBodenheimer
       (cycle,time,

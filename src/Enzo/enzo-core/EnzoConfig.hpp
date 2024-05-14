@@ -205,13 +205,6 @@ public: // interface
       initial_shu_collapse_instability_parameter(0.0),
       initial_shu_collapse_nominal_sound_speed(0.0),
       initial_shu_collapse_truncation_radius(0.0),
-      // EnzoInitialSoup
-      initial_soup_density(0.0),
-      initial_soup_file(""),
-      initial_soup_pressure_in(0.0),
-      initial_soup_pressure_out(0.0),
-      initial_soup_rank(0),
-      initial_soup_rotate(false),
       // EnzoInitialTurbulence
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
@@ -351,9 +344,6 @@ public: // interface
       initial_cloud_uniform_bfield[axis] = 0;
       initial_sedov_array[axis] = 0;
       initial_sedov_random_array[axis] = 0;
-      initial_soup_array[axis] = 0;
-      initial_soup_d_pos[axis] = 0;
-      initial_soup_d_size[axis] = 0;
       initial_collapse_array[axis] = 0;
       initial_IG_center_position[axis] = 0.5;
       initial_IG_bfield[axis]         = 0.0;
@@ -396,7 +386,6 @@ protected: // methods
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
   void read_initial_shu_collapse_(Parameters *);
-  void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
 
   //--------------------
@@ -566,17 +555,6 @@ public: // attributes
   double                     initial_sedov_random_pressure_out;
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
-
-  /// EnzoInitialSoup
-  int                        initial_soup_rank;
-  std::string                initial_soup_file;
-  bool                       initial_soup_rotate;
-  int                        initial_soup_array[3];
-  double                     initial_soup_d_pos[3];
-  double                     initial_soup_d_size[3];
-  double                     initial_soup_pressure_in;
-  double                     initial_soup_pressure_out;
-  double                     initial_soup_density;
 
   /// EnzoInitialTurbulence
   double                     initial_turbulence_density;

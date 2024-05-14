@@ -17,35 +17,28 @@ const int EnzoInitialSoup::position_[] =
 
 //======================================================================
 
-EnzoInitialSoup::EnzoInitialSoup
-(int cycle,
- double time,
- std::string filename,
- int rank,
- bool rotate,
- int    nax,    int nay,    int naz,
- double dpx, double dpy, double dpz,
- double dsx, double dsy, double dsz,
- double density,
- double pressure_in, double pressure_out) throw ()
+EnzoInitialSoup::EnzoInitialSoup(int cycle, double time, ParameterGroup p) throw ()
   : Initial(cycle,time),
-    file_name_(filename),
-    rank_(rank),
-    rotate_(rotate),
+    file_name_(p.value_string("filename","")),
+    rank_(p.value_int("rank",0)),
+    rotate_(p.value_logical("rotate",false)),
     png_mask_(NULL),
-    density_(density),
-    pressure_in_(pressure_in),
-    pressure_out_(pressure_out)
+    density_(p.value_float("density",0.0)),
+    pressure_in_(p.value_float("pressure_in",0.0)),
+    pressure_out_(p.value_float("pressure_out",0.0))
+    array_{}
+    d_pos_{}
+    d_size_{}
 {
-  array_[0] = nax;
-  array_[1] = nay;
-  array_[2] = naz;
-  d_pos_[0] = dpx;
-  d_pos_[1] = dpy;
-  d_pos_[2] = dpz;
-  d_size_[0] = dsx;
-  d_size_[1] = dsy;
-  d_size_[2] = dsz;
+  array_[0] = p.list_value_int(0,"nax",0);
+  array_[1] = p.list_value_int(1,"nay",0);
+  array_[2] = p.list_value_int(2,"naz",0);
+  d_pos_[0] = p.list_value_float(0,"dpx",0.0);
+  d_pos_[1] = p.list_value_float(1,"dpy",0.0);
+  d_pos_[2] = p.list_value_float(2,"dpz",0.0);
+  d_size_[0] = p.list_value_float(0,"dsx",0.0);
+  d_size_[1] = p.list_value_float(1,"dsy",0.0);
+  d_size_[2] = p.list_value_float(2,"dsz",0.0);
 
 
   int nx, ny;

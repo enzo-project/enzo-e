@@ -129,13 +129,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_pressure_out(0.0),
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
-  // EnzoInitialSoup
-  initial_soup_rank(0),
-  initial_soup_file(""),
-  initial_soup_rotate(false),
-  initial_soup_pressure_in(0.0),
-  initial_soup_pressure_out(0.0),
-  initial_soup_density(0.0),
   // EnzoInitialTurbulence
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
@@ -310,9 +303,6 @@ EnzoConfig::EnzoConfig() throw ()
   for (int i=0; i<3; i++) {
     initial_cloud_uniform_bfield[i] = 0;
     initial_sedov_array[i] = 0;
-    initial_soup_array[i]  = 0;
-    initial_soup_d_pos[i]  = 0.0;
-    initial_soup_d_size[i] = 0.0;
     initial_collapse_array[i] = 0;
     initial_IG_center_position[i] = 0.5;
     initial_IG_bfield[i] = 0.0;
@@ -488,16 +478,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_bulge;
   p | initial_IG_stellar_disk;
   p | initial_IG_use_gas_particles;
-
-  p | initial_soup_rank;
-  p | initial_soup_file;
-  p | initial_soup_rotate;
-  PUParray(p,initial_soup_array,3);
-  PUParray(p,initial_soup_d_pos,3);
-  PUParray(p,initial_soup_d_size,3);
-  p | initial_soup_pressure_in;
-  p | initial_soup_pressure_out;
-  p | initial_soup_density;
 
   p | initial_merge_sinks_test_particle_data_filename;
 
@@ -694,7 +674,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
   read_initial_shu_collapse_(p);
-  read_initial_soup_(p);
   read_initial_turbulence_(p);
 
   // it's important for read_physics_ to precede read_method_grackle_
@@ -1073,31 +1052,6 @@ void EnzoConfig::read_initial_cloud_(Parameters * p)
     ERROR("EnzoConfig::read",
 	  "Initial:cloud:uniform_bfield must contain 0 or 3 entries.");
   }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_soup_(Parameters * p)
-{
-  // InitialSoup initialization
-
-  initial_soup_rank      = p->value_integer ("Initial:soup:rank",0);
-  initial_soup_file      = p->value_string ("Initial:soup:file","soup.png");
-  initial_soup_rotate    = p->value_logical ("Initial:soup:rotate",false);
-  for (int axis=0; axis<3; axis++) {
-    initial_soup_array[axis]  = p->list_value_integer
-      (axis,"Initial:soup:array",1);
-    initial_soup_d_pos[axis]  = p->list_value_float
-      (axis,"Initial:soup:d_pos",0.0);
-    initial_soup_d_size[axis] = p->list_value_float
-      (axis,"Initial:soup:d_size",0.0);
-  }
-  initial_soup_pressure_in =
-    p->value_float("Initial:soup:pressure_in",1.0);
-  initial_soup_pressure_out =
-    p->value_float("Initial:soup:pressure_out",1e-5);
-  initial_soup_density =
-    p->value_float("Initial:soup:density",1.0);
 }
 
 //----------------------------------------------------------------------
