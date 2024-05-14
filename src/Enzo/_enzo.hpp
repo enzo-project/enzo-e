@@ -111,8 +111,6 @@ enum return_enum {
 
 #include "cosmology/EnzoPhysicsCosmology.hpp"
 
-#include "utils/EnzoFieldAdaptor.hpp"
-
 // TODO: remove the following 2 after factoring out other subcomponents
 #include "Enzo/chemistry/chemistry.hpp"
 #include "Enzo/fluid-props/fluid-props.hpp"
