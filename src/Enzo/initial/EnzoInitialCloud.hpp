@@ -36,7 +36,6 @@ public: // interface
       eint_wind_(p.value_float("wind_internal_energy",0.0)),
       velocity_wind_(p.value_float("wind_velocity",0.0)),
       metal_mass_frac_(p.value_float("metal_mass_fraction",0.0)),
-      initialize_uniform_bfield_(false),
       perturb_Nwaves_(p.value_integer("perturb_Nwaves", 0)),
       perturb_amplitude_(p.value_float("perturb_amplitude", 0.)),
       perturb_min_wavelength_(p.value_float
