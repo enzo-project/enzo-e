@@ -29,37 +29,6 @@
 
 //----------------------------------------------------------------------
 
-enum mass_type {
-  mass_unknown,
-  mass_dark,
-  mass_baryon
-};
-
-//----------------------------------------------------------------------
-
-enum {
-  index_turbulence_vad,
-  index_turbulence_aad,
-  index_turbulence_vvdot,
-  index_turbulence_vvot,
-  index_turbulence_vvd,
-  index_turbulence_vv,
-  index_turbulence_dd,
-  index_turbulence_d,
-  index_turbulence_dax,
-  index_turbulence_day,
-  index_turbulence_daz,
-  index_turbulence_dvx,
-  index_turbulence_dvy,
-  index_turbulence_dvz,
-  index_turbulence_dlnd,
-  index_turbulence_zones,
-  index_turbulence_mind,
-  index_turbulence_maxd,
-  max_turbulence_array };
-
-//----------------------------------------------------------------------
-
 enum enzo_sync_id {
   enzo_sync_id_cg = sync_id_last,
   enzo_sync_id_comoving_expansion,
@@ -116,22 +85,6 @@ enum return_enum {
   return_diverged,
   return_error,
   return_bypass
-};
-
-//----------------------------------------------------------------------
-
-const int field_undefined = -1;
-
-//----------------------------------------------------------------------
-
-struct enzo_fluxes
-{
-  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
-  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
-  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
 };
 
 //----------------------------------------------------------------------
@@ -205,13 +158,10 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "enzo-core/EnzoBoundary.hpp"
 
-#include "obsolete/EnzoInitialPm.hpp"
-
 #include "enzo-core/EnzoMethodBalance.hpp"
 #include "cosmology/EnzoMethodComovingExpansion.hpp"
 #include "cosmology/EnzoMethodCosmology.hpp"
 #include "chemistry/EnzoMethodGrackle.hpp"
-#include "obsolete/EnzoMethodHydro.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 

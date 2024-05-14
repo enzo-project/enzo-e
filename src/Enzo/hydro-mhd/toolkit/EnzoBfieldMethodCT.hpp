@@ -24,19 +24,6 @@ public: // interface
       cell_widths_(nullptr)
   { }
 
-  /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoBfieldMethodCT);
-
-  /// Charm++ PUP::able migration constructor
-  EnzoBfieldMethodCT (CkMigrateMessage *m)
-    : EnzoBfieldMethod (m)
-  { }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p){
-    EnzoBfieldMethodCT::pup(p);
-  }
-
   /// checks that the interface bfields exist and have the required shapes
   void check_required_fields() const noexcept;
 

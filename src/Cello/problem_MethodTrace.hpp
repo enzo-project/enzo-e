@@ -20,9 +20,7 @@ class MethodTrace : public Method
 public: // interface
 
   /// Create a new MethodTrace
-  MethodTrace (double courant,
-	       double timestep,
-	       std::string name) throw() ;
+  MethodTrace (ParameterGroup p) noexcept;
 
   /// Destructor
   virtual ~MethodTrace() throw()

@@ -10,18 +10,13 @@
   
 //----------------------------------------------------------------------
 
-MethodTrace::MethodTrace 
-(
- double courant,
- double timestep,
- std::string name
- ) throw() 
-  : Method (courant),
-    timestep_(timestep),
-    name_(name)
+MethodTrace::MethodTrace(ParameterGroup p) noexcept
+  : Method ( p.value_float("courant",1.0) ),
+    timestep_( p.value_float("timestep", std::numeric_limits<double>::max()) ),
+    name_( p.value_string("name", "trace") )
 {
-  cello::simulation()->refresh_set_name(ir_post_,name);
-  
+  cello::simulation()->refresh_set_name(ir_post_,name_);
+
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_particles();
 }

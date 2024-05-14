@@ -101,6 +101,11 @@ Initial * EnzoProblem::create_initial_
 
   Initial * initial = 0;
 
+  // move creation of p_accessor up the call stack?
+  const std::string root_path =
+    ("Initial:" + parameters->list_value_string(index, "Initial:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
 
@@ -161,7 +166,7 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "feedback_test") {
-    initial = new EnzoInitialFeedbackTest(enzo_config);
+    initial = new EnzoInitialFeedbackTest(cycle, time, p_group);
   } else if (type == "vlct_bfield") {
     initial = new EnzoInitialBCenter(parameters, cycle, time,
 				     enzo_config->initial_bcenter_update_etot);
@@ -202,16 +207,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
-    initial = new EnzoInitialInclinedWave
-      (cycle, time,
-       enzo_config->initial_inclinedwave_alpha,
-       enzo_config->initial_inclinedwave_beta,
-       enzo::fluid_props()->gamma(),
-       enzo_config->initial_inclinedwave_amplitude,
-       enzo_config->initial_inclinedwave_lambda,
-       enzo_config->initial_inclinedwave_parallel_vel,
-       enzo_config->initial_inclinedwave_positive_vel,
-       enzo_config->initial_inclinedwave_wave_type);
+    initial = new EnzoInitialInclinedWave(cycle, time, p_group);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,
@@ -230,14 +226,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
-    initial = new EnzoInitialShockTube
-      (enzo::fluid_props()->gamma(),
-       cycle, time,
-       enzo_config->initial_shock_tube_setup_name,
-       enzo_config->initial_shock_tube_aligned_ax,
-       enzo_config->initial_shock_tube_axis_velocity,
-       enzo_config->initial_shock_tube_trans_velocity,
-       enzo_config->initial_shock_tube_flip_initialize);
+    initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
@@ -591,6 +580,21 @@ Method * EnzoProblem::create_method_
 {
   Method * method = 0;
 
+  // historically, this method would always call method->set_courant after
+  // building a new method object. But, with this new p_group approach, each
+  // method objects should opt out of this approach (so that they can set
+  // appropriate default courant factors)
+  // - in cases where the courant factor is not used, we may not explicitly set
+  //   this variable to true (since it doesn't really matter)
+  bool skip_auto_courant = false;
+
+  // move creation of p_group up the call stack?
+  ASSERT("Problem::create_method_", "Something is wrong", cello::simulation());
+  Parameters* parameters = cello::simulation()->parameters();
+  const std::string root_path =
+    ("Method:" + parameters->list_value_string(index_method, "Method:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   const EnzoConfig * enzo_config = enzo::config();
 
   // The following 2 lines may need to be updated in the future
@@ -601,56 +605,26 @@ Method * EnzoProblem::create_method_
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
 
-    method = new EnzoMethodPpm
-      (store_fluxes_for_corrections,
-       enzo_config->ppm_diffusion,
-       enzo_config->ppm_flattening,
-       enzo_config->ppm_pressure_free,
-       enzo_config->ppm_steepening,
-       enzo_config->ppm_use_minimum_pressure_support,
-       enzo_config->ppm_minimum_pressure_support_parameter);
-/*
-  } else if (name == "hydro") {
-
-    method = new EnzoMethodHydro
-      (enzo_config->method_hydro_method,
-       enzo::fluid_props()->gamma(),
-       enzo_config->physics_gravity,
-       enzo_config->physics_cosmology,
-       enzo_config->method_hydro_dual_energy,
-       enzo_config->method_hydro_dual_energy_eta_1,
-       enzo_config->method_hydro_dual_energy_eta_2,
-       enzo_config->method_hydro_reconstruct_method,
-       enzo_config->method_hydro_reconstruct_conservative,
-       enzo_config->method_hydro_reconstruct_positive,
-       enzo_config->ppm_density_floor,
-       enzo_config->ppm_pressure_floor,
-       enzo_config->ppm_pressure_free,
-       enzo_config->ppm_diffusion,
-       enzo_config->ppm_flattening,
-       enzo_config->ppm_steepening,
-       enzo_config->method_hydro_riemann_solver
-       );
-*/
+    method = new EnzoMethodPpm(store_fluxes_for_corrections, p_group);
+    skip_auto_courant = true;
 
   } else if (name == "ppml") {
 
-    method = new EnzoMethodPpml;
+    method = new EnzoMethodPpml(p_group);
+    skip_auto_courant = true;
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
+    method = new EnzoMethodPmDeposit (p_group);
 
   } else if (name == "pm_update") {
 
-    method = new EnzoMethodPmUpdate
-      (enzo_config->method_pm_update_max_dt);
+    method = new EnzoMethodPmUpdate(p_group);
 
   } else if (name == "heat") {
 
-    method = new EnzoMethodHeat
-      (enzo_config->method_heat_alpha,
-       config->method_courant[index_method]);
+    method = new EnzoMethodHeat(p_group);
+    skip_auto_courant = true;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -690,7 +664,10 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "gravity") {
 
-    std::string solver_name = enzo_config->method_gravity_solver;
+    // the presence of this extra logic here is undesirable, but it appears
+    // somewhat unavoidable
+
+    std::string solver_name = p_group.value_string("solver","unknown");
 
     int index_solver = enzo_config->solver_index.at(solver_name);
 
@@ -700,18 +677,12 @@ Method * EnzoProblem::create_method_
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
     Prolong * prolong = create_prolong_
-      (config->method_prolong[index_method],config);
+      (p_group.value_string("prolong","linear"),config);
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
 
-    method = new EnzoMethodGravity
-      (
-       enzo_config->solver_index.at(solver_name),
-       enzo_config->method_gravity_order,
-       enzo_config->method_gravity_accumulate,
-       index_prolong,
-       enzo_config->method_gravity_dt_max);
+    method = new EnzoMethodGravity(p_group, index_solver, index_prolong);
 
   } else if (name == "mhd_vlct") {
 
@@ -820,15 +791,8 @@ Method * EnzoProblem::create_method_
     }
   } else if (name == "sink_maker") {
 
-    method = new EnzoMethodSinkMaker(
-			enzo_config->method_sink_maker_jeans_length_resolution_cells,
-			enzo_config->method_sink_maker_physical_density_threshold_cgs,
-			enzo_config->method_sink_maker_check_density_maximum,
-			enzo_config->method_sink_maker_max_mass_fraction,
-			enzo_config->method_sink_maker_min_sink_mass_solar,
-			enzo_config->method_sink_maker_max_offset_cell_fraction,
-			enzo_config->method_sink_maker_offset_seed_shift
-				     );
+    method = new EnzoMethodSinkMaker(p_group);
+
   } else {
 
     // Fallback to Cello method's
@@ -840,7 +804,9 @@ Method * EnzoProblem::create_method_
   if (method) {
 
     // set the method's courant safety factor
-    method->set_courant(config->method_courant[index_method]);
+    if (!skip_auto_courant){
+      method->set_courant(config->method_courant[index_method]);
+    }
 
     ASSERT2("EnzoProblem::create_method",
 	    "Method created %s does not match method requested %s",
