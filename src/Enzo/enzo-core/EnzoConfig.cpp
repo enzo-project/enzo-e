@@ -46,24 +46,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_burkertbodenheimer_densityprofile(1),
   initial_burkertbodenheimer_rotating(true),
   initial_burkertbodenheimer_outer_velocity(-1),
-  // EnzoInitialCloud
-  initial_cloud_center_x(0.0),
-  initial_cloud_center_y(0.0),
-  initial_cloud_center_z(0.0),
-  initial_cloud_density_cloud(0.0),
-  initial_cloud_density_wind(0.0),
-  initial_cloud_eint_wind(0.0),
-  initial_cloud_etot_wind(0.0),
-  initial_cloud_initialize_uniform_bfield(false),
-  initial_cloud_metal_mass_frac(0.0),
-  initial_cloud_perturb_Nwaves(0),
-  initial_cloud_perturb_amplitude(0.),
-  initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
-  initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
-  initial_cloud_perturb_seed(0),
-  initial_cloud_radius(0.),
-  initial_cloud_subsample_n(0),
-  initial_cloud_velocity_wind(0.0),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -308,7 +290,6 @@ EnzoConfig::EnzoConfig() throw ()
 
 {
   for (int i=0; i<3; i++) {
-    initial_cloud_uniform_bfield[i] = 0;
     initial_sedov_array[i] = 0;
     initial_soup_array[i]  = 0;
     initial_soup_d_pos[i]  = 0.0;
@@ -362,25 +343,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
-
-  p | initial_cloud_subsample_n;
-  p | initial_cloud_radius;
-  p | initial_cloud_center_x;
-  p | initial_cloud_center_y;
-  p | initial_cloud_center_z;
-  p | initial_cloud_density_cloud;
-  p | initial_cloud_density_wind;
-  p | initial_cloud_velocity_wind;
-  p | initial_cloud_etot_wind;
-  p | initial_cloud_eint_wind;
-  p | initial_cloud_metal_mass_frac;
-  p | initial_cloud_initialize_uniform_bfield;
-  PUParray(p,initial_cloud_uniform_bfield,3);
-  p | initial_cloud_perturb_Nwaves;
-  p | initial_cloud_perturb_amplitude;
-  p | initial_cloud_perturb_min_wavelength;
-  p | initial_cloud_perturb_max_wavelength;
-  p | initial_cloud_perturb_seed;
 
   p | initial_cosmology_temperature;
 
@@ -682,7 +644,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_bb_test_(p);
   read_initial_bcenter_(p);
   read_initial_burkertbodenheimer_(p);
-  read_initial_cloud_(p);
   read_initial_collapse_(p);
   read_initial_cosmology_(p);
   read_initial_grackle_(p);
@@ -1006,73 +967,6 @@ void EnzoConfig::read_initial_bcenter_(Parameters * p)
   // VL+CT b-field initialization
   initial_bcenter_update_etot = p->value_logical
     ("Initial:vlct_bfield:update_etot",false);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_cloud_(Parameters * p)
-{
-  // Cloud Crush Initialization
-  initial_cloud_subsample_n            = p->value_integer
-    ("Initial:cloud:subsample_n",0);
-  initial_cloud_radius                 = p->value_float
-    ("Initial:cloud:cloud_radius",0.0);
-  initial_cloud_center_x               = p->value_float
-    ("Initial:cloud:cloud_center_x",0.0);
-  initial_cloud_center_y               = p->value_float
-    ("Initial:cloud:cloud_center_y",0.0);
-  initial_cloud_center_z               = p->value_float
-    ("Initial:cloud:cloud_center_z",0.0);
-  initial_cloud_density_cloud          = p->value_float
-    ("Initial:cloud:cloud_density",0.0);
-  initial_cloud_density_wind           = p->value_float
-    ("Initial:cloud:wind_density",0.0);
-  initial_cloud_velocity_wind          = p->value_float
-    ("Initial:cloud:wind_velocity",0.0);
-  initial_cloud_etot_wind              = p->value_float
-    ("Initial:cloud:wind_total_energy",0.0);
-  initial_cloud_eint_wind              = p->value_float
-    ("Initial:cloud:wind_internal_energy",0.0);
-  initial_cloud_metal_mass_frac        = p->value_float
-    ("Initial:cloud:metal_mass_fraction",0.0);
-  initial_cloud_perturb_Nwaves         = p->value_integer
-    ("Initial:cloud:perturb_Nwaves", 0);
-  initial_cloud_perturb_amplitude      = p->value_float
-    ("Initial:cloud:perturb_amplitude", 0.);
-  initial_cloud_perturb_min_wavelength = p->value_float
-    ("Initial:cloud:perturb_min_lambda", std::numeric_limits<double>::min());
-  initial_cloud_perturb_max_wavelength = p->value_float
-    ("Initial:cloud:perturb_max_lambda", std::numeric_limits<double>::min());
-  if (initial_cloud_perturb_Nwaves > 0){
-    if (initial_cloud_perturb_max_wavelength
-        == std::numeric_limits<double>::min() ){
-      initial_cloud_perturb_max_wavelength = initial_cloud_radius;
-    }
-  }
-
-
-  int init_cloud_perturb_seed_         = p->value_integer
-    ("Initial:cloud:perturb_seed",0);
-  ASSERT("EnzoConfig::read()",
-         "Initial:cloud:perturb_seed must be a 32-bit unsigned integer",
-	 (init_cloud_perturb_seed_ >= 0) &&
-         (init_cloud_perturb_seed_ <= 4294967295L));
-  initial_cloud_perturb_seed = (unsigned int) init_cloud_perturb_seed_;
-
-  int initial_cloud_uniform_bfield_length = p->list_length
-    ("Initial:cloud:uniform_bfield");
-  if (initial_cloud_uniform_bfield_length == 0){
-    initial_cloud_initialize_uniform_bfield = false;
-  } else if (initial_cloud_uniform_bfield_length == 3){
-    initial_cloud_initialize_uniform_bfield = true;
-    for (int i = 0; i <3; i++){
-      initial_cloud_uniform_bfield[i] = p->list_value_float
-	(i,"Initial:cloud:uniform_bfield");
-    }
-  } else {
-    ERROR("EnzoConfig::read",
-	  "Initial:cloud:uniform_bfield must contain 0 or 3 entries.");
-  }
 }
 
 //----------------------------------------------------------------------

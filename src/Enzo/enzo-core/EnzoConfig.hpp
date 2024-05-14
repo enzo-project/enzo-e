@@ -88,24 +88,6 @@ public: // interface
       initial_burkertbodenheimer_rank(0),
       initial_burkertbodenheimer_rotating(true),
       initial_burkertbodenheimer_temperature(0.0),
-      // EnzoInitialCloud
-      initial_cloud_center_x(0.0),
-      initial_cloud_center_y(0.0),
-      initial_cloud_center_z(0.0),
-      initial_cloud_density_cloud(0.0),
-      initial_cloud_density_wind(0.0),
-      initial_cloud_eint_wind(0.0),
-      initial_cloud_etot_wind(0.0),
-      initial_cloud_initialize_uniform_bfield(false),
-      initial_cloud_metal_mass_frac(0.0),
-      initial_cloud_perturb_Nwaves(0),
-      initial_cloud_perturb_amplitude(0.0),
-      initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
-      initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
-      initial_cloud_perturb_seed(0),
-      initial_cloud_radius(0.),
-      initial_cloud_subsample_n(0),
-      initial_cloud_velocity_wind(0.0),
       // EnzoInitialCollapse
       initial_collapse_mass(0.0),
       initial_collapse_particle_ratio(0.0),
@@ -348,7 +330,6 @@ public: // interface
 
   {
     for (int axis=0; axis<3; axis++) {
-      initial_cloud_uniform_bfield[axis] = 0;
       initial_sedov_array[axis] = 0;
       initial_sedov_random_array[axis] = 0;
       initial_soup_array[axis] = 0;
@@ -384,7 +365,6 @@ protected: // methods
   void read_initial_bb_test_(Parameters *);
   void read_initial_bcenter_(Parameters *);
   void read_initial_burkertbodenheimer_(Parameters *);
-  void read_initial_cloud_(Parameters *);
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
   void read_initial_grackle_(Parameters *);
@@ -468,26 +448,6 @@ public: // attributes
   int                        initial_burkertbodenheimer_densityprofile;
   bool                       initial_burkertbodenheimer_rotating;
   double                     initial_burkertbodenheimer_outer_velocity;
-
-  /// EnzoInitialCloud;
-  double                     initial_cloud_center_x;
-  double                     initial_cloud_center_y;
-  double                     initial_cloud_center_z;
-  double                     initial_cloud_density_cloud;
-  double                     initial_cloud_density_wind;
-  double                     initial_cloud_eint_wind;
-  double                     initial_cloud_etot_wind;
-  bool                       initial_cloud_initialize_uniform_bfield;
-  double                     initial_cloud_uniform_bfield[3];
-  double                     initial_cloud_metal_mass_frac;
-  int                        initial_cloud_perturb_Nwaves;
-  double                     initial_cloud_perturb_amplitude;
-  double                     initial_cloud_perturb_min_wavelength;
-  double                     initial_cloud_perturb_max_wavelength;
-  unsigned int               initial_cloud_perturb_seed;
-  double                     initial_cloud_radius;
-  int                        initial_cloud_subsample_n;
-  double                     initial_cloud_velocity_wind;
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
