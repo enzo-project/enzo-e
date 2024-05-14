@@ -612,11 +612,10 @@ Method * EnzoProblem::create_method_
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
-      (enzo_config->method_grackle_chemistry,
-       enzo_config->method_grackle_use_cooling_timestep,
-       enzo_config->method_grackle_radiation_redshift,
+      (p_group,
        enzo_config->physics_cosmology_initial_redshift,
        enzo::simulation()->time());
+    skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
 

@@ -241,10 +241,6 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-  method_grackle_use_grackle(false),
-  method_grackle_chemistry(),
-  method_grackle_use_cooling_timestep(false),
-  method_grackle_radiation_redshift(-1.0),
   /// EnzoMethodBackgroundAcceleration
   method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
@@ -612,14 +608,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_length;
   p | units_time;
 
-  p | method_grackle_use_grackle;
-
-  if (method_grackle_use_grackle) {
-    p  | method_grackle_use_cooling_timestep;
-    p  | method_grackle_radiation_redshift;
-    p  | method_grackle_chemistry;
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -658,7 +646,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_soup_(p);
   read_initial_turbulence_(p);
 
-  // it's important for read_physics_ to precede read_method_grackle_
+  // it's important for read_physics_
   read_physics_(p);
 
   // Method [sorted]
@@ -667,7 +655,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_feedback_(p);
-  read_method_grackle_(p);
   read_method_merge_sinks_(p);
   read_method_m1_closure_(p);
   read_method_star_maker_(p);
@@ -1175,102 +1162,6 @@ void EnzoConfig::read_initial_bb_test_(Parameters * p)
 
   initial_bb_test_external_density = p->value_float
     ("Initial:bb_test:external_density",1.0e-6);
-}
-
-void EnzoConfig::read_method_grackle_(Parameters * p)
-
-{
-  method_grackle_use_grackle = false;
-
-  /// Grackle parameters
-
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "grackle") method_grackle_use_grackle=true;
-  }
-
-  // Defaults alert PUP::er() to ignore
-  if (method_grackle_use_grackle) {
-
-    method_grackle_use_cooling_timestep = p->value_logical
-      ("Method:grackle:use_cooling_timestep", false);
-
-    // for when not using cosmology - redshift of UVB
-    method_grackle_radiation_redshift = p->value_float
-      ("Method:grackle:radiation_redshift", -1.0);
-
-    // Now, we will initialize method_grackle_chemistry
-    // - we do this with a factory method that directly examines the parameter
-    //   values within the "Method:grackle:*" group.
-    // - Because Grackle has so many parameter values, it's very easy to make a
-    //   small mistake when specifying the name of a parameter value and not
-    //   notice until much later. For that reason, the factory method
-    //   aggressively reports unexpected parameters as errors.
-    // - to help this method, we provide 2 sets of parameter names
-
-    //   1. specify all of the Grackle parameters that we will manually setup
-    //      based on the values passed for other Enzo-E parameters. Errors will
-    //      be reported if any of these are encountered
-    const std::unordered_set<std::string> forbid_leaf_names = {"use_grackle",
-                                                               "Gamma"};
-
-    //   2. specify all parameters that MAY occur within the "Method:grackle:*"
-    //      group that should be ignored by the factory method. (This needs to
-    //      be updated if we introduce additional parameters for configuring
-    //      EnzoMethodGrackle)
-    const std::unordered_set<std::string> ignore_leaf_names =
-      {"use_cooling_timestep", "radiation_redshift",
-       // the next option is deprecated and is only listed in the short-term
-       // for backwards compatability (it should now be replaced by
-       // "Physics:fluid_props:floors:metallicity")
-       "metallicity_floor",
-       // for backwards compatability, we manually use "data_file" to
-       // initialize "grackle_data_file" parameter (in the future, we may want
-       // to change this)
-       "data_file", "grackle_data_file",
-       // the final two parameters auto-parsed by other Cello machinery
-       "type", "courant"};
-
-    method_grackle_chemistry = GrackleChemistryData::from_parameters
-      (*p, "Method:grackle", forbid_leaf_names, ignore_leaf_names);
-
-    // now let's manually initialize the handful of remaining runtime
-    // parameters that are stored within method_grackle_chemistry
-
-    // 1. use "Method:grackle:data_file" to initialize "grackle_data_file" 
-    if (p->param("Method:grackle:grackle_data_file") != nullptr){
-      ERROR("EnzoConfig::read_method_grackle_",
-            "for backwards compatability, the user can't specify "
-            "\"Method:grackle:grackle_data_file\". Instead, they must specify "
-            "\"Method:grackle:data_file\".");
-    } else if (p->param("Method:grackle:data_file") != nullptr) {
-      std::string fname = p->value_string("Method:grackle:data_file", "");
-      ASSERT("EnzoConfig::read_method_grackle_",
-             "\"Method:grackle:data_file\" can't be an empty string",
-             fname.length() > 0); // sanity check!
-      method_grackle_chemistry.set<std::string>("grackle_data_file", fname);
-    } else {
-      ERROR("EnzoConfig::read_method_grackle_",
-            "\"Method:grackle:data_file\" is required when using grackle");
-    }
-
-    // 2. update the value of use_grackle
-    method_grackle_chemistry.set<int>("use_grackle",
-                                      method_grackle_use_grackle);
-
-    // 3. Copy over parameters from Enzo-E to Grackle
-    if (physics_fluid_props_eos_variant.holds_alternative<EnzoEOSIdeal>()) {
-      method_grackle_chemistry.set<double>
-        ("Gamma", physics_fluid_props_eos_variant.get<EnzoEOSIdeal>().gamma);
-    } else {
-      ERROR("EnzoConfig::read_method_grackle_",
-            "Grackle currently can't be used when Enzo-E is configured to use "
-            "an equation of state other than the ideal gas law");
-    }
-
-    // In the future, we may want to manually set use_radiative_transfer based
-    // on an Enzo-E parameter for turning RT on / off:
-    //method_grackle_chemistry.set<int>("use_radiative_transfer", ENZO_E_PARAMETER_NAME);
-  }
 }
 
 //----------------------------------------------------------------------
