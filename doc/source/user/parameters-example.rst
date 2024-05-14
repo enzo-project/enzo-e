@@ -50,7 +50,6 @@ Field Group
     Field {
     
        ghost_depth  = 3;
-       courant = 0.8;
     
        fields = [ 
           "density",
@@ -68,13 +67,13 @@ Method Group
 
     Method {
     
-       sequence = [ "ppm" ];
+       list = [ "ppm" ];
 
        ppm {
-          diffusion   = true;
-          flattening  = 3;
-          steepening  = true;
-          dual_energy = false;
+          courant    = 0.8;
+          diffusion  = true;
+          flattening = 3;
+          steepening = true;
        }
     }
 
@@ -84,10 +83,16 @@ Physics Group
   ::
 
     Physics {
-    
-       dimensions = 2;
-       gamma = 1.4;
-    
+
+       list = ["fluid_props"];
+
+       fluid_props {
+          eos {
+             type = "ideal";
+             gamma = 1.4;
+          }
+          dual_energy { type = "disabled"; }
+       }
     }
 
 Initial Group

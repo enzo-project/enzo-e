@@ -317,7 +317,9 @@ static void allocate_FC_flux_buffer_(Block * block) throw()
 
 void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
-  if (block->cycle() == enzo::config()->initial_cycle) { post_init_checks_(); }
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
+    post_init_checks_();
+  }
 
   if (store_fluxes_for_corrections_){ allocate_FC_flux_buffer_(block); }
 

@@ -24,11 +24,7 @@ class EnzoMethodGravity : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravity object
-  EnzoMethodGravity(int index_solver,
-		    int order,
-		    bool accumulate,
-		    int index_prolong,
-		    double dt_max);
+  EnzoMethodGravity(ParameterGroup p, int index_solver, int index_prolong);
 
   EnzoMethodGravity()
     : index_solver_(-1),

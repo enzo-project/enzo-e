@@ -41,12 +41,6 @@ public: // interface
   EnzoConfig(CkMigrateMessage *m)
     : Config (m),
       adapt_mass_type(),
-      ppm_diffusion(0),
-      ppm_flattening(0),
-      ppm_minimum_pressure_support_parameter(0),
-      ppm_pressure_free(false),
-      ppm_steepening(false),
-      ppm_use_minimum_pressure_support(false),
       field_uniform_density(1.0),
       // Cosmology
       physics_cosmology(false),
@@ -94,24 +88,6 @@ public: // interface
       initial_burkertbodenheimer_rank(0),
       initial_burkertbodenheimer_rotating(true),
       initial_burkertbodenheimer_temperature(0.0),
-      // EnzoInitialCloud
-      initial_cloud_center_x(0.0),
-      initial_cloud_center_y(0.0),
-      initial_cloud_center_z(0.0),
-      initial_cloud_density_cloud(0.0),
-      initial_cloud_density_wind(0.0),
-      initial_cloud_eint_wind(0.0),
-      initial_cloud_etot_wind(0.0),
-      initial_cloud_initialize_uniform_bfield(false),
-      initial_cloud_metal_mass_frac(0.0),
-      initial_cloud_perturb_Nwaves(0),
-      initial_cloud_perturb_amplitude(0.0),
-      initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
-      initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
-      initial_cloud_perturb_seed(0),
-      initial_cloud_radius(0.),
-      initial_cloud_subsample_n(0),
-      initial_cloud_velocity_wind(0.0),
       // EnzoInitialCollapse
       initial_collapse_mass(0.0),
       initial_collapse_particle_ratio(0.0),
@@ -120,19 +96,6 @@ public: // interface
       initial_collapse_temperature(0.0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
-      // EnzoInitialFeedbackTest
-      initial_feedback_test_density(),
-      initial_feedback_test_e_density(),
-      initial_feedback_test_from_file(),
-      initial_feedback_test_HeI_density(),
-      initial_feedback_test_HeII_density(),
-      initial_feedback_test_HeIII_density(),
-      initial_feedback_test_HI_density(),
-      initial_feedback_test_HII_density(),
-      initial_feedback_test_metal_fraction(),
-      initial_feedback_test_star_mass(),
-      initial_feedback_test_temperature(),
-      initial_feedback_test_luminosity(),
       // EnzoGrackleTest
       initial_grackle_test_maximum_H_number_density(1000.0),
       initial_grackle_test_maximum_metallicity(1.0),
@@ -179,14 +142,6 @@ public: // interface
       initial_IG_stellar_bulge(false),
       initial_IG_stellar_disk(false),
       initial_IG_use_gas_particles(false),       //
-      // EnzoInitialInclinedWave
-      initial_inclinedwave_alpha(0.0),
-      initial_inclinedwave_amplitude(0.0),
-      initial_inclinedwave_beta(0.0),
-      initial_inclinedwave_lambda(0.0),
-      initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
-      initial_inclinedwave_positive_vel(true),
-      initial_inclinedwave_wave_type(""),
       // EnzoInitialMergeSinksTest
       initial_merge_sinks_test_particle_data_filename(""),
       // EnzoInitialMusic
@@ -225,12 +180,6 @@ public: // interface
       initial_sedov_random_radius_relative(0.0),
       initial_sedov_random_te_multiplier(0),
       initial_sedov_rank(0),
-      // EnzoInitialShockTube
-      initial_shock_tube_aligned_ax(""),
-      initial_shock_tube_axis_velocity(0.0),
-      initial_shock_tube_flip_initialize(false),
-      initial_shock_tube_setup_name(""),
-      initial_shock_tube_trans_velocity(0.0),
       // EnzoInitialShuCollapse
       initial_shu_collapse_central_sink_exists(false),
       initial_shu_collapse_central_sink_mass(0.0),
@@ -303,43 +252,9 @@ public: // interface
       method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
       method_star_maker_min_level(0), // minimum refinement level for star formation
       method_star_maker_turn_off_probability(false),
-      // EnzoMethodM1Closure
-      method_m1_closure(false),
-      method_m1_closure_N_groups(1), // # of frequency bins
-      method_m1_closure_flux_function("GLF"), // which flux function to use
-      method_m1_closure_hll_file("hll_evals.list"), // path to hll eigenvalue table
-      method_m1_closure_clight_frac(1.0), // fraction of speed of light value to use
-      method_m1_closure_photon_escape_fraction(1.0),
-      method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles 
-      method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
-      method_m1_closure_particle_luminosity(-1.0), // specify emission rate from sources
-      method_m1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
-      method_m1_closure_min_photon_density(0.0),
-      method_m1_closure_attenuation(true),
-      method_m1_closure_thermochemistry(true),
-      method_m1_closure_recombination_radiation(false),
-      method_m1_closure_H2_photodissociation(false),
-      method_m1_closure_lyman_werner_background(false),
-      method_m1_closure_LWB_J21(-1.0),
-      method_m1_closure_cross_section_calculator("vernier"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
-      method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
-      method_m1_closure_sigmaE(), 
-      method_m1_closure_energy_lower(),
-      method_m1_closure_energy_upper(),
-      method_m1_closure_energy_mean(), // mean energy for bin
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
-      // EnzoMethodGrackle
-      method_grackle_use_grackle(false),
-      method_grackle_chemistry(),
-      method_grackle_use_cooling_timestep(false),
-      method_grackle_radiation_redshift(-1.0),
-      // EnzoMethodGravity
-      method_gravity_solver(""),
-      method_gravity_order(4),
-      method_gravity_dt_max(1.0e10),
-      method_gravity_accumulate(false),
       // EnzoMethodBackgroundAcceleration
       method_background_acceleration_flavor(""),
       method_background_acceleration_mass(0.0),
@@ -386,7 +301,6 @@ public: // interface
 
   {
     for (int axis=0; axis<3; axis++) {
-      initial_cloud_uniform_bfield[axis] = 0;
       initial_sedov_array[axis] = 0;
       initial_sedov_random_array[axis] = 0;
       initial_soup_array[axis] = 0;
@@ -399,8 +313,6 @@ public: // interface
       initial_accretion_test_sink_velocity[axis] = 0.0;
       method_background_acceleration_center[axis] = 0.5;
       method_background_acceleration_angular_momentum[axis] = 0;
-
-      initial_feedback_test_position[axis] = 0.5;
     }
     method_background_acceleration_angular_momentum[2] = 1;
   }
@@ -424,20 +336,16 @@ protected: // methods
   void read_initial_bb_test_(Parameters *);
   void read_initial_bcenter_(Parameters *);
   void read_initial_burkertbodenheimer_(Parameters *);
-  void read_initial_cloud_(Parameters *);
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
-  void read_initial_feedback_test_(Parameters *);
   void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
-  void read_initial_inclined_wave_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
   void read_initial_music_(Parameters *);
   void read_initial_pm_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
-  void read_initial_shock_tube_(Parameters *);
   void read_initial_shu_collapse_(Parameters *);
   void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
@@ -449,12 +357,8 @@ protected: // methods
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
   void read_method_feedback_(Parameters *);
-  void read_method_grackle_(Parameters *);
-  void read_method_gravity_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
-  void read_method_ppm_(Parameters *);
   void read_method_star_maker_(Parameters *);
-  void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_vlct_(Parameters *);
   
@@ -476,15 +380,6 @@ public: // attributes
   /// Refine
 
   std::vector <std::string>  adapt_mass_type;
-
-  /// EnzoMethodPpm
-
-  bool                       ppm_diffusion;
-  int                        ppm_flattening;
-  int                        ppm_minimum_pressure_support_parameter;
-  bool                       ppm_pressure_free;
-  bool                       ppm_steepening;
-  bool                       ppm_use_minimum_pressure_support;
 
   double                     field_uniform_density;
 
@@ -523,26 +418,6 @@ public: // attributes
   bool                       initial_burkertbodenheimer_rotating;
   double                     initial_burkertbodenheimer_outer_velocity;
 
-  /// EnzoInitialCloud;
-  double                     initial_cloud_center_x;
-  double                     initial_cloud_center_y;
-  double                     initial_cloud_center_z;
-  double                     initial_cloud_density_cloud;
-  double                     initial_cloud_density_wind;
-  double                     initial_cloud_eint_wind;
-  double                     initial_cloud_etot_wind;
-  bool                       initial_cloud_initialize_uniform_bfield;
-  double                     initial_cloud_uniform_bfield[3];
-  double                     initial_cloud_metal_mass_frac;
-  int                        initial_cloud_perturb_Nwaves;
-  double                     initial_cloud_perturb_amplitude;
-  double                     initial_cloud_perturb_min_wavelength;
-  double                     initial_cloud_perturb_max_wavelength;
-  unsigned int               initial_cloud_perturb_seed;
-  double                     initial_cloud_radius;
-  int                        initial_cloud_subsample_n;
-  double                     initial_cloud_velocity_wind;
-
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
 
@@ -577,15 +452,6 @@ public: // attributes
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
-
-  /// EnzoInitialInclinedWave
-  double                     initial_inclinedwave_alpha;
-  double                     initial_inclinedwave_beta;
-  double                     initial_inclinedwave_amplitude;
-  double                     initial_inclinedwave_lambda;
-  double                     initial_inclinedwave_parallel_vel;
-  bool                       initial_inclinedwave_positive_vel;
-  std::string                initial_inclinedwave_wave_type;
 
   /// EnzoInitialMusic
 
@@ -630,13 +496,6 @@ public: // attributes
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
 
-  /// EnzoInitialShockTube
-  std::string                initial_shock_tube_setup_name;
-  std::string                initial_shock_tube_aligned_ax;
-  double                     initial_shock_tube_axis_velocity;
-  double                     initial_shock_tube_trans_velocity;
-  bool                       initial_shock_tube_flip_initialize;
-
   /// EnzoInitialSoup
   int                        initial_soup_rank;
   std::string                initial_soup_file;
@@ -652,22 +511,6 @@ public: // attributes
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
-
-  /// EnzoInitialFeedbackTest
-
-  double                     initial_feedback_test_position[3];
-  double                     initial_feedback_test_luminosity;
-  double                     initial_feedback_test_density;
-  double                     initial_feedback_test_HI_density;
-  double                     initial_feedback_test_HII_density;
-  double                     initial_feedback_test_HeI_density;
-  double                     initial_feedback_test_HeII_density;
-  double                     initial_feedback_test_HeIII_density;
-  double                     initial_feedback_test_e_density;
-  double                     initial_feedback_test_star_mass;
-  double                     initial_feedback_test_temperature;
-  bool                       initial_feedback_test_from_file;
-  double                     initial_feedback_test_metal_fraction;
 
   /// EnzoInitialIsolatedGalaxy
   bool                       initial_IG_analytic_velocity;
@@ -787,48 +630,9 @@ public: // attributes
   int                       method_star_maker_min_level;
   bool                      method_star_maker_turn_off_probability;
 
-
-  /// EnzoMethodM1Closure
-  
-  bool                      method_m1_closure; 
-  int                       method_m1_closure_N_groups;
-  std::string               method_m1_closure_flux_function;
-  std::string               method_m1_closure_hll_file;
-  double                    method_m1_closure_clight_frac;
-  double                    method_m1_closure_photon_escape_fraction;
-  std::string               method_m1_closure_radiation_spectrum;
-  double                    method_m1_closure_temperature_blackbody; 
-  double                    method_m1_closure_particle_luminosity;
-  std::vector<double>       method_m1_closure_SED;
-  double                    method_m1_closure_min_photon_density;
-  bool                      method_m1_closure_attenuation;
-  bool                      method_m1_closure_thermochemistry;
-  bool                      method_m1_closure_recombination_radiation;
-  bool                      method_m1_closure_H2_photodissociation;
-  bool                      method_m1_closure_lyman_werner_background;
-  double                    method_m1_closure_LWB_J21;
-  std::string               method_m1_closure_cross_section_calculator;
-  std::vector<double>       method_m1_closure_sigmaN;
-  std::vector<double>       method_m1_closure_sigmaE;
-  std::vector<double>       method_m1_closure_energy_lower;
-  std::vector<double>       method_m1_closure_energy_upper;
-  std::vector<double>       method_m1_closure_energy_mean;
-
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
-
-  /// EnzoMethodGrackle
-  bool                       method_grackle_use_grackle;
-  GrackleChemistryData       method_grackle_chemistry;
-  bool                       method_grackle_use_cooling_timestep;
-  double                     method_grackle_radiation_redshift;
-
-  /// EnzoMethodGravity
-  std::string                method_gravity_solver;
-  int                        method_gravity_order;
-  double                     method_gravity_dt_max;
-  bool                       method_gravity_accumulate;
 
   /// EnzoMethodBackgroundAcceleration
 

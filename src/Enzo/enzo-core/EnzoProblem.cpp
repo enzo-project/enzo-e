@@ -101,6 +101,11 @@ Initial * EnzoProblem::create_initial_
 
   Initial * initial = 0;
 
+  // move creation of p_accessor up the call stack?
+  const std::string root_path =
+    ("Initial:" + parameters->list_value_string(index, "Initial:list"));
+  ParameterGroup p_group(*parameters, root_path);
+
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
 
@@ -161,31 +166,12 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "feedback_test") {
-    initial = new EnzoInitialFeedbackTest(enzo_config);
+    initial = new EnzoInitialFeedbackTest(cycle, time, p_group);
   } else if (type == "vlct_bfield") {
     initial = new EnzoInitialBCenter(parameters, cycle, time,
 				     enzo_config->initial_bcenter_update_etot);
   } else if (type == "cloud") {
-    initial = new EnzoInitialCloud
-      (cycle,time,
-       enzo_config->initial_cloud_subsample_n,
-       enzo_config->initial_cloud_radius,
-       enzo_config->initial_cloud_center_x,
-       enzo_config->initial_cloud_center_y,
-       enzo_config->initial_cloud_center_z,
-       enzo_config->initial_cloud_density_cloud,
-       enzo_config->initial_cloud_density_wind,
-       enzo_config->initial_cloud_etot_wind,
-       enzo_config->initial_cloud_eint_wind,
-       enzo_config->initial_cloud_velocity_wind,
-       enzo_config->initial_cloud_metal_mass_frac,
-       enzo_config->initial_cloud_initialize_uniform_bfield,
-       enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_Nwaves,
-       enzo_config->initial_cloud_perturb_amplitude,
-       enzo_config->initial_cloud_perturb_min_wavelength,
-       enzo_config->initial_cloud_perturb_max_wavelength,
-       enzo_config->initial_cloud_perturb_seed);
+    initial = new EnzoInitialCloud(cycle,time, p_group);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
@@ -202,16 +188,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cosmology_temperature
        );
   } else if (type == "inclined_wave") {
-    initial = new EnzoInitialInclinedWave
-      (cycle, time,
-       enzo_config->initial_inclinedwave_alpha,
-       enzo_config->initial_inclinedwave_beta,
-       enzo::fluid_props()->gamma(),
-       enzo_config->initial_inclinedwave_amplitude,
-       enzo_config->initial_inclinedwave_lambda,
-       enzo_config->initial_inclinedwave_parallel_vel,
-       enzo_config->initial_inclinedwave_positive_vel,
-       enzo_config->initial_inclinedwave_wave_type);
+    initial = new EnzoInitialInclinedWave(cycle, time, p_group);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence
       (cycle,time,
@@ -230,14 +207,7 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
-    initial = new EnzoInitialShockTube
-      (enzo::fluid_props()->gamma(),
-       cycle, time,
-       enzo_config->initial_shock_tube_setup_name,
-       enzo_config->initial_shock_tube_aligned_ax,
-       enzo_config->initial_shock_tube_axis_velocity,
-       enzo_config->initial_shock_tube_trans_velocity,
-       enzo_config->initial_shock_tube_flip_initialize);
+    initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
@@ -615,14 +585,9 @@ Method * EnzoProblem::create_method_
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
-    method = new EnzoMethodPpm
-      (store_fluxes_for_corrections,
-       enzo_config->ppm_diffusion,
-       enzo_config->ppm_flattening,
-       enzo_config->ppm_pressure_free,
-       enzo_config->ppm_steepening,
-       enzo_config->ppm_use_minimum_pressure_support,
-       enzo_config->ppm_minimum_pressure_support_parameter);
+
+    method = new EnzoMethodPpm(store_fluxes_for_corrections, p_group);
+    skip_auto_courant = true;
 
   } else if (name == "ppml") {
 
@@ -647,11 +612,10 @@ Method * EnzoProblem::create_method_
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
-      (enzo_config->method_grackle_chemistry,
-       enzo_config->method_grackle_use_cooling_timestep,
-       enzo_config->method_grackle_radiation_redshift,
+      (p_group,
        enzo_config->physics_cosmology_initial_redshift,
        enzo::simulation()->time());
+    skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -680,7 +644,10 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "gravity") {
 
-    std::string solver_name = enzo_config->method_gravity_solver;
+    // the presence of this extra logic here is undesirable, but it appears
+    // somewhat unavoidable
+
+    std::string solver_name = p_group.value_string("solver","unknown");
 
     int index_solver = enzo_config->solver_index.at(solver_name);
 
@@ -690,18 +657,12 @@ Method * EnzoProblem::create_method_
 	     0 <= index_solver && index_solver < enzo_config->num_solvers);
 
     Prolong * prolong = create_prolong_
-      (config->method_prolong[index_method],config);
+      (p_group.value_string("prolong","linear"),config);
 
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
 
-    method = new EnzoMethodGravity
-      (
-       enzo_config->solver_index.at(solver_name),
-       enzo_config->method_gravity_order,
-       enzo_config->method_gravity_accumulate,
-       index_prolong,
-       enzo_config->method_gravity_dt_max);
+    method = new EnzoMethodGravity(p_group, index_solver, index_prolong);
 
   } else if (name == "mhd_vlct") {
 
@@ -755,7 +716,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "m1_closure") {
 
-    method = new EnzoMethodM1Closure(enzo_config->method_m1_closure_N_groups);
+    method = new EnzoMethodM1Closure(p_group);
+    skip_auto_courant = true;
 
   } else if (name == "check") {
 
