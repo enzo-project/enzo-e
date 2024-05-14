@@ -44,7 +44,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   : Method()
 {
 #ifdef CONFIG_USE_GRACKLE
-  if (enzo::config()->method_grackle_use_grackle){
+  if (enzo::problem()->method("grackle") != nullptr){
     // we can remove the following once EnzoMethodGrackle no longer requires
     // the internal_energy to be a permanent field
     ASSERT("EnzoMethodMHDVlct::determine_quantities_",
