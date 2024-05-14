@@ -1,16 +1,20 @@
 # See LICENSE_CELLO file for license and copyright information
 
-# add source files related to cosmology to the enzo target
-
-# Get the list of source files in this directory
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp *F
+# create Enzo::cosmology
+#
+# We explicitly list files (rather than use glob) since that makes CMake better
+# at rebuilds (especially after changing branches)
+add_library(Enzo_cosmology
+  cosmology.hpp
+  EnzoMethodComovingExpansion.hpp EnzoMethodComovingExpansion.cpp
+  EnzoMethodCosmology.cpp EnzoMethodCosmology.hpp
+  EnzoPhysicsCosmology.cpp EnzoPhysicsCosmology.hpp
+  expand_terms.F
 )
 
-target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
+add_library(Enzo::cosmology ALIAS Enzo_cosmology)
+
+# the following can be improved (it links more than is necessary)
+target_link_libraries(Enzo_cosmology PUBLIC enzo ${CELLO_LIBS})
+target_include_directories(Enzo_cosmology PUBLIC ${ROOT_INCLUDE_DIR})
+target_link_options(Enzo_cosmology PRIVATE ${Cello_TARGET_LINK_OPTIONS})
