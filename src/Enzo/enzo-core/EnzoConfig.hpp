@@ -252,30 +252,6 @@ public: // interface
       method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
       method_star_maker_min_level(0), // minimum refinement level for star formation
       method_star_maker_turn_off_probability(false),
-      // EnzoMethodM1Closure
-      method_m1_closure(false),
-      method_m1_closure_N_groups(1), // # of frequency bins
-      method_m1_closure_flux_function("GLF"), // which flux function to use
-      method_m1_closure_hll_file("hll_evals.list"), // path to hll eigenvalue table
-      method_m1_closure_clight_frac(1.0), // fraction of speed of light value to use
-      method_m1_closure_photon_escape_fraction(1.0),
-      method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles 
-      method_m1_closure_temperature_blackbody(-1.0), // requires radiation_spectrum="blackbody"
-      method_m1_closure_particle_luminosity(-1.0), // specify emission rate from sources
-      method_m1_closure_SED(), // supply list of emission rates for all groups (radiation_spectrum="custom")
-      method_m1_closure_min_photon_density(0.0),
-      method_m1_closure_attenuation(true),
-      method_m1_closure_thermochemistry(true),
-      method_m1_closure_recombination_radiation(false),
-      method_m1_closure_H2_photodissociation(false),
-      method_m1_closure_lyman_werner_background(false),
-      method_m1_closure_LWB_J21(-1.0),
-      method_m1_closure_cross_section_calculator("vernier"), // what type of cross section calculator to use ("vernier", "vernier_average", "custom")
-      method_m1_closure_sigmaN(), // user-defined cross sections (requires cross_section_calculator = "custom")
-      method_m1_closure_sigmaE(), 
-      method_m1_closure_energy_lower(),
-      method_m1_closure_energy_upper(),
-      method_m1_closure_energy_mean(), // mean energy for bin
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -383,7 +359,6 @@ protected: // methods
   void read_method_feedback_(Parameters *);
   void read_method_merge_sinks_(Parameters *);
   void read_method_star_maker_(Parameters *);
-  void read_method_m1_closure_(Parameters *);
   void read_method_turbulence_(Parameters *);
   void read_method_vlct_(Parameters *);
   
@@ -654,33 +629,6 @@ public: // attributes
   double                    method_star_maker_maximum_star_mass;
   int                       method_star_maker_min_level;
   bool                      method_star_maker_turn_off_probability;
-
-
-  /// EnzoMethodM1Closure
-  
-  bool                      method_m1_closure; 
-  int                       method_m1_closure_N_groups;
-  std::string               method_m1_closure_flux_function;
-  std::string               method_m1_closure_hll_file;
-  double                    method_m1_closure_clight_frac;
-  double                    method_m1_closure_photon_escape_fraction;
-  std::string               method_m1_closure_radiation_spectrum;
-  double                    method_m1_closure_temperature_blackbody; 
-  double                    method_m1_closure_particle_luminosity;
-  std::vector<double>       method_m1_closure_SED;
-  double                    method_m1_closure_min_photon_density;
-  bool                      method_m1_closure_attenuation;
-  bool                      method_m1_closure_thermochemistry;
-  bool                      method_m1_closure_recombination_radiation;
-  bool                      method_m1_closure_H2_photodissociation;
-  bool                      method_m1_closure_lyman_werner_background;
-  double                    method_m1_closure_LWB_J21;
-  std::string               method_m1_closure_cross_section_calculator;
-  std::vector<double>       method_m1_closure_sigmaN;
-  std::vector<double>       method_m1_closure_sigmaE;
-  std::vector<double>       method_m1_closure_energy_lower;
-  std::vector<double>       method_m1_closure_energy_upper;
-  std::vector<double>       method_m1_closure_energy_mean;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
