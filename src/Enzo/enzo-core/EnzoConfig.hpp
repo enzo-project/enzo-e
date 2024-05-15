@@ -12,10 +12,6 @@
 #define MAX_FIELDS      30
 #define MAX_FILE_GROUPS 10
 
-// we need to include this for the declaration of GrackleChemistryData
-// -> after GitHub PR #342 is merged, we can delete this line
-#include "Enzo/chemistry/GrackleChemistryData.hpp"
-
 class Parameters;
 
 class EnzoConfig : public Config {
