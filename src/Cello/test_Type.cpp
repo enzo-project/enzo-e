@@ -18,7 +18,8 @@ void check_get_type_enum(){
   unit_assert (cello::get_type_enum<double>() == type_double);
   {
     int long_double_val = cello::get_type_enum<long double>();
-    unit_assert((long_double_val == type_extended80) ||
+    unit_assert((long_double_val == type_extended64) ||
+                (long_double_val == type_extended80) ||
                 (long_double_val == type_extended96) ||
                 (long_double_val == type_quadruple));
   }
@@ -59,6 +60,8 @@ void check_enum_conversion(){
                 cello::convert_enum_precision_to_type(precision_single) );
   unit_assert ( type_double ==
                 cello::convert_enum_precision_to_type(precision_double) );
+  unit_assert ( type_extended64 ==
+                cello::convert_enum_precision_to_type(precision_extended64) );
   unit_assert ( type_extended80 ==
                 cello::convert_enum_precision_to_type(precision_extended80) );
   unit_assert ( type_extended96 ==

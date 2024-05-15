@@ -1,6 +1,9 @@
-// we explicitly avoid including <boost/filesystem> inside of a separate header
-// because it is a large header that takes a long time to read (~0.4 seconds)
-#include <boost/filesystem.hpp>
+// back when we used boost::filesystem, we explicitly avoided including the
+// associated header because it was a large header that took a long time to
+// read (~0.4 seconds).
+// -> we continue to do this with <filesystem>, but it's not clear how much
+//    this does for us
+#include <filesystem>
 
 #include "cello.hpp"
 #include "error.hpp"
@@ -11,11 +14,12 @@
 namespace cello {
 
   // @@@ KEEP IN SYNCH WITH precision_enum in cello.hpp
-  const char * precision_name[7] = {
+  const char * precision_name[8] = {
     "unknown",
     "default",
     "single",
     "double",
+    "extended64",
     "extended80",
     "extended96",
     "quadruple"
@@ -27,6 +31,7 @@ namespace cello {
     "default",    // "default" floating-point precision, e.g. enzo_float
     "single",
     "double",
+    "extended64",
     "extended80",
     "extended96",
     "quadruple",
@@ -42,6 +47,7 @@ namespace cello {
     0, // default
     4, // single
     8, // double
+    8, // extended64
     10, // extended80
     12, // extended96
     16, // quadruple
@@ -62,6 +68,7 @@ namespace cello {
     return (type == type_single || 
 	    type == type_double || 
 	    type == type_quadruple ||
+	    type == type_extended64 ||
 	    type == type_extended80 ||
 	    type == type_extended96);
   }
@@ -85,6 +92,9 @@ namespace cello {
       size = 4;
       break;
     case precision_double:
+      size = 8;
+      break;
+    case precision_extended64:
       size = 8;
       break;
     case precision_extended80:
@@ -119,6 +129,9 @@ namespace cello {
       break;
     case precision_double:
       is_supported = (sizeof(double)==8);
+      break;
+    case precision_extended64:
+      is_supported = (sizeof(long double)==8);
       break;
     case precision_extended80:
       is_supported = (sizeof(long double)==10);
@@ -533,15 +546,15 @@ namespace cello {
 
   bool ensure_directory_exists(const std::string& dir_name)
   {
-    boost::filesystem::path directory(dir_name);
+    std::filesystem::path directory(dir_name);
 
-    if (boost::filesystem::is_directory(directory)) {
+    if (std::filesystem::is_directory(directory)) {
       return true;
     } else {
-      boost::filesystem::create_directory(directory);
+      std::filesystem::create_directory(directory);
       ASSERT1 ("cello::ensure_directory_exists()",
                "Error creating directory %s",
-               dir_name.c_str(), boost::filesystem::is_directory(directory));
+               dir_name.c_str(), std::filesystem::is_directory(directory));
       return false;
     }
   }

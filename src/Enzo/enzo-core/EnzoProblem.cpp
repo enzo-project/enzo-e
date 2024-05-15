@@ -166,31 +166,12 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "feedback_test") {
-    initial = new EnzoInitialFeedbackTest(enzo_config);
+    initial = new EnzoInitialFeedbackTest(cycle, time, p_group);
   } else if (type == "vlct_bfield") {
     initial = new EnzoInitialBCenter(parameters, cycle, time,
 				     enzo_config->initial_bcenter_update_etot);
   } else if (type == "cloud") {
-    initial = new EnzoInitialCloud
-      (cycle,time,
-       enzo_config->initial_cloud_subsample_n,
-       enzo_config->initial_cloud_radius,
-       enzo_config->initial_cloud_center_x,
-       enzo_config->initial_cloud_center_y,
-       enzo_config->initial_cloud_center_z,
-       enzo_config->initial_cloud_density_cloud,
-       enzo_config->initial_cloud_density_wind,
-       enzo_config->initial_cloud_etot_wind,
-       enzo_config->initial_cloud_eint_wind,
-       enzo_config->initial_cloud_velocity_wind,
-       enzo_config->initial_cloud_metal_mass_frac,
-       enzo_config->initial_cloud_initialize_uniform_bfield,
-       enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_Nwaves,
-       enzo_config->initial_cloud_perturb_amplitude,
-       enzo_config->initial_cloud_perturb_min_wavelength,
-       enzo_config->initial_cloud_perturb_max_wavelength,
-       enzo_config->initial_cloud_perturb_seed);
+    initial = new EnzoInitialCloud(cycle,time, p_group);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
@@ -631,11 +612,10 @@ Method * EnzoProblem::create_method_
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
-      (enzo_config->method_grackle_chemistry,
-       enzo_config->method_grackle_use_cooling_timestep,
-       enzo_config->method_grackle_radiation_redshift,
+      (p_group,
        enzo_config->physics_cosmology_initial_redshift,
        enzo::simulation()->time());
+    skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -745,7 +725,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "m1_closure") {
 
-    method = new EnzoMethodM1Closure(enzo_config->method_m1_closure_N_groups);
+    method = new EnzoMethodM1Closure(p_group);
+    skip_auto_courant = true;
 
   } else if (name == "check") {
 

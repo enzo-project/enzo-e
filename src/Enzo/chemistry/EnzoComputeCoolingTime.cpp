@@ -64,7 +64,7 @@ void EnzoComputeCoolingTime::compute ( Block * block, enzo_float * ct) throw()
 void EnzoComputeCoolingTime::compute_(Block * block,
                                       enzo_float * ct,
                                       grackle_field_data * grackle_fields /* NULL */
-                                    )
+                                      )
 {
   const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
   ASSERT("EnzoComputeCoolingTime::compute_()",
