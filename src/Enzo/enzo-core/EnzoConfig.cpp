@@ -46,24 +46,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_burkertbodenheimer_densityprofile(1),
   initial_burkertbodenheimer_rotating(true),
   initial_burkertbodenheimer_outer_velocity(-1),
-  // EnzoInitialCloud
-  initial_cloud_center_x(0.0),
-  initial_cloud_center_y(0.0),
-  initial_cloud_center_z(0.0),
-  initial_cloud_density_cloud(0.0),
-  initial_cloud_density_wind(0.0),
-  initial_cloud_eint_wind(0.0),
-  initial_cloud_etot_wind(0.0),
-  initial_cloud_initialize_uniform_bfield(false),
-  initial_cloud_metal_mass_frac(0.0),
-  initial_cloud_perturb_Nwaves(0),
-  initial_cloud_perturb_amplitude(0.),
-  initial_cloud_perturb_min_wavelength(std::numeric_limits<double>::min()),
-  initial_cloud_perturb_max_wavelength(std::numeric_limits<double>::min()),
-  initial_cloud_perturb_seed(0),
-  initial_cloud_radius(0.),
-  initial_cloud_subsample_n(0),
-  initial_cloud_velocity_wind(0.0),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -210,30 +192,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_fade_SNR(true),
   method_feedback_NEvents(-1),
   method_feedback_radiation(true),
-  // EnzoMethodM1Closure
-  method_m1_closure(false),
-  method_m1_closure_N_groups(1), // # of frequency bins
-  method_m1_closure_flux_function("GLF"), // which flux function to use
-  method_m1_closure_hll_file("hll_evals.list"),
-  method_m1_closure_clight_frac(1.0), // reduced speed of light value to use
-  method_m1_closure_photon_escape_fraction(1.0),
-  method_m1_closure_radiation_spectrum("custom"), // Type of radiation spectrum to use for star particles
-  method_m1_closure_temperature_blackbody(0.0),
-  method_m1_closure_particle_luminosity(-1.0), // Set emission rate for star particles
-  method_m1_closure_SED(), // supply list of emission rate fraction for all groups
-  method_m1_closure_min_photon_density(0.0),
-  method_m1_closure_attenuation(true),
-  method_m1_closure_thermochemistry(true),
-  method_m1_closure_recombination_radiation(false),
-  method_m1_closure_H2_photodissociation(false),
-  method_m1_closure_lyman_werner_background(false),
-  method_m1_closure_LWB_J21(-1.0),
-  method_m1_closure_cross_section_calculator("vernier"),
-  method_m1_closure_sigmaN(),
-  method_m1_closure_sigmaE(),
-  method_m1_closure_energy_lower(),
-  method_m1_closure_energy_upper(),
-  method_m1_closure_energy_mean(),
   // EnzoMethodStarMaker,
   method_star_maker_flavor(""),                              // star maker type to use
   method_star_maker_use_altAlpha(false),
@@ -259,10 +217,6 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-  method_grackle_use_grackle(false),
-  method_grackle_chemistry(),
-  method_grackle_use_cooling_timestep(false),
-  method_grackle_radiation_redshift(-1.0),
   /// EnzoMethodBackgroundAcceleration
   method_background_acceleration_flavor(""),
   method_background_acceleration_mass(0.0),
@@ -308,7 +262,6 @@ EnzoConfig::EnzoConfig() throw ()
 
 {
   for (int i=0; i<3; i++) {
-    initial_cloud_uniform_bfield[i] = 0;
     initial_sedov_array[i] = 0;
     initial_soup_array[i]  = 0;
     initial_soup_d_pos[i]  = 0.0;
@@ -362,25 +315,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
-
-  p | initial_cloud_subsample_n;
-  p | initial_cloud_radius;
-  p | initial_cloud_center_x;
-  p | initial_cloud_center_y;
-  p | initial_cloud_center_z;
-  p | initial_cloud_density_cloud;
-  p | initial_cloud_density_wind;
-  p | initial_cloud_velocity_wind;
-  p | initial_cloud_etot_wind;
-  p | initial_cloud_eint_wind;
-  p | initial_cloud_metal_mass_frac;
-  p | initial_cloud_initialize_uniform_bfield;
-  PUParray(p,initial_cloud_uniform_bfield,3);
-  p | initial_cloud_perturb_Nwaves;
-  p | initial_cloud_perturb_amplitude;
-  p | initial_cloud_perturb_min_wavelength;
-  p | initial_cloud_perturb_max_wavelength;
-  p | initial_cloud_perturb_seed;
 
   p | initial_cosmology_temperature;
 
@@ -575,30 +509,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_star_maker_min_level;
   p | method_star_maker_turn_off_probability;
 
-  p | method_m1_closure;
-  p | method_m1_closure_N_groups;
-  p | method_m1_closure_flux_function;
-  p | method_m1_closure_hll_file;
-  p | method_m1_closure_clight_frac;
-  p | method_m1_closure_photon_escape_fraction;
-  p | method_m1_closure_radiation_spectrum;
-  p | method_m1_closure_temperature_blackbody;
-  p | method_m1_closure_particle_luminosity;
-  p | method_m1_closure_SED;
-  p | method_m1_closure_min_photon_density;
-  p | method_m1_closure_attenuation;
-  p | method_m1_closure_thermochemistry;
-  p | method_m1_closure_recombination_radiation;
-  p | method_m1_closure_H2_photodissociation;
-  p | method_m1_closure_lyman_werner_background;
-  p | method_m1_closure_LWB_J21;
-  p | method_m1_closure_cross_section_calculator;
-  p | method_m1_closure_sigmaN;
-  p | method_m1_closure_sigmaE;
-  p | method_m1_closure_energy_lower;
-  p | method_m1_closure_energy_upper;
-  p | method_m1_closure_energy_mean;
-
   p | method_turbulence_edot;
 
   p | method_background_acceleration_flavor;
@@ -650,14 +560,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_length;
   p | units_time;
 
-  p | method_grackle_use_grackle;
-
-  if (method_grackle_use_grackle) {
-    p  | method_grackle_use_cooling_timestep;
-    p  | method_grackle_radiation_redshift;
-    p  | method_grackle_chemistry;
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -682,7 +584,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_bb_test_(p);
   read_initial_bcenter_(p);
   read_initial_burkertbodenheimer_(p);
-  read_initial_cloud_(p);
   read_initial_collapse_(p);
   read_initial_cosmology_(p);
   read_initial_grackle_(p);
@@ -697,7 +598,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_soup_(p);
   read_initial_turbulence_(p);
 
-  // it's important for read_physics_ to precede read_method_grackle_
+  // it's important for read_physics_
   read_physics_(p);
 
   // Method [sorted]
@@ -706,9 +607,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_feedback_(p);
-  read_method_grackle_(p);
   read_method_merge_sinks_(p);
-  read_method_m1_closure_(p);
   read_method_star_maker_(p);
   read_method_turbulence_(p);
   read_method_vlct_(p);
@@ -1010,73 +909,6 @@ void EnzoConfig::read_initial_bcenter_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_initial_cloud_(Parameters * p)
-{
-  // Cloud Crush Initialization
-  initial_cloud_subsample_n            = p->value_integer
-    ("Initial:cloud:subsample_n",0);
-  initial_cloud_radius                 = p->value_float
-    ("Initial:cloud:cloud_radius",0.0);
-  initial_cloud_center_x               = p->value_float
-    ("Initial:cloud:cloud_center_x",0.0);
-  initial_cloud_center_y               = p->value_float
-    ("Initial:cloud:cloud_center_y",0.0);
-  initial_cloud_center_z               = p->value_float
-    ("Initial:cloud:cloud_center_z",0.0);
-  initial_cloud_density_cloud          = p->value_float
-    ("Initial:cloud:cloud_density",0.0);
-  initial_cloud_density_wind           = p->value_float
-    ("Initial:cloud:wind_density",0.0);
-  initial_cloud_velocity_wind          = p->value_float
-    ("Initial:cloud:wind_velocity",0.0);
-  initial_cloud_etot_wind              = p->value_float
-    ("Initial:cloud:wind_total_energy",0.0);
-  initial_cloud_eint_wind              = p->value_float
-    ("Initial:cloud:wind_internal_energy",0.0);
-  initial_cloud_metal_mass_frac        = p->value_float
-    ("Initial:cloud:metal_mass_fraction",0.0);
-  initial_cloud_perturb_Nwaves         = p->value_integer
-    ("Initial:cloud:perturb_Nwaves", 0);
-  initial_cloud_perturb_amplitude      = p->value_float
-    ("Initial:cloud:perturb_amplitude", 0.);
-  initial_cloud_perturb_min_wavelength = p->value_float
-    ("Initial:cloud:perturb_min_lambda", std::numeric_limits<double>::min());
-  initial_cloud_perturb_max_wavelength = p->value_float
-    ("Initial:cloud:perturb_max_lambda", std::numeric_limits<double>::min());
-  if (initial_cloud_perturb_Nwaves > 0){
-    if (initial_cloud_perturb_max_wavelength
-        == std::numeric_limits<double>::min() ){
-      initial_cloud_perturb_max_wavelength = initial_cloud_radius;
-    }
-  }
-
-
-  int init_cloud_perturb_seed_         = p->value_integer
-    ("Initial:cloud:perturb_seed",0);
-  ASSERT("EnzoConfig::read()",
-         "Initial:cloud:perturb_seed must be a 32-bit unsigned integer",
-	 (init_cloud_perturb_seed_ >= 0) &&
-         (init_cloud_perturb_seed_ <= 4294967295L));
-  initial_cloud_perturb_seed = (unsigned int) init_cloud_perturb_seed_;
-
-  int initial_cloud_uniform_bfield_length = p->list_length
-    ("Initial:cloud:uniform_bfield");
-  if (initial_cloud_uniform_bfield_length == 0){
-    initial_cloud_initialize_uniform_bfield = false;
-  } else if (initial_cloud_uniform_bfield_length == 3){
-    initial_cloud_initialize_uniform_bfield = true;
-    for (int i = 0; i <3; i++){
-      initial_cloud_uniform_bfield[i] = p->list_value_float
-	(i,"Initial:cloud:uniform_bfield");
-    }
-  } else {
-    ERROR("EnzoConfig::read",
-	  "Initial:cloud:uniform_bfield must contain 0 or 3 entries.");
-  }
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_initial_soup_(Parameters * p)
 {
   // InitialSoup initialization
@@ -1283,102 +1115,6 @@ void EnzoConfig::read_initial_bb_test_(Parameters * p)
     ("Initial:bb_test:external_density",1.0e-6);
 }
 
-void EnzoConfig::read_method_grackle_(Parameters * p)
-
-{
-  method_grackle_use_grackle = false;
-
-  /// Grackle parameters
-
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "grackle") method_grackle_use_grackle=true;
-  }
-
-  // Defaults alert PUP::er() to ignore
-  if (method_grackle_use_grackle) {
-
-    method_grackle_use_cooling_timestep = p->value_logical
-      ("Method:grackle:use_cooling_timestep", false);
-
-    // for when not using cosmology - redshift of UVB
-    method_grackle_radiation_redshift = p->value_float
-      ("Method:grackle:radiation_redshift", -1.0);
-
-    // Now, we will initialize method_grackle_chemistry
-    // - we do this with a factory method that directly examines the parameter
-    //   values within the "Method:grackle:*" group.
-    // - Because Grackle has so many parameter values, it's very easy to make a
-    //   small mistake when specifying the name of a parameter value and not
-    //   notice until much later. For that reason, the factory method
-    //   aggressively reports unexpected parameters as errors.
-    // - to help this method, we provide 2 sets of parameter names
-
-    //   1. specify all of the Grackle parameters that we will manually setup
-    //      based on the values passed for other Enzo-E parameters. Errors will
-    //      be reported if any of these are encountered
-    const std::unordered_set<std::string> forbid_leaf_names = {"use_grackle",
-                                                               "Gamma"};
-
-    //   2. specify all parameters that MAY occur within the "Method:grackle:*"
-    //      group that should be ignored by the factory method. (This needs to
-    //      be updated if we introduce additional parameters for configuring
-    //      EnzoMethodGrackle)
-    const std::unordered_set<std::string> ignore_leaf_names =
-      {"use_cooling_timestep", "radiation_redshift",
-       // the next option is deprecated and is only listed in the short-term
-       // for backwards compatability (it should now be replaced by
-       // "Physics:fluid_props:floors:metallicity")
-       "metallicity_floor",
-       // for backwards compatability, we manually use "data_file" to
-       // initialize "grackle_data_file" parameter (in the future, we may want
-       // to change this)
-       "data_file", "grackle_data_file",
-       // the final two parameters auto-parsed by other Cello machinery
-       "type", "courant"};
-
-    method_grackle_chemistry = GrackleChemistryData::from_parameters
-      (*p, "Method:grackle", forbid_leaf_names, ignore_leaf_names);
-
-    // now let's manually initialize the handful of remaining runtime
-    // parameters that are stored within method_grackle_chemistry
-
-    // 1. use "Method:grackle:data_file" to initialize "grackle_data_file" 
-    if (p->param("Method:grackle:grackle_data_file") != nullptr){
-      ERROR("EnzoConfig::read_method_grackle_",
-            "for backwards compatability, the user can't specify "
-            "\"Method:grackle:grackle_data_file\". Instead, they must specify "
-            "\"Method:grackle:data_file\".");
-    } else if (p->param("Method:grackle:data_file") != nullptr) {
-      std::string fname = p->value_string("Method:grackle:data_file", "");
-      ASSERT("EnzoConfig::read_method_grackle_",
-             "\"Method:grackle:data_file\" can't be an empty string",
-             fname.length() > 0); // sanity check!
-      method_grackle_chemistry.set<std::string>("grackle_data_file", fname);
-    } else {
-      ERROR("EnzoConfig::read_method_grackle_",
-            "\"Method:grackle:data_file\" is required when using grackle");
-    }
-
-    // 2. update the value of use_grackle
-    method_grackle_chemistry.set<int>("use_grackle",
-                                      method_grackle_use_grackle);
-
-    // 3. Copy over parameters from Enzo-E to Grackle
-    if (physics_fluid_props_eos_variant.holds_alternative<EnzoEOSIdeal>()) {
-      method_grackle_chemistry.set<double>
-        ("Gamma", physics_fluid_props_eos_variant.get<EnzoEOSIdeal>().gamma);
-    } else {
-      ERROR("EnzoConfig::read_method_grackle_",
-            "Grackle currently can't be used when Enzo-E is configured to use "
-            "an equation of state other than the ideal gas law");
-    }
-
-    // In the future, we may want to manually set use_radiative_transfer based
-    // on an Enzo-E parameter for turning RT on / off:
-    //method_grackle_chemistry.set<int>("use_radiative_transfer", ENZO_E_PARAMETER_NAME);
-  }
-}
-
 //----------------------------------------------------------------------
 
 void EnzoConfig::read_method_feedback_(Parameters * p)
@@ -1508,99 +1244,6 @@ void EnzoConfig::read_method_star_maker_(Parameters * p)
 
   method_star_maker_turn_off_probability = p->value_logical
     ("Method:star_maker:turn_off_probability",false);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_m1_closure_(Parameters * p)
-{
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "m1_closure") method_m1_closure=true;
-  }
-
-  method_m1_closure_N_groups = p->value_integer
-    ("Method:m1_closure:N_groups",1);
-
-  method_m1_closure_flux_function = p->value_string
-    ("Method:m1_closure:flux_function","GLF");
-
-  method_m1_closure_hll_file = p->value_string
-    ("Method:m1_closure:hll_file","hll_evals.list");
-
-  method_m1_closure_clight_frac = p->value_float
-    ("Method:m1_closure:clight_frac",1.0);
-
-  method_m1_closure_photon_escape_fraction = p->value_float
-    ("Method:m1_closure:photon_escape_fraction",1.0);
-
-  method_m1_closure_radiation_spectrum = p->value_string
-    ("Method:m1_closure:radiation_spectrum","custom");
-
-  method_m1_closure_temperature_blackbody = p->value_float
-    ("Method:m1_closure:temperature_blackbody",0.0);
-
-  method_m1_closure_particle_luminosity = p->value_float
-    ("Method:m1_closure:particle_luminosity",-1.0);
-
-  method_m1_closure_min_photon_density = p->value_float
-    ("Method:m1_closure:min_photon_density",0.0);
-
-  method_m1_closure_attenuation = p->value_logical
-    ("Method:m1_closure:attenuation", true);
-
-  method_m1_closure_thermochemistry = p->value_logical
-    ("Method:m1_closure:thermochemistry", true);
-
-  method_m1_closure_recombination_radiation = p->value_logical
-    ("Method:m1_closure:recombination_radiation",false);
-
-  method_m1_closure_H2_photodissociation = p->value_logical
-    ("Method:m1_closure:H2_photodissociation", false);
-
-  method_m1_closure_lyman_werner_background = p->value_logical
-    ("Method:m1_closure:lyman_werner_background", false);
-
-  method_m1_closure_LWB_J21 = p->value_float
-    ("Method:m1_closure:LWB_J21", -1.0);
-
-  method_m1_closure_cross_section_calculator = p->value_string
-    ("Method:m1_closure:cross_section_calculator","vernier");
-
-  method_m1_closure_SED.resize(method_m1_closure_N_groups);
-  method_m1_closure_energy_lower.resize(method_m1_closure_N_groups);
-  method_m1_closure_energy_upper.resize(method_m1_closure_N_groups);
-  method_m1_closure_energy_mean.resize(method_m1_closure_N_groups);
-  
-  int N_species = 3; // number of ionizable species for RT (HI, HeI, HeII)
-  method_m1_closure_sigmaN.resize(method_m1_closure_N_groups * N_species);
-  method_m1_closure_sigmaE.resize(method_m1_closure_N_groups * N_species);
-
-  // make default energy bins equally spaced between 1 eV and 101 eV
-  double bin_width = 100.0 / method_m1_closure_N_groups;
-  for (int i=0; i<method_m1_closure_N_groups; i++) {
-    // default SED (if this is being used) is flat spectrum
-    method_m1_closure_SED[i] = p->list_value_float
-      (i,"Method:m1_closure:SED", 1.0/method_m1_closure_N_groups);
-
-    method_m1_closure_energy_lower[i] = p->list_value_float
-      (i,"Method:m1_closure:energy_lower", 1.0 + bin_width*i);
-
-    method_m1_closure_energy_upper[i] = p->list_value_float
-      (i,"Method:m1_closure:energy_upper", 1.0 + bin_width*(i+1));
-
-    method_m1_closure_energy_mean[i] = p->list_value_float
-      (i,"Method:m1_closure:energy_mean", 
-         0.5*(method_m1_closure_energy_lower[i] + method_m1_closure_energy_upper[i]));
-
-    for (int j=0; j<N_species; j++) {
-      int sig_index = i*N_species + j;
-      method_m1_closure_sigmaN[sig_index] = p->list_value_float
-        (sig_index,"Method:m1_closure:sigmaN", 0.0);
-
-      method_m1_closure_sigmaE[sig_index] = p->list_value_float
-        (sig_index,"Method:m1_closure:sigmaE", 0.0);
-    }
-  }
 }
 
 //----------------------------------------------------------------------
