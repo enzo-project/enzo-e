@@ -14,11 +14,12 @@
 namespace cello {
 
   // @@@ KEEP IN SYNCH WITH precision_enum in cello.hpp
-  const char * precision_name[7] = {
+  const char * precision_name[8] = {
     "unknown",
     "default",
     "single",
     "double",
+    "extended64",
     "extended80",
     "extended96",
     "quadruple"
@@ -30,6 +31,7 @@ namespace cello {
     "default",    // "default" floating-point precision, e.g. enzo_float
     "single",
     "double",
+    "extended64",
     "extended80",
     "extended96",
     "quadruple",
@@ -45,6 +47,7 @@ namespace cello {
     0, // default
     4, // single
     8, // double
+    8, // extended64
     10, // extended80
     12, // extended96
     16, // quadruple
@@ -65,6 +68,7 @@ namespace cello {
     return (type == type_single || 
 	    type == type_double || 
 	    type == type_quadruple ||
+	    type == type_extended64 ||
 	    type == type_extended80 ||
 	    type == type_extended96);
   }
@@ -88,6 +92,9 @@ namespace cello {
       size = 4;
       break;
     case precision_double:
+      size = 8;
+      break;
+    case precision_extended64:
       size = 8;
       break;
     case precision_extended80:
@@ -122,6 +129,9 @@ namespace cello {
       break;
     case precision_double:
       is_supported = (sizeof(double)==8);
+      break;
+    case precision_extended64:
+      is_supported = (sizeof(long double)==8);
       break;
     case precision_extended80:
       is_supported = (sizeof(long double)==10);
