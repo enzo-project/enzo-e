@@ -668,13 +668,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "mhd_vlct") {
 
-    method = new EnzoMethodMHDVlct
-      (enzo_config->method_vlct_riemann_solver,
-       enzo_config->method_vlct_time_scheme,
-       enzo_config->method_vlct_reconstruct_method,
-       enzo_config->method_vlct_theta_limiter,
-       enzo_config->method_vlct_mhd_choice,
-       store_fluxes_for_corrections);
+    method = new EnzoMethodMHDVlct(p_group, store_fluxes_for_corrections);
+    skip_auto_courant = true;
 
   } else if (name == "background_acceleration") {
 

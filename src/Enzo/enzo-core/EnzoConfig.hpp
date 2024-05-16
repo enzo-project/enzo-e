@@ -225,12 +225,6 @@ public: // interface
       method_background_acceleration_stellar_scale_height_r(0.0),
       method_background_acceleration_stellar_scale_height_z(0.0),
       method_background_acceleration_apply_acceleration(true),
-      // EnzoMethodMHDVlct
-      method_vlct_riemann_solver(""),
-      method_vlct_time_scheme(""),
-      method_vlct_reconstruct_method(""),
-      method_vlct_theta_limiter(0.0),
-      method_vlct_mhd_choice(""),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -307,8 +301,7 @@ protected: // methods
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
   void read_method_turbulence_(Parameters *);
-  void read_method_vlct_(Parameters *);
-  
+
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
   void read_physics_gravity_(Parameters *);
@@ -549,14 +542,6 @@ public: // attributes
   double                     method_background_acceleration_center[3];
   double                     method_background_acceleration_angular_momentum[3];
   bool                       method_background_acceleration_apply_acceleration;
-
-  /// EnzoMethodMHDVlct
-  std::string                method_vlct_riemann_solver;
-  std::string                method_vlct_time_scheme;
-  std::string                method_vlct_reconstruct_method;
-  double                     method_vlct_theta_limiter;
-  std::string                method_vlct_mhd_choice;
-
 
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
