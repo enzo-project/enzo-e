@@ -23,7 +23,7 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_PRINTF ("Warning message:\n");
 
   char warning_message[ERROR_LENGTH];
-  sprintf (warning_message,"Warning message test");
+  snprintf (warning_message,sizeof(warning_message),"Warning message test");
   WARNING("main",warning_message);
 
   unit_func("WARNING");
