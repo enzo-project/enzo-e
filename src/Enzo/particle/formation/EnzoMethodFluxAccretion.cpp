@@ -13,12 +13,8 @@
 //------------------------------------------------------------------
 
 EnzoMethodFluxAccretion::EnzoMethodFluxAccretion
-(double accretion_radius_cells,
- double physical_density_threshold_cgs,
- double max_mass_fraction)
-  : EnzoMethodAccretion(accretion_radius_cells,
-			physical_density_threshold_cgs,
-			max_mass_fraction)
+(ParameterGroup p)
+  : EnzoMethodAccretion(p)
 {
   // The number of cell widths within the accretion radius cannot be larger than
   // any of the ghost depths minus 1. This is because this method requires computing

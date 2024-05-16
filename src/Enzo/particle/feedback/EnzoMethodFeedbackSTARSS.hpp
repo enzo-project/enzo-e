@@ -21,7 +21,7 @@ class EnzoMethodFeedbackSTARSS : public Method {
 
 public:
 
-  EnzoMethodFeedbackSTARSS();
+  EnzoMethodFeedbackSTARSS(ParameterGroup p);
 
   /// Destructor
   virtual ~EnzoMethodFeedbackSTARSS() throw() {};
@@ -122,10 +122,21 @@ protected: // methods
 
 protected:
 
-  int sf_minimum_level_;
-  int supernovae_;
+  // configuration parameters (these are directly set by the user)
+  bool supernovae_;
+  bool unrestricted_sn_;
+  bool stellar_winds_;
+  bool radiation_;
+  bool analytic_SNR_shell_mass_;
+  bool fade_SNR_;
+
+  // Sets off 'NEvents' supernovae (mainly for testing purposes), with at most
+  // one supernova per star particle per cycle.
   int NEvents;
 
+
+  // internal fields
+  
   // Refresh ID
   int ir_feedback_;
 
