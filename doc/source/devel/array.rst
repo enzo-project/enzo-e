@@ -873,7 +873,7 @@ snippets. Note that we don't support passing an integer value to
 Copy and ``const`` Semantics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Making a copy of an ``ViewMap`` instance (e.g. with a copy
+Making a copy of a ``ViewMap`` instance (e.g. with a copy
 constructor) always effectively produces a shallow copy. This is a
 natural consequnce of the ``CelloView``\'s pointer semantics. For
 example, each element in a copy of a ``std::vector<CelloView<T,D>>``
@@ -886,12 +886,12 @@ assign a variable, ``var``, as
 then the fact that you used ``const ViewMap`` effectively tells the
 compiler to forbid you from performing ``var = other_view_map;`` in a
 subsequent statement.  You are still free to mutate the elements held
-of any contained CelloView.
+by any contained CelloView.
 
 If you want to denote that a ``ViewMap`` is read-only, you should
-declare declare the type as ``ViewMap<const double>`` instead. Note
+declare the type as ``ViewMap<const double>`` instead. Note
 that a ``ViewMap<float>`` can be implicitly converted to a
-``ViewMap<const float, N>`` (e.g. you can pass the former to a
+``ViewMap<const float>`` (e.g. you can pass the former to a
 function that expecting the latter). It’s analogous to an implicit
 conversion from ``float*`` to a ``const float*``.
 
@@ -914,7 +914,7 @@ compiler will not compile any implementation of the function where the
 contents of arg are mutated (this can be a very useful reminder to any
 future developer that alters the implementation of
 ``calculate_pressure`` - they are of course able to change the
-function signature, but it's a a good reminder to make sure that they
+function signature, but it's a good reminder to make sure that they
 aren't breaking other areas of the code). For reference, the primary
 alternative to the above signature is identical, except that ``arg``
 is associated with the ``ViewMap<enzo_float>`` type. It's important to
@@ -986,7 +986,7 @@ approaches for internally storing the values of the map:
      ``CelloView`` values in a single ``CelloView<T, 4>`` instance.
      Access of individual ``CelloView`` values is accomplished with
      the overload of the ``CelloView<T,D>::subarray`` method. This
-     approach is used when you construct an ``ViewMap`` that
+     approach is used when you construct a ``ViewMap`` that
      allocates memory for the contained ``CelloView``\s.
 
 
