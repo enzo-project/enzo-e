@@ -39,7 +39,7 @@ file(GLOB SRC_FILES CONFIGURE_DEPENDS
 
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
 
-set(External_LIBS "Boost::filesystem;HDF5_C")
+set(External_LIBS "")
 if (USE_GRACKLE)
   LIST(APPEND External_LIBS "Grackle::Grackle")
 endif()
@@ -71,7 +71,7 @@ target_include_directories (main_enzo
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Cello # for main.hpp
 )
 target_link_libraries(main_enzo
-  PRIVATE enzo parallel cello_component monitor Boost::filesystem
+  PRIVATE enzo parallel cello_component monitor StdFilesystem::StdFilesystem
   PUBLIC main_enzoCharmModule # this is public because main_enzo.decl.h is in
                               # the public header file: main.hpp)
 )
@@ -84,13 +84,21 @@ target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 # add files in enzo-core to enzo target (and define a unit test)
 add_subdirectory(enzo-core)
 
-# add source files from other subdirectories to the enzo target
-add_subdirectory(chemistry)
+# add source files from the cosmology subdirectory to the enzo target
+# todo: create a distinct Enzo::cosmology target
 add_subdirectory(cosmology)
-add_subdirectory(fluid-props)
+
+# in the following lines all introduce targets (aka libraries) that are distinct
+# from the primary enzo target (later on, they are all linked to the enzo target)
 
 # define the Enzo::assorted target
 add_subdirectory(assorted)
+
+# define the Enzo::chemistry target
+add_subdirectory(chemistry)
+
+# define the Enzo::fluid-props target
+add_subdirectory(fluid-props)
 
 # define the Enzo::gravity target
 add_subdirectory(gravity)
@@ -125,8 +133,9 @@ add_subdirectory(utils)
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC Enzo::assorted Enzo::gravity Enzo::hydro-mhd Enzo::initial Enzo::io
-  PUBLIC Enzo::mesh Enzo::particle Enzo::tests Enzo::utils
+  PUBLIC Enzo::assorted Enzo::chemistry Enzo::fluid-props Enzo::gravity
+  PUBLIC Enzo::hydro-mhd Enzo::initial Enzo::io Enzo::mesh Enzo::particle
+  PUBLIC Enzo::tests Enzo::utils
   PUBLIC ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )

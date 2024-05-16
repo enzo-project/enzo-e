@@ -117,16 +117,6 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (ParameterGroup p,
                                       bool store_fluxes_for_corrections)
   : Method()
 {
-#ifdef CONFIG_USE_GRACKLE
-  if (enzo::config()->method_grackle_use_grackle){
-    // we can remove the following once EnzoMethodGrackle no longer requires
-    // the internal_energy to be a permanent field
-    ASSERT("EnzoMethodMHDVlct::determine_quantities_",
-           ("Grackle cannot currently be used alongside this integrator "
-            "unless the dual-energy formalism is in use"),
-           enzo::fluid_props()->dual_energy_config().any_enabled());
-  }
-#endif /* CONFIG_USE_GRACKLE */
 
   std::pair<std::string, EnzoMHDIntegratorStageArgPack*> pair
     = parse_mhdchoice_pack_pair_(p);
@@ -539,6 +529,18 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 void EnzoMethodMHDVlct::post_init_checks_() const noexcept
 {
+  if (enzo::grackle_chemistry() != nullptr){
+    // we can remove this check if:
+    // - EnzoMethodGrackle is modified to no longer require internal_energy to
+    //   be a permanent field
+    // - OR if EnzoMethodMHDVlct is modified to always track internal_energy
+    //   (even if not using dual-energy formalism)
+    ASSERT("EnzoMethodMHDVlct::determine_quantities_",
+           ("Grackle cannot currently be used alongside this integrator "
+            "unless the dual-energy formalism is in use"),
+           enzo::fluid_props()->dual_energy_config().any_enabled());
+  }
+
   ASSERT("EnzoMethodMHDVlct::post_init_checks_",
          "This solver isn't currently compatible with cosmological sims",
          enzo::cosmology() == nullptr);

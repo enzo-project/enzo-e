@@ -183,18 +183,21 @@ std::string Output::expand_name_
     left  = left.substr(0,pos);
 
     strncpy (buffer, middle.c_str(),MAX_BUFFER);
-    
-    if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
-    else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
-    else if (arg == "count") { sprintf (buffer_new,buffer, count_); }
-    else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
-    else if (arg == "flipflop")  { sprintf (buffer_new,buffer, count_%2); }
-    else 
-      {
-	ERROR3("Output::expand_name_",
-	       "Unknown file variable #%d '%s' for file '%s'",
-	       int(i),arg.c_str(),name.c_str());
-      }
+    if (arg == "cycle") {
+      snprintf (buffer_new, sizeof(buffer_new), buffer, cycle_);
+    } else if (arg == "time") {
+      snprintf (buffer_new, sizeof(buffer_new), buffer, time_);
+    } else if (arg == "count") {
+      snprintf (buffer_new, sizeof(buffer_new), buffer, count_);
+    } else if (arg == "proc") {
+      snprintf (buffer_new, sizeof(buffer_new), buffer, CkMyPe());
+    } else if (arg == "flipflop") {
+      snprintf (buffer_new, sizeof(buffer_new), buffer, count_ % 2);
+    } else {
+	  ERROR3("Output::expand_name_",
+             "Unknown file variable #%d '%s' for file '%s'",
+             int(i),arg.c_str(),name.c_str());
+    }
 
     right = std::string(buffer_new) + right;
 

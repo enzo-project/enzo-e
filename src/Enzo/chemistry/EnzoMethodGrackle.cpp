@@ -3,28 +3,120 @@
 /// @file     enzo_EnzoMethodGrackle.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 ///           Andrew Emerick (aemerick11@gmail.com)
+///           Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Tues May  7
 /// @brief    Implements the EnzoMethodGrackle class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/chemistry/chemistry.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
+//----------------------------------------------------------------------------
+
+namespace { // anonymous namespace
+
+// items within this namespace are just local to this file
+
+GrackleChemistryData parse_chemistry(ParameterGroup p)
+{
+  // Initialize GrackleChemistryData
+  // - we do this with a factory method that directly examines the parameter
+  //   values within the "Method:grackle:*" group.
+  // - Because Grackle has so many parameter values, it's very easy to make a
+  //   small mistake when specifying the name of a parameter value and not
+  //   notice until much later. For that reason, the factory method
+  //   aggressively reports unexpected parameters as errors.
+  // - to help this method, we provide 2 sets of parameter names
+
+  //   1. specify all of the Grackle parameters that we will manually setup
+  //      based on the values passed for other Enzo-E parameters. Errors will
+  //      be reported if any of these are encountered
+  const std::unordered_set<std::string> forbid_leaf_names = {"use_grackle",
+                                                             "Gamma"};
+
+  //   2. specify all parameters that MAY occur within the "Method:grackle:*"
+  //      group that should be ignored by the factory method. (This needs to
+  //      be updated if we introduce additional parameters for configuring
+  //      EnzoMethodGrackle)
+  const std::unordered_set<std::string> ignore_leaf_names =
+    {"use_cooling_timestep", "radiation_redshift",
+     // the next option is deprecated and is only listed in the short-term
+     // for backwards compatability (it should now be replaced by
+     // "Physics:fluid_props:floors:metallicity")
+     "metallicity_floor",
+     // for backwards compatability, we manually use "data_file" to
+     // initialize "grackle_data_file" parameter (in the future, we may want
+     // to change this)
+     "data_file", "grackle_data_file",
+     // the final two parameters auto-parsed by other Cello machinery
+     "type", "courant"};
+
+  GrackleChemistryData my_chemistry = GrackleChemistryData::from_parameters
+    (p, forbid_leaf_names, ignore_leaf_names);
+
+  // now let's manually initialize the handful of remaining runtime
+  // parameters that are stored within method_grackle_chemistry
+
+  // 1. use "Method:grackle:data_file" to initialize "grackle_data_file" 
+  if (p.param("grackle_data_file") != nullptr){
+    ERROR("EnzoMethodGrackle::from_parameters",
+          "for backwards compatability, the user can't specify "
+          "\"Method:grackle:grackle_data_file\". Instead, they must specify "
+          "\"Method:grackle:data_file\".");
+  } else if (p.param("data_file") != nullptr) {
+    std::string fname = p.value_string("data_file", "");
+    ASSERT("EnzoMethodGrackle::from_parameters",
+           "\"Method:grackle:data_file\" can't be an empty string",
+           fname.length() > 0); // sanity check!
+    my_chemistry.set<std::string>("grackle_data_file", fname);
+  } else {
+    ERROR("EnzoMethodGrackle::from_parameters",
+          "\"Method:grackle:data_file\" is required when using grackle");
+  }
+
+  // 2. update the value of use_grackle
+  my_chemistry.set<int>("use_grackle", 1);
+
+  // 3. Copy over parameters from Enzo-E to Grackle
+  // (it's ok to check fluid-props since physics objects should be initialized
+  //  before Method objects)
+  if (enzo::fluid_props()->eos_variant().holds_alternative<EnzoEOSIdeal>()) {
+    my_chemistry.set<double>
+      ("Gamma", enzo::fluid_props()->eos_variant().get<EnzoEOSIdeal>().gamma);
+  } else {
+    ERROR("EnzoMethodGrackle::from_parameters",
+          "Grackle currently can't be used when Enzo-E is configured to use "
+          "an equation of state other than the ideal gas law");
+  }
+
+  // In the future, we may want to manually set use_radiative_transfer based
+  // on an Enzo-E parameter for turning RT on / off:
+  // my_chemistry.set<int>("use_radiative_transfer", ENZO_E_PARAMETER_NAME);
+
+  return my_chemistry;
+}
+
+} // anonymous namespace
 
 //----------------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
- GrackleChemistryData my_chemistry,
- bool use_cooling_timestep,
- const double radiation_redshift,
+ ParameterGroup p,
  const double physics_cosmology_initial_redshift,
  const double time
 )
   : Method(),
-    grackle_facade_(std::move(my_chemistry), radiation_redshift,
-                    physics_cosmology_initial_redshift, time),
-    use_cooling_timestep_(use_cooling_timestep)
+    grackle_facade_(std::move(parse_chemistry(p)),
+                    // for when not using cosmology - redshift of UVB
+                    p.value_float("radiation_redshift", -1.0),
+                    // the next parameter is relevant when using cosmology
+                    physics_cosmology_initial_redshift,
+                    time),
+    use_cooling_timestep_(p.value_logical("use_cooling_timestep", false))
 {
+  // courant is only meaningful when use_cooling_timestep is true
+  this->set_courant(p.value_float("courant", 1.0));
 
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,

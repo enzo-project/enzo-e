@@ -69,35 +69,35 @@ public: // interface
 public: // virtual methods
  
   /// Return time units scaling factor (virtual)
-  virtual double time() const
+  double time() const override
   {
     return (cosmology_ == NULL) ?
       Units::time() : cosmology_->time_units();
   }
   
   /// Return mass units scaling factor (virtual)
-  virtual double mass() const
+  double mass() const override
   {
     return (cosmology_ == NULL) ?
       Units::mass() : cosmology_->mass_units();
   }
 
   /// Return length units scaling factor (virtual)
-  virtual double length() const
+  double length() const override
   {
     return (cosmology_ == NULL) ?
       Units::length() : cosmology_->length_units();
   }
 
   /// Return density units scaling factor (virtual)
-  virtual double density() const
+  double density() const override
   {
     return (cosmology_ == NULL) ?
       Units::density() : cosmology_->density_units();
   }
 
   /// Return velocity units scaling factor (virtual)
-  virtual double velocity() const
+  double velocity() const override
   {
     return (cosmology_ == NULL) ?
       Units::velocity() : cosmology_->velocity_units();

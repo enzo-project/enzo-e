@@ -206,9 +206,10 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
     TRACE_PPM ("BEGIN SolveHydroEquations");
 
-    enzo_block->SolveHydroEquations 
-      ( block->time(), block->dt(), comoving_coordinates_, single_flux_array,
-        diffusion_, flattening_, pressure_free_, steepening_,
+    EnzoMethodPpm::SolveHydroEquations 
+      ( *enzo_block, block->time(), block->dt(), comoving_coordinates_,
+        single_flux_array, diffusion_, flattening_, pressure_free_,
+        steepening_,
         use_minimum_pressure_support_,
         minimum_pressure_support_parameter_);
 
