@@ -77,7 +77,7 @@ Simulation::Simulation
   CkPrintf ("%d DEBUG_SIMULATION Simulation(parameter_file,n)\n",CkMyPe());
   fflush(stdout);
   char name[40];
-  sprintf (name,"parameters-%02d.text",CkMyPe());
+  snprintf (name,sizeof(name),"parameters-%02d.text",CkMyPe());
   parameters_->write(name);
 #endif
   

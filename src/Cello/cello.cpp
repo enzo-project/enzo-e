@@ -523,17 +523,21 @@ namespace cello {
       left  = left.substr(0,pos);
 
       strncpy (buffer, middle.c_str(),MAX_BUFFER);
-      if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle); }
-      else if (arg == "time")  { sprintf (buffer_new,buffer, time); }
-      else if (arg == "count") { sprintf (buffer_new,buffer, counter); }
-      else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
-      else if (arg == "flipflop")  { sprintf (buffer_new,buffer, counter % 2); }
-      else 
-        {
+      if (arg == "cycle") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, cycle);
+      } else if (arg == "time") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, time);
+      } else if (arg == "count") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, counter);
+      } else if (arg == "proc") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, CkMyPe());
+      } else if (arg == "flipflop") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, counter % 2);
+      } else {
           ERROR3("cello::expand_name",
                  "Unknown file variable #%d '%s' for file '%s'",
                  int(i),arg.c_str(),name.c_str());
-        }
+      }
 
       right = std::string(buffer_new) + right;
 

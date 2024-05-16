@@ -385,12 +385,13 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
       info.index_.index_level(il3,max_level_);
       char neighbor_block[80];
       if (block) {
-        sprintf (neighbor_block,"%s",block->name(info.index_).c_str());
+        snprintf (neighbor_block,sizeof(neighbor_block),"%s",
+                  block->name(info.index_).c_str());
       } else {
         int it3[3],ia3[3];
         info.index_.array(ia3,ia3+1,ia3+2);
         info.index_.tree(it3,it3+1,it3+2);
-        sprintf (neighbor_block,"%X:%X %X:%X,%X:%X",
+        snprintf (neighbor_block,sizeof(neighbor_block),"%X:%X %X:%X,%X:%X",
                  ia3[0],it3[0],
                  ia3[1],it3[1],
                  ia3[2],it3[2]);
@@ -412,7 +413,8 @@ void Adapt::write(std::string root, const Block * block, int cycle_start) const
   const int cycle = cello::simulation()->cycle();
   if (cycle >= cycle_start) {
     char filename[80];
-    sprintf (filename,"%d-%s.%s",cycle,root.c_str(),block->name().c_str());
+    snprintf (filename,sizeof(filename),"%d-%s.%s",cycle,root.c_str(),
+              block->name().c_str());
 
     CkPrintf ("%s\n",filename);
 
