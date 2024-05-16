@@ -7,9 +7,9 @@
 /// @date     Tues May  7
 /// @brief    Implements the EnzoMethodGrackle class
 
-#include "cello.hpp"
-#include "enzo.hpp"
-
+#include "Enzo/chemistry/chemistry.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------------
 
