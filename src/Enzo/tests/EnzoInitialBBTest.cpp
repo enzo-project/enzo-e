@@ -96,7 +96,11 @@ void EnzoInitialBBTest::enforce_block
 	 "required.",
 	 enzo::problem()->method_exists("mhd_vlct"));
 
-  // only been tested with the hllc Riemann Solver (in absence of bfield)
+  // only been tested with the hllc Riemann Solver
+
+  // require pure hydrodynamics
+  ASSERT("EnzoInitialBBTest","only works in pure-hydro sims",
+	     !enzo::uses_magnetic_fields());
 
   // Check that (1 - fluctuation_amplitude_) * mean_density is larger
   // than density floor

@@ -121,7 +121,11 @@ void EnzoInitialShuCollapse::enforce_block
 	 "required.",
 	 enzo::problem()->method_exists("mhd_vlct"));
 
-  // only been tested with the hllc Riemann Solver (in absence of bfield)
+  // only been tested with the hllc Riemann Solver
+
+  // require pure hydrodynamics
+  ASSERT("EnzoInitialShuCollapse","only works in pure-hydro sims",
+	     !enzo::uses_magnetic_fields());
 
   if (!block->is_leaf()) return;
   ASSERT("EnzoInitialShuCollapse",
