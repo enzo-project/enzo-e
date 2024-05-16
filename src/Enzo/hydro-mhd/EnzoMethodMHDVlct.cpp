@@ -56,7 +56,7 @@ parse_mhdchoice_pack_pair_(ParameterGroup p)
   } else {
     ERROR1("parse_mhdchoice_pack_pair_",
            "\"%s:time_scheme\" must be \"vl\" or \"euler\"",
-           p.get_group_path());
+           p.get_group_path().c_str());
   }
 
   // backwards compatibilty: deprecated half/full_dt_reconstruct_method params
