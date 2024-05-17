@@ -9,7 +9,6 @@ add_library(Enzo_utils
   utils.hpp utils.cpp
   EnzoCenteredFieldRegistry.cpp EnzoCenteredFieldRegistry.hpp
   EnzoComputeCicInterp.cpp EnzoComputeCicInterp.hpp
-  EnzoEFltArrayMap.cpp EnzoEFltArrayMap.hpp
   EnzoFieldAdaptor.cpp EnzoFieldAdaptor.hpp
 )
 add_library(Enzo::utils ALIAS Enzo_utils)
