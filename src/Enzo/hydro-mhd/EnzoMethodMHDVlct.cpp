@@ -59,40 +59,14 @@ parse_mhdchoice_pack_pair_(ParameterGroup p)
            p.get_group_path().c_str());
   }
 
-  // backwards compatibilty: deprecated half/full_dt_reconstruct_method params
   if (is_defined("half_dt_reconstruct_method") ||
       is_defined("full_dt_reconstruct_method")) {
-
-    if (is_defined("time_scheme") || is_defined("reconstruct_method")) {
-      ERROR1("parse_mhdchoice_pack_pair_",
-             "In the \"%s\" parameter-group, the deprecated parameters, "
-             "\"half_dt_reconstruct_method\" & \"full_dt_reconstruct_method\", "
-             "can't be specified when \"time_scheme\" or "
-             "\"reconstruct_method\" is specified.",
-             p.get_group_path().c_str());
-    }
-
-    if (p.value_string("half_dt_reconstruct_method", "nn") != "nn") {
-      // it never made ANY sense to allow the half timestep of the VL+CT
-      // algorithm to use anything other than the "nn" choice. (The only reason
-      // it was ever an option was due to a misunderstanding early on)
-      ERROR1("parse_mhdchoice_pack_pair_",
-             "The deprecated parameter, \"%s:half_dt_reconstruct_method\", "
-             "can't have any value other than \"nn\"",
-             p.get_group_path().c_str());
-    }
-
-    if (is_defined("full_dt_reconstruct_method")) {
-      recon_names[1] = p.value_string("full_dt_reconstruct_method", "plm");
-    }
-
-    WARNING1("parse_mhdchoice_pack_pair_",
-             "In the \"%s\" parameter-group, \"half_dt_reconstruct_method\" & "
-             "\"full_dt_reconstruct_method\" are deprecated, and they will be "
-             "removed in the future. The former can't have any value other "
-             "than \"nn\"; it won't be replaced. Use \"reconstruct_method\" "
-             "instead of the latter.",
-             p.get_group_path().c_str());
+    ERROR1("parse_mhdchoice_pack_pair_",
+           "In the \"%s\" parameter-group, \"half_dt_reconstruct_method\" & "
+           "\"full_dt_reconstruct_method\" have been removed. The former was "
+           "only allowed to have a value of \"nn\" and the latter was "
+           "replaced with \"reconstruct_method\".",
+           p.get_group_path().c_str());
   }
 
   // allocate and initialize argpack-ptr
