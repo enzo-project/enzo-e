@@ -38,6 +38,25 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+private:
+
+  /// This method does most of the heavy-lifting
+  ///
+  /// @note
+  /// This is only a static method for historical reasons. Feel free to better
+  /// integrate this with the rest of the class
+  static int SolveHydroEquations(EnzoBlock& block,
+                                 enzo_float time,
+                                 enzo_float dt,
+                                 bool comoving_coordinates,
+                                 bool single_flux_array,
+                                 bool diffusion,
+                                 int flattening,
+                                 bool pressure_free,
+                                 bool steepening,
+                                 bool use_minimum_pressure_support,
+                                 enzo_float minimum_pressure_support_parameter);
+
 public: // virtual methods
 
   /// Apply the method to advance a block one timestep 

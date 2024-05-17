@@ -17,13 +17,23 @@
 
 // Solve the MHD equations with the solver, saving the subgrid fluxes
 
+/// When this function was first ported to Enzo-E, it was an instance method of
+/// the EnzoBlock class. However as the codebase has matured, it has become
+/// customary for integrators to be encapsulated by Method Objects. As such
+/// this function has been converted to a static method of EnzoMethodPpml.
+///
+/// In the future, it probably makes sense to consolidate this file with
+/// EnzoMethodPpml.cpp (this consolidation has been left to a separate PR from
+/// the one where this function was removed from the EnzoBlock class to make
+/// merge conflicts easier to address)
+
 #include "Cello/cello.hpp"
 #include "Enzo/enzo.hpp"
 #include "Enzo/hydro-mhd/hydro-mhd.hpp"
 
 #include "Enzo/hydro-mhd/ppml_fortran/ppml_fortran.hpp" // FORTRAN_NAME(ppml)
 
-int EnzoBlock::SolveMHDEquations( enzo_float dt )
+int EnzoMethodPpml::SolveMHDEquations( EnzoBlock& block, enzo_float dt )
 {
 
   /* exit if not 3D */
@@ -33,7 +43,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
          "This function requires the domain's rank to be 3",
          GridRank == 3);
 
-  Field field = data()->field();
+  Field field = block.data()->field();
   if (field.num_permanent() > 0) { // TODO: revisit if-clause. This could be
                                    // improved. (plus we probably want to
                                    // report an error when false)
@@ -59,7 +69,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 
     size = 1;
     for (dim = 0; dim < GridRank; dim++)
-      size *= GridDimension[dim];
+      size *= block.GridDimension[dim];
 
     /* Get easy to handle pointers for each variable. */
 
@@ -151,15 +161,15 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 
      for (dim = 0; dim < GridRank; dim++)
        GridGlobalStart[dim] =
-     	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
-     	GridStartIndex[dim];
+     	NINT((block.GridLeftEdge[dim] - DomainLeftEdge[dim])
+             /block.CellWidth[dim]) - block.GridStartIndex[dim];
 
     /* fix grid quantities so they are defined to at least 3 dims */
 
     for (i = GridRank; i < 3; i++) {
-      GridDimension[i]   = 1;
-      GridStartIndex[i]  = 0;
-      GridEndIndex[i]    = 0;
+      block.GridDimension[i]   = 1;
+      block.GridStartIndex[i]  = 0;
+      block.GridEndIndex[i]    = 0;
       GridGlobalStart[i] = 0;
     }
 
@@ -328,7 +338,7 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
     enzo_float CellWidthTemp[MAX_DIMENSION];
     for (dim = 0; dim < MAX_DIMENSION; dim++) {
       if (dim < GridRank)
-	CellWidthTemp[dim] = enzo_float(a*CellWidth[dim]);
+	CellWidthTemp[dim] = enzo_float(a*block.CellWidth[dim]);
       else
 	CellWidthTemp[dim] = 1.0;
     }
@@ -350,8 +360,9 @@ int EnzoBlock::SolveMHDEquations( enzo_float dt )
 	 dens_ry,velox_ry,veloy_ry,veloz_ry,bfieldx_ry,bfieldy_ry,bfieldz_ry,
 	 dens_rz,velox_rz,veloy_rz,veloz_rz,bfieldx_rz,bfieldy_rz,bfieldz_rz,
 	 &dt, &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
-	 &GridDimension[0], &GridDimension[1], &GridDimension[2],
-	 GridStartIndex, GridEndIndex,
+	 &block.GridDimension[0], &block.GridDimension[1],
+         &block.GridDimension[2],
+	 block.GridStartIndex, block.GridEndIndex,
 	 &NumberOfSubgrids, leftface, rightface,
 	 istart, iend, jstart, jend,
 	 standard, dnindex,

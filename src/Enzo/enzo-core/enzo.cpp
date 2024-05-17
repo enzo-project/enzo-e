@@ -40,8 +40,6 @@ namespace enzo {
 
   const EnzoMethodGrackle * grackle_method()
   {
-    // previously, this explicitly checked the value of
-    // enzo::config()->method_grackle_use_grackle, but this was redundant
     return (const EnzoMethodGrackle *) problem()->method("grackle");
   }
 
@@ -89,4 +87,11 @@ namespace enzo {
   double grav_constant_cgs() noexcept
   { return get_physics_gravity_()->grav_constant_cgs(); }
 
+  bool uses_magnetic_fields() noexcept
+  {
+    FieldDescr* field_descr = cello::field_descr();
+    return (field_descr->is_field("bfield_x") ||
+            field_descr->is_field("bfield_y") ||
+            field_descr->is_field("bfield_z"));
+  }
 }

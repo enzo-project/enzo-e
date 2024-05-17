@@ -77,7 +77,7 @@ Simulation::Simulation
   CkPrintf ("%d DEBUG_SIMULATION Simulation(parameter_file,n)\n",CkMyPe());
   fflush(stdout);
   char name[40];
-  sprintf (name,"parameters-%02d.text",CkMyPe());
+  snprintf (name,sizeof(name),"parameters-%02d.text",CkMyPe());
   parameters_->write(name);
 #endif
   
@@ -426,9 +426,7 @@ void Simulation::initialize_performance_() throw()
   p->new_region(perf_stopping,           "stopping");
   p->new_region(perf_block,              "block");
   p->new_region(perf_exit,               "exit");
-#ifdef CONFIG_USE_GRACKLE
   p->new_region(perf_grackle,            "grackle");
-#endif
 
   timer_.start();
 

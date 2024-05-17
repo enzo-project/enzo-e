@@ -26,20 +26,9 @@ target_link_libraries(main_enzoCharmModule INTERFACE enzoCharmModule)
 #    target_include_directories(<MY-TARGET> PUBLIC ${ROOT_INCLUDE_DIR})
 set(ROOT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
-# Get the list of source files
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.F *.hpp fortran.h fortran_types.h
-)
-
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
 
-set(External_LIBS "Boost::filesystem;HDF5_C")
+set(External_LIBS "")
 if (USE_GRACKLE)
   LIST(APPEND External_LIBS "Grackle::Grackle")
 endif()
@@ -56,7 +45,7 @@ endif()
 
 # Step 1: forward-declare the enzo library. This holds most of the files that
 #         are turned into the enzo binary. (We will return to this shortly)
-add_library(enzo STATIC ${SRC_FILES})
+add_library(enzo STATIC charm_enzo.cpp)
 
 # Step 2: define main_enzo
 # -> this includes a machinery for driving the simulation (it's directly
@@ -71,7 +60,7 @@ target_include_directories (main_enzo
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Cello # for main.hpp
 )
 target_link_libraries(main_enzo
-  PRIVATE enzo parallel cello_component monitor Boost::filesystem
+  PRIVATE enzo parallel cello_component monitor StdFilesystem::StdFilesystem
   PUBLIC main_enzoCharmModule # this is public because main_enzo.decl.h is in
                               # the public header file: main.hpp)
 )
