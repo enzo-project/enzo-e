@@ -5,8 +5,9 @@
 /// @date     2023-02-13
 /// @brief    [\ref Enzo] Implementation of the EnzoPhysicsFluidProps class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/fluid-props/fluid-props.hpp"
 
 //----------------------------------------------------------------------
 

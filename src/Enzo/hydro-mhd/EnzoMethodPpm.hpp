@@ -17,17 +17,11 @@ class EnzoMethodPpm : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPpm object
-  EnzoMethodPpm(bool store_fluxes_for_corrections,
-                bool diffusion,
-                int flattening,
-                bool pressure_free,
-                bool steepening,
-                bool use_minimum_pressure_support,
-                enzo_float minimum_pressure_support_parameter);
+  EnzoMethodPpm(bool store_fluxes_for_corrections, ParameterGroup p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoMethodPpm (CkMigrateMessage *m)
     : Method (m),
@@ -43,6 +37,25 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
+private:
+
+  /// This method does most of the heavy-lifting
+  ///
+  /// @note
+  /// This is only a static method for historical reasons. Feel free to better
+  /// integrate this with the rest of the class
+  static int SolveHydroEquations(EnzoBlock& block,
+                                 enzo_float time,
+                                 enzo_float dt,
+                                 bool comoving_coordinates,
+                                 bool single_flux_array,
+                                 bool diffusion,
+                                 int flattening,
+                                 bool pressure_free,
+                                 bool steepening,
+                                 bool use_minimum_pressure_support,
+                                 enzo_float minimum_pressure_support_parameter);
 
 public: // virtual methods
 

@@ -17,6 +17,8 @@ documentation on specific parameters in Enzo-E / Cello, please see the
 `Enzo-E / Cello parameter reference
 <../param/index.html>`_ page.
 
+.. _parameter-group:
+
 Groups
 ******
 
@@ -225,9 +227,6 @@ underlying grammar and syntax are relatively fixed.
 
          list = [ "density", "velocity_x", "velocity_y",
                   "total_energy", "internal_energy", "pressure" ];
-
-         courant = 0.8;
-         gamma = 1.4;
          ghost_depth = 4;
      }
 
@@ -266,6 +265,25 @@ underlying grammar and syntax are relatively fixed.
 
          list = [ "ppm" ];
 
+         ppm {
+             courant    = 0.8;
+             diffusion  = true;
+             flattening = 3;
+             steepening = true;
+         }
+     }
+
+     Physics {
+
+         list = ["fluid_props"];
+
+         fluid_props {
+             eos {
+                 type  = "ideal";
+                 gamma = 1.4;
+             }
+             dual_energy { type = "disabled"; }
+         }
      }
 
      Output {

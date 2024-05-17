@@ -8,7 +8,7 @@ Getting Started: Pleiades
   # Load more up-to-date software stack
   module use -a /nasa/modulefiles/testing
   module purge
-  module load pkgsrc/2021Q1 gcc/10.2 mpi-hpe/mpt.2.23 boost/1.76 comp-intel/2020.4.304 hdf5/1.12.0_serial pkgsrc/2021Q1
+  module load pkgsrc/2021Q1 gcc/10.2 mpi-hpe/mpt.2.23 comp-intel/2020.4.304 hdf5/1.12.0_serial pkgsrc/2021Q1
   # Build Grackle (optional)
   # Following https://grackle.readthedocs.io/en/latest/Installation.html
   mkdir -p ~/src

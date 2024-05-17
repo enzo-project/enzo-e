@@ -23,9 +23,7 @@ module enzo {
   PUPable GrackleFacade;
 
   // EnzoInitial
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
-#endif
   PUPable EnzoInitialAccretionTest;
   PUPable EnzoInitialBBTest;
   PUPable EnzoInitialBCenter;
@@ -95,18 +93,9 @@ module enzo {
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
 
-  PUPable EnzoIntegrationQuanUpdate;
-  PUPable EnzoReconstructorNN;
-  // EnzoReconstructorPLMEnzoRKLim
-  PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
-  // EnzoReconstructorPLMAthenaLim
-  PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
-
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
   PUPable EnzoMethodStarMakerSTARSS;
-
-  PUPable EnzoBfieldMethodCT;
 
   PUPable EnzoPhysicsCosmology;
   PUPable EnzoPhysicsFluidProps;

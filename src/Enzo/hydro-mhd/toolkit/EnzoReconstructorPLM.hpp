@@ -120,12 +120,10 @@ class EnzoReconstructorPLM : public EnzoReconstructor
   ///   2. It might be useful to define an alias name for the specialization of
   ///      `EnzoReconstructorPLM` that uses the new `Limiter`
   ///      (e.g. `using EnzoReconstructorPLMEnzoRKLim)
-  ///   3. Then add the particlular specialization to enzo.CI (e.g. add the
-  ///      line: `PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;`)
-  ///   4. Update `EnzoReconstructor::construct_reconstructor` to construct the
+  ///   3. Update `EnzoReconstructor::construct_reconstructor` to construct the
   ///      reconstructor with the appropriate slope limiter when the correct
   ///      name is specified.
-  ///   5. Update the documentation with the name of the newly available
+  ///   4. Update the documentation with the name of the newly available
   ///      slope limiter
   ///
   /// @note The use of an enum specifying the desired limiter coupled with a
@@ -146,22 +144,6 @@ public: // interface
     : EnzoReconstructor(active_key_names),
       theta_limiter_(theta_limiter)
   { }
-
-  /// CHARM++ PUP::able declaration
-  PUPable_decl_template(EnzoReconstructorPLM<Limiter>);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoReconstructorPLM (CkMigrateMessage *m)
-    : EnzoReconstructor(m),
-      theta_limiter_(0.0)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    EnzoReconstructor::pup(p);
-    p | theta_limiter_;
-  };
 
   void reconstruct_interface
   (const EnzoEFltArrayMap &prim_map, EnzoEFltArrayMap &priml_map,

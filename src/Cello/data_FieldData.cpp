@@ -303,10 +303,8 @@ void FieldData::clear
 	}
 	break;
       default:
-	char buffer[80];
-	sprintf (buffer,"Clear called with unsupported precision %s" ,
-		 cello::precision_name[precision]);
-	ERROR("FieldData::clear", buffer);
+	ERROR1("FieldData::clear", "Clear called with unsupported precision %s",
+               cello::precision_name[precision]);
       }
 
     }
@@ -675,7 +673,7 @@ void FieldData::print
   ip=CkMyPe();
 
   char filename [80];
-  sprintf (filename,"%s-%d.debug",message,ip);
+  snprintf (filename,sizeof(filename),"%s-%d.debug",message,ip);
   printf ("DEBUG message = %s\n",message);
   printf ("DEBUG filename = %s\n",filename);
 

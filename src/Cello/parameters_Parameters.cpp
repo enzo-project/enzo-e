@@ -802,6 +802,38 @@ void Parameters::list_evaluate_logical
 
 //----------------------------------------------------------------------
 
+std::vector<std::string> Parameters::value_full_strlist
+(const std::string& parameter, bool coerce_string_to_list,
+ bool suppress_err) throw()
+{
+  int type = this->type(parameter);
+
+  if (this->param(parameter) == nullptr){
+    return {};
+  } else if (type == parameter_list) {
+    const int len = this->list_length(parameter);
+    if (len == 0) return {};
+
+    std::vector<std::string> out(len);
+    for (int i=0; i<len; i++) { out[i] = this->value(i, parameter, "none"); }
+    return out;
+
+  } else if ((type == parameter_string) && coerce_string_to_list) {
+    return { this->value_string(parameter,"none") };
+  } else if (suppress_err) {
+    return {};
+  }
+
+  const char* type_description = (coerce_string_to_list) ?
+    "single string or list of strings" : "list of strings";
+  ERROR3("Parameters::value_full_strlist",
+         ("Parameter \"%s\" expects to be assigned a %s; it was instead "
+          "assigned a value of type %d"),
+         parameter.c_str(), type_description, type);
+}
+
+//----------------------------------------------------------------------
+
 std::string Parameters::group(int i) const throw()
 {
   return (i < (int) current_group_.size()) ? current_group_[i] : "";

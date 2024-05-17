@@ -113,9 +113,6 @@
       minimum_temperature      = 10.0;
       maximum_temperature      = 1.0E8;
 
-      # Keep temperature constant with changing mu?
-      reset_energies           = 0;
-
       dt = 100.0;
    }
  }

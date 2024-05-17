@@ -155,6 +155,7 @@ enum precision_enum {
   precision_default,     //  default precision
   precision_single,      //  32-bit field data
   precision_double,      //  64-bit field data
+  precision_extended64,  //  64-bit field data (long double)
   precision_extended80,  //  80-bit field data
   precision_extended96,  //  96-bit field data
   precision_quadruple,   // 128-bit field data
@@ -179,6 +180,7 @@ enum type_enum {
   type_single,
   type_float = type_single,
   type_double,
+  type_extended64,
   type_extended80,
   type_extended96,
   type_quadruple,
@@ -231,6 +233,18 @@ enum class MsgType { msg_refine, msg_check };
 
 /// Length of hex message tags used for debugging
 #define TAG_LEN 8
+
+/// represents a kind of initial cycle
+///
+/// @note
+/// At the moment, we distinguish between a charm-based restart and a
+/// non-charm-based restart for completeness. But to my knowledge, we can't
+/// actually identify a charm-based restart
+enum class InitCycleKind {
+  fresh,                    ///< doesn't follow a restart
+  charmrestart,             ///< follows a charm-based restart
+  fresh_or_noncharm_restart ///< any kind other than a charm-based restart
+};
 
 //----------------------------------------------------------------------
 /// Macros for debugging
@@ -677,7 +691,7 @@ namespace cello {
 
   int sizeof_precision       (precision_type);
   int is_precision_supported (precision_type);
-  extern const char * precision_name[7];
+  extern const char * precision_name[8];
 
   /// converts a precision_enum to type_enum
   ///
@@ -850,6 +864,8 @@ namespace cello {
       return type_single;
     } else if constexpr (std::is_same_v<T_, double>) {
       return type_double;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==8)) {
+      return type_extended64;
     } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==10)) {
       return type_extended80;
     } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==12)) {
@@ -1055,6 +1071,22 @@ namespace cello {
     }
   }
 
+  /// Returns whether the current cycle is the first cycle after starting the
+  /// simulation
+  ///
+  /// This differentiates between the different kinds of initial cycles
+  ///
+  /// @note
+  /// While the Cello-layer is not actually responsible for implementing
+  /// non-charm-based restart functionality, it's useful to store the
+  /// functionality in this layer.
+  ///
+  /// @note
+  /// At the time of writing, we can't actually detect when a charm-based
+  /// restart has occured - the program aborts with an error in that case
+  /// (however, the option exists to make the code more explicit)
+  bool is_initial_cycle(InitCycleKind kind) noexcept;
+  bool is_initial_cycle(int cycle, InitCycleKind kind) noexcept;
 }
 
 #endif /* CELLO_HPP */

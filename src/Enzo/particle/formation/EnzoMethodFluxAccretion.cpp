@@ -13,12 +13,8 @@
 //------------------------------------------------------------------
 
 EnzoMethodFluxAccretion::EnzoMethodFluxAccretion
-(double accretion_radius_cells,
- double physical_density_threshold_cgs,
- double max_mass_fraction)
-  : EnzoMethodAccretion(accretion_radius_cells,
-			physical_density_threshold_cgs,
-			max_mass_fraction)
+(ParameterGroup p)
+  : EnzoMethodAccretion(p)
 {
   // The number of cell widths within the accretion radius cannot be larger than
   // any of the ghost depths minus 1. This is because this method requires computing
@@ -53,8 +49,9 @@ void EnzoMethodFluxAccretion::pup (PUP::er &p)
 void EnzoMethodFluxAccretion::compute (Block * block) throw()
 {
 
-  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     do_checks_(block);
+  }
 
   if (block->is_leaf()) {
     this->compute_(block);
