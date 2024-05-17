@@ -5,8 +5,8 @@
 /// @date     2023-07-03
 /// @brief    Common routines used for testing CelloView and related machinery
 
-#ifndef TEST_VIEW_TEST_ROUNTINES_HPP
-#define TEST_VIEW_TEST_ROUNTINES_HPP
+#ifndef TEST_VIEW_TEST_ROUTINES_HPP
+#define TEST_VIEW_TEST_ROUTINES_HPP
 
 #include "test.hpp"
 #include "view.hpp"
@@ -180,4 +180,4 @@ void assert_shape3D(const CelloView<T,3>& a,
          (a.shape(2) == expected[2]));
 }
 
-#endif /* TEST_VIEW_TEST_ROUNTINES_HPP */
+#endif /* TEST_VIEW_TEST_ROUTINES_HPP */

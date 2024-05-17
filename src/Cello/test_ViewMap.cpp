@@ -682,7 +682,7 @@ private:
       CelloView<const int,3> src_view = src_view_map.at(key);
 
       const int mz = dest_view.shape(0);
-      const int my = src_view.shape(1);
+      const int my = dest_view.shape(1);
       const int mx = dest_view.shape(2);
 
       for (int iz = 0; iz < mz; iz++){

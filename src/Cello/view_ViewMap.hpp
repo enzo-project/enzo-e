@@ -176,7 +176,7 @@ public: // interface
   ///    first `ref.size()`. When `false` (the default), the map must have the
   ///    same number of keys as `ref`.
   bool validate_key_order(const std::vector<std::string> &ref,
-			  bool raise_err, bool allow_smaller_ref = false)
+                          bool raise_err = true, bool allow_smaller_ref = false)
     const noexcept;
 
   /// Indicates if the contained views are stored in a single 4D view
