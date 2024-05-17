@@ -103,16 +103,17 @@
 #  is reason to be skeptical of this kind of approach.
 #  - In general, cmake expects variables like these to be set in a "toolchain
 #    file" (essentially as early in the cmake startup as possible).
-#  - Unfortunately, this approach is a undesirable since users need to craft
+#  - Unfortunately, this approach is undesirable since users need to craft
 #    their toolchain files ahead of time (and they can't rely upon the
 #    find_package command)
 #
 #  The convential approach (that we should probably adopt if the current
-#  approach) for handling the case where you want to link a program that makes
-#  use of framework that provides a special compiler-wrapper frontend (like
-#  mpicc) is to query the frontend for needed extra linking steps and then
-#  inform cmake of these extra steps and bypass the special charm-provided
-#  frontend during linking. There is an example of doing something like this at
+#  approach ever breaks) for handling the case where you want to link a program
+#  that makes use of a framework that provides a special compiler-wrapper
+#  frontend (like mpicc) is to (i) query the frontend for needed extra linking
+#  steps, (ii) inform cmake of these extra steps and (iii) bypass the special
+#  charm-provided frontend during linking. There is an example of doing
+#  something like this at
 #    https://github.com/sxs-collaboration/spectre/blob/develop/cmake/FindCharm.cmake
 
 function(_GET_CHARMINC _OUT_INC _charmc)
@@ -140,10 +141,6 @@ function(GET_CHARM_QUEUE_TYPE CHARM_RNDQ conv_conf_hdr)
  endif()
 endfunction()
 
-# NOTE: The following function
-
-# Xcode 15 started shipping with a new linker.
-
 function(_get_charm_linker_invocation charm_compiler out)
   # Given the name of the charm++ compiler (aka charmc), this determines the
   # shell-invocation that should be used to employ charm++ for linking
@@ -157,19 +154,21 @@ function(_get_charm_linker_invocation charm_compiler out)
   # WHY THIS EXISTS
   # ---------------
   # This function is not strictly necessary. In all cases where the charm
-  # compiler was build with a consistent set of compilers to the ones used in
-  # the current build, it can be directly invoked to perform linking
+  # compiler was built with a consistent set of compilers to the ones used in
+  # the current build, the charm compiler can be directly invoked to perform
+  # linking
   #
   # This primarily exists to come up with an invocation to deal with certain
   # warnings on Apple-devices in particular. Starting with the Xcode 15
   # toolchain, Apple started shipping a new linker. This produces a lot of
   # warnings. The main ones we handle here are
-  # -> It complains when static libraries are passed to the linker multiple time
-  #    https://discourse.cmake.org/t/avoid-duplicate-linking-to-avoid-xcode-15-warnings/9084
+  # -> It complains when static libraries are passed to the linker multiple
+  #    times. See:
+  #      https://discourse.cmake.org/t/avoid-duplicate-linking-to-avoid-xcode-15-warnings/9084
   # -> cmake 3.29 does introduce some mechanisms to deal with this. (Aside: if
   #    this solution worked for us, it would probably be reasonable to require
   #    users to use 3.29 to suppress the warning - especially since it is SO 
-  #    easy to get on macOS)
+  #    easy to get modern cmake versions on macOS)
   # -> However, the fact that we force CMake to invoke the charm++ compiler for
   #    linking keeps us from easily using the CMake solution.
   #    -> In a little more detail, CMake assumes that we are using the build's
@@ -177,7 +176,7 @@ function(_get_charm_linker_invocation charm_compiler out)
   #       escape certain arguments intended to be passed through to the linker 
   #       (with -Wl,... for gcc and -Xlinker for clang)
   #    -> charmc itself acts like a compiler frontend (it wraps the
-  #       compiler-frontend used to compile it, similar to hdf5cc or mpicc).
+  #       compiler-frontend used to compile it, similar to h5cc or mpicc).
   #       It usually invokes the linker through the wrapped compiler frontend.
   #       It has a different mechanism for escaping arguments intended for the
   #       linker.
