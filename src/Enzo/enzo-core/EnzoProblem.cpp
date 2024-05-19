@@ -878,8 +878,7 @@ Physics * EnzoProblem::create_physics_
              "object (it's okay if it comes before the \"gravity\" object)",
              enzo_config->physics_list[i] != "cosmology");
     }
-    physics = new EnzoPhysicsGravity
-      (enzo_config->physics_gravity_grav_constant_codeU);
+    physics = new EnzoPhysicsGravity(p_group);
 
   } else {
 
