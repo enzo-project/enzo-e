@@ -19,8 +19,8 @@ endif()
 #Define project and languages
 project(Enzo-E VERSION 1.0.0 LANGUAGES C CXX Fortran)
 
-# We need C++11
-set(CMAKE_CXX_STANDARD 11)
+# We need C++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -35,6 +35,12 @@ endif()
 
 # Ensure the custom modules to find Charm++ and Grackle are included
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# confirm that std::filesystem is supported by the compiler and create an
+# interface target called StdFilesystem::StdFilesystem that encapsulates
+# usage requirements (if there are any)
+include("CreateStdFilesystemTarget")
+create_StdFilesystem_target()
 
 #----------------------------------------------------------------------------------------
 # External libs
@@ -64,15 +70,10 @@ option(GRACKLE_USE_STATIC_LIBS  "sets Grackle's lib-type if USE_GRACKLE=ON" ON)
 if (USE_GRACKLE)
   find_package(Grackle)
   if (Grackle_FOUND)
-    # Setting global compile def as performance and simulation Cello libs need the var
-    # We should discuss the use of a central config.hpp (similar to the existing
-    # auto_config.def but also centrally included beyond informational output).
+    # This really only needs to be defined for a relatively small subset of
+    # files in the Enzo-layer
     add_compile_definitions(CONFIG_USE_GRACKLE)
 
-    # Also specifically setting the defines used in the *.ci files of Cello and Enzo.
-    # Alternatively, figure out a way to extract those from the `COMPILE_DEFINITIONS`
-    # property and directly process in `cmake/charm.cmake`.
-    set(CHARM_PREPROC_DEFS ${CHARM_PREPROC_DEFS} "-DCONFIG_USE_GRACKLE ")
   else()
     message(FATAL_ERROR
       "Configured to use Grackle but Grackle library not found.\n"
@@ -80,13 +81,6 @@ if (USE_GRACKLE)
       "(e.g., `-DGrackle_ROOT=/PATH/TO/GRACKLE/INSTALL/DIRECTORY`).")
   endif()
 endif()
-
-find_package(Boost REQUIRED COMPONENTS filesystem)
-# Fix linking error to
-# /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x679e): undefined reference to `boost::system::generic_category()'
-# /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x67aa): undefined reference to `boost::system::system_category()'
-# due to deprecated code (`filesystem` depends on `system`).
-add_compile_definitions(BOOST_SYSTEM_NO_DEPRECATED)
 
 find_package(PNG REQUIRED)
 add_compile_definitions(NO_FREETYPE)
@@ -309,6 +303,13 @@ if (__processedUserDefaults)
   include(${Enzo-E_CONFIG_PATH})
 endif()
 
+# we need to pull CTest sooner or later anyways. We do it before adding the
+# source directories because it introduces the BUILD_TESTING option which is
+# set to ON if it was not previously initialized (e.g. from the command line)
+# -> this option is used within source directories to determine whether the
+#    binaries for unit-tests should be declared
+include(CTest)
+
 # In principle a more fine grained control (i.e., target specific include directories
 # rather than this global one would be preferred, but, e.g., `pngwriter.h` is curently
 # included in many targets/libraries (without being linked) so we'll use the global for
@@ -316,15 +317,15 @@ endif()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/External)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+option(USE_PRECOMPILED_HEADERS
+  "Use precompiled headers to speed up compilation" ON)
+
 add_subdirectory(src/Cello)
 add_subdirectory(src/Enzo)
 add_subdirectory(src/External)
 
 
-include(CTest)
 
-# include(CTest) implicitly initializes BUILD_TESTING to ON if it was not
-# previously initialized (e.g. from the command line)
 if (BUILD_TESTING)
   add_subdirectory(test)
 endif()

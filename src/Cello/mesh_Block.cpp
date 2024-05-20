@@ -36,10 +36,6 @@ const char * phase_name[] = {
 
 // #define TRACE_BLOCK
 
-//======================================================================
-#ifdef BYPASS_CHARM_MEM_LEAK
-//======================================================================
-
 Block::Block ( process_type ip_source, MsgType msg_type )
   : CBase_Block(),
     data_(NULL),
@@ -84,10 +80,6 @@ Block::Block ( process_type ip_source, MsgType msg_type )
 
   thisIndex.array(array_,array_+1,array_+2);
 
-  if (msg_type == MsgType::msg_refine) {
-    proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -124,77 +116,6 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   delete msg;
 }
 
-//======================================================================
-#else /* not BYPASS_CHARM_MEM_LEAK */
-//======================================================================
-
-Block::Block ( MsgRefine * msg )
-  : CBase_Block(),
-    data_(NULL),
-    child_data_(NULL),
-    level_next_(0),
-    cycle_(0),
-    time_(0.0),
-    dt_(0.0),
-    stop_(false),
-    index_initial_(0),
-    children_(),
-    sync_coarsen_(),
-    sync_count_(),
-    sync_max_(),
-    adapt_(),
-    child_face_level_curr_(),
-    child_face_level_next_(),
-    count_coarsen_(0),
-    adapt_step_(0),
-    adapt_ready_(false),
-    adapt_balanced_(false),
-    adapt_changed_(0),
-    coarsened_(false),
-    is_leaf_((thisIndex.level() >= 0)),
-    age_(0),
-    ip_next_(-1),
-    name_(""),
-    index_method_(-1),
-    index_solver_(),
-    refresh_()
-{
-#ifdef TRACE_BLOCK
-
-  CkPrintf ("%d TRACE_BLOCK %s Block::Block(MsgRefine)\n",  CkMyPe(),name(thisIndex).c_str());
-
-#endif
-
-  performance_start_(perf_block);
-
-  init_refresh_();
-  usesAtSync = true;
-
-  thisIndex.array(array_,array_+1,array_+2);
-#ifdef TRACE_BLOCK
-  CkPrintf ("DEBUG_BLOCK Block(msg) face_level %p\n",
-            msg->face_level_);
-#endif
-  init_refine_ (msg->index_,
-	msg->nx_, msg->ny_, msg->nz_,
-	msg->num_field_blocks_,
-	msg->num_adapt_steps_,
-	msg->cycle_, msg->time_,  msg->dt_,
-	0, NULL, msg->refresh_type_,
-        msg->num_face_level_, msg->face_level_,
-        msg->adapt_parent_);
-
-  init_adapt_(msg->adapt_parent_);
-
-  apply_initial_(msg);
-  
-  performance_stop_(perf_block);
-
-}
-//======================================================================
-#endif /* BYPASS_CHARM_MEM_LEAK */
-//======================================================================
-
 //----------------------------------------------------------------------
 
 void Block::init_refine_
@@ -226,8 +147,8 @@ void Block::init_refine_
 
   if ((monitor != NULL) && monitor->is_verbose()) {
     char buffer [80];
-    sprintf (buffer,"Block() %s %d (%x %x %x) created",name().c_str(),
-	     index.level(),index[0],index[1],index[2]);
+    snprintf (buffer,sizeof(buffer),"Block() %s %d (%x %x %x) created",
+              name().c_str(), index.level(),index[0],index[1],index[2]);
     monitor->print("Adapt",buffer);
   }
   int ibx,iby,ibz;
@@ -297,7 +218,7 @@ void Block::init_refine_
     refresh->add_all_data();
 
     FieldFace * field_face = create_face
-      (if3, ic3, g3, refresh_fine, refresh, true);
+      (if3, ic3, g3, refresh_fine, refresh);
 
     // Copy refined field data
     field_face -> array_to_face (array, data()->field());
@@ -332,11 +253,10 @@ void Block::initialize()
   fflush(stdout);
 #endif
 
-  const bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
-  const bool initial_new    = cello::config()->initial_new;
+  const bool initial_new = cello::config()->initial_new;
 
   if (! initial_new) {
-    if (is_first_cycle && level() <= 0) {
+    if (cello::is_initial_cycle(cycle_,InitCycleKind::fresh) && level() <= 0) {
       CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
       contribute(0,0,CkReduction::concat,callback);
     }
@@ -412,6 +332,8 @@ void Block::pup(PUP::er &p)
     for (int i=0; i<len; i++) refresh_msg_list_[i].clear();
   }
 
+  p | index_order_;
+  p | count_order_;
 }
 
 //----------------------------------------------------------------------
@@ -502,14 +424,16 @@ void Block::print (FILE * fp_in) const
   fprintf (fp,"%d %s PRINT_BLOCK index_initial_ = %d\n",CkMyPe(),name_.c_str(),index_initial_);
   fprintf (fp,"%d %s PRINT_BLOCK children_.size() = %lu\n",CkMyPe(),name_.c_str(),children_.size());
   fprintf (fp,"%d %s PRINT_BLOCK child_face_level_curr_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_curr_.size());
-  for (int i=0; i<child_face_level_curr_.size(); i++) {fprintf (fp,"%d ",child_face_level_curr_[i]);} fprintf (fp,"\n");
+  for (std::size_t i=0; i<child_face_level_curr_.size(); i++) {fprintf (fp,"%d ",child_face_level_curr_[i]);} fprintf (fp,"\n");
   sync_coarsen_.print("PRINT_BLOCK",fp);
-  fprintf (fp,"%d %s PRINT_BLOCK sync_count_ %d: ",sync_count_.size());
-  for (int i=0; i<sync_count_.size(); i++) {fprintf (fp,"%d ",sync_count_[i]);} fprintf (fp,"\n");
-  fprintf (fp,"%d %s PRINT_BLOCK sync_max_ %d: ",sync_max_.size());
-  for (int i=0; i<sync_max_.size(); i++) {fprintf (fp,"%d ",sync_max_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK sync_count_ %d: ",
+           CkMyPe(), name_.c_str(), (int)sync_count_.size());
+  for (std::size_t i=0; i<sync_count_.size(); i++) {fprintf (fp,"%d ",sync_count_[i]);} fprintf (fp,"\n");
+  fprintf (fp,"%d %s PRINT_BLOCK sync_max_ %d: ",
+           CkMyPe(), name_.c_str(), (int)sync_max_.size());
+  for (std::size_t i=0; i<sync_max_.size(); i++) {fprintf (fp,"%d ",sync_max_[i]);} fprintf (fp,"\n");
   fprintf (fp,"%d %s PRINT_BLOCK child_face_level_next_.size() = %lu\n",CkMyPe(),name_.c_str(),child_face_level_next_.size());
-  for (int i=0; i<child_face_level_next_.size(); i++) {fprintf (fp,"%d ",child_face_level_next_[i]);} fprintf (fp,"\n");
+  for (std::size_t i=0; i<child_face_level_next_.size(); i++) {fprintf (fp,"%d ",child_face_level_next_[i]);} fprintf (fp,"\n");
 
   fprintf (fp,"%d %s PRINT_BLOCK count_coarsen_ = %d\n",CkMyPe(),name_.c_str(),count_coarsen_);
   fprintf (fp,"%d %s PRINT_BLOCK adapt_step_ = %d\n",CkMyPe(),name_.c_str(),adapt_step_);
@@ -526,7 +450,7 @@ void Block::print (FILE * fp_in) const
   fprintf (fp,"%d %s PRINT_BLOCK index_solver_.size() = %lu\n",CkMyPe(),name_.c_str(),index_solver_.size());
   adapt_.print(std::string("Adapt-")+name_,this,fp);
 
-  for (int i=0; i<refresh_.size(); i++) { refresh_[i]->print(fp); }
+  for (std::size_t i=0; i<refresh_.size(); i++) { refresh_[i]->print(fp); }
 
   if (fp_in == nullptr) {
     fclose (fp);
@@ -591,13 +515,11 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
   CkPrintf ("TRACE_BLOCK %s apply_initial()\n",name().c_str());
   fflush(stdout);
 #endif
-  const bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
-  const bool initial_new    = cello::config()->initial_new;
-
-  if (! is_first_cycle) {
+  if (! cello::is_initial_cycle(cycle_,InitCycleKind::fresh)) {
     msg->update(data());
   } else {
     TRACE("Block::apply_initial_()");
+    const bool initial_new = cello::config()->initial_new;
     if (initial_new) {
 
       initial_new_begin_(0);
@@ -624,8 +546,8 @@ Block::~Block()
 
   if (monitor && monitor->is_verbose()) {
     char buffer [80];
-    sprintf (buffer,"~Block() %s (%d;%d;%d) destroyed",name().c_str(),
-	     index_[0],index_[1],index_[2]);
+    snprintf (buffer,sizeof(buffer),"~Block() %s (%d;%d;%d) destroyed",
+              name().c_str(),index_[0],index_[1],index_[2]);
     monitor->print("Adapt",buffer);
   }
 
@@ -646,7 +568,7 @@ Block::~Block()
     refresh->add_all_data();
 
     FieldFace * field_face = create_face
-      ( if3,ic3,g3,refresh_coarse,refresh,true);
+      ( if3,ic3,g3,refresh_coarse,refresh);
 
     field_face->face_to_array(data()->field(),&n,&array);
     delete field_face;
@@ -689,7 +611,7 @@ void Block::p_refresh_child
   refresh->add_all_data();
 
   FieldFace * field_face = create_face
-    (if3, ic3, g3, refresh_coarse,refresh,true);
+    (if3, ic3, g3, refresh_coarse,refresh);
 
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;
@@ -754,10 +676,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
   adapt_.set_periodicity(p3);
   adapt_.set_valid(true);
 
-  const bool initial_cycle =
-    (cello::simulation()->cycle() == cello::config()->initial_cycle);
-
-  if ( (level <= 0) && initial_cycle ) {
+  if ( (level <= 0) && cello::is_initial_cycle(cycle_,InitCycleKind::fresh) ) {
     // If root-level (or below) block in first simulation cycle,
     // initialize neighbors to be all adjacent root-level blocks
     int nb3[3],np3[3],ib3[3];

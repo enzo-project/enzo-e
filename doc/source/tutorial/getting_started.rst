@@ -23,7 +23,7 @@ Dependency Installation
 =======================
 
 Before compiling ``Enzo-E / Cello``, you may need to download
-and install 1. ``CMake``, 2. ``Charm++``, 3. ``HDF5``, 4. ``libpng``, 5. ``libboost``, and (optionally) 6. ``Grackle``:
+and install 1. ``CMake``, 2. ``Charm++``, 3. ``HDF5``, 4. ``libpng``, and (optionally) 5. ``Grackle``:
 
 1. Install ``CMake``
 --------------------
@@ -103,16 +103,7 @@ available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
 <https://www.libpng.org/pub/png/libpng.html>`_ website.
 
-5. Install ``libboost-dev``
----------------------------
-
-"`Boost <https://www.boost.org/>`_ provides free peer-reviewed portable C++ source libraries."
-
-If ``libboost-dev`` is not already installed on your machine, it may be
-available through your operating system distribution, otherwise it can
-be downloaded from the `libboost <https://www.boost.org/>`_ website.
-
-6. Install Grackle  (Optional)
+5. Install Grackle  (Optional)
 ------------------------------
 
 By default, Enzo-E requires the Grackle chemistry and cooling library.
@@ -121,7 +112,7 @@ If you do not need to use Grackle, you can simple disabling it by setting
 See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
 instructions.
 
-7. Install yt (Optional)
+6. Install yt (Optional)
 ------------------------
 
 If you want to use the yt python package to analyse Enzo-E output data, you should install the latest version from source.
@@ -284,7 +275,7 @@ These options control compilation choices that can be used to facillitate profil
 Testing Options
 ^^^^^^^^^^^^^^^
 
-These options configure properties of parallel automated tests.
+These options configure properties of automated tests. These options currently just affect tests in the :ref:`ctest framework <ctest>` and don't affect tests in the :ref:`pytest framework <pytest>`.
 
 .. list-table:: Testing-Related Configuration
    :widths: 10 30 5
@@ -302,6 +293,10 @@ These options configure properties of parallel automated tests.
    * - ``PARALLEL_LAUNCHER_NPROC``
      - Number of processors to run parallel unit tests
      - 4
+   * - ``BUILD_TESTING``
+     - Whether to setup the CTest infrastructure and build unit test binaries (which are primarily built to be executed by the CTest infrastructure). This has no effect on the pytest infrastructure.
+     - "ON"
+
 
 Debugging Options
 ^^^^^^^^^^^^^^^^^
@@ -340,6 +335,22 @@ The following options are useful for debugging.
    * - ``verbose``
      - Trace main phases
      - OFF
+
+Misc Options
+^^^^^^^^^^^^
+
+The following options don't really belong in any other category
+
+.. list-table:: Misc Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_PRECOMPILED_HEADERS``
+     - Precompile headers to try to reduce compile time
+     - ON
 
 .. _how_to_specify_the_configuration:
 
@@ -498,7 +509,7 @@ Time = 0.10
 If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-E / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-E / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
 If you encounter any problems in getting Enzo-E to compile or run,
-please contact the Enzo-E / Cello community at cello-l@ucsd.edu or the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
+please contact the Enzo-E / Cello community at the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
 
 ----
 

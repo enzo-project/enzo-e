@@ -186,7 +186,7 @@ void MethodOrderMorton::recv_index
 {
   {
     char buffer[80];
-    sprintf (buffer,"recv_index %d %d\n",index,count);
+    snprintf (buffer,sizeof(buffer),"recv_index %d %d\n",index,count);
     TRACE_ORDER_BLOCK(buffer,block);
   }
   if (!self) {
@@ -201,7 +201,7 @@ void MethodOrderMorton::recv_index
   if (psync_index_(block)->next()) {
     {
       char buffer[80];
-      sprintf (buffer,"complete %d %d\n",index,count);
+      snprintf (buffer,sizeof(buffer),"complete %d %d\n",index,count);
       TRACE_ORDER_BLOCK(buffer,block);
     } 
     send_index(block,index, count, false);
@@ -224,6 +224,8 @@ void Block::r_method_order_morton_complete(CkReductionMsg * msg)
 
 void MethodOrderMorton::compute_complete(Block * block)
 {
+  // Update Block's index and count
+  block->set_order(*pindex_(block),*pcount_(block));
   block->compute_done();
 }
 

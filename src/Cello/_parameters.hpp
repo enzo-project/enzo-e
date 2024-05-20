@@ -47,6 +47,7 @@ extern const char * parameter_type_name [];
 #include "parameters_Param.hpp"
 #include "parameters_ParamNode.hpp"
 #include "parameters_Parameters.hpp"
+#include "parameters_ParameterGroup.hpp"
 
 #endif /* _PARAMETERS_HPP */
 

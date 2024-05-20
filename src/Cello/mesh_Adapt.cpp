@@ -86,7 +86,7 @@ void Adapt::refine_neighbor (Index index)
           Index index_child = index.index_child(icx,icy,icz);
           int adj = self_.index_.adjacency(index_child,rank_,periodicity_);
           if (adj >= 0) {
-            bool s = insert_neighbor(index_child);
+            insert_neighbor(index_child);
           }
         }
       }
@@ -351,12 +351,12 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
   if (fp != nullptr) {
     std::string prefix = std::string("DEBUG_ADAPT ")+message;
     fprintf (fp,"%s face_level curr: ",prefix.c_str());
-    for (int i=0; i<face_level_[0].size(); i++) {
+    for (std::size_t i=0; i<face_level_[0].size(); i++) {
       fprintf (fp,"%d ", face_level_[0].at(i));
     }
     fprintf (fp,"\n");
     fprintf (fp,"%s face_level next: ",prefix.c_str());
-    for (int i=0; i<face_level_[1].size(); i++) {
+    for (std::size_t i=0; i<face_level_[1].size(); i++) {
       fprintf (fp,"%d ", face_level_[1].at(i));
     }
     fprintf (fp,"\n");
@@ -366,7 +366,7 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
               periodicity_[1],
               periodicity_[2]);
 
-    for (int i=0; i<face_level_[2].size(); i++) {
+    for (std::size_t i=0; i<face_level_[2].size(); i++) {
       if (i%27==0) fprintf (fp,"\n%s face_level last: ",prefix.c_str());
       fprintf (fp,"%2d ", face_level_[2].at(i));
     }
@@ -383,20 +383,19 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
       const LevelInfo & info = neighbor_list_.at(i);
       int il3[3];
       info.index_.index_level(il3,max_level_);
-      int level = info.index_.level();
       char neighbor_block[80];
       if (block) {
-        sprintf (neighbor_block,"%s",block->name(info.index_).c_str());
+        snprintf (neighbor_block,sizeof(neighbor_block),"%s",
+                  block->name(info.index_).c_str());
       } else {
         int it3[3],ia3[3];
         info.index_.array(ia3,ia3+1,ia3+2);
         info.index_.tree(it3,it3+1,it3+2);
-        sprintf (neighbor_block,"%X:%X %X:%X,%X:%X",
+        snprintf (neighbor_block,sizeof(neighbor_block),"%X:%X %X:%X,%X:%X",
                  ia3[0],it3[0],
                  ia3[1],it3[1],
                  ia3[2],it3[2]);
       }
-      const int l = 1 << (max_level_ - level);
       fprintf (fp,"%s   %d %s [%d %d] S%d C%d\n",
                 prefix.c_str(),i,neighbor_block,
                 info.level_min_,
@@ -414,7 +413,8 @@ void Adapt::write(std::string root, const Block * block, int cycle_start) const
   const int cycle = cello::simulation()->cycle();
   if (cycle >= cycle_start) {
     char filename[80];
-    sprintf (filename,"%d-%s.%s",cycle,root.c_str(),block->name().c_str());
+    snprintf (filename,sizeof(filename),"%d-%s.%s",cycle,root.c_str(),
+              block->name().c_str());
 
     CkPrintf ("%s\n",filename);
 

@@ -5,8 +5,9 @@
 /// @date     Mon Oct 26 2020
 /// @brief    [\ref Enzo] Implementation of the EnzoEFltArrayMap class
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/utils/utils.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------
 

@@ -17,9 +17,7 @@ class MethodCloseFiles : public Method {
 public: // interface
 
   /// Constructor
-  MethodCloseFiles(double seconds_stagger,
-		   double seconds_delay,
-		   int group_size) throw();
+  MethodCloseFiles(ParameterGroup p) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(MethodCloseFiles);

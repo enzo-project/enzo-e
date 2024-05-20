@@ -7,7 +7,7 @@
    Domain { 
       lower = [0.0, 0.0];
       upper = [1.0, 1.0];
-   } 
+   }
 
    Adapt {
       max_level = 3; 
@@ -30,7 +30,6 @@
    Field {
 
       ghost_depth  = 4;
-      gamma = 1.4;
 
       list = [
         "density",
@@ -48,11 +47,10 @@
      list = ["ppm", "flux_correct"];
 
      ppm {
-         courant = 0.8;
+         courant     = 0.8;
          diffusion   = true;
          flattening  = 3;
          steepening  = true;
-         dual_energy = false;
      }
    }
 
@@ -66,6 +64,17 @@
                         "internal_energy", "total_energy" ];
      }
   }
+
+   Physics {
+       list = ["fluid_props"];
+       fluid_props {
+           eos {
+               type  = "ideal";
+               gamma = 1.4;
+           }
+           dual_energy { type = "disabled"; }
+       }
+   }
 
    Initial {
 

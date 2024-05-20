@@ -101,9 +101,9 @@
 ///
 ///======================================================================
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_SOLVER_CONTROL
 
@@ -177,7 +177,7 @@ EnzoSolverMg0::EnzoSolverMg0
   refresh->add_field (ir_);
   refresh->add_field (ic_);
 
-  refresh->set_min_face_rank(2);
+  refresh->set_min_face_rank(cello::rank() - 1);
   
   ScalarDescr * scalar_descr_int  = cello::scalar_descr_int();
   i_iter_  = scalar_descr_int ->new_value(name + ":iter");
@@ -925,12 +925,12 @@ FieldMsg * EnzoSolverMg0::pack_residual_(EnzoBlock * enzo_block) throw()
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ir_);
-  refresh->set_min_face_rank(2);
+  refresh->set_min_face_rank(cello::rank() - 1);
 
   // copy data from EnzoBlock to array via FieldFace
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, g3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh);
 
   refresh->set_restrict(index_restrict_);
 
@@ -974,14 +974,14 @@ void EnzoSolverMg0::unpack_residual_
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ib_);
-  refresh->set_min_face_rank(2);
+  refresh->set_min_face_rank(cello::rank() - 1);
 
   // copy data from msg to this EnzoBlock
 
   int * ic3 = msg->ic3;
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, g3, refresh_coarse, refresh, true);
+    (if3, ic3, g3, refresh_coarse, refresh);
 
   refresh->set_restrict(index_restrict_);
 
@@ -1010,11 +1010,11 @@ FieldMsg * EnzoSolverMg0::pack_correction_
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ix_);
-  refresh->set_min_face_rank(2);
+  refresh->set_min_face_rank(cello::rank() - 1);
   // copy data from EnzoBlock to array via FieldFace
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, g3, refresh_fine, refresh, true);
+    (if3, ic3, g3, refresh_fine, refresh);
 
   Field field = enzo_block->data()->field();
   int narray;
@@ -1056,12 +1056,12 @@ void EnzoSolverMg0::unpack_correction_
   refresh->set_prolong(index_prolong_);
   refresh->set_restrict(index_restrict_);
   refresh->add_field(ic_);
-  refresh->set_min_face_rank(2);
+  refresh->set_min_face_rank(cello::rank() - 1);
 
   // copy data from msg to this EnzoBlock
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, msg->ic3, g3, refresh_fine, refresh, true);
+    (if3, msg->ic3, g3, refresh_fine, refresh);
 
   Field field = enzo_block->data()->field();
   field_face->array_to_face (msg->a, field);

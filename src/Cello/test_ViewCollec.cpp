@@ -9,6 +9,9 @@
 #include "test.hpp"
 #include "view.hpp"
 
+#include "test_ViewTestTools.hpp" // assign_range_3Darray, range_3Darray,
+                                  // assert_allequal3D
+
 #include <array>
 #include <utility> // for std::pair
 #include <vector>
@@ -16,32 +19,6 @@
 //----------------------------------------------------------------------
 
 namespace {
-
-  template<typename T>
-  void assign_range_3Darray(const CelloView<T,3>& arr, T start, T step) {
-    int count = 0;
-
-    const int mz = arr.shape(0);
-    const int my = arr.shape(1);
-    const int mx = arr.shape(2);
-
-    for (int iz = 0; iz < mz; iz++){
-      for (int iy = 0; iy < my; iy++){
-        for (int ix = 0; ix < mx; ix++){
-          arr(iz,iy,ix) = start + static_cast<T>(count)*step;
-          count++;
-        }
-      }
-    }
-
-  }
-
-  template<typename T>
-  CelloView<T,3> range_3Darray(int mz, int my, int mx, T start, T step) {
-    CelloView<T,3> out(mz,my,mx);
-    assign_range_3Darray(out, start, step);
-    return out;
-  }
 
   template<typename T>
   class ViewCollecFactory {
@@ -88,41 +65,6 @@ namespace {
   };
 
   template<typename T>
-  void assert_allequal3D(const CelloView<T,3>& a, const CelloView<T,3>& b) {
-    ASSERT("assert_allequal3D",
-           "The arrays don't have the same shape",
-           (a.shape(0) == b.shape(0)) &&
-           (a.shape(1) == b.shape(1)) &&
-           (a.shape(2) == b.shape(2)));
-
-    const int mz = a.shape(0);
-    const int my = a.shape(1);
-    const int mx = a.shape(2);
-
-    bool all_equal = true;
-    for (int iz = 0; iz < mz; iz++){
-      for (int iy = 0; iy < my; iy++){
-        for (int ix = 0; ix < mx; ix++){
-          all_equal &= (a(iz,iy,ix) == b(iz,iy,ix));
-        }
-      }
-    }
-    ASSERT("assert_allequal3D", "The elements are not all equal", all_equal);
-  }
-
-
-  // the contents of a and b don't need to be aliases to pass this assertion
-  template<typename T>
-  void assert_allequal_array_elem(const ViewCollec<T>& a,
-                                  const ViewCollec<T>& b) {
-    ASSERT("assert_allequal_array_elem",
-           "The size of the collections are not the same.",
-           a.size() == b.size());
-    for (std::size_t i = 0; i < a.size(); i++){ assert_allequal3D(a[i], b[i]); }
-  }
-
-
-  template<typename T>
   void common_checks_(const char* test_name, ViewCollec<T>& collec,
                       std::size_t n_arrays, const std::array<int,3>& shape,
                       bool expect_contiguous) noexcept
@@ -144,7 +86,7 @@ namespace {
     if (expect_contiguous){
         CelloView<T,4> backing_arr = collec.get_backing_array();
         ASSERT(test_name, "Unexpected backing_array() shape.",
-               (backing_arr.shape(0) == n_arrays) &
+               (backing_arr.shape(0) == (int)n_arrays) &
                (backing_arr.shape(1) == shape[0]) &
                (backing_arr.shape(2) == shape[1]) &
                (backing_arr.shape(3) == shape[2]));
