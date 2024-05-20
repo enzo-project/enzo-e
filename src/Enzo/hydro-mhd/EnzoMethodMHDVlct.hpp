@@ -93,12 +93,7 @@ class EnzoMethodMHDVlct : public Method {
 public: // interface
 
   /// Create a new EnzoMethodMHDVlct object
-  EnzoMethodMHDVlct(std::string rsolver,
-		    std::string time_scheme,
-		    std::string recon_name,
-		    double theta_limiter,
-		    std::string mhd_choice,
-		    bool store_fluxes_for_corrections);
+  EnzoMethodMHDVlct(ParameterGroup p, bool store_fluxes_for_corrections);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodMHDVlct);

@@ -147,8 +147,8 @@ void Block::init_refine_
 
   if ((monitor != NULL) && monitor->is_verbose()) {
     char buffer [80];
-    sprintf (buffer,"Block() %s %d (%x %x %x) created",name().c_str(),
-	     index.level(),index[0],index[1],index[2]);
+    snprintf (buffer,sizeof(buffer),"Block() %s %d (%x %x %x) created",
+              name().c_str(), index.level(),index[0],index[1],index[2]);
     monitor->print("Adapt",buffer);
   }
   int ibx,iby,ibz;
@@ -546,8 +546,8 @@ Block::~Block()
 
   if (monitor && monitor->is_verbose()) {
     char buffer [80];
-    sprintf (buffer,"~Block() %s (%d;%d;%d) destroyed",name().c_str(),
-	     index_[0],index_[1],index_[2]);
+    snprintf (buffer,sizeof(buffer),"~Block() %s (%d;%d;%d) destroyed",
+              name().c_str(),index_[0],index_[1],index_[2]);
     monitor->print("Adapt",buffer);
   }
 

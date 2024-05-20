@@ -48,7 +48,7 @@ public: // public interface common to all EOS types
   /// create a string for debugging purposes that represents the EOS's value
   std::string debug_string() const noexcept {
     char buffer[50] = "";
-    sprintf(buffer, "EnzoEOSIdeal{ gamma : %#.16g }", gamma);
+    snprintf(buffer, sizeof(buffer), "EnzoEOSIdeal{ gamma : %#.16g }", gamma);
     return buffer;
   }
 

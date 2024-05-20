@@ -19,12 +19,12 @@ class EnzoMethodStarMaker : public Method {
 
   /// @class   EnzoMethodStarMaker
   /// @ingroup Enzo
-  /// @btief   [\ref Enzo] Encapsulate Star Maker Routines
+  /// @brief   [\ref Enzo] Encapsulate Star Maker Routines
 
 public:
 
   // Create a new StarMaker object
-  EnzoMethodStarMaker();
+  EnzoMethodStarMaker(ParameterGroup p);
 
   /// Destructor
   virtual ~EnzoMethodStarMaker() throw() {};
@@ -62,6 +62,16 @@ public:
   static void rescale_densities(EnzoBlock * enzo_block,
                                 const int index,
                                 const double density_ratio) throw();
+
+  double minimum_star_mass() const noexcept
+  { return star_particle_min_mass_; }
+
+  /// return minimum AMR level where star formation can occur
+  ///
+  /// @note
+  /// This can optionally be overwritten by subclasses
+  virtual int sf_minimum_level() const noexcept
+  { return 0; }
 
 protected: // methods
 
@@ -103,26 +113,36 @@ protected: // methods
 
 protected: // attributes
 
+  /// check above density threshold before SF
   bool use_density_threshold_;
+  /// check for converging flow before SF
   bool use_velocity_divergence_;
   bool use_self_gravitating_;
+  /// alternate virial parameter calculation
   bool use_altAlpha_;
   bool use_h2_self_shielding_;
   bool use_jeans_mass_;
   bool use_overdensity_threshold_;
   bool use_critical_metallicity_;
   bool use_temperature_threshold_;
+  /// check if t_cool < t_dyn
   bool use_cooling_time_;
+  /// compute t_ff / t_dyn. Otherwise take as 1.0
   bool use_dynamical_time_;
   double overdensity_threshold_;
   double critical_metallicity_;
+  /// Number density threshold in cgs
   double number_density_threshold_;
+  /// star maker efficiency per free fall time
   double efficiency_;
+  /// maximum cell mass fraction to convert to stars
   double maximum_star_fraction_;
+  /// minimum star particle mass in solar masses
   double star_particle_min_mass_;
+  /// maximum star particle mass in solar masses
   double star_particle_max_mass_;
   double temperature_threshold_;
-  // variables to be passsed here
+
 };
 
 #endif /* EnzoMethodStarMaker */

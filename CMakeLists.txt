@@ -36,6 +36,12 @@ endif()
 # Ensure the custom modules to find Charm++ and Grackle are included
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# confirm that std::filesystem is supported by the compiler and create an
+# interface target called StdFilesystem::StdFilesystem that encapsulates
+# usage requirements (if there are any)
+include("CreateStdFilesystemTarget")
+create_StdFilesystem_target()
+
 #----------------------------------------------------------------------------------------
 # External libs
 
@@ -64,15 +70,10 @@ option(GRACKLE_USE_STATIC_LIBS  "sets Grackle's lib-type if USE_GRACKLE=ON" ON)
 if (USE_GRACKLE)
   find_package(Grackle)
   if (Grackle_FOUND)
-    # Setting global compile def as performance and simulation Cello libs need the var
-    # We should discuss the use of a central config.hpp (similar to the existing
-    # auto_config.def but also centrally included beyond informational output).
+    # This really only needs to be defined for a relatively small subset of
+    # files in the Enzo-layer
     add_compile_definitions(CONFIG_USE_GRACKLE)
 
-    # Also specifically setting the defines used in the *.ci files of Cello and Enzo.
-    # Alternatively, figure out a way to extract those from the `COMPILE_DEFINITIONS`
-    # property and directly process in `cmake/charm.cmake`.
-    set(CHARM_PREPROC_DEFS ${CHARM_PREPROC_DEFS} "-DCONFIG_USE_GRACKLE ")
   else()
     message(FATAL_ERROR
       "Configured to use Grackle but Grackle library not found.\n"
@@ -80,23 +81,6 @@ if (USE_GRACKLE)
       "(e.g., `-DGrackle_ROOT=/PATH/TO/GRACKLE/INSTALL/DIRECTORY`).")
   endif()
 endif()
-
-# TODO: remove the dependency on boost::filesystem (since C++17 now offers
-# nearly identical functionality within the standard library). Initially, I
-# thought, it could make sense to keep using boost::filesystem in the
-# short-term since the clang compiler shipped on macOS didn't support this
-# library until version 11.0 of Xcode (requires macOS Mojave from 2018).
-# - Apple's clang compiler supports all new language features & the majority of
-#   new library features by version 10 (requires macOS High Sierra from 2017)
-# - For more info: https://en.cppreference.com/w/cpp/compiler_support/17
-# - After giving this some thought, this difference in support is probably not
-#   worth caring about
-find_package(Boost REQUIRED COMPONENTS filesystem)
-# Fix linking error to
-# /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x679e): undefined reference to `boost::system::generic_category()'
-# /opt/apps/gcc/8.3.0/bin/ld: main.cpp:(.text+0x67aa): undefined reference to `boost::system::system_category()'
-# due to deprecated code (`filesystem` depends on `system`).
-add_compile_definitions(BOOST_SYSTEM_NO_DEPRECATED)
 
 find_package(PNG REQUIRED)
 add_compile_definitions(NO_FREETYPE)

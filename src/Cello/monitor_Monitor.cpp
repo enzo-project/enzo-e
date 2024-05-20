@@ -182,7 +182,7 @@ void Monitor::write_ (FILE * fp, const char * component, const char * message) c
 
   char process[MONITOR_LENGTH] = "";
 
-  sprintf (process,"%0d",CkMyPe());
+  snprintf (process,MONITOR_LENGTH,"%0d",CkMyPe());
 
   // Get time
 
@@ -217,7 +217,7 @@ void Monitor::write_verbatim
 
     char buffer_process[MONITOR_LENGTH] = "";
 
-    sprintf (buffer_process,"%0d",CkMyPe());
+    snprintf (buffer_process,MONITOR_LENGTH,"%0d",CkMyPe());
 
     // Get time
 

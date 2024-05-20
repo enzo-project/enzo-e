@@ -8,14 +8,16 @@
 ///
 
 #include "enzo.hpp"
-#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoMethodMHDVlct, EnzoMethodPpm,
-                                        // EnzoMethodPpml
 
 #include "Enzo/assorted/assorted.hpp" // misc. Method classes
+#include "Enzo/chemistry/chemistry.hpp" // EnzoComputeCoolingTime, EnzoMethodGrackle
+#include "Enzo/fluid-props/fluid-props.hpp" // EnzoPhysicsFluidProps, EnzoCompute{Temperature,Pressure}
 #include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
                                     // EnzoMethodBackgroundAcceleration
                                     // EnzoComputeAcceleration
                                     // EnzoSolver* EnzoMatrix*
+#include "Enzo/hydro-mhd/hydro-mhd.hpp" // EnzoMethodMHDVlct, EnzoMethodPpm,
+                                        // EnzoMethodPpml
 #include "Enzo/initial/initial.hpp" // lots of initializers
 #include "Enzo/io/io.hpp" // EnzoMethodCheck, EnzoInitial{Hdf5,Music}
 #include "Enzo/mesh/mesh.hpp" // EnzoProlong, EnzoRefine*, EnzoRestrict*
@@ -166,31 +168,12 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "feedback_test") {
-    initial = new EnzoInitialFeedbackTest(enzo_config);
+    initial = new EnzoInitialFeedbackTest(cycle, time, p_group);
   } else if (type == "vlct_bfield") {
     initial = new EnzoInitialBCenter(parameters, cycle, time,
 				     enzo_config->initial_bcenter_update_etot);
   } else if (type == "cloud") {
-    initial = new EnzoInitialCloud
-      (cycle,time,
-       enzo_config->initial_cloud_subsample_n,
-       enzo_config->initial_cloud_radius,
-       enzo_config->initial_cloud_center_x,
-       enzo_config->initial_cloud_center_y,
-       enzo_config->initial_cloud_center_z,
-       enzo_config->initial_cloud_density_cloud,
-       enzo_config->initial_cloud_density_wind,
-       enzo_config->initial_cloud_etot_wind,
-       enzo_config->initial_cloud_eint_wind,
-       enzo_config->initial_cloud_velocity_wind,
-       enzo_config->initial_cloud_metal_mass_frac,
-       enzo_config->initial_cloud_initialize_uniform_bfield,
-       enzo_config->initial_cloud_uniform_bfield,
-       enzo_config->initial_cloud_perturb_Nwaves,
-       enzo_config->initial_cloud_perturb_amplitude,
-       enzo_config->initial_cloud_perturb_min_wavelength,
-       enzo_config->initial_cloud_perturb_max_wavelength,
-       enzo_config->initial_cloud_perturb_seed);
+    initial = new EnzoInitialCloud(cycle,time, p_group);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
@@ -631,11 +614,10 @@ Method * EnzoProblem::create_method_
   } else if (name == "grackle") {
 
     method = new EnzoMethodGrackle
-      (enzo_config->method_grackle_chemistry,
-       enzo_config->method_grackle_use_cooling_timestep,
-       enzo_config->method_grackle_radiation_redshift,
+      (p_group,
        enzo_config->physics_cosmology_initial_redshift,
        enzo::simulation()->time());
+    skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -686,13 +668,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "mhd_vlct") {
 
-    method = new EnzoMethodMHDVlct
-      (enzo_config->method_vlct_riemann_solver,
-       enzo_config->method_vlct_time_scheme,
-       enzo_config->method_vlct_reconstruct_method,
-       enzo_config->method_vlct_theta_limiter,
-       enzo_config->method_vlct_mhd_choice,
-       store_fluxes_for_corrections);
+    method = new EnzoMethodMHDVlct(p_group, store_fluxes_for_corrections);
+    skip_auto_courant = true;
 
   } else if (name == "background_acceleration") {
 
@@ -712,31 +689,41 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "star_maker") {
 
+    // TODO: maybe make a factory method, EnzoMethodStarMaker::from_parameters,
+    // that parses the feedback flavor and creates the appropriate subclass.
+
+    // we are reading Method:star_maker:flavor
+    std::string flavor = p_group.value_string("flavor", "stochastic");
+
     // should generalize this to enable multiple maker types
-    if (enzo_config->method_star_maker_flavor == "stochastic"){
-      method = new EnzoMethodStarMakerStochasticSF();
-    } else if (enzo_config->method_star_maker_flavor == "STARSS" ||
-               enzo_config->method_star_maker_flavor == "starss") {
-      method = new EnzoMethodStarMakerSTARSS();
+    if (flavor == "stochastic"){
+      method = new EnzoMethodStarMakerStochasticSF(p_group);
+    } else if ((flavor == "STARSS") || (flavor == "starss")) {
+      method = new EnzoMethodStarMakerSTARSS(p_group);
     } else{ // does not do anything
-      method = new EnzoMethodStarMaker();
+      method = new EnzoMethodStarMaker(p_group);
     }
 
   } else if (name == "feedback") {
 
-    // need a similar type swtich as in star maker
-    if (enzo_config->method_feedback_flavor == "distributed"){
-      method = new EnzoMethodDistributedFeedback();
-    } else if (enzo_config->method_feedback_flavor == "STARSS" ||
-               enzo_config->method_feedback_flavor == "starss") {
-      method = new EnzoMethodFeedbackSTARSS();
+    // TODO: maybe make a factory method, EnzoMethodFeedback::from_parameters,
+    // that parses the feedback flavor and creates the appropriate subclass.
+
+    // we are reading Method:feedback:flavor
+    std::string flavor = p_group.value_string("flavor", "distributed");
+
+    if (flavor == "distributed"){
+      method = new EnzoMethodDistributedFeedback(p_group);
+    } else if (flavor == "STARSS" || flavor == "starss") {
+      method = new EnzoMethodFeedbackSTARSS(p_group);
     }  else { // does not do anything
-      method = new EnzoMethodFeedback();
+      method = new EnzoMethodFeedback(p_group);
     }
 
   } else if (name == "m1_closure") {
 
-    method = new EnzoMethodM1Closure(enzo_config->method_m1_closure_N_groups);
+    method = new EnzoMethodM1Closure(p_group);
+    skip_auto_courant = true;
 
   } else if (name == "check") {
 
@@ -750,44 +737,29 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "merge_sinks") {
 
-    method = new EnzoMethodMergeSinks
-      (enzo_config->method_merge_sinks_merging_radius_cells);
+    method = new EnzoMethodMergeSinks(p_group);
 
   } else if (name == "accretion") {
 
-    if (enzo_config->method_accretion_flavor == "threshold") {
-      method = new EnzoMethodThresholdAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
-    } else if (enzo_config->method_accretion_flavor == "bondi_hoyle") {
-      method = new EnzoMethodBondiHoyleAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
-    } else if (enzo_config->method_accretion_flavor == "flux") {
-      method = new EnzoMethodFluxAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
-    } else if (enzo_config->method_accretion_flavor == "dummy"){
-      method = new EnzoMethodAccretion
-        (
-         enzo_config->method_accretion_accretion_radius_cells,
-         enzo_config->method_accretion_physical_density_threshold_cgs,
-         enzo_config->method_accretion_max_mass_fraction
-         );
+    // TODO: maybe make a factory method, EnzoMethodAccretion::from_parameters,
+    // that parses the feedback flavor and creates the appropriate subclass.
+
+    // we are reading Method:accretion:flavor
+    std::string flavor = p_group.value_string("flavor", "flavor");
+
+    if (flavor == "threshold") {
+      method = new EnzoMethodThresholdAccretion(p_group);
+    } else if (flavor == "bondi_hoyle") {
+      method = new EnzoMethodBondiHoyleAccretion(p_group);
+    } else if (flavor == "flux") {
+      method = new EnzoMethodFluxAccretion(p_group);
+    } else if (flavor == "dummy"){
+      method = new EnzoMethodAccretion(p_group);
     } else {
       ERROR1("EnzoProblem::create_method_",
              "\"accretion\" method has flavor \"%s\", which is not one of the possible options: "
 	     "\"threshold\", \"bondi_hoyle\", \"flux\", or \"dummy\"",
-	     enzo_config->method_accretion_flavor.c_str());
+	     flavor.c_str());
     }
   } else if (name == "sink_maker") {
 
