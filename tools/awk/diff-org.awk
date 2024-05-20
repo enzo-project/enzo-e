@@ -9,7 +9,6 @@
 
 BEGIN{
     p=1;
-    l=1
 }
 /^diff --git/ { # git
    file=$NF; p=0;
@@ -23,17 +22,9 @@ BEGIN{
 /^@@/ {
     line=$3;
     line=substr(line,2,index(line,",")-2);
-    print "*** TODO [[file:" file"::"line"]["l " " shortfile ":" line "]]"
-    lp = l
-};
+    print "*** TODO [[file:" file"::"line"]["shortfile ":" line "]]"};
 {
     if (p==1)
 	print;
     p=1
 }
-{
-    l=l+1
-}
-END {print l}
-
-
