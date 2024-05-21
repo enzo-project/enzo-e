@@ -110,9 +110,10 @@ endfunction()
 ############################### UNIT TESTS ####################################
 # The following tests are self-contained binary of individual components
 
-setup_test_unit(ViewCollec ViewComponent/ViewCollec test_view_collec)
 setup_test_unit(View ViewComponent/View test_cello_view)
 setup_test_unit(StringIndRdOnlyMap ViewComponent/StringIndRdOnlyMap test_string_ind_rd_only_map)
+setup_test_unit(ViewCollec ViewComponent/ViewCollec test_view_collec)
+setup_test_unit(ViewMap ViewComponent/ViewMap test_view_map)
 
 setup_test_unit(CelloType Cello/Type test_type)
 

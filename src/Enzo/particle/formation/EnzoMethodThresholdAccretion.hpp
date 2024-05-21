@@ -17,9 +17,7 @@ class EnzoMethodThresholdAccretion : public EnzoMethodAccretion {
 public:
 
   // Constructor
-  EnzoMethodThresholdAccretion(double accretion_radius_cells,
-				double density_threshold,
-				double max_mass_fraction);
+  EnzoMethodThresholdAccretion(ParameterGroup p);
 
   /// Charm++ Pup::able declarations
   PUPable_decl(EnzoMethodThresholdAccretion);

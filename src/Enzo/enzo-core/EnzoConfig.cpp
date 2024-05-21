@@ -33,8 +33,6 @@ EnzoConfig::EnzoConfig() throw ()
   physics_fluid_props_eos_variant(),
   physics_fluid_props_fluid_floor_config(),
   physics_fluid_props_mol_weight(0.0),
-  // Gravity
-  physics_gravity_grav_constant_codeU(-1.0),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
   // EnzoInitialBurkertBodenheimer
@@ -165,48 +163,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_bb_test_nominal_sound_speed(0.0),
   initial_bb_test_angular_rotation_velocity(0.0),
   initial_bb_test_external_density(0.0),
-  // EnzoMethodFeedback,
-  method_feedback_flavor(""),
-  method_feedback_ejecta_mass(0.0),
-  method_feedback_supernova_energy(1.0),
-  method_feedback_ejecta_metal_fraction(0.0),
-  method_feedback_stencil(3),
-  method_feedback_radius(-1),
-  method_feedback_shift_cell_center(true),
-  method_feedback_ke_fraction(0.0),
-  method_feedback_use_ionization_feedback(false),
-  method_feedback_time_first_sn(-1), // in Myr
-  // EnzoMethodFeedbackSTARSS,
-  method_feedback_supernovae(true),
-  method_feedback_unrestricted_sn(true),
-  method_feedback_stellar_winds(true),
-  method_feedback_min_level(0),
-  method_feedback_analytic_SNR_shell_mass(true),
-  method_feedback_fade_SNR(true),
-  method_feedback_NEvents(-1),
-  method_feedback_radiation(true),
-  // EnzoMethodStarMaker,
-  method_star_maker_flavor(""),                              // star maker type to use
-  method_star_maker_use_altAlpha(false),
-  method_star_maker_use_density_threshold(false),           // check above density threshold before SF
-  method_star_maker_use_velocity_divergence(false),         // check for converging flow before SF
-  method_star_maker_use_dynamical_time(false),              // compute t_ff / t_dyn. Otherwise take as 1.0
-  method_star_maker_use_cooling_time(false),                // check if t_cool < t_dyn
-  method_star_maker_use_overdensity_threshold(false),
-  method_star_maker_use_temperature_threshold(false),
-  method_star_maker_use_self_gravitating(false),            //
-  method_star_maker_use_h2_self_shielding(false),
-  method_star_maker_use_jeans_mass(false),
-  method_star_maker_number_density_threshold(0.0),         // Number density threshold in cgs
-  method_star_maker_overdensity_threshold(0.0),
-  method_star_maker_critical_metallicity(0.0),
-  method_star_maker_temperature_threshold(1.0E4),
-  method_star_maker_maximum_mass_fraction(0.05),            // maximum cell mass fraction to convert to stars
-  method_star_maker_efficiency(0.01),            // star maker efficiency per free fall time
-  method_star_maker_minimum_star_mass(0.0),    // minimum star particle mass in solar masses
-  method_star_maker_maximum_star_mass(-1.0),    // maximum star particle mass in solar masses
-  method_star_maker_min_level(0), // minimum AMR level for star formation
-  method_star_maker_turn_off_probability(false),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -222,19 +178,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_background_acceleration_stellar_scale_height_r(1.0E-10),
   method_background_acceleration_stellar_scale_height_z(1.0E-10),
   method_background_acceleration_apply_acceleration(true), // for debugging
-  /// EnzoMethodMHDVlct
-  method_vlct_riemann_solver(""),
-  method_vlct_time_scheme(""),
-  method_vlct_reconstruct_method(""),
-  method_vlct_theta_limiter(0.0),
-  method_vlct_mhd_choice(""),
-  /// EnzoMethodMergeSinks
-  method_merge_sinks_merging_radius_cells(0.0),
-  /// EnzoMethodAccretion
-  method_accretion_accretion_radius_cells(0.0),
-  method_accretion_flavor(""),
-  method_accretion_physical_density_threshold_cgs(0.0),
-  method_accretion_max_mass_fraction(0.0),
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -301,8 +244,6 @@ void EnzoConfig::pup (PUP::er &p)
   ::pup(p, physics_fluid_props_eos_variant);
   p | physics_fluid_props_fluid_floor_config;
   p | physics_fluid_props_mol_weight;
-
-  p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
 
@@ -446,49 +387,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_bb_test_angular_rotation_velocity;
   p | initial_bb_test_external_density;
 
-  p | method_feedback_flavor;
-  p | method_feedback_ejecta_mass;
-  p | method_feedback_supernova_energy;
-  p | method_feedback_ejecta_metal_fraction;
-  p | method_feedback_stencil;
-  p | method_feedback_radius;
-  p | method_feedback_shift_cell_center;
-  p | method_feedback_ke_fraction;
-  p | method_feedback_use_ionization_feedback;
-  p | method_feedback_time_first_sn;
-
-  p | method_feedback_supernovae;
-  p | method_feedback_unrestricted_sn;
-  p | method_feedback_stellar_winds;
-  p | method_feedback_min_level;
-  p | method_feedback_analytic_SNR_shell_mass;
-  p | method_feedback_fade_SNR;
-  p | method_feedback_NEvents;
-  p | method_feedback_radiation;
-
-  p | method_star_maker_flavor;
-  p | method_star_maker_use_altAlpha;
-  p | method_star_maker_use_density_threshold;
-  p | method_star_maker_use_overdensity_threshold;
-  p | method_star_maker_use_temperature_threshold;
-  p | method_star_maker_use_critical_metallicity;
-  p | method_star_maker_use_velocity_divergence;
-  p | method_star_maker_use_dynamical_time;
-  p | method_star_maker_use_cooling_time;
-  p | method_star_maker_use_self_gravitating;
-  p | method_star_maker_use_h2_self_shielding;
-  p | method_star_maker_use_jeans_mass;
-  p | method_star_maker_number_density_threshold;
-  p | method_star_maker_overdensity_threshold;
-  p | method_star_maker_critical_metallicity;
-  p | method_star_maker_temperature_threshold;
-  p | method_star_maker_maximum_mass_fraction;
-  p | method_star_maker_efficiency;
-  p | method_star_maker_minimum_star_mass;
-  p | method_star_maker_maximum_star_mass;
-  p | method_star_maker_min_level;
-  p | method_star_maker_turn_off_probability;
-
   p | method_turbulence_edot;
 
   p | method_background_acceleration_flavor;
@@ -504,19 +402,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_background_acceleration_apply_acceleration;
   PUParray(p,method_background_acceleration_angular_momentum,3);
   PUParray(p,method_background_acceleration_center,3);
-
-  p | method_vlct_riemann_solver;
-  p | method_vlct_time_scheme;
-  p | method_vlct_reconstruct_method;
-  p | method_vlct_theta_limiter;
-  p | method_vlct_mhd_choice;
-
-  p | method_merge_sinks_merging_radius_cells;
-
-  p | method_accretion_accretion_radius_cells;
-  p | method_accretion_flavor;
-  p | method_accretion_physical_density_threshold_cgs;
-  p | method_accretion_max_mass_fraction;
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -582,14 +467,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Method [sorted]
 
-  read_method_accretion_(p);
   read_method_background_acceleration_(p);
   read_method_check_(p);
-  read_method_feedback_(p);
-  read_method_merge_sinks_(p);
-  read_method_star_maker_(p);
   read_method_turbulence_(p);
-  read_method_vlct_(p);
 
   read_prolong_enzo_(p);
 
@@ -1071,137 +951,6 @@ void EnzoConfig::read_initial_bb_test_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_feedback_(Parameters * p)
-{
-  method_feedback_flavor = p->value_string
-    ("Method:feedback:flavor","distributed");
-
-  method_feedback_ejecta_mass = p->value_float
-    ("Method:feedback:ejecta_mass",0.0);
-
-  method_feedback_supernova_energy = p->value_float
-    ("Method:feedback:supernova_energy",1.0);
-
-  method_feedback_ejecta_metal_fraction = p->value_float
-    ("Method:feedback:ejecta_metal_fraction",0.1);
-
-  method_feedback_stencil = p->value_integer
-    ("Method:feedback:stencil",3);
-
-  method_feedback_radius = p->value_float
-    ("Method:feedback:radius",-1.0);
-
-  method_feedback_shift_cell_center = p->value_logical
-    ("Method:feedback:shift_cell_center", true);
-
-  method_feedback_ke_fraction = p->value_float
-    ("Method:feedback:ke_fraction", 0.0);
-
-  method_feedback_time_first_sn = p->value_float
-    ("Method:feedback:time_first_sn", -1.0);
-
-  method_feedback_use_ionization_feedback = p->value_logical
-    ("Method:feedback:use_ionization_feedback", false);
-
-  // MethodFeedbackSTARSS parameters
-  method_feedback_supernovae = p->value_logical
-    ("Method:feedback:supernovae",true);
-
-  method_feedback_unrestricted_sn = p->value_logical
-    ("Method:feedback:unrestricted_sn",true);
-
-  method_feedback_stellar_winds = p->value_logical
-    ("Method:feedback:stellar_winds",true);
-
-  method_feedback_min_level = p->value_integer
-    ("Method:feedback:min_level",0);
-
-  method_feedback_analytic_SNR_shell_mass = p->value_logical
-    ("Method:feedback:analytic_SNR_shell_mass",true);
-
-  method_feedback_fade_SNR = p->value_logical
-    ("Method:feedback:fade_SNR",true);
-
-  method_feedback_NEvents = p->value_integer
-    ("Method:feedback:NEvents",-1);
-
-  method_feedback_radiation = p->value_logical
-    ("Method:feedback:radiation", true);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_star_maker_(Parameters * p)
-{
-  method_star_maker_flavor = p->value_string
-    ("Method:star_maker:flavor","stochastic");
-
-  method_star_maker_use_altAlpha = p->value_logical
-    ("Method:star_maker:use_altAlpha",false);
-
-  method_star_maker_use_density_threshold = p->value_logical
-    ("Method:star_maker:use_density_threshold",false);
-
-  method_star_maker_use_overdensity_threshold = p->value_logical
-    ("Method:star_maker:use_overdensity_threshold",false);
-
-  method_star_maker_use_velocity_divergence = p->value_logical
-    ("Method:star_maker:use_velocity_divergence",false);
-
-  method_star_maker_use_dynamical_time = p->value_logical
-    ("Method:star_maker:use_dynamical_time",false);
-
-  method_star_maker_use_cooling_time = p->value_logical
-    ("Method:star_maker:use_cooling_time",false);
-
-  method_star_maker_use_self_gravitating = p->value_logical
-    ("Method:star_maker:use_self_gravitating", false);
-
-  method_star_maker_use_h2_self_shielding = p->value_logical
-    ("Method:star_maker:use_h2_self_shielding", false);
-
-  method_star_maker_use_jeans_mass = p->value_logical
-    ("Method:star_maker:use_jeans_mass", false);
-
-  method_star_maker_use_temperature_threshold = p->value_logical
-    ("Method:star_maker:use_temperature_threshold",false);
-
-  method_star_maker_use_critical_metallicity = p->value_logical
-    ("Method:star_maker:use_critical_metallicity",false);
-
-  method_star_maker_number_density_threshold = p->value_float
-    ("Method:star_maker:number_density_threshold",0.0);
-
-  method_star_maker_overdensity_threshold = p->value_float
-    ("Method:star_maker:overdensity_threshold",0.0);
-
-  method_star_maker_temperature_threshold = p->value_float
-    ("Method:star_maker:temperature_threshold",1.0E4);
-
-  method_star_maker_critical_metallicity = p->value_float
-    ("Method:star_maker:critical_metallicity",0.0);
-
-  method_star_maker_maximum_mass_fraction = p->value_float
-    ("Method:star_maker:maximum_mass_fraction",0.05);
-
-  method_star_maker_efficiency = p->value_float
-    ("Method:star_maker:efficiency",0.01);
-
-  method_star_maker_minimum_star_mass = p->value_float
-    ("Method:star_maker:minimum_star_mass",0.0);
-
-  method_star_maker_maximum_star_mass = p->value_float
-    ("Method:star_maker:maximum_star_mass",-1.0);
-
-  method_star_maker_min_level = p->value_integer
-    ("Method:star_maker:min_level",0);
-
-  method_star_maker_turn_off_probability = p->value_logical
-    ("Method:star_maker:turn_off_probability",false);
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_method_background_acceleration_(Parameters * p)
 {
   method_background_acceleration_flavor = p->value_string
@@ -1248,77 +997,6 @@ void EnzoConfig::read_method_background_acceleration_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_vlct_(Parameters * p)
-{
-  method_vlct_riemann_solver = p->value_string
-    ("Method:mhd_vlct:riemann_solver","hlld");
-  method_vlct_theta_limiter = p->value_float
-    ("Method:mhd_vlct:theta_limiter", 1.5);
-
-  // determine whether we're actually using vl+ct (for error-checking and
-  // handling backwards compatability)
-  bool uses_vlct = false;
-  for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "mhd_vlct") uses_vlct=true;
-  }
-
-  // raise an error if mhd_choice is not specified
-  method_vlct_mhd_choice = p->value_string
-    ("Method:mhd_vlct:mhd_choice", "");
-  if (uses_vlct && (p->param("Method:mhd_vlct:mhd_choice") == nullptr)) {
-    ERROR("EnzoConfig::read_method_vlct_",
-          "Method:mhd_vlct:mhd_choice was not specified");
-  }
-
-  // these parameters affect backwards compatability
-  std::string pname_time_scheme = "Method:mhd_vlct:time_scheme";
-  std::string pname_reconstruct = "Method:mhd_vlct:reconstruct_method";
-
-  method_vlct_time_scheme = p->value_string(pname_time_scheme, "vl");
-  method_vlct_reconstruct_method = p->value_string(pname_reconstruct, "plm");
-
-  // backwards compatibilty: deprecated half/full_dt_reconstruct_method params
-  std::string pname_half_recon = "Method:mhd_vlct:half_dt_reconstruct_method";
-  std::string pname_full_recon = "Method:mhd_vlct:full_dt_reconstruct_method";
-  bool specified_half_dt_recon = (p->param(pname_half_recon) != nullptr);
-  bool specified_full_dt_recon = (p->param(pname_full_recon) != nullptr);
-  if (uses_vlct && (specified_half_dt_recon || specified_full_dt_recon)) {
-
-    if ((p->param(pname_time_scheme) != nullptr) ||
-        (p->param(pname_reconstruct) != nullptr)) {
-      ERROR4("EnzoConfig::read_method_vlct_",
-             "The deprecated parameters, \"%s\" and \"%s\", can't be "
-             "specified when \"%s\" or \"%s\" is specified.",
-             pname_half_recon.c_str(), pname_full_recon.c_str(),
-             pname_time_scheme.c_str(), pname_reconstruct.c_str());
-    }
-
-    if (p->value_string(pname_half_recon, "nn") != "nn") {
-      // it never made ANY sense to allow the half timestep of the VL+CT
-      // algorithm to use anything other than the "nn" choice. (The only reason
-      // it was ever an option was due to a misunderstanding early on)
-      ERROR1("EnzoConfig::read_method_vlct_",
-             "The deprecated parameter, \"%s\", can't have any value other "
-             "than \"nn\"",
-             pname_half_recon.c_str());
-    }
-
-    if (specified_full_dt_recon) {
-      method_vlct_reconstruct_method = p->value_string(pname_full_recon,"plm");
-    }
-
-    WARNING3("EnzoConfig::read_method_vlct_",
-             "\"%s\" and \"%s\" are deprecated and they will be removed in "
-             "the future. The former can't have any value other than \"nn\"; "
-             "it won't be replaced. Use \"%s\" instead of the latter.",
-             pname_half_recon.c_str(), pname_full_recon.c_str(),
-             pname_reconstruct.c_str());
-  }
-
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_method_check_(Parameters * p)
 {
   p->group_set(0,"Method");
@@ -1341,29 +1019,6 @@ void EnzoConfig::read_method_check_(Parameters * p)
   }
   method_check_monitor_iter   = p->value_integer("monitor_iter",0);
   method_check_include_ghosts = p->value_logical("include_ghosts",false);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_merge_sinks_(Parameters * p)
-{
-  method_merge_sinks_merging_radius_cells = p->value_float
-    ("Method:merge_sinks:merging_radius_cells",8.0);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_method_accretion_(Parameters * p)
-{
-  method_accretion_accretion_radius_cells = p->value_float
-    ("Method:accretion:accretion_radius_cells",4.0);
-  method_accretion_flavor = p->value_string
-    ("Method:accretion:flavor","");
-  method_accretion_physical_density_threshold_cgs = p->value_float
-    ("Method:accretion:physical_density_threshold_cgs",1.0e-24);
-  method_accretion_max_mass_fraction = p->value_float
-    ("Method:accretion:max_mass_fraction",0.25);
-
 }
 
 //----------------------------------------------------------------------
@@ -1433,7 +1088,6 @@ void EnzoConfig::read_physics_(Parameters * p)
   // this is intentionally done outside of the for-loop (for
   // backwards-compatability purposes)
   read_physics_fluid_props_(p);
-  read_physics_gravity_(p);
 }
 
 //----------------------------------------------------------------------
@@ -1835,32 +1489,6 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
             "\"Method:ppm:mol_weight\" isn't valid since "
             "\"Physics:fluid_props:mol_weight\" is specified.");
     }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_physics_gravity_(Parameters * p)
-{
-  std::string legacy_parname = "Method:gravity:grav_const";
-  std::string actual_parname = "Physics:gravity:grav_const_codeU";
-
-  bool has_grav_method = std::find
-    (method_list.begin(), method_list.end(), "gravity") != method_list.end();
-  bool has_legacy_par = has_grav_method && (p->param(legacy_parname)!=nullptr);
-  bool has_actual_par = p->param(actual_parname) !=nullptr;
-
-  if (has_legacy_par && has_actual_par) {
-    ERROR2("EnzoConfig::read_physics_gravity_",
-           "\"%s\" isn't valid since \"%s\" is specified.",
-           legacy_parname.c_str(), actual_parname.c_str());
-  } else if (has_legacy_par) {
-    WARNING2("EnzoConfig::read_physics_gravity_",
-             "\"%s\" is a legacy parameter that will be replaced with \"%s\"",
-             legacy_parname.c_str(), actual_parname.c_str());
-    physics_gravity_grav_constant_codeU = p->value_float(legacy_parname, -1.0);
-  } else {
-    physics_gravity_grav_constant_codeU = p->value_float(actual_parname, -1.0);
   }
 }
 

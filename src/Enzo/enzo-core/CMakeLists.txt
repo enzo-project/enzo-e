@@ -10,25 +10,34 @@
 #         rm complains that it can't remove a directory.
 #       - We choose to avoid that name in order to avoid worrying users
 
-# Get the list of source files in this directory
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB LOCAL_SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.hpp
+
+target_sources(enzo PRIVATE
+  EnzoBlock.cpp
+  EnzoBlock.hpp
+  EnzoBoundary.cpp
+  EnzoBoundary.hpp
+  EnzoConfig.cpp
+  EnzoConfig.hpp
+  EnzoFactory.cpp
+  EnzoFactory.hpp
+  EnzoMethodBalance.cpp
+  EnzoMethodBalance.hpp
+  EnzoMsgCheck.cpp
+  EnzoMsgCheck.hpp
+  EnzoProblem.cpp
+  EnzoProblem.hpp
+  EnzoSimulation.cpp
+  EnzoSimulation.hpp
+  EnzoStopping.cpp
+  EnzoStopping.hpp
+  EnzoUnits.cpp
+  EnzoUnits.hpp
+  enzo.cpp
 )
-
-# remove the unit-test file from this search
-list(FILTER LOCAL_SRC_FILES EXCLUDE REGEX "test_EnzoUnits")
-
-target_sources(enzo PRIVATE ${LOCAL_SRC_FILES})
 
 if (BUILD_TESTING)
   # Add a unit test
-  add_executable(test_enzo_units "test_EnzoUnits.cpp")
+  add_executable(test_enzo_units test_EnzoUnits.cpp)
   target_link_libraries(test_enzo_units PRIVATE enzo main_enzo)
   target_link_options(test_enzo_units PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 endif()

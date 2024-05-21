@@ -859,7 +859,7 @@ protected: // functions
     char buffer[27];
     int v3[3];
     index_.values(v3);
-    sprintf (buffer,"%08X-%08X-%08X",
+    snprintf (buffer, sizeof(buffer), "%08X-%08X-%08X",
 	     v3[0],v3[1],v3[2]);
     return buffer;
   }
