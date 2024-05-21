@@ -19,16 +19,16 @@ const int EnzoInitialSoup::position_[] =
 
 EnzoInitialSoup::EnzoInitialSoup(int cycle, double time, ParameterGroup p) throw ()
   : Initial(cycle,time),
-    file_name_(p.value_string("filename","")),
-    rank_(p.value_int("rank",0)),
+    file_name_(p.value_string("filename","soup.png")),
+    rank_(p.value_integer("rank",0)),
     rotate_(p.value_logical("rotate",false)),
+    array_{},
+    d_pos_{},
+    d_size_{},
     png_mask_(NULL),
-    density_(p.value_float("density",0.0)),
-    pressure_in_(p.value_float("pressure_in",0.0)),
-    pressure_out_(p.value_float("pressure_out",0.0))
-    array_{}
-    d_pos_{}
-    d_size_{}
+    density_(p.value_float("density",1.0)),
+    pressure_in_(p.value_float("pressure_in",1.0)),
+    pressure_out_(p.value_float("pressure_out",1e-5))
 {
   for (int axis = 0; axis < 3; axis++){
     array_[axis]  = p.list_value_integer(axis, "array", 1);
