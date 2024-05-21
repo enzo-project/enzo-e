@@ -108,11 +108,8 @@ enum return_enum {
 #include "utils/utils.hpp"
 
 
-#include "cosmology/EnzoPhysicsCosmology.hpp"
-
-#include "utils/EnzoFieldAdaptor.hpp"
-
-// TODO: remove the following 2 after factoring out other subcomponents
+// TODO: remove the following 3 after factoring out other subcomponents
+#include "Enzo/cosmology/cosmology.hpp"
 #include "Enzo/chemistry/chemistry.hpp"
 #include "Enzo/fluid-props/fluid-props.hpp"
 
@@ -131,8 +128,6 @@ enum return_enum {
 #include "enzo-core/EnzoBoundary.hpp"
 
 #include "enzo-core/EnzoMethodBalance.hpp"
-#include "cosmology/EnzoMethodComovingExpansion.hpp"
-#include "cosmology/EnzoMethodCosmology.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 
