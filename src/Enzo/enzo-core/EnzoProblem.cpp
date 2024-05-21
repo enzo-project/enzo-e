@@ -209,7 +209,6 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "shock_tube") {
     initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
-    const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
       (cycle, time, p_group);
   } else if (type == "burkertbodenheimer") {

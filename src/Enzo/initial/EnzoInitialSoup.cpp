@@ -30,17 +30,16 @@ EnzoInitialSoup::EnzoInitialSoup(int cycle, double time, ParameterGroup p) throw
     d_pos_{}
     d_size_{}
 {
-  array_[0] = p.list_value_int(0,"nax",0);
-  array_[1] = p.list_value_int(1,"nay",0);
-  array_[2] = p.list_value_int(2,"naz",0);
-  d_pos_[0] = p.list_value_float(0,"dpx",0.0);
-  d_pos_[1] = p.list_value_float(1,"dpy",0.0);
-  d_pos_[2] = p.list_value_float(2,"dpz",0.0);
-  d_size_[0] = p.list_value_float(0,"dsx",0.0);
-  d_size_[1] = p.list_value_float(1,"dsy",0.0);
-  d_size_[2] = p.list_value_float(2,"dsz",0.0);
+  for (int axis = 0; axis < 3; axis++){
+    array_[axis]  = p.list_value_integer(axis, "array", 1);
+    d_pos_[axis]  = p.list_value_float(axis, "d_pos", 0.0);
+    d_size_[axis] = p.list_value_float(axis, "d_size", 0.0);
+  }
 
 
+  int nax = array_[0];
+  int nay = array_[1];
+  int naz = array_[2];
   int nx, ny;
   png_mask_ = pngio::read_as_mask(file_name_, nx, ny);
 
