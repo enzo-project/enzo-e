@@ -825,6 +825,18 @@ Physics * EnzoProblem::create_physics_
    Parameters * parameters) throw ()
 {
 
+  // move creation of p_accessor up the call stack?
+  // -> our initialization of ParameterGroup diverges from the other create_
+  //    methods to some degree. Namely, we directly construct `root_path` from
+  //    the `type` argument (rather than use the `index` argument to retrieve
+  //    the groupname from "Physics:list" parameter).
+  // -> We do this for 2 reasons:
+  //    1. we require a one-to-one mapping between the type and group-name
+  //    2. we may initialize a physics-object not included in the list for
+  //       compatability reasons
+  const std::string root_path = "Physics:" + type;
+  ParameterGroup p_group(*parameters, root_path);
+
   Physics * physics = NULL;
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -869,8 +881,7 @@ Physics * EnzoProblem::create_physics_
              "object (it's okay if it comes before the \"gravity\" object)",
              enzo_config->physics_list[i] != "cosmology");
     }
-    physics = new EnzoPhysicsGravity
-      (enzo_config->physics_gravity_grav_constant_codeU);
+    physics = new EnzoPhysicsGravity(p_group);
 
   } else {
 

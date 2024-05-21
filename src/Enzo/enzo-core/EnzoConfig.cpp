@@ -33,8 +33,6 @@ EnzoConfig::EnzoConfig() throw ()
   physics_fluid_props_eos_variant(),
   physics_fluid_props_fluid_floor_config(),
   physics_fluid_props_mol_weight(0.0),
-  // Gravity
-  physics_gravity_grav_constant_codeU(-1.0),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
   // EnzoInitialBurkertBodenheimer
@@ -256,8 +254,6 @@ void EnzoConfig::pup (PUP::er &p)
   ::pup(p, physics_fluid_props_eos_variant);
   p | physics_fluid_props_fluid_floor_config;
   p | physics_fluid_props_mol_weight;
-
-  p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
 
@@ -1138,7 +1134,6 @@ void EnzoConfig::read_physics_(Parameters * p)
   // this is intentionally done outside of the for-loop (for
   // backwards-compatability purposes)
   read_physics_fluid_props_(p);
-  read_physics_gravity_(p);
 }
 
 //----------------------------------------------------------------------
@@ -1540,32 +1535,6 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
             "\"Method:ppm:mol_weight\" isn't valid since "
             "\"Physics:fluid_props:mol_weight\" is specified.");
     }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_physics_gravity_(Parameters * p)
-{
-  std::string legacy_parname = "Method:gravity:grav_const";
-  std::string actual_parname = "Physics:gravity:grav_const_codeU";
-
-  bool has_grav_method = std::find
-    (method_list.begin(), method_list.end(), "gravity") != method_list.end();
-  bool has_legacy_par = has_grav_method && (p->param(legacy_parname)!=nullptr);
-  bool has_actual_par = p->param(actual_parname) !=nullptr;
-
-  if (has_legacy_par && has_actual_par) {
-    ERROR2("EnzoConfig::read_physics_gravity_",
-           "\"%s\" isn't valid since \"%s\" is specified.",
-           legacy_parname.c_str(), actual_parname.c_str());
-  } else if (has_legacy_par) {
-    WARNING2("EnzoConfig::read_physics_gravity_",
-             "\"%s\" is a legacy parameter that will be replaced with \"%s\"",
-             legacy_parname.c_str(), actual_parname.c_str());
-    physics_gravity_grav_constant_codeU = p->value_float(legacy_parname, -1.0);
-  } else {
-    physics_gravity_grav_constant_codeU = p->value_float(actual_parname, -1.0);
   }
 }
 
