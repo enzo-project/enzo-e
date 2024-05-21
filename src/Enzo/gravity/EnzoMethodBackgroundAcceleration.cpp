@@ -73,27 +73,8 @@ public:
   }
 
   /// compute the x,y,z components of the acceleration
-  ///
-  /// @note
-  /// it's unclear to me why we only consider the spherical acceleration
-  /// component - this is equivalent to the way that the code was written
-  /// before refactoring
-  std::array<double,3> accel_fluid(double G_code, double cosmo_a,
-                                   double x, double y, double z)
-    const noexcept
-  { return accel_helper_<true>(G_code, cosmo_a, x, y, z); }
-
-  /// compute the x,y,z components of the acceleration
-  std::array<double,3> accel_particle(double G_code, double cosmo_a,
-                                      double x, double y, double z)
-    const noexcept
-  { return accel_helper_<false>(G_code, cosmo_a, x, y, z); }
-
-private:
-
-  template <bool only_sph_component>
-  std::array<double,3> accel_helper_(double G_code, double cosmo_a,
-                                     double x, double y, double z)
+  std::array<double,3> accel(double G_code, double cosmo_a,
+                             double x, double y, double z)
     const noexcept
   {
     double zheight = (pack_codeU_.amom[0]*x +
@@ -142,10 +123,6 @@ private:
     accel_R   = (rcyl    == 0.0) ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a);
     accel_z   = (zheight == 0.0) ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a;
 
-    if (only_sph_component) {
-      accel_R = 0.0; accel_z = 0.0;
-    }
-
     return { accel_sph * x + accel_R*xplane + accel_z*pack_codeU_.amom[0],  // x
              accel_sph * y + accel_R*yplane + accel_z*pack_codeU_.amom[1],  // y
              accel_sph * z + accel_R*zplane + accel_z*pack_codeU_.amom[2]}; // z
@@ -176,8 +153,8 @@ public:
     min_accel_ = pack_codeU_.mass / ((rcore_tmp*rcore_tmp*rcore_tmp)*cosmo_a);
   }
 
-  std::array<double,3> accel_fluid(double G_code, double cosmo_a,
-                                   double x, double y, double z)
+  std::array<double,3> accel(double G_code, double cosmo_a,
+                             double x, double y, double z)
     const noexcept
   {
     double rsqr  = x*x + y*y + z*z;
@@ -187,15 +164,6 @@ public:
       G_code * std::min(pack_codeU_.mass / ((rsqr)*r*cosmo_a), min_accel_);
 
     return {accel * x, accel * y, accel * z};
-  }
-
-  std::array<double,3> accel_particle(double G_code, double cosmo_a,
-                                      double x, double y, double z)
-    const noexcept
-  {
-    ERROR("PointMassModel::accel_particle", "Not implemented yet");
-    // this functionality was not implemented prior to the refactor. But, as
-    // far as I can tell, we can just call accel_fluid
   }
 
 private:
@@ -228,8 +196,7 @@ void compute_accel_(const T functor,
        for (int ix=0; ix<mx; ix++){
          double x = block_info.x_val(ix) - accel_center[0];
 
-         std::array<double,3> accel =
-           functor.accel_fluid(G_code, cosmo_a, x, y, z);
+         std::array<double,3> accel = functor.accel(G_code, cosmo_a, x, y, z);
          // now apply accelerations in cartesian (grid) coordinates
          int i = INDEX(ix,iy,iz,mx,my);
          if (ax) ax[i] -= accel[0];
@@ -288,8 +255,7 @@ void compute_accel_(const T functor,
           const double y = py[ipdp] - accel_center[1];
           const double z = pz[ipdp] - accel_center[2];
 
-          std::array<double,3> accel =
-           functor.accel_particle(G_code, cosmo_a, x, y, z);
+          std::array<double,3> accel = functor.accel(G_code, cosmo_a, x, y, z);
 
           // now apply accelerations in cartesian (grid) coordinates
           if (pax) pax[ipda] -= accel[0];
