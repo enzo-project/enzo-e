@@ -17,37 +17,29 @@ const int EnzoInitialSoup::position_[] =
 
 //======================================================================
 
-EnzoInitialSoup::EnzoInitialSoup
-(int cycle,
- double time,
- std::string filename,
- int rank,
- bool rotate,
- int    nax,    int nay,    int naz,
- double dpx, double dpy, double dpz,
- double dsx, double dsy, double dsz,
- double density,
- double pressure_in, double pressure_out) throw ()
+EnzoInitialSoup::EnzoInitialSoup(int cycle, double time, ParameterGroup p) throw ()
   : Initial(cycle,time),
-    file_name_(filename),
-    rank_(rank),
-    rotate_(rotate),
+    file_name_(p.value_string("filename","soup.png")),
+    rank_(p.value_integer("rank",0)),
+    rotate_(p.value_logical("rotate",false)),
+    array_{},
+    d_pos_{},
+    d_size_{},
     png_mask_(NULL),
-    density_(density),
-    pressure_in_(pressure_in),
-    pressure_out_(pressure_out)
+    density_(p.value_float("density",1.0)),
+    pressure_in_(p.value_float("pressure_in",1.0)),
+    pressure_out_(p.value_float("pressure_out",1e-5))
 {
-  array_[0] = nax;
-  array_[1] = nay;
-  array_[2] = naz;
-  d_pos_[0] = dpx;
-  d_pos_[1] = dpy;
-  d_pos_[2] = dpz;
-  d_size_[0] = dsx;
-  d_size_[1] = dsy;
-  d_size_[2] = dsz;
+  for (int axis = 0; axis < 3; axis++){
+    array_[axis]  = p.list_value_integer(axis, "array", 1);
+    d_pos_[axis]  = p.list_value_float(axis, "d_pos", 0.0);
+    d_size_[axis] = p.list_value_float(axis, "d_size", 0.0);
+  }
 
 
+  int nax = array_[0];
+  int nay = array_[1];
+  int naz = array_[2];
   int nx, ny;
   png_mask_ = pngio::read_as_mask(file_name_, nx, ny);
 

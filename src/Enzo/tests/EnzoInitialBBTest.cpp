@@ -96,15 +96,11 @@ void EnzoInitialBBTest::enforce_block
 	 "required.",
 	 enzo::problem()->method_exists("mhd_vlct"));
 
-  // Check that mhd_choice parameter is set to "no_bfield"
-  ASSERT("EnzoInitialBBTest",
-	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
-	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
+  // only been tested with the hllc Riemann Solver
 
-  // Check that riemann_solver parameter is set to "hllc"
-  ASSERT("EnzoInitialBBTest",
-	 "Method:mhd_vlct:mhd_choice must be set to hllc",
-	 enzo::config()->method_vlct_riemann_solver == "hllc");
+  // require pure hydrodynamics
+  ASSERT("EnzoInitialBBTest","only works in pure-hydro sims",
+	     !enzo::uses_magnetic_fields());
 
   // Check that (1 - fluctuation_amplitude_) * mean_density is larger
   // than density floor
