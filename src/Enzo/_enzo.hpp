@@ -103,11 +103,10 @@ enum return_enum {
 
 #include "enzo_constants.hpp"
 
-// TODO: remove this after factoring out other subcomponents OR after
-//       EnzoEFltArrayMap becomes an alias for a class template defined in the
-//       Cello-layer (GH PR #326)
+// TODO: remove this include statement (this may be easier to do once we have
+//       finished separating out the various subcomponents)
 #include "utils/utils.hpp"
-#include "utils/EnzoPermutedCoordinates.hpp"
+
 
 // TODO: remove the following 3 after factoring out other subcomponents
 #include "Enzo/cosmology/cosmology.hpp"

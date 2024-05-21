@@ -34,11 +34,10 @@
 // Component headers
 //----------------------------------------------------------------------
 
-#include "utils/EnzoEFltArrayMap.hpp"
-
 #include "utils/EnzoCenteredFieldRegistry.hpp"
-#include "utils/EnzoFieldAdaptor.hpp"
 #include "utils/EnzoComputeCicInterp.hpp"
+#include "utils/EnzoFieldAdaptor.hpp"
+#include "utils/EnzoPermutedCoordinates.hpp"
 
 //----------------------------------------------------------------------
 // Assorted Public Functions
