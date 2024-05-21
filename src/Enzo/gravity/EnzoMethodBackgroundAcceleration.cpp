@@ -92,7 +92,7 @@ public:
     // need to multiple all of the below by the gravitational constants
     double xtemp     = radius/pack_codeU_.rcore;
 
-    double bulge_denom = pow(radius + pack_codeU_.bulgeradius, 2);
+    double bulge_denom = pow(radius + pack_codeU_.bulge_radius, 2);
     double accel_sph =
       G_code * pack_codeU_.bulge_mass / bulge_denom +  // bulge
       4.0 * G_code * cello::pi * DM_density_ * pack_codeU_.rcore *

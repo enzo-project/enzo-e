@@ -58,8 +58,8 @@ struct EnzoPotentialConfigGalaxy {
   double stellar_mass;
   /// bulge mass (default units of solar masses)
   double bulge_mass;
-  /// bulgeradius (default units of kpc)
-  double bulgeradius;
+  /// bulge radius (default units of kpc)
+  double bulge_radius;
   /// angular momentum vector unit vector
   std::array<double,3> amom_uvec;
   /// core radius (default units of kpc)
@@ -72,7 +72,7 @@ struct EnzoPotentialConfigGalaxy {
     double stellar_z = p.value_float("stellar_scale_height_z", 1.0E-10);
     double stellar_mass = p.value_float("stellar_mass", 0.0);
     double bulge_mass = p.value_float("bulge_mass", 0.0);
-    double bulgeradius = p.value_float("bulge_radius", 1.0E-10);
+    double bulge_radius = p.value_float("bulge_radius", 1.0E-10);
 
     // deal with angular-momentum argument
     std::array<double,3> amom;
@@ -93,7 +93,7 @@ struct EnzoPotentialConfigGalaxy {
             DM_mass, (DM_mass > 0));
 
     return {DM_mass, DM_mass_radius, stellar_r, stellar_z,
-            stellar_mass, bulge_mass, bulgeradius, amom_uvec, rcore};
+            stellar_mass, bulge_mass, bulge_radius, amom_uvec, rcore};
   }
 
   /// static method to convert from default units to code units
@@ -107,7 +107,7 @@ struct EnzoPotentialConfigGalaxy {
         pack_dfltU.stellar_z * enzo_constants::kpc_cm / units->length(),
         pack_dfltU.stellar_mass * enzo_constants::mass_solar / units->mass(),
         pack_dfltU.bulge_mass * enzo_constants::mass_solar / units->mass(),
-        pack_dfltU.bulgeradius * enzo_constants::kpc_cm / units->length(),
+        pack_dfltU.bulge_radius * enzo_constants::kpc_cm / units->length(),
         pack_dfltU.amom_uvec, // unit vector has no units to convert
         pack_dfltU.rcore * enzo_constants::kpc_cm / units->length() };
   }
@@ -119,7 +119,7 @@ struct EnzoPotentialConfigGalaxy {
     p | stellar_z;
     p | stellar_mass;
     p | bulge_mass;
-    p | bulgeradius;
+    p | bulge_radius;
     p | amom_uvec;
     p | rcore;
   }
