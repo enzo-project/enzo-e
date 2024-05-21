@@ -511,6 +511,7 @@ void EnzoConfig::read(Parameters * p) throw()
   read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_turbulence_(p);
+  read_method_inference_(p);
 
   read_prolong_enzo_(p);
 

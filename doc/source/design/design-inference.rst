@@ -59,8 +59,8 @@ array of inference-arrays. The level array is implemented as a sparse
 3D Charm++ chare array, where each element of the chare array is a
 collection of inference arrays containing field data for its region.
 
-Some synchronization and performance issues that should be addressed
-in the design include the following:
+Some synchronization and performance issues addressed in the design
+include the following:
 
    1. multiple level array "create" requests may be received from intersecting leaf blocks, but the level array element can only be created once
    2. inference arrays tend to be clustered, so level array elements should be distributed across compute nodes to reduce compute and memory load imbalances
@@ -71,22 +71,24 @@ in the design include the following:
 Phases
 ======
 
-Phases of the algorithm include the following:
+Phases of the algorithm are enumerated below:
 
-   1. **evaluate**: Blocks apply local criteria to determine where to create inference arrays
-   2. **allocate**: The "level array" chare array of inference arrays is created
-   3. **populate**: Inference arrays request and receive field data from intersecting leaf blocks
-   4. **apply inference**: Inference arrays apply the external DL inference method
-   5. **update blocks**: Inference arrays send results back to intersecting leaf blocks
+   1. **Evaluate**: blocks apply local criteria to determine where to create inference arrays
+   2. **Allocate**: the "level array" chare array of inference arrays is created
+   3. **Populate**: inference arrays request and receive field data from intersecting leaf blocks
+   4. **Apply inference**: inference arrays apply the external DL inference method
+   5. **Update blocks**: inference arrays send results back to intersecting leaf blocks
 
-These phases are described in more detail below:
+These phases are described in detail below:
 
 Phase 1. Evaluate
 =================
 
-Below is a UML sequence diagram illustrating the evaluation phase in ``EnzoMethodInference``.  The left blue columns represent inference
-arrays, the red right columns represent blocks in different refinement
-levels, and the center yellow column represents the root-node
+Below is a UML sequence diagram illustrating the evaluation phase in
+``EnzoMethodInference``.  The left blue columns represent inference
+arrays, the red right columns represent all blocks in successive
+refinement levels ("B0" are all root-level blocks, "B1" all level-1
+blocks, etc.), and the center yellow column represents the root-node
 Simulation object, used for synchronization and counting.
 
 .. image:: level-array-1.png
@@ -97,7 +99,7 @@ where to create inference arrays.  Control enters the method at the
 Block level, such that ``EnzoMethodInference::compute()`` is called on
 all blocks, which in turn call ``apply_criteria()``.
 
-The criteria currently implemented is whether the point-wise density
+The criteriumcurrently implemented is whether the point-wise density
 is greater than the block-local average by some specified threshold.
 (See the :ref:`Inference Parameters<inference parameters>` section for
 user parameters for the inference method, including density
@@ -127,11 +129,17 @@ step, the child masks are merged in their parent block using
 logical-OR (if ``level >= level_array``) or concatenation (if ``level <
 level_array``).
 
+Phase 2. Allocate
+=================
+
 When ``level_base`` is reached (level 2 in the
 figure), each block in the ``level_base`` level will have a mask
 specifying where each inference array needs to be created. At this
 step, the level array elements are created using
 ``p_create_level_array()``.
+
+.. image:: level-array-2.png
+           :width: 600
 
 The reduction operation continues with counting the number of
 inference arrays created, using ``p_count_arrays()``. This continues
@@ -140,12 +148,6 @@ the root Simulation object. After all root-level block counts have
 been received, the Simulation object will contain the total number of
 inference arrays to be created, which is used to initialize
 synchronization counters.
-
-Phase 2. Allocate
-=================
-
-.. image:: level-array-2.png
-           :width: 600
 
 The count of number of inference arrays to create, determined in the
 previous phase, is used to determine when all level array elements
