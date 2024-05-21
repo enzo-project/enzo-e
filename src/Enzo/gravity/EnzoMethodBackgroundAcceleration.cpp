@@ -77,14 +77,14 @@ public:
                              double x, double y, double z)
     const noexcept
   {
-    double zheight = (pack_codeU_.amom[0]*x +
-                      pack_codeU_.amom[1]*y +
-                      pack_codeU_.amom[2]*z); // height above disk
+    double zheight = (pack_codeU_.amom_uvec[0]*x +
+                      pack_codeU_.amom_uvec[1]*y +
+                      pack_codeU_.amom_uvec[2]*z); // height above disk
 
     // projected positions in plane of the disk
-    double xplane = x - zheight*pack_codeU_.amom[0];
-    double yplane = y - zheight*pack_codeU_.amom[1];
-    double zplane = z - zheight*pack_codeU_.amom[2];
+    double xplane = x - zheight*pack_codeU_.amom_uvec[0];
+    double yplane = y - zheight*pack_codeU_.amom_uvec[1];
+    double zplane = z - zheight*pack_codeU_.amom_uvec[2];
 
     double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
     double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
@@ -123,9 +123,9 @@ public:
     accel_R   = (rcyl    == 0.0) ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a);
     accel_z   = (zheight == 0.0) ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a;
 
-    return { accel_sph * x + accel_R*xplane + accel_z*pack_codeU_.amom[0],  // x
-             accel_sph * y + accel_R*yplane + accel_z*pack_codeU_.amom[1],  // y
-             accel_sph * z + accel_R*zplane + accel_z*pack_codeU_.amom[2]}; // z
+    return {accel_sph * x + accel_R*xplane + accel_z*pack_codeU_.amom_uvec[0],
+            accel_sph * y + accel_R*yplane + accel_z*pack_codeU_.amom_uvec[1],
+            accel_sph * z + accel_R*zplane + accel_z*pack_codeU_.amom_uvec[2]};
   }
 
 private:
