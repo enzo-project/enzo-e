@@ -305,7 +305,7 @@ Refine * EnzoProblem::create_refine_
        config->adapt_min_refine2[index],
        config->adapt_max_coarsen2[index],
        enzo::fluid_props()->gamma(),
-       enzo_config->physics_cosmology,
+       enzo::cosmology() != nullptr,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
@@ -510,12 +510,12 @@ Compute * EnzoProblem::create_compute
   if (name == "temperature") {
 
     compute = new EnzoComputeTemperature(enzo::fluid_props(),
-                                         enzo_config->physics_cosmology);
+                                         enzo::cosmology() != nullptr);
 
   } else if (name == "pressure"){
 
     compute = new EnzoComputePressure(enzo::fluid_props()->gamma(),
-                                      enzo_config->physics_cosmology);
+                                      enzo::cosmology() != nullptr);
 
 #ifdef CONFIG_USE_GRACKLE
   } else if (name == "cooling_time"){
@@ -619,7 +619,7 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
-       enzo_config->physics_cosmology);
+       enzo::cosmology() != nullptr);
 
   } else if (name == "cosmology") {
 
@@ -627,9 +627,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "comoving_expansion") {
 
-    bool comoving_coordinates = enzo_config->physics_cosmology;
-
-    method = new EnzoMethodComovingExpansion ( comoving_coordinates );
+    method = new EnzoMethodComovingExpansion ( enzo::cosmology() != nullptr );
 
   } else if (name == "gravity") {
 
