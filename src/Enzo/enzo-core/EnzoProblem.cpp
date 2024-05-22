@@ -660,19 +660,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "background_acceleration") {
 
-    // If self-gravity is calculated, we do not need to zero
-    // out the acceleration field from the previous time step
-    // before adding the background accelerations
-    bool zero_acceleration = true;
-    for (int index = 0; index < method_list_.size(); index++){
-      if (method_list_[index]->name() == "gravity"){
-        zero_acceleration = false;
-        break;
-      }
-    }
-
-    method = new EnzoMethodBackgroundAcceleration
-      (zero_acceleration);
+    method = new EnzoMethodBackgroundAcceleration(p_group);
 
   } else if (name == "star_maker") {
 

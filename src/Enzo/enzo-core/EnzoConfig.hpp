@@ -205,18 +205,6 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
-      // EnzoMethodBackgroundAcceleration
-      method_background_acceleration_flavor(""),
-      method_background_acceleration_mass(0.0),
-      method_background_acceleration_DM_mass(0.0),
-      method_background_acceleration_bulge_mass(0.0),
-      method_background_acceleration_core_radius(0.0),
-      method_background_acceleration_bulge_radius(0.0),
-      method_background_acceleration_stellar_mass(0.0),
-      method_background_acceleration_DM_mass_radius(0.0),
-      method_background_acceleration_stellar_scale_height_r(0.0),
-      method_background_acceleration_stellar_scale_height_z(0.0),
-      method_background_acceleration_apply_acceleration(true),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -245,10 +233,7 @@ public: // interface
       initial_IG_bfield[axis]         = 0.0;
       initial_accretion_test_sink_position[axis] = 0.0;
       initial_accretion_test_sink_velocity[axis] = 0.0;
-      method_background_acceleration_center[axis] = 0.5;
-      method_background_acceleration_angular_momentum[axis] = 0;
     }
-    method_background_acceleration_angular_momentum[2] = 1;
   }
 
   /// CHARM++ Pack / Unpack function
@@ -499,22 +484,6 @@ public: // attributes
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
-
-  /// EnzoMethodBackgroundAcceleration
-
-  std::string                method_background_acceleration_flavor;
-  double                     method_background_acceleration_mass;
-  double                     method_background_acceleration_DM_mass;
-  double                     method_background_acceleration_bulge_mass;
-  double                     method_background_acceleration_core_radius;
-  double                     method_background_acceleration_bulge_radius;
-  double                     method_background_acceleration_stellar_mass;
-  double                     method_background_acceleration_DM_mass_radius;
-  double                     method_background_acceleration_stellar_scale_height_r;
-  double                     method_background_acceleration_stellar_scale_height_z;
-  double                     method_background_acceleration_center[3];
-  double                     method_background_acceleration_angular_momentum[3];
-  bool                       method_background_acceleration_apply_acceleration;
 
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
