@@ -812,18 +812,7 @@ Physics * EnzoProblem::create_physics_
 
   if (type == "cosmology") {
 
-    physics = new EnzoPhysicsCosmology
-      (
-       enzo_config->physics_cosmology_hubble_constant_now,
-       enzo_config->physics_cosmology_omega_matter_now,
-       enzo_config->physics_cosmology_omega_baryon_now,
-       enzo_config->physics_cosmology_omega_cdm_now,
-       enzo_config->physics_cosmology_omega_lamda_now,
-       enzo_config->physics_cosmology_comoving_box_size,
-       enzo_config->physics_cosmology_max_expansion_rate,
-       enzo_config->physics_cosmology_initial_redshift,
-       enzo_config->physics_cosmology_final_redshift
-       );
+    physics = new EnzoPhysicsCosmology(p_group);
 
   } else if (type == "fluid_props") {
 
