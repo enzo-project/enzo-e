@@ -600,10 +600,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "grackle") {
 
-    method = new EnzoMethodGrackle
-      (p_group,
-       enzo_config->physics_cosmology_initial_redshift,
-       enzo::simulation()->time());
+    method = new EnzoMethodGrackle(p_group, enzo::simulation()->time());
     skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */

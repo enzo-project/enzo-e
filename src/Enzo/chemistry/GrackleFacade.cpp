@@ -162,7 +162,6 @@ std::unique_ptr<chemistry_data_storage> init_rates_
 
 GrackleFacade::GrackleFacade(GrackleChemistryData&& my_chemistry,
                              const double radiation_redshift,
-                             const double physics_cosmology_initial_redshift,
                              const double time) throw()
   : my_chemistry_(std::move(my_chemistry)),
     grackle_units_(nullptr),
