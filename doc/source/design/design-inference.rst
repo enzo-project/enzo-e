@@ -97,9 +97,9 @@ Simulation object, used for synchronization and counting.
 .. image:: level-array-1.png
            :width: 600
 
-In the "Evaluate" phase, Blocks apply local criteria to determine
+In the "Evaluate" phase, blocks apply local criteria to determine
 where to create inference arrays.  Control enters the method at the
-Block level, such that ``EnzoMethodInference::compute()`` is called on
+block level, such that ``EnzoMethodInference::compute()`` is called on
 all blocks, which in turn call ``apply_criteria()``.
 
 The criteria currently implemented are whether the point-wise density
@@ -176,10 +176,10 @@ After the level array chare array is created, the root Simulation
 object calls ``p_request_data()`` on all elements of the array. Each
 level array element sends a request to the unique block in
 ``level_base`` that it intersects.  This request is then forwarded via
-child blocks to all intersecting leaf Blocks using
+child blocks to all intersecting leaf blocks using
 ``p_request_data()``.
 
-When an intersecting leaf Block is reached, it serializes the required
+When an intersecting leaf block is reached, it serializes the required
 portion of field data and sends it directly to the intersecting inference array.
 Blocks coarser than ``level_infer`` must interpolate the
 data, which is done on the receive end; blocks finer than
@@ -214,10 +214,17 @@ using the same communication pattern as in the **populate** phase with
 ``level_base`` block and forwarded to the child leaf blocks via
 intersecting child blocks.
 
-For the method to end, all Blocks must call ``compute_done()``. To
-ensure this is called only after all Blocks have been updated with
-their data, a final ``p_results_received()`` call is forwarded from
-leaf blocks down to base_level Blocks, which update the root
-Simulation object. The root simulation object counts the
-acknowledgements, and calls ``compute_done()`` on all Blocks when the
-countdown is completed.
+For the method to end, all blocks must call ``compute_done()``. This
+is done via successive calls to ``p_done()`` on the level array chare,
+then the root-level simulation chare, and finally ``p_exit()`` on all
+blocks, which calls ``compute_done()``. This seemingly roundabout
+approach is used to ensure proper synchronization.  First, each level
+array element sums up the block volumes of incoming ``p_done()``
+methods from its containing blocks. When this volume sum reaches the
+volume associated with the level array element, it triggers a call to
+``p_done()`` on the root-level simulation chare.  The root-level
+simulation chare in turn counts the number of these incoming
+``p_done()`` calls from the level array chares. When the count reaches
+the total number of level array chares, it triggers a call to
+``p_exit()`` on all blocks, which calls ``compute_done()``, ending the
+method and returning control to Cello.

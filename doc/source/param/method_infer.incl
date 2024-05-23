@@ -1,7 +1,9 @@
 :p:`Method:inference` parameters are used to initialize Enzo-E's
 :c:`EnzoMethodInference` method, which is used to interface with a
 deep-learning model for star formation. See the :ref:`Inference
-Design` section for details on its capabilities and usage.
+Design` section for details on its capabilities and usage. Note that
+this method is normally not called every cycle, so a schedule
+parameter subgroup will likely be required.
 
 ----
 
@@ -70,12 +72,12 @@ Design` section for details on its capabilities and usage.
 ----
 
 :Parameter:  :p:`Method` : :p:`inference` : :p:`overdensity_threshold`
-:Summary: :s:`Specify the threshold of (local) overdensity to trigger creating an inference array`
+:Summary: :s:`Specify the threshold of (local) over-density to trigger creating an inference array`
 :Type:   :t:`float`
 :Default: :d:`0.0`
 :Scope:     :z:`Enzo`
 
-:e:`This threshold is used in part to define where ineference arrays are created. The local average density is computed, and if the density at any point is greater than the average times the threshold, an inference array will be created under that point.`
+:e:`This threshold is used in part to define where inference arrays are created. The local average density is computed, and if the density at any point is greater than the average times the threshold, an inference array will be created under that point.`
 
 
 
