@@ -103,19 +103,14 @@ enum return_enum {
 
 #include "enzo_constants.hpp"
 
-// TODO: remove this after factoring out other subcomponents OR after
-//       EnzoEFltArrayMap becomes an alias for a class template defined in the
-//       Cello-layer (GH PR #326)
+// TODO: remove this include statement (this may be easier to do once we have
+//       finished separating out the various subcomponents)
 #include "utils/utils.hpp"
-#include "utils/EnzoPermutedCoordinates.hpp"
 
 #include "inference/Index3.hpp"
 
-#include "cosmology/EnzoPhysicsCosmology.hpp"
-
-#include "utils/EnzoFieldAdaptor.hpp"
-
-// TODO: remove the following 2 after factoring out other subcomponents
+// TODO: remove the following 3 after factoring out other subcomponents
+#include "Enzo/cosmology/cosmology.hpp"
 #include "Enzo/chemistry/chemistry.hpp"
 #include "Enzo/fluid-props/fluid-props.hpp"
 
@@ -137,8 +132,6 @@ enum return_enum {
 #include "enzo-core/EnzoBoundary.hpp"
 
 #include "enzo-core/EnzoMethodBalance.hpp"
-#include "cosmology/EnzoMethodComovingExpansion.hpp"
-#include "cosmology/EnzoMethodCosmology.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
 

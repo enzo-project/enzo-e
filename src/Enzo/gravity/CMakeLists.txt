@@ -8,9 +8,11 @@
 add_library(Enzo_gravity
   gravity.hpp
   EnzoComputeAcceleration.cpp EnzoComputeAcceleration.hpp
+  EnzoPotentialConfig.hpp
   EnzoMethodBackgroundAcceleration.cpp EnzoMethodBackgroundAcceleration.hpp
   EnzoMethodGravity.cpp EnzoMethodGravity.hpp
   EnzoMethodPmDeposit.cpp EnzoMethodPmDeposit.hpp
+  EnzoPhysicsGravity.cpp EnzoPhysicsGravity.hpp
   grid_cic.F
 
   matrix/EnzoMatrixDiagonal.cpp matrix/EnzoMatrixDiagonal.hpp

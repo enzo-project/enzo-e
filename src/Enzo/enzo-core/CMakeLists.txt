@@ -30,6 +30,7 @@ target_sources(enzo PRIVATE
   EnzoSimulation.hpp
   EnzoStopping.cpp
   EnzoStopping.hpp
+  EnzoUnits.cpp
   EnzoUnits.hpp
   enzo.cpp
 )

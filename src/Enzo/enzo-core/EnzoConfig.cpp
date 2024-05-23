@@ -33,8 +33,6 @@ EnzoConfig::EnzoConfig() throw ()
   physics_fluid_props_eos_variant(),
   physics_fluid_props_fluid_floor_config(),
   physics_fluid_props_mol_weight(0.0),
-  // Gravity
-  physics_gravity_grav_constant_codeU(-1.0),
   // EnzoInitialBCenter
   initial_bcenter_update_etot(false),
   // EnzoInitialBurkertBodenheimer
@@ -111,13 +109,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_pressure_out(0.0),
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
-  // EnzoInitialSoup
-  initial_soup_rank(0),
-  initial_soup_file(""),
-  initial_soup_rotate(false),
-  initial_soup_pressure_in(0.0),
-  initial_soup_pressure_out(0.0),
-  initial_soup_density(0.0),
   // EnzoInitialTurbulence
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
@@ -183,18 +174,6 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-  /// EnzoMethodBackgroundAcceleration
-  method_background_acceleration_flavor(""),
-  method_background_acceleration_mass(0.0),
-  method_background_acceleration_DM_mass(0.0),
-  method_background_acceleration_bulge_mass(0.0),
-  method_background_acceleration_core_radius(1.0E-10),
-  method_background_acceleration_bulge_radius(1.0E-10),
-  method_background_acceleration_stellar_mass(0.0),
-  method_background_acceleration_DM_mass_radius(0.0),
-  method_background_acceleration_stellar_scale_height_r(1.0E-10),
-  method_background_acceleration_stellar_scale_height_z(1.0E-10),
-  method_background_acceleration_apply_acceleration(true), // for debugging
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -216,18 +195,11 @@ EnzoConfig::EnzoConfig() throw ()
 {
   for (int i=0; i<3; i++) {
     initial_sedov_array[i] = 0;
-    initial_soup_array[i]  = 0;
-    initial_soup_d_pos[i]  = 0.0;
-    initial_soup_d_size[i] = 0.0;
     initial_collapse_array[i] = 0;
     initial_IG_center_position[i] = 0.5;
     initial_IG_bfield[i] = 0.0;
-    method_background_acceleration_center[i] = 0.5;
-    method_background_acceleration_angular_momentum[i] = 0;
 
   }
-
-  method_background_acceleration_angular_momentum[2] = 1;
 }
 
 //----------------------------------------------------------------------
@@ -264,8 +236,6 @@ void EnzoConfig::pup (PUP::er &p)
   ::pup(p, physics_fluid_props_eos_variant);
   p | physics_fluid_props_fluid_floor_config;
   p | physics_fluid_props_mol_weight;
-
-  p | physics_gravity_grav_constant_codeU;
 
   p | initial_bcenter_update_etot;
 
@@ -376,16 +346,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_disk;
   p | initial_IG_use_gas_particles;
 
-  p | initial_soup_rank;
-  p | initial_soup_file;
-  p | initial_soup_rotate;
-  PUParray(p,initial_soup_array,3);
-  PUParray(p,initial_soup_d_pos,3);
-  PUParray(p,initial_soup_d_size,3);
-  p | initial_soup_pressure_in;
-  p | initial_soup_pressure_out;
-  p | initial_soup_density;
-
   p | initial_merge_sinks_test_particle_data_filename;
 
   p | method_check_num_files;
@@ -428,20 +388,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_bb_test_external_density;
 
   p | method_turbulence_edot;
-
-  p | method_background_acceleration_flavor;
-  p | method_background_acceleration_mass;
-  p | method_background_acceleration_DM_mass;
-  p | method_background_acceleration_bulge_mass;
-  p | method_background_acceleration_core_radius;
-  p | method_background_acceleration_bulge_radius;
-  p | method_background_acceleration_stellar_mass;
-  p | method_background_acceleration_DM_mass_radius;
-  p | method_background_acceleration_stellar_scale_height_r;
-  p | method_background_acceleration_stellar_scale_height_z;
-  p | method_background_acceleration_apply_acceleration;
-  PUParray(p,method_background_acceleration_angular_momentum,3);
-  PUParray(p,method_background_acceleration_center,3);
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -500,7 +446,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
   read_initial_shu_collapse_(p);
-  read_initial_soup_(p);
   read_initial_turbulence_(p);
 
   // it's important for read_physics_
@@ -508,7 +453,6 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Method [sorted]
 
-  read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_turbulence_(p);
   read_method_inference_(p);
@@ -810,31 +754,6 @@ void EnzoConfig::read_initial_bcenter_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_initial_soup_(Parameters * p)
-{
-  // InitialSoup initialization
-
-  initial_soup_rank      = p->value_integer ("Initial:soup:rank",0);
-  initial_soup_file      = p->value_string ("Initial:soup:file","soup.png");
-  initial_soup_rotate    = p->value_logical ("Initial:soup:rotate",false);
-  for (int axis=0; axis<3; axis++) {
-    initial_soup_array[axis]  = p->list_value_integer
-      (axis,"Initial:soup:array",1);
-    initial_soup_d_pos[axis]  = p->list_value_float
-      (axis,"Initial:soup:d_pos",0.0);
-    initial_soup_d_size[axis] = p->list_value_float
-      (axis,"Initial:soup:d_size",0.0);
-  }
-  initial_soup_pressure_in =
-    p->value_float("Initial:soup:pressure_in",1.0);
-  initial_soup_pressure_out =
-    p->value_float("Initial:soup:pressure_out",1e-5);
-  initial_soup_density =
-    p->value_float("Initial:soup:density",1.0);
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_initial_turbulence_(Parameters * p)
 {
   initial_turbulence_density = p->value_float
@@ -1018,52 +937,6 @@ void EnzoConfig::read_initial_bb_test_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_background_acceleration_(Parameters * p)
-{
-  method_background_acceleration_flavor = p->value_string
-   ("Method:background_acceleration:flavor","unknown");
-
-  method_background_acceleration_mass = p->value_float
-   ("Method:background_acceleration:mass",0.0);
-
-  method_background_acceleration_DM_mass = p->value_float
-   ("Method:background_acceleration:DM_mass",-1.0);
-
-  method_background_acceleration_bulge_mass = p->value_float
-    ("Method:background_acceleration:bulge_mass", 0.0);
-
-  method_background_acceleration_core_radius = p->value_float
-    ("Method:background_acceleration:core_radius", 1.0E-10);
-
-  method_background_acceleration_bulge_radius = p->value_float
-    ("Method:background_acceleration:bulge_radius", 1.0E-10);
-
-  method_background_acceleration_stellar_mass = p->value_float
-    ("Method:background_acceleration:stellar_mass", 0.0);
-
-  method_background_acceleration_DM_mass_radius = p->value_float
-   ("Method:background_acceleration:DM_mass_radius", 0.0);
-
-  method_background_acceleration_stellar_scale_height_r = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_r", 1.0E-10);
-
-  method_background_acceleration_stellar_scale_height_z = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_z", 1.0E-10);
-
-  method_background_acceleration_apply_acceleration = p->value_logical
-    ("Method:background_acceleration:apply_acceleration", true);
-
-  for (int axis = 0; axis < 3; axis++){
-    method_background_acceleration_center[axis] = p->list_value_float
-      (axis,"Method:background_acceleration:center",0.5);
-    method_background_acceleration_angular_momentum[axis] = p->list_value_float
-      (axis,"Method:background_acceleration:angular_momentum",0);
-  }
-
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_method_check_(Parameters * p)
 {
   p->group_set(0,"Method");
@@ -1198,7 +1071,6 @@ void EnzoConfig::read_physics_(Parameters * p)
   // this is intentionally done outside of the for-loop (for
   // backwards-compatability purposes)
   read_physics_fluid_props_(p);
-  read_physics_gravity_(p);
 }
 
 //----------------------------------------------------------------------
@@ -1600,32 +1472,6 @@ void EnzoConfig::read_physics_fluid_props_(Parameters * p)
             "\"Method:ppm:mol_weight\" isn't valid since "
             "\"Physics:fluid_props:mol_weight\" is specified.");
     }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_physics_gravity_(Parameters * p)
-{
-  std::string legacy_parname = "Method:gravity:grav_const";
-  std::string actual_parname = "Physics:gravity:grav_const_codeU";
-
-  bool has_grav_method = std::find
-    (method_list.begin(), method_list.end(), "gravity") != method_list.end();
-  bool has_legacy_par = has_grav_method && (p->param(legacy_parname)!=nullptr);
-  bool has_actual_par = p->param(actual_parname) !=nullptr;
-
-  if (has_legacy_par && has_actual_par) {
-    ERROR2("EnzoConfig::read_physics_gravity_",
-           "\"%s\" isn't valid since \"%s\" is specified.",
-           legacy_parname.c_str(), actual_parname.c_str());
-  } else if (has_legacy_par) {
-    WARNING2("EnzoConfig::read_physics_gravity_",
-             "\"%s\" is a legacy parameter that will be replaced with \"%s\"",
-             legacy_parname.c_str(), actual_parname.c_str());
-    physics_gravity_grav_constant_codeU = p->value_float(legacy_parname, -1.0);
-  } else {
-    physics_gravity_grav_constant_codeU = p->value_float(actual_parname, -1.0);
   }
 }
 

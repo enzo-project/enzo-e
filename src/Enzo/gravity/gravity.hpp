@@ -32,6 +32,7 @@
 //----------------------------------------------------------------------
 
 #include "gravity/EnzoPhysicsGravity.hpp"
+#include "gravity/EnzoPotentialConfig.hpp"
 #include "gravity/EnzoMethodBackgroundAcceleration.hpp"
 #include "gravity/EnzoMethodGravity.hpp"
 #include "gravity/EnzoMethodPmDeposit.hpp"

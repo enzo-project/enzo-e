@@ -11,6 +11,9 @@
 
 #include "Enzo/assorted/assorted.hpp" // misc. Method classes
 #include "Enzo/chemistry/chemistry.hpp" // EnzoComputeCoolingTime, EnzoMethodGrackle
+#include "Enzo/cosmology/cosmology.hpp" // EnzoPhysicsCosmology
+                                        // EnzoMethodComovingExpansion
+                                        // EnzoMethodCosmology
 #include "Enzo/fluid-props/fluid-props.hpp" // EnzoPhysicsFluidProps, EnzoCompute{Temperature,Pressure}
 #include "Enzo/gravity/gravity.hpp" // EnzoMethodGravity
                                     // EnzoMethodBackgroundAcceleration
@@ -211,24 +214,8 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "shock_tube") {
     initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
-    const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
-      (cycle, time,
-       enzo_config->initial_soup_file,
-       rank,
-       enzo_config->initial_soup_rotate,
-       enzo_config->initial_soup_array[0],
-       enzo_config->initial_soup_array[1],
-       enzo_config->initial_soup_array[2],
-       enzo_config->initial_soup_d_pos[0],
-       enzo_config->initial_soup_d_pos[1],
-       enzo_config->initial_soup_d_pos[2],
-       enzo_config->initial_soup_d_size[0],
-       enzo_config->initial_soup_d_size[1],
-       enzo_config->initial_soup_d_size[2],
-       enzo_config->initial_soup_density,
-       enzo_config->initial_soup_pressure_in,
-       enzo_config->initial_soup_pressure_out);
+      (cycle, time, p_group);
   } else if (type == "burkertbodenheimer") {
     initial = new EnzoInitialBurkertBodenheimer
       (cycle,time,
@@ -684,19 +671,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "background_acceleration") {
 
-    // If self-gravity is calculated, we do not need to zero
-    // out the acceleration field from the previous time step
-    // before adding the background accelerations
-    bool zero_acceleration = true;
-    for (int index = 0; index < method_list_.size(); index++){
-      if (method_list_[index]->name() == "gravity"){
-        zero_acceleration = false;
-        break;
-      }
-    }
-
-    method = new EnzoMethodBackgroundAcceleration
-      (zero_acceleration);
+    method = new EnzoMethodBackgroundAcceleration(p_group);
 
   } else if (name == "star_maker") {
 
@@ -833,6 +808,18 @@ Physics * EnzoProblem::create_physics_
    Parameters * parameters) throw ()
 {
 
+  // move creation of p_accessor up the call stack?
+  // -> our initialization of ParameterGroup diverges from the other create_
+  //    methods to some degree. Namely, we directly construct `root_path` from
+  //    the `type` argument (rather than use the `index` argument to retrieve
+  //    the groupname from "Physics:list" parameter).
+  // -> We do this for 2 reasons:
+  //    1. we require a one-to-one mapping between the type and group-name
+  //    2. we may initialize a physics-object not included in the list for
+  //       compatability reasons
+  const std::string root_path = "Physics:" + type;
+  ParameterGroup p_group(*parameters, root_path);
+
   Physics * physics = NULL;
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -877,8 +864,7 @@ Physics * EnzoProblem::create_physics_
              "object (it's okay if it comes before the \"gravity\" object)",
              enzo_config->physics_list[i] != "cosmology");
     }
-    physics = new EnzoPhysicsGravity
-      (enzo_config->physics_gravity_grav_constant_codeU);
+    physics = new EnzoPhysicsGravity(p_group);
 
   } else {
 

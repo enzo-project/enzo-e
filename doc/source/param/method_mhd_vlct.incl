@@ -139,52 +139,6 @@ The Method:mhd_vlct:mhd_choice determines whether the method is used as a pure h
 
 ----
 
-.. par:parameter:: Method:mhd_vlct:half_dt_reconstruct_method
-
-   :Summary: :s:`name of the reconstruction method to use for the full timestep`
-   :Type:   :par:typefmt:`string`
-   :Default: :d:`nn`
-   :Scope:     :z:`Enzo`
-
-   :e:`Name of the interpolation method used to reconstruct face-centered
-   primitives for the first half timestep.` ``"nn"`` :e:`is recommended
-   for this method (problems arise if` ``"plm"`` :e:`or` ``"plm_athena"``
-   :e:`are used). For a list of options, see`
-   :ref:`using-vlct-reconstruction`
-
-   .. warning::
-
-      This parameter is deprecated and will be removed in a future version.
-      It only carried meaning while using the original predictor-corrector
-      time integration scheme.
-
-      Furthermore, this parameter only conveyed the illusion of choice. In
-      reality, the integrator ONLY worked when this was set to ``"nn"``. For
-      that reason, this parameter is not replaced.
-
-----
-
-.. par:parameter:: Method:mhd_vlct:full_dt_reconstruct_method
-
-   :Summary: :s:`name of the reconstruction method to use for the full timestep`
-   :Type:   :par:typefmt:`string`
-   :Default: :d:`plm`
-   :Scope:     :z:`Enzo`
-
-   :e:`Name of the interpolation method used to reconstruct face-centered
-   primitives for the full timestep. For a list of options, see`
-   :ref:`using-vlct-reconstruction`
-
-   
-
-   .. warning::
-
-      This parameter is deprecated and will be removed in a future version.
-      The :par:param:`~Method:mhd_vlct:reconstruct_method` parameter is a
-      direct replacement.
-
-----
-
 Deprecated mhd_vlct parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following parameters have all been deprecated and will be removed

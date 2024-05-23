@@ -26,17 +26,7 @@ class EnzoInitialSoup : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialSoup
-  (int cycle,
-   double time,
-   std::string filename,
-   int rank,
-   bool rotate,
-   int     nx,     int ny,     int nz,
-   double dpx, double dpy, double dpz,
-   double dsx, double dsy, double dsz,
-   double density,
-   double pressure_in, double pressure_out) throw ();
+  EnzoInitialSoup(int cycle, double time, ParameterGroup p) throw ();
 
   /// Constructor
   EnzoInitialSoup(const EnzoConfig * enzo_config) throw();

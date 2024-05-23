@@ -58,8 +58,7 @@ public: // interface
       physics_fluid_props_eos_variant(),
       physics_fluid_props_fluid_floor_config(),
       physics_fluid_props_mol_weight(0.0),
-      // Gravity
-      physics_gravity_grav_constant_codeU(-1.0),
+
 
       //--------------------
       // INITIAL [sorted]
@@ -187,13 +186,6 @@ public: // interface
       initial_shu_collapse_instability_parameter(0.0),
       initial_shu_collapse_nominal_sound_speed(0.0),
       initial_shu_collapse_truncation_radius(0.0),
-      // EnzoInitialSoup
-      initial_soup_density(0.0),
-      initial_soup_file(""),
-      initial_soup_pressure_in(0.0),
-      initial_soup_pressure_out(0.0),
-      initial_soup_rank(0),
-      initial_soup_rotate(false),
       // EnzoInitialTurbulence
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
@@ -213,18 +205,6 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
-      // EnzoMethodBackgroundAcceleration
-      method_background_acceleration_flavor(""),
-      method_background_acceleration_mass(0.0),
-      method_background_acceleration_DM_mass(0.0),
-      method_background_acceleration_bulge_mass(0.0),
-      method_background_acceleration_core_radius(0.0),
-      method_background_acceleration_bulge_radius(0.0),
-      method_background_acceleration_stellar_mass(0.0),
-      method_background_acceleration_DM_mass_radius(0.0),
-      method_background_acceleration_stellar_scale_height_r(0.0),
-      method_background_acceleration_stellar_scale_height_z(0.0),
-      method_background_acceleration_apply_acceleration(true),
       /// EnzoMethodInference
       method_inference_level_base(0),
       method_inference_level_array(0),
@@ -256,18 +236,12 @@ public: // interface
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
       initial_sedov_random_array[axis] = 0;
-      initial_soup_array[axis] = 0;
-      initial_soup_d_pos[axis] = 0;
-      initial_soup_d_size[axis] = 0;
       initial_collapse_array[axis] = 0;
       initial_IG_center_position[axis] = 0.5;
       initial_IG_bfield[axis]         = 0.0;
       initial_accretion_test_sink_position[axis] = 0.0;
       initial_accretion_test_sink_velocity[axis] = 0.0;
-      method_background_acceleration_center[axis] = 0.5;
-      method_background_acceleration_angular_momentum[axis] = 0;
     }
-    method_background_acceleration_angular_momentum[2] = 1;
   }
 
   /// CHARM++ Pack / Unpack function
@@ -300,7 +274,6 @@ protected: // methods
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
   void read_initial_shu_collapse_(Parameters *);
-  void read_initial_soup_(Parameters *);
   void read_initial_turbulence_(Parameters *);
 
   //--------------------
@@ -313,7 +286,6 @@ protected: // methods
 
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
-  void read_physics_gravity_(Parameters *);
 
   void read_prolong_enzo_(Parameters *);
 
@@ -349,9 +321,6 @@ public: // attributes
   EnzoEOSVariant             physics_fluid_props_eos_variant;
   EnzoFluidFloorConfig       physics_fluid_props_fluid_floor_config;
   double                     physics_fluid_props_mol_weight;
-
-  /// Gravity
-  double                     physics_gravity_grav_constant_codeU;
 
   /// EnzoInitialBCenter;
   bool                       initial_bcenter_update_etot;
@@ -445,17 +414,6 @@ public: // attributes
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
 
-  /// EnzoInitialSoup
-  int                        initial_soup_rank;
-  std::string                initial_soup_file;
-  bool                       initial_soup_rotate;
-  int                        initial_soup_array[3];
-  double                     initial_soup_d_pos[3];
-  double                     initial_soup_d_size[3];
-  double                     initial_soup_pressure_in;
-  double                     initial_soup_pressure_out;
-  double                     initial_soup_density;
-
   /// EnzoInitialTurbulence
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
@@ -544,22 +502,6 @@ public: // attributes
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
-
-  /// EnzoMethodBackgroundAcceleration
-
-  std::string                method_background_acceleration_flavor;
-  double                     method_background_acceleration_mass;
-  double                     method_background_acceleration_DM_mass;
-  double                     method_background_acceleration_bulge_mass;
-  double                     method_background_acceleration_core_radius;
-  double                     method_background_acceleration_bulge_radius;
-  double                     method_background_acceleration_stellar_mass;
-  double                     method_background_acceleration_DM_mass_radius;
-  double                     method_background_acceleration_stellar_scale_height_r;
-  double                     method_background_acceleration_stellar_scale_height_z;
-  double                     method_background_acceleration_center[3];
-  double                     method_background_acceleration_angular_momentum[3];
-  bool                       method_background_acceleration_apply_acceleration;
 
   std::string                prolong_enzo_type;
   bool                       prolong_enzo_positive;
