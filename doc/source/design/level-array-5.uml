@@ -43,7 +43,7 @@
 
    hnote over root : sync_done
 
-   root -> b0 : p_done()
+   root -> b0 : p_exit()
    root -> b1
    root -> b2
    root -> b3

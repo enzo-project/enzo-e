@@ -79,7 +79,10 @@ Phases of the algorithm are enumerated below:
    4. **Apply inference**: inference arrays apply the external DL inference method
    5. **Update blocks**: inference arrays send results back to intersecting leaf blocks
 
-These phases are described in detail below:
+These phases are described in detail below. Note entry method
+organization prefixes are omitted below to clarify the UML sequence
+diagram labeling; e.g.  ``EnzoBlock::p_exit()`` in the documentation
+refers to ``EnzoBlock::p_method_infer_exit()`` in code.
 
 Phase 1. Evaluate
 =================
@@ -99,7 +102,7 @@ where to create inference arrays.  Control enters the method at the
 Block level, such that ``EnzoMethodInference::compute()`` is called on
 all blocks, which in turn call ``apply_criteria()``.
 
-The criteriumcurrently implemented is whether the point-wise density
+The criteria currently implemented are whether the point-wise density
 is greater than the block-local average by some specified threshold.
 (See the :ref:`Inference Parameters<inference parameters>` section for
 user parameters for the inference method, including density
@@ -174,14 +177,14 @@ object calls ``p_request_data()`` on all elements of the array. Each
 level array element sends a request to the unique block in
 ``level_base`` that it intersects.  This request is then forwarded via
 child blocks to all intersecting leaf Blocks using
-``p_method_infer_request_data()``.
+``p_request_data()``.
 
 When an intersecting leaf Block is reached, it serializes the required
 portion of field data and sends it directly to the intersecting inference array.
 Blocks coarser than ``level_infer`` must interpolate the
 data, which is done on the receive end; blocks finer than
 ``level_infer`` restrict data before sending it. The data is sent
-directly to the requisting level array element using
+directly to the requesting level array element using
 ``EnzoLevelArray::p_transfer_data()``.
 
 Phase 4. Apply inference
@@ -194,7 +197,7 @@ Level array elements keep track of incoming data, counting the relative volume o
 incoming data until the relative volume reaches 1.0. After the last piece of data
 is received and copied into the inference arrays, the level array element calls
 ``EnzoLevelArray::apply_inference()``. After the DL inference
-method is applied, ``p_infer_done()`` is called on the root-level Simulation
+method is applied, ``p_done()`` is called on the root-level Simulation
 object. The root Simulation object counts down the number of calls received,
 so it knows when all DL inference methods have completed.
 

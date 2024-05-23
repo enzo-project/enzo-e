@@ -25,7 +25,7 @@
    b2 -> a2
    activate a2 #DarkSalmon
 
-   a0 -> root : p_infer_array_created()
+   a0 -> root : p_array_created()
    a2 -> root
 
    hnote over root : sync_create
