@@ -24,8 +24,6 @@ public: // interface
   (int level_base,
    int level_array,
    int level_infer,
-   const int array_dims[3],
-   const int array_size[3],
    std::string field_group,
    float overdensity_threshold);
 
@@ -34,7 +32,6 @@ public: // interface
       level_base_(0),
       level_array_(0),
       level_infer_(0),
-      m3_level_(),
       m3_infer_(),
       field_group_(),
       num_fields_(0),
@@ -54,7 +51,6 @@ public: // interface
       level_base_(0),
       level_array_(0),
       level_infer_(0),
-      m3_level_(),
       m3_infer_(),
       field_group_(),
       num_fields_(0),
@@ -175,10 +171,6 @@ protected: // attributes
 
   /// Level of the resolution for the inference arrays.
   int level_infer_;
-
-  /// Dimensions of the level array, each element of which contains
-  /// inferenece arrays for each required field
-  int m3_level_[3];
 
   /// Size of the inference arrays associated with each level_array element
   int m3_infer_[3];

@@ -15,7 +15,6 @@ include "input/Inference/inference-tests.incl"
  Method {
      inference {
          level_infer = 5;
-         array_size = [ 32, 32, 32 ];
      }
  }
 

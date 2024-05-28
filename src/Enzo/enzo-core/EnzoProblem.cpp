@@ -614,8 +614,6 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_inference_level_base,
        enzo_config->method_inference_level_array,
        enzo_config->method_inference_level_infer,
-       enzo_config->method_inference_array_dims,
-       enzo_config->method_inference_array_size,
        enzo_config->method_inference_field_group,
        enzo_config->method_inference_overdensity_threshold);
 

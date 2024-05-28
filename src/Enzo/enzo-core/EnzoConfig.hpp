@@ -209,8 +209,6 @@ public: // interface
       method_inference_level_base(0),
       method_inference_level_array(0),
       method_inference_level_infer(0),
-      method_inference_array_dims(),
-      method_inference_array_size(),
       method_inference_field_group(),
       method_inference_overdensity_threshold(0),
       // EnzoProlong
@@ -494,8 +492,6 @@ public: // attributes
   int                        method_inference_level_base;
   int                        method_inference_level_array;
   int                        method_inference_level_infer;
-  int                        method_inference_array_dims[3];
-  int                        method_inference_array_size[3];
   std::string                method_inference_field_group;
   float                      method_inference_overdensity_threshold;
 

@@ -18,15 +18,12 @@ EnzoMethodInference::EnzoMethodInference
 (int level_base,
  int level_array,
  int level_infer,
- const int m3_level[3],
- const int m3_infer[3],
  std::string field_group,
  float overdensity_threshold)
   : Method(),
     level_base_(level_base),
     level_array_(level_array),
     level_infer_(level_infer),
-    m3_level_(),
     m3_infer_(),
     field_group_(field_group),
     num_fields_(cello::field_groups()->size(field_group_)),
@@ -36,12 +33,8 @@ EnzoMethodInference::EnzoMethodInference
     is_count_(-1),
     overdensity_threshold_(overdensity_threshold)
 {
-  for (int i=0; i<3; i++) {
-    m3_level_[i] = m3_level[i];
-    m3_infer_[i] = m3_infer[i];
-  }
-
-  // Verify level_array and m3_level match
+  // Compute m3_infer_ inference array sizes given level_infer and
+  // level_array
   // (note: using cello::config() rather than cello::hierarchy()
   // since the latter is not guaranteed to be initialized yet)
   int nd3[3] = {
@@ -54,19 +47,8 @@ EnzoMethodInference::EnzoMethodInference
     cello::config()->mesh_root_size[2] };
 
   for (int axis=0; axis<cello::rank(); axis++) {
-    ASSERT4("EnzoMethodInference()",
-            "level-array axis %d level %d nd3 %d mismatch with level array size %d",
-            axis,level_array,nd3[axis],m3_level_[axis],
-            (pow(2,level_array)*nd3[axis]==m3_level_[axis]));
-  }
-
-  for (int axis=0; axis<cello::rank(); axis++) {
     int nb = md3[axis]/nd3[axis]; // compute block size along axis
-    ASSERT5("EnzoMethodInference()",
-            "2**(%d - %d)*(%d/%d) "
-            "mismatch with inference array size %d",
-            level_infer,level_array,md3[axis],nd3[axis],m3_infer_[axis],
-            (pow(2,(level_infer-level_array))*nb == m3_infer_[axis]));
+    m3_infer_[axis] = pow(2,(level_infer-level_array))*nb;
   }
 
   // Define field_group fields
@@ -146,7 +128,6 @@ void EnzoMethodInference::pup (PUP::er &p)
   p | level_base_;
   p | level_array_;
   p | level_infer_;
-  PUParray(p,m3_level_,3);
   PUParray(p,m3_infer_,3);
   p | field_group_;
   p | num_fields_;
