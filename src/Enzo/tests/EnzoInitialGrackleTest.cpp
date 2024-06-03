@@ -213,40 +213,10 @@ void EnzoInitialGrackleTest::enforce_block
     }
   }
 
-  // Finally compute temperature and pressure if fields are tracked
-  // for output
-  int comoving_coordinates = enzo_config->physics_cosmology;
-  if (pressure){
-    const enzo_float gamma = enzo::fluid_props()->gamma();
-    EnzoComputePressure compute_pressure (gamma,comoving_coordinates);
-
-    // Note: using compute_ method to avoid re-generating grackle_fields
-    //       struct. Otherwise, one could just do:
-    //             compute_pressure.compute(enzo_block, pressure);
-    //       OR
-    //             compute_pressure.compute(enzo_block);
-    //
-    //       The former provides ability to compute pressure into an
-    //       array that is non-static (i.e. not a field that persists).
-    //
-    compute_pressure.compute_(enzo_block,
-                              pressure,
-                              0,
-                              &grackle_fields_);
-  }
-
-  if (temperature){
-    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                               comoving_coordinates);
-
-    compute_temperature.compute_(enzo_block,
-                                 temperature,
-                                 false, // do not re-compute pressure field
-                                 &grackle_fields_
-                                 );
-  }
-
-
+  // In the original version of this method, we computed the temperature and
+  // pressure fields here, but there wasn't any point to doing that.
+  // -> I think it sets a somewhat poor example to do that without any reason,
+  //    so I have deleted that logic
 
   block->initial_done();
 
