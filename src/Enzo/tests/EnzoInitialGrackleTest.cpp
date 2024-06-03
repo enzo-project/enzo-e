@@ -117,7 +117,11 @@ void EnzoInitialGrackleTest::enforce_block
   CelloView<enzo_float,3> eint = field.view<enzo_float>("internal_energy");
   CelloView<enzo_float,3> etot = field.view<enzo_float>("total_energy");
 
-  // we probably should insert as assertion that we are using metal_cooling
+  // at the time of writing the following check, it looks like grackle
+  // will soon unlock extra functionality with metal_cooling > 1
+  ASSERT("EnzoInitialGrackleTest",
+         "the initializer currently assumes Grackle has metal_cooling=1",
+         grackle_chem->get<int>("metal_cooling") == 1);
   CelloView<enzo_float,3> metal_density = field.view<enzo_float>("metal_density");
 
   // now we load in species fields
