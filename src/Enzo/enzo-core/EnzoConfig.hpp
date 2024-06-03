@@ -95,13 +95,6 @@ public: // interface
       initial_collapse_temperature(0.0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
-      // EnzoGrackleTest
-      initial_grackle_test_maximum_H_number_density(1000.0),
-      initial_grackle_test_maximum_metallicity(1.0),
-      initial_grackle_test_maximum_temperature(1.0E8),
-      initial_grackle_test_minimum_H_number_density(0.1),
-      initial_grackle_test_minimum_metallicity(1.0E-4),
-      initial_grackle_test_minimum_temperature(10.0),
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
@@ -257,7 +250,6 @@ protected: // methods
   void read_initial_burkertbodenheimer_(Parameters *);
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
-  void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
@@ -337,14 +329,6 @@ public: // attributes
   double                     initial_collapse_particle_ratio;
   double                     initial_collapse_mass;
   double                     initial_collapse_temperature;
-
-  /// EnzoGrackleTest
-  double                     initial_grackle_test_maximum_H_number_density;
-  double                     initial_grackle_test_maximum_metallicity;
-  double                     initial_grackle_test_maximum_temperature;
-  double                     initial_grackle_test_minimum_H_number_density;
-  double                     initial_grackle_test_minimum_metallicity;
-  double                     initial_grackle_test_minimum_temperature;
 
   /// EnzoInitialHdf5
 

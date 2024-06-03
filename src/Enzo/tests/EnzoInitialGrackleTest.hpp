@@ -17,7 +17,7 @@ class EnzoInitialGrackleTest : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialGrackleTest(const EnzoConfig * enzo_config) throw();
+  EnzoInitialGrackleTest(int cycle, double time, ParameterGroup p) noexcept;
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialGrackleTest);

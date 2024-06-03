@@ -12,19 +12,15 @@
 //----------------------------------------------------------------------
 
 EnzoInitialGrackleTest::EnzoInitialGrackleTest
-(const EnzoConfig * config) throw ()
-  : Initial(config->initial_cycle, config->initial_time),
-    min_max_H_number_density_{},
-    min_max_metallicity_{},
-    min_max_temperature_{}
-{
-  min_max_H_number_density_ = {config->initial_grackle_test_minimum_H_number_density,
-                               config->initial_grackle_test_maximum_H_number_density};
-  min_max_metallicity_ = {config->initial_grackle_test_minimum_metallicity,
-                          config->initial_grackle_test_maximum_metallicity};
-  min_max_temperature_ = {config->initial_grackle_test_minimum_temperature,
-                          config->initial_grackle_test_maximum_temperature};
-}
+(int cycle, double time, ParameterGroup p) noexcept
+  : Initial(cycle, time),
+    min_max_H_number_density_{p.value_float("minimum_H_number_density",0.1),
+                              p.value_float("maximum_H_number_density",1000.0)},
+    min_max_metallicity_{p.value_float("minimum_metallicity", 1.0E-4),
+                         p.value_float("maximum_metallicity", 1.0)},
+    min_max_temperature_{p.value_float("minimum_temperature",10.0),
+                         p.value_float("maximum_temperature",1.0E8)}
+{ }
 
 //----------------------------------------------------------------------
 
