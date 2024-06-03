@@ -53,7 +53,6 @@ void EnzoInitialGrackleTest::enforce_block
    block != NULL);
 
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits  * enzo_units = enzo::units();
 
   Field field = block->data()->field();
@@ -79,17 +78,14 @@ void EnzoInitialGrackleTest::enforce_block
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
 
-  double H_n_slope = log10(enzo_config->initial_grackle_test_maximum_H_number_density /
-                           enzo_config->initial_grackle_test_minimum_H_number_density) /
-                           double(nx);
+  double H_n_slope = log10(min_max_H_number_density_[1]/
+                           min_max_H_number_density_[0]) / double(nx);
 
-  double temperature_slope = log10(enzo_config->initial_grackle_test_maximum_temperature/
-                                   enzo_config->initial_grackle_test_minimum_temperature)/
-                                   double(ny);
+  double temperature_slope = log10(min_max_temperature_[1]/
+                                   min_max_temperature_[0]) / double(ny);
 
-  double metallicity_slope = log10(enzo_config->initial_grackle_test_maximum_metallicity/
-                                   enzo_config->initial_grackle_test_minimum_metallicity)/
-                                   double(nz);
+  double metallicity_slope = log10(min_max_metallicity_[1]/
+                                   min_max_metallicity_[0]) / double(nz);
 
   double tiny_number = 1e-10;
 
@@ -158,7 +154,7 @@ void EnzoInitialGrackleTest::enforce_block
 
         const enzo_float cur_density = 
           (enzo_constants::mass_hydrogen *
-           pow(10.0, ((H_n_slope * (ix-gx)) + log10(enzo_config->initial_grackle_test_minimum_H_number_density)))/
+           pow(10.0, ((H_n_slope * (ix-gx)) + log10(min_max_H_number_density_[0])))/
            HydrogenFractionByMass / enzo_units->density());
 
         density(iz,iy,ix) = cur_density;
@@ -166,7 +162,7 @@ void EnzoInitialGrackleTest::enforce_block
         // solar metallicity
         enzo_float solar_metal_dens = SolarMetalFractionByMass * cur_density;
         metal_density(iz,iy,ix) = pow(10.0,((metallicity_slope * (iz-gz)) +
-                                            log10(enzo_config->initial_grackle_test_minimum_metallicity))) *
+                                            log10(min_max_metallicity_[0]))) *
                                   solar_metal_dens;
         velocity_x(iz,iy,ix) = 0.0;
         velocity_y(iz,iy,ix) = 0.0;
@@ -195,7 +191,7 @@ void EnzoInitialGrackleTest::enforce_block
     }
   }
 
-  /* Set internal energy and temperature */
+  /* Set internal energy from temperature requirements */
   enzo_float nominal_mu = enzo::fluid_props()->mol_weight();
   const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
 
@@ -228,7 +224,7 @@ void EnzoInitialGrackleTest::enforce_block
 
         enzo_float specific_thermal_energy =
           (pow(10.0, ((temperature_slope * (iy-gy)) +
-           log10(enzo_config->initial_grackle_test_minimum_temperature)))/
+                      log10(min_max_temperature_[0]))) /
            mu / enzo_units->kelvin_per_energy_units() / (nominal_gamma - 1.0));
         eint(iz,iy,ix) = specific_thermal_energy;
         etot(iz,iy,ix) = specific_thermal_energy;
