@@ -52,7 +52,6 @@ void EnzoInitialGrackleTest::enforce_block
    "Block does not exist",
    block != NULL);
 
-  EnzoBlock * enzo_block = enzo::block(block);
   EnzoUnits  * enzo_units = enzo::units();
 
   Field field = block->data()->field();
