@@ -48,10 +48,6 @@ void EnzoInitialGrackleTest::enforce_block
  Block * block, const Hierarchy  * hierarchy) throw()
 {
 
-  ASSERT("EnzoInitialGrackleTest",
-   "Block does not exist",
-   block != NULL);
-
   EnzoUnits  * enzo_units = enzo::units();
 
   Field field = block->data()->field();
