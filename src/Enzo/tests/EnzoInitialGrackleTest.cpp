@@ -13,9 +13,17 @@
 
 EnzoInitialGrackleTest::EnzoInitialGrackleTest
 (const EnzoConfig * config) throw ()
-  : Initial(config->initial_cycle, config->initial_time)
+  : Initial(config->initial_cycle, config->initial_time),
+    min_max_H_number_density_{},
+    min_max_metallicity_{},
+    min_max_temperature_{}
 {
-  return;
+  min_max_H_number_density_ = {config->initial_grackle_test_minimum_H_number_density,
+                               config->initial_grackle_test_maximum_H_number_density};
+  min_max_metallicity_ = {config->initial_grackle_test_minimum_metallicity,
+                          config->initial_grackle_test_maximum_metallicity};
+  min_max_temperature_ = {config->initial_grackle_test_minimum_temperature,
+                          config->initial_grackle_test_maximum_temperature};
 }
 
 //----------------------------------------------------------------------
@@ -28,8 +36,9 @@ void EnzoInitialGrackleTest::pup (PUP::er &p)
 
   Initial::pup(p);
 
-  // previously we raised a bunch of warnings here about not pupping
-  // grackle-data structures. But in reality this hasn't been an issue in years
+  p | min_max_H_number_density_;
+  p | min_max_metallicity_;
+  p | min_max_temperature_;
 }
 
 //----------------------------------------------------------------------
