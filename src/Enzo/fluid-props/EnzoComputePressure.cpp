@@ -86,8 +86,7 @@ void EnzoComputePressure::compute_pressure
  bool dual_energy,
  double gamma,
  int stale_depth, /* 0 */
- bool ignore_grackle, /*false*/
- grackle_field_data * grackle_fields /*nullptr*/
+ bool ignore_grackle /*false*/
  ) throw()
 {
 
@@ -107,8 +106,7 @@ void EnzoComputePressure::compute_pressure
             "have identical strides to the fields.");
     }
 
-    grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth,
-                                       grackle_fields);
+    grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth);
 
   } else {
 

@@ -88,9 +88,7 @@ public: // interface
                                const CelloView<enzo_float, 3>& p,
                                bool mhd, bool dual_energy, double gamma,
                                int stale_depth = 0,
-                               bool ignore_grackle = false,
-                               grackle_field_data * grackle_fields = nullptr
-                               ) throw();
+                               bool ignore_grackle = false) throw();
 
 protected: // attributes
 
