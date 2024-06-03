@@ -60,17 +60,6 @@ void EnzoComputePressure::compute (Block * block, enzo_float *p,
 {
   if (!block->is_leaf()) return;
 
-  compute_(block, p, stale_depth);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoComputePressure::compute_(Block * block,
-                                   enzo_float * p,
-                                   int stale_depth, /* 0 */
-                                   grackle_field_data * grackle_fields /*NULL*/
-                                   )
-{
   // make a CelloView that wraps p
   Field field = block->data()->field();
   int gx,gy,gz;
