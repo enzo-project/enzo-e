@@ -80,6 +80,17 @@ public: // interface
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();
 
+  //--------------------------------------------------
+  // Nested grid initialization.
+  //--------------------------------------------------
+
+  /// Check if this block should create child blocks during initialization.
+  bool spawn_child_blocks() throw();
+
+  /// Create child blocks.
+  virtual void create_initial_child_blocks();
+  void instantiate_children() throw();
+
   //----------------------------------------------------------------------
   // Original Enzo functions
   //----------------------------------------------------------------------

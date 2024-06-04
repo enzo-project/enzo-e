@@ -68,11 +68,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_field_datasets(),
   initial_hdf5_field_names(),
   initial_hdf5_field_coords(),
+  initial_hdf5_field_levels(),
   initial_hdf5_particle_files(),
   initial_hdf5_particle_datasets(),
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
+  initial_hdf5_particle_levels(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -276,11 +278,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_hdf5_field_datasets;
   p | initial_hdf5_field_names;
   p | initial_hdf5_field_coords;
+  p | initial_hdf5_field_levels;
   p | initial_hdf5_particle_files;
   p | initial_hdf5_particle_datasets;
   p | initial_hdf5_particle_coords;
   p | initial_hdf5_particle_types;
   p | initial_hdf5_particle_attributes;
+  p | initial_hdf5_particle_levels;
 
   p | initial_music_field_coords;
   p | initial_music_field_datasets;
@@ -535,6 +539,16 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
   initial_hdf5_max_level = p->value_integer (name_initial + "max_level", 0);
   initial_hdf5_format    = p->value_string  (name_initial + "format", "music");
 
+  // Ensure hdf5 max level agrees with adapt max initial level.
+  int adapt_max_level = p->value_integer("Adapt:max_level", 0);
+  int adapt_max_initial_level = p->value_integer("Adapt:max_initial_level", adapt_max_level);
+  if (initial_hdf5_max_level > 0 && adapt_max_initial_level != initial_hdf5_max_level) {
+    ERROR2("Config::read_initial_hdf5_()",
+    "The hdf5 max level (%d) should equal Adapt:max_initial_level (%d)",
+    initial_hdf5_max_level,
+    adapt_max_initial_level);
+  }
+
   for (int i=0; i<3; i++) {
     initial_hdf5_blocking[i] =
       p->list_value_integer(i,name_initial+"blocking",1);
@@ -554,6 +568,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
     const std::string file    = p->value_string (file_id + "file","");
     const std::string dataset = p->value_string (file_id + "dataset","");
     const std::string coords  = p->value_string (file_id + "coords","xyz");
+    const int level           = p->value_integer (file_id + "level", 0);
 
     if (type == "particle") {
 
@@ -564,6 +579,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_particle_coords.    push_back(coords);
       initial_hdf5_particle_types.     push_back(name);
       initial_hdf5_particle_attributes.push_back(attribute);
+      initial_hdf5_particle_levels.    push_back(level);
 
     } else if (type == "field") {
 
@@ -571,6 +587,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_field_datasets.     push_back(dataset);
       initial_hdf5_field_names.        push_back(name);
       initial_hdf5_field_coords.       push_back(coords);
+      initial_hdf5_field_levels.       push_back(level);
 
     } else {
       ERROR2 ("EnzoConfig::read",
