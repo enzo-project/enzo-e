@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <thread>
+#include <vector>
 
 #define CHECK_COSMO_PARAMS true
 
@@ -119,7 +120,7 @@ void EnzoInitialHdf5::enforce_block
   int min_level = cello::hierarchy()->min_level();
 
   // Maintain running count of messages sent
-  int count_messages[max_level_ + 1] = {};
+  std::vector<int> count_messages(max_level_ + 1, 0);
 
   // Read in Field files
   for (size_t index=0; index<field_files_.size(); index++) {
