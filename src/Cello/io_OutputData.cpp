@@ -165,10 +165,11 @@ void OutputData::write_block ( const  Block * block ) throw()
     
   count = (text_block_count_ == 0) ? num_blocks : 0;
 
-  sprintf (file,"%s.block_list",name_file.c_str());
-  sprintf (dir, "%s",           name_dir.c_str());
-  sprintf (line,"%s %s\n",      block->name().c_str(),name_out_file.c_str());
-    
+  snprintf (file,sizeof(file),"%s.block_list",name_file.c_str());
+  snprintf (dir, sizeof(dir), "%s",           name_dir.c_str());
+  snprintf (line,sizeof(line),"%s %s\n",      block->name().c_str(),
+            name_out_file.c_str());
+
   proxy_main.p_text_file_write(strlen(dir)+1,  dir,
 			       strlen(file)+1, file,
 			       strlen(line)+1, line,
@@ -181,9 +182,9 @@ void OutputData::write_block ( const  Block * block ) throw()
       
     count = 0;
     
-    sprintf (file,"%s.file_list",name_file.c_str());
-    sprintf (dir, "%s",          name_dir.c_str());
-    sprintf (line,"%s\n",        name_out_file.c_str());
+    snprintf (file,sizeof(file),"%s.file_list",name_file.c_str());
+    snprintf (dir, sizeof(dir), "%s",          name_dir.c_str());
+    snprintf (line,sizeof(line),"%s\n",        name_out_file.c_str());
     
     proxy_main.p_text_file_write(strlen(dir)+1,  dir,
 				 strlen(file)+1, file,

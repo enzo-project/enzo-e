@@ -10,7 +10,7 @@
 
 /// @def      UNIT_MAX_NAME_LEN
 /// @brief    Maximum length of a class or function name
-#define UNIT_MAX_NAME_LEN 40
+#define UNIT_MAX_NAME_LEN 80
 
 /// @def      unit_incomplete
 /// @brief    Value used instead of "true" or "false" to indicate an

@@ -35,6 +35,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <type_traits> // std::remove_cv, std::is_same_v
 #include <vector>
 
 #include <charm++.h>
@@ -154,6 +155,7 @@ enum precision_enum {
   precision_default,     //  default precision
   precision_single,      //  32-bit field data
   precision_double,      //  64-bit field data
+  precision_extended64,  //  64-bit field data (long double)
   precision_extended80,  //  80-bit field data
   precision_extended96,  //  96-bit field data
   precision_quadruple,   // 128-bit field data
@@ -178,6 +180,7 @@ enum type_enum {
   type_single,
   type_float = type_single,
   type_double,
+  type_extended64,
   type_extended80,
   type_extended96,
   type_quadruple,
@@ -230,6 +233,18 @@ enum class MsgType { msg_refine, msg_check };
 
 /// Length of hex message tags used for debugging
 #define TAG_LEN 8
+
+/// represents a kind of initial cycle
+///
+/// @note
+/// At the moment, we distinguish between a charm-based restart and a
+/// non-charm-based restart for completeness. But to my knowledge, we can't
+/// actually identify a charm-based restart
+enum class InitCycleKind {
+  fresh,                    ///< doesn't follow a restart
+  charmrestart,             ///< follows a charm-based restart
+  fresh_or_noncharm_restart ///< any kind other than a charm-based restart
+};
 
 //----------------------------------------------------------------------
 /// Macros for debugging
@@ -449,7 +464,7 @@ enum class MsgType { msg_refine, msg_check };
 #define SIZE_VECTOR_VECTOR_TYPE(COUNT,TYPE,VECTOR)              \
   {                                                             \
     (COUNT) += sizeof(int);                                     \
-    for (size_t i=0; i<(VECTOR).size(); i++) {                     \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {             \
       SIZE_VECTOR_TYPE(COUNT,TYPE,(VECTOR)[i]);                 \
     }                                                           \
   }
@@ -458,7 +473,7 @@ enum class MsgType { msg_refine, msg_check };
     int size = (VECTOR).size();                         \
     memcpy(POINTER,&size, sizeof(int));                 \
     (POINTER) += sizeof(int);                           \
-    for (size_t i=0; i<(VECTOR).size(); i++) {             \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {     \
       SAVE_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
@@ -468,7 +483,7 @@ enum class MsgType { msg_refine, msg_check };
     memcpy(&size, POINTER, sizeof(int));                \
     (POINTER) += sizeof(int);                           \
     (VECTOR).resize(size);                              \
-    for (size_t i=0; i<(VECTOR).size(); i++) {             \
+    for (std::size_t i=0; i<(VECTOR).size(); i++) {     \
       LOAD_VECTOR_TYPE(POINTER,TYPE,(VECTOR)[i]);       \
     }                                                   \
   }
@@ -676,7 +691,14 @@ namespace cello {
 
   int sizeof_precision       (precision_type);
   int is_precision_supported (precision_type);
-  extern const char * precision_name[7];
+  extern const char * precision_name[8];
+
+  /// converts a precision_enum to type_enum
+  ///
+  /// at present, this is a trivial operation. This primarily exists to make
+  /// the developer's intention clear
+  inline int convert_enum_precision_to_type(precision_type precision)
+  { return precision; }
 
   inline void hex_string(char str[], int length)
   {
@@ -808,12 +830,85 @@ namespace cello {
   (const std::vector <std::string> * file_name,
    int counter, int cycle, double time);
 
-  /// Return the path for this file group output.  Creates
-  /// the subdirectories if they don't exist
+  /// Create a directory if it doesn't already exist (returns whether it
+  /// already existed)
+  bool ensure_directory_exists(const std::string& dir_name);
+
+  /// Return the path to the subdirectory specified by the given format and
+  /// arguments this file group output and creates the subdirectory if it
+  /// doesn't already exist.
+  ///
+  /// In the event that path_name doesn't specify a path, the path to the
+  /// current directory, ".", is returned
   std::string create_directory
   (const std::vector <std::string> * path_name,
    int counter, int cycle, double time, bool & already_exists);
 
+  //----------------------------------------------------------------------
+
+  // this is a common workaround used to raise a compile-time error in the
+  // elsebranch of a constexpr-if statement (as is down directly below
+  template<class> inline constexpr bool dummy_false_v_ = false;
+
+  /// returns the type_enum associated with the template type argument ``T``.
+  ///
+  /// @tparam T The type for which the enum value is returned. Any ``const`` or
+  //     ``volatile`` qualifiers are automatically shed from it.
+  /// @tparam unknown_on_fail When ``true``, the this returns ``type_unknown``
+  ///     when ``T`` isn't recognized. Otherwise, the program fails to compile
+  ///     (with a compile-time error), when ``T`` isn't recognized.
+  ///
+  /// @note
+  /// This will not return type_default
+  template<typename T, bool unknown_on_fail = false>
+  constexpr int get_type_enum() noexcept {
+    using T_ = typename std::remove_cv_t<T>;
+
+    if constexpr (std::is_same_v<T_,float>) {
+      return type_single;
+    } else if constexpr (std::is_same_v<T_, double>) {
+      return type_double;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==8)) {
+      return type_extended64;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==10)) {
+      return type_extended80;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==12)) {
+      return type_extended96;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==16)) {
+      return type_quadruple;
+    } else if constexpr (std::is_same_v<T_, char>) {
+      return type_char;
+    } else if constexpr (std::is_same_v<T_, short>) {
+      return type_short;
+    } else if constexpr (std::is_same_v<T_, int>) {
+      return type_int;
+    } else if constexpr (std::is_same_v<T_, long long>) {
+      return type_long_long;
+#if 0
+    // it's unclear to me at this time if the following is worth including.
+    // - On the one hand, fixed-width integer types are not guaranteed to be
+    //   defined on all systems.
+    // - On the other hand, we could probably provide custom definitions. In
+    //   the case where the smallest integer types can't be defined (b/c a
+    //   machine's definition of a byte exceeds 8 bits), we will encounter
+    //   other problems anyways...
+    } else if constexpr (std::is_same_v<T_, std::int8_t>){
+      return type_char;
+    } else if constexpr (std::is_same_v<T_, std::int16_t>){
+      return type_short;
+    } else if constexpr (std::is_same_v<T_, std::int32_t>){
+      return type_int;
+    } else if constexpr (std::is_same_v<T_, std::int64_t>){
+      return type_long_long;
+#endif
+    } else if constexpr (unknown_on_fail) {
+      return type_unknown;
+    } else {
+      static_assert(dummy_false_v_<T_>, "can't convert type!");
+    }
+  }
+
+  //----------------------------------------------------------------------
 
   inline int color_get_rgb (std::string color_name) {
     // CSS3 extended standard colors
@@ -980,6 +1075,22 @@ namespace cello {
     }
   }
 
+  /// Returns whether the current cycle is the first cycle after starting the
+  /// simulation
+  ///
+  /// This differentiates between the different kinds of initial cycles
+  ///
+  /// @note
+  /// While the Cello-layer is not actually responsible for implementing
+  /// non-charm-based restart functionality, it's useful to store the
+  /// functionality in this layer.
+  ///
+  /// @note
+  /// At the time of writing, we can't actually detect when a charm-based
+  /// restart has occured - the program aborts with an error in that case
+  /// (however, the option exists to make the code more explicit)
+  bool is_initial_cycle(InitCycleKind kind) noexcept;
+  bool is_initial_cycle(int cycle, InitCycleKind kind) noexcept;
 }
 
 #endif /* CELLO_HPP */

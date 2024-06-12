@@ -41,8 +41,6 @@ extern void method_close_files_mutex_init();
 #include <limits>
 #include <algorithm>
 
-#include "pngwriter.h"
-
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
@@ -69,6 +67,7 @@ extern void method_close_files_mutex_init();
 #include "problem_MethodFluxCorrect.hpp"
 #include "problem_MethodNull.hpp"
 #include "problem_MethodOrder.hpp"
+#include "problem_MethodOrderHilbert.hpp"
 #include "problem_MethodOutput.hpp"
 #include "problem_MethodRefresh.hpp"
 #include "problem_MethodTrace.hpp"

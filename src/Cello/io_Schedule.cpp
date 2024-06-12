@@ -97,13 +97,13 @@ Schedule * Schedule::create
 
     } else if (var_minutes) {
 
-      for (size_t i=0; i<list.size(); i++) list[i] *= 60.0;
+      for (std::size_t i=0; i<list.size(); i++) list[i] *= 60.0;
 
       ((ScheduleList * )schedule)->set_seconds_list(list);
 
     } else if (var_hours) {
 
-      for (size_t i=0; i<list.size(); i++) list[i] *= 3600.0;
+      for (std::size_t i=0; i<list.size(); i++) list[i] *= 3600.0;
 
       ((ScheduleList * )schedule)->set_seconds_list(list);
 

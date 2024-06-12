@@ -18,20 +18,17 @@ target_link_libraries(main_enzoCharmModule INTERFACE enzoCharmModule)
 # General setup
 #==============
 
-# Get the list of source files
-# - we do this using GLOB patterns. This approach is not recommended by the
-#   authors of CMake (their recommendation is to explicitly list all files that
-#   must be installed).
-# - Some of the disadvantages of this approach are mitigated by inclusion of
-#   the CONFIGURE_DEPENDS flag.
-# - See the CMake Primer section of the developer documentation for more details
-file(GLOB SRC_FILES CONFIGURE_DEPENDS
-  *.cpp *.F *.hpp fortran.h fortran_types.h
-)
+# the variable holds the commonly used root-include directory that lets files
+# include headers by calling:
+#    #include "Enzo/header/path.hpp"
+#    #include "Cello/header/path.hpp"
+# A target, called <MY-TARGET> uses of this variable in a call like:
+#    target_include_directories(<MY-TARGET> PUBLIC ${ROOT_INCLUDE_DIR})
+set(ROOT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
 set(Cello_LIBS "cello_component;charm_component;control;disk;error;data;io;memory;mesh;monitor;parameters;parallel;performance;problem;compute;simulation;test_Unit")
 
-set(External_LIBS "pngwriter;Boost::filesystem;PNG::PNG;HDF5_C")
+set(External_LIBS "")
 if (USE_GRACKLE)
   LIST(APPEND External_LIBS "Grackle::Grackle")
 endif()
@@ -48,7 +45,7 @@ endif()
 
 # Step 1: forward-declare the enzo library. This holds most of the files that
 #         are turned into the enzo binary. (We will return to this shortly)
-add_library(enzo STATIC ${SRC_FILES})
+add_library(enzo STATIC charm_enzo.cpp)
 
 # Step 2: define main_enzo
 # -> this includes a machinery for driving the simulation (it's directly
@@ -58,11 +55,12 @@ add_library(enzo STATIC ${SRC_FILES})
 add_library(main_enzo OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/../Cello/main_enzo.cpp)
 # TODO: we may want to reconsider the way that the code is structured so that
 # we aren't declaring targets with source files from the Cello layer
+
 target_include_directories (main_enzo
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Cello # for main.hpp
 )
 target_link_libraries(main_enzo
-  PRIVATE enzo parallel cello_component monitor Boost::filesystem
+  PRIVATE enzo parallel cello_component monitor StdFilesystem::StdFilesystem
   PUBLIC main_enzoCharmModule # this is public because main_enzo.decl.h is in
                               # the public header file: main.hpp)
 )
@@ -75,34 +73,58 @@ target_link_options(main_enzo PRIVATE ${Cello_TARGET_LINK_OPTIONS})
 # add files in enzo-core to enzo target (and define a unit test)
 add_subdirectory(enzo-core)
 
-# add files in hydro-mhd to enzo target and define the riemann library
+# in the following lines all introduce targets (aka libraries) that are distinct
+# from the primary enzo target (later on, they are all linked to the enzo target)
+
+# define the Enzo::assorted target
+add_subdirectory(assorted)
+
+# define the Enzo::chemistry target
+add_subdirectory(chemistry)
+
+# define the Enzo::cosmology target
+add_subdirectory(cosmology)
+
+# define the Enzo::fluid-props target
+add_subdirectory(fluid-props)
+
+# define the Enzo::gravity target
+add_subdirectory(gravity)
+
+# define the Enzo::hydro-mhd target
 add_subdirectory(hydro-mhd)
 
-# add source files from other subdirectories to the enzo target
-add_subdirectory(assorted)
-add_subdirectory(chemistry)
-add_subdirectory(cosmology)
-add_subdirectory(fluid-props)
-add_subdirectory(gravity)
+# define the Enzo::initial target
 add_subdirectory(initial)
-add_subdirectory(io)
-add_subdirectory(mesh)
-add_subdirectory(obsolete)
-add_subdirectory(particle)
-add_subdirectory(utils)
 
-# note that the tests subdirectory introduces problem initializers that can
+# define the Enzo::io target
+add_subdirectory(io)
+
+# define the Enzo::mesh target
+add_subdirectory(mesh)
+
+# define the Enzo::particle target
+add_subdirectory(particle)
+
+# define the Enzo::tests target
+# (note that the Enzo::tests target introduces problem initializers that can
 # be used to setup test-problems. The BUILD_TESTING option has no impact on
-# what is built from this directory (it only affects whether binaries,
+# what is built from this directory. The option only affects whether binaries,
 # expressly used for unit-testing are built)
 add_subdirectory(tests)
+
+# define the Enzo::utils target
+add_subdirectory(utils)
 
 # Step 4: specify additional information about the Enzo library
 # (dependencies are only PUBLIC because of the way that all headers are
 #  transitively included in all targets. If they weren't public, the include
 #  directories would not be properly inherited)
 target_link_libraries(enzo
-  PUBLIC riemann ${Cello_LIBS} ${External_LIBS}
+  PUBLIC Enzo::assorted Enzo::chemistry Enzo::cosmology Enzo::fluid-props
+  PUBLIC Enzo::gravity Enzo::hydro-mhd Enzo::initial Enzo::io Enzo::mesh
+  PUBLIC Enzo::particle Enzo::tests Enzo::utils
+  PUBLIC ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )
 target_include_directories(enzo

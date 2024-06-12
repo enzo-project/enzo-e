@@ -311,6 +311,7 @@ parameters
        the minimum across all 3 dimensions), at the highest refinement
        level.`
 
+.. _vlct_overview:
 
 ``"mhd_vlct"`` method
 =====================
@@ -361,23 +362,23 @@ parameter) should be less than 0.5.
      - Type
      - Default
      - Description
-   * - ``"mhd_choice"``
+   * - :par:param:`~Method:mhd_vlct:mhd_choice`
      - `string`
      - `none`
      - `Specifies handling of magnetic fields (or lack thereof)`
-   * - ``"riemann_solver"``
+   * - :par:param:`~Method:mhd_vlct:time_scheme`
+     - `string`
+     - `vl`
+     - `Specifies time integration scheme (CURRENTLY JUST FOR TESTING)`
+   * - :par:param:`~Method:mhd_vlct:riemann_solver`
      - `string`
      - `hlld`
      - `name of the Riemann Solver to use`
-   * - ``"half_dt_reconstruct_method"``
-     - `string`
-     - `nn`
-     - `Reconstruction method for half timestep`
-   * - ``"full_dt_reconstruct_method"``
+   * - :par:param:`~Method:mhd_vlct:reconstruct_method`
      - `string`
      - `plm`
-     - `Reconstruction method for full timestep`
-   * - ``"theta_limiter"``
+     - `Reconstruction method`
+   * - :par:param:`~Method:mhd_vlct:theta_limiter`
      - `float`
      - `1.5`
      - `controls dissipation of the "plm"/"plm_enzo" reconstruction
@@ -492,13 +493,13 @@ the stale depth increases. We define the amount by which it
 increases as the "staling rate" (which depends on the choice
 of interpolation method).
 
-For a unigrid simulation, the number of required ghost zones
-is given by the sum of the staling rates for each selected
-reconstruction method.
+For a unigrid simulation, the number of ghost zones is ``1 + staling_rate``
+where ``staling_rate`` depends on the chosen reconstruction method.
 
-We provide the names used to specify each available method in
-the input file, the associated staling depth, and a brief
-description.
+For each available reconstruction method, the following table provides
+the name that must be passed to
+:par:param:`~Method:mhd_vlct:reconstruct_method` in the input file,
+the associated staling depth, and a brief description.
 
 .. list-table:: Available ``mhd_vlct`` reconstructors (and slope
 		limiters)
@@ -536,20 +537,31 @@ description.
 
 We provide a few notes about the choice of interpolator for this algorithm:
 
-   * The recommended choices of reconstruction algorithms are ``"nn"`` for the
-     half-timestep and then piecewise-linear reconstruction for the
-     full-timestep (most test problems have been run using ``plm`` with
-     ``theta_limiter=2``, matching the integrator description in
-     `Stone & Gardiner 2009
-     <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
-     both times also works, however tests show that errors arise when
-     piecewise linear reconstruction is used both times.
+   * The recommended choices of reconstruction algorithm is
+     piecewise-linear reconstruction (most test problems have been run
+     using ``plm`` with ``theta_limiter=2``, matching the integrator
+     description in `Stone & Gardiner 2009
+     <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ).
    * It is supposed to be possible to reconstruct the characteristic quantities
      for this method or to use higher order reconstruction in place of ``"plm"``
    * Reconstruction is always performed on the cell-centered magnetic fields.
      After reconstructing values along a given axis, the values of the
      reconstructed magnetic field component for that axis are replaced by the
      face-centered magnetic field values.
+
+.. note::
+
+   Under the hood, the default predictor-corrector temporal integration scheme
+   **always** uses ``"nn"`` reconstruction to compute fluxes during the
+   prediction stage (aka the partial timestep); the scheme breaks for any other
+   choices.
+
+   This is why the number of required ghost zones is ``1 + staling_rate``:
+      * the first term is the staling depth of the ``"nn"`` reconstructor
+      * the second term is the staling depth of the reconstructor specified by
+        the :par:param:`~Method:mhd_vlct:reconstruct_method` parameter; this
+        is used for computing fluxes for the second stage (for the full
+        timestep). 
 
 .. _using-vlct-riemann-solver:
 
@@ -894,8 +906,6 @@ This method currently ignores all of the floor parameters that are set in the ``
 =================
 
 PPML ideal MHD solver
-
-.. _vlct_overview:
 
 ``"sink_maker"`` method
 =======================

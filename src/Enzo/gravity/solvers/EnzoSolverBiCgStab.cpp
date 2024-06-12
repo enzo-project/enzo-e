@@ -29,9 +29,9 @@
 /// LINE 16:     P = R + beta * (P - omega * V)
 /// LINE 17:  end for
 
-#include "cello.hpp"
-#include "charm_simulation.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_COPY_X0
 // #define DEBUG_COPY_R
@@ -890,7 +890,7 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
 
 #ifdef DEBUG_READ
     char buffer[40];
-    sprintf (buffer,"Q.%s",block->name().c_str());
+    snprintf (buffer,sizeof(buffer),"Q.%s",block->name().c_str());
     enzo_float * P = (enzo_float*) field.values(ip_);
     FILE * fp = fopen(buffer,"r");
     for (int i=0; i<m_; i++) fscanf (fp,"%g",P+i);
@@ -1192,7 +1192,7 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
 
 #ifdef DEBUG_WRITE
     char buffer[40];
-    sprintf (buffer,"Q.%s",block->name().c_str());
+    snprintf (buffer,sizeof(buffer),"Q.%s",block->name().c_str());
     FILE * fp = fopen(buffer,"w");
     enzo_float * Q = (enzo_float*) field.values(iq_);
     for (int i=0; i<m_; i++) fprintf (fp,"%g\n",Q[i]);

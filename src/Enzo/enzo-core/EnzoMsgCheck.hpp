@@ -14,6 +14,7 @@
 #define ADAPT_BUFFER_SIZE 2000
 
 class EnzoBlock;
+class IoEnzoBlock;
 
 class EnzoMsgCheck : public CMessage_EnzoMsgCheck {
 

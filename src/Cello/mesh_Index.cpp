@@ -500,7 +500,7 @@ void Index::write (int ip,
 		   const int nb3[3]) const
 {
   char filename[80];
-  sprintf (filename,"index.%s.%d",msg,ip);
+  snprintf (filename,sizeof(filename),"index.%s.%d",msg,ip);
   FILE * fp = fopen(filename,"a");
 
   print_(fp,msg,max_level,rank,nb3,false);

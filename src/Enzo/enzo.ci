@@ -14,22 +14,6 @@ module enzo {
   readonly int EnzoMsgCheck::counter[CONFIG_NODE_SIZE];
 
   readonly EnzoConfig g_enzo_config;
-  readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::DomainLeftEdge [CONFIG_NODE_SIZE_3];
-  readonly enzo_float EnzoBlock::DomainRightEdge[CONFIG_NODE_SIZE_3];
-  readonly int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
-  readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
 
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
@@ -39,9 +23,7 @@ module enzo {
   PUPable GrackleFacade;
 
   // EnzoInitial
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
-#endif
   PUPable EnzoInitialAccretionTest;
   PUPable EnzoInitialBBTest;
   PUPable EnzoInitialBCenter;
@@ -111,21 +93,13 @@ module enzo {
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
 
-  PUPable EnzoIntegrationQuanUpdate;
-  PUPable EnzoReconstructorNN;
-  // EnzoReconstructorPLMEnzoRKLim
-  PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
-  // EnzoReconstructorPLMAthenaLim
-  PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
-
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
   PUPable EnzoMethodStarMakerSTARSS;
 
-  PUPable EnzoBfieldMethodCT;
-
   PUPable EnzoPhysicsCosmology;
   PUPable EnzoPhysicsFluidProps;
+  PUPable EnzoPhysicsGravity;
 
   PUPable EnzoProblem;
   PUPable EnzoProlong;
@@ -185,7 +159,7 @@ module enzo {
     entry EnzoBlock (MsgType msg_type);
 
     entry EnzoBlock();
-
+ 
     // EnzoMethodFeedbackSTARSS synchronization entry methods
     entry void p_method_feedback_starss_end();
 

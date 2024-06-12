@@ -11,8 +11,9 @@
 /// particles (particles in the "is_gravitating" group, e.g. "dark" matter
 /// particles)
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 // #define DEBUG_COLLAPSE
 
@@ -32,9 +33,10 @@ extern "C" void  FORTRAN_NAME(dep_grid_cic)
 
 //----------------------------------------------------------------------
 
-EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
+EnzoMethodPmDeposit::EnzoMethodPmDeposit (ParameterGroup p)
   : Method(),
-    alpha_(alpha)
+    // read value from "Method:pm_deposit:alpha"
+    alpha_(p.value_float ("alpha",0.5))
 {
   // Check if particle types in "is_gravitating" group have either a constant
   // or an attribute called "mass" (but not both).

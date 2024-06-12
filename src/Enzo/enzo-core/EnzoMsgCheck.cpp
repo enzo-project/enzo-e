@@ -8,6 +8,8 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
+#include "Enzo/io/io.hpp" // IoEnzoBlock
+
 //----------------------------------------------------------------------
 
 long EnzoMsgCheck::counter[CONFIG_NODE_SIZE] = {0};

@@ -17,20 +17,45 @@ class EnzoMethodPpm : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPpm object
-  EnzoMethodPpm(bool store_fluxes_for_corrections);
+  EnzoMethodPpm(bool store_fluxes_for_corrections, ParameterGroup p);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoMethodPpm (CkMigrateMessage *m)
     : Method (m),
       comoving_coordinates_(false),
-      store_fluxes_for_corrections_(false)
+      store_fluxes_for_corrections_(false),
+      diffusion_(false),
+      flattening_(0),
+      pressure_free_(false),
+      steepening_(false),
+      use_minimum_pressure_support_(false),
+      minimum_pressure_support_parameter_(0.0)
   {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
+private:
+
+  /// This method does most of the heavy-lifting
+  ///
+  /// @note
+  /// This is only a static method for historical reasons. Feel free to better
+  /// integrate this with the rest of the class
+  static int SolveHydroEquations(EnzoBlock& block,
+                                 enzo_float time,
+                                 enzo_float dt,
+                                 bool comoving_coordinates,
+                                 bool single_flux_array,
+                                 bool diffusion,
+                                 int flattening,
+                                 bool pressure_free,
+                                 bool steepening,
+                                 bool use_minimum_pressure_support,
+                                 enzo_float minimum_pressure_support_parameter);
 
 public: // virtual methods
 
@@ -47,6 +72,16 @@ protected: // interface
 
   bool comoving_coordinates_;
   bool store_fluxes_for_corrections_;
+
+  bool diffusion_;
+  int flattening_;
+  bool pressure_free_;
+  bool steepening_;
+
+  // in the future, it may make sense to move the following parameters to
+  // PhysicsFluidProps or EnzoFluidFloorsConfig
+  bool use_minimum_pressure_support_;
+  enzo_float minimum_pressure_support_parameter_;
 };
 
 #endif /* ENZO_ENZO_METHOD_PPM_HPP */

@@ -335,26 +335,6 @@ gravity
 
 ----
 
-.. par:parameter:: Method:gravity:grav_const
-
-   :Summary: :s:`Gravitational constant`
-   :Type:    :par:typefmt:`float`
-   :Default: :d:`6.67384e-8`
-   :Scope:     :z:`Enzo`
-
-   Gravitational constant used in place of G.  The default is G in cgs units.
-   For non-cosmological simulations, if the user wants to use
-   the standard value for the gravitational constant, the user must set a
-   value which is consistent with their choice of units; i.e.,
-   its value must be :math:`G_{cgs}\times M \times T^2 \times L^{-3}`, or equivalently,
-   :math:`G_{cgs}\times D \times T^2`, where :math:`M, D, T, L` are the mass, density, time,
-   and length units, and :math:`G_{cgs}` is the value of the gravitational constant in cgs units.
-
-   In cosmological simulations, this parameter is ignored.
-
-
-----
-
 .. par:parameter:: Method:gravity:order
 
    :Summary: :s:`Order of accuracy discretization to use for the discrete Laplacian`
@@ -401,6 +381,27 @@ gravity
    timestep is independent of how the acceleration vectors are oriented relative
    to the mesh.`
 
+----
+
+.. par:parameter:: Method:gravity:grav_const
+
+   :Summary: :s:`Gravitational constant`
+   :Type:    :par:typefmt:`float`
+   :Default: :d:`none`
+   :Scope:     :z:`Enzo`
+
+   .. warning::
+
+      This parameter is deprecated and will be removed in the future.
+      The user should use :par:param:`Physics:gravity:grav_const_codeU`
+      instead. These 2 parameters have identical behavior when using
+      the ``"gravity"`` method, but the new parameter influences other
+      gravity-related calculations such as (but *NOT* limited to)
+
+        - calculation of acceleration from a static potential
+        - enforcement of minimum pressure support
+        - star formation
+        - certain initial conditions
 
 heat
 ----

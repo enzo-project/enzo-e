@@ -9,17 +9,18 @@
 #include <limits>
 #include <array>
 
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
-#include "cello.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 
 // return random value drawn from a uniform distribution on the unit interval
 double uniform_dist_transform_(std::minstd_rand &generator,
                                bool include_zero, bool include_one){
 
-  static_assert((generator.max() <= UINT32_MAX) && (generator.min() == 1), 
-                "Unexpected PRNG Property"); // sanity-check!
+  // this static_assert breaks things on macOS's apple-clang compiler
+  //static_assert((generator.max() <= UINT32_MAX) && (generator.min() == 1), 
+  //              "Unexpected PRNG Property"); // sanity-check!
 
   // cast to double since they can perfectly represent all values of uint32_t
   double raw = static_cast<double>(generator());
@@ -95,10 +96,10 @@ public:
     if (Nwaves_ > 0 && amplitude_ > 0.){
       std::minstd_rand generator(seed);
 
-      // These are sanity-checks for our assumptions for our about the
-      // generator
-      static_assert((generator.max() <= UINT32_MAX) &&(generator.min() == 1), 
-                    "Unexpected PRNG Property"); // sanity-check!
+      // this static_assert breaks things on macOS's apple-clang compiler
+      // sanity-checks for our assumptions for our about the generator
+      //static_assert((generator.max() <= UINT32_MAX) &&(generator.min() == 1), 
+      //              "Unexpected PRNG Property"); // sanity-check!
 
       for (std::size_t i=0; i < Nwaves; i++){
         // draw wavelength from [min_lambda, max_lambda]

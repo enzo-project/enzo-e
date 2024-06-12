@@ -12,17 +12,20 @@
 ///         iterative procedure to merge particles together, so that no
 ///         two particles are within a 'merging radius' of each other.
 
-#include "cello.hpp"
-#include "enzo.hpp"
-#include "../FofLib.hpp" // should this be in "enzo.hpp"?
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
+#include "Enzo/particle/FofLib.hpp"
+
 #include <time.h>
 
 //#define DEBUG_MERGESINKS
 
 
-EnzoMethodMergeSinks::EnzoMethodMergeSinks(double merging_radius_cells)
+EnzoMethodMergeSinks::EnzoMethodMergeSinks(ParameterGroup p)
   : Method(),
-    merging_radius_cells_(merging_radius_cells)
+    merging_radius_cells_(p.value_float("merging_radius_cells",8.0))
 {
   // This method requires three dimensions.
   ASSERT("EnzoMethodMergeSinks::EnzoMethodMergeSinks()",
@@ -73,8 +76,9 @@ void EnzoMethodMergeSinks::pup (PUP::er &p)
 
 void EnzoMethodMergeSinks::compute ( Block *block) throw()
 {
-  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     do_checks_(block);
+  }
 
   if (block->is_leaf()){
     this->compute_(block);

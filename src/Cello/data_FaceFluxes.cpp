@@ -387,6 +387,7 @@ void FaceFluxes::print (Block * block, std::string message)
 {
   cello_float min=1e30, max=-1e30, avg=0.0;
   int mx,my,mz;
+  get_size(&mx,&my,&mz);
   for (int iz=0; iz<mz; iz++) {
     for (int iy=0; iy<my; iy++) {
       for (int ix=0; ix<mx; ix++) {

@@ -6,8 +6,9 @@
 /// @brief    Initializer for the Shu Collapse problem as described
 ///           in Federrath et al 2010, ApJ, 713, 269.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 EnzoInitialShuCollapse::EnzoInitialShuCollapse
 (int cycle, double time,
@@ -120,15 +121,11 @@ void EnzoInitialShuCollapse::enforce_block
 	 "required.",
 	 enzo::problem()->method_exists("mhd_vlct"));
 
-  // Check that mhd_choice parameter is set to "no_bfield"
-  ASSERT("EnzoInitialShuCollapse",
-	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
-	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
+  // only been tested with the hllc Riemann Solver
 
-  // Check that riemann_solver parameter is set to "hllc"
-  ASSERT("EnzoInitialShuCollapse",
-	 "Method:mhd_vlct:mhd_choice must be set to hllc",
-	 enzo::config()->method_vlct_riemann_solver == "hllc");
+  // require pure hydrodynamics
+  ASSERT("EnzoInitialShuCollapse","only works in pure-hydro sims",
+	     !enzo::uses_magnetic_fields());
 
   if (!block->is_leaf()) return;
   ASSERT("EnzoInitialShuCollapse",
@@ -240,7 +237,7 @@ void EnzoInitialShuCollapse::enforce_block
   std::fill_n(specific_te,m,specific_ke + specific_ie);
 
   // Now to initialise the density field
-  const double const_G  = enzo_constants::grav_constant * enzo::units()->density() *
+  const double const_G  = enzo::grav_constant_cgs() * enzo::units()->density() *
     enzo::units()->time() * enzo::units()->time();
 
   const double density_profile_factor =

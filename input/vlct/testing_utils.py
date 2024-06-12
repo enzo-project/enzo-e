@@ -281,8 +281,12 @@ def isclose(a,b,abs_tol = False):
     # subtracted
     if abs_tol:
         # slow wave requires slightly bigger tolerance (since it includes more
-        # timesteps which allows the floating point errors to grow more)
-        atol = 5.e-14
+        # timesteps which allows the floating point errors to grow more).
+        # -> the variation can be shockingly large between machines. When
+        #    comparing ubuntu 20.04 with a macbook, the difference was nearly
+        #    2e-13 while both used gcc compilers. We choose something in the
+        #    middle...
+        atol = 7.e-14
     else:
         atol = 0
     return np.isclose(a,b,rtol=err,atol=atol)

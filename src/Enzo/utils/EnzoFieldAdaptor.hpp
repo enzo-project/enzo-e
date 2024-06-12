@@ -262,9 +262,14 @@ public:
   /// @note
   /// You should treat the returned value as a `const enzo_float*` (do not
   /// modify the values referenced by the pointer)
-  inline gr_float* ptr_for_grackle(const std::string& name,
-                                   bool require_exists = false) const{
-    const gr_float* ptr;
+  ///
+  /// @note
+  /// We opt to return enzo_float rather than gr_float due to some issues with
+  /// header-inclusion order. This is totally fine since gr_float must be
+  /// equivalent to enzo_float.
+  inline enzo_float* ptr_for_grackle(const std::string& name,
+                                     bool require_exists = false) const{
+    const enzo_float* ptr;
     if (holds_block_){
       ptr = reinterpret_cast<BlockWrapper*>(wrapper_)->ptr_grackle(name);
     } else {
@@ -275,7 +280,7 @@ public:
       ERROR1("EnzoFieldAdaptor::ptr_for_grackle",
              "there is no array called \"%s\"", name.c_str());
     }
-    return const_cast<gr_float*>(ptr);
+    return const_cast<enzo_float*>(ptr);
   }
 
   /// Compute the grackle grid properties.

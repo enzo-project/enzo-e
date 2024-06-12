@@ -18,11 +18,13 @@ class MethodFluxCorrect : public Method
 
 public: // interface
 
+  /// create a new MethodFluxCorrect from a ParameterGroup
+  MethodFluxCorrect(ParameterGroup p) noexcept;
+
   /// Create a new MethodFluxCorrect
   MethodFluxCorrect
-  (const std::string group, bool enable,
-   const std::vector<std::string>& min_digits_fields,
-   const std::vector<double>& min_digits_values) throw();
+  (std::string group, bool enable,
+   std::map<std::string, double> min_digits_map) noexcept;
 
   /// Destructor
   virtual ~MethodFluxCorrect() throw()

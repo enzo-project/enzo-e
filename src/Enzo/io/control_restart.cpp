@@ -11,11 +11,12 @@
 
 //--------------------------------------------------
 
-#include "enzo.hpp"
+#include "Cello/charm_simulation.hpp"
+#include "Cello/charm_mesh.hpp"
+#include "Cello/main.hpp"
 
-#include "charm_simulation.hpp"
-#include "charm_mesh.hpp"
-#include "main.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/io/io.hpp"
 
 // #define TRACE_RESTART
 
