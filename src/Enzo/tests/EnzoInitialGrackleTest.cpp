@@ -215,7 +215,7 @@ void EnzoInitialGrackleTest::enforce_block
 
   // Finally compute temperature and pressure if fields are tracked
   // for output
-  int comoving_coordinates = enzo_config->physics_cosmology;
+  int comoving_coordinates = enzo::cosmology()!=nullptr;
   if (pressure){
     const enzo_float gamma = enzo::fluid_props()->gamma();
     EnzoComputePressure compute_pressure (gamma,comoving_coordinates);

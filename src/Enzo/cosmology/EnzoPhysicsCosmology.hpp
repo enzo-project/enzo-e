@@ -35,28 +35,17 @@ public: // interface
   }
 
   /// Constructor
-  EnzoPhysicsCosmology
-  (
-   enzo_float hubble_constant_now,
-   enzo_float omega_matter_now,
-   enzo_float omega_baryon_now,
-   enzo_float omega_cdm_now,
-   enzo_float omega_lambda_now,
-   enzo_float comoving_box_size,
-   enzo_float max_expansion_rate,
-   enzo_float initial_redshift,
-   enzo_float final_redshift
-   )
+  EnzoPhysicsCosmology(ParameterGroup p)
     : Physics(),
-      hubble_constant_now_(hubble_constant_now),
-      omega_matter_now_(omega_matter_now),
-      omega_baryon_now_(omega_baryon_now),
-      omega_cdm_now_(omega_cdm_now),
-      omega_lambda_now_(omega_lambda_now),
-      comoving_box_size_(comoving_box_size),
-      max_expansion_rate_(max_expansion_rate),
-      initial_redshift_(initial_redshift),
-      final_redshift_(final_redshift),
+      hubble_constant_now_(p.value_float("hubble_constant_now",0.701)),
+      omega_matter_now_(p.value_float("omega_matter_now", 0.279)),
+      omega_baryon_now_(p.value_float("omega_baryon_now", 1.0)),
+      omega_cdm_now_(p.value_float("omega_cdm_now", 0.0)),
+      omega_lambda_now_(p.value_float("omega_lambda_now", 0.721)),
+      comoving_box_size_(p.value_float("comoving_box_size", 64.0)),
+      max_expansion_rate_(p.value_float("max_expansion_rate", 0.01)),
+      initial_redshift_(p.value_float("initial_redshift",  20.0)),
+      final_redshift_(p.value_float("final_redshift")),
       cosmo_a_(0.0),
       cosmo_dadt_(0.0),
       current_redshift_(-1.0)

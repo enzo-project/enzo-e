@@ -300,8 +300,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
   if (temperature) {
     EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                               enzo_config->physics_cosmology);
-
+                                               enzo::cosmology() != nullptr);
     compute_temperature.compute(block);
   }
 
