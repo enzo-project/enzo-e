@@ -38,6 +38,8 @@ Hierarchy::Hierarchy
   refinement_(refinement),
   min_level_(min_level),
   max_level_(max_level),
+  refined_regions_lower_(),
+  refined_regions_upper_(),
   num_blocks_(0),
   num_blocks_level_(),
   num_particles_(0),
@@ -81,6 +83,8 @@ void Hierarchy::pup (PUP::er &p)
   p | refinement_;
   p | min_level_;
   p | max_level_;
+  p | refined_regions_lower_;
+  p | refined_regions_upper_;
 
   p | num_blocks_;
   p | num_blocks_level_;
@@ -182,11 +186,19 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-void Hierarchy::root_blocks (int * nbx, int * nby, int * nbz) const throw()
+void Hierarchy::root_blocks
+(int * nbx, int * nby, int * nbz,int level) const throw()
 {
   if (nbx) (*nbx) = blocking_[0];
   if (nby) (*nby) = blocking_[1];
   if (nbz) (*nbz) = blocking_[2];
+  if (level > 0) {
+    const int r = std::pow(2,level);
+    const int rank = cello::rank();
+    if (nbx && rank >= 1) (*nbx) *= r;
+    if (nby && rank >= 2) (*nby) *= r;
+    if (nbz && rank >= 3) (*nbz) *= r;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -301,6 +313,32 @@ void Hierarchy::create_subblock_array () throw()
      mbx,mby,mbz,
      num_field_blocks);
     
+}
+
+// --------------------------------------------------------------------
+
+void Hierarchy::refined_region_lower(int* region_lower, int level) throw()
+{
+  if (level >= 0){
+    region_lower[0] = refined_regions_lower_.at(level).at(0);
+    region_lower[1] = refined_regions_lower_.at(level).at(1);
+    region_lower[2] = refined_regions_lower_.at(level).at(2);
+  } else {
+    region_lower[0] = 0;
+    region_lower[1] = 0;
+    region_lower[2] = 0;
+  }
+}
+
+void Hierarchy::refined_region_upper(int* region_upper, int level) throw()
+{
+  if (level >= 0) {
+    region_upper[0] = refined_regions_upper_.at(level).at(0);
+    region_upper[1] = refined_regions_upper_.at(level).at(1);
+    region_upper[2] = refined_regions_upper_.at(level).at(2);
+  } else {
+    root_blocks(region_upper, region_upper+1, region_upper+2);
+  }
 }
 
 // --------------------------------------------------------------------

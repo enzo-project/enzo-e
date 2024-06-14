@@ -60,6 +60,7 @@ Simulation::Simulation
   scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
+  sync_init_block_count_(),
   sync_output_begin_(),
   sync_output_write_(),
   sync_restart_created_(),
@@ -131,6 +132,7 @@ Simulation::Simulation()
   scalar_descr_index_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
+  sync_init_block_count_(),
   sync_output_begin_(),
   sync_output_write_(),
   sync_restart_created_(),
@@ -190,6 +192,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     scalar_descr_index_(NULL),
     field_descr_(NULL),
     particle_descr_(NULL),
+    sync_init_block_count_(),
     sync_output_begin_(),
     sync_output_write_(),
     sync_restart_created_(),
@@ -287,6 +290,7 @@ void Simulation::pup (PUP::er &p)
     monitor_->print ("Simulation","restarting");
   }
 
+  p | sync_init_block_count_;
   p | sync_output_begin_;
   p | sync_output_write_;
   p | sync_restart_created_;
@@ -746,6 +750,8 @@ void Simulation::initialize_hierarchy_() throw()
                lp3[1] ? root_blocks[1] : 0,
                lp3[2] ? root_blocks[2] : 0 };
   hierarchy_->set_periodicity (p3[0],p3[1],p3[2]);
+  hierarchy_->set_refined_regions_lower(config_->refined_regions_lower);
+  hierarchy_->set_refined_regions_upper(config_->refined_regions_upper);
 }
 
 //----------------------------------------------------------------------
@@ -768,6 +774,12 @@ void Simulation::initialize_balance_() throw()
 
 void Simulation::initialize_block_array_() throw()
 {
+  if (CkMyPe() == 0) {
+    // Set sync counter for initial blocks;
+    int num_initial_blocks = initial_block_count();
+    sync_init_block_count_.set_stop(num_initial_blocks);
+  }
+
   // Create the root-level blocks for level = 0
   hierarchy_->create_block_array ();
 
@@ -775,17 +787,46 @@ void Simulation::initialize_block_array_() throw()
   if (hierarchy_->min_level() < 0) {
     hierarchy_->create_subblock_array ();
   }
-
-  contribute (CkCallback (CkIndex_Simulation::r_initialize_root_blocks_created(nullptr),
-                          thisProxy));
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::r_initialize_root_blocks_created(CkReductionMsg * msg)
-{
-  delete msg;
-  hierarchy_->block_array().doneInserting();
+int Simulation::initial_block_count() throw() {
+  // TODO: Generalise this to arbitrary rank (assumes rank = 3)
+  // Count blocks on level 0;
+  int nx, ny, nz;
+  hierarchy_->root_blocks(&nx, &ny, &nz);
+  int block_count = nx * ny * nz;
+
+  // Count blocks below level 0.
+  if (hierarchy_->min_level() < 0) {
+    while (nx > 0) {
+      nx >>= 1; ny >>= 1; nz >>= 1;
+      block_count += nx * ny * nz;
+    }
+  }
+
+  // Count blocks above level 0.
+  int lower[3], upper[3];
+  int num_refined_levels = hierarchy_->refined_region_lower().size();
+  for (int l=0; l<num_refined_levels; l++) {
+    hierarchy_->refined_region_lower(lower, l);
+    hierarchy_->refined_region_upper(upper, l);
+    nx = upper[0] - lower[0]; 
+    ny = upper[1] - lower[1]; 
+    nz = upper[2] - lower[2];
+
+    block_count += 8 * nx * ny * nz;
+  }
+
+  return block_count;
+}
+
+void Simulation::p_initial_block_created() throw() {
+  if (sync_init_block_count_.next()) {
+    hierarchy_->block_array().doneInserting();
+    hierarchy_->block_array().p_initial_begin();
+  }
 }
 //----------------------------------------------------------------------
 

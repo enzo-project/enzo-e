@@ -128,11 +128,14 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_hdf5_field_datasets,
        enzo_config->initial_hdf5_field_coords,
        enzo_config->initial_hdf5_field_names,
+       enzo_config->initial_hdf5_field_levels,
        enzo_config->initial_hdf5_particle_files,
        enzo_config->initial_hdf5_particle_datasets,
        enzo_config->initial_hdf5_particle_coords,
        enzo_config->initial_hdf5_particle_types,
-       enzo_config->initial_hdf5_particle_attributes);
+       enzo_config->initial_hdf5_particle_attributes,
+       enzo_config->initial_hdf5_particle_levels
+       );
 
   } else if (type == "music") {
 
@@ -214,24 +217,8 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "shock_tube") {
     initial = new EnzoInitialShockTube(cycle, time, p_group);
   } else if (type == "soup") {
-    const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
-      (cycle, time,
-       enzo_config->initial_soup_file,
-       rank,
-       enzo_config->initial_soup_rotate,
-       enzo_config->initial_soup_array[0],
-       enzo_config->initial_soup_array[1],
-       enzo_config->initial_soup_array[2],
-       enzo_config->initial_soup_d_pos[0],
-       enzo_config->initial_soup_d_pos[1],
-       enzo_config->initial_soup_d_pos[2],
-       enzo_config->initial_soup_d_size[0],
-       enzo_config->initial_soup_d_size[1],
-       enzo_config->initial_soup_d_size[2],
-       enzo_config->initial_soup_density,
-       enzo_config->initial_soup_pressure_in,
-       enzo_config->initial_soup_pressure_out);
+      (cycle, time, p_group);
   } else if (type == "burkertbodenheimer") {
     initial = new EnzoInitialBurkertBodenheimer
       (cycle,time,
@@ -624,6 +611,15 @@ Method * EnzoProblem::create_method_
 
 #endif /* CONFIG_USE_GRACKLE */
 
+  } else if (name == "inference") {
+
+    method = new EnzoMethodInference
+      (enzo_config->method_inference_level_base,
+       enzo_config->method_inference_level_array,
+       enzo_config->method_inference_level_infer,
+       enzo_config->method_inference_field_group,
+       enzo_config->method_inference_overdensity_threshold);
+
   } else if (name == "balance") {
 
     method = new EnzoMethodBalance;
@@ -676,19 +672,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "background_acceleration") {
 
-    // If self-gravity is calculated, we do not need to zero
-    // out the acceleration field from the previous time step
-    // before adding the background accelerations
-    bool zero_acceleration = true;
-    for (int index = 0; index < method_list_.size(); index++){
-      if (method_list_[index]->name() == "gravity"){
-        zero_acceleration = false;
-        break;
-      }
-    }
-
-    method = new EnzoMethodBackgroundAcceleration
-      (zero_acceleration);
+    method = new EnzoMethodBackgroundAcceleration(p_group);
 
   } else if (name == "star_maker") {
 

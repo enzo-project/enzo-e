@@ -4,6 +4,12 @@
 Enzo-E / Cello Parameters
 *************************
 
+.. toctree::
+   :maxdepth: 1
+   :glob:
+   :titlesonly:
+   :numbered:
+
 This page documents all current parameters implemented in Enzo-E /
 Cello.  Each parameter is summarized, its type or types are listed,
 and the default value (if any) is provided.  The scope of the

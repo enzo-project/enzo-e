@@ -68,11 +68,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_field_datasets(),
   initial_hdf5_field_names(),
   initial_hdf5_field_coords(),
+  initial_hdf5_field_levels(),
   initial_hdf5_particle_files(),
   initial_hdf5_particle_datasets(),
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
+  initial_hdf5_particle_levels(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -109,13 +111,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_pressure_out(0.0),
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
-  // EnzoInitialSoup
-  initial_soup_rank(0),
-  initial_soup_file(""),
-  initial_soup_rotate(false),
-  initial_soup_pressure_in(0.0),
-  initial_soup_pressure_out(0.0),
-  initial_soup_density(0.0),
   // EnzoInitialTurbulence
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
@@ -170,21 +165,15 @@ EnzoConfig::EnzoConfig() throw ()
   initial_bb_test_nominal_sound_speed(0.0),
   initial_bb_test_angular_rotation_velocity(0.0),
   initial_bb_test_external_density(0.0),
+  // EnzoMethodInference
+  method_inference_level_base(0),
+  method_inference_level_array(0),
+  method_inference_level_infer(0),
+  method_inference_field_group(),
+  method_inference_overdensity_threshold(0),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-  /// EnzoMethodBackgroundAcceleration
-  method_background_acceleration_flavor(""),
-  method_background_acceleration_mass(0.0),
-  method_background_acceleration_DM_mass(0.0),
-  method_background_acceleration_bulge_mass(0.0),
-  method_background_acceleration_core_radius(1.0E-10),
-  method_background_acceleration_bulge_radius(1.0E-10),
-  method_background_acceleration_stellar_mass(0.0),
-  method_background_acceleration_DM_mass_radius(0.0),
-  method_background_acceleration_stellar_scale_height_r(1.0E-10),
-  method_background_acceleration_stellar_scale_height_z(1.0E-10),
-  method_background_acceleration_apply_acceleration(true), // for debugging
   /// EnzoProlong
   prolong_enzo_type(),
   prolong_enzo_positive(true),
@@ -206,18 +195,11 @@ EnzoConfig::EnzoConfig() throw ()
 {
   for (int i=0; i<3; i++) {
     initial_sedov_array[i] = 0;
-    initial_soup_array[i]  = 0;
-    initial_soup_d_pos[i]  = 0.0;
-    initial_soup_d_size[i] = 0.0;
     initial_collapse_array[i] = 0;
     initial_IG_center_position[i] = 0.5;
     initial_IG_bfield[i] = 0.0;
-    method_background_acceleration_center[i] = 0.5;
-    method_background_acceleration_angular_momentum[i] = 0;
 
   }
-
-  method_background_acceleration_angular_momentum[2] = 1;
 }
 
 //----------------------------------------------------------------------
@@ -302,11 +284,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_hdf5_field_datasets;
   p | initial_hdf5_field_names;
   p | initial_hdf5_field_coords;
+  p | initial_hdf5_field_levels;
   p | initial_hdf5_particle_files;
   p | initial_hdf5_particle_datasets;
   p | initial_hdf5_particle_coords;
   p | initial_hdf5_particle_types;
   p | initial_hdf5_particle_attributes;
+  p | initial_hdf5_particle_levels;
 
   p | initial_music_field_coords;
   p | initial_music_field_datasets;
@@ -364,16 +348,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_disk;
   p | initial_IG_use_gas_particles;
 
-  p | initial_soup_rank;
-  p | initial_soup_file;
-  p | initial_soup_rotate;
-  PUParray(p,initial_soup_array,3);
-  PUParray(p,initial_soup_d_pos,3);
-  PUParray(p,initial_soup_d_size,3);
-  p | initial_soup_pressure_in;
-  p | initial_soup_pressure_out;
-  p | initial_soup_density;
-
   p | initial_merge_sinks_test_particle_data_filename;
 
   p | method_check_num_files;
@@ -381,6 +355,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_dir;
   p | method_check_monitor_iter;
   p | method_check_include_ghosts;
+
+  p | method_inference_level_base;
+  p | method_inference_level_array;
+  p | method_inference_level_infer;
+  p | method_inference_field_group;
+  p | method_inference_overdensity_threshold;
 
   PUParray(p,initial_accretion_test_sink_position,3);
   PUParray(p,initial_accretion_test_sink_velocity,3);
@@ -408,20 +388,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_bb_test_external_density;
 
   p | method_turbulence_edot;
-
-  p | method_background_acceleration_flavor;
-  p | method_background_acceleration_mass;
-  p | method_background_acceleration_DM_mass;
-  p | method_background_acceleration_bulge_mass;
-  p | method_background_acceleration_core_radius;
-  p | method_background_acceleration_bulge_radius;
-  p | method_background_acceleration_stellar_mass;
-  p | method_background_acceleration_DM_mass_radius;
-  p | method_background_acceleration_stellar_scale_height_r;
-  p | method_background_acceleration_stellar_scale_height_z;
-  p | method_background_acceleration_apply_acceleration;
-  PUParray(p,method_background_acceleration_angular_momentum,3);
-  PUParray(p,method_background_acceleration_center,3);
 
   p | prolong_enzo_type;
   p | prolong_enzo_positive;
@@ -480,7 +446,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
   read_initial_shu_collapse_(p);
-  read_initial_soup_(p);
   read_initial_turbulence_(p);
 
   // it's important for read_physics_
@@ -488,9 +453,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Method [sorted]
 
-  read_method_background_acceleration_(p);
   read_method_check_(p);
   read_method_turbulence_(p);
+  read_method_inference_(p);
 
   read_prolong_enzo_(p);
 
@@ -587,6 +552,16 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
   initial_hdf5_max_level = p->value_integer (name_initial + "max_level", 0);
   initial_hdf5_format    = p->value_string  (name_initial + "format", "music");
 
+  // Ensure hdf5 max level agrees with adapt max initial level.
+  int adapt_max_level = p->value_integer("Adapt:max_level", 0);
+  int adapt_max_initial_level = p->value_integer("Adapt:max_initial_level", adapt_max_level);
+  if (initial_hdf5_max_level > 0 && adapt_max_initial_level != initial_hdf5_max_level) {
+    ERROR2("Config::read_initial_hdf5_()",
+    "The hdf5 max level (%d) should equal Adapt:max_initial_level (%d)",
+    initial_hdf5_max_level,
+    adapt_max_initial_level);
+  }
+
   for (int i=0; i<3; i++) {
     initial_hdf5_blocking[i] =
       p->list_value_integer(i,name_initial+"blocking",1);
@@ -606,6 +581,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
     const std::string file    = p->value_string (file_id + "file","");
     const std::string dataset = p->value_string (file_id + "dataset","");
     const std::string coords  = p->value_string (file_id + "coords","xyz");
+    const int level           = p->value_integer (file_id + "level", 0);
 
     if (type == "particle") {
 
@@ -616,6 +592,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_particle_coords.    push_back(coords);
       initial_hdf5_particle_types.     push_back(name);
       initial_hdf5_particle_attributes.push_back(attribute);
+      initial_hdf5_particle_levels.    push_back(level);
 
     } else if (type == "field") {
 
@@ -623,6 +600,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_field_datasets.     push_back(dataset);
       initial_hdf5_field_names.        push_back(name);
       initial_hdf5_field_coords.       push_back(coords);
+      initial_hdf5_field_levels.       push_back(level);
 
     } else {
       ERROR2 ("EnzoConfig::read",
@@ -785,31 +763,6 @@ void EnzoConfig::read_initial_bcenter_(Parameters * p)
   // VL+CT b-field initialization
   initial_bcenter_update_etot = p->value_logical
     ("Initial:vlct_bfield:update_etot",false);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_soup_(Parameters * p)
-{
-  // InitialSoup initialization
-
-  initial_soup_rank      = p->value_integer ("Initial:soup:rank",0);
-  initial_soup_file      = p->value_string ("Initial:soup:file","soup.png");
-  initial_soup_rotate    = p->value_logical ("Initial:soup:rotate",false);
-  for (int axis=0; axis<3; axis++) {
-    initial_soup_array[axis]  = p->list_value_integer
-      (axis,"Initial:soup:array",1);
-    initial_soup_d_pos[axis]  = p->list_value_float
-      (axis,"Initial:soup:d_pos",0.0);
-    initial_soup_d_size[axis] = p->list_value_float
-      (axis,"Initial:soup:d_size",0.0);
-  }
-  initial_soup_pressure_in =
-    p->value_float("Initial:soup:pressure_in",1.0);
-  initial_soup_pressure_out =
-    p->value_float("Initial:soup:pressure_out",1e-5);
-  initial_soup_density =
-    p->value_float("Initial:soup:density",1.0);
 }
 
 //----------------------------------------------------------------------
@@ -997,52 +950,6 @@ void EnzoConfig::read_initial_bb_test_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_background_acceleration_(Parameters * p)
-{
-  method_background_acceleration_flavor = p->value_string
-   ("Method:background_acceleration:flavor","unknown");
-
-  method_background_acceleration_mass = p->value_float
-   ("Method:background_acceleration:mass",0.0);
-
-  method_background_acceleration_DM_mass = p->value_float
-   ("Method:background_acceleration:DM_mass",-1.0);
-
-  method_background_acceleration_bulge_mass = p->value_float
-    ("Method:background_acceleration:bulge_mass", 0.0);
-
-  method_background_acceleration_core_radius = p->value_float
-    ("Method:background_acceleration:core_radius", 1.0E-10);
-
-  method_background_acceleration_bulge_radius = p->value_float
-    ("Method:background_acceleration:bulge_radius", 1.0E-10);
-
-  method_background_acceleration_stellar_mass = p->value_float
-    ("Method:background_acceleration:stellar_mass", 0.0);
-
-  method_background_acceleration_DM_mass_radius = p->value_float
-   ("Method:background_acceleration:DM_mass_radius", 0.0);
-
-  method_background_acceleration_stellar_scale_height_r = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_r", 1.0E-10);
-
-  method_background_acceleration_stellar_scale_height_z = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_z", 1.0E-10);
-
-  method_background_acceleration_apply_acceleration = p->value_logical
-    ("Method:background_acceleration:apply_acceleration", true);
-
-  for (int axis = 0; axis < 3; axis++){
-    method_background_acceleration_center[axis] = p->list_value_float
-      (axis,"Method:background_acceleration:center",0.5);
-    method_background_acceleration_angular_momentum[axis] = p->list_value_float
-      (axis,"Method:background_acceleration:angular_momentum",0);
-  }
-
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_method_check_(Parameters * p)
 {
   p->group_set(0,"Method");
@@ -1065,6 +972,25 @@ void EnzoConfig::read_method_check_(Parameters * p)
   }
   method_check_monitor_iter   = p->value_integer("monitor_iter",0);
   method_check_include_ghosts = p->value_logical("include_ghosts",false);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_inference_(Parameters* p)
+{
+  p->group_set(0,"Method");
+  p->group_push("inference");
+
+  method_inference_level_base = p->value_integer ("level_base");
+  method_inference_level_array = p->value_integer ("level_array");
+  method_inference_level_infer = p->value_integer ("level_infer");
+
+  const int rank = p->value_integer("Mesh:root_rank",0);
+
+  method_inference_field_group = p->value_string  ("field_group");
+
+  method_inference_overdensity_threshold = p->value_float
+    ("Method:inference:overdensity_threshold",0.0);
 }
 
 //----------------------------------------------------------------------
