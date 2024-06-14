@@ -12,7 +12,10 @@ if(NOT __processedUserDefaults)
   set(CMAKE_CXX_COMPILER icpc CACHE STRING "")
   set(CMAKE_C_COMPILER icc CACHE STRING "")
   set(CMAKE_Fortran_COMPILER ifort CACHE STRING "")
-  set(CMAKE_Fortran_FLAGS "-nofor-main" CACHE STRING "Default Fortran flags")
+
+  # the minimal set of required flags to successfully compile with this Fortran
+  # compiler are handled internally (if those flags don't work, please update
+  # the relevant internal logic rather than specifying them here)
 
   # these flag(s) are currently only used when using openmp-simd optimizations
   # (to specify available/prefered instruction sets).
@@ -26,9 +29,5 @@ if(NOT __processedUserDefaults)
   set(__processedUserDefaults ON)
 
 else()
-
-  if (USE_DOUBLE_PREC)
-    string(APPEND CMAKE_Fortran_FLAGS " -real-size 64 -double-size 64")
-  endif()
 
 endif()

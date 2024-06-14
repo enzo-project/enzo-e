@@ -13,7 +13,10 @@ if(NOT __processedUserDefaults)
   set(CMAKE_CXX_COMPILER mpicxx CACHE STRING "")
   set(CMAKE_C_COMPILER mpicc CACHE STRING "")
   set(CMAKE_Fortran_COMPILER mpif90  CACHE STRING "")
-  set(CMAKE_Fortran_FLAGS "-ffixed-line-length-132" CACHE STRING "Default Fortran flags")
+
+  # the minimal set of required flags to successfully compile with this Fortran
+  # compiler are handled internally (if those flags don't work, please update
+  # the relevant internal logic rather than specifying them here)
 
   # add optional flags to C and C++ compilers that provide useful warnings
   #set(CMAKE_C_FLAGS "-Wall" CACHE STRING "Default C flags")
@@ -30,8 +33,5 @@ if(NOT __processedUserDefaults)
 
 else()
 
-  if (USE_DOUBLE_PREC)
-    string(APPEND CMAKE_Fortran_FLAGS " -fdefault-real-8 -fdefault-double-8")
-  endif()
 
 endif()

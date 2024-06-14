@@ -297,6 +297,10 @@ elseif (USE_SIMD)
   message(FATAL_ERROR "Can only use `USE_SIMD=ON` when `OPTIMIZE_FP=ON`.")
 endif()
 
+include("RequiredFortranCompileOptions")
+get_required_fortran_options(_ENZOE_REQ_FORTRAN_OPTS)
+add_compile_options("${_ENZOE_REQ_FORTRAN_OPTS}")
+
 # Include machine file second time (if used initially) to set additional options that may depend
 # on global (default) options, such as USE_DOUBLE_PREC
 if (__processedUserDefaults)
