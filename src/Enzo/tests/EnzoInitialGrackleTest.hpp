@@ -17,14 +17,17 @@ class EnzoInitialGrackleTest : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialGrackleTest(const EnzoConfig * enzo_config) throw();
+  EnzoInitialGrackleTest(int cycle, double time, ParameterGroup p) noexcept;
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialGrackleTest);
 
   /// CHARM++ migration constructor
   EnzoInitialGrackleTest(CkMigrateMessage *m)
-     : Initial (m)
+    : Initial(m),
+      min_max_H_number_density_{},
+      min_max_metallicity_{},
+      min_max_temperature_{}
   {  }
 
   /// CHARM++ Pack / Unpack function
@@ -39,7 +42,9 @@ public: // interface
   virtual ~EnzoInitialGrackleTest() throw() {};
 
 private:
-
+  std::array<double,2> min_max_H_number_density_;
+  std::array<double,2> min_max_metallicity_;
+  std::array<double,2> min_max_temperature_;
 };
 
 #endif /* ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP */
