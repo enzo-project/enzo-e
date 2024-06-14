@@ -288,6 +288,10 @@ if (use_papi)
   endif()
 endif()
 
+# define recipies for building external dependencies before we introduce
+# compiler flags specific to Enzo-E (and Cello)
+add_subdirectory(src/External)
+
 # fetch known sets of compiler flags
 # ----------------------------------
 # right now, we apply these flags with add_compile_options
@@ -344,8 +348,6 @@ option(USE_PRECOMPILED_HEADERS
 
 add_subdirectory(src/Cello)
 add_subdirectory(src/Enzo)
-add_subdirectory(src/External)
-
 
 
 if (BUILD_TESTING)
