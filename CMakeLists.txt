@@ -288,11 +288,29 @@ if (use_papi)
   endif()
 endif()
 
+# fetch known sets of compiler flags
+# ----------------------------------
+# right now, we apply these flags with add_compile_options
+# -> this applies the flags to when compiling all targets defined after this
+#    point in the cmake-file (aside: add_compile_options behaves a little more
+#    sensibly than other commands that apply global properties)
+# -> to selectively apply flags based on language (and build-type), we
+#    currently make use of generator expressions.
+#
+# NOTE: we should transition to defining a series of INTERFACE libraries
+# (e.g. CommonOptionsC, CommonOptionsCXX, CommonOptionsFortran) and use
+# those to propogate our compiler-flags to our various targets. This is
+# desirable for 2 reasons:
+#   1. it is a little more explicit and idiomatic
+#   2. language-specific generator-expressions are not supported on all
+#      build-generators (this isn't really a problem per-se, but it would be
+#      nice to be as flexible as possible)
 option(OPTIMIZE_FP "Enables value-unsafe floating-point optimizations (this may already be enabled on some compilers like icc)." OFF)
 option(USE_SIMD "Use OpenMP SIMD directives. This may already be enabled on some compilers (like icc)." OFF)
 include("cmake/EnableFPOptimizations.cmake")
 if (OPTIMIZE_FP)
-  enableFPOptimizations(USE_SIMD)
+  get_fp_optimization_compile_options(${USE_SIMD} _ENZOE_optimization_options)
+  add_compile_options("${_ENZOE_optimization_options}")
 elseif (USE_SIMD)
   message(FATAL_ERROR "Can only use `USE_SIMD=ON` when `OPTIMIZE_FP=ON`.")
 endif()
