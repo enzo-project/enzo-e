@@ -60,6 +60,7 @@ module mesh {
   PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
+  PUPable ObjectSphere;
   PUPable OutputCheckpoint;
   PUPable OutputData;
   PUPable OutputImage;

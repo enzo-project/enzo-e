@@ -207,6 +207,12 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
+      /// EnzoMethodInference
+      method_inference_level_base(0),
+      method_inference_level_array(0),
+      method_inference_level_infer(0),
+      method_inference_field_group(),
+      method_inference_overdensity_threshold(0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -275,6 +281,7 @@ protected: // methods
   //--------------------
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
+  void read_method_inference_(Parameters *);
   void read_method_turbulence_(Parameters *);
 
   void read_physics_(Parameters *);
@@ -484,6 +491,13 @@ public: // attributes
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
+
+  /// EnzoMethodInference
+  int                        method_inference_level_base;
+  int                        method_inference_level_array;
+  int                        method_inference_level_infer;
+  std::string                method_inference_field_group;
+  float                      method_inference_overdensity_threshold;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
