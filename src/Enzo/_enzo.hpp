@@ -107,6 +107,7 @@ enum return_enum {
 //       finished separating out the various subcomponents)
 #include "utils/utils.hpp"
 
+#include "inference/Index3.hpp"
 
 // TODO: remove the following 3 after factoring out other subcomponents
 #include "Enzo/cosmology/cosmology.hpp"
@@ -124,6 +125,9 @@ enum return_enum {
 #include "enzo-core/EnzoConfig.hpp"
 
 #include "enzo-core/EnzoBlock.hpp"
+
+#include "inference/EnzoLevelArray.hpp"
+#include "inference/EnzoMethodInference.hpp"
 
 #include "enzo-core/EnzoBoundary.hpp"
 

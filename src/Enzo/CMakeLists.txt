@@ -97,6 +97,9 @@ add_subdirectory(hydro-mhd)
 # define the Enzo::initial target
 add_subdirectory(initial)
 
+# define the Enzo::inference target
+add_subdirectory(inference)
+
 # define the Enzo::io target
 add_subdirectory(io)
 
@@ -124,6 +127,8 @@ target_link_libraries(enzo
   PUBLIC Enzo::assorted Enzo::chemistry Enzo::cosmology Enzo::fluid-props
   PUBLIC Enzo::gravity Enzo::hydro-mhd Enzo::initial Enzo::io Enzo::mesh
   PUBLIC Enzo::particle Enzo::tests Enzo::utils
+  PUBLIC Enzo::inference
+
   PUBLIC ${Cello_LIBS} ${External_LIBS}
   PUBLIC enzoCharmModule
 )

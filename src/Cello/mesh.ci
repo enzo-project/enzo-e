@@ -60,6 +60,7 @@ module mesh {
   PUPable MethodOutput;
   PUPable MethodRefresh;
   PUPable MethodTrace;
+  PUPable ObjectSphere;
   PUPable OutputCheckpoint;
   PUPable OutputData;
   PUPable OutputImage;
@@ -104,6 +105,7 @@ module mesh {
 
     entry void p_initial_exit();
     entry void r_end_initialize(CkReductionMsg *);
+    entry void p_initial_begin();
     entry void r_initial_new_next(CkReductionMsg *);
     entry void r_initial_new_continue(CkReductionMsg *);
 

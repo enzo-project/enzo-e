@@ -98,6 +98,7 @@ public: // interface
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
+      initial_hdf5_field_levels(),
       initial_hdf5_field_datasets(),
       initial_hdf5_field_files(),
       initial_hdf5_field_names(),
@@ -105,6 +106,7 @@ public: // interface
       initial_hdf5_max_level(),
       initial_hdf5_monitor_iter(),
       initial_hdf5_particle_attributes(),
+      initial_hdf5_particle_levels(),
       initial_hdf5_particle_coords(),
       initial_hdf5_particle_datasets(),
       initial_hdf5_particle_files(),
@@ -198,6 +200,12 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
+      /// EnzoMethodInference
+      method_inference_level_base(0),
+      method_inference_level_array(0),
+      method_inference_level_infer(0),
+      method_inference_field_group(),
+      method_inference_overdensity_threshold(0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -265,6 +273,7 @@ protected: // methods
   //--------------------
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
+  void read_method_inference_(Parameters *);
   void read_method_turbulence_(Parameters *);
 
   void read_physics_(Parameters *);
@@ -340,11 +349,13 @@ public: // attributes
   std::vector < std::string > initial_hdf5_field_datasets;
   std::vector < std::string > initial_hdf5_field_names;
   std::vector < std::string > initial_hdf5_field_coords;
+  std::vector < int >         initial_hdf5_field_levels;
   std::vector < std::string > initial_hdf5_particle_files;
   std::vector < std::string > initial_hdf5_particle_datasets;
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
+  std::vector < int >         initial_hdf5_particle_levels;
 
   /// EnzoInitialMusic
 
@@ -464,6 +475,13 @@ public: // attributes
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
+
+  /// EnzoMethodInference
+  int                        method_inference_level_base;
+  int                        method_inference_level_array;
+  int                        method_inference_level_infer;
+  std::string                method_inference_field_group;
+  float                      method_inference_overdensity_threshold;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

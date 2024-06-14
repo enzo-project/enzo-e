@@ -128,11 +128,14 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_hdf5_field_datasets,
        enzo_config->initial_hdf5_field_coords,
        enzo_config->initial_hdf5_field_names,
+       enzo_config->initial_hdf5_field_levels,
        enzo_config->initial_hdf5_particle_files,
        enzo_config->initial_hdf5_particle_datasets,
        enzo_config->initial_hdf5_particle_coords,
        enzo_config->initial_hdf5_particle_types,
-       enzo_config->initial_hdf5_particle_attributes);
+       enzo_config->initial_hdf5_particle_attributes,
+       enzo_config->initial_hdf5_particle_levels
+       );
 
   } else if (type == "music") {
 
@@ -605,6 +608,15 @@ Method * EnzoProblem::create_method_
     skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
+
+  } else if (name == "inference") {
+
+    method = new EnzoMethodInference
+      (enzo_config->method_inference_level_base,
+       enzo_config->method_inference_level_array,
+       enzo_config->method_inference_level_infer,
+       enzo_config->method_inference_field_group,
+       enzo_config->method_inference_overdensity_threshold);
 
   } else if (name == "balance") {
 

@@ -61,11 +61,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_field_datasets(),
   initial_hdf5_field_names(),
   initial_hdf5_field_coords(),
+  initial_hdf5_field_levels(),
   initial_hdf5_particle_files(),
   initial_hdf5_particle_datasets(),
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
+  initial_hdf5_particle_levels(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -156,6 +158,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_bb_test_nominal_sound_speed(0.0),
   initial_bb_test_angular_rotation_velocity(0.0),
   initial_bb_test_external_density(0.0),
+  // EnzoMethodInference
+  method_inference_level_base(0),
+  method_inference_level_array(0),
+  method_inference_level_infer(0),
+  method_inference_field_group(),
+  method_inference_overdensity_threshold(0),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -262,11 +270,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_hdf5_field_datasets;
   p | initial_hdf5_field_names;
   p | initial_hdf5_field_coords;
+  p | initial_hdf5_field_levels;
   p | initial_hdf5_particle_files;
   p | initial_hdf5_particle_datasets;
   p | initial_hdf5_particle_coords;
   p | initial_hdf5_particle_types;
   p | initial_hdf5_particle_attributes;
+  p | initial_hdf5_particle_levels;
 
   p | initial_music_field_coords;
   p | initial_music_field_datasets;
@@ -331,6 +341,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_dir;
   p | method_check_monitor_iter;
   p | method_check_include_ghosts;
+
+  p | method_inference_level_base;
+  p | method_inference_level_array;
+  p | method_inference_level_infer;
+  p | method_inference_field_group;
+  p | method_inference_overdensity_threshold;
 
   PUParray(p,initial_accretion_test_sink_position,3);
   PUParray(p,initial_accretion_test_sink_velocity,3);
@@ -424,6 +440,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   read_method_check_(p);
   read_method_turbulence_(p);
+  read_method_inference_(p);
 
   read_prolong_enzo_(p);
 
@@ -501,6 +518,16 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
   initial_hdf5_max_level = p->value_integer (name_initial + "max_level", 0);
   initial_hdf5_format    = p->value_string  (name_initial + "format", "music");
 
+  // Ensure hdf5 max level agrees with adapt max initial level.
+  int adapt_max_level = p->value_integer("Adapt:max_level", 0);
+  int adapt_max_initial_level = p->value_integer("Adapt:max_initial_level", adapt_max_level);
+  if (initial_hdf5_max_level > 0 && adapt_max_initial_level != initial_hdf5_max_level) {
+    ERROR2("Config::read_initial_hdf5_()",
+    "The hdf5 max level (%d) should equal Adapt:max_initial_level (%d)",
+    initial_hdf5_max_level,
+    adapt_max_initial_level);
+  }
+
   for (int i=0; i<3; i++) {
     initial_hdf5_blocking[i] =
       p->list_value_integer(i,name_initial+"blocking",1);
@@ -520,6 +547,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
     const std::string file    = p->value_string (file_id + "file","");
     const std::string dataset = p->value_string (file_id + "dataset","");
     const std::string coords  = p->value_string (file_id + "coords","xyz");
+    const int level           = p->value_integer (file_id + "level", 0);
 
     if (type == "particle") {
 
@@ -530,6 +558,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_particle_coords.    push_back(coords);
       initial_hdf5_particle_types.     push_back(name);
       initial_hdf5_particle_attributes.push_back(attribute);
+      initial_hdf5_particle_levels.    push_back(level);
 
     } else if (type == "field") {
 
@@ -537,6 +566,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_field_datasets.     push_back(dataset);
       initial_hdf5_field_names.        push_back(name);
       initial_hdf5_field_coords.       push_back(coords);
+      initial_hdf5_field_levels.       push_back(level);
 
     } else {
       ERROR2 ("EnzoConfig::read",
@@ -908,6 +938,25 @@ void EnzoConfig::read_method_check_(Parameters * p)
   }
   method_check_monitor_iter   = p->value_integer("monitor_iter",0);
   method_check_include_ghosts = p->value_logical("include_ghosts",false);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_inference_(Parameters* p)
+{
+  p->group_set(0,"Method");
+  p->group_push("inference");
+
+  method_inference_level_base = p->value_integer ("level_base");
+  method_inference_level_array = p->value_integer ("level_array");
+  method_inference_level_infer = p->value_integer ("level_infer");
+
+  const int rank = p->value_integer("Mesh:root_rank",0);
+
+  method_inference_field_group = p->value_string  ("field_group");
+
+  method_inference_overdensity_threshold = p->value_float
+    ("Method:inference:overdensity_threshold",0.0);
 }
 
 //----------------------------------------------------------------------
