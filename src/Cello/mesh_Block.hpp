@@ -175,7 +175,22 @@ public: // interface
 
   /// Return the index of this Block in global coordinates for its level
   void index_global
-  ( int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const;
+  ( Index index, int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const;
+
+  void index_global
+  ( int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const {
+    index_global(index_, ix, iy, iz, nx, ny, nz);
+  };
+
+  /// Return the index for the block corresponding to the given global coordinates.
+  Index index_from_global(int ix, int iy, int iz, int level, int min_level);
+
+  /// Create child blocks during initialization.
+  virtual void create_initial_child_blocks() {};
+
+  /// Return boolean indicating if the indicated block should refine
+  /// during the initialization phase.
+  bool refine_during_initialization (Index index) const throw();
 
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
@@ -241,8 +256,11 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
-  /// Initiate applying the sequence of Initial conditions
-  void initial_new_begin_(int level);
+  /// Initiate applying all Initial conditions.
+  void p_initial_begin() { initial_begin(); }
+  void initial_begin();
+  void initial_new_begin_();
+
   /// Continue to the next Initial conditions object
   void r_initial_new_next(CkReductionMsg * msg)
   { delete msg; initial_new_next_(); }
@@ -595,6 +613,11 @@ public:
   void r_method_order_morton_complete(CkReductionMsg * msg);
   void p_method_order_morton_weight(int ic3[3], int weight, Index index);
   void p_method_order_morton_index(int index, int count);
+
+  void r_method_order_hilbert_continue(CkReductionMsg * msg);
+  void r_method_order_hilbert_complete(CkReductionMsg * msg);
+  void p_method_order_hilbert_weight(int ic3[3], int weight, Index index);
+  void p_method_order_hilbert_index(int index, int count);
 
   void p_method_output_next (MsgOutput * msg);
   void p_method_output_write (MsgOutput * msg);

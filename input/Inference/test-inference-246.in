@@ -1,0 +1,29 @@
+# This is a simple test problem for the EnzoMethodInference method.
+#
+# The problem is the same as the cosmology test problem using the DD
+# solver, but with the "inference" method added.
+#
+# The numbers "246" in the parameter file name indicate the "base", "array",
+# and "infer" levels defining the inference arrays:
+#
+#    level_base  = 2
+#    level_array = 4
+#    level_infer = 6
+
+include "input/Inference/inference-tests.incl"
+
+ Method {
+     inference {
+         level_infer = 6;
+     }
+ }
+
+ Output {
+     ax {   dir = [ "Inf246_%04d", "cycle" ]; }
+     ay {   dir = [ "Inf246_%04d", "cycle" ]; }
+     az {   dir = [ "Inf246_%04d", "cycle" ]; }
+     dark { dir = [ "Inf246_%04d", "cycle" ]; }
+     de {   dir = [ "Inf246_%04d", "cycle" ]; }
+     mesh { dir = [ "Inf246_%04d", "cycle" ];  }
+     po {   dir = [ "Inf246_%04d", "cycle" ];  }
+ }

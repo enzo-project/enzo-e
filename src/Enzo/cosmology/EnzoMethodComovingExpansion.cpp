@@ -7,7 +7,6 @@
 
 #include "Enzo/cosmology/cosmology.hpp"
 #include "Enzo/enzo.hpp"
-
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion

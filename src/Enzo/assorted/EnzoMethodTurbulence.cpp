@@ -11,8 +11,6 @@
 #include "Cello/cello.hpp"
 #include "Enzo/enzo.hpp"
 
-//#include "enzo.decl.h"
-
 // #define DEBUG_TURBULENCE
 
 #ifdef DEBUG_TURBULENCE

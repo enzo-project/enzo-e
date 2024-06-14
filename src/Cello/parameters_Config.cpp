@@ -108,6 +108,8 @@ void Config::pup (PUP::er &p)
   p | mesh_min_level;
   p | mesh_max_level;
   p | mesh_max_initial_level;
+  p | refined_regions_lower;
+  p | refined_regions_upper;
 
   // Method
 
@@ -749,6 +751,66 @@ void Config::read_mesh_ (Parameters * p) throw()
               "should be at least as large as the ghost depth",
               az_str.c_str());
     }
+  }
+
+  // Vectors to hold the coordinates defining regions to refine
+  // during initialization.
+  refined_regions_lower = std::vector< std::vector<int> >();
+  refined_regions_upper = std::vector< std::vector<int> >();
+
+  // Read in the lower coordinates defining regions to refine
+  // during initialization.
+  int level = 1;
+  bool continue_reading = true;
+  std::string prefix = "Mesh:level_";
+  std::string suffix = "_lower";
+  std::string name;
+
+  while (continue_reading) {
+    name = prefix + std::to_string(level) + suffix;
+    if (p->list_value_integer(0, name, -1) != -1) {
+      std::vector<int> lower(3);
+      lower[0] = p->list_value_integer(0, name, -1);
+      lower[1] = p->list_value_integer(1, name, -1);
+      lower[2] = p->list_value_integer(2, name, -1);
+      refined_regions_lower.push_back(lower);
+    }
+    else {continue_reading = false;}
+    level++;
+  }
+
+  // Read in the upper coordinates defining regions to refine
+  // during initialization.
+  level = 1;
+  continue_reading = true;
+  suffix = "_upper";
+
+  while (continue_reading) {
+    name = prefix + std::to_string(level) + suffix;
+    if (p->list_value_integer(0, name, -1) != -1) {
+      std::vector<int> upper(3);
+      upper[0] = p->list_value_integer(0, name, -1);
+      upper[1] = p->list_value_integer(1, name, -1);
+      upper[2] = p->list_value_integer(2, name, -1);
+      refined_regions_upper.push_back(upper);
+    }
+    else {continue_reading = false;}
+    level++;
+  }
+
+  // Ensure the number of regions to refine during initialization 
+  // matches the max initial level specified in the Adapt group
+  if (refined_regions_lower.size() > 0 && refined_regions_lower.size() != mesh_max_initial_level) {
+    ERROR2("Config::read_mesh_()",
+    "The number of lower coordinates defining regions to refine (%d) should equal Adapt:max_initial_level (%d)", 
+    refined_regions_lower.size(), 
+    mesh_max_initial_level);
+  }
+  if (refined_regions_upper.size() > 0 && refined_regions_upper.size() != mesh_max_initial_level) {
+    ERROR2("Config::read_mesh_()",
+    "The number of upper coordinates defining regions to refine (%d) should equal Adapt:max_initial_level (%d)", 
+    refined_regions_upper.size(), 
+    mesh_max_initial_level);
   }
 }
 

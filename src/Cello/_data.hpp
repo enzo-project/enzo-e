@@ -94,6 +94,9 @@ class FieldFace;
 #include "data_ItIndexList.hpp"
 #include "data_ItIndexRange.hpp"
 
+#include "data_Object.hpp"
+#include "data_ObjectSphere.hpp"
+
 #include "data_ParticleDescr.hpp"
 #include "data_ParticleData.hpp"
 #include "data_Particle.hpp"
