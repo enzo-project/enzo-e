@@ -10,10 +10,10 @@
 # This can also add the openmp-simd flags to the C and C++ compilers (and any
 # other flags necessary for simd optimizations).
 
-if(__enableFPOptimizations)
+if(__FPOptimizationCompileOptions)
   return()
 endif()
-set(__enableFPOptimizations YES)
+set(__FPOptimizationCompileOptions YES)
 
 # Function 'get_fp_optimization_compile_options' is used to retrieve C and C++
 # flags, that compile the program with value unsafe floating point
