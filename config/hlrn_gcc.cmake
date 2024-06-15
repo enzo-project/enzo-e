@@ -19,14 +19,21 @@ if(NOT __processedUserDefaults)
   # the relevant internal logic rather than specifying them here)
 
   # add optional flags to C and C++ compilers that provide useful warnings
-  #set(CMAKE_C_FLAGS "-Wall" CACHE STRING "Default C flags")
-  #set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "Default C++ flags")
+  #set(ENZOE_C_FLIST "-Wall" CACHE STRING "Default C flags")
+  #set(ENZOE_CXX_FLIST "${ENZOE_C_FLIST}" CACHE STRING "Default C++ flags")
 
   # these flag(s) are currently only used when using openmp-simd optimizations
   # (to specify available/prefered instruction sets).
   # This particular value tells the compiler to optimize the code for the
   # instruction set of the machine used to compile the code.
   set(CONFIG_ARCH_FLAGS "-march=skylake-avx512")
+
+  # if you choose to add other flags, you should generally prefer to use:
+  #     ENZOE_C_FLIST_INIT, ENZOE_CXX_FLIST_INIT, ENZOE_Fortran_FLIST_INIT
+  # rather than CMAKE_C_FLAGS, CMAKE_CXX_FLAGS, and CMAKE_Fortran_FLAGS
+  # -> These alternatives will affect Cello/Enzo-E, but won't influence any
+  #    dependencies compiled in the same-build
+  # -> plus, the alternatives let users easily overwrite them
 
   # Mark done
   set(__processedUserDefaults ON)

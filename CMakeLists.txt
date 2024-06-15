@@ -309,6 +309,34 @@ add_subdirectory(src/External)
 #   2. language-specific generator-expressions are not supported on all
 #      build-generators (this isn't really a problem per-se, but it would be
 #      nice to be as flexible as possible)
+
+# handle flags within ENZOE_<LANG>_FLIST for each language used be Enzo-E
+include("GenericOptionCommand")
+get_property(_ENZOE_LANG_LIST GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+foreach(lang IN LISTS _ENZOE_LANG_LIST)
+  # first, initialize ENZOE_<LANG>_FLIST if it hasn't already been initialized
+  generic_option(
+    ENZOE_${lang}_FLIST STRING "\
+specifies flags that are passed to the compiler (in all configurations) for \
+compiling the ${lang} files that are used in Cello and Enzo-E. There are 3 \
+main differences from CMAKE_${lang}_FLAGS: \
+(i) these flags won't be passed to any external dependencies that are \
+compiled as part of this build \
+(ii) these flags will NOT be passed to the linker, and \
+(ii) these flags must be specified as a semi-colon delimited list of values."
+    # if there are any, the default values would be set in machine file
+    DEFAULT_VALUE "${ENZOE_${lang}_FLIST_INIT}"
+    FORBID_EXISTING_NONCACHE_VAR # <- discourage bad habits!
+  )
+
+  # now setup cmake to make use of any compiler flags in the list
+  if(NOT ("${ENZOE_${LANG}_FLIST}" STREQUAL ""))
+    message("$<$<COMPILE_LANGUAGE:${LANG}>:${ENZOE_${LANG}_FLIST}>")
+  endif()
+endforeach()
+
+# introduce floating-point related compiler options
 option(OPTIMIZE_FP "Enables value-unsafe floating-point optimizations (this may already be enabled on some compilers like icc)." OFF)
 option(USE_SIMD "Use OpenMP SIMD directives. This may already be enabled on some compilers (like icc)." OFF)
 include("FPOptimizationCompileOptions")
@@ -319,6 +347,7 @@ elseif (USE_SIMD)
   message(FATAL_ERROR "Can only use `USE_SIMD=ON` when `OPTIMIZE_FP=ON`.")
 endif()
 
+# introduce required Fortran Compiler Options
 include("RequiredFortranCompileOptions")
 get_required_fortran_options(_ENZOE_REQ_FORTRAN_OPTS)
 add_compile_options("${_ENZOE_REQ_FORTRAN_OPTS}")

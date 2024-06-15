@@ -23,7 +23,14 @@ if(NOT __processedUserDefaults)
   # Lake (CLX) Compute Nodes
   set(CONFIG_ARCH_FLAGS "-xCORE-AVX512")
 
-  # Setting package paths (e.g., Grackle)
+  # if you choose to add other flags, you should generally prefer to use:
+  #     ENZOE_C_FLIST_INIT, ENZOE_CXX_FLIST_INIT, ENZOE_Fortran_FLIST_INIT
+  # rather than CMAKE_C_FLAGS, CMAKE_CXX_FLAGS, and CMAKE_Fortran_FLAGS
+  # -> These alternatives will affect Cello/Enzo-E, but won't influence any
+  #    dependencies compiled in the same-build
+  # -> plus, the alternatives let users easily overwrite them
+
+  # Set package paths (e.g., Grackle) - Only do this in personal machine files
 
   # Mark done
   set(__processedUserDefaults ON)
