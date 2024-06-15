@@ -68,11 +68,6 @@ protected: // functions
   // (unique and guaranteed to exist)
   Index get_block_index_();
 
-  /// Return the index limits of octree root blocks intersecting this
-  /// level array
-  void intersecting_root_blocks_
-  (Block * block, int im3[3], int ip3[3], int array_size[3]) const;
-
   void interpolate_
   (enzo_float * af,
    int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz,
@@ -80,10 +75,8 @@ protected: // functions
    int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz);
 
   void copy_
-  (enzo_float * af,
-   int mfx, int mfy, int mfz, int nfx, int nfy, int nfz, int efx, int efy, int efz,
-   const enzo_float * ac,
-   int mcx, int mcy, int mcz, int ncx, int ncy, int ncz, int ecx, int ecy, int ecz);
+  (      enzo_float * af, int mfx, int mfy, int mfz, int nfx, int nfy, int nfz,
+   const enzo_float * ac, int mcx, int mcy, int mcz, int ncx, int ncy, int ncz);
 
 private: // attributes
 

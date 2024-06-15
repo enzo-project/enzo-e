@@ -215,3 +215,74 @@ void EnzoBlock::initialize () throw()
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }
 
+bool EnzoBlock::spawn_child_blocks() throw()
+{
+  int level = index_.level();
+  if (level >= 0) {
+    
+    if (level + 1 <= enzo::config()->refined_regions_lower.size()) {
+
+      std::vector<int> lower = enzo::config()->refined_regions_lower.at(level);
+      std::vector<int> upper = enzo::config()->refined_regions_upper.at(level);
+
+      int ix, iy, iz, nx, ny, nz;
+      index_global(&ix, &iy, &iz, &nx, &ny, &nz);
+      if (lower.at(0) <= ix && ix < upper.at(0)) {
+        if (lower.at(1) <= iy && iy < upper.at(1)) {
+          if (lower.at(2) <= iz && iz < upper.at(2)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+void EnzoBlock::create_initial_child_blocks()
+{
+  bool spawn_children = spawn_child_blocks();
+  if (spawn_children) {instantiate_children();}
+}
+
+void EnzoBlock::instantiate_children() throw()
+{
+  child_face_level_curr_.resize(cello::num_children()*27);
+  int num_field_blocks = 1;
+
+  int nx, ny, nz;
+  data()->field().size(&nx, &ny, &nz);
+
+  const int rank = cello::rank();
+  ItChild it_child(rank);
+  int ic3[3];
+  // WARNING: code duplication in control_adapt.cpp adapt_refine_()
+  while (it_child.next(ic3)) {
+    Index index_child = index_.index_child(ic3);
+    DataMsg * data_msg = NULL;
+
+    std::vector<int> face_level;
+    face_level.resize(27);
+    const int o = 27*IC3(ic3);
+    for (int i=0; i<face_level.size(); i++) {
+      face_level[i] = child_face_level_curr_[o+i];
+    }
+    MsgRefine * msg = new MsgRefine
+      (index_child,
+       nx,ny,nz,
+       num_field_blocks,
+       adapt_step_,
+       refresh_fine,
+       face_level,
+       &adapt_,state_.get());
+
+    msg->set_data_msg(data_msg);
+    cello::simulation()->p_refine_create_block (msg);
+
+    children_.push_back(index_child);
+  }
+
+  adapt_.set_valid(false);
+  is_leaf_ = false;
+}

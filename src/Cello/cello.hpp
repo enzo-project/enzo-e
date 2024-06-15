@@ -155,6 +155,7 @@ enum precision_enum {
   precision_default,     //  default precision
   precision_single,      //  32-bit field data
   precision_double,      //  64-bit field data
+  precision_extended64,  //  64-bit field data (long double)
   precision_extended80,  //  80-bit field data
   precision_extended96,  //  96-bit field data
   precision_quadruple,   // 128-bit field data
@@ -179,6 +180,7 @@ enum type_enum {
   type_single,
   type_float = type_single,
   type_double,
+  type_extended64,
   type_extended80,
   type_extended96,
   type_quadruple,
@@ -718,7 +720,7 @@ namespace cello {
 
   int sizeof_precision       (precision_type);
   int is_precision_supported (precision_type);
-  extern const char * precision_name[7];
+  extern const char * precision_name[8];
 
   /// converts a precision_enum to type_enum
   ///
@@ -891,6 +893,8 @@ namespace cello {
       return type_single;
     } else if constexpr (std::is_same_v<T_, double>) {
       return type_double;
+    } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==8)) {
+      return type_extended64;
     } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==10)) {
       return type_extended80;
     } else if constexpr (std::is_same_v<T_, long double> && (sizeof(T_)==12)) {

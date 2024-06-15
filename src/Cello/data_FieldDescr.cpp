@@ -178,7 +178,7 @@ int FieldDescr::insert_(const std::string & field_name,
     for (int i=0; i<id; i++) {
       if (name_[i] == field_name) {
 	char buffer [ ERROR_LENGTH ];
-	sprintf (buffer,
+	snprintf (buffer, ERROR_LENGTH,
 		 "Insert field called multiple times with same field %s",
 		 field_name.c_str());
 	WARNING("FieldDescr::insert_permanent", buffer);
@@ -210,11 +210,8 @@ int FieldDescr::insert_(const std::string & field_name,
 void FieldDescr::set_precision(int id_field, int precision) throw()
 {
   if ( ! cello::is_precision_supported (precision) ) {
-    char buffer[80];
-    sprintf (buffer,"precision \"%s\" is not supported",
-	     cello::precision_name[precision]);
-    WARNING("FieldDescr::set_precision",
-	    buffer);
+    WARNING1("FieldDescr::set_precision","precision \"%s\" is not supported",
+	         cello::precision_name[precision]);
   }
   if (id_field >= 0) {
     precision_.at(id_field) = 

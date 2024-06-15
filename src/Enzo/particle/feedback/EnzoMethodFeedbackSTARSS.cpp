@@ -42,7 +42,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
     *nSNII = 0;
     *nSNIA = 0;
     double RII=0, RIA=0, PII=0, PIA=0, random = 0;
-    if (enzo_config->method_feedback_supernovae && NEvents < 0)
+    if (this->supernovae_ && NEvents < 0)
     {
         /* age-dependent rates */
         if (age_Myr < 3.401)
@@ -70,7 +70,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
             PII = RII * pmass_Msun / enzo_constants::Myr_s *tunit*dt;
             double random = double(mt())/double(mt.max());
             if (PII > 1.0){
-                if (enzo_config->method_feedback_unrestricted_sn) {
+                if (this->unrestricted_sn_) {
                     int round = (int)PII;
                     *nSNII = round;  // number of Type II SNe that will definitely go off
                     PII -= round; // probability for setting off one more supernova
@@ -99,7 +99,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
 
             if (PIA > 1.0)
             {
-                if (enzo_config->method_feedback_unrestricted_sn) {
+                if (this->unrestricted_sn_) {
                     int round = int(PIA);
                     *nSNIA = round; // number of Type Ia SNe that will definitely go off
                     PIA -= round; // probability for setting off one more supernova
@@ -110,7 +110,7 @@ int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA
                 }
             }
             
-            if (!enzo_config->method_feedback_unrestricted_sn && *nSNII > 0) {
+            if (!this->unrestricted_sn_ && *nSNII > 0) {
                 // for unrestricted_sn = false, only set off a Type IA supernova
                 // if nSNII == 0
                 *nSNIA = 0;
@@ -240,8 +240,7 @@ extern "C" void FORTRAN_NAME(cic_deposit)
 // =============================================================================
 // =============================================================================
 
-EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
-()
+EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS(ParameterGroup p)
   : Method()
   , ir_feedback_(-1)
 {
@@ -270,9 +269,20 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
-  
-  sf_minimum_level_ = enzo_config->method_star_maker_min_level;
-  supernovae_        = enzo_config->method_feedback_supernovae;
+
+  // previously a parameter was parsed called "Method:feedback:min_level",
+  // but that never got used!
+
+  supernovae_              = p.value_logical("supernovae",true);
+  unrestricted_sn_         = p.value_logical("unrestricted_sn",true);
+  stellar_winds_           = p.value_logical("stellar_winds",true);
+  radiation_               = p.value_logical("radiation",true);
+  analytic_SNR_shell_mass_ = p.value_logical("analytic_SNR_shell_mass",true);
+  fade_SNR_                = p.value_logical("fade_SNR",true);
+
+  // initialize NEvents parameter (mainly for testing). Sets off 'NEvents'
+  // supernovae, with at most one supernova per star particle per cycle.
+  NEvents                  = p.value_integer("NEvents",-1);
 
   // Initialize temporary fields
   i_d_dep  = cello::field_descr()->insert_temporary();
@@ -327,12 +337,7 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS
     (i_d_shell, i_d_shell_a);
  
   refresh_fb->set_callback(CkIndex_EnzoBlock::p_method_feedback_starss_end());
- 
-  std::mt19937 mt(std::time(nullptr)); // initialize random function
-  
-  // initialize NEvents parameter (mainly for testing). Sets off 'NEvents' supernovae,
-  // with at most one supernova per star particle per cycle.
-  this->NEvents = enzo_config->method_feedback_NEvents;
+
   return;
 }
 
@@ -344,8 +349,12 @@ void EnzoMethodFeedbackSTARSS::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p | sf_minimum_level_;
   p | supernovae_;
+  p | unrestricted_sn_;
+  p | stellar_winds_;
+  p | radiation_;
+  p | analytic_SNR_shell_mass_;
+  p | fade_SNR_;
   p | NEvents;
   p | ir_feedback_;
 
@@ -720,7 +729,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
         // Now do stellar winds
         double windMass=0.0, windMetals=0.0, windEnergy=0.0;
-        if (enzo_config->method_feedback_stellar_winds){
+        if (this->stellar_winds_){
 
           const double starZ = pmetal[ipdmf] / z_solar;
 
@@ -747,7 +756,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
 
         // ionizing radiation
-        if (enzo_config->method_feedback_radiation) {
+        if (this->radiation_) {
           double Psi_ion;
           if (age < 3.5) {
               Psi_ion = 500; // units of Lsun/Msun
@@ -812,7 +821,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   
   const EnzoConfig * enzo_config = enzo::config();
 
-  bool AnalyticSNRShellMass = enzo_config->method_feedback_analytic_SNR_shell_mass;
+  bool AnalyticSNRShellMass = this->analytic_SNR_shell_mass_;
 
   // Obtain grid sizes and ghost sizes
   int mx, my, mz, gx, gy, gz, nx, ny, nz;
@@ -1147,7 +1156,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
         }
 
         // fading phase
-        if (faded && enzo_config->method_feedback_fade_SNR){ 
+        if (faded && this->fade_SNR_){
           coupledMomenta *= (1.0 - tanh(pow(1.25*fader, 2)));
           #ifdef DEBUG_FEEDBACK_STARSS 
             CkPrintf("STARSS_FB: Coupling Fading phase: p = %e\n", coupledMomenta);
@@ -1511,12 +1520,16 @@ double EnzoMethodFeedbackSTARSS::timestep (Block * block) throw()
   // dt < star_lifetime (or something like that), especially if
   // important things happen throughout the star's lifetime.
   EnzoUnits * enzo_units = enzo::units();
-  const EnzoConfig * enzo_config = enzo::config();
+
+  EnzoMethodStarMaker* starmaker_method =
+    (EnzoMethodStarMaker*)(enzo::problem()->method("star_maker"));
+  ASSERT("EnzoMethodFeedbackSTARSS::timestep",
+         "requires \"star_maker\" method", starmaker_method != nullptr);
 
   double dtStar = std::numeric_limits<double>::max();
-  if (block->level() >= sf_minimum_level_){
-    const double pSNmax = 0.0005408 * enzo_config->method_star_maker_minimum_star_mass *
-      block->state()->dt() * enzo_units->time() / enzo_constants::Myr_s * 1.25;
+  if (block->level() >= starmaker_method->sf_minimum_level()){
+    const double pSNmax = 0.0005408 * starmaker_method->minimum_star_mass() *
+    block->state()->dt() * block->state()->time() / enzo_constants::Myr_s * 1.25;
     if (pSNmax > 1.0) dtStar = block->state()->dt() * 1.0 / pSNmax;
   }
 

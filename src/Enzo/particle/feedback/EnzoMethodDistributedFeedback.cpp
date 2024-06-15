@@ -299,18 +299,11 @@ double s99_sn_metallicity(const double & t){
 //
 
 EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
-()
+(ParameterGroup p)
   : Method()
 {
   cello::particle_descr()->check_particle_attribute("star","mass");
-  const EnzoConfig * enzo_config = enzo::config();
-  EnzoUnits * enzo_units = enzo::units();
 
-  // AJE: This was the old way this was done:
-  // Initialize default refresh object
-  // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-  //                           enzo_sync_id_method_feedback);
-  // refresh(ir)->add_all_fields();
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
@@ -337,24 +330,26 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 
 
   // Fraction of total energy to deposit as kinetic rather than thermal energy
-  kinetic_fraction_    = enzo_config->method_feedback_ke_fraction;
+  kinetic_fraction_    = p.value_float("ke_fraction", 0.0);;
 
   // Values related to CIC cell deposit. Stencil is the number of cells across
   // in the stencil. stencil_rad  is the number of cells off-from-center
+
   //
-  stencil_                   = enzo_config->method_feedback_stencil;
+  stencil_                   = p.value_integer("stencil",3);
   stencil_rad_               = ( (int) ((stencil_ - 1) / 2.0));
   number_of_feedback_cells_  = stencil_ * stencil_ * stencil_;
 
   // Flag to turn on / off particle kicking from boundaries
-  shift_cell_center_         = enzo_config->method_feedback_shift_cell_center;
+  shift_cell_center_         = p.value_logical("shift_cell_center", true);
 
   // Flag to turn on / off single-zone ionization routine
-  use_ionization_feedback_   = enzo_config->method_feedback_use_ionization_feedback;
+  use_ionization_feedback_   = p.value_logical("use_ionization_feedback",
+                                               false);
 
   // Time of first SN (input in Myr, stored in yr)
   //     Forces a fixed delay time for all SNe
-  time_first_sn_ = enzo_config->method_feedback_time_first_sn * 1.0E6;
+  time_first_sn_ = p.value_float("time_first_sn", -1.0) * 1.0E6;
 
 
 
@@ -404,8 +399,12 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 {
 
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   Particle particle = enzo_block->data()->particle();
+
+  EnzoMethodStarMaker* star_maker_method =
+    (EnzoMethodStarMaker*)(enzo::problem()->method("star_maker"));
+  ASSERT("EnzoMethodDistributedFeedback::compute_",
+         "requires \"star_maker\" method", star_maker_method != nullptr);
 
   EnzoUnits * enzo_units = enzo::units();
 
@@ -551,7 +550,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           const float expected_sn_s99 = 10616.955572;
           // Number of expected SNe for the minimum star particle mass
           const float lambda         = expected_sn_s99 * 1.0E-6 *
-                                       enzo_config->method_star_maker_minimum_star_mass;
+                                       star_maker_method->minimum_star_mass();
 
 
 
@@ -686,7 +685,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
      //          This ejection rate is correct for the 10^6 solar mass 'cluster'
      //           used to compute these rates with starburst 99.  Reduce to account
      //           for the size of the star particle
-        wind_mass = wind_mass * enzo_config->method_star_maker_minimum_star_mass * 1.0E-6;
+        wind_mass = wind_mass * star_maker_method->minimum_star_mass() * 1.0E-6;
         wind_mass = wind_mass / enzo_constants::yr_s; // in Msun / s
         wind_mass = (wind_mass * enzo_units->time()) * enzo_block->state()->dt(); // Msun this timestep
 
@@ -750,7 +749,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 // -----
 
         this->inject_feedback(block, xpos, ypos, zpos,
-                              m_eject, (energy/1.0E51), enzo_config->method_feedback_ke_fraction,
+                              m_eject, (energy/1.0E51),
+                              this->kinetic_fraction_,
                               metal_fraction,
                               pvx[ipdv], pvy[ipdv], pvz[ipdv]);
         // remove mass - error checking on the std::max is handled above with warning
@@ -799,7 +799,6 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   if (s49_tot <= 0) return;
 
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
   Field field = block->data()->field();

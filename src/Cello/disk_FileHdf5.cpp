@@ -909,6 +909,7 @@ hdf5_id FileHdf5::scalar_to_hdf5_ (int type) const throw()
 
   switch (type) {
   case type_unknown:
+  case type_extended64:
   case type_extended80:
   case type_extended96:
     ERROR1("FileHdf5::scalar_to_hdf5_",

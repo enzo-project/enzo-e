@@ -6,9 +6,9 @@
 /// @date     2019-05-07
 /// @brief    Implements the EnzoComputePressure class
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/fluid-props/fluid-props.hpp"
 
 //----------------------------------------------------------------------
 
@@ -60,17 +60,6 @@ void EnzoComputePressure::compute (Block * block, enzo_float *p,
 {
   if (!block->is_leaf()) return;
 
-  compute_(block, p, stale_depth);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoComputePressure::compute_(Block * block,
-                                   enzo_float * p,
-                                   int stale_depth, /* 0 */
-                                   grackle_field_data * grackle_fields /*NULL*/
-                                   )
-{
   // make a CelloView that wraps p
   Field field = block->data()->field();
   int gx,gy,gz;
@@ -97,8 +86,7 @@ void EnzoComputePressure::compute_pressure
  bool dual_energy,
  double gamma,
  int stale_depth, /* 0 */
- bool ignore_grackle, /*false*/
- grackle_field_data * grackle_fields /*nullptr*/
+ bool ignore_grackle /*false*/
  ) throw()
 {
 
@@ -118,8 +106,7 @@ void EnzoComputePressure::compute_pressure
             "have identical strides to the fields.");
     }
 
-    grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth,
-                                       grackle_fields);
+    grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth);
 
   } else {
 

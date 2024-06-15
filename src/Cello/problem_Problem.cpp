@@ -929,6 +929,10 @@ Method * Problem::create_method_
     //     Hierarchy?
     method = new MethodOrderMorton(config->mesh_min_level);
 
+  } else if (name == "order_hilbert") {
+
+    method = new MethodOrderHilbert(config->mesh_min_level);
+
   } else if (name == "refresh") {
     method = new MethodRefresh(p_group);
   } else if (name == "debug") {

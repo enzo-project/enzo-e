@@ -361,7 +361,6 @@ Usually you will introduce a header (``.hpp``) and source (``.cpp``) file at the
    If it doesn't exist, check the parent directory.
    Repeat the process until you find it.
 5. Add the paths to your new header and source file to the existing list of other files that are located in the same subdirectory as your new files.
-   (If no such list exists, but you see something about ``GLOB``, you may not need to do anything).
 
 **How do I delete a file from the Enzo Layer?**
 

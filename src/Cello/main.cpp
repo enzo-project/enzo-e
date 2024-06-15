@@ -5,7 +5,7 @@
 /// @date     2011-08-10
 /// @brief    Implementation of main-level CHARM entry functions in main.ci
 
-#include <boost/filesystem.hpp>
+#include <filesystem>  // this is intentionally not included in a public header
 #include "cello.hpp"
 #include "test.hpp"
 #include "parallel.hpp"
@@ -208,12 +208,12 @@ void Main::p_text_file_write
   if (fp_text_[full_file] == NULL) {
 
     // Create subdirectory if any
-    boost::filesystem::path directory(dir);
-    if (! boost::filesystem::is_directory(directory)) {
+    std::filesystem::path directory(dir);
+    if (! std::filesystem::is_directory(directory)) {
       ASSERT1 ("Main::p_text_file_write()",
 	       "Error creating directory %s",
 	       dir,
-	       (boost::filesystem::create_directory(directory)));
+	       (std::filesystem::create_directory(directory)));
     }
     
     fp_text   = fp_text_[full_file] = fopen(full_file.c_str(),"w");

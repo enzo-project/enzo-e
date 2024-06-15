@@ -28,11 +28,7 @@ class EnzoMethodGravity : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravity object
-  EnzoMethodGravity(int index_solver,
-		    int order,
-		    bool accumulate,
-		    int index_prolong,
-		    double dt_max,
+  EnzoMethodGravity(ParameterGroup p, int index_solver, int index_prolong,
                     int max_supercycle,
                     std::string type_super);
 

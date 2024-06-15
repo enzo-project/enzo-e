@@ -110,9 +110,10 @@ endfunction()
 ############################### UNIT TESTS ####################################
 # The following tests are self-contained binary of individual components
 
-setup_test_unit(ViewCollec ViewComponent/ViewCollec test_view_collec)
 setup_test_unit(View ViewComponent/View test_cello_view)
 setup_test_unit(StringIndRdOnlyMap ViewComponent/StringIndRdOnlyMap test_string_ind_rd_only_map)
+setup_test_unit(ViewCollec ViewComponent/ViewCollec test_view_collec)
+setup_test_unit(ViewMap ViewComponent/ViewMap test_view_map)
 
 setup_test_unit(CelloType Cello/Type test_type)
 
@@ -229,6 +230,10 @@ setup_test_serial(Music-411 InitialMusic/Music-411  input/InitialMusic/initial_m
 setup_test_serial(Music-141 InitialMusic/Music-141  input/InitialMusic/initial_music-141.in)
 setup_test_serial(Music-114 InitialMusic/Music-114  input/InitialMusic/initial_music-114.in)
 
+# Nested Initial
+setup_test_serial(Nested-Initial-serial Nested_ICs/serial/ input/Nested_ICs/nested_ics_serial.in)
+setup_test_parallel(Nested-Initial-parallel Nested_ICs/parallel input/Nested_ICs/nested_ics_parallel.in)
+
 # Output
 setup_test_parallel(Output-Stride-1 Output/Output-Stride-1  input/Output/output-stride-1.in)
 setup_test_parallel(Output-Stride-2 Output/Output-Stride-2  input/Output/output-stride-2.in)
@@ -293,3 +298,6 @@ add_custom_target(process_test_results
                   pandoc -s -o TEST_RESULTS.html --metadata title="Enzo-E Test Results" TEST_RESULTS.md
                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
+# Load Balance
+#setup_test_parallel(LoadBalance-1 LoadBalance/morton-1  input/LoadBalance/test_balance-on-bcg.in)
+setup_test_parallel(LoadBalance-2 LoadBalance/hilbert-1  input/LoadBalance/test_hilbert-balance-on-bcg.in)

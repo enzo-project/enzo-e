@@ -48,18 +48,9 @@ public: // interface
     p | redshift_;
   };
 
-  virtual void set_time (double time)
-  {
-    time_ = time;
-    Simulation * simulation = cello::simulation();
-    EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-    EnzoPhysicsCosmology * cosmology =
-      units ? units->cosmology() : nullptr ;
-    if (cosmology) {
-      cosmology->set_current_time(time);
-      redshift_ = cosmology->current_redshift();
-    }
-  }
+
+  /// Update the current time including redshift
+  virtual void set_time (double time);
 
   void set_redshift (double redshift)
   { redshift_ = redshift; }

@@ -80,34 +80,16 @@ public: // interface
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();
 
-  //----------------------------------------------------------------------
-  // Original Enzo functions
-  //----------------------------------------------------------------------
+  //--------------------------------------------------
+  // Nested grid initialization.
+  //--------------------------------------------------
 
-  //  enzo_float ComputeTimeStep();
+  /// Check if this block should create child blocks during initialization.
+  bool spawn_child_blocks() throw();
 
-  /// Set the energy to provide minimal pressure support
-  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-                        enzo_float minimum_pressure_support_parameter,
-                        bool comoving_coordinates);
-
-  /// Solve the hydro equations using PPM
-  int SolveHydroEquations ( enzo_float time,
-                            enzo_float dt,
-                            bool comoving_coordinates,
-                            bool single_flux_array,
-                            bool diffusion,
-                            int flattening,
-                            bool pressure_free,
-                            bool steepening,
-                            bool use_minimum_pressure_support,
-                            enzo_float minimum_pressure_support_parameter );
-
-  /// Solve the hydro equations using Enzo 3.0 PPM
-  int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
-
-  /// Solve the mhd equations (with ppml), saving subgrid fluxes
-  int SolveMHDEquations(enzo_float dt);
+  /// Create child blocks.
+  virtual void create_initial_child_blocks();
+  void instantiate_children() throw();
 
   /// Initialize EnzoBlock
   virtual void initialize () throw();

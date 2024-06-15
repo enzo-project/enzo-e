@@ -98,7 +98,7 @@ void Simulation::r_initialize_block_array(CkReductionMsg * msg)
 // NEW INITIAL
 //======================================================================
 
-void  Block::initial_new_begin_(int level)
+void  Block::initial_new_begin_()
 {
   TRACE_INITIAL("initial_new_begin_",this);
   index_initial_ = 0;
@@ -121,9 +121,8 @@ void  Block::initial_new_next_()
   if (initial && (! initial_restart)) {
     initial->enforce_block(this,nullptr);
   } else {
-    const auto initial_cycle = cello::config()->initial_cycle;
-    bool is_first_cycle = (state_->cycle() == initial_cycle);
-    if (is_first_cycle && level() <= 0) {
+    bool is_first_cycle = (state_->cycle() == cello::config()->initial_cycle);
+    if (is_first_cycle && level() <= cello::config()->mesh_max_initial_level) {
       initial_exit_();
     }
   }

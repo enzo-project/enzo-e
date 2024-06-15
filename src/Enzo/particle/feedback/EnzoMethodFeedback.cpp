@@ -10,7 +10,7 @@
 #include "Enzo/particle/particle.hpp"
 
 EnzoMethodFeedback::EnzoMethodFeedback
-()
+(ParameterGroup p)
   : Method()
 {
   cello::particle_descr()->check_particle_attribute("star","mass");
@@ -29,14 +29,14 @@ EnzoMethodFeedback::EnzoMethodFeedback
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
 
-  ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * enzo_constants::mass_solar /
-                      enzo_units->mass();
+  ejecta_mass_   = (p.value_float("ejecta_mass",0.0) *
+                    enzo_constants::mass_solar / enzo_units->mass());
 
-  ejecta_energy_ = enzo_config->method_feedback_supernova_energy * 1.0E51 /
+  ejecta_energy_ = p.value_float("supernova_energy",1.0) * 1.0E51 /
                    enzo_units->mass() / enzo_units->velocity() /
                    enzo_units->velocity();
 
-  ejecta_metal_fraction_ = enzo_config->method_feedback_ejecta_metal_fraction;
+  ejecta_metal_fraction_ = p.value_float("ejecta_metal_fraction",0.1);
 
   return;
 }

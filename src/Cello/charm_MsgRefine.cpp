@@ -264,6 +264,8 @@ void MsgRefine::print()
   CkPrintf ("int refresh_type_ = %d\n",refresh_type_);
   if (restart_io_reader_ >= 0)
     CkPrintf ("int restart_io_reader_ = %d\n",restart_io_reader_);
-  adapt_parent_->print("MsgRefine");
-  CkPrintf ("State \n"); state_->print("MsgRefine");
+  if (adapt_parent_)
+    adapt_parent_->print("MsgRefine");
+  else
+    CkPrintf ("Adapt * adapt_parent_ = nullptr\n");
 }

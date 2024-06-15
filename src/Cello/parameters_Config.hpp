@@ -76,12 +76,13 @@ public: // interface
     mesh_min_level(0),
     mesh_max_level(0),
     mesh_max_initial_level(0),
+    refined_regions_lower(),
+    refined_regions_upper(),
     num_method(0),
     method_courant_global(1.0),
     method_list(),
     method_schedule_index(),
     method_courant(),
-    method_prolong(),
     method_type(),
     monitor_debug(false),
     monitor_verbose(false),
@@ -227,12 +228,13 @@ public: // interface
       mesh_min_level(0),
       mesh_max_level(0),
       mesh_max_initial_level(0),
+      refined_regions_lower(),
+      refined_regions_upper(),
       num_method(0),
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
       method_courant(),
-      method_prolong(),
       method_type(),
       monitor_debug(false),
       monitor_verbose(false),
@@ -425,6 +427,8 @@ public: // attributes
   int                        mesh_min_level;
   int                        mesh_max_level;
   int                        mesh_max_initial_level;
+  std::vector< std::vector<int> > refined_regions_lower;
+  std::vector< std::vector<int> > refined_regions_upper;
 
   // Method
 
@@ -436,7 +440,6 @@ public: // attributes
 
   std::vector<int>           method_schedule_index;
   std::vector<double>        method_courant;
-  std::vector<std::string>   method_prolong;
   std::vector<std::string>   method_type;
 
 

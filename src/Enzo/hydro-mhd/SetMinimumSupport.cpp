@@ -13,12 +13,13 @@
 
 //----------------------------------------------------------------------
  
-int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-                                 enzo_float minimum_pressure_support_parameter,
-				 bool comoving_coordinates)
+int enzo::SetMinimumSupport(EnzoBlock& block,
+                            enzo_float &MinimumSupportEnergyCoefficient,
+                            enzo_float minimum_pressure_support_parameter,
+                            bool comoving_coordinates)
 {
 
-  Field field = data()->field();
+  Field field = block.data()->field();
   if (field.num_permanent() > 0) {  // TODO: revisit if-clause. This could be
                                     // improved. (plus we probably want to
                                     // report an error when false)
@@ -29,12 +30,13 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
-    ASSERT ("EnzoBlock::SetMinimumSupport()",
+    ASSERT ("enzo::SetMinimumSupport()",
 	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
 	    ! (comoving_coordinates && (cosmology == NULL)) );
 
     if (comoving_coordinates) {
-      cosmology ->compute_expansion_factor(&cosmo_a, &cosmo_dadt,state()->time());
+          cosmology ->compute_expansion_factor
+            (&cosmo_a, &cosmo_dadt, block.state()->time());
     }
 
     enzo_float CosmoFactor = 1.0/cosmo_a;
@@ -45,7 +47,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
  
     int dim, size = 1, i;
     for (dim = 0; dim < GridRank; dim++)
-      size *= GridDimension[dim];
+      size *= block.GridDimension[dim];
 
     enzo_float * density         = (enzo_float*) field.values("density");
     enzo_float * total_energy    = (enzo_float *)field.values("total_energy");
@@ -74,14 +76,19 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     ASSERT("EnzoBlock::SetMinimumSupport",
            "This function currently requires that cells are perfect cubes. "
            "The cell-widths are NOT all equal",
-           enzo_utils::consistent_cube_cellwidths(CellWidth[0], CellWidth[1],
-                                                  CellWidth[2]));
+           enzo_utils::consistent_cube_cellwidths(block.CellWidth[0],
+                                                  block.CellWidth[1],
+                                                  block.CellWidth[2]));
+
+    // TODO: Consider what kind of assumptions are made right here about cell
+    //       shapes (are we assuming that each side is the same length?)
+    // -> If this isn't a problem, add a clarifying comment!
 
     const enzo_float gamma = enzo::fluid_props()->gamma();
     MinimumSupportEnergyCoefficient =
       enzo::grav_constant_codeU() / (cello::pi * (gamma*(gamma-1.0))) *
       CosmoFactor * minimum_pressure_support_parameter *
-      CellWidth[0] * CellWidth[0];
+      block.CellWidth[0] * block.CellWidth[0];
 
     /* PPM: set GE. */
     
@@ -94,7 +101,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
       uses_dual_energy_formalism = false;
     } else { // de_config.modern_formulation() == true
       // it's unlikely that there would be issues, but raise error to be safe
-      ERROR("EnzoBlock::SetMinimumSupport",
+      ERROR("enzo::SetMinimumSupport",
             "the method is untested with this formulation of the dual "
             "energy formalism");
       uses_dual_energy_formalism = true;
@@ -114,8 +121,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 		      velocity_z[i]*velocity_z[i])),
 	      total_energy[i]);
 								
-    }
-    else {
+    } else {
       fprintf(stderr, "not implemented.\n");
       return ENZO_FAIL;
     }

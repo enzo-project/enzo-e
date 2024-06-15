@@ -12,23 +12,18 @@
 // #define TRACE_INFER
 // #define DEBUG_INFER
 
-# define PRINT_FIELD_VALUES
-
 //----------------------------------------------------------------------
 
 EnzoMethodInference::EnzoMethodInference
 (int level_base,
  int level_array,
  int level_infer,
- const int m3_level[3],
- const int m3_infer[3],
  std::string field_group,
  float overdensity_threshold)
   : Method(),
     level_base_(level_base),
     level_array_(level_array),
     level_infer_(level_infer),
-    m3_level_(),
     m3_infer_(),
     field_group_(field_group),
     num_fields_(cello::field_groups()->size(field_group_)),
@@ -38,12 +33,8 @@ EnzoMethodInference::EnzoMethodInference
     is_count_(-1),
     overdensity_threshold_(overdensity_threshold)
 {
-  for (int i=0; i<3; i++) {
-    m3_level_[i] = m3_level[i];
-    m3_infer_[i] = m3_infer[i];
-  }
-
-  // Verify level_array and m3_level match
+  // Compute m3_infer_ inference array sizes given level_infer and
+  // level_array
   // (note: using cello::config() rather than cello::hierarchy()
   // since the latter is not guaranteed to be initialized yet)
   int nd3[3] = {
@@ -56,19 +47,8 @@ EnzoMethodInference::EnzoMethodInference
     cello::config()->mesh_root_size[2] };
 
   for (int axis=0; axis<cello::rank(); axis++) {
-    ASSERT4("EnzoMethodInference()",
-            "level-array axis %d level %d nd3 %d mismatch with level array size %d",
-            axis,level_array,nd3[axis],m3_level_[axis],
-            (pow(2,level_array)*nd3[axis]==m3_level_[axis]));
-  }
-
-  for (int axis=0; axis<cello::rank(); axis++) {
     int nb = md3[axis]/nd3[axis]; // compute block size along axis
-    ASSERT5("EnzoMethodInference()",
-            "2**(%d - %d)*(%d/%d) "
-            "mismatch with inference array size %d",
-            level_infer,level_array,md3[axis],nd3[axis],m3_infer_[axis],
-            (pow(2,(level_infer-level_array))*nb == m3_infer_[axis]));
+    m3_infer_[axis] = pow(2,(level_infer-level_array))*nb;
   }
 
   // Define field_group fields
@@ -148,7 +128,6 @@ void EnzoMethodInference::pup (PUP::er &p)
   p | level_base_;
   p | level_array_;
   p | level_infer_;
-  PUParray(p,m3_level_,3);
   PUParray(p,m3_infer_,3);
   p | field_group_;
   p | num_fields_;
@@ -606,19 +585,19 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 
     // compute buffer size nb
     int nb = 0;
-    for (int i=0; i<n; i++) {
+    for (int i_f=0; i_f<n; i_f++) {
 
       const std::string field_name =
-        cello::field_groups() -> item(field_group_,i);
+        cello::field_groups() -> item(field_group_,i_f);
 
       const int index_field = field.field_id (field_name);
 
-      std::tie(ox[i],oy[i],oz[i],nx[i],ny[i],nz[i]) =
+      std::tie(ox[i_f],oy[i_f],oz[i_f],nx[i_f],ny[i_f],nz[i_f]) =
         get_block_portion_(index_block, index_field, ia3);
 
-      nxa[i] = nx[i];
-      nya[i] = ny[i];
-      nza[i] = nz[i];
+      nxa[i_f] = nx[i_f];
+      nya[i_f] = ny[i_f];
+      nza[i_f] = nz[i_f];
       // determine array offsets if needed
       if (level > level_array_) {
         int cx,cy,cz;
@@ -626,19 +605,19 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 
         unsigned factor = 1 << (level - level_array_);
         unsigned mask = factor - 1;
-        oxa[i] = (cx & mask)*m3_infer_[0]/factor;
-        oya[i] = (cy & mask)*m3_infer_[1]/factor;
-        oza[i] = (cz & mask)*m3_infer_[2]/factor;
+        oxa[i_f] = (cx & mask)*m3_infer_[0]/factor;
+        oya[i_f] = (cy & mask)*m3_infer_[1]/factor;
+        oza[i_f] = (cz & mask)*m3_infer_[2]/factor;
       }
       for (int l=level; l>level_infer_; l--) {
-        nxa[i] = (nxa[i]-2*ex)/rx+2*ex;
-        nya[i] = (nya[i]-2*ey)/ry+2*ey;
-        nza[i] = (nza[i]-2*ez)/rz+2*ez;
+        nxa[i_f] = (nxa[i_f]-2*ex)/rx+2*ex;
+        nya[i_f] = (nya[i_f]-2*ey)/ry+2*ey;
+        nza[i_f] = (nza[i_f]-2*ez)/rz+2*ez;
       }
       // Reserve storage for array size (3) offsets (3), and field
       // value portion (taking into account size after any restrict
       // operations)
-      nb += 6 + nxa[i]*nya[i]*nza[i];
+      nb += 6 + nxa[i_f]*nya[i_f]*nza[i_f];
     }
 
     // allocate buffer
@@ -652,11 +631,11 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
       int i_b = 0;
 
       // for each field in the field group
-      for (int i=0; i<n; i++) {
+      for (int i_f=0; i_f<n; i_f++) {
 
         // Get the field index and valuesfield_name
         const std::string field_name =
-          cello::field_groups() -> item(field_group_,i);
+          cello::field_groups() -> item(field_group_,i_f);
 
         enzo_float * field_values = (enzo_float *)field.values(field_name);
 
@@ -665,14 +644,12 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
         // Find the dimension of the field (may vary between fields
         // depending on centering)
         int mx,my,mz;
-        int gx,gy,gz;
         field.dimensions (index_field,&mx,&my,&mz);
-        field.ghost_depth(index_field,&gx,&gy,&gz);
 
         // determine offset into field
-        const int ofx = ox[i];
-        const int ofy = oy[i];
-        const int ofz = oz[i];
+        const int ofx = ox[i_f];
+        const int ofy = oy[i_f];
+        const int ofz = oz[i_f];
         const int of = ofx + mx*(ofy + my*ofz);
 
         // pointer to field portion to restrict
@@ -680,6 +657,7 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
         enzo_float * a_c = nullptr;
         int ncx,ncy,ncz;
         int nfx,nfy,nfz;
+        int mfx,mfy,mfz;
 
         // Apply linear restriction level - level_infer_ times
         for (int l=level; l>level_infer_; l--) {
@@ -691,44 +669,70 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
           // Input: field if first, else previous output
           if (is_first) {
             a_f = field_values + of;
-            nfx = nx[i];
-            nfy = ny[i];
-            nfz = nz[i];
+            nfx = nx[i_f];
+            nfy = ny[i_f];
+            nfz = nz[i_f];
+            mfx = mx;
+            mfy = my;
+            mfz = mz;
           } else {
             a_f = a_c;
             nfx = (nfx-2*ex)/rx+2*ex;
             nfy = (nfy-2*ey)/ry+2*ey;
             nfz = (nfz-2*ez)/rz+2*ez;
+            mfx = nfx;
+            mfy = nfy;
+            mfz = nfz;
           }
 
           // Output: array if last, else temporary
+          ncx = (nfx-2*ex)/rx+2*ex;
+          ncy = (nfy-2*ey)/ry+2*ey;
+          ncz = (nfz-2*ez)/rz+2*ez;
           if (is_last) {
-            ncx = (ncx-2*ex)*rx;
-            ncy = (ncy-2*ey)*ry;
-            ncz = (ncz-2*ez)*rz;
             buffer_values[i_b++] = ncx;
             buffer_values[i_b++] = ncy;
             buffer_values[i_b++] = ncz;
-            buffer_values[i_b++] = oxa[i];
-            buffer_values[i_b++] = oya[i];
-            buffer_values[i_b++] = oza[i];
+            buffer_values[i_b++] = oxa[i_f];
+            buffer_values[i_b++] = oya[i_f];
+            buffer_values[i_b++] = oza[i_f];
             a_c = buffer_values.data() + i_b;
             i_b += ncx*ncy*ncz;
           } else {
-            ncx = (ncx-2*ex)*rx+2*ex;
-            ncy = (ncy-2*ey)*ry+2*ey;
-            ncz = (ncz-2*ez)*rz+2*ez;
             a_c = new enzo_float [ncx*ncy*ncz];
           }
-
+#ifdef DEBUG_INFER
+          CkPrintf ("DEBUG_INFER coarsen a_c %d %d %d  %d %d %d  %d %d %d\n",
+                    ncx,ncy,ncz,ncx,ncy,ncz,ex,ey,ez);
+          CkPrintf ("DEBUG_INFER coarsen a_f %d %d %d  %d %d %d  %d %d %d\n",
+                    mfx,mfy,mfz,nfx,nfy,nfz,ex,ey,ez);
+#endif
           coarsen_(a_c,ncx,ncy,ncz,ncx,ncy,ncz,ex,ey,ez,
-                   a_f,nfx,nfy,nfz,nfx,nfy,nfz,ex,ey,ez);
+                   a_f,mfx,mfy,mfz,nfx,nfy,nfz,ex,ey,ez);
 
-          // delete temporary when done
+#ifdef DEBUG_INFER
+        int c,cx,cy,cz;
+        block->index().child(block->level(),&cx,&cy,&cz);
+        c=1+cx+2*(cy+2*cz);
+        for (int iz=0; iz<ncz; iz++) {
+          for (int iy=0; iy<ncy; iy++) {
+            for (int ix=0; ix<ncx; ix++) {
+              const int i = ix + ncx*(iy+ncy*iz);
+              a_c[i] = c;
+            }
+          }
+        }
+#endif
+
+        // delete temporary when done
           if (!is_first) delete [] a_f;
 
         }
       }
+      ASSERT2("EnzoMethodInference::request_data",
+              "Mismatch betwen expected %d and actual %d buffer size",
+              i_b,nb,
+              (i_b == nb));
 
     } else {
 
@@ -736,10 +740,10 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 
       int i_b = 0; // buffer index
 
-      for (int i=0; i<n; i++) {
+      for (int i_f=0; i_f<n; i_f++) {
 
         const std::string field_name =
-          cello::field_groups() -> item(field_group_,i);
+          cello::field_groups() -> item(field_group_,i_f);
 
         enzo_float * field_values = (enzo_float *)field.values(field_name);
 
@@ -751,32 +755,30 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
         // First copy o[xyz] and n[xyz] indices to buffer
         // (to avoid having to recompute)
 
-        buffer_values[i_b++] = nx[i];
-        buffer_values[i_b++] = ny[i];
-        buffer_values[i_b++] = nz[i];
-        buffer_values[i_b++] = oxa[i];
-        buffer_values[i_b++] = oya[i];
-        buffer_values[i_b++] = oza[i];
+        buffer_values[i_b++] = nx[i_f];
+        buffer_values[i_b++] = ny[i_f];
+        buffer_values[i_b++] = nz[i_f];
+        buffer_values[i_b++] = oxa[i_f];
+        buffer_values[i_b++] = oya[i_f];
+        buffer_values[i_b++] = oza[i_f];
 
         // Then copy field portion values to buffer
 #ifdef DEBUG_INFER
         int c,cx,cy,cz;
         block->index().child(block->level(),&cx,&cy,&cz);
         c=1+cx+2*(cy+2*cz);
-        if (i==0) CkPrintf ("DEBUG_INFER %s child %d %d %d  %d\n",block->name().c_str(),cx,cy,cz,c);
-        if (i==0) CkPrintf ("DEBUG_INFER %s size  %d %d %d\n",block->name().c_str(),nx[i],ny[i],nz[i]);
 #endif
-        for (int iz=0; iz<nz[i]; iz++) {
-          const int ifz = oz[i] + iz;
-          for (int iy=0; iy<ny[i]; iy++) {
-            const int ify = oy[i] + iy;
-            for (int ix=0; ix<nx[i]; ix++) {
-              const int ifx = ox[i] + ix;
-              const int i_f = ifx + mx*(ify+my*ifz);
+        for (int iz=0; iz<nz[i_f]; iz++) {
+          const int ifz = oz[i_f] + iz;
+          for (int iy=0; iy<ny[i_f]; iy++) {
+            const int ify = oy[i_f] + iy;
+            for (int ix=0; ix<nx[i_f]; ix++) {
+              const int ifx = ox[i_f] + ix;
+              const int iff = ifx + mx*(ify+my*ifz);
 #ifdef DEBUG_INFER
               buffer_values[i_b++] = c;
 #else
-              buffer_values[i_b++] = field_values[i_f];
+              buffer_values[i_b++] = field_values[iff];
 #endif
             }
           }
@@ -790,6 +792,10 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 
     Index3 index3(ia3[0],ia3[1],ia3[2]);
 
+#ifdef TRACE_INFER
+    CkPrintf ("TRACE_INFER %s p_transfer_data SEND %d %d %d\n",
+              block->name().c_str(),ia3[0],ia3[1],ia3[2]);
+#endif
     proxy_level_array[index3].p_transfer_data
       (index_block,nb,buffer_values.data());
 
@@ -812,6 +818,10 @@ void EnzoMethodInference::request_data (Block * block, int ia3[3])
 void EnzoLevelArray::p_transfer_data
 (Index index, int nb, enzo_float * buffer_values )
 {
+#ifdef TRACE_INFER
+    CkPrintf ("TRACE_INFER p_transfer_data RECV %d %d %d\n",
+              thisIndex[0],thisIndex[1],thisIndex[2]);
+#endif
   // Loop through fields
   int i_b = 0;
   const int level = index.level();
@@ -838,7 +848,6 @@ void EnzoLevelArray::p_transfer_data
     enzo_float * field = buffer_values + i_b;
     enzo_float * array = field_values_[i_f].data();
 
-    const int na = nax_*nay_*naz_;
     enzo_float * a_c = field;
     enzo_float * a_f = array;
     int ecx = (rank >= 1) ? 1 : 0;
@@ -897,6 +906,12 @@ void EnzoLevelArray::p_transfer_data
           efz = efz;
         }
 
+#ifdef DEBUG_INFER
+        CkPrintf ("DEBUG_INFER interpolate a_f %d %d %d  %d %d %d  %d %d %d\n",
+                  mfx,mfy,mfz,nfx,nfy,nfz,efx,efy,efz);
+        CkPrintf ("DEBUG_INFER interpolate a_c %d %d %d  %d %d %d  %d %d %d\n",
+                  ncx,ncy,ncz,ncx,ncy,ncz,ecx,ecy,ecz);
+#endif
         interpolate_(a_f,mfx,mfy,mfz,nfx,nfy,nfz,efx,efy,efz,
                      a_c,ncx,ncy,ncz,ncx,ncy,ncz,ecx,ecy,ecz);
 
@@ -905,15 +920,25 @@ void EnzoLevelArray::p_transfer_data
 
       }
 
-    } else {
+    } else { // copy
 
       // Copy (if restriction is required it's performed at source)
       int l = level;
-      int mdx = nbx+2*efx;
-      int mdy = nby+2*efy;
-      int mdz = nbz+2*efz;
-      copy_(a_f,nbx,nby,nbz,nbx,nby,nbz,0,0,0,
-            a_c,mdx,mdy,mdz,nbx,nby,nbz,efx,efy,efz);
+      const int mfx = nix_;
+      const int mfy = niy_;
+      const int mfz = niz_;
+      const int ncx = nbx;
+      const int ncy = nby;
+      const int ncz = nbz;
+      a_f = array + oax + mfx*(oay + mfy*oaz);
+#ifdef DEBUG_INFER
+      CkPrintf ("DEBUG_INFER copy a_d %d %d %d  %d %d %d  %d %d %d\n",
+                mfx,mfy,mfz,nbx-2,nby-2,nbz-2,0,0,0);
+      CkPrintf ("DEBUG_INFER copy a_s %d %d %d  %d %d %d  %d %d %d\n",
+                ncx,ncy,ncz,ncx-2,ncy-2,ncz-2,0,0,0);
+#endif
+      copy_(a_f,mfx,mfy,mfz,nbx-2,nby-2,nbz-2,
+            a_c,ncx,ncy,ncz,ncx-2,ncy-2,ncz-2);
     }
 
     // advance pointer to next field
@@ -959,9 +984,10 @@ void EnzoLevelArray::apply_inference()
   CkPrintf ("DEBUG_INFER level array count na[xyz] %d %d %d\n",nax_,nay_,naz_);
   CkPrintf ("DEBUG_INFER level array size  ni[xyz] %d %d %d\n",nix_,niy_,niz_);
   for (int i_f=0; i_f<num_fields_; i_f++) {
-    std::string field_name=cello::field_groups() -> item(field_group_,i_f \
-                                                         );
+    std::string field_name=cello::field_groups() -> item(field_group_,i_f);
     double sum=0.0;
+    double min=+1e10;
+    double max=-1e10;
     double wsum=0.0;
 
     for (int iz=0; iz<niz_; iz++) {
@@ -969,13 +995,18 @@ void EnzoLevelArray::apply_inference()
         for (int ix=0; ix<nix_; ix++) {
           const int i = ix+nix_*(iy+niy_*iz);
           sum += field_values_[i_f][i];
+          min = std::min(min,field_values_[i_f][i]);
+          max = std::max(max,field_values_[i_f][i]);
           wsum += (ix+1+2*(iy+1)-3*(iz+1))*field_values_[i_f][i];
-          if (i_f==0) CkPrintf ("density %d %d %d %g\n",ix,iy,iz,field_values_[i_f][i]);
         }
       }
     }
     CkPrintf ("DEBUG_INFER %s SUM %d %d %d %g\n",
               field_name.c_str(),thisIndex[0],thisIndex[1],thisIndex[2],sum);
+    CkPrintf ("DEBUG_INFER %s MIN %d %d %d %g\n",
+              field_name.c_str(),thisIndex[0],thisIndex[1],thisIndex[2],min);
+    CkPrintf ("DEBUG_INFER %s MAX %d %d %d %g\n",
+              field_name.c_str(),thisIndex[0],thisIndex[1],thisIndex[2],max);
     CkPrintf ("DEBUG_INFER %s WSUM %d %d %d %g\n",
               field_name.c_str(),thisIndex[0],thisIndex[1],thisIndex[2],wsum);
     fflush(stdout);
@@ -1119,9 +1150,6 @@ std::tuple<int,int,int,int,int,int>
 EnzoMethodInference::get_block_portion_
 (Index index, int index_field, int ia3[3])
 {
-  int gx,gy,gz;
-  cello::field_descr()->ghost_depth(index_field,&gx,&gy,&gz);
-
   const int rank = cello::rank();
 
   // Get block size (nx,ny,nz)
@@ -1136,10 +1164,6 @@ EnzoMethodInference::get_block_portion_
     ny = mdy/ndy;
     nz = mdz/ndz;
   }
-
-  // Determine reduced size if restricting
-  const int num_restrict   = std::max(index.level() - level_infer_,0);
-  const int ratio_restrict = pow(2,num_restrict);
 
   // Determine reduced size if multiple inference arrays per block
   const int num_infer   = std::max(level_array_ - index.level(),0);
@@ -1164,7 +1188,7 @@ EnzoMethodInference::get_block_portion_
   // compute field portion size
   int nbx,nby,nbz;
 
-  const int ratio = ratio_restrict*ratio_infer;
+  const int ratio = ratio_infer;
 
   nbx = (rank >= 1) ? nx / ratio + 2*ex : 1;
   nby = (rank >= 2) ? ny / ratio + 2*ey : 1;
@@ -1172,6 +1196,9 @@ EnzoMethodInference::get_block_portion_
 
   // compute field portion offset
   int obx,oby,obz;
+
+  int gx,gy,gz;
+  cello::field_descr()->ghost_depth(index_field,&gx,&gy,&gz);
 
   obx = kbx*nx/ratio + gx - ex;
   oby = kby*ny/ratio + gy - ey;
@@ -1342,10 +1369,14 @@ void EnzoLevelArray::interpolate_
 
 void EnzoLevelArray::copy_
 (enzo_float * a_dst,
- int mdx, int mdy, int mdz, int ndx,int ndy, int ndz, int edx, int edy, int edz,
+ int mdx, int mdy, int mdz, int ndx,int ndy, int ndz,
  const enzo_float * a_src,
- int msx, int msy, int msz, int nsx,int nsy, int nsz, int esx, int esy, int esz)
+ int msx, int msy, int msz, int nsx,int nsy, int nsz)
 {
+  ASSERT6("EnzoLevelArray::copy_",
+          "Mismatch between expected sizes: src %d %d %d dst %d %d %d\n",
+          nsx,nsy,nsz,ndx,ndy,ndz,
+          (nsx==ndx) && (nsy==ndy) && (nsz==ndz));
   if (cello::rank() == 1) {
     for (int idx=0; idx<ndx; idx++) {
       const int isx = idx;

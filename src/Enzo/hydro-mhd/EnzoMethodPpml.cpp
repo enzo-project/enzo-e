@@ -63,7 +63,7 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
   EnzoBlock * enzo_block = enzo::block(block);
 
-  enzo_block->SolveMHDEquations ( block->state()->dt() );
+  EnzoMethodPpml::SolveMHDEquations ( *enzo_block, block->state()->dt() );
 
   enzo_block->compute_done();
 

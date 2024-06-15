@@ -14,21 +14,17 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodGravity::EnzoMethodGravity
-(int index_solver,
- int order,
- bool accumulate,
- int index_prolong,
- double dt_max,
- int max_super,
- std::string type_super)
+EnzoMethodGravity::EnzoMethodGravity(ParameterGroup p, int index_solver,
+                                     int index_prolong,
+                                     int max_super,
+                                     std::string type_super)
   : Method(),
     index_solver_(index_solver),
-    order_(order),
+    order_(p.value_integer("order",4)),
     ir_exit_(-1),
     index_prolong_(index_prolong),
-    dt_max_(dt_max),
-    type_super_()
+    type_super_(),
+    dt_max_(p.value_float("dt_max",1.0e10))
 {
   max_supercycle_ = max_super;
   // Initialize type_super_ super-cycling type
@@ -43,6 +39,10 @@ EnzoMethodGravity::EnzoMethodGravity
   }
 
   // Declare required fields
+  const bool accumulate = p.value_logical("accumulate",true);
+
+  // Change this if fields used in this routine change
+  // declare required fields
   cello::define_field ("density");
   cello::define_field ("density_total");
   cello::define_field ("B");

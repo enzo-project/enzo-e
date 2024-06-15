@@ -59,8 +59,8 @@ array of inference-arrays. The level array is implemented as a sparse
 3D Charm++ chare array, where each element of the chare array is a
 collection of inference arrays containing field data for its region.
 
-Some synchronization and performance issues that should be addressed
-in the design include the following:
+Some synchronization and performance issues addressed in the design
+include the following:
 
    1. multiple level array "create" requests may be received from intersecting leaf blocks, but the level array element can only be created once
    2. inference arrays tend to be clustered, so level array elements should be distributed across compute nodes to reduce compute and memory load imbalances
@@ -71,33 +71,38 @@ in the design include the following:
 Phases
 ======
 
-Phases of the algorithm include the following:
+Phases of the algorithm are enumerated below:
 
-   1. **evaluate**: Blocks apply local criteria to determine where to create inference arrays
-   2. **allocate**: The "level array" chare array of inference arrays is created
-   3. **populate**: Inference arrays request and receive field data from intersecting leaf blocks
-   4. **apply inference**: Inference arrays apply the external DL inference method
-   5. **update blocks**: Inference arrays send results back to intersecting leaf blocks
+   1. **Evaluate**: blocks apply local criteria to determine where to create inference arrays
+   2. **Allocate**: the "level array" chare array of inference arrays is created
+   3. **Populate**: inference arrays request and receive field data from intersecting leaf blocks
+   4. **Apply inference**: inference arrays apply the external DL inference method
+   5. **Update blocks**: inference arrays send results back to intersecting leaf blocks
 
-These phases are described in more detail below:
+These phases are described in detail below. Note entry method
+organization prefixes are omitted below to clarify the UML sequence
+diagram labeling; e.g.  ``EnzoBlock::p_exit()`` in the documentation
+refers to ``EnzoBlock::p_method_infer_exit()`` in code.
 
 Phase 1. Evaluate
 =================
 
-Below is a UML sequence diagram illustrating the evaluation phase in ``EnzoMethodInference``.  The left blue columns represent inference
-arrays, the red right columns represent blocks in different refinement
-levels, and the center yellow column represents the root-node
+Below is a UML sequence diagram illustrating the evaluation phase in
+``EnzoMethodInference``.  The left blue columns represent inference
+arrays, the red right columns represent all blocks in successive
+refinement levels ("B0" are all root-level blocks, "B1" all level-1
+blocks, etc.), and the center yellow column represents the root-node
 Simulation object, used for synchronization and counting.
 
 .. image:: level-array-1.png
            :width: 600
 
-In the "Evaluate" phase, Blocks apply local criteria to determine
+In the "Evaluate" phase, blocks apply local criteria to determine
 where to create inference arrays.  Control enters the method at the
-Block level, such that ``EnzoMethodInference::compute()`` is called on
+block level, such that ``EnzoMethodInference::compute()`` is called on
 all blocks, which in turn call ``apply_criteria()``.
 
-The criteria currently implemented is whether the point-wise density
+The criteria currently implemented are whether the point-wise density
 is greater than the block-local average by some specified threshold.
 (See the :ref:`Inference Parameters<inference parameters>` section for
 user parameters for the inference method, including density
@@ -127,11 +132,17 @@ step, the child masks are merged in their parent block using
 logical-OR (if ``level >= level_array``) or concatenation (if ``level <
 level_array``).
 
+Phase 2. Allocate
+=================
+
 When ``level_base`` is reached (level 2 in the
 figure), each block in the ``level_base`` level will have a mask
 specifying where each inference array needs to be created. At this
 step, the level array elements are created using
 ``p_create_level_array()``.
+
+.. image:: level-array-2.png
+           :width: 600
 
 The reduction operation continues with counting the number of
 inference arrays created, using ``p_count_arrays()``. This continues
@@ -140,12 +151,6 @@ the root Simulation object. After all root-level block counts have
 been received, the Simulation object will contain the total number of
 inference arrays to be created, which is used to initialize
 synchronization counters.
-
-Phase 2. Allocate
-=================
-
-.. image:: level-array-2.png
-           :width: 600
 
 The count of number of inference arrays to create, determined in the
 previous phase, is used to determine when all level array elements
@@ -171,15 +176,15 @@ After the level array chare array is created, the root Simulation
 object calls ``p_request_data()`` on all elements of the array. Each
 level array element sends a request to the unique block in
 ``level_base`` that it intersects.  This request is then forwarded via
-child blocks to all intersecting leaf Blocks using
-``p_method_infer_request_data()``.
+child blocks to all intersecting leaf blocks using
+``p_request_data()``.
 
-When an intersecting leaf Block is reached, it serializes the required
+When an intersecting leaf block is reached, it serializes the required
 portion of field data and sends it directly to the intersecting inference array.
 Blocks coarser than ``level_infer`` must interpolate the
 data, which is done on the receive end; blocks finer than
 ``level_infer`` restrict data before sending it. The data is sent
-directly to the requisting level array element using
+directly to the requesting level array element using
 ``EnzoLevelArray::p_transfer_data()``.
 
 Phase 4. Apply inference
@@ -192,7 +197,7 @@ Level array elements keep track of incoming data, counting the relative volume o
 incoming data until the relative volume reaches 1.0. After the last piece of data
 is received and copied into the inference arrays, the level array element calls
 ``EnzoLevelArray::apply_inference()``. After the DL inference
-method is applied, ``p_infer_done()`` is called on the root-level Simulation
+method is applied, ``p_done()`` is called on the root-level Simulation
 object. The root Simulation object counts down the number of calls received,
 so it knows when all DL inference methods have completed.
 
@@ -207,12 +212,19 @@ forward the results to the intersecting leaf blocks. This is done
 using the same communication pattern as in the **populate** phase with
 ``p_request_data()``, in which data is sent to the unique
 ``level_base`` block and forwarded to the child leaf blocks via
-intersecting child blocks.``p_request_data()`` in the populate step.
+intersecting child blocks.
 
-For the method to end, all Blocks must call ``compute_done()``. To
-ensure this is called only after all Blocks have been updated with
-their data, a final ``p_results_received()`` call is forwarded from
-leaf blocks down to base_level Blocks, which update the root
-Simulation object. The root simulation object counts the
-acknowledgements, and calls ``compute_done()`` on all Blocks when the
-countdown is completed.
+For the method to end, all blocks must call ``compute_done()``. This
+is done via successive calls to ``p_done()`` on the level array chare,
+then the root-level simulation chare, and finally ``p_exit()`` on all
+blocks, which calls ``compute_done()``. This seemingly roundabout
+approach is used to ensure proper synchronization.  First, each level
+array element sums up the block volumes of incoming ``p_done()``
+methods from its containing blocks. When this volume sum reaches the
+volume associated with the level array element, it triggers a call to
+``p_done()`` on the root-level simulation chare.  The root-level
+simulation chare in turn counts the number of these incoming
+``p_done()`` calls from the level array chares. When the count reaches
+the total number of level array chares, it triggers a call to
+``p_exit()`` on all blocks, which calls ``compute_done()``, ending the
+method and returning control to Cello.

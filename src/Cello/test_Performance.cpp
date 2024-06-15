@@ -15,7 +15,7 @@
 void sleep_flop (int s, int count)
 {
   char sleep_string [10];
-  sprintf (sleep_string,"sleep %d",s);
+  snprintf (sleep_string,sizeof(sleep_string),"sleep %d",s);
   int err = system(sleep_string);
 
   if (err == -1) ERROR("main","system(sleep) failed!!");

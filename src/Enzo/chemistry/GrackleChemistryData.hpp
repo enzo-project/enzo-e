@@ -16,12 +16,16 @@
 #ifndef ENZO_GRACKLE_CHEMISTRY_DATA_HPP
 #define ENZO_GRACKLE_CHEMISTRY_DATA_HPP
 
-// in the future, when the grackle header isn't included in the global header,
-// we should always forward declare the chemistry data struct
-#ifndef CONFIG_USE_GRACKLE
-// unclear how necessary `extern "C"` is here
-extern "C" { struct chemistry_data; };
-#endif
+// this header is intended to be fairly self-contained
+
+#include <memory> // std::unique_ptr
+#include <string>
+#include <type_traits> // std::is_same
+#include <unordered_set>
+#include <utility> // std::pair
+#include <vector>
+
+#include "chemistry/chemistry_grackleincl.hpp"
 
 class GrackleChemistryData {
 
@@ -67,9 +71,7 @@ public: // public interface (implementation is tied to Grackle details)
 
   /// factory method that builds GrackleChemistryData from a Parameters object
   ///
-  /// @param[in] p the titular Parameters object
-  /// @param[in] parameter_group string holding the full group name (usually it
-  ///     will just be ``"Method:grackle"``.
+  /// @param[in] p the titular ParameterAccessor object
   /// @param[in] forbid_leaf_names names of parameters that correspond to
   ///     grackle parameters that are not allowed to appear in the
   ///     "Method:grackle:*" group. These parameters are usually mutated after
@@ -83,7 +85,7 @@ public: // public interface (implementation is tied to Grackle details)
   /// function is VERY aggressive about reporting any unexpected parameters as
   /// an error.
   GrackleChemistryData static from_parameters
-    (Parameters& p, const std::string& parameter_group,
+    (ParameterGroup p,
      const std::unordered_set<std::string>& forbid_leaf_names,
      const std::unordered_set<std::string>& ignore_leaf_names) noexcept;
 

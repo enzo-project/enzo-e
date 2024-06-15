@@ -245,6 +245,7 @@ void BoundaryValue::enforce
 	  }
 	}
        	break;
+      case precision_extended64:
       case precision_extended80:
       case precision_extended96:
       case precision_quadruple:

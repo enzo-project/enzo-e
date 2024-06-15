@@ -1,9 +1,19 @@
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file      enzo_SolveHydroEquations.cpp
+/// @file      EnzoMethodPpm_SolveHydroEquations.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
 /// @brief     Solve the hydro equations, saving subgrid fluxes
+///
+/// When this function was first ported to Enzo-E, it was an instance method of
+/// the EnzoBlock class. However as the codebase has matured, it has become
+/// customary for integrators to be encapsulated by Method Objects. As such
+/// this function has been converted to a static method of EnzoMethodPpm.
+///
+/// In the future, it probably makes sense to consolidate this file with
+/// EnzoMethodPpm.cpp (this consolidation has been left to a separate PR from
+/// the one where this function was removed from the EnzoBlock class to make
+/// merge conflicts easier to address)
 
 #include <stdio.h>
 
@@ -19,8 +29,9 @@
 // #define DEBUG_FLUX
 //----------------------------------------------------------------------
 
-int EnzoBlock::SolveHydroEquations
+int EnzoMethodPpm::SolveHydroEquations
 (
+ EnzoBlock& block,
  enzo_float time,
  enzo_float dt,
  bool comoving_coordinates,
@@ -37,7 +48,7 @@ int EnzoBlock::SolveHydroEquations
 
   int dim, size;
 
-  Field field = data()->field();
+  Field field = block.data()->field();
   int gx,gy,gz;
   int mx,my,mz;
   field.ghost_depth(0,&gx,&gy,&gz);
@@ -87,7 +98,7 @@ int EnzoBlock::SolveHydroEquations
 
   size = 1;
   for (dim = 0; dim < rank; dim++)
-    size *= GridDimension[dim];
+    size *= block.GridDimension[dim];
 
   enzo_float * density         = (enzo_float *) field.values("density");
   enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
@@ -137,13 +148,13 @@ int EnzoBlock::SolveHydroEquations
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if ((cello::hierarchy()->max_level() == this->level()) &&
+  if ((cello::hierarchy()->max_level() == block.level()) &&
       use_minimum_pressure_support) {
-    if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
-                          minimum_pressure_support_parameter,
-			  comoving_coordinates) == ENZO_FAIL) {
-      ERROR("EnzoBlock::SolveHydroEquations()",
-	    "EnzoBlock::SetMinimumSupport() returned ENZO_FAIL");
+    if (enzo::SetMinimumSupport(block, MinimumSupportEnergyCoefficient,
+                                minimum_pressure_support_parameter,
+                                comoving_coordinates) == ENZO_FAIL) {
+      ERROR("EnzoMethodPpm::SolveHydroEquations()",
+	    "enzo::SetMinimumSupport() returned ENZO_FAIL");
     }
   }
 
@@ -182,18 +193,18 @@ int EnzoBlock::SolveHydroEquations
   /* fix grid quantities so they are defined to at least 3 dims */
 
   for (int i = rank; i < 3; i++) {
-    GridDimension[i]   = 1;
-    GridStartIndex[i]  = 0;
-    GridEndIndex[i]    = 0;
+    block.GridDimension[i]   = 1;
+    block.GridStartIndex[i]  = 0;
+    block.GridEndIndex[i]    = 0;
     //      GridGlobalStart[i] = 0;
   }
 
   /* allocate temporary space for solver (enough to fit 31 of the largest
      possible 2d slices plus 4*ncolor). */
 
-  int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
-			 GridDimension[1]*GridDimension[2]),
-		     GridDimension[2]*GridDimension[0]);
+  int tempsize = MAX(MAX(block.GridDimension[0]*block.GridDimension[1],
+			 block.GridDimension[1]*block.GridDimension[2]),
+		     block.GridDimension[2]*block.GridDimension[0]);
 
   enzo_float *temp = new enzo_float[tempsize*(32+ncolor*4)];
 
@@ -223,7 +234,7 @@ int EnzoBlock::SolveHydroEquations
   // Offsets computed from the "standard" pointer to the start of each
   // flux data
 
-  FluxData * flux_data = data()->flux_data();
+  FluxData * flux_data = block.data()->flux_data();
 
   enzo_float * flux_array = (single_flux_array) ?
     flux_data->flux_array() : temp;
@@ -283,7 +294,7 @@ int EnzoBlock::SolveHydroEquations
   }
 
 #ifdef DEBUG_FLUX
-  CkPrintf ("DEBUG_FLUX %s %lld %lld\n",this->name().c_str(),min,max);
+  CkPrintf ("DEBUG_FLUX %s %lld %lld\n",block.name().c_str(),min,max);
 #endif
   
 
@@ -303,7 +314,7 @@ int EnzoBlock::SolveHydroEquations
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt, time+0.5*dt);
   }
 
-  ASSERT ("EnzoBlock::SolveHydroEquations()",
+  ASSERT ("EnzoMethodPpm::SolveHydroEquations()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
 	  ! (comoving_coordinates && (cosmology == NULL)) );
 
@@ -311,12 +322,12 @@ int EnzoBlock::SolveHydroEquations
 
   enzo_float * CellWidthTemp[MAX_DIMENSION];
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
-    CellWidthTemp[dim] = new enzo_float [GridDimension[dim]];
+    CellWidthTemp[dim] = new enzo_float [block.GridDimension[dim]];
     if (dim < rank) {
-      for (int i=0; i<GridDimension[dim]; i++)
-	CellWidthTemp[dim][i] = (cosmo_a*CellWidth[dim]);
+      for (int i=0; i<block.GridDimension[dim]; i++)
+	CellWidthTemp[dim][i] = (cosmo_a*block.CellWidth[dim]);
     } else {
-      for (int i=0; i<GridDimension[dim]; i++)
+      for (int i=0; i<block.GridDimension[dim]; i++)
 	CellWidthTemp[dim][i] = 1.0;
     }
   }
@@ -333,7 +344,7 @@ int EnzoBlock::SolveHydroEquations
   int iposrec = 0;
 
   int error = 0;
-  int cycle = state_->cycle();
+  int cycle = block.state()->cycle();
 
   // convert the dtype of a couple of arguments:
   int diffusion_int = diffusion;
@@ -350,8 +361,8 @@ int EnzoBlock::SolveHydroEquations
      acceleration_z,
      &gamma, &dt, &cycle,
      CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
-     &rank, &GridDimension[0], &GridDimension[1],
-     &GridDimension[2], GridStartIndex, GridEndIndex,
+     &rank, &block.GridDimension[0], &block.GridDimension[1],
+     &block.GridDimension[2], block.GridStartIndex, block.GridEndIndex,
      &flattening,
      &pressure_free_int,
      &iconsrec, &iposrec,
@@ -366,8 +377,8 @@ int EnzoBlock::SolveHydroEquations
      );
 
 #ifdef EXIT_ON_ERROR  
-  ASSERT2 ("EnzoBlock::SolveHydroEquations",
-           "Error %d in call to ppm_de block %s",error,name().c_str(),
+  ASSERT2 ("EnzoMethodPpm::SolveHydroEquations",
+           "Error %d in call to ppm_de block %s",error,block.name().c_str(),
            (error == 0));
 #endif  
 

@@ -206,7 +206,7 @@ public: // virtual functions
   void debug_open() {
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
     char buffer[40];
-    sprintf(buffer,"out.debug.%03d-%03d",CkMyPe(),cycle_);
+    snprintf(buffer,sizeof(buffer),"out.debug.%03d-%03d",CkMyPe(),cycle_);
     fp_debug_ = fopen (buffer,"w");
 #endif
   }
@@ -385,6 +385,18 @@ public: // virtual functions
   int refresh_count() const
   { return refresh_list_.size(); }
 
+  //--------------------------------------
+  // Initialization
+  //--------------------------------------
+
+  /// Return the number of blocks created during the 
+  /// initialization phase.
+  int initial_block_count () throw();
+
+  /// Update block counter used to synchornize blocks
+  /// during the initialization phase.
+  void p_initial_block_created() throw();
+
 protected: // functions
 
   /// Initialize the Config object
@@ -524,6 +536,9 @@ protected: // attributes
 
   /// Particle descriptor
   ParticleDescr * particle_descr_;
+
+  /// Initialization synchronization.
+  Sync sync_init_block_count_;
 
   /// Output synchronization (depreciated)
   Sync sync_output_begin_;

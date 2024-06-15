@@ -5,9 +5,8 @@
 /// @date     2017-07-24
 /// @brief    Implementation of the EnzoMethodCosmology class
 
-#include "cello.hpp"
-#include "charm_simulation.hpp"
-#include "enzo.hpp"
+#include "Enzo/cosmology/cosmology.hpp"
+#include "Enzo/enzo.hpp"
 
 // #define DEBUG_COSMO
 

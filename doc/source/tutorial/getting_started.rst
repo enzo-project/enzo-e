@@ -23,7 +23,7 @@ Dependency Installation
 =======================
 
 Before compiling ``Enzo-E / Cello``, you may need to download
-and install 1. ``CMake``, 2. ``Charm++``, 3. ``HDF5``, 4. ``libpng``, 5. ``libboost``, and (optionally) 6. ``Grackle``:
+and install 1. ``CMake``, 2. ``Charm++``, 3. ``HDF5``, 4. ``libpng``, and (optionally) 5. ``Grackle``:
 
 1. Install ``CMake``
 --------------------
@@ -103,16 +103,7 @@ available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
 <https://www.libpng.org/pub/png/libpng.html>`_ website.
 
-5. Install ``libboost-dev``
----------------------------
-
-"`Boost <https://www.boost.org/>`_ provides free peer-reviewed portable C++ source libraries."
-
-If ``libboost-dev`` is not already installed on your machine, it may be
-available through your operating system distribution, otherwise it can
-be downloaded from the `libboost <https://www.boost.org/>`_ website.
-
-6. Install Grackle  (Optional)
+5. Install Grackle  (Optional)
 ------------------------------
 
 By default, Enzo-E requires the Grackle chemistry and cooling library.
@@ -121,7 +112,7 @@ If you do not need to use Grackle, you can simple disabling it by setting
 See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
 instructions.
 
-7. Install yt (Optional)
+6. Install yt (Optional)
 ------------------------
 
 If you want to use the yt python package to analyse Enzo-E output data, you should install the latest version from source.
