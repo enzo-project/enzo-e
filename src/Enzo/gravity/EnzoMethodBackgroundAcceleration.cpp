@@ -363,11 +363,11 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   enzo_float cosmo_a = 1.0;
 
   const int rank = cello::rank();
+  const double dt   = block->state()->dt();
+  const double time = block->state()->time();
 
   if (cosmology) {
     enzo_float cosmo_dadt = 0.0;
-    double dt    = block->dt();
-    double time  = block->time();
     cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,time+0.5*dt);
     if (rank >= 1) block_info.cell_width[0] *= cosmo_a;
     if (rank >= 2) block_info.cell_width[1] *= cosmo_a;
@@ -397,7 +397,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
     const GalaxyModel functor(*galaxy_pack_dfltU_, units);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
-                   cosmo_a, potential_center_xyz_, enzo_block->dt);
+                   cosmo_a, potential_center_xyz_, dt);
 
   } else if (point_mass_pack_dfltU_ != nullptr) {
 
@@ -407,7 +407,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
                                  cosmo_a, block_info.cell_width);
 
     compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
-                   cosmo_a, potential_center_xyz_, enzo_block->dt);
+                   cosmo_a, potential_center_xyz_, dt);
 
   } else {
 
@@ -449,8 +449,8 @@ double EnzoMethodBackgroundAcceleration::timestep (Block * block) throw()
   if (cosmology) {
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
-    double dt   = block->dt();
-    double time = block->time();
+    const double dt   = block->state()->dt();
+    const double time = block->state()->time();
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
     if (rank >= 1) hx*=cosmo_a;
     if (rank >= 2) hy*=cosmo_a;

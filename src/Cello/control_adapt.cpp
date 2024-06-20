@@ -18,6 +18,7 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define DEBUG_STATE
 // #define TRACE_ADAPT
 // #define TRACE_REFINE
 // #define TRACE_COARSEN
@@ -57,7 +58,6 @@ void Block::adapt_enter_()
 {
   TRACE_ADAPT("adapt_enter_",this);
   if ( do_adapt_()) {
-
     adapt_begin_();
 
   } else {
@@ -231,7 +231,7 @@ void Block::adapt_end_()
   sync_coarsen_.set_stop(cello::num_children());
 
   const int initial_cycle = cello::config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
+  const bool is_first_cycle = (initial_cycle == state_->cycle());
   const int level_maximum = cello::config()->mesh_max_level;
 
   bool adapt_again = (is_first_cycle && (adapt_step_ < level_maximum));
@@ -252,9 +252,32 @@ void Block::adapt_end_()
 /// @brief Return whether the adapt phase should be called this cycle.
 bool Block::do_adapt_()
 {
+  // Check adapt interval
   int adapt_interval = cello::config()->adapt_interval;
 
-  return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
+  // Check whether any methods supercycling (step != 0)
+  bool is_cycle_boundary = false;
+  for (int i=0; i<state()->num_methods(); i++) {
+    const auto & method_state = state()->method(i);
+#ifdef DEBUG_STATE
+    if (index_.is_root()) {
+      CkPrintf ("DEBUG_STATE method %d step %d num_steps %d\n",i,method_state.step(),method_state.num_steps());
+    }
+#endif
+    bool method_cycle_boundary = (method_state.step() <= 1); // method_state.num_steps()
+    is_cycle_boundary = is_cycle_boundary || method_cycle_boundary;
+  }
+
+  bool adapt_scheduled = ((adapt_interval && ((state_->cycle() % adapt_interval) == 0)));
+#ifdef DEBUG_STATE
+  if (index_.is_root()) {
+    CkPrintf ("DEBUG_STATE adapt_scheduled %d is_cycle_boundary %d adapt %d\n",adapt_scheduled ? 1 : 0,
+              is_cycle_boundary ? 1 : 0,
+              adapt_scheduled && is_cycle_boundary);
+  }
+#endif
+
+  return adapt_scheduled && is_cycle_boundary;
 }
 
 //----------------------------------------------------------------------
@@ -288,13 +311,13 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 
     Schedule * schedule = refine->schedule();
 
-    if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
+    if ((schedule==NULL) || schedule->write_this_cycle(state_->cycle(),state_->time()) ) {
       adapt = std::max(adapt,refine->apply(this));
     }
 
   }
   const int initial_cycle = cello::config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
+  const bool is_first_cycle = (initial_cycle == state_->cycle());
 
   if (adapt == adapt_coarsen && level > 0 && ! is_first_cycle)
     level_desired = level - 1;
@@ -375,6 +398,7 @@ void Block::adapt_refine_()
       // @@@ should be true but ~FieldFace() crashes
       data_msg -> set_field_face (field_face,false);
       data_msg -> set_field_data (data()->field_data(),false);
+      data_msg -> set_scalars (data());
       ParticleData * p_data = new ParticleData(*particle_list[IC3(ic3)]);
       data_msg -> set_particle_data (p_data,true);
 
@@ -386,6 +410,12 @@ void Block::adapt_refine_()
       char * array = 0;
       int num_field_data = 1;
 
+      std::vector<int> face_level;
+      face_level.resize(27);
+      const int o = 27*IC3(ic3);
+      for (int i=0; i<face_level.size(); i++) {
+        face_level[i] = child_face_level_curr_[o+i];
+      }
       factory->create_block
 	(
 	 data_msg,
@@ -393,11 +423,9 @@ void Block::adapt_refine_()
 	 nx,ny,nz,
 	 num_field_data,
 	 adapt_step_,
-	 cycle_,time_,dt_,
 	 narray, array, refresh_fine,
-	 27,
-         &child_face_level_curr_.data()[27*IC3(ic3)],
-         &adapt_,
+         face_level,
+         &adapt_,state_.get(),
 	 cello::simulation());
 
       delete [] array;
@@ -933,6 +961,7 @@ void Block::adapt_coarsen_()
   data_msg -> set_field_face (field_face,false);
   data_msg -> set_field_data (data()->field_data(),false);
   data_msg -> set_particle_data (data()->particle_data(),false);
+  data_msg -> set_scalars(data());
 
   const int nf = adapt_.size_face_level(Adapt::LevelType::curr);
 

@@ -85,7 +85,7 @@ void Block::compute_continue_ ()
   Schedule * schedule = method->schedule();
   bool is_scheduled = 
     (schedule==NULL) ||
-    (schedule->write_this_cycle(cycle_,time_));
+    (schedule->write_this_cycle(state_->cycle(),state_->time()));
 
   if (is_scheduled) {
     TRACE2 ("Block::compute_continue() method = %d %p\n",
@@ -100,7 +100,7 @@ void Block::compute_continue_ ()
     // Apply the method to the Block
 
     method->compute (this);
-    
+
     performance_stop_(perf_compute,__FILE__,__LINE__);
 
   } else {
@@ -119,8 +119,27 @@ void Block::compute_done ()
   if (cycle() >= CYCLE)
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_done_()\n", CkMyPe(),name().c_str());
 #endif
+  compute_update_method_state_(index_method_);
   index_method_++;
   compute_next_();
+}
+
+//----------------------------------------------------------------------
+
+void Block::compute_update_method_state_(int index_method)
+{
+  auto & method_state = state_->method(index_method);
+  const double dt_global = state_->dt();
+  const double time_global = state_->time();
+  const double time_method = method_state.time();
+  const double dt_method = method_state.dt();
+  const int step_method = method_state.step();
+  const int num_step_method = method_state.num_steps();
+  const int max_supercycle = method()->max_supercycle();
+
+  method_state.set_time(time_method + dt_global);
+  method_state.set_step(step_method + 1);
+
 }
 
 //----------------------------------------------------------------------
@@ -137,19 +156,23 @@ void Block::compute_end_ ()
   //  traceUserBracketEvent(10,time_start, CmiWallTimer());
 #endif
 
+  // Update block cycle and time
+  int cycle   = state_->cycle();
+  double time = state_->time();
+  double dt   = state_->dt();
+  state_->set_cycle(cycle + 1);
+  state_->set_time (time + dt);
+
   // Push back fields if saving old ones
-  data()->field().save_history(time_);
+  data()->field().save_history(state_->time());
 
   // delete fluxes
   data()->flux_data()->deallocate();
 
-  // Update block cycle and time
-  set_cycle (cycle_ + 1);
-  set_time  (time_  + dt_);
-
   // Update Simulation cycle and time (redundant)
-  cello::simulation()->set_cycle(cycle_);
-  cello::simulation()->set_time(time_);
+  auto & global_state = cello::simulation()->state();
+  global_state->set_cycle(state_->cycle());
+  global_state->set_time(state_->time());
 
   compute_exit_();
 

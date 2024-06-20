@@ -30,7 +30,13 @@ public: // interface
       face_fluxes_delete_(),
       coarse_field_buffer_(),
       coarse_field_list_src_(),
-      coarse_field_list_dst_()
+      coarse_field_list_dst_(),
+      scalar_data_long_double_(),
+      scalar_data_double_(),
+      scalar_data_int_(),
+      scalar_data_long_long_(),
+      scalar_data_sync_(),
+      scalar_data_index_()
   {
     for (int i=0; i<3; i++) {
       iam3_cf_[i]  =0;
@@ -189,10 +195,16 @@ public: // interface
    const std::vector<int> & field_list_dst,
    std::string debug_block_recv);
 
+  /// Set message scalars from Data object scalars
+  void set_scalars ( Data * data);
+  
+  /// Update data object scalars from message scalars
+  void update_scalars ( Data * data);
+
   ///--------------------
   /// PACKING / UNPACKING
   ///--------------------
-  
+
   /// Return the number of bytes required to serialize the data object
   int data_size () const;
 
@@ -213,7 +225,7 @@ public: // interface
   void update (Data * data, bool is_local, bool is_kept = true);
 
   /// Debugging
-  void print (const char * message, FILE * fp = nullptr) const;
+  void print (std::string, FILE * fp = nullptr) const;
 
 protected: // attributes
 
@@ -262,6 +274,13 @@ protected: // attributes
   /// loop limits for the receiving field
   int ifmr3_cf_[3], ifpr3_cf_[3];
 
+  /// Scalar data
+  ScalarData<long double> scalar_data_long_double_;
+  ScalarData<double>      scalar_data_double_;
+  ScalarData<int>         scalar_data_int_;
+  ScalarData<long long>   scalar_data_long_long_;
+  ScalarData<Sync>        scalar_data_sync_;
+  ScalarData<Index>       scalar_data_index_;
 };
 
 #endif /* DATA_DATA_MSG_HPP */

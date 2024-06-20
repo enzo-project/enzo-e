@@ -99,8 +99,9 @@ void EnzoBoundary::enforce_reflecting_
  axis_enum axis
  ) const throw()
 {
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
 
-  Data * data = block->data();
+  Data * data = enzo_block->data();
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -122,7 +123,7 @@ void EnzoBoundary::enforce_reflecting_
   data -> lower(&xm,&ym,&zm);
   data -> upper(&xp,&yp,&zp);
 
-  double t = block->time();
+  double t = enzo_block->state()->time();
 
   const int rank = cello::rank();
 
@@ -293,7 +294,9 @@ void EnzoBoundary::enforce_outflow_
  ) const throw()
 {
 
-  Data * data = block->data();
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
+
+  Data * data = enzo_block->data();
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -315,7 +318,7 @@ void EnzoBoundary::enforce_outflow_
   data -> lower(&xm,&ym,&zm);
   data -> upper(&xp,&yp,&zp);
 
-  double t = block->time();
+  double t = enzo_block->state()->time();
 
   // @@@
   // @@@ BUG: loops through all fields; should only use fields in field_list

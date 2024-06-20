@@ -31,7 +31,7 @@ EnzoInitialCosmology::EnzoInitialCosmology
   cosmology->set_current_redshift(r0);
 
   // set initial time based on redshift
-  enzo::simulation()->set_time(cosmology->time_from_redshift(r0));
+  enzo::simulation()->state()->set_time(cosmology->time_from_redshift(r0));
 }
 
 //----------------------------------------------------------------------
@@ -48,16 +48,17 @@ void EnzoInitialCosmology::enforce_block
     temperature_ = 550.0 *
       pow((1.0 + cosmology->initial_redshift())/(1.0 + 200.00), 2.0);
   }
-  
-  block->set_time(enzo::simulation()->time());
-  
+
+  double time = enzo::simulation()->state()->time();
+  block->state()->set_time (time);
+
   const double default_mu = 0.6;
 
   const double internal_energy = temperature_/units->kelvin_per_energy_units()
     /default_mu/(gamma_-1.0);
 
   Field field = block->data()->field();
-  
+
   enzo_float * ei = (enzo_float *) field.values("internal_energy");
   enzo_float * et = (enzo_float *) field.values("total_energy");
   enzo_float * vx = (enzo_float *) field.values("velocity_x");

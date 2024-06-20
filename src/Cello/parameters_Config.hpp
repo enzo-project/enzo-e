@@ -305,8 +305,8 @@ public: // interface
       solver_prolong(),
       solver_min_level(),
       solver_max_level(),
-    solver_field_x(),
-    solver_field_b(),
+      solver_field_x(),
+      solver_field_b(),
       stopping_cycle(0),
       stopping_time(0.0),
       stopping_seconds(0.0),
@@ -435,6 +435,9 @@ public: // attributes
   int                        num_method;
   double                     method_courant_global;
   std::vector<std::string>   method_list;
+
+  std::vector<int>           method_max_supercycle;
+
   std::vector<int>           method_schedule_index;
   std::vector<double>        method_courant;
   std::vector<std::string>   method_type;
