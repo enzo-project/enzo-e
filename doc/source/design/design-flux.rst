@@ -1,16 +1,16 @@
 .. include:: ../roles.incl
-  
+
 **********************
 Flux Correction Design
 **********************
 .. toctree::
-     
+
 ============
 Requirements
 ============
 
 Flux correction involves updating field values along faces between
-neighboring blocks to ensure that conserved quantities are 
+neighboring blocks to ensure that conserved quantities are
 conserved across jumps in spacial and temporal resolution.
 The update involves adding correction factors to all coarse
 values that lie along coarse-fine interfaces, where the correction
@@ -23,7 +23,7 @@ MHD, and expansion terms in cosmological problems may also need to be
 considered.
 
 Basic operations involved include the following:
-   
+
 #. allocating and deallocating flux data
 #. setting and accessing flux values
 #. communicating fluxes between neighboring blocks (fine-to-coarse)
@@ -74,7 +74,7 @@ sufficient support for storing fluxes, computing flux correction
 factors, and applying the flux correction to conserved field values.
 
 Specific requirements include the following:
-   
+
 - **RC-1.** Store fluxes of conserved fields that lie along block faces
 - **RC-2.** Store associated fluxes computed on adjacent blocks
 - **RC-3.** Communicate fluxes between adjacent blocks when (and ideally only when) needed
@@ -130,7 +130,7 @@ MethodFluxCorrect class
 The :p:`MethodFluxCorrect` class is a Cello :p:`Method`, whose
 main virtual method is :p:`compute(Block)`.  This operates on some
 subset of data types on a Block.  The :p:`MethodFluxCorrect` method
-initiates communication 
+initiates communication
 between processes, and computes and applies appropriate
 flux-correction operations on required Field values along block
 interfaces.
@@ -149,19 +149,19 @@ required for flux-correction.)
 .. glossary::
 
    ``MethodFluxCorrect::MethodFluxCorrect()``
-   
+
       *Create a new MethodFluxCorrect object, and define its refresh communication requirements*
-  
+
 ----
 
 .. glossary::
 
    ``virtual void MethodFluxCorrect::compute (Block * block)``
-   
+
       *Request Cello to refresh its flux data, then apply flux correction*
 
       * **block**: *Block that flux correction is being applied to*
-   
+
 ----------
 Face class
 ----------
@@ -209,9 +209,9 @@ y=1, z=2), and face (lower=0, upper=1).
    ``int Face::face()``
     *Return whether the normal direction is towards the lower (0) or upper (1) face direction.*
 
-----------------     
+----------------
 FaceFluxes class
-----------------     
+----------------
 
 Face fluxes represent an array of fluxes of a given conserved Field
 through a Block's face or subset of a face.  Operations available for
@@ -226,10 +226,10 @@ finer time step to match a neighboring block's coarser time step.
    comment # [*]
 
 .. glossary::
-   
+
    ``FaceFluxes::FaceFluxes (Face face, int index_field, int nx, int ny, int nz, int cx, int cy, int cz)``
     *Create a FaceFluxes object for the given face, field, and block size. Optionally include centering adjustment (0 <= cx,cy,cz <= 1) for facet-, edge-, or corner-located field values*
-   
+
 ----
 
 .. glossary::
@@ -272,42 +272,42 @@ finer time step to match a neighboring block's coarser time step.
 
   ``void FaceFluxes::get_size (int * mx, int * my, int * mz)``
    *Return the array dimensions of the flux array, including any adjustments for centering.  Indexing is ix + mx\*(iy +my\*iz).*
-   
+
 ----
 
 .. glossary::
 
   ``void FaceFluxes::set_flux_array ( std::vector<double> array, int dx, int dy, int dz)``
    *Copy flux values from an array to the FluxFaces flux array. Array element array[ix\*dx + iy\*dy + iz\*dz] should correspond to flux value (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
-  
+
 ----
 
 .. glossary::
 
   ``std::vector<double> & FaceFluxes::flux_array (int * dx=0, int * dy=0, int * dz=0)``
    *Return the array of fluxes and associated strides (dx,dy,dz) such that the (ix,iy,iz) flux value is fluxes[ix\*dx + iy\*dy + iz\*dz], where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
-  
+
 ----
 
 .. glossary::
 
   ``void FaceFluxes::coarsen(int cx, int cy, int cz, int rank)``
    *Used for coarsening fine-level fluxes to match coarse level fluxes. Arguments (cx,cy,cz) specify the child indices of the block within its parent (not to be confused with centering (cx_,cy_,cz_); flux array size is kept the same, with offset determined by child indices.*
-  
+
 ----
 
 .. glossary::
 
   ``void FaceFluxes::accumulate (FaceFluxes & ff, int cx, int cy, int cz, rank)``
    *Add the FaceFluxes object to this one. Used for accumulating fluxes with finer time steps until they match the coarser time step. Assumes spacially-conforming FaceFluxes objects.*
-  
+
 ----
 
 .. glossary::
 
   ``FaceFluxes & FaceFluxes::operator *= (double weight)``
    *Scale the fluxes array by a scalar constant.*
-  
+
 --------------
 FluxData class
 --------------
@@ -324,7 +324,7 @@ differencing fluxes is the responsibility of the :p:`FaceFluxes`
 class; :p:`FluxData` is primarily a container.
 
 
-.. glossary::      
+.. glossary::
 
    ``FluxData::FluxData()``
      *Create an empty FluxData() object*
@@ -359,35 +359,35 @@ class; :p:`FluxData` is primarily a container.
 
 ----
 
-.. glossary::      
+.. glossary::
 
    ``void FluxData::block_fluxes(int axis, int face, int i_f)``
     *Return the face fluxes object associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
 
 ----
 
-.. glossary::      
+.. glossary::
 
    ``void FluxData::neighbor_fluxes(int axis, int face, int i_f)``
     *Return the neighboring block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
 
 ----
 
-.. glossary::      
+.. glossary::
 
    ``void FluxData::set_block_fluxes(FaceFluxes * ff, int axis, int face, int i_f)``
     *Set the block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
 
 ----
 
-.. glossary::      
+.. glossary::
 
    ``void FluxData::set_neighbor_fluxes(FaceFluxes * ff, int axis, int face, int i_f)``
     *Set the neighboring block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
 
 ----
 
-.. glossary::      
+.. glossary::
 
    ``void FluxData::sum_neighbor_fluxes(FaceFluxes * ff, int axis, int face, int i_f)``
     *Accumulate (sum) the neighboring block's face fluxes associated with the given facet and field. Note 0 <= i_f  < num_fields() is an index into the field_list vector, not the field index itself.*
@@ -417,7 +417,7 @@ type, which by definition includes
    3. only from finer resolution to coarser resolution (temporal as
       well as spacial)
 
----- 
+----
 
 .. figure:: flux-refresh-1.png
     :width: 500px
@@ -425,9 +425,9 @@ type, which by definition includes
     :alt: figure illustrating that fine block fluxes are coarsened before being communicated
     :figclass: align-center
 
-    Communicating fluxes assuming constant time steps.               
-      
----- 
+    Communicating fluxes assuming constant time steps.
+
+----
 
 .. figure:: flux-refresh-2.png
     :width: 500px
@@ -435,13 +435,13 @@ type, which by definition includes
     :alt:  figure illustrating that fine block fluxes with shorter time steps are accumulated in the receiving coarse grid neighbor fluxes
     :figclass: align-center
 
-    Communicating fluxes assuming adaptive time steps.               
-      
+    Communicating fluxes assuming adaptive time steps.
+
 Testing
 =======
 
 Multiple levels of testing are used, including unit tests for the lower level
-:p:`Face`, :p:`FaceFluxes`, and :p:`FluxData` classes, and 
+:p:`Face`, :p:`FaceFluxes`, and :p:`FluxData` classes, and
 application testing for :p:`MethodFluxCorrect`.
 
 Application tests include varying difficulties of meshes, physics,
@@ -454,7 +454,7 @@ are summarized below:
    * **M1** unigrid
    * **M2** one additional refinement level
    * **M3** two additional refinement levels
-     
+
 * **Physics**
 
   * **PH** hydro
@@ -473,7 +473,7 @@ are summarized below:
   * **F8** double
 
 * **Parallelism**
-  
+
   * **p1**: single processor
   * **pc**: parallel across cores
   * **pn**: parallel across nodes
@@ -481,11 +481,11 @@ are summarized below:
 Documentation
 =============
 
-- **DD-1.** *Design*: add flux correction design to :p:`design/design-flux.rst` 
+- **DD-1.** *Design*: add flux correction design to :p:`design/design-flux.rst`
 - **DD-2.** *Method*: add :p:`MethodFluxCorrect` method documentation to :p:`user/problem_method.rst`
 - **DD-3.** *Testing*: add :p:`testing/testing_flux.rst` test documentation
 - **DD-4.** *Parameters*: update :p:`doc/source/param/`  parameter documentation
-   
+
 ==========
 Milestones
 ==========

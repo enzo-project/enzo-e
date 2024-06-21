@@ -15,7 +15,7 @@ architectures, including the "Frontera" supercomputer at TACC and the
 
 .. toctree::
    :maxdepth: 1
-	   
+
    getting_started_pleiades
    getting_started_frontera
 
@@ -302,7 +302,7 @@ Debugging Options
 ^^^^^^^^^^^^^^^^^
 
 The following options are useful for debugging.
-       
+
 .. list-table:: Debug Options
    :widths: 10 30 5
    :header-rows: 1
@@ -366,7 +366,7 @@ For example, a configure line may look like
   cmake -DCHARM_ROOT=$(pwd)/../../charm/build-gcc-mpi-proj -DEnzo-E_CONFIG=msu_hpcc_gcc -DGrackle_ROOT=${HOME}/src/grackle/build-gcc -Duse_projections=ON -Duse_jemalloc=ON -Dbalance=ON  ..
 
 To see all available (and selected) options you can also run ``ccmake .`` in the
-build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI 
+build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI
 directly to interactively configure Enzo-E by calling ``ccmake ..`` in an empty build
 directory.
 
@@ -497,7 +497,7 @@ Time = 0.05
 Time = 0.10
 
 .. image:: hello-de-0165.png
-   :scale: 40 %                   
+   :scale: 40 %
 
 .. image:: hello-mesh-level-0165.png
    :scale: 40 %

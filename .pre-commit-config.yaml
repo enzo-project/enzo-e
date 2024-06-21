@@ -1,0 +1,20 @@
+
+# if we choose to adopt the pre-commit ci, uncomment the following
+#ci:
+#    autofix_prs: false
+
+
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: check-case-conflict
+    -   id: trailing-whitespace
+        files: |
+            (?x)^(
+                doc/source/.*\.rst|
+                .*\.cmake|
+                .*CMakeLists.txt
+            )$
+

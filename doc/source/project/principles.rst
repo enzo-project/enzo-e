@@ -72,7 +72,7 @@ Usability
 .. table:: A simple hydrodynamics problem
 
    ===========  ===========
-     |NSF000|      |NSF300| 
+     |NSF000|      |NSF300|
    ===========  ===========
 
 Cello is designed to be both *user-friendly* and *developer-friendly*.
@@ -92,7 +92,7 @@ field:
 
 .. role:: config(code)
    :language: python
- 
+
 This reads naturally as "initialize density with the value 1.0
 wherever the input image mask is set (i.e. not black), and 0.125
 elsewhere."
