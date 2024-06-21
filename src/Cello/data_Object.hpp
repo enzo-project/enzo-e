@@ -33,8 +33,7 @@ public: // interface
   Object & operator= (const Object & Object) = default;
 
   /// Destructor
-  virtual ~Object() throw()
-  { }
+  virtual ~Object() = default;
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
