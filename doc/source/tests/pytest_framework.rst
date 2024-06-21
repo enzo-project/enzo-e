@@ -235,7 +235,7 @@ For all classes annotated with this decorator:
 
  * the framework knows that it must make symbolic links to all files in the directory run by ``GRACKLE_INPUT_DATA_DIR`` before it runs the simulation associated with this class.
  * the testing framwork also knows to skip the associated test(s) if the ``GRACKLE_INPUT_DATA_DIR`` environment variable is unset.
- 
+
 If you forget to add this label, ``Enzo-E`` will not be able to locate the data file needed for Grackle (in a portable way).
 Thus, the associated simulation and test will fail.
 

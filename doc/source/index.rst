@@ -46,15 +46,15 @@ highly scalable multigrid-based linear solver.
 
 .. toctree::
    :maxdepth: 1
-	   
+
    tutorial/index
-   user/index      
+   user/index
    reference/index
    devel/index
    design/index
    project/index
    tests/index
-   
+
 Getting started
 ---------------
 
@@ -121,7 +121,7 @@ below.  They are more up-to-date, but are also still rather large.
    :download:`Enzo-E / Cello Status and What's New? <http://client64-71.sdsc.edu/Tutorial/1805-1-status.pdf>`
 
    :download:`Introduction to Enzo-E <http://client64-71.sdsc.edu/Tutorial/1805-2-intro.pdf>`
-	     
+
    :download:`First Steps with Enzo-E <http://client64-71.sdsc.edu/Tutorial/1805-3-using.pdf>`
 
 Indices and tables

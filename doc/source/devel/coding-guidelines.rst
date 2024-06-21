@@ -8,7 +8,7 @@ Enzo-E Coding Guidelines
 
 
 This page describes current coding guidelines for Enzo-E development.  It is
-a working document and always open to suggestions for changes.  
+a working document and always open to suggestions for changes.
 
 -----------------------
 
@@ -22,7 +22,7 @@ File paths have the form
 ``src/Enzo/``\ *component*\ ``/`` *class*\ ``.[hc]pp``, where
 
 * *component* is the organizing directory from the Enzo-Layer. You can
-  investigate 
+  investigate
 * *class* is the class-name (see below for Enzo-E class naming
   guidelines)
 * and the ``.hpp`` extension is for header (declaration) files while
@@ -103,7 +103,7 @@ discussion about file naming can be found in the previous section)
 +---------------------+---------------------------+------------------+
 | Boundary conditions | ``EnzoBoundary``\ *Name*  | ``Boundary``     |
 +---------------------+---------------------------+------------------+
-| Interpolation       | ``EnzoProlong``\ *Name*   | ``Prolong``      | 
+| Interpolation       | ``EnzoProlong``\ *Name*   | ``Prolong``      |
 +---------------------+---------------------------+------------------+
 | Restriction         | ``EnzoRestrict``\ *Name*  | ``Restrict``     |
 +---------------------+---------------------------+------------------+
@@ -429,7 +429,7 @@ We recommend some of the following coding practices:
   * You explicitly want to allow the argument to be a ``nullptr``.
 
 * When declaring enumerations, prefer to use a `scoped enum <https://en.cppreference.com/w/cpp/language/enum>`_.
-  The concept of a scoped enums was introduced in C++11. 
+  The concept of a scoped enums was introduced in C++11.
   An example of a scoped enum from the codebase is the :cpp:enum:`!ghost_choice` enumeration.
   The declaration of this type looks something like the following snippet:
 
@@ -446,7 +446,7 @@ We recommend some of the following coding practices:
        This is much more explicit (and consequently better) than the alternative.
        If :cpp:enum:`!ghost_choice` were instead defined as an unscoped enum, :cpp:enumerator:`!exclude`, :cpp:enumerator:`!include`, and :cpp:enumerator:`!permit` would be introduced as symbols in the global namespace. [#f2]_
 
-    2. Because :cpp:enum:`!ghost_choice` is a scoped enum, ``ghost_choice`` is directly recognized as a type of a variable. If it were an unscoped enum, you must 
+    2. Because :cpp:enum:`!ghost_choice` is a scoped enum, ``ghost_choice`` is directly recognized as a type of a variable. If it were an unscoped enum, you must
        If it were an unscoped enum, you could instead declare a variable of type ``enum ghost_choice``.
 
     3. Perhaps most importantly, scoped enums have better type safety.
