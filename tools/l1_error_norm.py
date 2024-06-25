@@ -444,7 +444,7 @@ def load_reference_table(fname, coerce_pos_key = False):
                 break
 
     # load the actual data
-    rec = np.recfromtxt(fname, skip_header = header_line_count, comments = "#",
+    rec = np.genfromtxt(fname, skip_header = header_line_count, comments = "#",
                         dtype = None, delimiter = ',', names = True,
                         encoding='utf-8')
     # reformat the actual data
