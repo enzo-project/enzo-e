@@ -166,6 +166,7 @@ Configuration options
 Current ``cmake`` options are listed in the following subsubsections.
 Skip ahead to :ref:`how_to_specify_the_configuration` for details about how to specify the configuration.
 
+
 General Configuration
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -352,6 +353,33 @@ The following options don't really belong in any other category
      - Precompile headers to try to reduce compile time
      - ON
 
+.. _about_enzoe_lang_flist:
+
+``ENZOE_<LANG>_FLIST`` Variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We strongly encourage users and developers to make use of the options described in the preceding subsections.
+They exist to provide a curated/consistent experience in a variety of scenarios.
+(If you think that some option is missing, please let us know!)
+
+With that said, we also recognize that the need may arise where a user/developer may want to specify arbitrary flags.
+We provide the ``ENZOE_<LANG>_FLIST`` variables for this purpose (where ``<LANG>`` is ``C``, ``CXX``, ``Fortran``).
+Flags passed to this variable will be passed to the compiler while compiling source files (that are written in ``<LANG>``) that are directly used in the Cello/Enzo-E libraries and resulting executable.
+Here are 2 illustrative examples:
+
+ * First we show that in order to pass multiple flags, the flags need to be specified by a semicolon delimited list.
+   If you stored ``"-Wall;-Wpedantic;-funroll-loops"`` within the ``ENZOE_CXX_FLIST`` variable, then all C++ files used to build Cello and Enzo-E would be passed those flags.
+
+ * Next we show that to properly pass "options groups" you may need to make use of shell-like quoting with the ``SHELL:`` prefix (this relates option de-duplication performed by cmake).
+   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``. 
+
+
+CMake offers a similar set of standard variables named ``CMAKE_<LANG>_FLAGS`` that serve a similar purpose, but they behave slightly differently.
+**Most importantly**, flags passed ``CMAKE_<LANG>_FLAGS`` will be used to specify flags that are passed to ALL source-files (of the given language) compiled in a given build -- including the source files of any external dependencies that the build is automatically compiling (in the near future, this may include Grackle).
+The contents of ``CMAKE_<LANG>_FLAGS`` are also passed to the compiler front-end during linking.
+Additionally, the contents of ``CMAKE_<LANG>_FLAGS`` are command line snippets (i.e. options are separated by whitespace rather than semi-colons and no shell-quoting is needed).
+
+
 .. _how_to_specify_the_configuration:
 
 Specifying Configuration Options
@@ -411,6 +439,12 @@ In other words, if ``USE_DOUBLE_PREC`` is ``ON`` in the machine file (or even au
 through the global default), the running
 ``cmake -DEnzo-E_CONFIG=my_config_name -DUSE_DOUBLE_PREC=OFF ..`` will result in a single
 precision version of Enzo-E.
+
+Some of these files may also initialize the ``ENZOE_<LANG>_FLIST_INIT`` variables.
+When defined, these variables are used to provide defaults for the ``ENZOE_<LANG>_FLIST`` variables, which are discussed :ref:`up above <about_enzoe_lang_flist>`.
+As discussed above, these variables provide a mechanism to quickly and easily provide extra flags to the compiler.
+Ideally you should only need to rely upon these for quick-and-easy-tests and the other options should meet most of your needs.
+If you find the existing options don't meet your needs, please let us know
 
 Options in the machine file can also include the paths to external libraries and
 can be set via a "cached string", i.e., via
