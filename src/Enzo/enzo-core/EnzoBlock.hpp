@@ -46,6 +46,7 @@ public: // interface
   {
     performance_start_(perf_block);
 
+    // replace Block's State with EnzoState
     state_ = std::make_shared<EnzoState> (0, 0.0, 0.0, false);
 
     for (int i=0; i<MAX_DIMENSION; i++) {
@@ -257,7 +258,8 @@ public: /// entry methods
   void p_method_m1_closure_solve_transport_eqn();
   void p_method_m1_closure_set_global_averages(CkReductionMsg * msg);
 
-  const auto state() const { return std::dynamic_pointer_cast<EnzoState> (state_); }
+  const auto state() const
+  { return std::dynamic_pointer_cast<EnzoState> (state_); }
 
   virtual void print() const {
     FILE *fp = fopen ((std::string("EB-")+name_).c_str(),"a");

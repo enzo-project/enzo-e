@@ -19,6 +19,7 @@
 EnzoBlock::EnzoBlock (CkMigrateMessage *m)
   : CBase_EnzoBlock (m)
 {
+  // replace Block's State with EnzoState
   state_ = std::make_shared<EnzoState>(0, 0.0, 0.0, false);
 
   TRACE("CkMigrateMessage");
@@ -26,9 +27,12 @@ EnzoBlock::EnzoBlock (CkMigrateMessage *m)
   proxy_enzo_simulation[0].p_method_balance_check();
 }
 
+//----------------------------------------------------------------------
+
 EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
   : CBase_EnzoBlock (ip_source, msg_type)
 {
+  // replace Block's State with EnzoState
   state_ = std::make_shared<EnzoState>(0, 0.0, 0.0, false);
 #ifdef TRACE_BLOCK
 

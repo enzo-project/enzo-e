@@ -388,6 +388,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
       compute_acceleration.compute(enzo_block);
 
       super_save_fields_(enzo_block);
+
     } else { // not a solve step
 
       super_extrapolate_fields_(enzo_block, enzo_block->state()->time());

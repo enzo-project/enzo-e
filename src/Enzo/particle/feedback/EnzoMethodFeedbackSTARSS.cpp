@@ -1528,9 +1528,11 @@ double EnzoMethodFeedbackSTARSS::timestep (Block * block) throw()
 
   double dtStar = std::numeric_limits<double>::max();
   if (block->level() >= starmaker_method->sf_minimum_level()){
+    const auto dt   = block->state()->dt();
+    const auto time = block->state()->time();
     const double pSNmax = 0.0005408 * starmaker_method->minimum_star_mass() *
-    block->state()->dt() * block->state()->time() / enzo_constants::Myr_s * 1.25;
-    if (pSNmax > 1.0) dtStar = block->state()->dt() * 1.0 / pSNmax;
+      dt * time / enzo_constants::Myr_s * 1.25;
+    if (pSNmax > 1.0) dtStar = dt * 1.0 / pSNmax;
   }
 
   return dtStar;

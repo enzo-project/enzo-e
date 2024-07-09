@@ -506,7 +506,7 @@ void Problem::initialize_method
 			     config->schedule_list[index_schedule]));
       }
       method->set_max_supercycle(config->method_max_supercycle[index_method]);
-      method->set_index(method_list_.size() - 1);
+      method->set_index(num_methods() - 1);
 
     } else {
       ERROR1("Problem::initialize_method",
