@@ -25,6 +25,13 @@ This will cause charm++ to open an xterm window for each node and within each wi
    You generally don't need to worry about having symbols for other libraries (like charm++).
 
 .. note::
+
+   If you are on a modern version macOS, you might encounter some weird errors complaining about the ``DISPLAY`` variable when you pass ``++debug`` or ``++debug-no-pause``.
+   One way to work around this issue is to install XQuartz from `the official website <https://www.xquartz.org/>`_ and download xterm through homebrew.
+   Note: you probably need to restart your machine after installing both of these.
+
+
+.. note::
    TODO: add instructions for using GDB on a remote cluster using an MPI-based build of charm++
 
    TODO: it may be useful to provide a link to documentation describing how to use GDB to investigate stack frames

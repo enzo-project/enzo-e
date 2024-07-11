@@ -65,7 +65,7 @@ public: // interface
   { }
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
+  void pup (PUP::er &p) override
   {
     TRACEPUP;
     Physics::pup(p);
