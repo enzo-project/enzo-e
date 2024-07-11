@@ -52,13 +52,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
-  // EnzoInitialGrackleTest
-  initial_grackle_test_maximum_H_number_density(1000.0),
-  initial_grackle_test_maximum_metallicity(1.0),
-  initial_grackle_test_maximum_temperature(1.0E8),
-  initial_grackle_test_minimum_H_number_density(0.1),
-  initial_grackle_test_minimum_metallicity(1.0E-4),
-  initial_grackle_test_minimum_temperature(10.0),
   // EnzoInitialHdf5
   initial_hdf5_max_level(),
   initial_hdf5_format(),
@@ -248,13 +241,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_collapse_mass;
   p | initial_collapse_temperature;
 
-  p | initial_grackle_test_minimum_H_number_density;
-  p | initial_grackle_test_maximum_H_number_density;
-  p | initial_grackle_test_minimum_temperature;
-  p | initial_grackle_test_maximum_temperature;
-  p | initial_grackle_test_minimum_metallicity;
-  p | initial_grackle_test_maximum_metallicity;
-
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
   p | initial_sedov_radius_relative;
@@ -437,7 +423,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_burkertbodenheimer_(p);
   read_initial_collapse_(p);
   read_initial_cosmology_(p);
-  read_initial_grackle_(p);
   read_initial_hdf5_(p);
   read_initial_isolated_galaxy_(p);
   read_initial_merge_sinks_test_(p);
@@ -522,25 +507,6 @@ void EnzoConfig::read_initial_cosmology_(Parameters * p)
 {
   initial_cosmology_temperature =
     p->value_float("Initial:cosmology:temperature",0.0);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoConfig::read_initial_grackle_(Parameters * p)
-{
-  // Grackle test initialization
-  initial_grackle_test_minimum_H_number_density =
-    p->value_float("Initial:grackle_test:minimum_H_number_density",0.1);
-  initial_grackle_test_maximum_H_number_density =
-    p->value_float("Initial:grackle_test:maximum_H_number_density",1000.0);
-  initial_grackle_test_minimum_temperature =
-    p->value_float("Initial:grackle_test:minimum_temperature",10.0);
-  initial_grackle_test_maximum_temperature =
-    p->value_float("Initial:grackle_test:maximum_temperature",1.0E8);
-  initial_grackle_test_minimum_metallicity =
-    p->value_float("Initial:grackle_test:minimum_metallicity", 1.0E-4);
-  initial_grackle_test_maximum_metallicity =
-    p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
 }
 
 //----------------------------------------------------------------------

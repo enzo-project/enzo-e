@@ -37,7 +37,7 @@ public: // interface
   { }
   
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup (PUP::er &p) override;
 
   /// Update current units for cosmological problems
   void set_current_time (double time);
