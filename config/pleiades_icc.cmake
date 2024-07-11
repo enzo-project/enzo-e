@@ -12,9 +12,23 @@ if(NOT __processedUserDefaults)
   set(CMAKE_CXX_COMPILER icpc CACHE STRING "")
   set(CMAKE_C_COMPILER icc CACHE STRING "")
   set(CMAKE_Fortran_COMPILER ifort CACHE STRING "")
-  set(CMAKE_Fortran_FLAGS "-nofor-main" CACHE STRING "Default Fortran flags")
 
-  # Setting package paths (e.g., Grackle)
+  # the minimal set of required flags to successfully compile with this Fortran
+  # compiler are handled internally (if those flags don't work, please update
+  # the relevant internal logic rather than specifying them here)
+
+  # in principle we should set flags to specify hardware architecture (so that
+  # they can be used with openmp-simd optimizations
+  # set(CONFIG_ARCH_FLAGS ...)
+
+  # if you choose to add other flags, you should generally prefer to use:
+  #     ENZOE_C_FLIST_INIT, ENZOE_CXX_FLIST_INIT, ENZOE_Fortran_FLIST_INIT
+  # rather than CMAKE_C_FLAGS, CMAKE_CXX_FLAGS, and CMAKE_Fortran_FLAGS
+  # -> These alternatives will affect Cello/Enzo-E, but won't influence any
+  #    dependencies compiled in the same-build
+  # -> plus, the alternatives let users easily overwrite them
+
+  # Set package paths (e.g., Grackle) - Only do this in personal machine files
 
   # Setting test environment
   set(PARALLEL_LAUNCHER "mpiexec" CACHE STRING "Use mpiexec for launching parallel tests")
@@ -24,9 +38,5 @@ if(NOT __processedUserDefaults)
   set(__processedUserDefaults ON)
 
 else()
-
-  if (USE_DOUBLE_PREC)
-    string(APPEND CMAKE_Fortran_FLAGS " -real-size 64 -double-size 64")
-  endif()
 
 endif()
