@@ -37,22 +37,10 @@ public: // interface
   { }
   
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) {
-
-    TRACEPUP;
-
-    Units::pup(p);
-
-    p | cosmology_; // PUP::able
-  }
+  void pup (PUP::er &p) override;
 
   /// Update current units for cosmological problems
-  void set_current_time (double time)
-  {
-    if (cosmology_ != NULL) {
-      cosmology_->set_current_time(time);
-    }
-  }
+  void set_current_time (double time);
 
   /// Return the Cosmology object (may be NULL)
   EnzoPhysicsCosmology * cosmology()
@@ -69,39 +57,19 @@ public: // interface
 public: // virtual methods
  
   /// Return time units scaling factor (virtual)
-  virtual double time() const
-  {
-    return (cosmology_ == NULL) ?
-      Units::time() : cosmology_->time_units();
-  }
+  double time() const override;
   
   /// Return mass units scaling factor (virtual)
-  virtual double mass() const
-  {
-    return (cosmology_ == NULL) ?
-      Units::mass() : cosmology_->mass_units();
-  }
+  double mass() const override;
 
   /// Return length units scaling factor (virtual)
-  virtual double length() const
-  {
-    return (cosmology_ == NULL) ?
-      Units::length() : cosmology_->length_units();
-  }
+  double length() const override;
 
   /// Return density units scaling factor (virtual)
-  virtual double density() const
-  {
-    return (cosmology_ == NULL) ?
-      Units::density() : cosmology_->density_units();
-  }
+  double density() const override;
 
   /// Return velocity units scaling factor (virtual)
-  virtual double velocity() const
-  {
-    return (cosmology_ == NULL) ?
-      Units::velocity() : cosmology_->velocity_units();
-  }
+  double velocity() const override;
 
   /// Returns the scaling factor to be divided by temperature to convert from
   /// units of Kelvin to units of specific internal energy
@@ -125,9 +93,9 @@ public: // virtual methods
     // just 1.5-3 (Bolton and Haehnelt 2007), so it makes sense to define our
     // cosmological photon number density units as proportional to
     // the cosmological baryon density units to keep the numbers of order unity in code units.
-    return (cosmology_ == NULL) ?
-      1.0 / Units::volume() : 0.76 * cosmology_->density_units() /
-                              enzo_constants::mass_hydrogen;
+    return (cosmology_ == NULL)
+      ? 1.0 / Units::volume()
+      : 0.76 * this->density() / enzo_constants::mass_hydrogen;
   }
   
 private: // functions

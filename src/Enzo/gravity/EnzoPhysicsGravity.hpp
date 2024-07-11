@@ -8,6 +8,8 @@
 #ifndef ENZO_GRAVITY_ENZO_PHYSICS_GRAVITY_HPP
 #define ENZO_GRAVITY_ENZO_PHYSICS_GRAVITY_HPP
 
+#include "cello.hpp"
+#include "parameters_ParameterGroup.hpp"
 class EnzoPhysicsGravity : public Physics {
 
   /// @class    EnzoPhysicsGravity
@@ -47,23 +49,7 @@ class EnzoPhysicsGravity : public Physics {
 public: // interface
 
   /// Constructor
-  ///
-  /// @param grav_const_code_units When positive, this specifies the
-  ///     gravitational constant in code units. Otherwise, the gravitational
-  ///     constant is defined such that it's equal to the value of
-  //      enzo_constants::standard_grav_const when converted to cgs
-  EnzoPhysicsGravity(double grav_const_code_units)
-    : Physics()
-  {
-    if (grav_const_code_units <= 0.0) {
-      grav_constant_codeU_ = -1.0;
-    } else {
-      ASSERT("EnzoPhysicsGravity::EnzoPhysicsGravity",
-             "users aren't allowed to specify the gravitational constant in "
-             "a cosmological simulation", enzo::cosmology() == nullptr);
-      grav_constant_codeU_ = grav_const_code_units;
-    }
-  }
+  EnzoPhysicsGravity(ParameterGroup p);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoPhysicsGravity);
@@ -79,7 +65,7 @@ public: // interface
   { }
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
+  void pup (PUP::er &p) override
   {
     TRACEPUP;
     Physics::pup(p);

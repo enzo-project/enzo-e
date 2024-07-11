@@ -5,10 +5,8 @@
 /// @date     Wed May 24 12:25:56 PDT 2017
 /// @brief    Implements comoving expansion class
 
-#include "cello.hpp"
-#include "charm_simulation.hpp"
-#include "enzo.hpp"
-#include "enzo.decl.h"
+#include "Enzo/cosmology/cosmology.hpp"
+#include "Enzo/enzo.hpp"
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion

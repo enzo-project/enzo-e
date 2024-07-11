@@ -320,7 +320,8 @@ void FileHdf5::data_read
 
   // error check H5Dread
 
-  ASSERT1("FileHdf5::data_read","H5Dread() returned %d",retval,(retval>=0));
+  ASSERT3("FileHdf5::data_read","H5Dread() returned %d file %s data %s",
+          retval,file_name.c_str(),data_name_.c_str(),(retval>=0));
 
 }
 
@@ -908,6 +909,7 @@ hdf5_id FileHdf5::scalar_to_hdf5_ (int type) const throw()
 
   switch (type) {
   case type_unknown:
+  case type_extended64:
   case type_extended80:
   case type_extended96:
     ERROR1("FileHdf5::scalar_to_hdf5_",

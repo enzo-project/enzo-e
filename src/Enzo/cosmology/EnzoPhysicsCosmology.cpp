@@ -5,7 +5,8 @@
 /// @date     2017-05-23
 /// @brief    Porting cosmology from Enzo
 
-#include "enzo.hpp"
+#include "Enzo/cosmology/cosmology.hpp"
+#include "Enzo/enzo.hpp"
 
 //----------------------------------------------------------------------
 

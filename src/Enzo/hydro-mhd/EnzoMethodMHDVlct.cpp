@@ -35,46 +35,74 @@ static str_vec_t concat_str_vec_(const str_vec_t& vec1, const str_vec_t& vec2){
 
 //----------------------------------------------------------------------
 
-EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
-				      std::string time_scheme,
-                                      std::string recon_name,
-				      double theta_limiter,
-				      std::string mhd_choice,
-				      bool store_fluxes_for_corrections)
-  : Method()
+static std::pair<std::string, EnzoMHDIntegratorStageArgPack*>
+parse_mhdchoice_pack_pair_(ParameterGroup p)
 {
-#ifdef CONFIG_USE_GRACKLE
-  if (enzo::problem()->method("grackle") != nullptr){
-    // we can remove the following once EnzoMethodGrackle no longer requires
-    // the internal_energy to be a permanent field
-    ASSERT("EnzoMethodMHDVlct::determine_quantities_",
-           ("Grackle cannot currently be used alongside this integrator "
-            "unless the dual-energy formalism is in use"),
-           enzo::fluid_props()->dual_energy_config().any_enabled());
-  }
-#endif /* CONFIG_USE_GRACKLE */
+  // is_defined is a function that indicates if a user defined a parameter
+  auto is_defined = [&](const std::string& param_name) -> bool
+  { return p.param(param_name) != nullptr; };
 
-  time_scheme_ = time_scheme;
-
+  // parse time-scheme & reconstruct-method (they affect backwards compat.)
+  const std::string time_scheme = p.value_string("time_scheme", "vl");
   std::vector<std::string> recon_names;
   if (time_scheme == "euler") {
-    recon_names = {recon_name};
-    WARNING("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
+    recon_names = {p.value_string("reconstruct_method", "plm")};
+    WARNING("parse_mhdchoice_pack_pair_",
             "\"euler\" temporal integration exists for debugging purposes. It "
             "has not been rigorously tested. USE WITH CAUTION");
   } else if (time_scheme == "vl") {
     // ALWAYS use nearest-neighbor reconstruction for partial timestep!
-    recon_names = {"nn", recon_name};
+    recon_names = {"nn", p.value_string("reconstruct_method", "plm")};
   } else {
-    ERROR("EnzoMethodMHDVlct::EnzoMethodMHDVlct",
-          "time_scheme must be \"vl\" or \"euler\"");
+    ERROR1("parse_mhdchoice_pack_pair_",
+           "\"%s:time_scheme\" must be \"vl\" or \"euler\"",
+           p.get_group_path().c_str());
   }
 
-  int nstages = static_cast<int>(recon_names.size());
+  if (is_defined("half_dt_reconstruct_method") ||
+      is_defined("full_dt_reconstruct_method")) {
+    ERROR1("parse_mhdchoice_pack_pair_",
+           "In the \"%s\" parameter-group, \"half_dt_reconstruct_method\" & "
+           "\"full_dt_reconstruct_method\" have been removed. The former was "
+           "only allowed to have a value of \"nn\" and the latter was "
+           "replaced with \"reconstruct_method\".",
+           p.get_group_path().c_str());
+  }
+
+  // allocate and initialize argpack-ptr
+
+  if (!is_defined("mhd_choice")) {
+    std::string name = p.full_name("mhd_choice");
+    ERROR1("parse_mhdchoice_pack_pair_", "%s wasn't specified", name.c_str());
+  }
+
+  EnzoMHDIntegratorStageArgPack *argpack_ptr =
+    new EnzoMHDIntegratorStageArgPack {p.value_string("riemann_solver","hlld"),
+                                       recon_names,
+                                       p.value_float("theta_limiter", 1.5),
+                                       p.value_string("mhd_choice", "")};
+
+  return {time_scheme, argpack_ptr};
+}
+
+//----------------------------------------------------------------------
+
+EnzoMethodMHDVlct::EnzoMethodMHDVlct (ParameterGroup p,
+                                      bool store_fluxes_for_corrections)
+  : Method()
+{
+
+  std::pair<std::string, EnzoMHDIntegratorStageArgPack*> pair
+    = parse_mhdchoice_pack_pair_(p);
+
+  time_scheme_ = pair.first;
+  integrator_arg_pack_ = pair.second;
+  const double dflt_courant = (time_scheme_ == "vl") ? 0.3 : 1.0;
+  this->set_courant(p.value_float("courant",dflt_courant));
+
+  int nstages = static_cast<int>(integrator_arg_pack_->recon_names.size());
 
   // initialize the integrator
-  integrator_arg_pack_ = new EnzoMHDIntegratorStageArgPack {rsolver, recon_names,
-                                                 theta_limiter, mhd_choice};
   integrator_ = new EnzoMHDIntegratorStageCommands(*integrator_arg_pack_);
 
   // Determine the lists of fields that are required to hold the integration
@@ -475,6 +503,18 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 void EnzoMethodMHDVlct::post_init_checks_() const noexcept
 {
+  if (enzo::grackle_chemistry() != nullptr){
+    // we can remove this check if:
+    // - EnzoMethodGrackle is modified to no longer require internal_energy to
+    //   be a permanent field
+    // - OR if EnzoMethodMHDVlct is modified to always track internal_energy
+    //   (even if not using dual-energy formalism)
+    ASSERT("EnzoMethodMHDVlct::determine_quantities_",
+           ("Grackle cannot currently be used alongside this integrator "
+            "unless the dual-energy formalism is in use"),
+           enzo::fluid_props()->dual_energy_config().any_enabled());
+  }
+
   ASSERT("EnzoMethodMHDVlct::post_init_checks_",
          "This solver isn't currently compatible with cosmological sims",
          enzo::cosmology() == nullptr);

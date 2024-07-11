@@ -97,54 +97,24 @@ enum return_enum {
 // Component class includes
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_GRACKLE
-#include <stdlib.h>
-extern "C" {
-  #define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
-  #include <grackle.h>
-}
-#else
-extern "C" { // declare the names of Grackle types so can reduce the usage of
-             // ifdef statements
-  struct chemistry_data;
-  struct chemistry_data_storage;
-  struct code_units;
-  struct grackle_field_data;
-}
-#endif
-
-//----------------------------------------------------------------------
-
 #include "fortran.h" /* included so scons knowns to install fortran.h */
 
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
 
 #include "enzo_constants.hpp"
 
-// TODO: remove this after factoring out other subcomponents OR after
-//       EnzoEFltArrayMap becomes an alias for a class template defined in the
-//       Cello-layer (GH PR #326)
+// TODO: remove this include statement (this may be easier to do once we have
+//       finished separating out the various subcomponents)
 #include "utils/utils.hpp"
-#include "utils/EnzoPermutedCoordinates.hpp"
 
-#include "cosmology/EnzoPhysicsCosmology.hpp"
+#include "inference/Index3.hpp"
 
-// [order dependencies:]
-#include "fluid-props/EnzoEOSIdeal.hpp"
-#include "fluid-props/EnzoEOSIsothermal.hpp"
-#include "fluid-props/EnzoEOSVariant.hpp"
-
-#include "fluid-props/EnzoDualEnergyConfig.hpp"
-#include "fluid-props/EnzoFluidFloorConfig.hpp"
-#include "fluid-props/EnzoPhysicsFluidProps.hpp"
+// TODO: remove the following 3 after factoring out other subcomponents
+#include "Enzo/cosmology/cosmology.hpp"
+#include "Enzo/chemistry/chemistry.hpp"
+#include "Enzo/fluid-props/fluid-props.hpp"
 
 #include "enzo-core/EnzoUnits.hpp"
-
-// [order dependencies:]
-#include "utils/EnzoEFltArrayMap.hpp"
-#include "utils/EnzoFieldAdaptor.hpp"
-#include "chemistry/GrackleChemistryData.hpp"
-#include "chemistry/GrackleFacade.hpp"
 
 #include "enzo-core/EnzoFactory.hpp"
 
@@ -156,18 +126,14 @@ extern "C" { // declare the names of Grackle types so can reduce the usage of
 
 #include "enzo-core/EnzoBlock.hpp"
 
+#include "inference/EnzoLevelArray.hpp"
+#include "inference/EnzoMethodInference.hpp"
+
 #include "enzo-core/EnzoBoundary.hpp"
 
 #include "enzo-core/EnzoMethodBalance.hpp"
-#include "cosmology/EnzoMethodComovingExpansion.hpp"
-#include "cosmology/EnzoMethodCosmology.hpp"
-#include "chemistry/EnzoMethodGrackle.hpp"
 
 #include "enzo-core/EnzoMsgCheck.hpp"
-
-#include "fluid-props/EnzoComputePressure.hpp"
-#include "fluid-props/EnzoComputeTemperature.hpp"
-#include "chemistry/EnzoComputeCoolingTime.hpp"
 
 #include "enzo-core/EnzoStopping.hpp"
 

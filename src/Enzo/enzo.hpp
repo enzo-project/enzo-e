@@ -95,6 +95,12 @@ namespace enzo {
   /// since this will return the user-customizable value of the gravitational
   /// constant (the user can only customize the value in non-cosmological sims)
   double grav_constant_cgs() noexcept;
+
+  /// specifies whether the simulation is configured with magnetic fields
+  ///
+  /// @note
+  /// Maybe this should be defined somewhere else?
+  bool uses_magnetic_fields() noexcept;
 }
 
 // this include statement must follow the above function declarations, so that
@@ -104,6 +110,7 @@ namespace enzo {
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
 extern CProxy_IoEnzoWriter proxy_io_enzo_writer;
 extern CProxy_IoEnzoReader proxy_io_enzo_reader;
+extern CProxy_EnzoLevelArray proxy_level_array;
 extern void mutex_init();
 extern void mutex_init_bcg_iter();
 #endif /* ENZO_HPP */

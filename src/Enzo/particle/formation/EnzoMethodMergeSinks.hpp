@@ -19,7 +19,7 @@ class EnzoMethodMergeSinks : public Method {
 public:
 
   // Create a new MergeSinks object
-  EnzoMethodMergeSinks(double merging_radius_cells);
+  EnzoMethodMergeSinks(ParameterGroup p);
 
   /// Destructor
   virtual ~EnzoMethodMergeSinks() throw() {};
@@ -48,6 +48,10 @@ public:
 
   // Compute the maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
+
+  // allow other Method objects to query this information
+  enzo_float merging_radius_cells() const throw()
+  { return merging_radius_cells_; }
 
 protected: // methods
 

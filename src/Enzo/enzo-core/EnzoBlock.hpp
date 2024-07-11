@@ -12,7 +12,7 @@
 
 // #define TRACE_BLOCK
 
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 
 class EnzoBlock : public CBase_EnzoBlock
 
@@ -80,34 +80,20 @@ public: // interface
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();
 
+  //--------------------------------------------------
+  // Nested grid initialization.
+  //--------------------------------------------------
+
+  /// Check if this block should create child blocks during initialization.
+  bool spawn_child_blocks() throw();
+
+  /// Create child blocks.
+  virtual void create_initial_child_blocks();
+  void instantiate_children() throw();
+
   //----------------------------------------------------------------------
   // Original Enzo functions
   //----------------------------------------------------------------------
-
-  //  enzo_float ComputeTimeStep();
-
-  /// Set the energy to provide minimal pressure support
-  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-                        enzo_float minimum_pressure_support_parameter,
-                        bool comoving_coordinates);
-
-  /// Solve the hydro equations using PPM
-  int SolveHydroEquations ( enzo_float time,
-                            enzo_float dt,
-                            bool comoving_coordinates,
-                            bool single_flux_array,
-                            bool diffusion,
-                            int flattening,
-                            bool pressure_free,
-                            bool steepening,
-                            bool use_minimum_pressure_support,
-                            enzo_float minimum_pressure_support_parameter );
-
-  /// Solve the hydro equations using Enzo 3.0 PPM
-  int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
-
-  /// Solve the mhd equations (with ppml), saving subgrid fluxes
-  int SolveMHDEquations(enzo_float dt);
 
   /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();
@@ -145,6 +131,19 @@ public: /// entry methods
 
   /// Synchronize for refresh
   void p_method_gravity_end();
+
+  // EnzoMethodInference
+
+  /// Merge inference array creation masks from children
+  void p_method_infer_merge_masks (int n, char * mask, int ic3[3]);
+  /// Count inference arrays
+  void p_method_infer_count_arrays (int count);
+  /// Request from inference array for field data
+  void p_method_infer_request_data (int il3[3]);
+  /// Update blocks with inference results
+  void p_method_infer_update(int n, char * buffer, int il3[3]);
+  /// Exit EnzoMethodInference
+  void p_method_infer_exit();
 
   //--------------------------------------------------
   /// Checkpoint

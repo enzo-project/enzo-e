@@ -191,7 +191,7 @@ add_library(cello_component ${CELLO_COMP_SRC_FILES})
 setupCelloLibHelper(cello_component)
 target_link_libraries (cello_component
   PUBLIC CHARM::CHARM_HEADERS # charm++.h included in public header
-  PRIVATE Boost::filesystem
+  PRIVATE StdFilesystem::StdFilesystem
   PRIVATE charm_component error simulation # these private dependencies arise
                                            # from source files
   PRIVATE cello_component_PCH # cello component-precompiled header
@@ -350,7 +350,7 @@ function(makeTester TARGET SRC)
   add_library(${TARGET} STATIC ${SRC})
   target_link_libraries(${TARGET}
     PUBLIC parallel cello_component monitor
-    PRIVATE Boost::filesystem
+    PRIVATE StdFilesystem::StdFilesystem
     INTERFACE test_Unit # the source file compiled in this target doesn't
                         # directly depend on this, but all tests depend on this
   )
@@ -470,11 +470,12 @@ if (use_papi)
 endif()
 
 # tests of the view component
-addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
 addUnitTestBinary(test_cello_view "test_CelloView.cpp" view tester_default)
 addUnitTestBinary(
   test_string_ind_rd_only_map "test_StringIndRdOnlyMap.cpp" view tester_default
 )
+addUnitTestBinary(test_view_collec "test_ViewCollec.cpp" view tester_default)
+addUnitTestBinary(test_view_map "test_ViewMap.cpp" view tester_default)
 
 # the following test is broken (an API change is not reflected in the test)
 #addUnitTestBinary(test_index "test_Index.cpp" mesh tester_mesh)
