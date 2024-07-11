@@ -28,16 +28,16 @@ public:
    {  }
 
   /// Charm++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup (PUP::er &p) override;
 
   /// Apply method
-  virtual void compute ( Block * block) throw();
+  void compute ( Block * block) throw() override;
 
-  virtual std::string particle_type () throw()
+  std::string particle_type () throw() override
   { return "star";}
 
   /// Name
-  virtual std::string name () throw()
+  std::string name () throw() override
    { return "star_maker";}
 
   virtual ~EnzoMethodStarMakerSTARSS() throw() {};
