@@ -150,10 +150,10 @@ set(balancer_default "TreeLB" CACHE STRING "Charm++ load balancer to use by defa
 #TODO we should figure our reasonale defaults and/or provide instructions in the docs
 if (balance)
   foreach(BALANCER IN LISTS balancer_included)
-    string(APPEND Cello_TARGET_LINK_OPTIONS " -module ${BALANCER}")
+    list(APPEND Cello_TARGET_LINK_OPTIONS "SHELL:-module ${BALANCER}")
   endforeach()
   foreach(BALANCER IN LISTS balancer_default)
-    string(APPEND Cello_TARGET_LINK_OPTIONS " -balancer ${BALANCER}")
+    list(APPEND Cello_TARGET_LINK_OPTIONS "SHELL:-balancer ${BALANCER}")
   endforeach()
 endif()
 
