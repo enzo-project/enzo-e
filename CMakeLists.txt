@@ -56,42 +56,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-find_package(Charm REQUIRED)
-# Link executables with the charmc wrapper
-STRING(REGEX REPLACE "<CMAKE_CXX_COMPILER>" "${CHARM_LINKER}"
-       CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE}")
-
-
-# Need to process Grackle here as both Cello and Enzo-E depend on it
-option(USE_GRACKLE "Use Grackle Chemistry" ON)
-# don't bother advertising the following option (but users can
-# overwrite it if they really want to - e.g. to reduce binary size)
-option(GRACKLE_USE_STATIC_LIBS  "sets Grackle's lib-type if USE_GRACKLE=ON" ON)
-if (USE_GRACKLE)
-  find_package(Grackle)
-  if (Grackle_FOUND)
-    # This really only needs to be defined for a relatively small subset of
-    # files in the Enzo-layer
-    add_compile_definitions(CONFIG_USE_GRACKLE)
-
-  else()
-    message(FATAL_ERROR
-      "Configured to use Grackle but Grackle library not found.\n"
-      "Either disable grackle (e.g., `-DUSE_GRACKLE=OFF`) or provide path "
-      "(e.g., `-DGrackle_ROOT=/PATH/TO/GRACKLE/INSTALL/DIRECTORY`).")
-  endif()
-endif()
-
-find_package(PNG REQUIRED)
-add_compile_definitions(NO_FREETYPE)
-
-find_package(HDF5 REQUIRED COMPONENTS C)
-# HDF5 Interface library
-add_library(HDF5_C INTERFACE)
-target_link_libraries(HDF5_C INTERFACE ${HDF5_C_LIBRARIES})
-target_compile_definitions(HDF5_C INTERFACE ${HDF5_C_DEFINITIONS})
-target_include_directories(HDF5_C INTERFACE ${HDF5_C_INCLUDE_DIRS})
-
+include("dependencies.cmake")
 
 set(Cello_TARGET_LINK_OPTIONS "")
 
@@ -185,10 +150,10 @@ set(balancer_default "TreeLB" CACHE STRING "Charm++ load balancer to use by defa
 #TODO we should figure our reasonale defaults and/or provide instructions in the docs
 if (balance)
   foreach(BALANCER IN LISTS balancer_included)
-    string(APPEND Cello_TARGET_LINK_OPTIONS " -module ${BALANCER}")
+    list(APPEND Cello_TARGET_LINK_OPTIONS "SHELL:-module ${BALANCER}")
   endforeach()
   foreach(BALANCER IN LISTS balancer_default)
-    string(APPEND Cello_TARGET_LINK_OPTIONS " -balancer ${BALANCER}")
+    list(APPEND Cello_TARGET_LINK_OPTIONS "SHELL:-balancer ${BALANCER}")
   endforeach()
 endif()
 
@@ -245,22 +210,6 @@ if (have_git)
         )
 endif()
 
-
-option (use_jemalloc "Use the jemalloc library for memory allocation" OFF)
-if (use_jemalloc)
-  find_package(jemalloc)
-  if (jemalloc_FOUND)
-    add_compile_definitions(CONFIG_USE_JEMALLOC)
-  else()
-    message(FATAL_ERROR
-      "Requested to use the jemalloc library for memory allocation but jemalloc was not found. "
-      "Try setting specific path via `-Djemalloc_ROOT=/PATH/TO/jemalloc/INSTALL` "
-      " or disable jemalloc via `-Duse_jemalloc=OFF` (default)."
-      )
-  endif()
-endif()
-
-
 option (smp "Use Charm++ in SMP mode." OFF)
 if (smp)
   if (CHARM_SMP)
@@ -274,28 +223,69 @@ if (smp)
 endif()
 
 
-option(use_papi "Use the PAPI performance API" OFF)
-if (use_papi)
-  find_package(PAPI)
-  if (PAPI_FOUND)
-    add_compile_definitions(CONFIG_USE_PAPI PAPI3)
-  else()
-    message(FATAL_ERROR
-      "Requested to use PAPI performance API but PAPI was not found. "
-      "Try setting specific path via `-DPAPI_ROOT=/PATH/TO/PAPI/INSTALL` "
-      " or disable PAPI via `-Duse_papi=OFF` (default)."
-      )
-  endif()
-endif()
+# define recipies for building external dependencies before we introduce
+# compiler flags specific to Enzo-E (and Cello)
+add_subdirectory(src/External)
 
+# fetch known sets of compiler flags
+# ----------------------------------
+# right now, we apply these flags with add_compile_options
+# -> this applies the flags to when compiling all targets defined after this
+#    point in the cmake-file (aside: add_compile_options behaves a little more
+#    sensibly than other commands that apply global properties)
+# -> to selectively apply flags based on language (and build-type), we
+#    currently make use of generator expressions.
+#
+# NOTE: we should transition to defining a series of INTERFACE libraries
+# (e.g. CommonOptionsC, CommonOptionsCXX, CommonOptionsFortran) and use
+# those to propogate our compiler-flags to our various targets. This is
+# desirable for 2 reasons:
+#   1. it is a little more explicit and idiomatic
+#   2. language-specific generator-expressions are not supported on all
+#      build-generators (this isn't really a problem per-se, but it would be
+#      nice to be as flexible as possible)
+
+# handle flags within ENZOE_<LANG>_FLIST for each language used be Enzo-E
+include("GenericOptionCommand")
+get_property(_ENZOE_LANG_LIST GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+foreach(lang IN LISTS _ENZOE_LANG_LIST)
+  # first, initialize ENZOE_<LANG>_FLIST if it hasn't already been initialized
+  generic_option(
+    ENZOE_${lang}_FLIST STRING "\
+specifies flags that are passed to the compiler (in all configurations) for \
+compiling the ${lang} files that are used in Cello and Enzo-E. There are 3 \
+main differences from CMAKE_${lang}_FLAGS: \
+(i) these flags won't be passed to any external dependencies that are \
+compiled as part of this build \
+(ii) these flags will NOT be passed to the linker, and \
+(ii) these flags must be specified as a semi-colon delimited list of values."
+    # if there are any, the default values would be set in machine file
+    DEFAULT_VALUE "${ENZOE_${lang}_FLIST_INIT}"
+    FORBID_EXISTING_NONCACHE_VAR # <- discourage bad habits!
+  )
+
+  # now setup cmake to make use of any compiler flags in the list
+  if(NOT ("${ENZOE_${LANG}_FLIST}" STREQUAL ""))
+    message("$<$<COMPILE_LANGUAGE:${LANG}>:${ENZOE_${LANG}_FLIST}>")
+  endif()
+endforeach()
+
+# introduce floating-point related compiler options
 option(OPTIMIZE_FP "Enables value-unsafe floating-point optimizations (this may already be enabled on some compilers like icc)." OFF)
 option(USE_SIMD "Use OpenMP SIMD directives. This may already be enabled on some compilers (like icc)." OFF)
-include("cmake/EnableFPOptimizations.cmake")
+include("FPOptimizationCompileOptions")
 if (OPTIMIZE_FP)
-  enableFPOptimizations(USE_SIMD)
+  get_fp_optimization_compile_options(${USE_SIMD} _ENZOE_optimization_options)
+  add_compile_options("${_ENZOE_optimization_options}")
 elseif (USE_SIMD)
   message(FATAL_ERROR "Can only use `USE_SIMD=ON` when `OPTIMIZE_FP=ON`.")
 endif()
+
+# introduce required Fortran Compiler Options
+include("RequiredFortranCompileOptions")
+get_required_fortran_options(_ENZOE_REQ_FORTRAN_OPTS)
+add_compile_options("${_ENZOE_REQ_FORTRAN_OPTS}")
 
 # Include machine file second time (if used initially) to set additional options that may depend
 # on global (default) options, such as USE_DOUBLE_PREC
@@ -322,8 +312,6 @@ option(USE_PRECOMPILED_HEADERS
 
 add_subdirectory(src/Cello)
 add_subdirectory(src/Enzo)
-add_subdirectory(src/External)
-
 
 
 if (BUILD_TESTING)
