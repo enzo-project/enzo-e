@@ -9,48 +9,36 @@
 #define ENZO_ENZO_COMPUTE_COOLINGTIME_HPP
 
 class EnzoComputeCoolingTime : public Compute {
-
   /// @class    EnzoComputeCoolingTime
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate Enzo's ComputeCoolingTime functions
 
-public: // interface
-
+public:  // interface
   /// Create a new EnzoComputeCoolingTime object
-  EnzoComputeCoolingTime
-  ();
+  EnzoComputeCoolingTime();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeCoolingTime);
 
   /// Charm++ PUP::able migration constructor
-  EnzoComputeCoolingTime (CkMigrateMessage *m)
-    : Compute(m)
-  { }
+  EnzoComputeCoolingTime(CkMigrateMessage* m) : Compute(m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup(PUP::er& p);
 
   /// Perform the computation on the block
-  virtual void compute( Block * block) throw();
+  virtual void compute(Block* block) throw();
 
-  virtual void compute( Block * block, enzo_float * ct) throw();
+  virtual void compute(Block* block, enzo_float* ct) throw();
 
   // name of derived field that this function calculates
-  std::string name () throw() {
-    return "cooling_time";
-  }
+  std::string name() throw() { return "cooling_time"; }
 
-  void compute_(Block * block,
-   enzo_float * ct,
-   grackle_field_data * grackle_fields = NULL
- );
+  void compute_(Block* block, enzo_float* ct,
+                grackle_field_data* grackle_fields = NULL);
 
-private: // functions
-
-
-private: // attributes
-
+private:  // functions
+private:  // attributes
 };
 
 #endif /* ENZO_ENZO_COMPUTE_COOLINGTIME_HPP */

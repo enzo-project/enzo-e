@@ -358,16 +358,6 @@ src/Enzo/assorted/EnzoMethodTurbulence.hpp
 src/Enzo/assorted/assorted.hpp
 src/Enzo/charm_enzo.cpp
 src/Enzo/charm_enzo.hpp
-src/Enzo/chemistry/EnzoComputeCoolingTime.cpp
-src/Enzo/chemistry/EnzoComputeCoolingTime.hpp
-src/Enzo/chemistry/EnzoMethodGrackle.cpp
-src/Enzo/chemistry/EnzoMethodGrackle.hpp
-src/Enzo/chemistry/GrackleChemistryData.cpp
-src/Enzo/chemistry/GrackleChemistryData.hpp
-src/Enzo/chemistry/GrackleFacade.cpp
-src/Enzo/chemistry/GrackleFacade.hpp
-src/Enzo/chemistry/chemistry.hpp
-src/Enzo/chemistry/chemistry_grackleincl.hpp
 src/Enzo/cosmology/EnzoMethodComovingExpansion.cpp
 src/Enzo/cosmology/EnzoMethodComovingExpansion.hpp
 src/Enzo/cosmology/EnzoMethodCosmology.cpp
