@@ -1,0 +1,34 @@
+# this is based on Google style, with a few tweaks based on LLVM style 
+# -> the 2 styles are extremely similar
+# -> The Google style tries to put a function's return-type on the same line
+#    as the function's name (which a lot of people prefer). It also makes a
+#    few minor stylistic choices that generally produces slightly terser code 
+# -> LLVM style is a little more permissive about certain things
+
+# we inherit all defaults from Google style
+BasedOnStyle: Google
+
+# this is redundant, but this is specified to ensure that we remove all tabs
+UseTab: Never
+
+
+# inclusion-overrides:
+# --------------------
+# By default, the Google-style wants sort include-directives. If Enzo-E's
+# header files were all self-contained, this would be fine. But until that
+# time we need to disable this!
+IncludeBlocks: Preserve
+SortIncludes: Never
+
+
+# overrides based on LLVM
+# -----------------------
+# tweaks indents/outdent of private, public, protected in C++ classes/structs
+AccessModifierOffset: -2
+# controls alignment of backslashes that escape newlines (most common in macros
+# that extend over 3 or more lines)
+AlignEscapedNewlines: Right
+# be more definitive about the preferred pointer alignment
+DerivePointerAlignment: false
+
+
