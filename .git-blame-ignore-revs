@@ -1,2 +1,4 @@
 # remove trailing whitespace from cmake files and rst files
 95497bac8e74844b6e7f36b30dfa42bd89338b8c
+# remove trailing whitespace from some newer cmake files and rst files
+84d7c2baf0c655c277d901e6e5f8e2dd00e6fff4
