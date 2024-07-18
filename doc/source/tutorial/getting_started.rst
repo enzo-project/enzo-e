@@ -371,7 +371,7 @@ Here are 2 illustrative examples:
    If you stored ``"-Wall;-Wpedantic;-funroll-loops"`` within the ``ENZOE_CXX_FLIST`` variable, then all C++ files used to build Cello and Enzo-E would be passed those flags.
 
  * Next we show that to properly pass "options groups" you may need to make use of shell-like quoting with the ``SHELL:`` prefix (this is required because of option de-duplication performed by cmake).
-   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``. 
+   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``.
 
 
 CMake offers a similar set of standard variables named ``CMAKE_<LANG>_FLAGS`` that serve a similar purpose, but they behave slightly differently.
