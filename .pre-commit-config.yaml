@@ -1,7 +1,5 @@
-
-# if we choose to adopt the pre-commit ci, uncomment the following
-#ci:
-#    autofix_prs: false
+ci:
+    autofix_prs: false
 
 
 repos:
