@@ -10,31 +10,24 @@
 #include "Enzo/enzo.hpp"
 #include "Cello/cello.hpp"
 
-EnzoInitialShuCollapse::EnzoInitialShuCollapse
-(int cycle, double time,
- const double center[3],
- const double drift_velocity[3],
- double truncation_radius,
- double nominal_sound_speed,
- double instability_parameter,
- double external_density,
- bool central_sink_exists,
- double central_sink_mass) throw()
+EnzoInitialShuCollapse::EnzoInitialShuCollapse(int cycle, double time, ParameterGroup p) throw()
   :Initial(cycle, time),
-   truncation_radius_(truncation_radius),
-   nominal_sound_speed_(nominal_sound_speed),
-   instability_parameter_(instability_parameter),
-   external_density_(external_density),
-   central_sink_exists_(central_sink_exists),
-   central_sink_mass_(central_sink_mass)
+   truncation_radius_(p.value_float("truncation_radius",1.0)),
+   nominal_sound_speed_(p.value_float("nominal_sound_speed",1.0)),
+   instability_parameter_(p.value_float("instability_parameter",2.1)),
+   external_density_(p.value_float("external_density",1.0e-6)),
+   central_sink_exists_(p.value_logical("central_sink_exists",false)),
+   central_sink_mass_(p.value_float("central_sink_mass",0.0)),
+   center_{},
+   drift_velocity_{}
 {
-  center_[0] = center[0];
-  center_[1] = center[1];
-  center_[2] = center[2];
+  center_[0] = p.list_value_float(0,"center",0.0);
+  center_[1] = p.list_value_float(1,"center",0.0);
+  center_[2] = p.list_value_float(2,"center",0.0);
 
-  drift_velocity_[0] = drift_velocity[0];
-  drift_velocity_[1] = drift_velocity[1];
-  drift_velocity_[2] = drift_velocity[2];
+  drift_velocity_[0] = p.list_value_float(0,"drift_velocity",0.0);
+  drift_velocity_[1] = p.list_value_float(1,"drift_velocity",0.0);
+  drift_velocity_[2] = p.list_value_float(2,"drift_velocity",0.0);
 
 }
 
