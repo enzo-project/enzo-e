@@ -1,4 +1,4 @@
-# Problem: Checkpoint-Restart Boundary-Conditions
+# Problem: Checkpoint-Restart PPM 2D Implosion Problem
 # Author: Matthew Abruzzo
 #
 # This is an input file for testing the new-style checkpoint-restart machinery
@@ -12,24 +12,20 @@
 # Details are provided on the website documentation about how you can see the
 # full parameter files that are generated in this test.
 
-   include "input/Checkpoint/legacy/checkpoint_boundary.in"
+include "input/Checkpoint/legacy/checkpoint_ppm.in"
 
    Adapt {
-      max_initial_level = 0;
       min_level = -1;
-      max_level = 0;
-   }
 
-   # we want to check if the time-dependence of a boundary works properly.
-   # it is not supported by the old-style checkpoint-restart infrastructure.
-   Boundary {
-      VX_inflow {
-        value = 1.0 + 0.005 * t;
-      }
+      # for unigrid simulations, we might also include the following. But in
+      # this case, we are considering AMR simulations (and these parameters
+      # have already been set appropriately)
+      #max_level = 0;
+      #max_initial_level = 0;
    }
 
    Method {
-      list = ["order_morton", "check", "ppm"];
+      list = ["order_morton", "check", "ppm", "flux_correct"];
 
       order_morton {
           schedule {
@@ -51,3 +47,4 @@
       };
 
    }
+

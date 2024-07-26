@@ -43,11 +43,19 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p | scalar_expr_list_;
 
-    std::size_t num_masks = mask_list_.size();
-    p | num_masks;
-    if (num_masks != 0) {
-      ERROR("Value::pup",
-            "Not currently implemented when mask_list_ has 1 or more entries");
+    for (std::size_t i = 0; i < mask_list_.size(); i++){
+      if (mask_list_[i].get() != nullptr) {
+        ERROR1("Value::pup",
+               "Current implementation only supports PUPing when mask_list_ "
+               "just contains nullptrs. Index %d is not a nullptr\n", int(i));
+      }
+    }
+    int null_mask_count = int(mask_list_.size());
+    p | null_mask_count;
+    if (p.isUnpacking()) {
+      for (int i = 0; i < null_mask_count; i++){
+        mask_list_.push_back(nullptr);
+      }
     }
   }
 

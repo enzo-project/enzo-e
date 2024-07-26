@@ -1,0 +1,139 @@
+# Problem: Legacy-Checkpoint-Restart Boundary-Conditions
+# Author: Matthew Abruzzo
+#
+# This is an input file for testing the legacy checkpoint-restart machinery
+# that is based on the charm++ machinery.
+#
+# In more detail, this mostly acts like a template-file that is used by the
+# testing tool. In practice, the testing tool will:
+# - provide a Stopping section and an Output section.
+# - use the contents of Field:list to determine which fields to compare before
+#   and after a restart
+# Details are provided on the website documentation about how you can see the
+# full parameter files that are generated in this test.
+#
+#
+# The basic idea here is to check that the checkpoint capabilities of all
+# boundaries work correctly. Maybe this should be broken into separate tests
+# in the future. (The motivation for this test came from the fact that certain
+# inflow-boundaries failed quietly upon restart. While that functionality
+# couldn't be fixed entirely, the broken-parts now fail loudly! This tests the
+# parts that are expected to work AND other types of restarts)
+
+   Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 1.0, 1.0];
+   }
+
+   Mesh {
+      root_rank   = 3;
+      root_size   = [16,16,16];
+      root_blocks = [2,2,2];
+   }
+
+   Boundary {
+      list = ["density_inflow", "total_energy_inflow", "VX_inflow",
+              "VY_inflow", "VZ_inflow", "downwind", "yedge", "zedge"];
+      density_inflow {
+        face = "lower";
+        axis = "x";
+        type = "inflow";
+        field_list = "density";
+        value = 1.0;
+      }
+      total_energy_inflow {
+        face = "lower";
+        axis = "x";
+        type = "inflow";
+        field_list = "total_energy";
+        value = 5.5;
+      }
+      VX_inflow {
+        face = "lower";
+        axis = "x";
+        type = "inflow";
+        field_list = "velocity_x";
+        value = 1.0;
+      }
+      VY_inflow {
+        face = "lower";
+        axis = "x";
+        type = "inflow";
+        field_list = "velocity_y";
+        value = -1.0;
+      }
+      VZ_inflow {
+        face = "lower";
+        axis = "x";
+        type = "inflow";
+        field_list = "velocity_z";
+        value = 2.0;
+      }
+
+      downwind {
+         type = "outflow";
+         axis = "x";
+         face = "upper";
+      };
+
+      yedge {
+         type = "reflecting";
+      };
+
+      zedge {
+         type = "periodic";
+      };
+   }
+
+
+   Field {
+
+      ghost_depth = 3;
+
+      list = [
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "velocity_z",
+        "total_energy",
+        "internal_energy",
+	"pressure"
+      ] ;
+
+      gamma = 1.4;
+
+   }
+
+   Method {
+
+      list = ["ppm"];
+
+      ppm {
+         courant   = 0.8;
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+      }
+   }
+
+   Initial {
+
+       list = ["value"];
+
+       value {
+          density       = 1.0;
+          # if pressure = 1.0, then
+          #    specific internal energy = 1.0/((1.4 - 1.0) * 1.0) = 2.5
+          # specific kinetic energy = 0.5*v^2 = 0.5*(6) = 3.0 
+          total_energy  = 5.5;
+          velocity_x    = 1.0;
+          velocity_y    = -1.0;
+          velocity_z    = 2.0;
+          internal_energy = 0.0; 
+       }
+   }
+
+   Stopping {
+      cycle = 10;
+   }
