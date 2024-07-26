@@ -15,7 +15,7 @@ architectures, including the "Frontera" supercomputer at TACC and the
 
 .. toctree::
    :maxdepth: 1
-	   
+
    getting_started_pleiades
    getting_started_frontera
 
@@ -303,7 +303,7 @@ Debugging Options
 ^^^^^^^^^^^^^^^^^
 
 The following options are useful for debugging.
-       
+
 .. list-table:: Debug Options
    :widths: 10 30 5
    :header-rows: 1
@@ -371,7 +371,7 @@ Here are 2 illustrative examples:
    If you stored ``"-Wall;-Wpedantic;-funroll-loops"`` within the ``ENZOE_CXX_FLIST`` variable, then all C++ files used to build Cello and Enzo-E would be passed those flags.
 
  * Next we show that to properly pass "options groups" you may need to make use of shell-like quoting with the ``SHELL:`` prefix (this is required because of option de-duplication performed by cmake).
-   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``. 
+   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``.
 
 
 CMake offers a similar set of standard variables named ``CMAKE_<LANG>_FLAGS`` that serve a similar purpose, but they behave slightly differently.
@@ -394,7 +394,7 @@ For example, a configure line may look like
   cmake -DCHARM_ROOT=$(pwd)/../../charm/build-gcc-mpi-proj -DEnzo-E_CONFIG=msu_hpcc_gcc -DGrackle_ROOT=${HOME}/src/grackle/build-gcc -Duse_projections=ON -Duse_jemalloc=ON -Dbalance=ON  ..
 
 To see all available (and selected) options you can also run ``ccmake .`` in the
-build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI 
+build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI
 directly to interactively configure Enzo-E by calling ``ccmake ..`` in an empty build
 directory.
 
@@ -531,7 +531,7 @@ Time = 0.05
 Time = 0.10
 
 .. image:: hello-de-0165.png
-   :scale: 40 %                   
+   :scale: 40 %
 
 .. image:: hello-mesh-level-0165.png
    :scale: 40 %

@@ -28,12 +28,12 @@ Field API
 FieldData (field data) object.`
 
 ----
-   
+
 :Method:  :p:`Field::Field(FieldDescr \*, FieldData \*)`
-:Method:  Field(const Field & field) 
+:Method:  Field(const Field & field)
 :Summary:   :s:`Copy constructor`
 :Return:   :t:`none`
-		       
+
 ----
 
 :Method:  :p:`Field::operator= (const Field & field)`
@@ -51,7 +51,7 @@ FieldData (field data) object.`
 :Method:  :p:`Field::pup (PUP::er &p)`
 :Summary:   :s:`CHARM++ Pack / Unpack function`
 :Return:   :t:`void`
-  
+
 ----
 
 :Method:  :p:`Field::field_descr()`
@@ -76,7 +76,7 @@ FieldData (field data) object.`
 :Summary:  :s:`Set the field data object for the Field object`
 :Return:   :t:`void`
 
-  
+
 Field Descriptor
 ----------------
 
@@ -101,13 +101,13 @@ Field Descriptor
 :Method:   :p:`Field::set_ghost_depth(int id, int gx, int gy=0, int gz=0)`
 :Summary:   :s:`Set ghost_depth for a field`
 :Return:   :t:`void`
-    
+
 ----
 
 :Method:   :p:`Field::set_precision(int id, int precision)`
 :Summary:   :s:`Set precision for a field`
 :Return:   :t:`void`
-    
+
 ----
 
 :Method:   :p:`Field::insert_permanent(const std::string & name)`
@@ -168,7 +168,7 @@ Properties
 :Method:   :p:`centering(int id, int \* cx, int \* cy = 0, int \* cz = 0) const`
 :Summary:   :s:`centering of given field`
 :Return:   :t:`void`
-    
+
 ----
 
 :Method:   :p:`is_centered(int id) const`
@@ -180,7 +180,7 @@ Properties
 :Method:   :p:`ghost_depth(int id, int \* gx, int \* gy = 0, int \* gz = 0) const`
 :Summary:   :s:`depth of ghost zones of given field`
 :Return:   :t:`void`
-    
+
 ----
 
 :Method:   :p:`precision(int id) const`
@@ -220,14 +220,14 @@ History
 :Return:   :t:`int`
 
 ----
-  
+
 :Method:   :p:`save_history (double time)`
 :Summary:   :s:`Copy "current" fields to history`
 :Return:   :t:`void`
 
 :e:`Copy "current" fields to history = 1 fields (saving time), and
 push back older generations up to num_history()`
-  
+
 ----
 
 :Method:   :p:`history_time (int ih) const`
@@ -244,7 +244,7 @@ Units
 :e:`if it's already in cgs, then leave as-is
 except if it's in cgs but the scaling factor has changed (e.g. due to
 expansion) then adjust for the new scaling factor`
-    
+
 ----
 
 :Method:   :p:`units_scale_code (int id, double amount)`
@@ -252,7 +252,7 @@ expansion) then adjust for the new scaling factor`
 :Return:   :t:`void`
 
 :e:`if it's already in code units, leave it as-is warning if scaling factor has changed.`
-	  
+
 ----
 
 :Method:   :p:`units_scaling (const FieldDescr \*, int id)`
@@ -291,7 +291,7 @@ FieldData
 :Return:   :t:`char \*`
 
 :e:`Return array for the corresponding field, which does not contain ghosts whether they're allocated or not`
-	     
+
 ----
 
 :Method:   :p:`permanent ()  const`
@@ -311,7 +311,7 @@ FieldData
 :Method:   :p:`clear (float value = 0.0, int id_first = -1, int id_last  = -1)`
 :Summary:   :s:`Clear specified array(s) to specified value`
 :Return:   :t:`void`
- 
+
 ----
 
 :Method:   :p:`permanent_allocated() const`
@@ -371,7 +371,7 @@ FieldData
 :e:`Return the number of elements (nx,ny,nz) along each axis, and total number of bytes n`
 
 Debugging
----------  
+---------
 
 :Method:   :p:`print (const char \* message, bool use_file = false) const`
 :Summary:   :s:`Print basic field characteristics for debugging`

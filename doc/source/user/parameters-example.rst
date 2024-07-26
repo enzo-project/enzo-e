@@ -27,31 +27,31 @@ Domain Group
 
   ::
 
-    Domain { 
+    Domain {
        lower = [ 0.0, 0.0 ];
        upper = [ 1.0, 1.0 ];
-    } 
+    }
 
 Mesh Group
 ----------
 
   ::
 
-   Mesh { 
+   Mesh {
       root_size      = [160, 160];
       root_blocks    = [  1,   1 ];
    }
-    
+
 Field Group
 -----------
 
   ::
 
     Field {
-    
+
        ghost_depth  = 3;
-    
-       fields = [ 
+
+       fields = [
           "density",
           "velocity_x",
           "velocity_y",
@@ -66,7 +66,7 @@ Method Group
   ::
 
     Method {
-    
+
        list = [ "ppm" ];
 
        ppm {
@@ -101,7 +101,7 @@ Initial Group
   ::
 
    Initial {
-       density       { value = [ 1.0, 
+       density       { value = [ 1.0,
        (0.35 < x && x < 0.40 && 0.25 < y && y < 0.70) ||
        (0.35 < x && x < 0.60 && 0.25 < y && y < 0.30) ||
        (0.35 < x && x < 0.60 && 0.45 < y && y < 0.50) ||
@@ -139,7 +139,7 @@ Output Group
 
   ::
 
-   Output { 
+   Output {
 
       file_groups = ["cycle_step"];
 
