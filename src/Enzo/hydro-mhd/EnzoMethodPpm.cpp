@@ -206,8 +206,10 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
     TRACE_PPM ("BEGIN SolveHydroEquations");
 
+    const double time = block->state()->time();
+    const double dt   = block->state()->dt();
     EnzoMethodPpm::SolveHydroEquations 
-      ( *enzo_block, block->time(), block->dt(), comoving_coordinates_,
+      ( *enzo_block, time, dt, comoving_coordinates_,
         single_flux_array, diffusion_, flattening_, pressure_free_,
         steepening_,
         use_minimum_pressure_support_,
@@ -254,8 +256,8 @@ double EnzoMethodPpm::timestep ( Block * block ) throw()
 
   if (comoving_coordinates_) {
 
-    cosmology->compute_expansion_factor
-      (&cosmo_a, &cosmo_dadt,(enzo_float)enzo_block->time());
+    enzo_float time = (enzo_float)enzo_block->state()->time();
+    cosmology->compute_expansion_factor (&cosmo_a, &cosmo_dadt, time);
 
   }
 

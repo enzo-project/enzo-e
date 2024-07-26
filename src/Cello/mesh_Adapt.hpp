@@ -140,7 +140,7 @@ public: // interface
     face_level_[int(LevelType::next)] = face_level_[int(LevelType::curr)];
   }
 
-  void copy_face_level(LevelType level_type, int * face_level)
+  void copy_face_level(LevelType level_type, const int * face_level)
   {
     ASSERT("Adapt::copy_face_level",
            "copy_face_level() called with LevelType::last",
@@ -269,7 +269,7 @@ public: // interface
   inline Index index(int i) const { return neighbor_list_.at(i).index_; }
 
   /// Display Adapt attributes for debugging
-  void print(std::string message, const Block * block = nullptr, FILE * fp=nullptr) const;
+  void print(std::string message, const Block * block = nullptr, FILE * fp=stdout) const;
 
   /// Write block's neighbors to file for debugging
   void write(std::string filename, const Block * block, int cycle_start = 0) const;

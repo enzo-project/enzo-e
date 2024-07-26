@@ -151,6 +151,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_bb_test_nominal_sound_speed(0.0),
   initial_bb_test_angular_rotation_velocity(0.0),
   initial_bb_test_external_density(0.0),
+  // EnzoMethodGravity
+  method_gravity_type_super(),
   // EnzoMethodInference
   method_inference_level_base(0),
   method_inference_level_array(0),
@@ -335,6 +337,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_monitor_iter;
   p | method_check_include_ghosts;
 
+  p | method_gravity_type_super;
+
   p | method_inference_level_base;
   p | method_inference_level_array;
   p | method_inference_level_infer;
@@ -422,8 +426,9 @@ void EnzoConfig::read(Parameters * p) throw()
   // Method [sorted]
 
   read_method_check_(p);
-  read_method_turbulence_(p);
+  read_method_gravity_(p);
   read_method_inference_(p);
+  read_method_turbulence_(p);
 
   read_prolong_enzo_(p);
 
@@ -893,6 +898,14 @@ void EnzoConfig::read_method_check_(Parameters * p)
 }
 
 //----------------------------------------------------------------------
+
+void EnzoConfig::read_method_gravity_(Parameters * p)
+{
+  method_gravity_type_super = p->value_string
+    ("Method:gravity:type_super","accelerations");
+}
+
+//-------------------------------------------------------------
 
 void EnzoConfig::read_method_inference_(Parameters* p)
 {

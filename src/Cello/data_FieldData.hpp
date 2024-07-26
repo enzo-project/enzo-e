@@ -46,8 +46,8 @@ public: // interface
   /// Return dimensions of the given field in the block, without assuming that
   /// it is cell-centered. This always includes ghost zones (regardless of
   /// whether they've been allocated).
-  void dimensions(const FieldDescr *, int id_field,
-		  int * mx, int * my = 0, int * mz = 0) const throw();
+  int  dimensions(const FieldDescr *, int id_field,
+		  int * mx = 0, int * my = 0, int * mz = 0) const throw();
 
   /// Return size of fields on the data, assuming centered (this only includes
   /// the active zone)
@@ -69,6 +69,13 @@ public: // interface
 		       std::string name, int history=0) const throw ()
   { return values (field_descr,field_descr->field_id(name),history); }
 
+  template <class T>
+  std::shared_ptr<T[]> values_at (const FieldDescr * field_descr,
+                                  int id_field, double time);
+  template <class T>
+  std::shared_ptr<T[]> values_at (const FieldDescr * field_descr,
+                                  std::string name, double time);
+  
   /// Return a CelloView that acts as a view of the corresponding field
   ///
   /// If the field cannot be found the program will abort with an error.
@@ -240,11 +247,11 @@ public: // interface
   /// Return the number of elements (nx,ny,nz) along each axis
   /// (including ghosts), and total number of bytes n
   int field_size (const FieldDescr *,
-		  int id_field, int *nx=0, int *ny=0, int *nz=0) const throw();
+		  int id_field, int *mx=0, int *my=0, int *mz=0) const throw();
 
   /// Return the number of elements (nx,ny,nz) along each axis of the coarse field
   void coarse_dimensions
-  (const FieldDescr *, int id_field, int *nx=0, int *ny=0, int *nz=0) const throw();
+  (const FieldDescr *, int id_field, int *mx=0, int *my=0, int *mz=0) const throw();
 
   /// Print basic field characteristics for debugging
   void print (const FieldDescr *,
@@ -269,11 +276,17 @@ public: // interface
   /// Copy "current" fields to "old" fields
   void save_history (const FieldDescr *, double time);
 
+  /// Initialize "current" fields to given time
+  void init_history_time (const FieldDescr *, double time)
+  {
+    history_time_[0] = time;
+  }
+
   /// Return time for given history
   double history_time (const FieldDescr * field_descr, int ih) const
   {
     const int nh = field_descr->num_history();
-    return (1 <= ih && ih <= nh) ? history_time_[ih-1] : 0.0;
+    return (0 <= ih && ih <= nh) ? history_time_[ih] : 0.0;
   }
 
   //----------------------------------------------------------------------
