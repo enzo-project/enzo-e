@@ -14,13 +14,27 @@
 #include "charm_mesh.hpp"
 
 // #define DEBUG_COMPUTE
+// #define TRACE_COMPUTE
+// #define CYCLE 0
 
-#define CYCLE 0
-
+#ifdef TRACE_COMPUTE
+# define TRACE_BLOCK (cycle()>=0)
+# undef TRACE_COMPUTE
+# define TRACE_COMPUTE(A)                               \
+  if (TRACE_BLOCK) {                                    \
+    CkPrintf ("%d :%d %s TRACE_COMPUTE %s %d \n",        \
+              CkMyPe(),__LINE__,               \
+              name_.c_str(), A,index_method_);                       \
+    fflush(stdout);                                     \
+  }
+#else
+# define TRACE_COMPUTE(A) ;
+#endif
 //======================================================================
 
 void Block::compute_enter_ ()
 {
+  TRACE_COMPUTE("compute_enter_");
   performance_start_(perf_compute,__FILE__,__LINE__);
   compute_begin_();
   performance_stop_(perf_compute,__FILE__,__LINE__);
@@ -41,17 +55,22 @@ void Block::compute_begin_ ()
 
 void Block::compute_next_ ()
 {
+  TRACE_COMPUTE("compute_next_");
   Method * method = this->method();
 
 #ifdef DEBUG_COMPUTE
-  if (cycle() >= CYCLE)
+  if (cycle() >= CYCLE) {
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_next_(%s)\n",CkMyPe(), name().c_str(),method?method->name().c_str():"NULL");
+    fflush(stdout);
+  }
 #endif
 
   if (method) {
 
 #ifdef DEBUG_COMPUTE
-    CkPrintf ("DEBUG_REFRESH %s:%d calling refresh_[enter|start]\n",__FILE__,__LINE__);
+    CkPrintf ("DEBUG_REFRESH %s calling refresh_[enter|start]\n",
+              name().c_str(),__FILE__,__LINE__);
+    fflush(stdout);
 #endif
 
     int ir_post = method->refresh_id_post();
@@ -73,8 +92,10 @@ void Block::compute_continue_ ()
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_COMPUTE
-  if (cycle() >= CYCLE)
+  if (cycle() >= CYCLE) {
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_continue_()\n", CkMyPe(),name().c_str());
+    fflush(stdout);
+  }
 #endif
 
 #ifdef CONFIG_USE_PROJECTIONS
@@ -92,10 +113,12 @@ void Block::compute_continue_ ()
 	    index_method_,method); fflush(stdout);
 
 #ifdef DEBUG_COMPUTE
-    if (cycle() >= CYCLE)
+    if (cycle() >= CYCLE) {
       CkPrintf ("%d %s DEBUG_COMPUTE applying Method %s\n",
-	      CkMyPe(),name().c_str(),method->name().c_str());
-    CkPrintf ("DEBUG_TRACE_REFRESH Method %s compute()\n",method->name().c_str());
+                CkMyPe(),name().c_str(),method->name().c_str());
+      CkPrintf ("DEBUG_TRACE_REFRESH Method %s compute()\n",method->name().c_str());
+      fflush(stdout);
+    }
 #endif
     // Apply the method to the Block
 
@@ -116,8 +139,11 @@ void Block::compute_continue_ ()
 void Block::compute_done ()
 {
 #ifdef DEBUG_COMPUTE
-  if (cycle() >= CYCLE)
+  if (cycle() >= CYCLE) {
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_done_()\n", CkMyPe(),name().c_str());
+    fflush(stdout);
+  }
+
 #endif
   index_method_++;
   compute_next_();
@@ -127,9 +153,12 @@ void Block::compute_done ()
 
 void Block::compute_end_ ()
 {
+  TRACE_COMPUTE("compute_end_");
 #ifdef DEBUG_COMPUTE
-  if (cycle() >= CYCLE)
+  if (cycle() >= CYCLE) {
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_end_()\n", CkMyPe(),name().c_str());
+    fflush(stdout);
+  }
 #endif
 
 
