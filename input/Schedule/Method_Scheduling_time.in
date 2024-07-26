@@ -1,0 +1,63 @@
+# Problem: Method-Scheduling test
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+#
+# The purpose of this test is to ensure that the Enzo-E executes methods at the
+# exact simulation times when they are scheduled
+
+Domain {
+   lower = [-2.0, -2.0];
+   upper = [ 2.0,  2.0];
+}
+
+Mesh {
+   root_rank = 2;
+   root_size = [8,8];
+   root_blocks = [2,2];
+}
+
+Boundary {
+   type = "periodic";
+}
+
+Field {
+   list = ["test"]; # just a dummy field
+   ghost_depth = 2;
+}
+
+Initial {
+   list = ["value"];
+   value {  test = 0.0; }
+}
+
+Stopping {
+   time  = 100.0;
+}
+
+Method {
+   list = ["null", "output_step", "output_list"];
+   null { dt = 100.0; }
+
+   output_step{
+       field_list = ["test"];
+       type = "output";
+       file_name = ["data-%03d.h5", "proc"];
+       path_name = ["outstep_t_%03.f", "time"];
+       schedule {
+             start = 0.0;
+             step = 25.0;
+             stop = 75.0;
+             var = "time";
+       };
+   }
+
+   output_list{
+       field_list = ["test"];
+       type = "output";
+       file_name = ["data-%03d.h5", "proc"];
+       path_name = ["outlist_t_%03.f", "time"];
+       schedule {
+             list = [1.0,7.0];
+             var = "time";
+       }
+   }
+}
