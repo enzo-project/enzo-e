@@ -85,7 +85,7 @@ The general advice is to implement a :cpp:class:`!Physics` class so that it is i
 This makes the behavior of :cpp:class:`!Physics` classes much easier to reason about because a single PE (processing element)
 
   - only has one instance of a given :cpp:class:`!Physics` class
-  
+
   - AND is responsible for evolving one or more instances of :cpp:class:`EnzoBlock`.
 
 

@@ -11,17 +11,11 @@
 
 //----------------------------------------------------------------------
 
-EnzoComputeCoolingTime::EnzoComputeCoolingTime
-()
-  : Compute()
-{
-}
+EnzoComputeCoolingTime::EnzoComputeCoolingTime() : Compute() {}
 
 //----------------------------------------------------------------------
 
-void EnzoComputeCoolingTime::pup (PUP::er &p)
-{
-
+void EnzoComputeCoolingTime::pup(PUP::er& p) {
   // NOTE: change this function whenever attributes change
 
   TRACEPUP;
@@ -31,16 +25,15 @@ void EnzoComputeCoolingTime::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoComputeCoolingTime::compute ( Block * block) throw()
-{
-
+void EnzoComputeCoolingTime::compute(Block* block) throw() {
   if (!block->is_leaf()) return;
 
-  EnzoBlock * enzo_block = enzo::block(block);
+  EnzoBlock* enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
-  enzo_float * ct = field.is_field("cooling_time") ?
-                    (enzo_float*) field.values("cooling_time", i_hist_) : NULL;
+  enzo_float* ct = field.is_field("cooling_time")
+                       ? (enzo_float*)field.values("cooling_time", i_hist_)
+                       : NULL;
 
   if (!ct) {
     ERROR("EnzoComputeCoolingTime::compute()",
@@ -52,9 +45,7 @@ void EnzoComputeCoolingTime::compute ( Block * block) throw()
 
 //---------------------------------------------------------------------
 
-void EnzoComputeCoolingTime::compute ( Block * block, enzo_float * ct) throw()
-{
-
+void EnzoComputeCoolingTime::compute(Block* block, enzo_float* ct) throw() {
   if (!block->is_leaf()) return;
 
   compute_(block, ct);
@@ -62,11 +53,9 @@ void EnzoComputeCoolingTime::compute ( Block * block, enzo_float * ct) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoComputeCoolingTime::compute_(Block * block,
-                                      enzo_float * ct,
-                                      grackle_field_data * grackle_fields /* NULL */
-                                      )
-{
+void EnzoComputeCoolingTime::compute_(
+    Block* block, enzo_float* ct, grackle_field_data* grackle_fields /* NULL */
+) {
   const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
   ASSERT("EnzoComputeCoolingTime::compute_()",
          "Grackle must be enabled in order to compute the cooling time",

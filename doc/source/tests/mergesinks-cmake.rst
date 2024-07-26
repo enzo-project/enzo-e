@@ -7,11 +7,11 @@ Four tests of the enzo-e "merge sinks" method.
 - the stationary serial test
 
 - the stationary parallel test
-    
+
 - the drifting serial test
 
 - the stationary parallel test
-    
+
 All the files necessary for running the tests can be found in input/merge_sinks.
 
 Each test involves setting up initial conditions with 1000 sink particles randomly
