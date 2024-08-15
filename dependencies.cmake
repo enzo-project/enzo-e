@@ -38,20 +38,20 @@ if(USE_GRACKLE)
   # first, declare where to find FetchContent would find grackle (even if we
   # don't ultimately use FetchContent
 
-  # TODO: shift this to mainline Grackle Repository after
-  #         https://github.com/grackle-project/grackle/pull/182
-  #       get's merged into Grackle
   FetchContent_Declare(Grackle
-    GIT_REPOSITORY https://github.com/mabruzzo/grackle
-    GIT_TAG 689be185ac55dba098309e2da9d6acdda37d1923
-    # ^ current hash is right after cmake build-system got introduced
+    GIT_REPOSITORY https://github.com/grackle-project/grackle
+    GIT_TAG 06c665fa2f53013752810cf7cce8a833930c343d
+    # ^ current hash is shortly after cmake build-system got introduced
   )
 
-  # some time after the following PR is merged
-  #    https://github.com/grackle-project/grackle/pull/204
-  # And we feel comfortable requiring that people use a CMake-build of grackle
-  # that ships a GrackleConfig.cmake file, a better default behavior might be
-  # to always search for Grackle first and then perform an in-source build if
+  # At this time, Grackle currently supports 2 build-systems
+  #   1. the classic build-system (inherited from Enzo-Classic) 
+  #   2. the newer cmake build-system. 
+  # Once we feel comfortable requiring that people always use a CMake-build of 
+  # Grackle, we can start to make use of thet GrackleConfig.cmake file that is
+  # created in those builds. (Doing that will ALWAYS be more robust than our
+  # custom FindGrackle.cmake logic). A better default behavior might then be
+  # to searching for Grackle first and then performing an in-source build if
   # it can't be found
 
   if (USE_EXTERNAL_GRACKLE)
