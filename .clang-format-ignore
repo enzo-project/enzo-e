@@ -18,6 +18,10 @@ src/Cello/lex.yy.c
 src/Cello/parse.tab.c
 src/Cello/parse.tab.h
 
+# Header files included within fortran source code
+# ------------------------------------------------
+src/Enzo/fortran_types.h
+
 # List of legacy files
 # --------------------
 # Do NOT add anything to this section.
@@ -409,7 +413,6 @@ src/Enzo/fluid-props/EnzoPhysicsFluidProps.cpp
 src/Enzo/fluid-props/EnzoPhysicsFluidProps.hpp
 src/Enzo/fluid-props/fluid-props.hpp
 src/Enzo/fortran.h
-src/Enzo/fortran_types.h
 src/Enzo/gravity/EnzoComputeAcceleration.cpp
 src/Enzo/gravity/EnzoComputeAcceleration.hpp
 src/Enzo/gravity/EnzoMethodBackgroundAcceleration.cpp
