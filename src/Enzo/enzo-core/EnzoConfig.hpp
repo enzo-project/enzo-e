@@ -174,13 +174,6 @@ public: // interface
       initial_sedov_random_radius_relative(0.0),
       initial_sedov_random_te_multiplier(0),
       initial_sedov_rank(0),
-      // EnzoInitialShuCollapse
-      initial_shu_collapse_central_sink_exists(false),
-      initial_shu_collapse_central_sink_mass(0.0),
-      initial_shu_collapse_external_density(0.0),
-      initial_shu_collapse_instability_parameter(0.0),
-      initial_shu_collapse_nominal_sound_speed(0.0),
-      initial_shu_collapse_truncation_radius(0.0),
       // EnzoInitialTurbulence
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
@@ -267,7 +260,6 @@ protected: // methods
   void read_initial_pm_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
-  void read_initial_shu_collapse_(Parameters *);
   void read_initial_turbulence_(Parameters *);
 
   //--------------------
@@ -444,16 +436,6 @@ public: // attributes
   double                     initial_accretion_test_sink_mass;
   double                     initial_accretion_test_sink_position[3];
   double                     initial_accretion_test_sink_velocity[3];
-
-  // EnzoInitialShuCollapse
-  bool                       initial_shu_collapse_central_sink_exists;
-  double                     initial_shu_collapse_center[3];
-  double                     initial_shu_collapse_central_sink_mass;
-  double                     initial_shu_collapse_drift_velocity[3];
-  double                     initial_shu_collapse_external_density;
-  double                     initial_shu_collapse_instability_parameter;
-  double                     initial_shu_collapse_nominal_sound_speed;
-  double                     initial_shu_collapse_truncation_radius;
 
   // EnzoInitialBBTest
   double                     initial_bb_test_angular_rotation_velocity;

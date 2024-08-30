@@ -18,16 +18,7 @@ class EnzoInitialShuCollapse : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialShuCollapse
-  (int cycle, double time,
-   const double center[3],
-   const double drift_velocity[3],
-   double truncation_radius,
-   double nominal_sound_speed,
-   double instability_parameter,
-   double external_density,
-   bool central_sink_exists,
-   double central_sink_mass) throw();
+EnzoInitialShuCollapse(int cycle, double time, ParameterGroup p) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialShuCollapse);
@@ -39,7 +30,9 @@ public: // interface
       nominal_sound_speed_(0.0),
       instability_parameter_(0.0),
       central_sink_exists_(false),
-      central_sink_mass_(0.0)
+      central_sink_mass_(0.0),
+      center_{},
+      drift_velocity_{}
   {}
 
   /// CHARM++ Pack / Unpack function
