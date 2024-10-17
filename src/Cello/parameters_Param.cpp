@@ -286,7 +286,7 @@ std::string Param::value_to_string (int type)
     break;
   case parameter_logical_expr:
   case parameter_float_expr:
-    sprintf_expression(value_expr_,char_buffer);
+    sprintf_expression(value_expr_,char_buffer,sizeof(char_buffer));
     string_buffer = expr_begin + char_buffer + expr_end;
     break;
   case parameter_integer:
