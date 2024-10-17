@@ -15,22 +15,22 @@
 # behalf a nonexclusive, paid-up, irrevocable worldwide license in this material
 # to reproduce, prepare derivative works, distribute copies to the public,
 # perform publicly and display publicly, and to permit others to do so.
-# 
+#
 # Additionally, redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 # list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 # this list of conditions and the following disclaimer in the documentation and/or
 # other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of Triad National Security, LLC, Los Alamos National
 # Laboratory, LANL, the U.S. Government, nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY TRIAD NATIONAL SECURITY, LLC AND CONTRIBUTORS "AS
 # IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -167,13 +167,13 @@ function(_get_charm_linker_invocation charm_compiler out)
   #      https://discourse.cmake.org/t/avoid-duplicate-linking-to-avoid-xcode-15-warnings/9084
   # -> cmake 3.29 does introduce some mechanisms to deal with this. (Aside: if
   #    this solution worked for us, it would probably be reasonable to require
-  #    users to use 3.29 to suppress the warning - especially since it is SO 
+  #    users to use 3.29 to suppress the warning - especially since it is SO
   #    easy to get modern cmake versions on macOS)
   # -> However, the fact that we force CMake to invoke the charm++ compiler for
   #    linking keeps us from easily using the CMake solution.
   #    -> In a little more detail, CMake assumes that we are using the build's
   #       mainstream c++ compiler to invoke linking. Consequently, it tries to
-  #       escape certain arguments intended to be passed through to the linker 
+  #       escape certain arguments intended to be passed through to the linker
   #       (with -Wl,... for gcc and -Xlinker for clang)
   #    -> charmc itself acts like a compiler frontend (it wraps the
   #       compiler-frontend used to compile it, similar to h5cc or mpicc).
@@ -213,11 +213,11 @@ function(_get_charm_linker_invocation charm_compiler out)
     message(WARNING
       "something went wrong while trying to query apple-clang version")
   endif()
-    
+
   if (suppress)
     # https://discourse.cmake.org/t/avoid-duplicate-linking-to-avoid-xcode-15-warnings/9084/3
     set(linker "${linker} -ld-option -Wl,-no_warn_duplicate_libraries")
- 
+
     # the following could plausibly be unnecessary in newer version of charm++
     if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR
         CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

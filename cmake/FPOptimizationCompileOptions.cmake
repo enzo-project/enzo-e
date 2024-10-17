@@ -6,7 +6,7 @@
 #
 # Defines a function that enables value-unsafe floating point optimization
 # flags for the C and C++ compilers.
-# 
+#
 # This can also add the openmp-simd flags to the C and C++ compilers (and any
 # other flags necessary for simd optimizations).
 

@@ -10,8 +10,9 @@ including adding new computational methods, initial conditions,
 refinement criteria, etc.
 
 .. toctree::
-      
+
    coding-guidelines
+   style-formatting
    initial
    adapt
    method

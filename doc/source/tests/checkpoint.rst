@@ -2,7 +2,7 @@
 Checkpoint Tests
 ----------------
 
-Tests for restart checkpoints. Runs 2D implosion using PPM method with slope mesh refinement. 
+Tests for restart checkpoints. Runs 2D implosion using PPM method with slope mesh refinement.
 
 
 checkpoint_ppm-1

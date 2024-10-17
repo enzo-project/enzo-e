@@ -23,18 +23,18 @@
 
 #include <stdlib.h>
 extern "C" {
-  #define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
-  #include <grackle.h>
+#define OMIT_LEGACY_INTERNAL_GRACKLE_FUNC
+#include <grackle.h>
 }
 
 #else
 
 // declare the names of Grackle types to reduce the usage of ifdef statements
-extern "C" { 
-  struct chemistry_data;
-  struct chemistry_data_storage;
-  struct code_units;
-  struct grackle_field_data;
+extern "C" {
+struct chemistry_data;
+struct chemistry_data_storage;
+struct code_units;
+struct grackle_field_data;
 }
 
 #endif /* CONFIG_USE_GRACKLE */

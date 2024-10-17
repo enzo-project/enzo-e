@@ -11,11 +11,15 @@
 #ifndef ENZO_ENZO_GRACKLE_FACADE_HPP
 #define ENZO_ENZO_GRACKLE_FACADE_HPP
 
-enum class GracklePropertyEnum
-  { cooling_time, dust_temperature, gamma, pressure, temperature };
+enum class GracklePropertyEnum {
+  cooling_time,
+  dust_temperature,
+  gamma,
+  pressure,
+  temperature
+};
 
 class GrackleFacade : public PUP::able {
-
   /// @class    GrackleFacade
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Grackle's state and operations
@@ -78,9 +82,7 @@ class GrackleFacade : public PUP::able {
   ///   - Alternatively, we'd have to support a default constructor that could
   ///     be used at any time
 
-
-public: // interface
-
+public:  // interface
   static bool linked_against_grackle() noexcept;
 
   /// public-facing constructor
@@ -93,10 +95,10 @@ public: // interface
   PUPable_decl(GrackleFacade);
 
   /// CHARM++ migration constructor for PUP::able
-  GrackleFacade(CkMigrateMessage *m);
+  GrackleFacade(CkMigrateMessage* m);
 
   /// CHARM++ Pack / Unpack function
-  void pup(PUP::er &p);
+  void pup(PUP::er& p);
 
   /// Destructor
   ~GrackleFacade() noexcept;
@@ -117,32 +119,28 @@ public: // interface
   /// We may be able to simplify this implementation. I'm pretty sure that
   /// Grackle MUST be used for an instance of GrackleFacade to exist at all
   /// (in which case, we never need to worry about returning nullptr)
-  const GrackleChemistryData* try_get_chemistry() const noexcept
-  {
+  const GrackleChemistryData* try_get_chemistry() const noexcept {
     bool not_null = (GrackleFacade::linked_against_grackle() &&
                      (my_chemistry_.get<int>("use_grackle") == 1));
     return (not_null) ? &my_chemistry_ : nullptr;
   }
 
-public: // low-level legacy methods - these will (probably) be removed or made
-        // private in the near future
-
+public:  // low-level legacy methods - these will (probably) be removed or made
+         // private in the near future
   void setup_grackle_fields(const EnzoFieldAdaptor& fadaptor,
-                            grackle_field_data * grackle_fields,
+                            grackle_field_data* grackle_fields,
                             int stale_depth = 0,
                             bool omit_cell_width = false) const noexcept;
 
-  void setup_grackle_fields(Block * block, grackle_field_data* grackle_fields,
-                            int i_hist = 0 ) const noexcept
-  {
-    setup_grackle_fields(EnzoFieldAdaptor(block, i_hist),
-                         grackle_fields, 0, false);
+  void setup_grackle_fields(Block* block, grackle_field_data* grackle_fields,
+                            int i_hist = 0) const noexcept {
+    setup_grackle_fields(EnzoFieldAdaptor(block, i_hist), grackle_fields, 0,
+                         false);
   }
 
   void delete_grackle_fields(grackle_field_data* grackle_fields) const noexcept;
 
-public: // wrapped grackle functions:
-
+public:  // wrapped grackle functions:
   /// light-weight wrapper around local_solve_chemistry function from grackle
   ///
   /// @param[in] block Holds the field data that will be passed through to
@@ -176,13 +174,12 @@ public: // wrapped grackle functions:
   /// @param[in]  stale_depth Specifies stale depth of the field
   /// @param[in]  grackle_fields Pointer to a precomputed grackle_field_data
   ///     struct. When this is a nullptr, a temporary is constructed.
-  void compute_property(const EnzoFieldAdaptor& fadaptor,
-                        GracklePropertyEnum func_choice,
-                        enzo_float* values, int stale_depth = 0,
-                        grackle_field_data* grackle_fields = nullptr
-                        ) const noexcept;
+  void compute_property(
+      const EnzoFieldAdaptor& fadaptor, GracklePropertyEnum func_choice,
+      enzo_float* values, int stale_depth = 0,
+      grackle_field_data* grackle_fields = nullptr) const noexcept;
 
-private: // attributes
+private:  // attributes
   // the attributes are treated as immutable after construction/deserialization
 
   /// wrapper around chemistry_data struct, which stores runtime parameters
@@ -200,7 +197,6 @@ private: // attributes
   /// specifies the redshift of the UV background. A negative value means that
   /// this is unset
   double radiation_redshift_;
-
 };
 
 #endif /* ENZO_ENZO_GRACKLE_FACADE_HPP */

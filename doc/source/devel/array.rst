@@ -68,7 +68,7 @@ the number of dimensionsions of the array.
 
 At a high-level, this class template has semantics like a pointer or
 ``std::shared_ptr`` (there are also similarities to numpy's
-``ndarray``).  These objects serve as a 
+``ndarray``).  These objects serve as a
 smart-pointer with methods for treating the data as a specialized
 array.  These semantics explicitly differ from the C++ standard
 library containers (like ``std::vector``).
@@ -106,10 +106,10 @@ Simplest initialization:
 
 
     * Construct an array of shape ``(5,)`` that holds ints:
-       
+
     .. code-block:: c++
 
-       CelloView<int,1> arr(5); 
+       CelloView<int,1> arr(5);
        CelloView<int,1> arr2 = CelloView<int,1>(5); // yields same result
 
 Wrap a pre-existing pointer:
@@ -130,7 +130,7 @@ We can also forward declare an array and assign values to it later.
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloView<int,2> arr; 
+   CelloView<int,2> arr;
    arr = CelloView<int,2>(data,2,3);
 
 
@@ -189,7 +189,7 @@ To perform a deepcopy, assign the the results of the ``deepcopy`` method.
    int data[] = {0,1,2,3,4,5};
    CelloView<int,2> a(data,2,3);
    CelloView<int,2> e = a.deepcopy(); // e is now a deep copy of a
-   
+
 Modifications to the contents of ``e`` will not be reflected in ``a``
 or ``data`` (and vice-versa)
 
@@ -339,7 +339,7 @@ the generating subarrays of a ``CelloView`` instance. These are
      are passed as the ``start`` argument, they are understood to mean
      that the slice starts at the first element
      (``CSlice(0,NULL)``, ``CSlice(0,nullptr)``, ``CSlice(NULL,NULL)``, &
-     ``CSlice(nullptr,nullptr)`` are all equivalent). 
+     ``CSlice(nullptr,nullptr)`` are all equivalent).
 
 Finally, we note that ``CSlice`` provides a default constructor to
 simplify the construction of arrays of slices. However, to help avoid
@@ -486,16 +486,16 @@ have:
 
   * An ``(mz,my,mx-1)`` array of left reconstructed values, ``wl``
 
-  * An ``(mz,my,mx-1)`` array of right reconstructed values, ``wr`` 
+  * An ``(mz,my,mx-1)`` array of right reconstructed values, ``wr``
 
 First is an the ``CelloView`` version:
-    
+
 .. code-block:: c++
 
    typedef double enzo_float;
    typedef CelloView<enzo_float,3> EFlt3DArray;
 
-   void reconstruct_NN_x(EFlt3DArray &w, EFlt3DArray &wl, 
+   void reconstruct_NN_x(EFlt3DArray &w, EFlt3DArray &wl,
                          EFlt3DArray &wr){
        w.subarray(CSlice(0,w.shape(0)),
                   CSlice(0,w.shape(1)),
@@ -518,7 +518,7 @@ The analogous code using conventional pointer operations is:
        for (int iy=0; iy<my-1; iy++) {
          for(int ix=0; ix<mx-1; ix++) {
            int i = (iz*my + iy)*mx + ix;
-           int i_xf = (iz*my + iy)*(mx-1) + ix; 
+           int i_xf = (iz*my + iy)*(mx-1) + ix;
            wl[i_xf] = w[i];
            Wr[i_xf] = w[i + offset];
          }
@@ -585,9 +585,9 @@ The analogous function using conventional pointer operations is provided below:
    typedef double enzo_float;
    typedef CelloView<enzo_float,3> EFlt3DArray;
 
-   void update_cons(enzo_float *u, enzo_float *out, 
+   void update_cons(enzo_float *u, enzo_float *out,
                     enzo_float *xflux, enzo_float *yflux,
-                    enzo_float *zflux, enzo_float dt, 
+                    enzo_float *zflux, enzo_float dt,
                     enzo_float dx, enzo_float dy, enzo_float dz,
                     int mx, int my, int mz){
      enzo_float dtdx = dt/dx;
@@ -606,7 +606,7 @@ The analogous function using conventional pointer operations is provided below:
            int i_yf = (iz*(my-1) + iy) * mx + ix;
            int i_xf = (iz*my + iy) * (mx-1) + ix;
 
-           out[i] = (u[i] 
+           out[i] = (u[i]
                      - dtdx * (xflux[i_xf] - xflux[i_xf - x_offset])
                      - dtdy * (yflux[i_yf] - yflux[i_yf - y_offset])
                      - dtdz * (zflux[i_zf] - zflux[i_zf - z_offset]));
@@ -651,7 +651,7 @@ This code assumes a mesh with shape ``(mz, my, mx)``. Suppose we have:
    void calc_center_bfield(EFlt3DArray &bc, EFlt3DArray &bi, int dim){
      EFlt3DArray bi_l = bi;
 
-     // The following is a repeating pattern that gets factored out into 
+     // The following is a repeating pattern that gets factored out into
      // a helper function
      EFlt3DArrau bi_r;
      if (dim == 0) {
@@ -709,7 +709,7 @@ map/dictionary of instances of ``CelloView<T,3>``.  The keys of the
 map are always strings.
 
 .. note::
-   
+
     As a historical note, the ``ViewMap`` class template replaces an
     older concrete class known as ``EnzoEFltArrayMap``, which was a
     map/dictionary of instances of ``CelloView<enzo_float,3>`` (or
