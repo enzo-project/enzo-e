@@ -6,5 +6,7 @@ From other parts of the codebase, you will need to add code like the following b
 
     ```python
     import sys
-    sys.path.append('path/to/test_utils')
+    sys.path.append('path/to/test_utils/..')
     ```
+
+**NOTE:** it's important to add the path to the directory containing ``test_utils``, rather than to the ``test_utils`` directory, itself (otherwise, the import statements between files within the test_utils directory won't work right).

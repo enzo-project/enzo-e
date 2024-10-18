@@ -13,7 +13,8 @@ from unittest import TestCase
 from yt.funcs import ensure_dir
 from yt.testing import assert_rel_equal
 
-from test_utils.enzoe_driver import EnzoEDriver
+from test_utils.enzoe_driver import \
+    EnzoEDriver, create_symlinks, grackle_symlink_targets
 
 _base_file = os.path.basename(__file__)
 
@@ -85,23 +86,25 @@ def uses_grackle(cls):
     )
     return wrapper_factory(cls)
 
+def get_symlink_targets(grackle_files = False):
+    # iterate over the standard symlink targets that are needed to run enzo-e
+    # in an arbitrary directory
+    yield os.path.join(src_path, input_dir)
+
+    if grackle_files:
+        for e in grackle_symlink_targets(cached_opts().grackle_input_data_dir):
+            yield e
+
 class EnzoETest(TestCase):
     parameter_file = None
     max_runtime = np.inf
     ncpus = None
 
     def setup_symlinks(self):
-        ipath = os.path.join(src_path, input_dir)
-        spath = os.path.join(self.tmpdir, input_dir)
-        os.symlink(ipath, spath)
-
-        if self.__class__.__name__ in _grackle_tagged_tests:
-            # make symlinks to each grackle input file
-            with os.scandir(cached_opts().grackle_input_data_dir) as it:
-                for entry in it:
-                    if not entry.is_file():
-                        continue
-                    os.symlink(entry.path,os.path.join(self.tmpdir, entry.name))
+        targets = get_symlink_targets(
+            grackle_files = (self.__class__.__name__ in _grackle_tagged_tests)
+        )
+        create_symlinks(dst_dir = self.tmpdir, target_iterable = targets)
 
     def setUp(self):
         self.curdir = os.getcwd()
