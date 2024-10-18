@@ -7,9 +7,9 @@ Tests of full code to demonstrate functionality. These are done as a demostratio
 HelloWorld
 ==========
 
-Demonstration test of Enzo-E, generates high pressure region in shape of Hello World 
+Demonstration test of Enzo-E, generates high pressure region in shape of Hello World
 
-Hi 
+Hi
 ===
 
 Shorter version of HelloWorld. Takes few minutes as opposed to several hours
