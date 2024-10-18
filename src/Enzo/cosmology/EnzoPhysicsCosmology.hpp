@@ -161,7 +161,6 @@ public: // interface
   {
     update_expansion_factor (time);
     current_redshift_ = (1 + initial_redshift_)/cosmo_a_ - 1;
-
   }
 
   void set_current_redshift (enzo_float redshift)

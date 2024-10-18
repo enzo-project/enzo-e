@@ -344,13 +344,12 @@ int EnzoMethodPpm::SolveHydroEquations
   int iposrec = 0;
 
   int error = 0;
+  int cycle = block.state()->cycle();
 
   // convert the dtype of a couple of arguments:
   int diffusion_int = diffusion;
   int pressure_free_int = pressure_free;
   int steepening_int = steepening;
-
-  int cycle = block.cycle();
 
   FORTRAN_NAME(ppm_de)
     (

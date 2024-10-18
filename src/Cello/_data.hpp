@@ -80,6 +80,7 @@ class FieldData;
 class FieldFace;
 
 #include "data_Grouping.hpp"
+#include "data_State.hpp"
 
 #include "data_ScalarDescr.hpp"
 #include "data_ScalarData.hpp"

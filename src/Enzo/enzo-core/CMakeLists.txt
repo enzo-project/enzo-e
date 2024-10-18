@@ -28,6 +28,8 @@ target_sources(enzo PRIVATE
   EnzoProblem.hpp
   EnzoSimulation.cpp
   EnzoSimulation.hpp
+  EnzoState.cpp
+  EnzoState.hpp
   EnzoStopping.cpp
   EnzoStopping.hpp
   EnzoUnits.cpp

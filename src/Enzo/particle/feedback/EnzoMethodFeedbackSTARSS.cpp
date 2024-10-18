@@ -536,7 +536,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   double tunit = enzo_units->time();
   double lunit = enzo_units->length();
 
-  double current_time  = block->time();
+  double current_time  = block->state()->time();
 
   Field field = enzo_block->data()->field();
 
@@ -695,7 +695,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
           /* Determine number of SN events from rates (currently taken from Hopkins 2018) */
 
           determineSN(age, &nSNII, &nSNIa, pmass_solar,
-                      tunit, block->dt());
+                      tunit, block->state()->dt());
 
           numSN += nSNII + nSNIa;
 
@@ -735,7 +735,7 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
 
           determineWinds(age, &windEnergy, &windMass, &windMetals,
                          pmass_solar,
-                         starZ, tunit, block->dt());
+                         starZ, tunit, block->state()->dt());
 
           if (windMass > 0){
             #ifdef DEBUG_FEEDBACK_STARSS
@@ -1528,9 +1528,11 @@ double EnzoMethodFeedbackSTARSS::timestep (Block * block) throw()
 
   double dtStar = std::numeric_limits<double>::max();
   if (block->level() >= starmaker_method->sf_minimum_level()){
+    const auto dt   = block->state()->dt();
+    const auto time = block->state()->time();
     const double pSNmax = 0.0005408 * starmaker_method->minimum_star_mass() *
-                          block->dt() * enzo_units->time() / enzo_constants::Myr_s * 1.25;
-    if (pSNmax > 1.0) dtStar = block->dt() * 1.0 / pSNmax;
+      dt * time / enzo_constants::Myr_s * 1.25;
+    if (pSNmax > 1.0) dtStar = dt * 1.0 / pSNmax;
   }
 
   return dtStar;

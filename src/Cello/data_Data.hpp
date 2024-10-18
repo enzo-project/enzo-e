@@ -13,6 +13,7 @@ class Data {
 
   friend class Block;
   friend class IoBlock;
+  friend class DataMsg;
 
   /// @class    Data
   /// @ingroup  Data
