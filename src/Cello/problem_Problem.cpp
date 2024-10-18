@@ -924,12 +924,11 @@ Method * Problem::create_method_
   } else if (name == "output") {
     // we probably don't have to directly pass factory...
     method = new MethodOutput(factory, p_group);
-  } else if (name == "order_morton") {
+  } else if (name == "order") {
 
-    // TODO: refactor to use a factory method/default constructor
-    //   - can we look up mesh_min_level from an existing object? Like Adapt or
-    //     Hierarchy?
-    method = new MethodOrderMorton(config->mesh_min_level);
+    method = new MethodOrder
+      (config->method_order_ordering[index_method],
+       config->mesh_min_level);
 
   } else if (name == "order_hilbert") {
 

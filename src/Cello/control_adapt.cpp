@@ -18,33 +18,6 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define TRACE_ADAPT
-// #define TRACE_REFINE
-// #define TRACE_COARSEN
-// #define TRACE_DONE_INSERTING
-// #define DEBUG_ADAPT
-
-// #define WRITE_NEIGHBORS
-
-#define DEBUG_CYCLE_START 0
-
-#ifdef TRACE_ADAPT
-#   undef TRACE_ADAPT
-#   define TRACE_ADAPT(MSG,BLOCK)                                       \
-  if (BLOCK->cycle() >= DEBUG_CYCLE_START) {                            \
-    CkPrintf ("TRACE_ADAPT %s %s step %d ready %d self conv %d neighb conv %d\n", \
-              BLOCK->name().c_str(),                                    \
-              std::string(MSG).c_str(),                                 \
-              BLOCK->adapt_step_,                                       \
-              BLOCK->adapt_ready_?1:0 ,                                 \
-              BLOCK->adapt_.is_converged()?1:0,                         \
-              BLOCK->adapt_.neighbors_converged()?1:0);                 \
-    fflush(stdout);                                                     \
-  }
-#else
-#   define TRACE_ADAPT(MSG,BLOCK) /* ... */
-#endif
-
 //======================================================================
 
 /// @brief First function in the adapt phase: apply local refinement criteria.
@@ -55,7 +28,6 @@
 
 void Block::adapt_enter_()
 {
-  TRACE_ADAPT("adapt_enter_",this);
   if ( do_adapt_()) {
 
     adapt_begin_();
@@ -71,28 +43,18 @@ void Block::adapt_enter_()
 
 void Block::adapt_begin_()
 {
-  TRACE_ADAPT("adapt_begin_",this);
-
   cello::simulation()->set_phase(phase_adapt);
 
   if (is_leaf()) {
 
-#ifdef WRITE_NEIGHBORS
-    adapt_.write("adapt",this,DEBUG_CYCLE_START);
-#endif
-
-  // Evaluate local mesh refinement criteria
+    // Evaluate local mesh refinement criteria
     const int level_maximum = cello::config()->mesh_max_level;
     level_next_ = adapt_compute_desired_level_(level_maximum);
 
     // Reset adapt level bounds for next adapt phase
-    adapt_.reset_bounds();
-    adapt_.initialize_self(index_,level_next_,index_.level());
+    adapt_.initialize_bounds(level_next_,level());
     adapt_.update_bounds();
   }
-#ifdef DEBUG_ADAPT
-  CkPrintf ("DEBUG_ADAPT %s level_next = %d\n",name().c_str(),level_next_);
-#endif
   const int min_face_rank = cello::config()->adapt_min_face_rank;
   control_sync_neighbor (CkIndex_Block::p_adapt_called(),
 			 sync_id_adapt_begin,
@@ -109,14 +71,11 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
-  TRACE_ADAPT("adapt_called_",this);
   if (! is_leaf()) {
-    TRACE_ADAPT("adapt_barrier [not leaf]",this);
     adapt_barrier_();
     return;
   }
   adapt_send_level();
-
 }
 
 //----------------------------------------------------------------------
@@ -124,7 +83,6 @@ void Block::adapt_barrier_()
 {
   if (! adapt_balanced_) {
     adapt_balanced_ = true;
-    TRACE_ADAPT("calling contribute",this);
     int changed = (is_leaf() && (level() != level_next_)) ? 1 : 0;
     CkCallback callback = CkCallback
       (CkIndex_Block::r_adapt_next(nullptr), 
@@ -144,27 +102,19 @@ void Block::adapt_barrier_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  TRACE_ADAPT("adapt_next contribute called_",this);
   update_levels_();
 
   level_next_ = adapt_.level_min();
-  
+
   if (is_leaf()) {
     if (level() < level_next_) {
-#ifdef TRACE_REFINE
-      CkPrintf ("TRACE_REFINE %s\n",name().c_str());
-#endif
       adapt_refine_();
     }
     if (level() > level_next_) {
-#ifdef TRACE_COARSEN
-      CkPrintf ("TRACE_COARSEN %s\n",name().c_str());
-#endif
       adapt_coarsen_();
     }
   }
   control_sync_quiescence (CkIndex_Main::p_adapt_update());
-
 }
 
 //----------------------------------------------------------------------
@@ -202,11 +152,7 @@ void Block::update_levels_ ()
 
 void Block::adapt_update_()
 {
-  TRACE_ADAPT("adapt_update_",this);
   if (index_.is_root() && (adapt_changed_ != 0)) {
-#ifdef TRACE_DONE_INSERTING
-    CkPrintf ("TRACE_DONE_INSERTING\n");
-#endif
     thisProxy.doneInserting();
   }
   adapt_end_();
@@ -224,11 +170,15 @@ void Block::adapt_update_()
 /// been deleted.
 void Block::adapt_end_()
 {
-  TRACE_ADAPT("adapt_end_",this);
-  adapt_.reset_face_level(Adapt::LevelType::last);
-
   sync_coarsen_.reset();
   sync_coarsen_.set_stop(cello::num_children());
+
+  adapt_.reset_face_level_last();
+
+  // clear counts used to maintain write-write dependency order
+  adapt_.clear_count();
+  adapt_.clear_face_counts();
+  this->clear_child_face_level_counts();
 
   const int initial_cycle = cello::config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
@@ -272,7 +222,6 @@ bool Block::do_adapt_()
 /// @return The desired level based on local refinement criteria.
 int Block::adapt_compute_desired_level_(int level_maximum)
 {
-  TRACE_ADAPT("adapt_compute_desired_level_",this);
   if (! is_leaf()) return adapt_same;
 
   int adapt = adapt_unknown;
@@ -312,7 +261,6 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 
 void Block::adapt_refine_()
 {
-  TRACE_ADAPT("adapt_refine",this);
   Monitor * monitor = cello::monitor();
   if (monitor->is_verbose()) {
     char buffer [80];
@@ -426,7 +374,6 @@ void Block::adapt_refine_()
 
   adapt_.set_valid(false);
   is_leaf_ = false;
-  TRACE_ADAPT("adapt_refine exit",this);
 }
 
 //----------------------------------------------------------------------
@@ -534,10 +481,10 @@ void Block::adapt_delete_child_(Index index_child)
 
 void Block::adapt_send_level()
 {
-
   adapt_ready_ = true;
-  TRACE_ADAPT("adapt_send_level",this);
+
   if (!is_leaf()) return;
+
   const int level = this->level();
 
   int level_min;
@@ -545,6 +492,7 @@ void Block::adapt_send_level()
   bool can_coarsen;
   adapt_.update_bounds();
   adapt_.get_level_bounds(&level_min,&level_max,&can_coarsen);
+  int count = adapt_.count();
 
   ItNeighbor it_neighbor = this->it_neighbor(index_);
   int of3[3];
@@ -578,26 +526,16 @@ void Block::adapt_send_level()
     if (index_first[index_neighbor]) {
 
       msg_map[index_neighbor] = new MsgAdapt
-        (adapt_step_,index_,ic3,of3,level,level_min,level_max,can_coarsen);
+        (adapt_step_,index_,ic3,of3,level,level_min,level_max,can_coarsen,count);
       index_first[index_neighbor] = false;
     } else {
       msg_map[index_neighbor]->add_face(of3);
     }
 
-#ifdef DEBUG_ADAPT
-    CkPrintf ("DEBUG_ADAPT %s : %s send_level of3 %d %d %dic3 %d %d %d\n",
-              name().c_str(),name(index_neighbor).c_str(),
-              of3[0],of3[1],of3[2],ic3[0],ic3[1],ic3[2]);
-#endif
     if (--index_count[index_neighbor] == 0) {
-#ifdef DEBUG_ADAPT
-      CkPrintf ("DEBUG_ADAPT %s : %s send_level sending message\n",
-                name().c_str(),name(index_neighbor).c_str());
-#endif
       thisProxy[index_neighbor].p_adapt_recv_level (msg_map[index_neighbor]);
     }
   }
-  TRACE_ADAPT("calling adapt_recv_level",this);
   adapt_recv_level();
 }
 
@@ -617,7 +555,8 @@ void Block::p_adapt_recv_level (MsgAdapt * msg)
        msg->level_now_,
        msg->level_min_,
        msg->level_max_,
-       msg->can_coarsen_);
+       msg->can_coarsen_,
+       msg->count_);
     delete msg;
   }
 }
@@ -627,7 +566,6 @@ void Block::adapt_recv_level()
   // Process any saved messages
   adapt_check_messages_();
   if (adapt_.neighbors_converged() && adapt_.is_converged()) {
-    TRACE_ADAPT("adapt_barrier [self]",this);
     adapt_barrier_();
   }
 }
@@ -644,7 +582,8 @@ void Block::adapt_check_messages_()
                       msg->level_now_,
                       msg->level_min_,
                       msg->level_max_,
-                      msg->can_coarsen_);
+                      msg->can_coarsen_,
+                      msg->count_);
   }
   for (std::size_t i=0; i<adapt_msg_list_.size(); i++) {
     delete adapt_msg_list_[i];
@@ -661,26 +600,21 @@ void Block::adapt_recv_level
  int level_face_curr,
  int level_face_new,
  int level_face_max,
- bool can_coarsen
+ bool can_coarsen,
+ int count
  )
 {
   bool changed = false;
-  int level_min;
+  int level_min=0;
   performance_start_(perf_adapt_update);
   for (std::size_t i=0; i<ofv[0].size(); i++) {
 
     int if3[3] = {ofv[0][i],ofv[1][i],ofv[2][i]};
-#ifdef DEBUG_ADAPT
-    CkPrintf ("DEBUG_ADAPT adapt_recv_level if3 %d %d %d\n",
-              if3[0],if3[1],if3[2]);
-#endif
-    //  if (adapt_step != adapt_step_) return;
 
     ASSERT4("Block::p_adapt_recv_level()",
             "Mismatch in %s : %s adapt_recv_level actual %d != expected %d\n",
             name().c_str(),name(index_send).c_str(),adapt_step,adapt_step_,
             adapt_step == adapt_step_);
-    TRACE_ADAPT("adapt_recv_level",this);
     int level_max;
 
     adapt_.update_neighbor
@@ -695,7 +629,7 @@ void Block::adapt_recv_level
             level_face_curr == index_send.level());
 
     if (index_send.level() != level_face_curr) {
-      PARALLEL_PRINTF
+      CkPrintf
         ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
          __LINE__,index_send.level(), level_face_curr);
       int nb3[3] = {2,2,2};
@@ -703,8 +637,7 @@ void Block::adapt_recv_level
       index_send.print("index_",-1,2,nb3,false,cello::simulation());
     }
 
-    adapt_.set_face_level_last
-      (ic3,if3, level_face_new,level_face_max, can_coarsen);
+    adapt_.set_face_level_last (ic3,if3, level_face_new,count);
 
     int level_next = level_next_;
 
@@ -727,7 +660,7 @@ void Block::adapt_recv_level
     const int level_diff = (level_face_curr - level);
 
     adapt_recv(index_send,of3,ic3,level_face_new,level_diff,
-               level_face_max,can_coarsen);
+               level_face_max,can_coarsen,count);
 
     // If this block wants to coarsen, then
     //
@@ -795,11 +728,10 @@ void Block::adapt_recv_level
   }
   if (changed) {
     level_next_ = level_min;
+    adapt_.inc_count(); // update count for level update messages
     adapt_send_level();
   }
-  TRACE_ADAPT("testing convergence",this);
   if (adapt_.neighbors_converged() && adapt_.is_converged()) {
-    TRACE_ADAPT("adapt_barrier [recv_level]",this);
     adapt_barrier_();
   }
   performance_stop_(perf_adapt_update);
@@ -812,7 +744,7 @@ void Block::adapt_recv
 ( Index index_send,
   const int of3[3],
   const int ic3[3], int level_face_new, int level_relative,
-  int level_max, bool can_coarsen)
+  int level_max, bool can_coarsen, int count)
 {
 
   const int rank = cello::rank();
@@ -823,9 +755,7 @@ void Block::adapt_recv
     // neighbor.  Unique face level is updated, and levels on
     // possibly multiple faces of multiple children are updated.
 
-    adapt_.set_face_level
-      (of3, Adapt::LevelType::next,
-       level_face_new,level_max,can_coarsen);
+    adapt_.set_face_level_next (of3, level_face_new, count);
 
     ItChild it_child (rank,of3);
     int jc3[3];
@@ -839,7 +769,7 @@ void Block::adapt_recv
 
       if (level_relative == 0) {
         while (it_face.next(kf3)) {
-          set_child_face_level_next(jc3,kf3,level_face_new);
+          set_child_face_level_next(jc3,kf3,level_face_new,count);
         }
       } else if (level_relative == +1) {
         while (it_face.next(kf3)) {
@@ -849,7 +779,7 @@ void Block::adapt_recv
           Index index_neighbor = neighbor_(of3).index_child(ic3);
 
           if (in == index_neighbor) {
-            set_child_face_level_next(jc3,kf3,level_face_new);
+            set_child_face_level_next(jc3,kf3,level_face_new,count);
           }
         }
       }
@@ -867,8 +797,7 @@ void Block::adapt_recv
     int jf3[3];
     while (it_face.next(jf3)) {
 
-      adapt_.set_face_level (jf3, Adapt::LevelType::next,
-                             level_face_new,level_max,can_coarsen);
+      adapt_.set_face_level_next (jf3, level_face_new, count);
 
       ItChild it_child (rank,jf3);
 
@@ -880,7 +809,7 @@ void Block::adapt_recv
 
         int kf3[3];
         while (it_face_child.next(kf3)) {
-          set_child_face_level_next(jc3,kf3,level_face_new);
+          set_child_face_level_next(jc3,kf3,level_face_new, count);
         }
       }
     }
@@ -896,7 +825,7 @@ void Block::adapt_coarsen_()
   // send data to parent
 
   ASSERT2 ("adapt_coarsen_()",
-	  "Leaf = %s must be true and level = %d must be greater than 0",
+           "Leaf = %s must be true and level = %d must be greater than 0",
 	   is_leaf()?"true":"false", level,
 	   is_leaf() && level > 0);
 
@@ -934,10 +863,9 @@ void Block::adapt_coarsen_()
   data_msg -> set_field_data (data()->field_data(),false);
   data_msg -> set_particle_data (data()->particle_data(),false);
 
-  const int nf = adapt_.size_face_level(Adapt::LevelType::curr);
-
+  const int nf = adapt_.face_level_curr().size();
   MsgCoarsen * msg = new MsgCoarsen
-    (nf,adapt_.vector_face_level(Adapt::LevelType::curr),ic3,&adapt_);
+    (nf,adapt_.face_level_curr(),adapt_.face_level_curr_count(),ic3,&adapt_);
 
   msg->set_data_msg (data_msg);
 
@@ -950,12 +878,11 @@ void Block::adapt_coarsen_()
 
 void Block::p_adapt_recv_child (MsgCoarsen * msg)
 {
-  TRACE_ADAPT("p_adapt_recv_child",this);
-
   performance_start_(perf_adapt_update);
   msg->update(data());
   int * ic3 = msg->ic3();
   int * child_face_level_curr = msg->face_level();
+  int * child_face_level_count= msg->face_level_count();
   // copy child face level array
   const int min_face_rank = cello::config()->adapt_min_face_rank;
   Index index_child = index_.index_child(ic3);
@@ -972,11 +899,12 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
   // copy face level array
   ItFace it_face = this->it_face(min_face_rank,index_);
   while (it_face.next(of3)) {
-    int level_child = child_face_level_curr[IF3(of3)];
+    const int i = IF3(of3);
+    int level_child = child_face_level_curr[i];
+    int count_child = child_face_level_count[i];
     int opf3[3];
     if (parent_face_(opf3,of3,ic3)) {
-      adapt_.set_face_level
-        (opf3,Adapt::LevelType::curr,level_child);
+      adapt_.set_face_level_curr (opf3,level_child,count_child);
     }
   }
 
@@ -1034,7 +962,7 @@ void Block::initialize_child_face_levels_()
       Index inp = in.index_parent();
       // Determine level for the child's face
       const int level_face =
-        adapt_.face_level(ip3,Adapt::LevelType::curr);
+        adapt_.face_level_curr(ip3);
       int level_child_face = (inp == thisIndex) ?
         (level + 1) : level_face;
       if (refine_during_initialization(in))
