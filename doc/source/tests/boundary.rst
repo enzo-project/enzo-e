@@ -2,7 +2,7 @@
 Boundary Condition Tests
 ------------------------
 
-Runs an implosion problem on various boundary conditions in 2D and 3D. 
+Runs an implosion problem on various boundary conditions in 2D and 3D.
 
 
 boundary_mixed-2d

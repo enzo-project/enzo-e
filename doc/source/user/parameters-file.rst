@@ -34,12 +34,12 @@ and ``root_size`` are parameters contained in the respective groups.
 
   ::
 
-     Domain { 
+     Domain {
        lower = [0.0, 0.0, 0.0];
        upper = [1.0, 1.0, 1.0];
-     } 
+     }
 
-     Mesh { 
+     Mesh {
        root_size = [128,128,128];
      }
 
@@ -51,17 +51,17 @@ be "``reflecting``".
 
   ::
 
-     Boundary { 
+     Boundary {
        type = "periodic";
-     } 
+     }
 
-     Mesh { 
+     Mesh {
        root_size = [128,128,128];
      }
 
-     Boundary { 
+     Boundary {
        type = "reflecting";
-     } 
+     }
 
 Subgroups
 *********
@@ -140,16 +140,16 @@ A parameter value is one of several different basic data types:
     ==================	=============================
 
 **Integer types** are integers, and must be representable using a
-32-bit integer.    
+32-bit integer.
 
-    
-**Scalar types** are any floating point or integral numerical values.  
+
+**Scalar types** are any floating point or integral numerical values.
 The constant 'pi' is also recognized as a scalar.
 
    *Note that floating-point and integers are not interchangeable: if a
    floating point type is expected, one cannot use an integer.*
 
-**String types** are enclosed in double-quotes. 
+**String types** are enclosed in double-quotes.
 
 **Variables** represent the position coordinates in space (x, y, and z) and time
 (t).
@@ -238,7 +238,7 @@ underlying grammar and syntax are relatively fixed.
            total_energy = [ 2.8, ( x  +  y ) <  0.1517 , 2.5 ];
            velocity_x = 0.0;
            velocity_y = 0.0;
-        }     
+        }
      }
 
      Adapt {
@@ -326,4 +326,4 @@ underlying grammar and syntax are relatively fixed.
 ----
 
 2020-04-10: Updated with corrections from Joshua Smith.
-     
+

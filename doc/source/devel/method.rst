@@ -50,7 +50,7 @@ Be mindful, that the following snippet doesn't actually exist anywhere in the co
       Method* cur_method = method_l[method_ind];
 
       for (std::size_t j = 0; j < num_local_blocks; j++){
-        /* do some fancy stuff related to refreshing fields with data from 
+        /* do some fancy stuff related to refreshing fields with data from
            neighboring blocks */
 
         // call compute on the method
@@ -66,7 +66,7 @@ Be mindful, that the following snippet doesn't actually exist anywhere in the co
     }
 
   }
-  
+
 Pitfalls
 ========
 The previous section should have made it clear that a given ``Method`` instance generally has its ``timestep`` and ``compute`` method invoked on one or more ``Block`` per cycle.

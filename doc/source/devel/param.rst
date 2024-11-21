@@ -15,7 +15,7 @@ We are currently in the process of migrating between approaches for accessing th
 Given the large scope of this transition, we decided to gradually migrate between the approaches, rather than try to do it one shot.
 
 * At the time of writing, we have migrated a large number of :cpp:class:`!Method` classes.
-  
+
 * Our intention is to eventually migrate as much as possible to this new approach (e.g. all :cpp:class:`!Method` classes, all :cpp:class:`!Physics` classes, all :cpp:class:`!Initial` classes, etc.).
   Ultimately we would like to remove the :cpp:class:`!Config` and :cpp:class:`!EnzoConfig` classes.
 
@@ -77,7 +77,7 @@ Values associated with parameters can be queried by invoking methods directly pr
 
 Basic API for Accessing Parameters
 ----------------------------------
-   
+
 Both classes define a common set of methods for querying the values associated with the parameters.
 We'll now describe some of the most commonly used methods.
 Consider a reference to a :cpp:class:`!Parameters` instance or a :cpp:class:`!ParametersGroup` instance called ``p``.
@@ -162,7 +162,7 @@ Here's we present (an edited) example of what the class's constructor might look
     : Method(),
       alpha_(p.value_float("alpha",0.7)) // access alpha param & use it to initialize
                                          // this->alpha_ (for the sake of example,
-                                         // it defaults to 0.7 if not specified) 
+                                         // it defaults to 0.7 if not specified)
    {
      // parse the courant value
      double parsed_courant_val = p.value_float("courant", 1.0);
@@ -190,7 +190,7 @@ How to add a new parameter
 ==========================
 
 
-Let’s walk through an example where we want to introduce a new parameter to :cpp:class:`!EnzoMethodHeat`. 
+Let’s walk through an example where we want to introduce a new parameter to :cpp:class:`!EnzoMethodHeat`.
 Suppose we want to add a new parameter called :par:param:`!my_param`.
 The full name of this parameter would be :par:param:`!Method:heat:my_param`.
 
@@ -209,7 +209,7 @@ The steps are as follows:
 2. Modify the pup routine of :cpp:class:`!EnzoMethodHeat` and the ``PUP::able`` migration constructor to properly handle the newly added member-variable
 
 3. Modify the main constructor of :cpp:class:`!EnzoMethodHeat` to initialize ``my_param_`` based on the value parsed from the parameter file.
-   
+
    - The constructor of :cpp:class:`!EnzoMethodHeat` is passed a copy of an instance of :cpp:class:`!ParameterGroup`, in an argument ``p``.
 
    - In the simplest case, you might use one of the methods described :ref:`here <basic-parameter-access-api>` to access the value specified in the parameter-file, and store the result in ``my_param_``.
@@ -369,7 +369,7 @@ A code snippet using our new approach is shown below:
    However, this is mostly unavoidable if we want to gracefully accomodate initialization of multiple instances of the same :cpp:class:`!Method` subclass.
    Hopefully, this page of documentation will help to offset this disadvantage.
 
-   The *only* other alternative is have :cpp:class:`!ParameterGroup` instances "auto-magically" redirect absolute parameter-paths, but I think that will generally be more confusing. 
+   The *only* other alternative is have :cpp:class:`!ParameterGroup` instances "auto-magically" redirect absolute parameter-paths, but I think that will generally be more confusing.
 
 Hypothetical Question: How do I used :cpp:class:`!ParameterGroup` to query the parameter specified to configure some other :cpp:class:`!Method` subclass?
 ---------------------------------------------------------------------------------------------------------------------------------------------------------

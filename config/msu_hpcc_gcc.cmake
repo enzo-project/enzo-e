@@ -15,7 +15,7 @@ if(NOT __processedUserDefaults)
 
   # the minimal set of required flags to successfully compile with this Fortran
   # compiler are handled internally (if those flags don't work, please update
-  # the relevant internal logic rather than specifying them here) 
+  # the relevant internal logic rather than specifying them here)
 
   # in principle we should set flags to specify hardware architecture (so that
   # they can be used with openmp-simd optimizations
