@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -34,6 +34,10 @@
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 /* All symbols defined below should begin with yy or YY, to avoid
    infringing on user name space.  This should be done even for local
    variables, as they might otherwise be expanded by user macros.
@@ -41,14 +45,11 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* Identify Bison output, and Bison version.  */
+#define YYBISON 30802
 
-/* Identify Bison output.  */
-#define YYBISON 1
-
-/* Bison version.  */
-#define YYBISON_VERSION "3.5.1"
+/* Bison version string.  */
+#define YYBISON_VERSION "3.8.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -75,6 +76,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #ifndef __APPLE__
 	#include <malloc.h>
@@ -444,7 +446,7 @@ const char * op_name[] = {
   }
 
 
-#line 448 "build/Cello/parse.tab.c"
+#line 450 "build/Cello/parse.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -467,107 +469,100 @@ const char * op_name[] = {
 #  endif
 # endif
 
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_YY_BUILD_CELLO_PARSE_TAB_H_INCLUDED
-# define YY_YY_BUILD_CELLO_PARSE_TAB_H_INCLUDED
-/* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 1
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
-
-/* Token type.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
-  {
-    STRING = 258,
-    IDENTIFIER = 259,
-    VARIABLE = 260,
-    FLOAT = 261,
-    INTEGER = 262,
-    LOGICAL = 263,
-    LE = 264,
-    GE = 265,
-    NE = 266,
-    EQ = 267,
-    AND = 268,
-    OR = 269,
-    ACOS = 270,
-    ACOSH = 271,
-    APPEND = 272,
-    ASIN = 273,
-    ASINH = 274,
-    ATAN = 275,
-    ATANH = 276,
-    CBRT = 277,
-    CEIL = 278,
-    COS = 279,
-    COSH = 280,
-    ERFC = 281,
-    ERF = 282,
-    EXP = 283,
-    EXPM1 = 284,
-    FABS = 285,
-    FLOOR = 286,
-    J0 = 287,
-    J1 = 288,
-    LGAMMA = 289,
-    LOG10 = 290,
-    LOG1P = 291,
-    LOGB = 292,
-    LOG = 293,
-    PI = 294,
-    SIN = 295,
-    SINH = 296,
-    SQRT = 297,
-    TAN = 298,
-    TANH = 299,
-    Y0 = 300,
-    Y1 = 301,
-    RINT = 302
-  };
-#endif
-
-/* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
+#include "parse.tab.h"
+/* Symbol kind.  */
+enum yysymbol_kind_t
 {
-#line 380 "build/Cello/parse.y"
- 
-  int logical_type;  
-  int integer_type; 
-  double float_type;  
-  char * string_type; 
-  char * group_type;
-  struct node_expr * node_type;
-  
-
-#line 558 "build/Cello/parse.tab.c"
-
+  YYSYMBOL_YYEMPTY = -2,
+  YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
+  YYSYMBOL_YYerror = 1,                    /* error  */
+  YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
+  YYSYMBOL_STRING = 3,                     /* STRING  */
+  YYSYMBOL_IDENTIFIER = 4,                 /* IDENTIFIER  */
+  YYSYMBOL_VARIABLE = 5,                   /* VARIABLE  */
+  YYSYMBOL_FLOAT = 6,                      /* FLOAT  */
+  YYSYMBOL_INTEGER = 7,                    /* INTEGER  */
+  YYSYMBOL_LOGICAL = 8,                    /* LOGICAL  */
+  YYSYMBOL_LE = 9,                         /* LE  */
+  YYSYMBOL_GE = 10,                        /* GE  */
+  YYSYMBOL_NE = 11,                        /* NE  */
+  YYSYMBOL_EQ = 12,                        /* EQ  */
+  YYSYMBOL_AND = 13,                       /* AND  */
+  YYSYMBOL_OR = 14,                        /* OR  */
+  YYSYMBOL_15_ = 15,                       /* '<'  */
+  YYSYMBOL_16_ = 16,                       /* '>'  */
+  YYSYMBOL_17_ = 17,                       /* '+'  */
+  YYSYMBOL_18_ = 18,                       /* '-'  */
+  YYSYMBOL_19_ = 19,                       /* '*'  */
+  YYSYMBOL_20_ = 20,                       /* '/'  */
+  YYSYMBOL_21_ = 21,                       /* '^'  */
+  YYSYMBOL_ACOS = 22,                      /* ACOS  */
+  YYSYMBOL_ACOSH = 23,                     /* ACOSH  */
+  YYSYMBOL_APPEND = 24,                    /* APPEND  */
+  YYSYMBOL_ASIN = 25,                      /* ASIN  */
+  YYSYMBOL_ASINH = 26,                     /* ASINH  */
+  YYSYMBOL_ATAN = 27,                      /* ATAN  */
+  YYSYMBOL_ATANH = 28,                     /* ATANH  */
+  YYSYMBOL_CBRT = 29,                      /* CBRT  */
+  YYSYMBOL_CEIL = 30,                      /* CEIL  */
+  YYSYMBOL_COS = 31,                       /* COS  */
+  YYSYMBOL_COSH = 32,                      /* COSH  */
+  YYSYMBOL_ERFC = 33,                      /* ERFC  */
+  YYSYMBOL_ERF = 34,                       /* ERF  */
+  YYSYMBOL_EXP = 35,                       /* EXP  */
+  YYSYMBOL_EXPM1 = 36,                     /* EXPM1  */
+  YYSYMBOL_FABS = 37,                      /* FABS  */
+  YYSYMBOL_FLOOR = 38,                     /* FLOOR  */
+  YYSYMBOL_J0 = 39,                        /* J0  */
+  YYSYMBOL_J1 = 40,                        /* J1  */
+  YYSYMBOL_LGAMMA = 41,                    /* LGAMMA  */
+  YYSYMBOL_LOG10 = 42,                     /* LOG10  */
+  YYSYMBOL_LOG1P = 43,                     /* LOG1P  */
+  YYSYMBOL_LOGB = 44,                      /* LOGB  */
+  YYSYMBOL_LOG = 45,                       /* LOG  */
+  YYSYMBOL_PI = 46,                        /* PI  */
+  YYSYMBOL_SIN = 47,                       /* SIN  */
+  YYSYMBOL_SINH = 48,                      /* SINH  */
+  YYSYMBOL_SQRT = 49,                      /* SQRT  */
+  YYSYMBOL_TAN = 50,                       /* TAN  */
+  YYSYMBOL_TANH = 51,                      /* TANH  */
+  YYSYMBOL_Y0 = 52,                        /* Y0  */
+  YYSYMBOL_Y1 = 53,                        /* Y1  */
+  YYSYMBOL_RINT = 54,                      /* RINT  */
+  YYSYMBOL_55_ = 55,                       /* '{'  */
+  YYSYMBOL_56_ = 56,                       /* '}'  */
+  YYSYMBOL_57_ = 57,                       /* ';'  */
+  YYSYMBOL_58_ = 58,                       /* '='  */
+  YYSYMBOL_59_ = 59,                       /* '['  */
+  YYSYMBOL_60_ = 60,                       /* ']'  */
+  YYSYMBOL_61_ = 61,                       /* ','  */
+  YYSYMBOL_62_ = 62,                       /* '('  */
+  YYSYMBOL_63_ = 63,                       /* ')'  */
+  YYSYMBOL_YYACCEPT = 64,                  /* $accept  */
+  YYSYMBOL_file = 65,                      /* file  */
+  YYSYMBOL_group = 66,                     /* group  */
+  YYSYMBOL_parameter_group = 67,           /* parameter_group  */
+  YYSYMBOL_parameter_list = 68,            /* parameter_list  */
+  YYSYMBOL_group_name = 69,                /* group_name  */
+  YYSYMBOL_parameter_name = 70,            /* parameter_name  */
+  YYSYMBOL_parameter_assignment = 71,      /* parameter_assignment  */
+  YYSYMBOL_parameter_append = 72,          /* parameter_append  */
+  YYSYMBOL_parameter_value = 73,           /* parameter_value  */
+  YYSYMBOL_list = 74,                      /* list  */
+  YYSYMBOL_existing_list = 75,             /* existing_list  */
+  YYSYMBOL_LIST_BEGIN = 76,                /* LIST_BEGIN  */
+  YYSYMBOL_LIST_APPEND = 77,               /* LIST_APPEND  */
+  YYSYMBOL_LIST_END = 78,                  /* LIST_END  */
+  YYSYMBOL_list_elements = 79,             /* list_elements  */
+  YYSYMBOL_80_1 = 80,                      /* $@1  */
+  YYSYMBOL_cle = 81,                       /* cle  */
+  YYSYMBOL_cse = 82,                       /* cse  */
+  YYSYMBOL_cie = 83,                       /* cie  */
+  YYSYMBOL_vse = 84,                       /* vse  */
+  YYSYMBOL_vle = 85                        /* vle  */
 };
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
-#endif
+typedef enum yysymbol_kind_t yysymbol_kind_t;
 
-
-extern YYSTYPE yylval;
-
-int yyparse (void);
-
-#endif /* !YY_YY_BUILD_CELLO_PARSE_TAB_H_INCLUDED  */
 
 
 
@@ -606,6 +601,18 @@ typedef __INT_LEAST16_TYPE__ yytype_int16;
 typedef int_least16_t yytype_int16;
 #else
 typedef short yytype_int16;
+#endif
+
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
 #endif
 
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
@@ -667,6 +674,7 @@ typedef int yytype_uint16;
 
 #define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
 
+
 /* Stored state numbers (used for stacks). */
 typedef yytype_int16 yy_state_t;
 
@@ -684,6 +692,7 @@ typedef int yy_state_fast_t;
 #  define YY_(Msgid) Msgid
 # endif
 #endif
+
 
 #ifndef YY_ATTRIBUTE_PURE
 # if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
@@ -703,17 +712,23 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
+# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
+# else
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
     _Pragma ("GCC diagnostic push")                                     \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# endif
 # define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
@@ -742,7 +757,7 @@ typedef int yy_state_fast_t;
 
 #define YY_ASSERT(E) ((void) (0 && (E)))
 
-#if ! defined yyoverflow || YYERROR_VERBOSE
+#if !defined yyoverflow
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -807,8 +822,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
-
+#endif /* !defined yyoverflow */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
@@ -884,14 +898,16 @@ union yyalloc
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  347
 
-#define YYUNDEFTOK  2
+/* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   302
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
-#define YYTRANSLATE(YYX)                                                \
-  (0 <= (YYX) && (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+#define YYTRANSLATE(YYX)                                \
+  (0 <= (YYX) && (YYX) <= YYMAXUTOK                     \
+   ? YY_CAST (yysymbol_kind_t, yytranslate[YYX])        \
+   : YYSYMBOL_YYUNDEF)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex.  */
@@ -931,37 +947,44 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   464,   464,   465,   469,   472,   473,   476,   477,   478,
-     479,   480,   481,   482,   483,   487,   492,   495,   499,   503,
-     504,   505,   506,   507,   508,   509,   515,   516,   518,   519,
-     522,   530,   550,   557,   558,   558,   565,   566,   567,   568,
-     569,   570,   571,   572,   573,   574,   578,   579,   580,   581,
-     582,   583,   584,   585,   586,   587,   588,   589,   590,   591,
-     592,   593,   594,   595,   596,   597,   598,   599,   601,   602,
-     603,   604,   605,   606,   607,   608,   609,   610,   611,   612,
-     613,   614,   615,   616,   617,   621,   622,   623,   624,   625,
-     626,   627,   631,   632,   633,   634,   635,   636,   637,   638,
-     639,   640,   641,   642,   643,   644,   645,   646,   647,   648,
-     649,   650,   651,   652,   653,   654,   655,   656,   657,   658,
-     659,   660,   661,   662,   664,   665,   666,   667,   668,   669,
-     670,   671,   672,   673,   674,   675,   676,   677,   678,   679,
-     684,   685,   686,   687,   688,   689,   690,   691,   692,   693,
-     694,   695,   696,   697,   698,   699,   700,   701,   702,   703,
-     704,   705,   706,   707,   708
+       0,   465,   465,   466,   470,   473,   474,   477,   478,   479,
+     480,   481,   482,   483,   484,   488,   493,   496,   500,   504,
+     505,   506,   507,   508,   509,   510,   516,   517,   519,   520,
+     523,   531,   551,   558,   559,   559,   566,   567,   568,   569,
+     570,   571,   572,   573,   574,   575,   579,   580,   581,   582,
+     583,   584,   585,   586,   587,   588,   589,   590,   591,   592,
+     593,   594,   595,   596,   597,   598,   599,   600,   602,   603,
+     604,   605,   606,   607,   608,   609,   610,   611,   612,   613,
+     614,   615,   616,   617,   618,   622,   623,   624,   625,   626,
+     627,   628,   632,   633,   634,   635,   636,   637,   638,   639,
+     640,   641,   642,   643,   644,   645,   646,   647,   648,   649,
+     650,   651,   652,   653,   654,   655,   656,   657,   658,   659,
+     660,   661,   662,   663,   665,   666,   667,   668,   669,   670,
+     671,   672,   673,   674,   675,   676,   677,   678,   679,   680,
+     685,   686,   687,   688,   689,   690,   691,   692,   693,   694,
+     695,   696,   697,   698,   699,   700,   701,   702,   703,   704,
+     705,   706,   707,   708,   709
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+/** Accessing symbol of state STATE.  */
+#define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
+
+#if YYDEBUG || 0
+/* The user-facing name of the symbol whose (internal) number is
+   YYSYMBOL.  No bounds checking.  */
+static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
+
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "STRING", "IDENTIFIER", "VARIABLE",
-  "FLOAT", "INTEGER", "LOGICAL", "LE", "GE", "NE", "EQ", "AND", "OR",
-  "'<'", "'>'", "'+'", "'-'", "'*'", "'/'", "'^'", "ACOS", "ACOSH",
+  "\"end of file\"", "error", "\"invalid token\"", "STRING", "IDENTIFIER",
+  "VARIABLE", "FLOAT", "INTEGER", "LOGICAL", "LE", "GE", "NE", "EQ", "AND",
+  "OR", "'<'", "'>'", "'+'", "'-'", "'*'", "'/'", "'^'", "ACOS", "ACOSH",
   "APPEND", "ASIN", "ASINH", "ATAN", "ATANH", "CBRT", "CEIL", "COS",
   "COSH", "ERFC", "ERF", "EXP", "EXPM1", "FABS", "FLOOR", "J0", "J1",
   "LGAMMA", "LOG10", "LOG1P", "LOGB", "LOG", "PI", "SIN", "SINH", "SQRT",
@@ -972,22 +995,13 @@ static const char *const yytname[] =
   "existing_list", "LIST_BEGIN", "LIST_APPEND", "LIST_END",
   "list_elements", "$@1", "cle", "cse", "cie", "vse", "vle", YY_NULLPTR
 };
-#endif
 
-# ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
+static const char *
+yysymbol_name (yysymbol_kind_t yysymbol)
 {
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,    60,    62,    43,    45,    42,
-      47,    94,   270,   271,   272,   273,   274,   275,   276,   277,
-     278,   279,   280,   281,   282,   283,   284,   285,   286,   287,
-     288,   289,   290,   291,   292,   293,   294,   295,   296,   297,
-     298,   299,   300,   301,   302,   123,   125,    59,    61,    91,
-      93,    44,    40,    41
-};
-# endif
+  return yytname[yysymbol];
+}
+#endif
 
 #define YYPACT_NINF (-66)
 
@@ -999,8 +1013,8 @@ static const yytype_int16 yytoknum[] =
 #define yytable_value_is_error(Yyn) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
      -66,    84,   -66,   -66,   -66,   -38,     4,   -66,    31,    71,
@@ -1040,9 +1054,9 @@ static const yytype_int16 yypact[] =
      -66,   -66,   -66,   -66,   -66,   -66,   -66
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
        2,     0,     1,    15,     3,     0,     0,     4,    16,     9,
@@ -1082,7 +1096,7 @@ static const yytype_uint8 yydefact[] =
       80,   136,    81,   137,    82,   138,    35
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
      -66,   -66,   144,   -66,   -66,   -66,   -66,   317,   318,   -20,
@@ -1090,17 +1104,17 @@ static const yytype_int16 yypgoto[] =
      106,     0
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int16 yydefgoto[] =
 {
-      -1,     1,     4,     7,    10,     5,    11,    12,    13,    76,
+       0,     1,     4,     7,    10,     5,    11,    12,    13,    76,
       67,    25,    68,    26,    77,    78,   346,    69,    70,    71,
       72,    73
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
      112,    66,   118,   119,   120,   121,   122,   123,     8,    30,
@@ -1331,8 +1345,8 @@ static const yytype_int16 yycheck[] =
       -1,    -1,    -1,    63,    -1,    -1,    -1,    -1,    63
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
        0,    65,     0,     4,    66,    69,    55,    67,     4,    66,
@@ -1372,7 +1386,7 @@ static const yytype_int8 yystos[] =
       63,    63,    63,    63,    63,    63,    80
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    64,    65,    65,    66,    67,    67,    68,    68,    68,
@@ -1394,7 +1408,7 @@ static const yytype_int8 yyr1[] =
       85,    85,    85,    85,    85
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     2,     2,     3,     4,     1,     1,     1,
@@ -1417,14 +1431,15 @@ static const yytype_int8 yyr2[] =
 };
 
 
+enum { YYENOMEM = -2 };
+
 #define yyerrok         (yyerrstatus = 0)
 #define yyclearin       (yychar = YYEMPTY)
-#define YYEMPTY         (-2)
-#define YYEOF           0
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
+#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
@@ -1446,10 +1461,9 @@ static const yytype_int8 yyr2[] =
       }                                                           \
   while (0)
 
-/* Error token number */
-#define YYTERROR        1
-#define YYERRCODE       256
-
+/* Backward compatibility with an undocumented macro.
+   Use YYerror or YYUNDEF. */
+#define YYERRCODE YYUNDEF
 
 
 /* Enable debugging if requested.  */
@@ -1466,19 +1480,16 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
-#ifndef YY_LOCATION_PRINT
-# define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-#endif
 
 
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)                    \
+
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
 do {                                                                      \
   if (yydebug)                                                            \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Type, Value); \
+                  Kind, Value); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
@@ -1489,18 +1500,15 @@ do {                                                                      \
 `-----------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_value_print (FILE *yyo,
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep)
 {
   FILE *yyoutput = yyo;
-  YYUSE (yyoutput);
+  YY_USE (yyoutput);
   if (!yyvaluep)
     return;
-# ifdef YYPRINT
-  if (yytype < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yytype], *yyvaluep);
-# endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yytype);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1510,12 +1518,13 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
 `---------------------------*/
 
 static void
-yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
+yy_symbol_print (FILE *yyo,
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep)
 {
   YYFPRINTF (yyo, "%s %s (",
-             yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
+             yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
 
-  yy_symbol_value_print (yyo, yytype, yyvaluep);
+  yy_symbol_value_print (yyo, yykind, yyvaluep);
   YYFPRINTF (yyo, ")");
 }
 
@@ -1548,7 +1557,8 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp,
+                 int yyrule)
 {
   int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -1560,9 +1570,8 @@ yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule)
     {
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr,
-                       yystos[+yyssp[yyi + 1 - yynrhs]],
-                       &yyvsp[(yyi + 1) - (yynrhs)]
-                                              );
+                       YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
+                       &yyvsp[(yyi + 1) - (yynrhs)]);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -1577,8 +1586,8 @@ do {                                    \
    multiple parsers can coexist.  */
 int yydebug;
 #else /* !YYDEBUG */
-# define YYDPRINTF(Args)
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
+# define YYDPRINTF(Args) ((void) 0)
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
 #endif /* !YYDEBUG */
@@ -1601,265 +1610,38 @@ int yydebug;
 #endif
 
 
-#if YYERROR_VERBOSE
 
-# ifndef yystrlen
-#  if defined __GLIBC__ && defined _STRING_H
-#   define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
-#  else
-/* Return the length of YYSTR.  */
-static YYPTRDIFF_T
-yystrlen (const char *yystr)
-{
-  YYPTRDIFF_T yylen;
-  for (yylen = 0; yystr[yylen]; yylen++)
-    continue;
-  return yylen;
-}
-#  endif
-# endif
 
-# ifndef yystpcpy
-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
-#   define yystpcpy stpcpy
-#  else
-/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-   YYDEST.  */
-static char *
-yystpcpy (char *yydest, const char *yysrc)
-{
-  char *yyd = yydest;
-  const char *yys = yysrc;
 
-  while ((*yyd++ = *yys++) != '\0')
-    continue;
-
-  return yyd - 1;
-}
-#  endif
-# endif
-
-# ifndef yytnamerr
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
-static YYPTRDIFF_T
-yytnamerr (char *yyres, const char *yystr)
-{
-  if (*yystr == '"')
-    {
-      YYPTRDIFF_T yyn = 0;
-      char const *yyp = yystr;
-
-      for (;;)
-        switch (*++yyp)
-          {
-          case '\'':
-          case ',':
-            goto do_not_strip_quotes;
-
-          case '\\':
-            if (*++yyp != '\\')
-              goto do_not_strip_quotes;
-            else
-              goto append;
-
-          append:
-          default:
-            if (yyres)
-              yyres[yyn] = *yyp;
-            yyn++;
-            break;
-
-          case '"':
-            if (yyres)
-              yyres[yyn] = '\0';
-            return yyn;
-          }
-    do_not_strip_quotes: ;
-    }
-
-  if (yyres)
-    return yystpcpy (yyres, yystr) - yyres;
-  else
-    return yystrlen (yystr);
-}
-# endif
-
-/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
-   about the unexpected token YYTOKEN for the state stack whose top is
-   YYSSP.
-
-   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
-   not large enough to hold the message.  In that case, also set
-   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
-   required number of bytes is too large to store.  */
-static int
-yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
-                yy_state_t *yyssp, int yytoken)
-{
-  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-  /* Internationalized format string. */
-  const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat: reported tokens (one for the "unexpected",
-     one per "expected"). */
-  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-  /* Actual size of YYARG. */
-  int yycount = 0;
-  /* Cumulated lengths of YYARG.  */
-  YYPTRDIFF_T yysize = 0;
-
-  /* There are many possibilities here to consider:
-     - If this state is a consistent state with a default action, then
-       the only way this function was invoked is if the default action
-       is an error action.  In that case, don't check for expected
-       tokens because there are none.
-     - The only way there can be no lookahead present (in yychar) is if
-       this state is a consistent state with a default action.  Thus,
-       detecting the absence of a lookahead is sufficient to determine
-       that there is no unexpected or expected token to report.  In that
-       case, just report a simple "syntax error".
-     - Don't assume there isn't a lookahead just because this state is a
-       consistent state with a default action.  There might have been a
-       previous inconsistent state, consistent state with a non-default
-       action, or user semantic action that manipulated yychar.
-     - Of course, the expected token list depends on states to have
-       correct lookahead information, and it depends on the parser not
-       to perform extra reductions after fetching a lookahead from the
-       scanner and before detecting a syntax error.  Thus, state merging
-       (from LALR or IELR) and default reductions corrupt the expected
-       token list.  However, the list is correct for canonical LR with
-       one exception: it will still contain any token that will not be
-       accepted due to an error action in a later state.
-  */
-  if (yytoken != YYEMPTY)
-    {
-      int yyn = yypact[+*yyssp];
-      YYPTRDIFF_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
-      yysize = yysize0;
-      yyarg[yycount++] = yytname[yytoken];
-      if (!yypact_value_is_default (yyn))
-        {
-          /* Start YYX at -YYN if negative to avoid negative indexes in
-             YYCHECK.  In other words, skip the first -YYN actions for
-             this state because they are default actions.  */
-          int yyxbegin = yyn < 0 ? -yyn : 0;
-          /* Stay within bounds of both yycheck and yytname.  */
-          int yychecklim = YYLAST - yyn + 1;
-          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-          int yyx;
-
-          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
-                && !yytable_value_is_error (yytable[yyx + yyn]))
-              {
-                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                  {
-                    yycount = 1;
-                    yysize = yysize0;
-                    break;
-                  }
-                yyarg[yycount++] = yytname[yyx];
-                {
-                  YYPTRDIFF_T yysize1
-                    = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
-                  if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
-                    yysize = yysize1;
-                  else
-                    return 2;
-                }
-              }
-        }
-    }
-
-  switch (yycount)
-    {
-# define YYCASE_(N, S)                      \
-      case N:                               \
-        yyformat = S;                       \
-      break
-    default: /* Avoid compiler warnings. */
-      YYCASE_(0, YY_("syntax error"));
-      YYCASE_(1, YY_("syntax error, unexpected %s"));
-      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
-# undef YYCASE_
-    }
-
-  {
-    /* Don't count the "%s"s in the final size, but reserve room for
-       the terminator.  */
-    YYPTRDIFF_T yysize1 = yysize + (yystrlen (yyformat) - 2 * yycount) + 1;
-    if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
-      yysize = yysize1;
-    else
-      return 2;
-  }
-
-  if (*yymsg_alloc < yysize)
-    {
-      *yymsg_alloc = 2 * yysize;
-      if (! (yysize <= *yymsg_alloc
-             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
-        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
-      return 1;
-    }
-
-  /* Avoid sprintf, as that infringes on the user's name space.
-     Don't have undefined behavior even if the translation
-     produced a string with the wrong number of "%s"s.  */
-  {
-    char *yyp = *yymsg;
-    int yyi = 0;
-    while ((*yyp = *yyformat) != '\0')
-      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
-        {
-          yyp += yytnamerr (yyp, yyarg[yyi++]);
-          yyformat += 2;
-        }
-      else
-        {
-          ++yyp;
-          ++yyformat;
-        }
-  }
-  return 0;
-}
-#endif /* YYERROR_VERBOSE */
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
+yydestruct (const char *yymsg,
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep)
 {
-  YYUSE (yyvaluep);
+  YY_USE (yyvaluep);
   if (!yymsg)
     yymsg = "Deleting";
-  YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
+  YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yytype);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
-
-
-/* The lookahead symbol.  */
+/* Lookahead token kind.  */
 int yychar;
 
 /* The semantic value of the lookahead symbol.  */
 YYSTYPE yylval;
 /* Number of syntax errors so far.  */
 int yynerrs;
+
+
 
 
 /*----------.
@@ -1869,43 +1651,36 @@ int yynerrs;
 int
 yyparse (void)
 {
-    yy_state_fast_t yystate;
+    yy_state_fast_t yystate = 0;
     /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
+    int yyerrstatus = 0;
 
-    /* The stacks and their tools:
-       'yyss': related to states.
-       'yyvs': related to semantic values.
-
-       Refer to the stacks through separate pointers, to allow yyoverflow
+    /* Refer to the stacks through separate pointers, to allow yyoverflow
        to reallocate them elsewhere.  */
 
-    /* The state stack.  */
+    /* Their size.  */
+    YYPTRDIFF_T yystacksize = YYINITDEPTH;
+
+    /* The state stack: array, bottom, top.  */
     yy_state_t yyssa[YYINITDEPTH];
-    yy_state_t *yyss;
-    yy_state_t *yyssp;
+    yy_state_t *yyss = yyssa;
+    yy_state_t *yyssp = yyss;
 
-    /* The semantic value stack.  */
+    /* The semantic value stack: array, bottom, top.  */
     YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
-
-    YYPTRDIFF_T yystacksize;
+    YYSTYPE *yyvs = yyvsa;
+    YYSTYPE *yyvsp = yyvs;
 
   int yyn;
+  /* The return value of yyparse.  */
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead symbol kind.  */
+  yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
 
-#if YYERROR_VERBOSE
-  /* Buffer for error messages, and its allocated size.  */
-  char yymsgbuf[128];
-  char *yymsg = yymsgbuf;
-  YYPTRDIFF_T yymsg_alloc = sizeof yymsgbuf;
-#endif
+
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
 
@@ -1913,16 +1688,10 @@ yyparse (void)
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  yyssp = yyss = yyssa;
-  yyvsp = yyvs = yyvsa;
-  yystacksize = YYINITDEPTH;
-
   YYDPRINTF ((stderr, "Starting parse\n"));
 
-  yystate = 0;
-  yyerrstatus = 0;
-  yynerrs = 0;
   yychar = YYEMPTY; /* Cause a token to be read.  */
+
   goto yysetstate;
 
 
@@ -1944,10 +1713,11 @@ yysetstate:
   YY_IGNORE_USELESS_CAST_BEGIN
   *yyssp = YY_CAST (yy_state_t, yystate);
   YY_IGNORE_USELESS_CAST_END
+  YY_STACK_PRINT (yyss, yyssp);
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    goto yyexhaustedlab;
+    YYNOMEM;
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
@@ -1975,7 +1745,7 @@ yysetstate:
 # else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
+        YYNOMEM;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
@@ -1986,10 +1756,10 @@ yysetstate:
           YY_CAST (union yyalloc *,
                    YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          goto yyexhaustedlab;
+          YYNOMEM;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
-# undef YYSTACK_RELOCATE
+#  undef YYSTACK_RELOCATE
         if (yyss1 != yyssa)
           YYSTACK_FREE (yyss1);
       }
@@ -2007,6 +1777,7 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -2028,17 +1799,28 @@ yybackup:
 
   /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
+  /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
   if (yychar == YYEMPTY)
     {
-      YYDPRINTF ((stderr, "Reading a token: "));
+      YYDPRINTF ((stderr, "Reading a token\n"));
       yychar = yylex ();
     }
 
   if (yychar <= YYEOF)
     {
-      yychar = yytoken = YYEOF;
+      yychar = YYEOF;
+      yytoken = YYSYMBOL_YYEOF;
       YYDPRINTF ((stderr, "Now at end of input.\n"));
+    }
+  else if (yychar == YYerror)
+    {
+      /* The scanner already issued an error message, process directly
+         to error recovery.  But do not keep the error token as
+         lookahead, it is too special and may lead us to an endless
+         loop in error recovery. */
+      yychar = YYUNDEF;
+      yytoken = YYSYMBOL_YYerror;
+      goto yyerrlab1;
     }
   else
     {
@@ -2108,183 +1890,183 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 3:
-#line 465 "build/Cello/parse.y"
+  case 3: /* file: file group  */
+#line 466 "build/Cello/parse.y"
               { }
-#line 2115 "build/Cello/parse.tab.c"
+#line 1897 "build/Cello/parse.tab.c"
     break;
 
-  case 4:
-#line 469 "build/Cello/parse.y"
+  case 4: /* group: group_name parameter_group  */
+#line 470 "build/Cello/parse.y"
                             {  }
-#line 2121 "build/Cello/parse.tab.c"
+#line 1903 "build/Cello/parse.tab.c"
     break;
 
-  case 5:
-#line 472 "build/Cello/parse.y"
-                                 { current_group[--current_group_level] = 0; }
-#line 2127 "build/Cello/parse.tab.c"
-    break;
-
-  case 6:
+  case 5: /* parameter_group: '{' parameter_list '}'  */
 #line 473 "build/Cello/parse.y"
                                  { current_group[--current_group_level] = 0; }
-#line 2133 "build/Cello/parse.tab.c"
+#line 1909 "build/Cello/parse.tab.c"
     break;
 
-  case 7:
-#line 476 "build/Cello/parse.y"
-                                         {  }
-#line 2139 "build/Cello/parse.tab.c"
+  case 6: /* parameter_group: '{' parameter_list ';' '}'  */
+#line 474 "build/Cello/parse.y"
+                                 { current_group[--current_group_level] = 0; }
+#line 1915 "build/Cello/parse.tab.c"
     break;
 
-  case 8:
+  case 7: /* parameter_list: parameter_assignment  */
 #line 477 "build/Cello/parse.y"
-                                     {  }
-#line 2145 "build/Cello/parse.tab.c"
-    break;
-
-  case 9:
-#line 478 "build/Cello/parse.y"
-                          {  }
-#line 2151 "build/Cello/parse.tab.c"
-    break;
-
-  case 10:
-#line 479 "build/Cello/parse.y"
-                              {  }
-#line 2157 "build/Cello/parse.tab.c"
-    break;
-
-  case 11:
-#line 480 "build/Cello/parse.y"
                                          {  }
-#line 2163 "build/Cello/parse.tab.c"
+#line 1921 "build/Cello/parse.tab.c"
     break;
 
-  case 12:
-#line 481 "build/Cello/parse.y"
+  case 8: /* parameter_list: parameter_append  */
+#line 478 "build/Cello/parse.y"
                                      {  }
-#line 2169 "build/Cello/parse.tab.c"
+#line 1927 "build/Cello/parse.tab.c"
     break;
 
-  case 13:
-#line 482 "build/Cello/parse.y"
+  case 9: /* parameter_list: group  */
+#line 479 "build/Cello/parse.y"
                           {  }
-#line 2175 "build/Cello/parse.tab.c"
+#line 1933 "build/Cello/parse.tab.c"
     break;
 
-  case 14:
-#line 483 "build/Cello/parse.y"
+  case 10: /* parameter_list: group ';'  */
+#line 480 "build/Cello/parse.y"
                               {  }
-#line 2181 "build/Cello/parse.tab.c"
+#line 1939 "build/Cello/parse.tab.c"
     break;
 
-  case 15:
-#line 487 "build/Cello/parse.y"
+  case 11: /* parameter_list: parameter_list parameter_assignment  */
+#line 481 "build/Cello/parse.y"
+                                         {  }
+#line 1945 "build/Cello/parse.tab.c"
+    break;
+
+  case 12: /* parameter_list: parameter_list parameter_append  */
+#line 482 "build/Cello/parse.y"
+                                     {  }
+#line 1951 "build/Cello/parse.tab.c"
+    break;
+
+  case 13: /* parameter_list: parameter_list group  */
+#line 483 "build/Cello/parse.y"
+                          {  }
+#line 1957 "build/Cello/parse.tab.c"
+    break;
+
+  case 14: /* parameter_list: parameter_list group ';'  */
+#line 484 "build/Cello/parse.y"
+                              {  }
+#line 1963 "build/Cello/parse.tab.c"
+    break;
+
+  case 15: /* group_name: IDENTIFIER  */
+#line 488 "build/Cello/parse.y"
              {
   current_group[current_group_level++] = (yyvsp[0].string_type); 
 }
-#line 2189 "build/Cello/parse.tab.c"
+#line 1971 "build/Cello/parse.tab.c"
     break;
 
-  case 16:
-#line 492 "build/Cello/parse.y"
+  case 16: /* parameter_name: IDENTIFIER  */
+#line 493 "build/Cello/parse.y"
              { current_parameter = (yyvsp[0].string_type);}
-#line 2195 "build/Cello/parse.tab.c"
+#line 1977 "build/Cello/parse.tab.c"
     break;
 
-  case 17:
-#line 495 "build/Cello/parse.y"
+  case 17: /* parameter_assignment: parameter_name '=' parameter_value ';'  */
+#line 496 "build/Cello/parse.y"
                                        { new_parameter(); }
-#line 2201 "build/Cello/parse.tab.c"
+#line 1983 "build/Cello/parse.tab.c"
     break;
 
-  case 18:
-#line 499 "build/Cello/parse.y"
+  case 18: /* parameter_append: parameter_name APPEND existing_list ';'  */
+#line 500 "build/Cello/parse.y"
                                         { new_parameter(); }
-#line 2207 "build/Cello/parse.tab.c"
+#line 1989 "build/Cello/parse.tab.c"
     break;
 
-  case 19:
-#line 503 "build/Cello/parse.y"
-       { current_type = enum_parameter_string;       yylval.string_type = (yyvsp[0].string_type); }
-#line 2213 "build/Cello/parse.tab.c"
-    break;
-
-  case 20:
+  case 19: /* parameter_value: STRING  */
 #line 504 "build/Cello/parse.y"
-       { current_type = enum_parameter_integer;      yylval.integer_type = (yyvsp[0].integer_type);}
-#line 2219 "build/Cello/parse.tab.c"
+       { current_type = enum_parameter_string;       yylval.string_type = (yyvsp[0].string_type); }
+#line 1995 "build/Cello/parse.tab.c"
     break;
 
-  case 21:
+  case 20: /* parameter_value: cie  */
 #line 505 "build/Cello/parse.y"
-       { current_type = enum_parameter_float;        yylval.float_type = (yyvsp[0].float_type);}
-#line 2225 "build/Cello/parse.tab.c"
+       { current_type = enum_parameter_integer;      yylval.integer_type = (yyvsp[0].integer_type);}
+#line 2001 "build/Cello/parse.tab.c"
     break;
 
-  case 22:
+  case 21: /* parameter_value: cse  */
 #line 506 "build/Cello/parse.y"
-       { current_type = enum_parameter_logical;      yylval.logical_type = (yyvsp[0].logical_type); }
-#line 2231 "build/Cello/parse.tab.c"
+       { current_type = enum_parameter_float;        yylval.float_type = (yyvsp[0].float_type);}
+#line 2007 "build/Cello/parse.tab.c"
     break;
 
-  case 23:
+  case 22: /* parameter_value: cle  */
 #line 507 "build/Cello/parse.y"
-       { current_type = enum_parameter_float_expr;   yylval.node_type = (yyvsp[0].node_type); }
-#line 2237 "build/Cello/parse.tab.c"
+       { current_type = enum_parameter_logical;      yylval.logical_type = (yyvsp[0].logical_type); }
+#line 2013 "build/Cello/parse.tab.c"
     break;
 
-  case 24:
+  case 23: /* parameter_value: vse  */
 #line 508 "build/Cello/parse.y"
-       { current_type = enum_parameter_logical_expr; yylval.node_type = (yyvsp[0].node_type); }
-#line 2243 "build/Cello/parse.tab.c"
+       { current_type = enum_parameter_float_expr;   yylval.node_type = (yyvsp[0].node_type); }
+#line 2019 "build/Cello/parse.tab.c"
     break;
 
-  case 25:
+  case 24: /* parameter_value: vle  */
 #line 509 "build/Cello/parse.y"
+       { current_type = enum_parameter_logical_expr; yylval.node_type = (yyvsp[0].node_type); }
+#line 2025 "build/Cello/parse.tab.c"
+    break;
+
+  case 25: /* parameter_value: list  */
+#line 510 "build/Cello/parse.y"
        { current_type = enum_parameter_list; }
-#line 2249 "build/Cello/parse.tab.c"
+#line 2031 "build/Cello/parse.tab.c"
     break;
 
-  case 26:
-#line 515 "build/Cello/parse.y"
-                                        {  }
-#line 2255 "build/Cello/parse.tab.c"
-    break;
-
-  case 27:
+  case 26: /* list: LIST_BEGIN list_elements LIST_END  */
 #line 516 "build/Cello/parse.y"
+                                        {  }
+#line 2037 "build/Cello/parse.tab.c"
+    break;
+
+  case 27: /* list: LIST_BEGIN LIST_END  */
+#line 517 "build/Cello/parse.y"
                           {  }
-#line 2261 "build/Cello/parse.tab.c"
+#line 2043 "build/Cello/parse.tab.c"
     break;
 
-  case 28:
-#line 518 "build/Cello/parse.y"
-                                                  {  }
-#line 2267 "build/Cello/parse.tab.c"
-    break;
-
-  case 29:
+  case 28: /* existing_list: LIST_APPEND list_elements LIST_END  */
 #line 519 "build/Cello/parse.y"
-                           {  }
-#line 2273 "build/Cello/parse.tab.c"
+                                                  {  }
+#line 2049 "build/Cello/parse.tab.c"
     break;
 
-  case 30:
-#line 522 "build/Cello/parse.y"
+  case 29: /* existing_list: LIST_APPEND LIST_END  */
+#line 520 "build/Cello/parse.y"
+                           {  }
+#line 2055 "build/Cello/parse.tab.c"
+    break;
+
+  case 30: /* LIST_BEGIN: '['  */
+#line 523 "build/Cello/parse.y"
      { 
    struct param_struct * p = new_param_sentinel();
    p->list_value = param_curr; /* save param_curr */
    new_param_list(p);
    param_curr = p;
  }
-#line 2284 "build/Cello/parse.tab.c"
+#line 2066 "build/Cello/parse.tab.c"
     break;
 
-  case 31:
-#line 530 "build/Cello/parse.y"
+  case 31: /* LIST_APPEND: '['  */
+#line 531 "build/Cello/parse.y"
      { 
   
    struct param_struct * p = find_param();
@@ -2303,812 +2085,812 @@ yyreduce:
      param_curr = p;
    }
  }
-#line 2307 "build/Cello/parse.tab.c"
+#line 2089 "build/Cello/parse.tab.c"
     break;
 
-  case 32:
-#line 550 "build/Cello/parse.y"
+  case 32: /* LIST_END: ']'  */
+#line 551 "build/Cello/parse.y"
     {
   current_type = enum_parameter_list;
   param_curr = param_curr->list_value; /* restore param_curr */ 
 }
-#line 2316 "build/Cello/parse.tab.c"
+#line 2098 "build/Cello/parse.tab.c"
     break;
 
-  case 33:
-#line 557 "build/Cello/parse.y"
-                                         { new_parameter(); }
-#line 2322 "build/Cello/parse.tab.c"
-    break;
-
-  case 34:
+  case 33: /* list_elements: parameter_value  */
 #line 558 "build/Cello/parse.y"
                                          { new_parameter(); }
-#line 2328 "build/Cello/parse.tab.c"
+#line 2104 "build/Cello/parse.tab.c"
     break;
 
-  case 35:
-#line 560 "build/Cello/parse.y"
+  case 34: /* $@1: %empty  */
+#line 559 "build/Cello/parse.y"
+                                         { new_parameter(); }
+#line 2110 "build/Cello/parse.tab.c"
+    break;
+
+  case 35: /* list_elements: list_elements ',' parameter_value $@1  */
+#line 561 "build/Cello/parse.y"
 { }
-#line 2334 "build/Cello/parse.tab.c"
+#line 2116 "build/Cello/parse.tab.c"
     break;
 
-  case 36:
-#line 565 "build/Cello/parse.y"
-            { (yyval.logical_type) = (yyvsp[-1].logical_type); }
-#line 2340 "build/Cello/parse.tab.c"
-    break;
-
-  case 37:
+  case 36: /* cle: '(' cle ')'  */
 #line 566 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].float_type) <= (yyvsp[0].float_type); }
-#line 2346 "build/Cello/parse.tab.c"
+            { (yyval.logical_type) = (yyvsp[-1].logical_type); }
+#line 2122 "build/Cello/parse.tab.c"
     break;
 
-  case 38:
+  case 37: /* cle: cse LE cse  */
 #line 567 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].float_type) >= (yyvsp[0].float_type); }
-#line 2352 "build/Cello/parse.tab.c"
+               { (yyval.logical_type) = (yyvsp[-2].float_type) <= (yyvsp[0].float_type); }
+#line 2128 "build/Cello/parse.tab.c"
     break;
 
-  case 39:
+  case 38: /* cle: cse GE cse  */
 #line 568 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].float_type) <  (yyvsp[0].float_type); }
-#line 2358 "build/Cello/parse.tab.c"
+               { (yyval.logical_type) = (yyvsp[-2].float_type) >= (yyvsp[0].float_type); }
+#line 2134 "build/Cello/parse.tab.c"
     break;
 
-  case 40:
+  case 39: /* cle: cse '<' cse  */
 #line 569 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].float_type) >  (yyvsp[0].float_type); }
-#line 2364 "build/Cello/parse.tab.c"
+               { (yyval.logical_type) = (yyvsp[-2].float_type) <  (yyvsp[0].float_type); }
+#line 2140 "build/Cello/parse.tab.c"
     break;
 
-  case 41:
+  case 40: /* cle: cse '>' cse  */
 #line 570 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].float_type) == (yyvsp[0].float_type); }
-#line 2370 "build/Cello/parse.tab.c"
+               { (yyval.logical_type) = (yyvsp[-2].float_type) >  (yyvsp[0].float_type); }
+#line 2146 "build/Cello/parse.tab.c"
     break;
 
-  case 42:
+  case 41: /* cle: cse EQ cse  */
 #line 571 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].float_type) != (yyvsp[0].float_type); }
-#line 2376 "build/Cello/parse.tab.c"
+               { (yyval.logical_type) = (yyvsp[-2].float_type) == (yyvsp[0].float_type); }
+#line 2152 "build/Cello/parse.tab.c"
     break;
 
-  case 43:
+  case 42: /* cle: cse NE cse  */
 #line 572 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].logical_type) || (yyvsp[0].logical_type); }
-#line 2382 "build/Cello/parse.tab.c"
+               { (yyval.logical_type) = (yyvsp[-2].float_type) != (yyvsp[0].float_type); }
+#line 2158 "build/Cello/parse.tab.c"
     break;
 
-  case 44:
+  case 43: /* cle: cle OR cle  */
 #line 573 "build/Cello/parse.y"
-               { (yyval.logical_type) = (yyvsp[-2].logical_type) && (yyvsp[0].logical_type); }
-#line 2388 "build/Cello/parse.tab.c"
+               { (yyval.logical_type) = (yyvsp[-2].logical_type) || (yyvsp[0].logical_type); }
+#line 2164 "build/Cello/parse.tab.c"
     break;
 
-  case 45:
+  case 44: /* cle: cle AND cle  */
 #line 574 "build/Cello/parse.y"
+               { (yyval.logical_type) = (yyvsp[-2].logical_type) && (yyvsp[0].logical_type); }
+#line 2170 "build/Cello/parse.tab.c"
+    break;
+
+  case 45: /* cle: LOGICAL  */
+#line 575 "build/Cello/parse.y"
            { (yyval.logical_type) = (yyvsp[0].logical_type); }
-#line 2394 "build/Cello/parse.tab.c"
+#line 2176 "build/Cello/parse.tab.c"
     break;
 
-  case 46:
-#line 578 "build/Cello/parse.y"
-             { (yyval.float_type) = (yyvsp[-1].float_type); }
-#line 2400 "build/Cello/parse.tab.c"
-    break;
-
-  case 47:
+  case 46: /* cse: '(' cse ')'  */
 #line 579 "build/Cello/parse.y"
-               { (yyval.float_type) = (yyvsp[-2].float_type) + (yyvsp[0].float_type);}
-#line 2406 "build/Cello/parse.tab.c"
+             { (yyval.float_type) = (yyvsp[-1].float_type); }
+#line 2182 "build/Cello/parse.tab.c"
     break;
 
-  case 48:
+  case 47: /* cse: cse '+' cse  */
 #line 580 "build/Cello/parse.y"
-               { (yyval.float_type) = (yyvsp[-2].float_type) - (yyvsp[0].float_type);}
-#line 2412 "build/Cello/parse.tab.c"
+               { (yyval.float_type) = (yyvsp[-2].float_type) + (yyvsp[0].float_type);}
+#line 2188 "build/Cello/parse.tab.c"
     break;
 
-  case 49:
+  case 48: /* cse: cse '-' cse  */
 #line 581 "build/Cello/parse.y"
-               { (yyval.float_type) = (yyvsp[-2].float_type) * (yyvsp[0].float_type);}
-#line 2418 "build/Cello/parse.tab.c"
+               { (yyval.float_type) = (yyvsp[-2].float_type) - (yyvsp[0].float_type);}
+#line 2194 "build/Cello/parse.tab.c"
     break;
 
-  case 50:
+  case 49: /* cse: cse '*' cse  */
 #line 582 "build/Cello/parse.y"
-               { (yyval.float_type) = (yyvsp[-2].float_type) / (yyvsp[0].float_type);}
-#line 2424 "build/Cello/parse.tab.c"
+               { (yyval.float_type) = (yyvsp[-2].float_type) * (yyvsp[0].float_type);}
+#line 2200 "build/Cello/parse.tab.c"
     break;
 
-  case 51:
+  case 50: /* cse: cse '/' cse  */
 #line 583 "build/Cello/parse.y"
-               { (yyval.float_type) = pow((double)(yyvsp[-2].float_type), (double)(yyvsp[0].float_type)); }
-#line 2430 "build/Cello/parse.tab.c"
+               { (yyval.float_type) = (yyvsp[-2].float_type) / (yyvsp[0].float_type);}
+#line 2206 "build/Cello/parse.tab.c"
     break;
 
-  case 52:
+  case 51: /* cse: cse '^' cse  */
 #line 584 "build/Cello/parse.y"
-                   { (yyval.float_type) = acos((yyvsp[-1].float_type)); }
-#line 2436 "build/Cello/parse.tab.c"
+               { (yyval.float_type) = pow((double)(yyvsp[-2].float_type), (double)(yyvsp[0].float_type)); }
+#line 2212 "build/Cello/parse.tab.c"
     break;
 
-  case 53:
+  case 52: /* cse: ACOS '(' cse ')'  */
 #line 585 "build/Cello/parse.y"
-                    { (yyval.float_type) = acosh((yyvsp[-1].float_type)); }
-#line 2442 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = acos((yyvsp[-1].float_type)); }
+#line 2218 "build/Cello/parse.tab.c"
     break;
 
-  case 54:
+  case 53: /* cse: ACOSH '(' cse ')'  */
 #line 586 "build/Cello/parse.y"
-                   { (yyval.float_type) = asin((yyvsp[-1].float_type)); }
-#line 2448 "build/Cello/parse.tab.c"
+                    { (yyval.float_type) = acosh((yyvsp[-1].float_type)); }
+#line 2224 "build/Cello/parse.tab.c"
     break;
 
-  case 55:
+  case 54: /* cse: ASIN '(' cse ')'  */
 #line 587 "build/Cello/parse.y"
-                    { (yyval.float_type) = asinh((yyvsp[-1].float_type)); }
-#line 2454 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = asin((yyvsp[-1].float_type)); }
+#line 2230 "build/Cello/parse.tab.c"
     break;
 
-  case 56:
+  case 55: /* cse: ASINH '(' cse ')'  */
 #line 588 "build/Cello/parse.y"
-                   { (yyval.float_type) = atan((yyvsp[-1].float_type)); }
-#line 2460 "build/Cello/parse.tab.c"
+                    { (yyval.float_type) = asinh((yyvsp[-1].float_type)); }
+#line 2236 "build/Cello/parse.tab.c"
     break;
 
-  case 57:
+  case 56: /* cse: ATAN '(' cse ')'  */
 #line 589 "build/Cello/parse.y"
-                    { (yyval.float_type) = atanh((yyvsp[-1].float_type)); }
-#line 2466 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = atan((yyvsp[-1].float_type)); }
+#line 2242 "build/Cello/parse.tab.c"
     break;
 
-  case 58:
+  case 57: /* cse: ATANH '(' cse ')'  */
 #line 590 "build/Cello/parse.y"
-                   { (yyval.float_type) = cbrt((yyvsp[-1].float_type)); }
-#line 2472 "build/Cello/parse.tab.c"
+                    { (yyval.float_type) = atanh((yyvsp[-1].float_type)); }
+#line 2248 "build/Cello/parse.tab.c"
     break;
 
-  case 59:
+  case 58: /* cse: CBRT '(' cse ')'  */
 #line 591 "build/Cello/parse.y"
-                   { (yyval.float_type) = ceil((yyvsp[-1].float_type)); }
-#line 2478 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = cbrt((yyvsp[-1].float_type)); }
+#line 2254 "build/Cello/parse.tab.c"
     break;
 
-  case 60:
+  case 59: /* cse: CEIL '(' cse ')'  */
 #line 592 "build/Cello/parse.y"
-                  { (yyval.float_type) = cos((yyvsp[-1].float_type)); }
-#line 2484 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = ceil((yyvsp[-1].float_type)); }
+#line 2260 "build/Cello/parse.tab.c"
     break;
 
-  case 61:
+  case 60: /* cse: COS '(' cse ')'  */
 #line 593 "build/Cello/parse.y"
-                   { (yyval.float_type) = cosh((yyvsp[-1].float_type)); }
-#line 2490 "build/Cello/parse.tab.c"
+                  { (yyval.float_type) = cos((yyvsp[-1].float_type)); }
+#line 2266 "build/Cello/parse.tab.c"
     break;
 
-  case 62:
+  case 61: /* cse: COSH '(' cse ')'  */
 #line 594 "build/Cello/parse.y"
-                   { (yyval.float_type) = erfc((yyvsp[-1].float_type)); }
-#line 2496 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = cosh((yyvsp[-1].float_type)); }
+#line 2272 "build/Cello/parse.tab.c"
     break;
 
-  case 63:
+  case 62: /* cse: ERFC '(' cse ')'  */
 #line 595 "build/Cello/parse.y"
-                  { (yyval.float_type) = erf((yyvsp[-1].float_type)); }
-#line 2502 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = erfc((yyvsp[-1].float_type)); }
+#line 2278 "build/Cello/parse.tab.c"
     break;
 
-  case 64:
+  case 63: /* cse: ERF '(' cse ')'  */
 #line 596 "build/Cello/parse.y"
-                  { (yyval.float_type) = exp((yyvsp[-1].float_type)); }
-#line 2508 "build/Cello/parse.tab.c"
+                  { (yyval.float_type) = erf((yyvsp[-1].float_type)); }
+#line 2284 "build/Cello/parse.tab.c"
     break;
 
-  case 65:
+  case 64: /* cse: EXP '(' cse ')'  */
 #line 597 "build/Cello/parse.y"
-                    { (yyval.float_type) = expm1((yyvsp[-1].float_type)); }
-#line 2514 "build/Cello/parse.tab.c"
+                  { (yyval.float_type) = exp((yyvsp[-1].float_type)); }
+#line 2290 "build/Cello/parse.tab.c"
     break;
 
-  case 66:
+  case 65: /* cse: EXPM1 '(' cse ')'  */
 #line 598 "build/Cello/parse.y"
-                   { (yyval.float_type) = fabs((yyvsp[-1].float_type)); }
-#line 2520 "build/Cello/parse.tab.c"
+                    { (yyval.float_type) = expm1((yyvsp[-1].float_type)); }
+#line 2296 "build/Cello/parse.tab.c"
     break;
 
-  case 67:
+  case 66: /* cse: FABS '(' cse ')'  */
 #line 599 "build/Cello/parse.y"
+                   { (yyval.float_type) = fabs((yyvsp[-1].float_type)); }
+#line 2302 "build/Cello/parse.tab.c"
+    break;
+
+  case 67: /* cse: FLOOR '(' cse ')'  */
+#line 600 "build/Cello/parse.y"
                     { (yyval.float_type) = floor((yyvsp[-1].float_type)); }
-#line 2526 "build/Cello/parse.tab.c"
+#line 2308 "build/Cello/parse.tab.c"
     break;
 
-  case 68:
-#line 601 "build/Cello/parse.y"
-                 { (yyval.float_type) = j0((yyvsp[-1].float_type)); }
-#line 2532 "build/Cello/parse.tab.c"
-    break;
-
-  case 69:
+  case 68: /* cse: J0 '(' cse ')'  */
 #line 602 "build/Cello/parse.y"
-                 { (yyval.float_type) = j1((yyvsp[-1].float_type)); }
-#line 2538 "build/Cello/parse.tab.c"
+                 { (yyval.float_type) = j0((yyvsp[-1].float_type)); }
+#line 2314 "build/Cello/parse.tab.c"
     break;
 
-  case 70:
+  case 69: /* cse: J1 '(' cse ')'  */
 #line 603 "build/Cello/parse.y"
-                     { (yyval.float_type) = lgamma((yyvsp[-1].float_type)); }
-#line 2544 "build/Cello/parse.tab.c"
+                 { (yyval.float_type) = j1((yyvsp[-1].float_type)); }
+#line 2320 "build/Cello/parse.tab.c"
     break;
 
-  case 71:
+  case 70: /* cse: LGAMMA '(' cse ')'  */
 #line 604 "build/Cello/parse.y"
-                    { (yyval.float_type) = log10((yyvsp[-1].float_type)); }
-#line 2550 "build/Cello/parse.tab.c"
+                     { (yyval.float_type) = lgamma((yyvsp[-1].float_type)); }
+#line 2326 "build/Cello/parse.tab.c"
     break;
 
-  case 72:
+  case 71: /* cse: LOG10 '(' cse ')'  */
 #line 605 "build/Cello/parse.y"
-                    { (yyval.float_type) = log1p((yyvsp[-1].float_type)); }
-#line 2556 "build/Cello/parse.tab.c"
+                    { (yyval.float_type) = log10((yyvsp[-1].float_type)); }
+#line 2332 "build/Cello/parse.tab.c"
     break;
 
-  case 73:
+  case 72: /* cse: LOG1P '(' cse ')'  */
 #line 606 "build/Cello/parse.y"
-                   { (yyval.float_type) = logb((yyvsp[-1].float_type)); }
-#line 2562 "build/Cello/parse.tab.c"
+                    { (yyval.float_type) = log1p((yyvsp[-1].float_type)); }
+#line 2338 "build/Cello/parse.tab.c"
     break;
 
-  case 74:
+  case 73: /* cse: LOGB '(' cse ')'  */
 #line 607 "build/Cello/parse.y"
-                  { (yyval.float_type) = log((yyvsp[-1].float_type)); }
-#line 2568 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = logb((yyvsp[-1].float_type)); }
+#line 2344 "build/Cello/parse.tab.c"
     break;
 
-  case 75:
+  case 74: /* cse: LOG '(' cse ')'  */
 #line 608 "build/Cello/parse.y"
-                  { (yyval.float_type) = sin((yyvsp[-1].float_type)); }
-#line 2574 "build/Cello/parse.tab.c"
+                  { (yyval.float_type) = log((yyvsp[-1].float_type)); }
+#line 2350 "build/Cello/parse.tab.c"
     break;
 
-  case 76:
+  case 75: /* cse: SIN '(' cse ')'  */
 #line 609 "build/Cello/parse.y"
-                   { (yyval.float_type) = sinh((yyvsp[-1].float_type)); }
-#line 2580 "build/Cello/parse.tab.c"
+                  { (yyval.float_type) = sin((yyvsp[-1].float_type)); }
+#line 2356 "build/Cello/parse.tab.c"
     break;
 
-  case 77:
+  case 76: /* cse: SINH '(' cse ')'  */
 #line 610 "build/Cello/parse.y"
-                   { (yyval.float_type) = sqrt((yyvsp[-1].float_type)); }
-#line 2586 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = sinh((yyvsp[-1].float_type)); }
+#line 2362 "build/Cello/parse.tab.c"
     break;
 
-  case 78:
+  case 77: /* cse: SQRT '(' cse ')'  */
 #line 611 "build/Cello/parse.y"
-                  { (yyval.float_type) = tan((yyvsp[-1].float_type)); }
-#line 2592 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = sqrt((yyvsp[-1].float_type)); }
+#line 2368 "build/Cello/parse.tab.c"
     break;
 
-  case 79:
+  case 78: /* cse: TAN '(' cse ')'  */
 #line 612 "build/Cello/parse.y"
-                   { (yyval.float_type) = tanh((yyvsp[-1].float_type)); }
-#line 2598 "build/Cello/parse.tab.c"
+                  { (yyval.float_type) = tan((yyvsp[-1].float_type)); }
+#line 2374 "build/Cello/parse.tab.c"
     break;
 
-  case 80:
+  case 79: /* cse: TANH '(' cse ')'  */
 #line 613 "build/Cello/parse.y"
-                 { (yyval.float_type) = y0((yyvsp[-1].float_type)); }
-#line 2604 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = tanh((yyvsp[-1].float_type)); }
+#line 2380 "build/Cello/parse.tab.c"
     break;
 
-  case 81:
+  case 80: /* cse: Y0 '(' cse ')'  */
 #line 614 "build/Cello/parse.y"
-                 { (yyval.float_type) = y1((yyvsp[-1].float_type)); }
-#line 2610 "build/Cello/parse.tab.c"
+                 { (yyval.float_type) = y0((yyvsp[-1].float_type)); }
+#line 2386 "build/Cello/parse.tab.c"
     break;
 
-  case 82:
+  case 81: /* cse: Y1 '(' cse ')'  */
 #line 615 "build/Cello/parse.y"
-                   { (yyval.float_type) = rint((yyvsp[-1].float_type)); }
-#line 2616 "build/Cello/parse.tab.c"
+                 { (yyval.float_type) = y1((yyvsp[-1].float_type)); }
+#line 2392 "build/Cello/parse.tab.c"
     break;
 
-  case 83:
+  case 82: /* cse: RINT '(' cse ')'  */
 #line 616 "build/Cello/parse.y"
-        { (yyval.float_type) = (yyvsp[0].float_type);}
-#line 2622 "build/Cello/parse.tab.c"
+                   { (yyval.float_type) = rint((yyvsp[-1].float_type)); }
+#line 2398 "build/Cello/parse.tab.c"
     break;
 
-  case 84:
+  case 83: /* cse: FLOAT  */
 #line 617 "build/Cello/parse.y"
+        { (yyval.float_type) = (yyvsp[0].float_type);}
+#line 2404 "build/Cello/parse.tab.c"
+    break;
+
+  case 84: /* cse: PI  */
+#line 618 "build/Cello/parse.y"
      { (yyval.float_type) = M_PI ; }
-#line 2628 "build/Cello/parse.tab.c"
+#line 2410 "build/Cello/parse.tab.c"
     break;
 
-  case 85:
-#line 621 "build/Cello/parse.y"
-             { (yyval.integer_type) = (yyvsp[-1].integer_type); }
-#line 2634 "build/Cello/parse.tab.c"
-    break;
-
-  case 86:
+  case 85: /* cie: '(' cie ')'  */
 #line 622 "build/Cello/parse.y"
-               { (yyval.integer_type) = (yyvsp[-2].integer_type) + (yyvsp[0].integer_type);}
-#line 2640 "build/Cello/parse.tab.c"
+             { (yyval.integer_type) = (yyvsp[-1].integer_type); }
+#line 2416 "build/Cello/parse.tab.c"
     break;
 
-  case 87:
+  case 86: /* cie: cie '+' cie  */
 #line 623 "build/Cello/parse.y"
-               { (yyval.integer_type) = (yyvsp[-2].integer_type) - (yyvsp[0].integer_type);}
-#line 2646 "build/Cello/parse.tab.c"
+               { (yyval.integer_type) = (yyvsp[-2].integer_type) + (yyvsp[0].integer_type);}
+#line 2422 "build/Cello/parse.tab.c"
     break;
 
-  case 88:
+  case 87: /* cie: cie '-' cie  */
 #line 624 "build/Cello/parse.y"
-               { (yyval.integer_type) = (yyvsp[-2].integer_type) * (yyvsp[0].integer_type);}
-#line 2652 "build/Cello/parse.tab.c"
+               { (yyval.integer_type) = (yyvsp[-2].integer_type) - (yyvsp[0].integer_type);}
+#line 2428 "build/Cello/parse.tab.c"
     break;
 
-  case 89:
+  case 88: /* cie: cie '*' cie  */
 #line 625 "build/Cello/parse.y"
-               { (yyval.integer_type) = (yyvsp[-2].integer_type) / (yyvsp[0].integer_type);}
-#line 2658 "build/Cello/parse.tab.c"
+               { (yyval.integer_type) = (yyvsp[-2].integer_type) * (yyvsp[0].integer_type);}
+#line 2434 "build/Cello/parse.tab.c"
     break;
 
-  case 90:
+  case 89: /* cie: cie '/' cie  */
 #line 626 "build/Cello/parse.y"
-               { (yyval.integer_type) = pow((double)(yyvsp[-2].integer_type), (double)(yyvsp[0].integer_type));}
-#line 2664 "build/Cello/parse.tab.c"
+               { (yyval.integer_type) = (yyvsp[-2].integer_type) / (yyvsp[0].integer_type);}
+#line 2440 "build/Cello/parse.tab.c"
     break;
 
-  case 91:
+  case 90: /* cie: cie '^' cie  */
 #line 627 "build/Cello/parse.y"
+               { (yyval.integer_type) = pow((double)(yyvsp[-2].integer_type), (double)(yyvsp[0].integer_type));}
+#line 2446 "build/Cello/parse.tab.c"
+    break;
+
+  case 91: /* cie: INTEGER  */
+#line 628 "build/Cello/parse.y"
            { (yyval.integer_type) = (yyvsp[0].integer_type);}
-#line 2670 "build/Cello/parse.tab.c"
+#line 2452 "build/Cello/parse.tab.c"
     break;
 
-  case 92:
-#line 631 "build/Cello/parse.y"
-               { (yyval.node_type) = (yyvsp[-1].node_type); }
-#line 2676 "build/Cello/parse.tab.c"
-    break;
-
-  case 93:
+  case 92: /* vse: '(' vse ')'  */
 #line 632 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,new_node_float((yyvsp[0].float_type))); }
-#line 2682 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = (yyvsp[-1].node_type); }
+#line 2458 "build/Cello/parse.tab.c"
     break;
 
-  case 94:
+  case 93: /* vse: vse '+' cse  */
 #line 633 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_add,(yyvsp[0].node_type)); }
-#line 2688 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,new_node_float((yyvsp[0].float_type))); }
+#line 2464 "build/Cello/parse.tab.c"
     break;
 
-  case 95:
+  case 94: /* vse: cse '+' vse  */
 #line 634 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,(yyvsp[0].node_type)); }
-#line 2694 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_add,(yyvsp[0].node_type)); }
+#line 2470 "build/Cello/parse.tab.c"
     break;
 
-  case 96:
+  case 95: /* vse: vse '+' vse  */
 #line 635 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,new_node_float((yyvsp[0].float_type))); }
-#line 2700 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,(yyvsp[0].node_type)); }
+#line 2476 "build/Cello/parse.tab.c"
     break;
 
-  case 97:
+  case 96: /* vse: vse '-' cse  */
 #line 636 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_sub,(yyvsp[0].node_type)); }
-#line 2706 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,new_node_float((yyvsp[0].float_type))); }
+#line 2482 "build/Cello/parse.tab.c"
     break;
 
-  case 98:
+  case 97: /* vse: cse '-' vse  */
 #line 637 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,(yyvsp[0].node_type)); }
-#line 2712 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_sub,(yyvsp[0].node_type)); }
+#line 2488 "build/Cello/parse.tab.c"
     break;
 
-  case 99:
+  case 98: /* vse: vse '-' vse  */
 #line 638 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,new_node_float((yyvsp[0].float_type))); }
-#line 2718 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,(yyvsp[0].node_type)); }
+#line 2494 "build/Cello/parse.tab.c"
     break;
 
-  case 100:
+  case 99: /* vse: vse '*' cse  */
 #line 639 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_mul,(yyvsp[0].node_type)); }
-#line 2724 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,new_node_float((yyvsp[0].float_type))); }
+#line 2500 "build/Cello/parse.tab.c"
     break;
 
-  case 101:
+  case 100: /* vse: cse '*' vse  */
 #line 640 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,(yyvsp[0].node_type)); }
-#line 2730 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_mul,(yyvsp[0].node_type)); }
+#line 2506 "build/Cello/parse.tab.c"
     break;
 
-  case 102:
+  case 101: /* vse: vse '*' vse  */
 #line 641 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,new_node_float((yyvsp[0].float_type))); }
-#line 2736 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,(yyvsp[0].node_type)); }
+#line 2512 "build/Cello/parse.tab.c"
     break;
 
-  case 103:
+  case 102: /* vse: vse '/' cse  */
 #line 642 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_div,(yyvsp[0].node_type)); }
-#line 2742 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,new_node_float((yyvsp[0].float_type))); }
+#line 2518 "build/Cello/parse.tab.c"
     break;
 
-  case 104:
+  case 103: /* vse: cse '/' vse  */
 #line 643 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,(yyvsp[0].node_type)); }
-#line 2748 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_div,(yyvsp[0].node_type)); }
+#line 2524 "build/Cello/parse.tab.c"
     break;
 
-  case 105:
+  case 104: /* vse: vse '/' vse  */
 #line 644 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, new_node_float((yyvsp[0].float_type))); }
-#line 2754 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,(yyvsp[0].node_type)); }
+#line 2530 "build/Cello/parse.tab.c"
     break;
 
-  case 106:
+  case 105: /* vse: vse '^' cse  */
 #line 645 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_pow, (yyvsp[0].node_type)); }
-#line 2760 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, new_node_float((yyvsp[0].float_type))); }
+#line 2536 "build/Cello/parse.tab.c"
     break;
 
-  case 107:
+  case 106: /* vse: cse '^' vse  */
 #line 646 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, (yyvsp[0].node_type)); }
-#line 2766 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_pow, (yyvsp[0].node_type)); }
+#line 2542 "build/Cello/parse.tab.c"
     break;
 
-  case 108:
+  case 107: /* vse: vse '^' vse  */
 #line 647 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( acos, "acos", (yyvsp[-1].node_type)); }
-#line 2772 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, (yyvsp[0].node_type)); }
+#line 2548 "build/Cello/parse.tab.c"
     break;
 
-  case 109:
+  case 108: /* vse: ACOS '(' vse ')'  */
 #line 648 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( acosh, "acosh", (yyvsp[-1].node_type)); }
-#line 2778 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( acos, "acos", (yyvsp[-1].node_type)); }
+#line 2554 "build/Cello/parse.tab.c"
     break;
 
-  case 110:
+  case 109: /* vse: ACOSH '(' vse ')'  */
 #line 649 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( asin, "asin", (yyvsp[-1].node_type)); }
-#line 2784 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( acosh, "acosh", (yyvsp[-1].node_type)); }
+#line 2560 "build/Cello/parse.tab.c"
     break;
 
-  case 111:
+  case 110: /* vse: ASIN '(' vse ')'  */
 #line 650 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( asinh, "asinh", (yyvsp[-1].node_type)); }
-#line 2790 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( asin, "asin", (yyvsp[-1].node_type)); }
+#line 2566 "build/Cello/parse.tab.c"
     break;
 
-  case 112:
+  case 111: /* vse: ASINH '(' vse ')'  */
 #line 651 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( atan, "atan", (yyvsp[-1].node_type)); }
-#line 2796 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( asinh, "asinh", (yyvsp[-1].node_type)); }
+#line 2572 "build/Cello/parse.tab.c"
     break;
 
-  case 113:
+  case 112: /* vse: ATAN '(' vse ')'  */
 #line 652 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( atanh, "atanh", (yyvsp[-1].node_type)); }
-#line 2802 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( atan, "atan", (yyvsp[-1].node_type)); }
+#line 2578 "build/Cello/parse.tab.c"
     break;
 
-  case 114:
+  case 113: /* vse: ATANH '(' vse ')'  */
 #line 653 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( cbrt, "cbrt", (yyvsp[-1].node_type)); }
-#line 2808 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( atanh, "atanh", (yyvsp[-1].node_type)); }
+#line 2584 "build/Cello/parse.tab.c"
     break;
 
-  case 115:
+  case 114: /* vse: CBRT '(' vse ')'  */
 #line 654 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( ceil, "ceil", (yyvsp[-1].node_type)); }
-#line 2814 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( cbrt, "cbrt", (yyvsp[-1].node_type)); }
+#line 2590 "build/Cello/parse.tab.c"
     break;
 
-  case 116:
+  case 115: /* vse: CEIL '(' vse ')'  */
 #line 655 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( cos, "cos", (yyvsp[-1].node_type)); }
-#line 2820 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( ceil, "ceil", (yyvsp[-1].node_type)); }
+#line 2596 "build/Cello/parse.tab.c"
     break;
 
-  case 117:
+  case 116: /* vse: COS '(' vse ')'  */
 #line 656 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( cosh, "cosh", (yyvsp[-1].node_type)); }
-#line 2826 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( cos, "cos", (yyvsp[-1].node_type)); }
+#line 2602 "build/Cello/parse.tab.c"
     break;
 
-  case 118:
+  case 117: /* vse: COSH '(' vse ')'  */
 #line 657 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( erfc, "erfc", (yyvsp[-1].node_type)); }
-#line 2832 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( cosh, "cosh", (yyvsp[-1].node_type)); }
+#line 2608 "build/Cello/parse.tab.c"
     break;
 
-  case 119:
+  case 118: /* vse: ERFC '(' vse ')'  */
 #line 658 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( erf, "erf", (yyvsp[-1].node_type)); }
-#line 2838 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( erfc, "erfc", (yyvsp[-1].node_type)); }
+#line 2614 "build/Cello/parse.tab.c"
     break;
 
-  case 120:
+  case 119: /* vse: ERF '(' vse ')'  */
 #line 659 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( exp, "exp", (yyvsp[-1].node_type)); }
-#line 2844 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( erf, "erf", (yyvsp[-1].node_type)); }
+#line 2620 "build/Cello/parse.tab.c"
     break;
 
-  case 121:
+  case 120: /* vse: EXP '(' vse ')'  */
 #line 660 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( expm1, "expm1", (yyvsp[-1].node_type)); }
-#line 2850 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( exp, "exp", (yyvsp[-1].node_type)); }
+#line 2626 "build/Cello/parse.tab.c"
     break;
 
-  case 122:
+  case 121: /* vse: EXPM1 '(' vse ')'  */
 #line 661 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( fabs, "fabs", (yyvsp[-1].node_type)); }
-#line 2856 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( expm1, "expm1", (yyvsp[-1].node_type)); }
+#line 2632 "build/Cello/parse.tab.c"
     break;
 
-  case 123:
+  case 122: /* vse: FABS '(' vse ')'  */
 #line 662 "build/Cello/parse.y"
+                      { (yyval.node_type) = new_node_function ( fabs, "fabs", (yyvsp[-1].node_type)); }
+#line 2638 "build/Cello/parse.tab.c"
+    break;
+
+  case 123: /* vse: FLOOR '(' vse ')'  */
+#line 663 "build/Cello/parse.y"
                       { (yyval.node_type) = new_node_function ( floor, "floor", (yyvsp[-1].node_type)); }
-#line 2862 "build/Cello/parse.tab.c"
+#line 2644 "build/Cello/parse.tab.c"
     break;
 
-  case 124:
-#line 664 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( j0, "j0", (yyvsp[-1].node_type)); }
-#line 2868 "build/Cello/parse.tab.c"
-    break;
-
-  case 125:
+  case 124: /* vse: J0 '(' vse ')'  */
 #line 665 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( j1, "j1", (yyvsp[-1].node_type)); }
-#line 2874 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( j0, "j0", (yyvsp[-1].node_type)); }
+#line 2650 "build/Cello/parse.tab.c"
     break;
 
-  case 126:
+  case 125: /* vse: J1 '(' vse ')'  */
 #line 666 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( lgamma, "lgamma", (yyvsp[-1].node_type)); }
-#line 2880 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( j1, "j1", (yyvsp[-1].node_type)); }
+#line 2656 "build/Cello/parse.tab.c"
     break;
 
-  case 127:
+  case 126: /* vse: LGAMMA '(' vse ')'  */
 #line 667 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( log10, "log10", (yyvsp[-1].node_type)); }
-#line 2886 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( lgamma, "lgamma", (yyvsp[-1].node_type)); }
+#line 2662 "build/Cello/parse.tab.c"
     break;
 
-  case 128:
+  case 127: /* vse: LOG10 '(' vse ')'  */
 #line 668 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( log1p, "log1p", (yyvsp[-1].node_type)); }
-#line 2892 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( log10, "log10", (yyvsp[-1].node_type)); }
+#line 2668 "build/Cello/parse.tab.c"
     break;
 
-  case 129:
+  case 128: /* vse: LOG1P '(' vse ')'  */
 #line 669 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( logb, "logb", (yyvsp[-1].node_type)); }
-#line 2898 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( log1p, "log1p", (yyvsp[-1].node_type)); }
+#line 2674 "build/Cello/parse.tab.c"
     break;
 
-  case 130:
+  case 129: /* vse: LOGB '(' vse ')'  */
 #line 670 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( log, "log", (yyvsp[-1].node_type)); }
-#line 2904 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( logb, "logb", (yyvsp[-1].node_type)); }
+#line 2680 "build/Cello/parse.tab.c"
     break;
 
-  case 131:
+  case 130: /* vse: LOG '(' vse ')'  */
 #line 671 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( sin, "sin", (yyvsp[-1].node_type)); }
-#line 2910 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( log, "log", (yyvsp[-1].node_type)); }
+#line 2686 "build/Cello/parse.tab.c"
     break;
 
-  case 132:
+  case 131: /* vse: SIN '(' vse ')'  */
 #line 672 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( sinh, "sinh", (yyvsp[-1].node_type)); }
-#line 2916 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( sin, "sin", (yyvsp[-1].node_type)); }
+#line 2692 "build/Cello/parse.tab.c"
     break;
 
-  case 133:
+  case 132: /* vse: SINH '(' vse ')'  */
 #line 673 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( sqrt, "sqrt", (yyvsp[-1].node_type)); }
-#line 2922 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( sinh, "sinh", (yyvsp[-1].node_type)); }
+#line 2698 "build/Cello/parse.tab.c"
     break;
 
-  case 134:
+  case 133: /* vse: SQRT '(' vse ')'  */
 #line 674 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( tan, "tan", (yyvsp[-1].node_type)); }
-#line 2928 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( sqrt, "sqrt", (yyvsp[-1].node_type)); }
+#line 2704 "build/Cello/parse.tab.c"
     break;
 
-  case 135:
+  case 134: /* vse: TAN '(' vse ')'  */
 #line 675 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( tanh, "tanh", (yyvsp[-1].node_type)); }
-#line 2934 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( tan, "tan", (yyvsp[-1].node_type)); }
+#line 2710 "build/Cello/parse.tab.c"
     break;
 
-  case 136:
+  case 135: /* vse: TANH '(' vse ')'  */
 #line 676 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( y0, "y0", (yyvsp[-1].node_type)); }
-#line 2940 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( tanh, "tanh", (yyvsp[-1].node_type)); }
+#line 2716 "build/Cello/parse.tab.c"
     break;
 
-  case 137:
+  case 136: /* vse: Y0 '(' vse ')'  */
 #line 677 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( y1, "y1", (yyvsp[-1].node_type)); }
-#line 2946 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( y0, "y0", (yyvsp[-1].node_type)); }
+#line 2722 "build/Cello/parse.tab.c"
     break;
 
-  case 138:
+  case 137: /* vse: Y1 '(' vse ')'  */
 #line 678 "build/Cello/parse.y"
-                      { (yyval.node_type) = new_node_function ( rint, "rint", (yyvsp[-1].node_type)); }
-#line 2952 "build/Cello/parse.tab.c"
+                      { (yyval.node_type) = new_node_function ( y1, "y1", (yyvsp[-1].node_type)); }
+#line 2728 "build/Cello/parse.tab.c"
     break;
 
-  case 139:
+  case 138: /* vse: RINT '(' vse ')'  */
 #line 679 "build/Cello/parse.y"
+                      { (yyval.node_type) = new_node_function ( rint, "rint", (yyvsp[-1].node_type)); }
+#line 2734 "build/Cello/parse.tab.c"
+    break;
+
+  case 139: /* vse: VARIABLE  */
+#line 680 "build/Cello/parse.y"
             { (yyval.node_type) = new_node_variable ((yyvsp[0].string_type));  }
-#line 2958 "build/Cello/parse.tab.c"
+#line 2740 "build/Cello/parse.tab.c"
     break;
 
-  case 140:
-#line 684 "build/Cello/parse.y"
-             { (yyval.node_type) = (yyvsp[-1].node_type); }
-#line 2964 "build/Cello/parse.tab.c"
-    break;
-
-  case 141:
+  case 140: /* vle: '(' vle ')'  */
 #line 685 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_le,new_node_float((yyvsp[0].float_type))); }
-#line 2970 "build/Cello/parse.tab.c"
+             { (yyval.node_type) = (yyvsp[-1].node_type); }
+#line 2746 "build/Cello/parse.tab.c"
     break;
 
-  case 142:
+  case 141: /* vle: vse LE cse  */
 #line 686 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_le,(yyvsp[0].node_type)); }
-#line 2976 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_le,new_node_float((yyvsp[0].float_type))); }
+#line 2752 "build/Cello/parse.tab.c"
     break;
 
-  case 143:
+  case 142: /* vle: cse LE vse  */
 #line 687 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_le,(yyvsp[0].node_type)); }
-#line 2982 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_le,(yyvsp[0].node_type)); }
+#line 2758 "build/Cello/parse.tab.c"
     break;
 
-  case 144:
+  case 143: /* vle: vse LE vse  */
 #line 688 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ge,new_node_float((yyvsp[0].float_type))); }
-#line 2988 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_le,(yyvsp[0].node_type)); }
+#line 2764 "build/Cello/parse.tab.c"
     break;
 
-  case 145:
+  case 144: /* vle: vse GE cse  */
 #line 689 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_ge,(yyvsp[0].node_type)); }
-#line 2994 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ge,new_node_float((yyvsp[0].float_type))); }
+#line 2770 "build/Cello/parse.tab.c"
     break;
 
-  case 146:
+  case 145: /* vle: cse GE vse  */
 #line 690 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ge,(yyvsp[0].node_type)); }
-#line 3000 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_ge,(yyvsp[0].node_type)); }
+#line 2776 "build/Cello/parse.tab.c"
     break;
 
-  case 147:
+  case 146: /* vle: vse GE vse  */
 #line 691 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_lt,new_node_float((yyvsp[0].float_type))); }
-#line 3006 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ge,(yyvsp[0].node_type)); }
+#line 2782 "build/Cello/parse.tab.c"
     break;
 
-  case 148:
+  case 147: /* vle: vse '<' cse  */
 #line 692 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_lt,(yyvsp[0].node_type)); }
-#line 3012 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_lt,new_node_float((yyvsp[0].float_type))); }
+#line 2788 "build/Cello/parse.tab.c"
     break;
 
-  case 149:
+  case 148: /* vle: cse '<' vse  */
 #line 693 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_lt,(yyvsp[0].node_type)); }
-#line 3018 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_lt,(yyvsp[0].node_type)); }
+#line 2794 "build/Cello/parse.tab.c"
     break;
 
-  case 150:
+  case 149: /* vle: vse '<' vse  */
 #line 694 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_gt,new_node_float((yyvsp[0].float_type))); }
-#line 3024 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_lt,(yyvsp[0].node_type)); }
+#line 2800 "build/Cello/parse.tab.c"
     break;
 
-  case 151:
+  case 150: /* vle: vse '>' cse  */
 #line 695 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_gt,(yyvsp[0].node_type)); }
-#line 3030 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_gt,new_node_float((yyvsp[0].float_type))); }
+#line 2806 "build/Cello/parse.tab.c"
     break;
 
-  case 152:
+  case 151: /* vle: cse '>' vse  */
 #line 696 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_gt,(yyvsp[0].node_type)); }
-#line 3036 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_gt,(yyvsp[0].node_type)); }
+#line 2812 "build/Cello/parse.tab.c"
     break;
 
-  case 153:
+  case 152: /* vle: vse '>' vse  */
 #line 697 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_eq,new_node_float((yyvsp[0].float_type))); }
-#line 3042 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_gt,(yyvsp[0].node_type)); }
+#line 2818 "build/Cello/parse.tab.c"
     break;
 
-  case 154:
+  case 153: /* vle: vse EQ cse  */
 #line 698 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_eq,(yyvsp[0].node_type)); }
-#line 3048 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_eq,new_node_float((yyvsp[0].float_type))); }
+#line 2824 "build/Cello/parse.tab.c"
     break;
 
-  case 155:
+  case 154: /* vle: cse EQ vse  */
 #line 699 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_eq,(yyvsp[0].node_type)); }
-#line 3054 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_eq,(yyvsp[0].node_type)); }
+#line 2830 "build/Cello/parse.tab.c"
     break;
 
-  case 156:
+  case 155: /* vle: vse EQ vse  */
 #line 700 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ne,new_node_float((yyvsp[0].float_type))); }
-#line 3060 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_eq,(yyvsp[0].node_type)); }
+#line 2836 "build/Cello/parse.tab.c"
     break;
 
-  case 157:
+  case 156: /* vle: vse NE cse  */
 #line 701 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_ne,(yyvsp[0].node_type)); }
-#line 3066 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ne,new_node_float((yyvsp[0].float_type))); }
+#line 2842 "build/Cello/parse.tab.c"
     break;
 
-  case 158:
+  case 157: /* vle: cse NE vse  */
 #line 702 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ne,(yyvsp[0].node_type)); }
-#line 3072 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_ne,(yyvsp[0].node_type)); }
+#line 2848 "build/Cello/parse.tab.c"
     break;
 
-  case 159:
+  case 158: /* vle: vse NE vse  */
 #line 703 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_or,new_node_logical((yyvsp[0].logical_type))); }
-#line 3078 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ne,(yyvsp[0].node_type)); }
+#line 2854 "build/Cello/parse.tab.c"
     break;
 
-  case 160:
+  case 159: /* vle: vle OR cle  */
 #line 704 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[-2].logical_type)), enum_op_or,(yyvsp[0].node_type)); }
-#line 3084 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_or,new_node_logical((yyvsp[0].logical_type))); }
+#line 2860 "build/Cello/parse.tab.c"
     break;
 
-  case 161:
+  case 160: /* vle: cle OR vle  */
 #line 705 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_or,(yyvsp[0].node_type)); }
-#line 3090 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[-2].logical_type)), enum_op_or,(yyvsp[0].node_type)); }
+#line 2866 "build/Cello/parse.tab.c"
     break;
 
-  case 162:
+  case 161: /* vle: vle OR vle  */
 #line 706 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_and,new_node_logical((yyvsp[0].logical_type))); }
-#line 3096 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_or,(yyvsp[0].node_type)); }
+#line 2872 "build/Cello/parse.tab.c"
     break;
 
-  case 163:
+  case 162: /* vle: vle AND cle  */
 #line 707 "build/Cello/parse.y"
-               { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[-2].logical_type)), enum_op_and,(yyvsp[0].node_type)); }
-#line 3102 "build/Cello/parse.tab.c"
+               { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_and,new_node_logical((yyvsp[0].logical_type))); }
+#line 2878 "build/Cello/parse.tab.c"
     break;
 
-  case 164:
+  case 163: /* vle: cle AND vle  */
 #line 708 "build/Cello/parse.y"
+               { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[-2].logical_type)), enum_op_and,(yyvsp[0].node_type)); }
+#line 2884 "build/Cello/parse.tab.c"
+    break;
+
+  case 164: /* vle: vle AND vle  */
+#line 709 "build/Cello/parse.y"
                { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_and,(yyvsp[0].node_type)); }
-#line 3108 "build/Cello/parse.tab.c"
+#line 2890 "build/Cello/parse.tab.c"
     break;
 
 
-#line 3112 "build/Cello/parse.tab.c"
+#line 2894 "build/Cello/parse.tab.c"
 
       default: break;
     }
@@ -3123,11 +2905,10 @@ yyreduce:
      case of YYERROR or YYBACKUP, subsequent parser actions might lead
      to an incorrect destructor call or verbose syntax error message
      before the lookahead is translated.  */
-  YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
+  YY_SYMBOL_PRINT ("-> $$ =", YY_CAST (yysymbol_kind_t, yyr1[yyn]), &yyval, &yyloc);
 
   YYPOPSTACK (yylen);
   yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
 
@@ -3151,49 +2932,13 @@ yyreduce:
 yyerrlab:
   /* Make sure we have latest lookahead translation.  See comments at
      user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
-
+  yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
       ++yynerrs;
-#if ! YYERROR_VERBOSE
       yyerror (YY_("syntax error"));
-#else
-# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
-                                        yyssp, yytoken)
-      {
-        char const *yymsgp = YY_("syntax error");
-        int yysyntax_error_status;
-        yysyntax_error_status = YYSYNTAX_ERROR;
-        if (yysyntax_error_status == 0)
-          yymsgp = yymsg;
-        else if (yysyntax_error_status == 1)
-          {
-            if (yymsg != yymsgbuf)
-              YYSTACK_FREE (yymsg);
-            yymsg = YY_CAST (char *, YYSTACK_ALLOC (YY_CAST (YYSIZE_T, yymsg_alloc)));
-            if (!yymsg)
-              {
-                yymsg = yymsgbuf;
-                yymsg_alloc = sizeof yymsgbuf;
-                yysyntax_error_status = 2;
-              }
-            else
-              {
-                yysyntax_error_status = YYSYNTAX_ERROR;
-                yymsgp = yymsg;
-              }
-          }
-        yyerror (yymsgp);
-        if (yysyntax_error_status == 2)
-          goto yyexhaustedlab;
-      }
-# undef YYSYNTAX_ERROR
-#endif
     }
-
-
 
   if (yyerrstatus == 3)
     {
@@ -3227,6 +2972,7 @@ yyerrorlab:
      label yyerrorlab therefore never appears in user code.  */
   if (0)
     YYERROR;
+  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -3243,13 +2989,14 @@ yyerrorlab:
 yyerrlab1:
   yyerrstatus = 3;      /* Each real token shifted decrements this.  */
 
+  /* Pop stack until we find a state that shifts the error token.  */
   for (;;)
     {
       yyn = yypact[yystate];
       if (!yypact_value_is_default (yyn))
         {
-          yyn += YYTERROR;
-          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
+          yyn += YYSYMBOL_YYerror;
+          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYSYMBOL_YYerror)
             {
               yyn = yytable[yyn];
               if (0 < yyn)
@@ -3263,7 +3010,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp);
+                  YY_ACCESSING_SYMBOL (yystate), yyvsp);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -3275,7 +3022,7 @@ yyerrlab1:
 
 
   /* Shift the error token.  */
-  YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
+  YY_SYMBOL_PRINT ("Shifting", YY_ACCESSING_SYMBOL (yyn), yyvsp, yylsp);
 
   yystate = yyn;
   goto yynewstate;
@@ -3286,7 +3033,7 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
 /*-----------------------------------.
@@ -3294,24 +3041,22 @@ yyacceptlab:
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
-#if !defined yyoverflow || YYERROR_VERBOSE
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
+/*-----------------------------------------------------------.
+| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
+`-----------------------------------------------------------*/
 yyexhaustedlab:
   yyerror (YY_("memory exhausted"));
   yyresult = 2;
-  /* Fall through.  */
-#endif
+  goto yyreturnlab;
 
 
-/*-----------------------------------------------------.
-| yyreturn -- parsing is finished, return the result.  |
-`-----------------------------------------------------*/
-yyreturn:
+/*----------------------------------------------------------.
+| yyreturnlab -- parsing is finished, clean up and return.  |
+`----------------------------------------------------------*/
+yyreturnlab:
   if (yychar != YYEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
@@ -3327,20 +3072,18 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[+*yyssp], yyvsp);
+                  YY_ACCESSING_SYMBOL (+*yyssp), yyvsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
-#if YYERROR_VERBOSE
-  if (yymsg != yymsgbuf)
-    YYSTACK_FREE (yymsg);
-#endif
+
   return yyresult;
 }
-#line 712 "build/Cello/parse.y"
+
+#line 713 "build/Cello/parse.y"
 
 
 int cello_new_file(const char * filename);
@@ -3418,61 +3161,79 @@ void print_expression (struct node_expr * node,
 
 }
 
-void sprintf_expression (struct node_expr * node,
-			 char * buffer)
-/* WARNING: buffer is assumed to be big enough to hold the expression */
+struct crude_str_buffer_{
+  char* start;
+  char* stop; // first address that isn't in the buffer
+};
+
+void print_to_buf_(struct crude_str_buffer_ * buffer, const char * fmt, ...) {
+  if ((buffer->start + 1) >= buffer->stop) {
+    return;
+  }
+  va_list args;
+  va_start(args, fmt);
+  size_t size = buffer->stop - buffer->start;
+  int count = vsnprintf(buffer->start, size, fmt, args);
+  va_end(args);
+
+  if (count < 0) {
+    buffer->start = buffer->stop;
+  } else {
+    // count returns the total number of counters that would be written, without
+    // truncation, while not including the terminating null-byte
+    buffer->start += count;
+  }
+}
+
+void sprintf_expression_helper_(struct node_expr * node,
+                                struct crude_str_buffer_ * buffer)
 {
   if (node == NULL) {
-    sprintf (buffer,"NULL");
+    print_to_buf_(buffer,"NULL");
   } else {
     char left,right;
     switch (node->type) {
     case enum_node_integer:
-      sprintf (buffer,"%d",node->integer_value);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%d",node->integer_value);
       break;
     case enum_node_float:
       /* '#' format character forces a decimal point */
-      sprintf (buffer,FLOAT_FORMAT,node->float_value);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,FLOAT_FORMAT,node->float_value);
       break;
     case enum_node_variable:
-      sprintf (buffer,"%c",node->var_value);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%c",node->var_value);
       break;
     case enum_node_function:
-      sprintf (buffer,"%s(",node->function_name);
-      buffer += strlen(buffer);
-      sprintf_expression(node->left,buffer+strlen(buffer));
-      buffer += strlen(buffer);
-      sprintf (buffer,")");
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%s(",node->function_name);
+      sprintf_expression_helper_(node->left,buffer);
+      print_to_buf_ (buffer,")");
       break;
     case enum_node_operation:
       left  = (node->left->type == enum_node_operation) ? '(' : ' ';
       right = (node->left->type == enum_node_operation) ? ')' : ' ';
-      sprintf (buffer,"%c",left);
-      buffer += strlen(buffer);
-      sprintf_expression(node->left,buffer+strlen(buffer));
-      buffer += strlen(buffer);
-      sprintf (buffer,"%c",right);
-      buffer += strlen(buffer);
-      sprintf (buffer," %s ",op_name[node->op_value]);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%c",left);
+      sprintf_expression_helper_(node->left,buffer);
+      print_to_buf_ (buffer,"%c",right);
+      print_to_buf_ (buffer," %s ",op_name[node->op_value]);
       left  = (node->right->type == enum_node_operation) ? '(' : ' ';
       right = (node->right->type == enum_node_operation) ? ')' : ' ';
-      sprintf (buffer,"%c",left);
-      buffer += strlen(buffer);
-      sprintf_expression(node->right,buffer+strlen(buffer));
-      buffer += strlen(buffer);
-      sprintf (buffer,"%c",right);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%c",left);
+      sprintf_expression_helper_(node->right,buffer);
+      print_to_buf_ (buffer,"%c",right);
       break;
     default:
       break;
     }
   }
 }
+
+void sprintf_expression (struct node_expr * node,
+                         char * buffer, size_t buffer_size)
+{
+  struct crude_str_buffer_ buf = {buffer, buffer+buffer_size};
+  sprintf_expression_helper_(node,&buf);
+}
+
 
 void cello_parameters_print_list(struct param_struct * head, int level);
 void cello_print_parameter(struct param_struct * p, int level)
