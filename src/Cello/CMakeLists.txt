@@ -290,7 +290,7 @@ target_link_libraries(monitor
   PUBLIC error parallel performance
 )
 
-# whenever parse.y or parse.l changes, you should use the 
+# whenever parse.y or parse.l changes, you should use the
 #   tools/regenerate_parser.py
 # script to regenerate parse.tab.[ch] and lex.yy.c
 # (doing this involves bison and flex)
