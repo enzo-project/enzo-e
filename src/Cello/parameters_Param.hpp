@@ -9,6 +9,7 @@
 #define PARAMETERS_PARAM_HPP
 
 //----------------------------------------------------------------------
+#include <stddef.h> // size_t
 
 /// @brief Print a parameter expression
 extern "C" { 
@@ -19,7 +20,7 @@ extern "C" {
 /// @brief Print a parameter expression
 extern "C" { 
   void sprintf_expression(struct node_expr * node,
-			  char * buffer);
+			  char * buffer, size_t buffer_size);
 }
 
 /// @brief Print a parameter list

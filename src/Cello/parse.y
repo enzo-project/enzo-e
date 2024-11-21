@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #ifndef __APPLE__
 	#include <malloc.h>
@@ -786,61 +787,79 @@ void print_expression (struct node_expr * node,
 
 }
 
-void sprintf_expression (struct node_expr * node,
-			 char * buffer)
-/* WARNING: buffer is assumed to be big enough to hold the expression */
+struct crude_str_buffer_{
+  char* start;
+  char* stop; // first address that isn't in the buffer
+};
+
+void print_to_buf_(struct crude_str_buffer_ * buffer, const char * fmt, ...) {
+  if ((buffer->start + 1) >= buffer->stop) {
+    return;
+  }
+  va_list args;
+  va_start(args, fmt);
+  size_t size = buffer->stop - buffer->start;
+  int count = vsnprintf(buffer->start, size, fmt, args);
+  va_end(args);
+
+  if (count < 0) {
+    buffer->start = buffer->stop;
+  } else {
+    // count returns the total number of counters that would be written, without
+    // truncation, while not including the terminating null-byte
+    buffer->start += count;
+  }
+}
+
+void sprintf_expression_helper_(struct node_expr * node,
+                                struct crude_str_buffer_ * buffer)
 {
   if (node == NULL) {
-    sprintf (buffer,"NULL");
+    print_to_buf_(buffer,"NULL");
   } else {
     char left,right;
     switch (node->type) {
     case enum_node_integer:
-      sprintf (buffer,"%d",node->integer_value);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%d",node->integer_value);
       break;
     case enum_node_float:
       /* '#' format character forces a decimal point */
-      sprintf (buffer,FLOAT_FORMAT,node->float_value);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,FLOAT_FORMAT,node->float_value);
       break;
     case enum_node_variable:
-      sprintf (buffer,"%c",node->var_value);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%c",node->var_value);
       break;
     case enum_node_function:
-      sprintf (buffer,"%s(",node->function_name);
-      buffer += strlen(buffer);
-      sprintf_expression(node->left,buffer+strlen(buffer));
-      buffer += strlen(buffer);
-      sprintf (buffer,")");
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%s(",node->function_name);
+      sprintf_expression_helper_(node->left,buffer);
+      print_to_buf_ (buffer,")");
       break;
     case enum_node_operation:
       left  = (node->left->type == enum_node_operation) ? '(' : ' ';
       right = (node->left->type == enum_node_operation) ? ')' : ' ';
-      sprintf (buffer,"%c",left);
-      buffer += strlen(buffer);
-      sprintf_expression(node->left,buffer+strlen(buffer));
-      buffer += strlen(buffer);
-      sprintf (buffer,"%c",right);
-      buffer += strlen(buffer);
-      sprintf (buffer," %s ",op_name[node->op_value]);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%c",left);
+      sprintf_expression_helper_(node->left,buffer);
+      print_to_buf_ (buffer,"%c",right);
+      print_to_buf_ (buffer," %s ",op_name[node->op_value]);
       left  = (node->right->type == enum_node_operation) ? '(' : ' ';
       right = (node->right->type == enum_node_operation) ? ')' : ' ';
-      sprintf (buffer,"%c",left);
-      buffer += strlen(buffer);
-      sprintf_expression(node->right,buffer+strlen(buffer));
-      buffer += strlen(buffer);
-      sprintf (buffer,"%c",right);
-      buffer += strlen(buffer);
+      print_to_buf_ (buffer,"%c",left);
+      sprintf_expression_helper_(node->right,buffer);
+      print_to_buf_ (buffer,"%c",right);
       break;
     default:
       break;
     }
   }
 }
+
+void sprintf_expression (struct node_expr * node,
+                         char * buffer, size_t buffer_size)
+{
+  struct crude_str_buffer_ buf = {buffer, buffer+buffer_size};
+  sprintf_expression_helper_(node,&buf);
+}
+
 
 void cello_parameters_print_list(struct param_struct * head, int level);
 void cello_print_parameter(struct param_struct * p, int level)
