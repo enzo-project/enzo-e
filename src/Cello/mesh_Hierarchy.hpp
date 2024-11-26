@@ -29,6 +29,8 @@ public: // interface
     refinement_(0),
     min_level_(0),
     max_level_(0),
+    refined_regions_lower_(),
+    refined_regions_upper_(),
     num_blocks_(0),
     num_blocks_level_(),
     block_vec_(),
@@ -65,7 +67,7 @@ public: // interface
 
   /// Set domain upper extent
   void set_upper(double x, double y, double z) throw ();
-  
+
   /// Set root-level grid size
   void set_root_size(int nx, int ny, int nz) throw ();
 
@@ -197,13 +199,26 @@ public: // interface
   {  return num_zones_total_;  }
 
   CProxy_Block new_block_proxy (bool allocate_data) throw();
-  
+
   void create_block_array () throw();
 
   void create_subblock_array () throw();
 
+  // Getter/Setter functions for refined_regions_lower/upper members.
+  void refined_region_lower(int region_lower[3], int level) throw();
+  void refined_region_upper(int region_upper[3], int level) throw();
+  std::vector< std::vector<int> > refined_region_lower() {return refined_regions_lower_;}
+  std::vector< std::vector<int> > refined_region_upper() {return refined_regions_upper_;}
+  void set_refined_regions_lower(std::vector< std::vector<int> > lower) throw() {
+    refined_regions_lower_ = lower;
+  }
+  void set_refined_regions_upper(std::vector< std::vector<int> > upper) throw() {
+    refined_regions_upper_ = upper;
+  }
+
   /// Return the number of root-level Blocks along each rank
-  void root_blocks (int * nbx, int * nby=0, int * nbz=0) const throw();
+  /// in the given level (default level is root)
+  void root_blocks (int * nbx, int * nby=0, int * nbz=0, int level=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
@@ -223,6 +238,14 @@ protected: // attributes
 
   /// Maximum mesh level
   int max_level_;
+
+  // Lower limits of regions of blocks, at different levels, which should
+  // refine to create the next nested grid at initialization.
+  std::vector< std::vector<int> > refined_regions_lower_;
+
+  // Upper limits of regions of blocks, at different levels, which should
+  // refine to create the next nested grid at initialization.
+  std::vector< std::vector<int> > refined_regions_upper_;
 
   /// Maximum number of refinement levels
 

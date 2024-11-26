@@ -62,16 +62,6 @@ public: // interface
                 enzo_float* p,
                 int stale_depth = 0) throw();
 
-  /// Perform the calculation with the provided `grackle_units` or
-  /// `grackle_fields` object.
-  ///
-  /// @note
-  /// This is primarily used by `EnzoInitialGrackleTest`
-  void compute_(Block * block,
-                enzo_float * p,
-                int stale_depth = 0,
-                grackle_field_data * grackle_fields = nullptr);
-
   /// static method to compute thermal pressure
   ///
   /// @param[in]  fadaptor Contains arrays of quantities used to compute the
@@ -98,9 +88,7 @@ public: // interface
                                const CelloView<enzo_float, 3>& p,
                                bool mhd, bool dual_energy, double gamma,
                                int stale_depth = 0,
-                               bool ignore_grackle = false,
-                               grackle_field_data * grackle_fields = nullptr
-                               ) throw();
+                               bool ignore_grackle = false) throw();
 
 protected: // attributes
 

@@ -65,7 +65,8 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     name_(""),
     index_method_(-1),
     index_solver_(),
-    refresh_()
+    refresh_(),
+    index_(thisIndex)
 {
 #ifdef TRACE_BLOCK
 
@@ -102,6 +103,7 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   apply_initial_(msg);
 
   performance_stop_(perf_block);
+
 #ifdef TRACE_BLOCK
   {
   CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine) done\n",
@@ -183,6 +185,17 @@ void Block::init_refine_
     child_face_level_curr_.resize(cello::num_children()*27);
 
     adapt_.reset_face_level (Adapt::LevelType::curr);
+
+    // Compute and set the face levels of
+    int if3[3], na3[3], face_levels[27] = {};
+    size_array(na3,na3+1,na3+2);
+    ItFace it_face = this->it_face(cello::config()->adapt_min_face_rank, index_);
+    while (it_face.next(if3)) {
+      Index neighbor_index = index_.index_neighbor(if3, na3);
+      bool refine = refine_during_initialization(neighbor_index);
+      face_levels[IF3(if3)] = refine ? 1 : 0;
+    }
+    adapt_.copy_face_level(Adapt::LevelType::curr, face_levels);
 
   } else {
 
@@ -519,20 +532,35 @@ void Block::apply_initial_(MsgRefine * msg) throw ()
     msg->update(data());
   } else {
     TRACE("Block::apply_initial_()");
-    const bool initial_new = cello::config()->initial_new;
-    if (initial_new) {
+    Simulation * simulation = cello::simulation();
+    if (simulation->phase() == phase_initial) {
+      // Create child blocks if this block refines during the initialization
+      // phase.
+      create_initial_child_blocks();
 
-      initial_new_begin_(0);
-
+      // Tell the root Simulation object this block is inserted and ready 
+      // to initialize data.
+      proxy_simulation[0].p_initial_block_created();
     } else {
-      // Apply initial conditions
+      initial_begin();
+    }
+  }
+}
 
-      index_initial_ = 0;
-      Problem * problem = cello::problem();
-      while (Initial * initial = problem->initial(index_initial_)) {
-        initial->enforce_block(this,cello::hierarchy());
-        index_initial_++;
-      }
+void Block::initial_begin()
+{
+  const bool initial_new = cello::config()->initial_new;
+
+  if (initial_new) {
+    initial_new_begin_();
+
+  } else {
+    // Apply initial conditions
+    index_initial_ = 0;
+    Problem * problem = cello::problem();
+    while (Initial * initial = problem->initial(index_initial_)) {
+      initial->enforce_block(this,cello::hierarchy());
+      index_initial_++;
     }
   }
 }
@@ -712,6 +740,7 @@ void Block::init_adapt_(Adapt * adapt_parent)
         }
       }
     }
+  
   } else if (level > 0) {
     // else if a refined Block, initialize adapt from its incoming
     // parent block
@@ -724,6 +753,20 @@ void Block::init_adapt_(Adapt * adapt_parent)
     adapt_parent->print("init_adapt parent",this);
     adapt_.print("init_adapt child after",this);
 #endif    
+  }
+
+  // replace neighbor blocks with their child blocks if they refine
+  // during the initialization phase.
+  int max_initial_level = cello::config()->mesh_max_initial_level;
+  for (int level_i=level; level_i < max_initial_level; level_i++) {
+    std::vector<Index> neighbors = adapt_.index_neighbors();
+    for (int i=0; i<(int) neighbors.size(); i++) {
+      Index neighbor_index = neighbors.at(i);
+      if (neighbor_index.level() == level_i) {
+        if (refine_during_initialization(neighbor_index))
+          adapt_.refine_neighbor(neighbor_index);
+      }
+    }
   }
 }
 
@@ -857,16 +900,13 @@ void Block::cell_width
 //----------------------------------------------------------------------
 
 void Block::index_global
-( int *ix, int *iy, int *iz,
+( Index index,
+  int *ix, int *iy, int *iz,
   int *nx, int *ny, int *nz ) const
 {
-
-  index_array(ix,iy,iz);
+  const int level = index.level();
+  index.array(ix,iy,iz);
   size_array (nx,ny,nz);
-
-  Index index = this->index();
-
-  const int level = this->level();
 
   if (level < 0 ) {
     for (int i=level; i<0; i++) {
@@ -889,6 +929,21 @@ void Block::index_global
       if (nz) (*nz) <<= 1;
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+Index Block::index_from_global(int ix, int iy, int iz, int level, int min_level)
+{
+  Index index;
+  index.set_array(ix >> level, iy >> level, iz >> level);
+  index.set_level(level);
+  for (int i = 0; i < level - min_level; i++) {
+    int l = level - i;
+    index.set_child(l, (ix >> i) & 1, (iy >> i) & 1, (iz >> i) & 1, min_level);
+  }
+
+  return index;
 }
 
 //----------------------------------------------------------------------
@@ -1139,3 +1194,30 @@ bool Block::check_position_in_block
   return result;
 }
 
+//----------------------------------------------------------------------
+
+bool Block::refine_during_initialization(Index index) const throw()
+{
+  int level = index.level();
+  if (level >= 0) {
+    
+    if (level + 1 <= (int) cello::config()->refined_regions_lower.size()) {
+
+      std::vector<int> lower = cello::config()->refined_regions_lower.at(level);
+      std::vector<int> upper = cello::config()->refined_regions_upper.at(level);
+
+      int ix, iy, iz, nx, ny, nz;
+      index_global(index, &ix, &iy, &iz, &nx, &ny, &nz);
+
+      if (lower.at(0) <= ix && ix < upper.at(0)) {
+        if (lower.at(1) <= iy && iy < upper.at(1)) {
+          if (lower.at(2) <= iz && iz < upper.at(2)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}

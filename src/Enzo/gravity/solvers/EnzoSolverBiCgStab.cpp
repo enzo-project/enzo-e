@@ -732,7 +732,6 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
     const long double s_c =   S(c);
     if (is_singular_()) {
       enzo_float shift = s_r0s/ s_c;
-	
       if (is_finest_(block)) {
 	Field field = block->data()->field();
 	enzo_float* R0 = (enzo_float*) field.values(ir0_);
@@ -1634,7 +1633,7 @@ void EnzoSolverBiCgStab::end (EnzoBlock* block, int retval) throw () {
   TRACE_BCG(block,this,"end");
 
   deallocate_temporary_(block);
-  
+
   Solver::end_(block);
 }
 

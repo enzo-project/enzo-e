@@ -128,11 +128,14 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_hdf5_field_datasets,
        enzo_config->initial_hdf5_field_coords,
        enzo_config->initial_hdf5_field_names,
+       enzo_config->initial_hdf5_field_levels,
        enzo_config->initial_hdf5_particle_files,
        enzo_config->initial_hdf5_particle_datasets,
        enzo_config->initial_hdf5_particle_coords,
        enzo_config->initial_hdf5_particle_types,
-       enzo_config->initial_hdf5_particle_attributes);
+       enzo_config->initial_hdf5_particle_attributes,
+       enzo_config->initial_hdf5_particle_levels
+       );
 
   } else if (type == "music") {
 
@@ -166,10 +169,8 @@ Initial * EnzoProblem::create_initial_
     if (rank == 2) initial = new EnzoInitialSedovArray2(enzo_config);
     if (rank == 3) initial = new EnzoInitialSedovArray3(enzo_config);
 
-#ifdef CONFIG_USE_GRACKLE
   } else if (type == "grackle_test") {
-    initial = new EnzoInitialGrackleTest(enzo_config);
-#endif /* CONFIG_USE_GRACKLE */
+    initial = new EnzoInitialGrackleTest(cycle, time, p_group);
   } else if (type == "feedback_test") {
     initial = new EnzoInitialFeedbackTest(cycle, time, p_group);
   } else if (type == "vlct_bfield") {
@@ -241,15 +242,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_accretion_test_gas_radial_velocity);
   } else if (type == "shu_collapse") {
     initial = new EnzoInitialShuCollapse
-      (cycle, time,
-       enzo_config->initial_shu_collapse_center,
-       enzo_config->initial_shu_collapse_drift_velocity,
-       enzo_config->initial_shu_collapse_truncation_radius,
-       enzo_config->initial_shu_collapse_nominal_sound_speed,
-       enzo_config->initial_shu_collapse_instability_parameter,
-       enzo_config->initial_shu_collapse_external_density,
-       enzo_config->initial_shu_collapse_central_sink_exists,
-       enzo_config->initial_shu_collapse_central_sink_mass);
+      (cycle, time, p_group);
   } else if (type == "bb_test") {
     initial = new EnzoInitialBBTest
       (cycle, time,
@@ -604,6 +597,15 @@ Method * EnzoProblem::create_method_
     skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
+
+  } else if (name == "inference") {
+
+    method = new EnzoMethodInference
+      (enzo_config->method_inference_level_base,
+       enzo_config->method_inference_level_array,
+       enzo_config->method_inference_level_infer,
+       enzo_config->method_inference_field_group,
+       enzo_config->method_inference_overdensity_threshold);
 
   } else if (name == "balance") {
 

@@ -111,7 +111,7 @@ The introduction of this formalism has 2 key benefits:
      determination of which indices to iterate over. The
      ``EnzoFieldArrayFactory`` can take the stale depth as an argument
      in its constructor and then all arrays that an instance builds
-     will have the stale values clipped off.  This allows the bounds of 
+     will have the stale values clipped off.  This allows the bounds of
      for-loops to be written as though the only reconstruction algorithm
      is nearest-neighbor interpolation and as though there never any
      preceeding partial timesteps.
@@ -765,7 +765,7 @@ reproduced below:
 .. note::
    In the near-future, the above snippet will be replaced with nicer looking
    documentation that will be auto-generated using doxygen and breathe
-   
+
 More details will be given below about internal energy calculations.
 
     .. _KernelReq-section:

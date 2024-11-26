@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_BUILD_CELLO_PARSE_TAB_H_INCLUDED
 # define YY_YY_BUILD_CELLO_PARSE_TAB_H_INCLUDED
@@ -44,64 +45,69 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    STRING = 258,
-    IDENTIFIER = 259,
-    VARIABLE = 260,
-    FLOAT = 261,
-    INTEGER = 262,
-    LOGICAL = 263,
-    LE = 264,
-    GE = 265,
-    NE = 266,
-    EQ = 267,
-    AND = 268,
-    OR = 269,
-    ACOS = 270,
-    ACOSH = 271,
-    APPEND = 272,
-    ASIN = 273,
-    ASINH = 274,
-    ATAN = 275,
-    ATANH = 276,
-    CBRT = 277,
-    CEIL = 278,
-    COS = 279,
-    COSH = 280,
-    ERFC = 281,
-    ERF = 282,
-    EXP = 283,
-    EXPM1 = 284,
-    FABS = 285,
-    FLOOR = 286,
-    J0 = 287,
-    J1 = 288,
-    LGAMMA = 289,
-    LOG10 = 290,
-    LOG1P = 291,
-    LOGB = 292,
-    LOG = 293,
-    PI = 294,
-    SIN = 295,
-    SINH = 296,
-    SQRT = 297,
-    TAN = 298,
-    TANH = 299,
-    Y0 = 300,
-    Y1 = 301,
-    RINT = 302
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    STRING = 258,                  /* STRING  */
+    IDENTIFIER = 259,              /* IDENTIFIER  */
+    VARIABLE = 260,                /* VARIABLE  */
+    FLOAT = 261,                   /* FLOAT  */
+    INTEGER = 262,                 /* INTEGER  */
+    LOGICAL = 263,                 /* LOGICAL  */
+    LE = 264,                      /* LE  */
+    GE = 265,                      /* GE  */
+    NE = 266,                      /* NE  */
+    EQ = 267,                      /* EQ  */
+    AND = 268,                     /* AND  */
+    OR = 269,                      /* OR  */
+    ACOS = 270,                    /* ACOS  */
+    ACOSH = 271,                   /* ACOSH  */
+    APPEND = 272,                  /* APPEND  */
+    ASIN = 273,                    /* ASIN  */
+    ASINH = 274,                   /* ASINH  */
+    ATAN = 275,                    /* ATAN  */
+    ATANH = 276,                   /* ATANH  */
+    CBRT = 277,                    /* CBRT  */
+    CEIL = 278,                    /* CEIL  */
+    COS = 279,                     /* COS  */
+    COSH = 280,                    /* COSH  */
+    ERFC = 281,                    /* ERFC  */
+    ERF = 282,                     /* ERF  */
+    EXP = 283,                     /* EXP  */
+    EXPM1 = 284,                   /* EXPM1  */
+    FABS = 285,                    /* FABS  */
+    FLOOR = 286,                   /* FLOOR  */
+    J0 = 287,                      /* J0  */
+    J1 = 288,                      /* J1  */
+    LGAMMA = 289,                  /* LGAMMA  */
+    LOG10 = 290,                   /* LOG10  */
+    LOG1P = 291,                   /* LOG1P  */
+    LOGB = 292,                    /* LOGB  */
+    LOG = 293,                     /* LOG  */
+    PI = 294,                      /* PI  */
+    SIN = 295,                     /* SIN  */
+    SINH = 296,                    /* SINH  */
+    SQRT = 297,                    /* SQRT  */
+    TAN = 298,                     /* TAN  */
+    TANH = 299,                    /* TANH  */
+    Y0 = 300,                      /* Y0  */
+    Y1 = 301,                      /* Y1  */
+    RINT = 302                     /* RINT  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 380 "build/Cello/parse.y"
+#line 381 "build/Cello/parse.y"
  
   int logical_type;  
   int integer_type; 
@@ -111,7 +117,7 @@ union YYSTYPE
   struct node_expr * node_type;
   
 
-#line 115 "build/Cello/parse.tab.h"
+#line 121 "build/Cello/parse.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -122,6 +128,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_BUILD_CELLO_PARSE_TAB_H_INCLUDED  */

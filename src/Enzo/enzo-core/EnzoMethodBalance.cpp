@@ -50,8 +50,8 @@ void EnzoMethodBalance::compute ( Block * block) throw()
     monitor->print("Method", "Calling Cello load-balancer");
 
   ScalarDescr * sd = cello::scalar_descr_long_long();
-  const int is_count = sd->index("order_morton:count");  
-  const int is_index = sd->index("order_morton:index");  
+  const int is_count = sd->index("order_hilbert:count") == -1 ? sd->index("order_morton:count") : sd->index("order_hilbert:count");
+  const int is_index = sd->index("order_hilbert:index") == -1 ? sd->index("order_morton:index") : sd->index("order_hilbert:index");
   Scalar<long long> scalar(cello::scalar_descr_long_long(),
                      block->data()->scalar_data_long_long());
 

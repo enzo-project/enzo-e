@@ -290,7 +290,12 @@ target_link_libraries(monitor
   PUBLIC error parallel performance
 )
 
-
+# whenever parse.y or parse.l changes, you should use the
+#   tools/regenerate_parser.py
+# script to regenerate parse.tab.[ch] and lex.yy.c
+# (doing this involves bison and flex)
+# Aside: we have intentionally avoided building this into the build-system
+#        so that users don't need to have these applications installed
 addCelloLib(parameters "parse.tab.c;lex.yy.c")
 target_link_libraries(parameters
   PUBLIC error performance monitor parallel

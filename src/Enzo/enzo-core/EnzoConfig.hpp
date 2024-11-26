@@ -84,16 +84,10 @@ public: // interface
       initial_collapse_temperature(0.0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
-      // EnzoGrackleTest
-      initial_grackle_test_maximum_H_number_density(1000.0),
-      initial_grackle_test_maximum_metallicity(1.0),
-      initial_grackle_test_maximum_temperature(1.0E8),
-      initial_grackle_test_minimum_H_number_density(0.1),
-      initial_grackle_test_minimum_metallicity(1.0E-4),
-      initial_grackle_test_minimum_temperature(10.0),
       // EnzoInitialHdf5
       initial_hdf5_blocking(),
       initial_hdf5_field_coords(),
+      initial_hdf5_field_levels(),
       initial_hdf5_field_datasets(),
       initial_hdf5_field_files(),
       initial_hdf5_field_names(),
@@ -101,6 +95,7 @@ public: // interface
       initial_hdf5_max_level(),
       initial_hdf5_monitor_iter(),
       initial_hdf5_particle_attributes(),
+      initial_hdf5_particle_levels(),
       initial_hdf5_particle_coords(),
       initial_hdf5_particle_datasets(),
       initial_hdf5_particle_files(),
@@ -168,13 +163,6 @@ public: // interface
       initial_sedov_random_radius_relative(0.0),
       initial_sedov_random_te_multiplier(0),
       initial_sedov_rank(0),
-      // EnzoInitialShuCollapse
-      initial_shu_collapse_central_sink_exists(false),
-      initial_shu_collapse_central_sink_mass(0.0),
-      initial_shu_collapse_external_density(0.0),
-      initial_shu_collapse_instability_parameter(0.0),
-      initial_shu_collapse_nominal_sound_speed(0.0),
-      initial_shu_collapse_truncation_radius(0.0),
       // EnzoInitialTurbulence
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
@@ -194,6 +182,12 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
+      /// EnzoMethodInference
+      method_inference_level_base(0),
+      method_inference_level_array(0),
+      method_inference_level_infer(0),
+      method_inference_field_group(),
+      method_inference_overdensity_threshold(0),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -246,7 +240,6 @@ protected: // methods
   void read_initial_burkertbodenheimer_(Parameters *);
   void read_initial_collapse_(Parameters *);
   void read_initial_cosmology_(Parameters *);
-  void read_initial_grackle_(Parameters *);
   void read_initial_hdf5_(Parameters *);
   void read_initial_isolated_galaxy_(Parameters *);
   void read_initial_merge_sinks_test_(Parameters *);
@@ -254,7 +247,6 @@ protected: // methods
   void read_initial_pm_(Parameters *);
   void read_initial_sedov_(Parameters *);
   void read_initial_sedov_random_(Parameters *);
-  void read_initial_shu_collapse_(Parameters *);
   void read_initial_turbulence_(Parameters *);
 
   //--------------------
@@ -262,6 +254,7 @@ protected: // methods
   //--------------------
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
+  void read_method_inference_(Parameters *);
   void read_method_turbulence_(Parameters *);
 
   void read_physics_(Parameters *);
@@ -315,14 +308,6 @@ public: // attributes
   double                     initial_collapse_mass;
   double                     initial_collapse_temperature;
 
-  /// EnzoGrackleTest
-  double                     initial_grackle_test_maximum_H_number_density;
-  double                     initial_grackle_test_maximum_metallicity;
-  double                     initial_grackle_test_maximum_temperature;
-  double                     initial_grackle_test_minimum_H_number_density;
-  double                     initial_grackle_test_minimum_metallicity;
-  double                     initial_grackle_test_minimum_temperature;
-
   /// EnzoInitialHdf5
 
   int                         initial_hdf5_max_level;
@@ -333,11 +318,13 @@ public: // attributes
   std::vector < std::string > initial_hdf5_field_datasets;
   std::vector < std::string > initial_hdf5_field_names;
   std::vector < std::string > initial_hdf5_field_coords;
+  std::vector < int >         initial_hdf5_field_levels;
   std::vector < std::string > initial_hdf5_particle_files;
   std::vector < std::string > initial_hdf5_particle_datasets;
   std::vector < std::string > initial_hdf5_particle_coords;
   std::vector < std::string > initial_hdf5_particle_types;
   std::vector < std::string > initial_hdf5_particle_attributes;
+  std::vector < int >         initial_hdf5_particle_levels;
 
   /// EnzoInitialMusic
 
@@ -424,16 +411,6 @@ public: // attributes
   double                     initial_accretion_test_sink_position[3];
   double                     initial_accretion_test_sink_velocity[3];
 
-  // EnzoInitialShuCollapse
-  bool                       initial_shu_collapse_central_sink_exists;
-  double                     initial_shu_collapse_center[3];
-  double                     initial_shu_collapse_central_sink_mass;
-  double                     initial_shu_collapse_drift_velocity[3];
-  double                     initial_shu_collapse_external_density;
-  double                     initial_shu_collapse_instability_parameter;
-  double                     initial_shu_collapse_nominal_sound_speed;
-  double                     initial_shu_collapse_truncation_radius;
-
   // EnzoInitialBBTest
   double                     initial_bb_test_angular_rotation_velocity;
   double                     initial_bb_test_center[3];
@@ -457,6 +434,13 @@ public: // attributes
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
+
+  /// EnzoMethodInference
+  int                        method_inference_level_base;
+  int                        method_inference_level_array;
+  int                        method_inference_level_infer;
+  std::string                method_inference_field_group;
+  float                      method_inference_overdensity_threshold;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

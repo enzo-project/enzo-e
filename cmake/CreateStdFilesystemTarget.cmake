@@ -47,11 +47,11 @@ function(_detect_stdlib_impl output_variable)
   # this detection stategy, won't work for libstdc++ older than 6.1
   # (but that's okay, such versions are older than C++17)
   file(WRITE ${test_file}
-" 
+"
 // include headers defining implementation-specific macros (since we include
 // <iostream>, this may not be strictly necessary)
 #if __has_include(<ciso646>)
-  // pre c++20, this header is commonly included for std library implementation 
+  // pre c++20, this header is commonly included for std library implementation
   // macros: https://en.cppreference.com/w/cpp/header/version
   #include <ciso646>
 #else

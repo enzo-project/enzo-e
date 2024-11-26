@@ -42,13 +42,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
-  // EnzoInitialGrackleTest
-  initial_grackle_test_maximum_H_number_density(1000.0),
-  initial_grackle_test_maximum_metallicity(1.0),
-  initial_grackle_test_maximum_temperature(1.0E8),
-  initial_grackle_test_minimum_H_number_density(0.1),
-  initial_grackle_test_minimum_metallicity(1.0E-4),
-  initial_grackle_test_minimum_temperature(10.0),
   // EnzoInitialHdf5
   initial_hdf5_max_level(),
   initial_hdf5_format(),
@@ -58,11 +51,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_hdf5_field_datasets(),
   initial_hdf5_field_names(),
   initial_hdf5_field_coords(),
+  initial_hdf5_field_levels(),
   initial_hdf5_particle_files(),
   initial_hdf5_particle_datasets(),
   initial_hdf5_particle_coords(),
   initial_hdf5_particle_types(),
   initial_hdf5_particle_attributes(),
+  initial_hdf5_particle_levels(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -139,13 +134,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_accretion_test_gas_density(0.0),
   initial_accretion_test_gas_pressure(0.0),
   initial_accretion_test_gas_radial_velocity(0.0),
-  // EnzoInitialShuCollapse
-  initial_shu_collapse_truncation_radius(0.0),
-  initial_shu_collapse_nominal_sound_speed(0.0),
-  initial_shu_collapse_instability_parameter(0.0),
-  initial_shu_collapse_external_density(0.0),
-  initial_shu_collapse_central_sink_exists(false),
-  initial_shu_collapse_central_sink_mass(0.0),
   // EnzoInitialBBTest
   initial_bb_test_mean_density(0.0),
   initial_bb_test_fluctuation_amplitude(0.0),
@@ -153,6 +141,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_bb_test_nominal_sound_speed(0.0),
   initial_bb_test_angular_rotation_velocity(0.0),
   initial_bb_test_external_density(0.0),
+  // EnzoMethodInference
+  method_inference_level_base(0),
+  method_inference_level_array(0),
+  method_inference_level_infer(0),
+  method_inference_field_group(),
+  method_inference_overdensity_threshold(0),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -219,13 +213,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_collapse_mass;
   p | initial_collapse_temperature;
 
-  p | initial_grackle_test_minimum_H_number_density;
-  p | initial_grackle_test_maximum_H_number_density;
-  p | initial_grackle_test_minimum_temperature;
-  p | initial_grackle_test_maximum_temperature;
-  p | initial_grackle_test_minimum_metallicity;
-  p | initial_grackle_test_maximum_metallicity;
-
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
   p | initial_sedov_radius_relative;
@@ -255,11 +242,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_hdf5_field_datasets;
   p | initial_hdf5_field_names;
   p | initial_hdf5_field_coords;
+  p | initial_hdf5_field_levels;
   p | initial_hdf5_particle_files;
   p | initial_hdf5_particle_datasets;
   p | initial_hdf5_particle_coords;
   p | initial_hdf5_particle_types;
   p | initial_hdf5_particle_attributes;
+  p | initial_hdf5_particle_levels;
 
   p | initial_music_field_coords;
   p | initial_music_field_datasets;
@@ -325,21 +314,18 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_check_monitor_iter;
   p | method_check_include_ghosts;
 
+  p | method_inference_level_base;
+  p | method_inference_level_array;
+  p | method_inference_level_infer;
+  p | method_inference_field_group;
+  p | method_inference_overdensity_threshold;
+
   PUParray(p,initial_accretion_test_sink_position,3);
   PUParray(p,initial_accretion_test_sink_velocity,3);
   p | initial_accretion_test_sink_mass;
   p | initial_accretion_test_gas_density;
   p | initial_accretion_test_gas_pressure;
   p | initial_accretion_test_gas_radial_velocity;
-
-  PUParray(p,initial_shu_collapse_center,3);
-  PUParray(p,initial_shu_collapse_drift_velocity,3);
-  p | initial_shu_collapse_truncation_radius;
-  p | initial_shu_collapse_nominal_sound_speed;
-  p | initial_shu_collapse_instability_parameter;
-  p | initial_shu_collapse_external_density;
-  p | initial_shu_collapse_central_sink_exists;
-  p | initial_shu_collapse_central_sink_mass;
 
   PUParray(p,initial_bb_test_center,3);
   PUParray(p,initial_bb_test_drift_velocity,3);
@@ -400,7 +386,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_burkertbodenheimer_(p);
   read_initial_collapse_(p);
   read_initial_cosmology_(p);
-  read_initial_grackle_(p);
   read_initial_hdf5_(p);
   read_initial_isolated_galaxy_(p);
   read_initial_merge_sinks_test_(p);
@@ -408,7 +393,6 @@ void EnzoConfig::read(Parameters * p) throw()
   read_initial_pm_(p);
   read_initial_sedov_(p);
   read_initial_sedov_random_(p);
-  read_initial_shu_collapse_(p);
   read_initial_turbulence_(p);
 
   // it's important for read_physics_
@@ -418,6 +402,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   read_method_check_(p);
   read_method_turbulence_(p);
+  read_method_inference_(p);
 
   read_prolong_enzo_(p);
 
@@ -488,31 +473,22 @@ void EnzoConfig::read_initial_cosmology_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_initial_grackle_(Parameters * p)
-{
-  // Grackle test initialization
-  initial_grackle_test_minimum_H_number_density =
-    p->value_float("Initial:grackle_test:minimum_H_number_density",0.1);
-  initial_grackle_test_maximum_H_number_density =
-    p->value_float("Initial:grackle_test:maximum_H_number_density",1000.0);
-  initial_grackle_test_minimum_temperature =
-    p->value_float("Initial:grackle_test:minimum_temperature",10.0);
-  initial_grackle_test_maximum_temperature =
-    p->value_float("Initial:grackle_test:maximum_temperature",1.0E8);
-  initial_grackle_test_minimum_metallicity =
-    p->value_float("Initial:grackle_test:minimum_metallicity", 1.0E-4);
-  initial_grackle_test_maximum_metallicity =
-    p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
-}
-
-//----------------------------------------------------------------------
-
 void EnzoConfig::read_initial_hdf5_(Parameters * p)
 {
   const std::string name_initial = "Initial:hdf5:";
 
   initial_hdf5_max_level = p->value_integer (name_initial + "max_level", 0);
   initial_hdf5_format    = p->value_string  (name_initial + "format", "music");
+
+  // Ensure hdf5 max level agrees with adapt max initial level.
+  int adapt_max_level = p->value_integer("Adapt:max_level", 0);
+  int adapt_max_initial_level = p->value_integer("Adapt:max_initial_level", adapt_max_level);
+  if (initial_hdf5_max_level > 0 && adapt_max_initial_level != initial_hdf5_max_level) {
+    ERROR2("Config::read_initial_hdf5_()",
+    "The hdf5 max level (%d) should equal Adapt:max_initial_level (%d)",
+    initial_hdf5_max_level,
+    adapt_max_initial_level);
+  }
 
   for (int i=0; i<3; i++) {
     initial_hdf5_blocking[i] =
@@ -533,6 +509,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
     const std::string file    = p->value_string (file_id + "file","");
     const std::string dataset = p->value_string (file_id + "dataset","");
     const std::string coords  = p->value_string (file_id + "coords","xyz");
+    const int level           = p->value_integer (file_id + "level", 0);
 
     if (type == "particle") {
 
@@ -543,6 +520,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_particle_coords.    push_back(coords);
       initial_hdf5_particle_types.     push_back(name);
       initial_hdf5_particle_attributes.push_back(attribute);
+      initial_hdf5_particle_levels.    push_back(level);
 
     } else if (type == "field") {
 
@@ -550,6 +528,7 @@ void EnzoConfig::read_initial_hdf5_(Parameters * p)
       initial_hdf5_field_datasets.     push_back(dataset);
       initial_hdf5_field_names.        push_back(name);
       initial_hdf5_field_coords.       push_back(coords);
+      initial_hdf5_field_levels.       push_back(level);
 
     } else {
       ERROR2 ("EnzoConfig::read",
@@ -835,37 +814,6 @@ void EnzoConfig::read_initial_accretion_test_(Parameters * p)
     ("Initial:accretion_test:gas_radial_velocity",0.0);
 }
 
-void EnzoConfig::read_initial_shu_collapse_(Parameters * p)
-{
-  for (int axis=0; axis<3; axis++){
-    initial_shu_collapse_center[axis] = p->list_value_float
-      (axis, "Initial:shu_collapse:center", 0.0);
-  }
-
-  for (int axis=0; axis<3; axis++){
-    initial_shu_collapse_drift_velocity[axis] = p->list_value_float
-      (axis, "Initial:shu_collapse:drift_velocity", 0.0);
-  }
-
-  initial_shu_collapse_truncation_radius = p->value_float
-    ("Initial:shu_collapse:truncation_radius",1.0);
-
-  initial_shu_collapse_nominal_sound_speed = p->value_float
-    ("Initial:shu_collapse:nominal_sound_speed",1.0);
-
-  initial_shu_collapse_instability_parameter = p->value_float
-    ("Initial:shu_collapse:instability_parameter",2.1);
-
-  initial_shu_collapse_external_density = p->value_float
-    ("Initial:shu_collapse:external_density",1.0e-6);
-
-  initial_shu_collapse_central_sink_exists = p->value_logical
-    ("Initial:shu_collapse:central_sink_exists",false);
-
-  initial_shu_collapse_central_sink_mass = p->value_float
-    ("Initial:shu_collapse:central_sink_mass",0.0);
-}
-
 void EnzoConfig::read_initial_bb_test_(Parameters * p)
 {
   for (int axis=0; axis<3; axis++){
@@ -921,6 +869,25 @@ void EnzoConfig::read_method_check_(Parameters * p)
   }
   method_check_monitor_iter   = p->value_integer("monitor_iter",0);
   method_check_include_ghosts = p->value_logical("include_ghosts",false);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoConfig::read_method_inference_(Parameters* p)
+{
+  p->group_set(0,"Method");
+  p->group_push("inference");
+
+  method_inference_level_base = p->value_integer ("level_base");
+  method_inference_level_array = p->value_integer ("level_array");
+  method_inference_level_infer = p->value_integer ("level_infer");
+
+  const int rank = p->value_integer("Mesh:root_rank",0);
+
+  method_inference_field_group = p->value_string  ("field_group");
+
+  method_inference_overdensity_threshold = p->value_float
+    ("Method:inference:overdensity_threshold",0.0);
 }
 
 //----------------------------------------------------------------------

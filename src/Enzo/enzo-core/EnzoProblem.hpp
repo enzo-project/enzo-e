@@ -68,7 +68,7 @@ private: // functions
   /// Create named refine object
   virtual Refine * create_refine_ 
   (std::string type,
-   int index, 
+   int         index,
    Config * config, 
    Parameters * parameters) throw ();
 

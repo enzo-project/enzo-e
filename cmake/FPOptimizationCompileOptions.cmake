@@ -1,31 +1,36 @@
 # See LICENSE_ENZO file for license and copyright information
 
 #.rst:
-# EnableFPOptimizations
-# ---------------------
+# FPOptimizationCompileOptions
+# ----------------------------
 #
 # Defines a function that enables value-unsafe floating point optimization
 # flags for the C and C++ compilers.
-# 
+#
 # This can also add the openmp-simd flags to the C and C++ compilers (and any
 # other flags necessary for simd optimizations).
 
-if(__enableFPOptimizations)
+if(__FPOptimizationCompileOptions)
   return()
 endif()
-set(__enableFPOptimizations YES)
+set(__FPOptimizationCompileOptions YES)
 
-# Function 'enableFPOptimizations' is used to add C and C++ flags to the
-# various build types that compile the program with value unsafe floating point
-# optimizations.
+# Function 'get_fp_optimization_compile_options' is used to retrieve C and C++
+# flags, that compile the program with value unsafe floating point
+# optimizations. The flags use generator-expressions to conditionally
+# enable/disable choices based on the precise built-type
 #
 # ARGUMENTS
 # ---------
 # USE_SIMD
-#   When this a passed a TRUE value, this function also adds C and C++ compiler
-#   flags to enable OpenMP's SIMD directives
+#   When this is passed a TRUE value, this function also adds C and C++
+#   compiler flags to enable OpenMP's SIMD directives
 #   - For clang, gnu and intel compilers this does NOT enable other OpenMP
 #     directives and should not link the openmp runtime library
+# outVar
+#   The name of the variable where the list of compiler-options are written to
+#   by this function.
+#
 #
 # NOTES
 # -----
@@ -40,7 +45,7 @@ set(__enableFPOptimizations YES)
 # the Intel compiler compared to code compiled by other compilers. This is
 # because the Intel compilers enable some of these options by default (this
 # strongly to the Intel Compiler's reputation for producing faster code)
-function(enableFPOptimizations USE_SIMD)
+function(get_fp_optimization_compile_options USE_SIMD outVar)
 
   # ToDo: check assumption that CMAKE_C_COMPILER_ID and CMAKE_CXX_COMPILER_ID
   # are equal to each other...
@@ -64,15 +69,19 @@ function(enableFPOptimizations USE_SIMD)
   # - OMPSIMD_FLAGS:
   #     * Specifies flags enabling OpenMP's SIMD directives
 
-  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    # theoretically includes Clang and AppleClang
+  if(CMAKE_CXX_COMPILER_ID MATCHES "^AppleClang|Clang$")
 
     set(DFLT_HOSTARCHFLAG "-march=native")
-    set(SPEED_FLAGS "-O3 -funroll-loops")
-    set(FP_FLAGS "-fopenmp-simd")
-    set(OMPSIMD_FLAGS "-fopenmp-simd")
+    set(SPEED_FLAGS "-O3;-funroll-loops")
+    set(FP_FLAGS "-ffast-math")
 
-    message(FATAL_ERROR "enableOFPOptimizations is untested for Clang.")
+    if (USE_SIMD AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+      message(FATAL_ERROR "AppleClang does not support OpenMP-SIMD")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(OMPSIMD_FLAGS "-fopenmp-simd")
+      message(FATAL_ERROR
+        "get_fp_optimization_compile_options is untested for Clang.")
+    endif()
 
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
@@ -86,7 +95,7 @@ function(enableFPOptimizations USE_SIMD)
     #   (see MHD_shock_tube_test)
 
     set(DFLT_HOSTARCHFLAG "-march=native")
-    set(SPEED_FLAGS "-O3 -funroll-loops")
+    set(SPEED_FLAGS "-O3;-funroll-loops")
     set(FP_FLAGS "-ffast-math")
     set(OMPSIMD_FLAGS "-fopenmp-simd")
 
@@ -104,8 +113,8 @@ function(enableFPOptimizations USE_SIMD)
 
   else()
     message(FATAL_ERROR
-      "OpenMP-SIMD handling is not yet implemented for the "
-      "${CMAKE_CXX_COMPILER_ID} compiler."
+      "get_fp_optimization_compile_options does not support the "
+      "${CMAKE_CXX_COMPILER_ID} compiler yet."
       )
   endif()
 
@@ -119,37 +128,22 @@ function(enableFPOptimizations USE_SIMD)
       )
   endif()
 
-  # Finally, update the flags
-  # - we NEED to update CMAKE_<LANG>_FLAGS_<CONFIG>
-  # - if we update CMAKE_<LANG>_FLAGS the optimization level flags in
-  #   CMAKE_<LANG>_FLAGS_<CONFIG> get precedence. This is specifically an
-  #   issue for RelWithDebInfo builds
-  # - we could theoretically use add_compile_options(), but that would also
-  #   pass these flags to the FORTRAN compiler
-  foreach(BTYPE IN ITEMS "DEBUG" "RELEASE" "MINSIZEREL" "RELWITHDEBINFO")
-    foreach(LANG IN ITEMS "C" "CXX")
+  # Finally, construct the list of flags
+  set(optionList ${CONFIG_ARG_FLAGS} ${FP_FLAGS})
 
-      # make a copy of global variable to be modified
-      set(localCopy ${CMAKE_${LANG}_FLAGS_${BTYPE}})
+  if(USE_SIMD)
+    list(APPEND optionList ${OMPSIMD_FLAGS})
+  endif()
 
-      # append the new flags to the local copy
-      string(APPEND localCopy " ${FP_FLAGS} ${CONFIG_ARCH_FLAGS}")
+  if (NOT (SPEED_FLAGS STREQUAL ""))
+    # ONLY include SPEED_FLAGS if building RELEASE or RELWITHDEBINFO configs
+    # -> these flags prioritize speed at expense of size and debugability
+    # -> starting in cmake version 3.19, could be more concise
+    list(APPEND optionList
+      "$<$<CONFIG:RELEASE>:${SPEED_FLAGS}>"
+      "$<$<CONFIG:RELWITHDEBINFO>:${SPEED_FLAGS}>")
+  endif()
 
-      if(USE_SIMD)
-        string(APPEND localCopy " ${OMPSIMD_FLAGS}")
-      endif()
+  set("${outVar}" "$<$<COMPILE_LANGUAGE:C,CXX>:${optionList}>" PARENT_SCOPE)
 
-      if ((BTYPE STREQUAL "RELEASE") OR
-          (BTYPE STREQUAL "RELWITHDEBINFO"))
-        # append strings that prioritize speed (at expense of size)
-        string(APPEND localCopy " ${SPEED_FLAGS}")
-      endif()
-
-      # overwrite the global variable
-      set(CMAKE_${LANG}_FLAGS_${BTYPE} ${localCopy} PARENT_SCOPE)
-
-    endforeach(LANG)
-  endforeach(BTYPE)
-endfunction(enableFPOptimizations)
-
-# REQUIRE TARGET_ARCH_FLAGS for gcc compiler...
+endfunction()
