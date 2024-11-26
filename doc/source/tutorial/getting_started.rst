@@ -107,10 +107,10 @@ be downloaded from the `libpng
 ------------------------------
 
 By default, Enzo-E requires the Grackle chemistry and cooling library.
-If you do not need to use Grackle, you can simple disabling it by setting
-``-DUSE_GRACKLE=OFF`` when you configure Enzo-E.
-See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
-instructions.
+For user-convenience, the default behavior is for Grackle to be automatically downloaded and compiled as part of an Enzo-E build.
+Alternatively, if you want to make use of an existing Grackle installation (those installation instructions are provided  `here <https://grackle.readthedocs.io>`__), you can set ``-DUSE_EXTERNAL_GRACKLE=ON``.
+
+If you do not need to use Grackle, you can disable it by setting ``-DUSE_GRACKLE=OFF``.
 
 6. Install yt (Optional)
 ------------------------
@@ -218,6 +218,9 @@ In some cases, you may need to provide additional hints about the location of th
    * - ``USE_GRACKLE``
      - Use Grackle Chemistry
      - ON
+   * - ``USE_EXTERNAL_GRACKLE``
+     - Indicates preference for using an existing grackle installation or directly embedding grackle within the Enzo-E build.
+     - OFF
    * - ``use_jemalloc``
      - Use the jemalloc library for memory allocation
      - OFF
@@ -452,6 +455,15 @@ can be set via a "cached string", i.e., via
 ..  code-block:: cmake
 
   set(CHARM_ROOT "/home/user/Charm/charm/build-mpi" CACHE STRING "my charm build")
+
+Advanced Options
+----------------
+It is worth mentioning that when using automatic dependency management of Grackle, the default behavior is to freshly download the Grackle repository every time you configure a new build-directory.
+You should **NOT** modify the downloaded source files since they can be freely overwritten at any time.
+
+If you want to codevelop a feature in Grackle and Enzo-E, you can check out a local copy of Grackle and configure Enzo-E with ``-DFETCHCONTENT_SOURCE_DIR_GRACKLE=<path/to/grackle/repository>``.
+By doing this, your Enzo-E build will directly use the source files from your Grackle repositories (and any changes you make to them will be reflected in the resulting Enzo-E binary).
+
 
 Running
 =======
