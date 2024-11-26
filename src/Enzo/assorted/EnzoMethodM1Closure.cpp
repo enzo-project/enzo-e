@@ -281,7 +281,7 @@ void EnzoMethodM1Closure::compute ( Block * block ) throw()
   if (this->thermochemistry_) {
     // compute the temperature
     EnzoComputeTemperature compute_temperature
-      (enzo::fluid_props(), enzo::config()->physics_cosmology);
+      (enzo::fluid_props(), enzo::cosmology() != nullptr);
 
     compute_temperature.compute(enzo_block);
   }

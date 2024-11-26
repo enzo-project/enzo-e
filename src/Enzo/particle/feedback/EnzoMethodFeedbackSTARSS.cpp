@@ -30,7 +30,6 @@
 int EnzoMethodFeedbackSTARSS::determineSN(double age_Myr, int* nSNII, int* nSNIA,
                 double pmass_Msun, double tunit, float dt){
 
-    const EnzoConfig * enzo_config = enzo::config();
     std::mt19937 mt(std::time(nullptr));
 
     if (NEvents > 0){
@@ -135,7 +134,6 @@ int EnzoMethodFeedbackSTARSS::determineWinds(double age_Myr, double * eWinds, do
     {
     // age in Myr
 
-    const EnzoConfig * enzo_config = enzo::config();
     bool oldEnough = (age_Myr < 0.0001)?(false):(true);
     double windE = 0,  wind_mass_solar = 0, windZ = 0.0;
     double wind_factor = 0.0;
@@ -245,7 +243,6 @@ EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS(ParameterGroup p)
   , ir_feedback_(-1)
 {
   FieldDescr * field_descr = cello::field_descr();
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
   ASSERT("EnzoMethodFeedbackSTARSS::EnzoMethodFeedbackSTARSS",
@@ -528,7 +525,6 @@ void EnzoMethodFeedbackSTARSS::compute_ (Block * block)
   //-----------------------------------------------------
 
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   Particle particle = enzo_block->data()->particle();
   EnzoUnits * enzo_units = enzo::units();
 
@@ -819,8 +815,6 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
   double tunit = enzo_units->time();
   double eunit = munit*vunit*vunit; // energy units (NOTE: not specific energy) 
   
-  const EnzoConfig * enzo_config = enzo::config();
-
   bool AnalyticSNRShellMass = this->analytic_SNR_shell_mass_;
 
   // Obtain grid sizes and ghost sizes
@@ -1067,7 +1061,7 @@ void EnzoMethodFeedbackSTARSS::deposit_feedback (Block * block,
 
   // compute the temperature (returns temperature in Kelvin)
   EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                             enzo_config->physics_cosmology);
+                                             enzo::cosmology() != nullptr);
 
   compute_temperature.compute(enzo_block);
 
