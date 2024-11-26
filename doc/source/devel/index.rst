@@ -12,6 +12,7 @@ refinement criteria, etc.
 .. toctree::
 
    coding-guidelines
+   style-formatting
    initial
    adapt
    method

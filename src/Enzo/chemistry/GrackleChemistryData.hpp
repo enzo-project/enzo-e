@@ -1,7 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_GrackleChemistryData.hpp
-/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com) 
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Feb 6 2023
 /// @brief    [\ref Enzo] Declaration of the GrackleChemistryData wrapper class
 ///
@@ -18,17 +18,16 @@
 
 // this header is intended to be fairly self-contained
 
-#include <memory> // std::unique_ptr
+#include <memory>  // std::unique_ptr
 #include <string>
-#include <type_traits> // std::is_same
+#include <type_traits>  // std::is_same
 #include <unordered_set>
-#include <utility> // std::pair
+#include <utility>  // std::pair
 #include <vector>
 
 #include "chemistry/chemistry_grackleincl.hpp"
 
 class GrackleChemistryData {
-
   /// @class    GrackleChemistryData
   /// @ingroup  Enzo
   ///
@@ -51,8 +50,7 @@ class GrackleChemistryData {
   /// that are slow probably don't need to be much faster since they are mostly
   /// used during startup
 
-public: // public interface (implementation is tied to Grackle details)
-
+public:  // public interface (implementation is tied to Grackle details)
   /// construct a new GrackleChemistryData
   GrackleChemistryData();
 
@@ -64,10 +62,10 @@ public: // public interface (implementation is tied to Grackle details)
   ~GrackleChemistryData();
 
   /// copy assignment operator (performs a deepcopy)
-  GrackleChemistryData& operator= (const GrackleChemistryData&);
+  GrackleChemistryData& operator=(const GrackleChemistryData&);
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup(PUP::er& p);
 
   /// factory method that builds GrackleChemistryData from a Parameters object
   ///
@@ -84,33 +82,37 @@ public: // public interface (implementation is tied to Grackle details)
   /// make it EXTREMELY easy to make a small mistake. For that reason, this
   /// function is VERY aggressive about reporting any unexpected parameters as
   /// an error.
-  GrackleChemistryData static from_parameters
-    (ParameterGroup p,
-     const std::unordered_set<std::string>& forbid_leaf_names,
-     const std::unordered_set<std::string>& ignore_leaf_names) noexcept;
+  GrackleChemistryData static from_parameters(
+      ParameterGroup p,
+      const std::unordered_set<std::string>& forbid_leaf_names,
+      const std::unordered_set<std::string>& ignore_leaf_names) noexcept;
 
-public: // public interface (implementation is independent of Grackle details)
-
+public:  // public interface (implementation is independent of Grackle details)
   /// copy constructor (performs a deepcopy)
   ///
   /// @note
   /// this currently wraps the assignment operation
   GrackleChemistryData(const GrackleChemistryData& other)
-    : GrackleChemistryData()
-  { (*this) = other; }
+      : GrackleChemistryData() {
+    (*this) = other;
+  }
 
   /// move constructor
-  GrackleChemistryData(GrackleChemistryData&& other)
-    : GrackleChemistryData()
-  { this->swap(other); }
+  GrackleChemistryData(GrackleChemistryData&& other) : GrackleChemistryData() {
+    this->swap(other);
+  }
 
   /// assignment operation
-  GrackleChemistryData& operator= (GrackleChemistryData&& other) noexcept
-  { this->swap(other); return *this; }
+  GrackleChemistryData& operator=(GrackleChemistryData&& other) noexcept {
+    this->swap(other);
+    return *this;
+  }
 
   /// exchange the contents of this with other
-  void swap(GrackleChemistryData& other) noexcept
-  { ptr_.swap(other.ptr_); str_allocs_.swap(other.str_allocs_); }
+  void swap(GrackleChemistryData& other) noexcept {
+    ptr_.swap(other.ptr_);
+    str_allocs_.swap(other.str_allocs_);
+  }
 
   /// returns a pointer to the managed chemistry_data struct
   ///
@@ -128,27 +130,26 @@ public: // public interface (implementation is independent of Grackle details)
   /// types. The alternative, having a single template method that returns a
   /// reference or pointer to the parameter, would generally produce issues for
   /// parameters of the string type.
-  template<class T>
+  template <class T>
   T get(const std::string& field) const noexcept {
-    std::pair<T,bool> tmp = this->try_get<T>(field);
-    if (!tmp.second){
+    std::pair<T, bool> tmp = this->try_get<T>(field);
+    if (!tmp.second) {
       std::string user_type = "";
-      if (std::is_same<T, int>::value)         user_type = "int";
-      if (std::is_same<T, double>::value)      user_type = "double";
+      if (std::is_same<T, int>::value) user_type = "int";
+      if (std::is_same<T, double>::value) user_type = "double";
       if (std::is_same<T, std::string>::value) user_type = "string";
       param_err_("GrackleChemistryData::get", user_type, field);
     }
     return tmp.first;
   }
-  
-  /// updates a field-values of the chemistry_data struct
-  template<class T>
-  void set(const std::string& field, const T& value) noexcept {
-    if (!this->try_set<T>(field, value)){
 
+  /// updates a field-values of the chemistry_data struct
+  template <class T>
+  void set(const std::string& field, const T& value) noexcept {
+    if (!this->try_set<T>(field, value)) {
       std::string user_type = "";
-      if (std::is_same<T, int>::value)         user_type = "int";
-      if (std::is_same<T, double>::value)      user_type = "double";
+      if (std::is_same<T, int>::value) user_type = "int";
+      if (std::is_same<T, double>::value) user_type = "double";
       if (std::is_same<T, std::string>::value) user_type = "string";
 
       param_err_("GrackleChemistryData::set", user_type, field);
@@ -169,8 +170,8 @@ public: // public interface (implementation is independent of Grackle details)
   ///
   /// @note
   /// specializations of this method follow the class declaration
-  template<class T>
-  std::pair<T,bool> try_get(const std::string& field) const noexcept {
+  template <class T>
+  std::pair<T, bool> try_get(const std::string& field) const noexcept {
     ERROR("GrackleChemistryData::try_get",
           "template parameter must be int, double, or std::string")
   }
@@ -182,14 +183,13 @@ public: // public interface (implementation is independent of Grackle details)
   ///
   /// @note
   /// specializations of this method follow the class declaration
-  template<class T>
+  template <class T>
   bool try_set(const std::string& field, const T& value) noexcept {
     ERROR("GrackleChemistryData::try_set",
           "template parameter must be int, double, or std::string")
   }
 
-private: // methods
-
+private:  // methods
   /// static method used to generate nicely formatted error message when trying
   /// to access/modify a parameter that either doesn't have the user specified
   /// type or doesn't exist.
@@ -200,18 +200,17 @@ private: // methods
                                       const std::string& user_type,
                                       const std::string& field);
 
-  std::pair<int,bool> try_get_int_(const std::string& field) const noexcept;
-  std::pair<double,bool> try_get_dbl_(const std::string& field) const noexcept;
-  std::pair<std::string,bool> try_get_str_(const std::string& field)
-    const noexcept;
+  std::pair<int, bool> try_get_int_(const std::string& field) const noexcept;
+  std::pair<double, bool> try_get_dbl_(const std::string& field) const noexcept;
+  std::pair<std::string, bool> try_get_str_(
+      const std::string& field) const noexcept;
 
   bool try_set_int_(const std::string& field, const int& value) noexcept;
   bool try_set_dbl_(const std::string& field, const double& value) noexcept;
   bool try_set_str_(const std::string& field,
                     const std::string& value) noexcept;
 
-private: // attributes
-
+private:  // attributes
   /// pointer to the chemistry_data struct
   std::unique_ptr<chemistry_data> ptr_;
 
@@ -227,23 +226,37 @@ private: // attributes
 };
 
 // specializations for get
-template<> inline std::pair<int,bool> GrackleChemistryData::try_get<>
-  (const std::string& field) const noexcept { return try_get_int_(field); }
-template<> inline std::pair<double,bool> GrackleChemistryData::try_get<>
-  (const std::string& field) const noexcept { return try_get_dbl_(field); }
-template<> inline std::pair<std::string,bool> GrackleChemistryData::try_get<>
-  (const std::string& field) const noexcept { return try_get_str_(field); }
+template <>
+inline std::pair<int, bool> GrackleChemistryData::try_get<>(
+    const std::string& field) const noexcept {
+  return try_get_int_(field);
+}
+template <>
+inline std::pair<double, bool> GrackleChemistryData::try_get<>(
+    const std::string& field) const noexcept {
+  return try_get_dbl_(field);
+}
+template <>
+inline std::pair<std::string, bool> GrackleChemistryData::try_get<>(
+    const std::string& field) const noexcept {
+  return try_get_str_(field);
+}
 
 // specializations for try_set
-template<> inline bool GrackleChemistryData::try_set<>
-  (const std::string& f, const int& v) noexcept
-{return try_set_int_(f, v);}
-template<> inline bool GrackleChemistryData::try_set<>
-  (const std::string& f, const double& v) noexcept
-{return try_set_dbl_(f, v);}
-template<> inline bool GrackleChemistryData::try_set<>
-  (const std::string& f, const std::string& v) noexcept
-{return try_set_str_(f, v);}
-
+template <>
+inline bool GrackleChemistryData::try_set<>(const std::string& f,
+                                            const int& v) noexcept {
+  return try_set_int_(f, v);
+}
+template <>
+inline bool GrackleChemistryData::try_set<>(const std::string& f,
+                                            const double& v) noexcept {
+  return try_set_dbl_(f, v);
+}
+template <>
+inline bool GrackleChemistryData::try_set<>(const std::string& f,
+                                            const std::string& v) noexcept {
+  return try_set_str_(f, v);
+}
 
 #endif /* ENZO_GRACKLE_CHEMISTRY_DATA_HPP */
