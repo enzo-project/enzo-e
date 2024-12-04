@@ -979,19 +979,6 @@ std::vector<std::string> Parameters::leaf_parameter_names
 
 //----------------------------------------------------------------------
 
-std::vector<std::string> Parameters::leaf_parameter_names() const throw()
-{
-  std::string full_group_name = full_name("");
-  ASSERT("Parameters::leaf_parameter_names",
-         "the version of this method that returns the leaf parameter names in "
-         "the current parameter-group can't be called when the current "
-         "parameter-group is empty",
-         full_group_name != ":");
-  return leaf_parameter_names(full_group_name);
-}
-
-//----------------------------------------------------------------------
-
 std::string Parameters::full_name(std::string parameter) const throw()
 {
   int n = current_group_.size();
