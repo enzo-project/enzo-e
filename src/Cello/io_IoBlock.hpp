@@ -48,8 +48,9 @@ public: // interface
     p | time_;
     p |  dt_;
     PUParray(p,array_,3);
-    p | index_order_;
-    p | count_order_;
+    p | order_index_;
+    p | order_count_;
+    PUParray(p,order_next_,3);
   }
 
   /// Set block
@@ -66,10 +67,18 @@ public: // interface
     upper[2]=upper_[2];
   }
 
-  void get_order (long long * index_order, long long * count_order) const
-  { *index_order = index_order_; *count_order = count_order_; }
+  void get_order (long long * order_index, long long * order_count, Index * order_next) const
+  { *order_index = order_index_;
+    *order_count = order_count_;
+    order_next->set_values(order_next_);
+  }
 
-  void index(int index3[3]) { index3[0]=index_[0]; index3[1]=index_[1]; index3[2]=index_[2]; }
+  void index(int index3[3])
+  {
+    index3[0]=index_[0];
+    index3[1]=index_[1];
+    index3[2]=index_[2];
+  }
 
   /// PACKING / UNPACKING
 
@@ -106,8 +115,10 @@ public: // interface
     CkPrintf ("DEBUG_IO_BLOCK dt_             %g\n", dt_);
     CkPrintf ("DEBUG_IO_BLOCK array_          %d %d %d\n",
               array_[0], array_[1], array_[2]);
-    CkPrintf ("DEBUG_IO_BLOCK index_order_    %lld\n", index_order_);
-    CkPrintf ("DEBUG_IO_BLOCK count_order_    %lld\n", count_order_);
+    CkPrintf ("DEBUG_IO_BLOCK order_index_    %lld\n", order_index_);
+    CkPrintf ("DEBUG_IO_BLOCK order_count_    %lld\n", order_count_);
+    CkPrintf ("DEBUG_IO_BLOCK order_next_     %08x %08x %08x\n",
+              order_next_[0],order_next_[1],order_next_[2]);
   }
 protected: // attributes
 
@@ -119,8 +130,9 @@ protected: // attributes
   double time_;
   double dt_;
   int array_[3];
-  long long index_order_;
-  long long count_order_;
+  long long order_index_;
+  long long order_count_;
+  int order_next_[3];
 
 };
 
