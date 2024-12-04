@@ -190,6 +190,8 @@ public: // interface
       method_check_monitor_iter(0),
       // EnzoMethodCheckGravity
       method_check_gravity_particle_type(),
+      // EnzoMethodGravity
+      method_gravity_type_super(),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -265,9 +267,10 @@ protected: // methods
   //--------------------
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
+  void read_method_gravity_(Parameters *);
   void read_method_inference_(Parameters *);
   void read_method_turbulence_(Parameters *);
-
+  
   void read_physics_(Parameters *);
   void read_physics_fluid_props_(Parameters *);
 
@@ -457,6 +460,9 @@ public: // attributes
 
   /// EnzoMethodCheckGravity
   std::string                method_check_gravity_particle_type;
+
+  /// EnzoMethodGravity
+  std::string                method_gravity_type_super;
 
   /// EnzoMethodInference
   int                        method_inference_level_base;

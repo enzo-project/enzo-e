@@ -9,6 +9,9 @@
 #define DATA_FIELD_FACE_HPP
 
 class Refresh;
+class Prolong;
+class Restrict;
+class Box;
 
 class FieldFace {
 

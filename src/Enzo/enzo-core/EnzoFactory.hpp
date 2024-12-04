@@ -29,10 +29,10 @@ public: // interface
   EnzoFactory(CkMigrateMessage *m) : Factory (m) {}
 
   /// CHARM++ Pack / Unpack function
-  virtual void pup (PUP::er &p);
+  virtual void pup (PUP::er &p) override;
 
   /// Create the Input / Output accessor object for EnzoBlock
-  virtual IoBlock * create_io_block () const throw();
+  virtual IoBlock * create_io_block () const throw() override;
 
   /// Create a new CHARM++ Block array [abstract factory design pattern]
 
@@ -40,7 +40,7 @@ public: // interface
   virtual CProxy_Block new_block_proxy
   (
    DataMsg * data_msg,
-   int nbx, int nby, int nbz) const throw();
+   int nbx, int nby, int nbz) const throw() override;
 
   /// Create a new CHARM++ Block array
   virtual void create_block_array
@@ -49,7 +49,7 @@ public: // interface
    CProxy_Block block_array,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
-   int num_field_blocks) const throw();
+   int num_field_blocks) const throw() override;
 
   /// Create a new coarse blocks under the Block array.  For Multigrid
   ///  solvers.  Arguments are the same as create_block_array(), plus
@@ -62,7 +62,7 @@ public: // interface
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
-   int num_field_blocks) const throw();
+   int num_field_blocks) const throw() override;
 
   /// Create a new Block  [abstract factory design pattern]
   virtual void create_block
@@ -73,14 +73,13 @@ public: // interface
    int nx, int ny, int nz,
    int num_field_blocks,
    int count_adapt,
-   int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level,
-   int * face_level,
+   const std::vector<int> & face_level,
    Adapt * adapt,
+   State * state,
    Simulation * simulation = 0,
    int io_reader = -1,
-   int ip = -1) const throw();
+   int ip = -1) const throw() override;
 };
 
 #endif /* ENZO_ENZO_FACTORY_HPP */

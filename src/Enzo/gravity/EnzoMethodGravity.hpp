@@ -10,6 +10,10 @@
 #ifndef ENZO_ENZO_METHOD_GRAVITY_HPP
 #define ENZO_ENZO_METHOD_GRAVITY_HPP
 
+enum TypeSuper {
+  super_type_potential = 0,
+  super_type_accelerations = 1 };
+
 class EnzoMethodGravity : public Method {
 
   /// @class    EnzoMethodGravity
@@ -24,15 +28,22 @@ class EnzoMethodGravity : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravity object
-  EnzoMethodGravity(ParameterGroup p, int index_solver, int index_prolong);
+  EnzoMethodGravity(ParameterGroup p, int index_solver, int index_prolong,
+                    int max_supercycle,
+                    std::string type_super);
 
   EnzoMethodGravity()
     : index_solver_(-1),
       order_(4),
       ir_exit_(-1),
       index_prolong_(0),
-      dt_max_(0.0)
-  {};
+      dt_max_(0.0),
+      ipotential_curr_(-1),
+      ipotential_prev_(-1),
+      is_time_curr_(-1),
+      is_time_prev_(-1),
+      type_super_(super_type_potential)
+  {}
 
   /// Destructor
   virtual ~EnzoMethodGravity() throw() {}
@@ -47,8 +58,12 @@ public: // interface
       order_(4),
       ir_exit_(-1),
       index_prolong_(0),
-      dt_max_(0.0)
-
+      dt_max_(0.0),
+      ipotential_curr_(-1),
+      ipotential_prev_(-1),
+      is_time_curr_(-1),
+      is_time_prev_(-1),
+      type_super_(super_type_potential)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -67,6 +82,11 @@ public: // interface
     p | order_;
     p | dt_max_;
     p | ir_exit_;
+    p | ipotential_curr_;
+    p | ipotential_prev_;
+    p | is_time_curr_;
+    p | is_time_prev_;
+    p | type_super_;
 
   }
 
@@ -90,7 +110,20 @@ public: // interface
 
   /// Compute maximum timestep for this method
   double timestep_ (Block * block) throw() ;
-  
+
+  /// Scalar times for previous and current saved potentials when max_supercycling > 1
+  double & s_time_curr_(Block * block)
+  { return *block->data()->scalar_double().value(is_time_curr_); }
+  double & s_time_prev_(Block * block)
+  { return *block->data()->scalar_double().value(is_time_prev_); }
+
+  void refresh_add_potentials_(Refresh *);
+  void refresh_add_accelerations_(Refresh *);
+  bool is_supercycle_potential()
+  { return (is_supercycle() && type_super_ == super_type_potential); }
+  bool is_supercycle_accelerations()
+  { return (is_supercycle() && type_super_ == super_type_accelerations); }
+    
 protected: // attributes
 
   /// Solver index for the linear solver used to compute the potential
@@ -108,6 +141,17 @@ protected: // attributes
 
   /// Maximum timestep
   double dt_max_;
+
+  /// Temporary fields
+  int ipotential_curr_;
+  int ipotential_prev_;
+
+  /// Scalars
+  int is_time_curr_;
+  int is_time_prev_;
+
+  /// Type of super-cycling (if any): 0 potential 1:accelerations
+  int type_super_;
 };
 
 

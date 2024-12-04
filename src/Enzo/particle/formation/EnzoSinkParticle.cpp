@@ -259,7 +259,7 @@ void EnzoSinkParticle::write_particle_data() throw() {
   pvz[particle_index_ * dv] =
     (old_momentum_z + total_momentum_z_change_) / pmass[particle_index_ * dm];
 
-  paccrate[particle_index_ * daccrate] = total_pmass_change_ / block_->dt();
+  paccrate[particle_index_ * daccrate] = total_pmass_change_ / block_->state()->dt();
 
   if (pmetalfrac) pmetalfrac[particle_index_ * dmf] =
       (old_metal_mass + total_pmetal_mass_change_) / pmass[particle_index_ * dm];

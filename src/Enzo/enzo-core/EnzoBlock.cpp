@@ -18,19 +18,22 @@
 
 EnzoBlock::EnzoBlock (CkMigrateMessage *m)
   : CBase_EnzoBlock (m)
-    // dt(0.0),
-    // redshift(0.0)
 {
+  // replace Block's State with EnzoState
+  state_ = std::make_shared<EnzoState>(0, 0.0, 0.0, false);
+
   TRACE("CkMigrateMessage");
   // EnzoSimulation[0] counts migrated Blocks
   proxy_enzo_simulation[0].p_method_balance_check();
 }
 
-EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
-  : CBase_EnzoBlock (ip_source, msg_type),
-    redshift(0.0)
+//----------------------------------------------------------------------
 
+EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
+  : CBase_EnzoBlock (ip_source, msg_type)
 {
+  // replace Block's State with EnzoState
+  state_ = std::make_shared<EnzoState>(0, 0.0, 0.0, false);
 #ifdef TRACE_BLOCK
 
   CkPrintf ("%d %p TRACE_BLOCK %s EnzoBlock(ip) msg_type %d\n",
@@ -96,8 +99,6 @@ void EnzoBlock::pup(PUP::er &p)
 
   CBase_EnzoBlock::pup(p);
 
-  p | dt;
-
   const int in = cello::index_static();
 
   static bool warn1[CONFIG_NODE_SIZE] = {true};
@@ -111,8 +112,6 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,GridStartIndex,MAX_DIMENSION);
   PUParray(p,GridEndIndex,MAX_DIMENSION);
   PUParray(p,CellWidth,MAX_DIMENSION);
-
-  p | redshift;
 }
 
 //======================================================================
@@ -137,33 +136,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // problem
 
-  fprintf (fp,"EnzoBlock: dt %g\n", dt);
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::set_dt (double dt_param) throw ()
-{
-  Block::set_dt (dt_param);
-
-  dt = dt_param;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::set_time (double time) throw ()
-{
-  Block::set_time (time);
-
-  Simulation * simulation = cello::simulation();
-  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-  EnzoPhysicsCosmology * cosmology = units->cosmology();
-
-  if (cosmology) {
-    cosmology->set_current_time(time);
-    redshift = cosmology->current_redshift();
-  }
 }
 
 //----------------------------------------------------------------------
@@ -289,28 +261,27 @@ void EnzoBlock::instantiate_children() throw()
   const int rank = cello::rank();
   ItChild it_child(rank);
   int ic3[3];
+  // WARNING: code duplication in control_adapt.cpp adapt_refine_()
   while (it_child.next(ic3)) {
     Index index_child = index_.index_child(ic3);
     DataMsg * data_msg = NULL;
 
+    std::vector<int> face_level;
+    face_level.resize(27);
+    const int o = 27*IC3(ic3);
+    for (int i=0; i<face_level.size(); i++) {
+      face_level[i] = child_face_level_curr_[o+i];
+    }
     MsgRefine * msg = new MsgRefine
       (index_child,
-      nx,ny,nz,
-      num_field_blocks,
-      adapt_step_,
-      cycle_,time_,dt_,
-      refresh_fine,
-      27, 
-      &child_face_level_curr_.data()[27*IC3(ic3)], 
-      &adapt_);
+       nx,ny,nz,
+       num_field_blocks,
+       adapt_step_,
+       refresh_fine,
+       face_level,
+       &adapt_,state_.get());
 
     msg->set_data_msg(data_msg);
-    // #ifdef BYPASS_CHARM_MEM_LEAK
-    //   enzo::simulation()->set_msg_refine (index_child, msg);
-    //   thisProxy[index_child].insert (process_type(CkMyPe()), MsgType::msg_refine);
-    // #else
-    //   thisProxy[index_child].insert (msg);
-    // #endif
     cello::simulation()->p_refine_create_block (msg);
 
     children_.push_back(index_child);

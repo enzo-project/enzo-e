@@ -74,7 +74,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   // declare particle position arrays
   //  default particle type is "star", but this will default
   //  to subclass particle_type
-  const int it    = particle.type_index (this->particle_type());
+  const int it    = particle.type_index (particle_type());
 
   const int ia_id = particle.attribute_index (it, "id");
   const int ia_m  = particle.attribute_index (it, "mass");
@@ -101,7 +101,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   enzo_float * pvx  = 0;
   enzo_float * pvy  = 0;
   enzo_float * pvz  = 0;
-   ///
+  ///
   enzo_float * pmetal = 0;
   enzo_float * pform  = 0;
   enzo_float * plifetime = 0;
@@ -173,12 +173,12 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         //
         // Apply the criteria for star formation
         //
-        if (! this->check_number_density_threshold(ndens)) continue;
-        if (! this->check_self_gravitating( mean_particle_mass, rho_cgs, temperature[i],
-                                            velocity_x, velocity_y, velocity_z,
-                                            enzo_units->length(), enzo_units->velocity(),
-                                            enzo_units->density(),
-                                            i, 1, mx, mx*my, dx, dy, dz)) continue;
+        if (! check_number_density_threshold(ndens)) continue;
+        if (! check_self_gravitating( mean_particle_mass, rho_cgs, temperature[i],
+                                      velocity_x, velocity_y, velocity_z,
+                                      enzo_units->length(), enzo_units->velocity(),
+                                      enzo_units->density(),
+                                      i, 1, mx, mx*my, dx, dy, dz)) continue;
 
         // AJE: TO DO ---
         //      If Grackle is used, check for this and use the H2
@@ -186,41 +186,43 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         //      do this in the self shielding factor function
 
         // Only allow star formation out of the H2 shielding component (if used)
-        const double f_h2 = this->h2_self_shielding_factor(density,
-                                                           metallicity,
-                                                           enzo_units->density(),
-                                                           enzo_units->length(),
-                                                           i, 1, mx, mx*my,
-                                                           dx, dy, dz);
+        const double f_h2 = h2_self_shielding_factor(density,
+                                                     metallicity,
+                                                     enzo_units->density(),
+                                                     enzo_units->length(),
+                                                     i, 1, mx, mx*my,
+                                                     dx, dy, dz);
         mass *= f_h2; // apply correction (f_h2 = 1 if not used)
 
-        if (! this->check_velocity_divergence(velocity_x, velocity_y,
-                                              velocity_z, i,
-                                              1, mx, mx*my, dx, dy, dz)) continue;
+        if (! check_velocity_divergence(velocity_x, velocity_y,
+                                        velocity_z, i,
+                                        1, mx, mx*my, dx, dy, dz)) continue;
         // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
-        if (! this->check_mass(mass)) continue;
+        if (! check_mass(mass)) continue;
 
         double tdyn = sqrt(3.0 * cello::pi / 32.0 / enzo::grav_constant_cgs() /
-                      (density[i] * enzo_units->density()));
+                           (density[i] * enzo_units->density()));
 
         //
         // compute fraction that can / will be converted to stars this step
         // (just set to efficiency if dynamical time is ignored)
         //
-        double star_fraction =  this->use_dynamical_time_ ?
-                                std::min(this->efficiency_ * enzo_block->dt * enzo_units->time() / tdyn, 1.0) :
-                                         this->efficiency_ ;
+
+        const auto dt   = enzo_block->state()->dt();
+        const auto time = enzo_units->time();
+        double star_fraction =  use_dynamical_time_ ?
+          std::min(efficiency_ * dt * time / tdyn, 1.0) : efficiency_ ;
 
         // if this is less than the mass of a single particle,
         // use a random number draw to generate the particle
-        if ( star_fraction * mass < this->star_particle_min_mass_){
+        if ( star_fraction * mass < star_particle_min_mass_){
           // get a random number
           double rnum = (double(rand())) / (double(RAND_MAX));
-          double probability = this->efficiency_ * mass / this->star_particle_min_mass_;
+          double probability = efficiency_ * mass / star_particle_min_mass_;
           if (rnum > probability){
-              continue; // do not form stars
+            continue; // do not form stars
           } else{
-            star_fraction = this->star_particle_min_mass_ / mass;
+            star_fraction = star_particle_min_mass_ / mass;
           }
         } else {
           // else allow the total mass of stars to form to be up to the
@@ -232,15 +234,15 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
           //      region and presumably increase the amount of SF and burstiness
           //      of the SF and feedback cycle. Check this!!!!
 
-          if (star_fraction * mass > this->star_particle_max_mass_){
+          if (star_fraction * mass > star_particle_max_mass_){
 #ifdef DEBUG_SF
             CkPrintf( "DEBUG_SF: StochasticSF - SF mass = %g ; max particle mass = %g\n",
-                                         star_fraction*mass, this->star_particle_max_mass_);
+                      star_fraction*mass, star_particle_max_mass_);
 #endif
-            star_fraction = this->star_particle_max_mass_ / mass;
+            star_fraction = star_particle_max_mass_ / mass;
           }
 
-          star_fraction = std::min(star_fraction, this->maximum_star_fraction_);
+          star_fraction = std::min(star_fraction, maximum_star_fraction_);
         }
 
         count++; //
@@ -286,7 +288,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
         pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
 
-        pform[io]     =  enzo_block->time();   // formation time
+        pform[io]     =  enzo_block->state()->time();   // formation time
         plifetime[io] =  tdyn;  // 10.0 * enzo_constants::Myr_s / enzo_units->time() ; // lifetime
 
         if (metal){
