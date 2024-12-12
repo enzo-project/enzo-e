@@ -102,7 +102,7 @@ function(get_required_fortran_options outVar)
     set(gnu_precision_flags "-fdefault-real-8;-fdefault-double-8")
   else()
     set(gnu_precision_flags "")
-  endif() 
+  endif()
   set(all_gnu_flags
     "-fno-second-underscore" "-ffixed-line-length-132" ${gnu_precision_flags})
 
@@ -176,7 +176,7 @@ function(target_required_fortran_compile_options target flag_scope)
 
   get_required_fortran_options(_REQ_FC_FLAGS)
 
-  if (NOT ("${_REQ_FC_FLAGS}" STREQUAL "")) 
+  if (NOT ("${_REQ_FC_FLAGS}" STREQUAL ""))
     target_compile_options(${target} ${flag_scope} "${_REQ_FC_FLAGS}")
   endif()
 endfunction()
