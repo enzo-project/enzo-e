@@ -1,5 +1,7 @@
 #include "enzo.hpp"
 
+#include "Enzo/gravity/gravity.hpp"
+
 namespace enzo {
 
   EnzoSimulation * simulation()
@@ -38,8 +40,6 @@ namespace enzo {
 
   const EnzoMethodGrackle * grackle_method()
   {
-    // previously, this explicitly checked the value of
-    // enzo::config()->method_grackle_use_grackle, but this was redundant
     return (const EnzoMethodGrackle *) problem()->method("grackle");
   }
 
@@ -64,4 +64,34 @@ namespace enzo {
     return static_cast<EnzoBlock*> (block);
   }
 
+}
+
+namespace { // things inside of an anonymous namespace are local to this file
+
+  const EnzoPhysicsGravity * get_physics_gravity_() noexcept
+  {
+    const Physics* out = enzo::problem()->physics("gravity");
+    // handling in EnzoProblem::initialize_physics_coda_ should ensure that
+    // this is never a nullptr
+    ASSERT("get_physics_gravity_", "Something went wrong", out != nullptr);
+    return (const EnzoPhysicsGravity *) out;
+  }
+
+}
+
+namespace enzo {
+
+  double grav_constant_codeU() noexcept
+  { return get_physics_gravity_()->grav_constant_codeU(); }
+
+  double grav_constant_cgs() noexcept
+  { return get_physics_gravity_()->grav_constant_cgs(); }
+
+  bool uses_magnetic_fields() noexcept
+  {
+    FieldDescr* field_descr = cello::field_descr();
+    return (field_descr->is_field("bfield_x") ||
+            field_descr->is_field("bfield_y") ||
+            field_descr->is_field("bfield_z"));
+  }
 }

@@ -1,0 +1,39 @@
+   @startuml
+
+   box "Inference arrays" #LightBlue
+   participant array_i as a0
+   participant array_j as a2
+   end box
+
+   box "Root process" #LightYellow
+   participant "Root process" as root
+   end box
+
+   box "Block levels" #LightPink
+   participant "B0" as b0
+   participant "B1" as b1
+   participant "B2" as b2
+   participant "B3" as b3
+   participant "B4" as b4
+   end box
+
+   == 1. evaluate ==
+
+   b2 -> b2 : apply_criteria()
+   b3 -> b3
+   b4 -> b4
+
+   b4 -> b3 : p_merge_masks()
+   hnote over b3 : sync_child
+   b3 -> b2
+   hnote over b2 : sync_child
+
+   b2 -> b1 : p_count_arrays()
+   hnote over b1 : sync_child
+   b1 -> b0
+   hnote over b0 : sync_child
+   b0 -> root
+
+   hnote over root : sync_count
+
+@enduml

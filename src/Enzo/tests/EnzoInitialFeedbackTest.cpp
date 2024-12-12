@@ -7,8 +7,9 @@
 
 #include <fstream>
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/tests/tests.hpp"
 
 //----------------------------------------------------------------------
 
@@ -17,14 +18,32 @@
 int nlines(std::string fname);
 
 
-EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
-(const EnzoConfig * config) throw ()
-  : Initial(config->initial_cycle, config->initial_time)
+EnzoInitialFeedbackTest::EnzoInitialFeedbackTest(int cycle, double time,
+                                                 ParameterGroup p) throw ()
+  : Initial(cycle, time),
+    density_CGS_(p.value_float("density", 1.0E-24)),
+    temperature_(p.value_float("temperature", 1.0E4)),
+    metal_fraction_(p.value_float("metal_fraction", 0.01)),
+    species_densities_CGS_(),
+    num_particles(0),
+    position{},
+    mass(),
+    luminosity()
 {
 
   cello::particle_descr()->check_particle_attribute("star","mass");
 
-  if (config->initial_feedback_test_from_file){
+  // I kept things consistent when I transfered the parsing of parameters out
+  // of EnzoConfig, but it seems like HI_density should default to the value
+  // this->density_CGS_
+  species_densities_CGS_["HI_density"] = p.value_float("HI_density", 1.0E-24);
+  const std::vector<std::string> other_species =
+    {"HII_density","HeI_density","HeII_density","HeIII_density","e_density"};
+  for (const std::string species : other_species) {
+    species_densities_CGS_[species] = p.value_float(species, 1.0E-100);
+  }
+
+  if (p.value_logical("from_file", false)){
     this->num_particles = nlines("initial_feedback_stars.in");
 
     for (int dim = 0; dim < 3; dim++){
@@ -36,7 +55,8 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
     std::fstream inFile;
     inFile.open("initial_feedback_stars.in", std::ios::in);
 
-    ASSERT("EnzoInitialFeedbackTest", "initial_feedback_stars.in failed to open",
+    ASSERT("EnzoInitialFeedbackTest",
+           "initial_feedback_stars.in failed to open",
            inFile.is_open());
 
     int i = 0;
@@ -54,10 +74,10 @@ EnzoInitialFeedbackTest::EnzoInitialFeedbackTest
     for (int dim = 0; dim < 3; dim++){
       this->position[dim].resize(this->num_particles);
 
-      this->position[dim][0] = config->initial_feedback_test_position[dim];
+      this->position[dim][0] = p.list_value_float(dim, "position", 0.5);
     }
-    this->mass[0] = config->initial_feedback_test_star_mass;
-    this->luminosity[0] = config->initial_feedback_test_luminosity;
+    this->mass[0] = p.value_float("star_mass", 1000.0);
+    this->luminosity[0] = p.value_float("luminosity", 0.0);
   }
 
   return;
@@ -73,9 +93,14 @@ void EnzoInitialFeedbackTest::pup (PUP::er &p)
 
   Initial::pup(p);
 
+  p | density_CGS_;
+  p | temperature_;
+  p | metal_fraction_;
+  p | species_densities_CGS_;
   p | num_particles;
   for (int dim = 0; dim < 3; dim++) p | position[dim];
   p | mass;
+  p | luminosity;
 
   return;
 }
@@ -93,8 +118,6 @@ void EnzoInitialFeedbackTest::enforce_block
     return;
   }
 
-  EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
   Field field = block->data()->field();
@@ -111,7 +134,6 @@ void EnzoInitialFeedbackTest::enforce_block
   enzo_float * d_HeII = (enzo_float *) field.values("HeII_density");
   enzo_float * d_HeIII = (enzo_float *) field.values("HeIII_density");
   enzo_float * d_electron = (enzo_float *) field.values("e_density");
-  enzo_float * temperature = (enzo_float *) field.values("temperature");
 
   enzo_float * v3[3] = { (enzo_float *) field.values("velocity_x"),
                          (enzo_float *) field.values("velocity_y"),
@@ -142,7 +164,15 @@ void EnzoInitialFeedbackTest::enforce_block
   int ngz = nz + 2*gz;
 
   const enzo_float gamma = enzo::fluid_props()->gamma();
+  // shouldn't we be using a self-consistent mmw?
   const enzo_float mol_weight = enzo::fluid_props()->mol_weight();
+
+  double d_HI_CGS = species_densities_CGS_.at("HI_density");
+  double d_HII_CGS = species_densities_CGS_.at("HII_density");
+  double d_HeI_CGS = species_densities_CGS_.at("HeI_density");
+  double d_HeII_CGS = species_densities_CGS_.at("HeII_density");
+  double d_HeIII_CGS = species_densities_CGS_.at("HeIII_density");
+  double d_electron_CGS = species_densities_CGS_.at("e_density");
 
   for (int iz = 0; iz < ngz; iz++){
     for (int iy = 0; iy < ngy; iy++){
@@ -151,23 +181,23 @@ void EnzoInitialFeedbackTest::enforce_block
          int i = INDEX(ix,iy,iz,ngx,ngy);
 
          // values are specified in CGS in the parameter file
-         d[i]  = enzo_config->initial_feedback_test_density / enzo_units->density(); 
-         d_HI[i]  = enzo_config->initial_feedback_test_HI_density / enzo_units->density();
-         d_HII[i]  = enzo_config->initial_feedback_test_HII_density / enzo_units->density();
-         d_HeI[i]  = enzo_config->initial_feedback_test_HeI_density / enzo_units->density();
-         d_HeII[i]  = enzo_config->initial_feedback_test_HeII_density / enzo_units->density();
-         d_HeIII[i]  = enzo_config->initial_feedback_test_HeIII_density / enzo_units->density();
-         d_electron[i]  = enzo_config->initial_feedback_test_e_density / enzo_units->density();
+         d[i]          = density_CGS_ / enzo_units->density(); 
+         d_HI[i]       = d_HI_CGS / enzo_units->density();
+         d_HII[i]      = d_HII_CGS / enzo_units->density();
+         d_HeI[i]      = d_HeI_CGS / enzo_units->density();
+         d_HeII[i]     = d_HeII_CGS / enzo_units->density();
+         d_HeIII[i]    = d_HeIII_CGS / enzo_units->density();
+         d_electron[i] = d_electron_CGS / enzo_units->density();
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
-         ge[i] = (enzo_config->initial_feedback_test_temperature / mol_weight /
+         ge[i] = (temperature_ / mol_weight /
                   enzo_units->kelvin_per_energy_units() / (gamma - 1.0));
 
          for (int dim = 0; dim < 3; dim ++)
              te[i] = ge[i] + 0.5 * v3[dim][i] * v3[dim][i];
 
-         metal[i] = enzo_config->initial_feedback_test_metal_fraction * d[i];
+         metal[i] = this->metal_fraction_ * d[i];
 
       }
     }

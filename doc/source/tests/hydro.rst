@@ -20,7 +20,7 @@ From `broken link <https://ww.astro.virginia.edu/VITA/ATHENA/dmr.html>_`
 test_implosion
 ==============
 
-Runs a 2D implosion problem. Tests Initial:<field>:value. Test outputs density image file and mesh image file. 
+Runs a 2D implosion problem. Tests Initial:<field>:value. Test outputs density image file and mesh image file.
 
 test_implosion-code
 ===================

@@ -94,6 +94,9 @@ class FieldFace;
 #include "data_ItIndexList.hpp"
 #include "data_ItIndexRange.hpp"
 
+#include "data_Object.hpp"
+#include "data_ObjectSphere.hpp"
+
 #include "data_ParticleDescr.hpp"
 #include "data_ParticleData.hpp"
 #include "data_Particle.hpp"
@@ -160,9 +163,9 @@ class FieldFace;
     CkPrintf ("DEBUG_FIELD %s %20.18g %20.18g %20.18g\n",  NAME,sum_abs,sum_mean,sum_var); \
     fflush(stdout);							\
     char filename[80];						\
-    sprintf (filename,"renzo-e-%s.png",NAME);				\
+    snprintf (filename,sizeof(filename),"renzo-e-%s.png",NAME); \
     png_array (filename,(float*)(FIELD),gx,gy,gz,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
-    sprintf (filename,"enzo-e-%s.png",NAME);				\
+    snprintf (filename,sizeof(filename),"enzo-e-%s.png",NAME); \
     png_array (filename,(float*)(FIELD),0,0,0,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
   }
 #   define TRACE_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,false)

@@ -226,7 +226,7 @@ private: // methods
   void clean_ ();
 
   int num_bits_(int value) const;
-	
+
   void print_ (FILE * fp,
 	       const char * msg,
 	       int max_level,
@@ -244,26 +244,17 @@ private: // attributes
 
 #ifndef TEST
   PUPbytes(Index)
-#endif
+  PUPbytes(NodeBits)
 
-#ifndef TEST
-// public:
-//   void pup(PUP::er &p) {
-//   }
-PUPbytes(NodeBits)
-#endif
-
-//----------------------------------------------------------------------
-#ifndef TEST
-class CkArrayIndexIndex:public CkArrayIndex {
-  Index * index_;
-public:
-  CkArrayIndexIndex(const Index &in)
-  {
-    index_ = new (index) Index(in);
-    nInts=sizeof(Index)/sizeof(int);
-  }
-};
+  class CkArrayIndexIndex:public CkArrayIndex {
+    Index * index_;
+  public:
+    CkArrayIndexIndex(const Index &in)
+    {
+      index_ = new (index) Index(in);
+      nInts=sizeof(Index)/sizeof(int);
+    }
+  };
 #endif
 
 #endif /* INDEX_HPP */

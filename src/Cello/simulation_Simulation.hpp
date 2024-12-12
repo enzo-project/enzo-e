@@ -66,16 +66,9 @@ public: // interface
   // BLOCK INITIALIZATION WITH MsgRefine
   //----------------------------------------------------------------------
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-  /// Request by newly created Block to get its MsgRefine object
-  virtual void p_get_msg_refine(Index index);
-
-  /// Set MsgRefine * for a newly created Block
-  void set_msg_refine (Index index, MsgRefine *);
-
-  /// Return MsgRefine * for a newly created Block and remove from list
-  MsgRefine * get_msg_refine (Index index);
-#endif
+  /// Create a new block on receiving process
+  virtual void p_refine_create_block (MsgRefine *);
+  void refine_create_block (MsgRefine *);
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -135,6 +128,8 @@ public: // interface
 
   void set_cycle(int cycle) throw()
   { cycle_ = cycle; }
+  void set_initial_cycle(int cycle) throw()
+  { cycle_initial_ = cycle; }
   void set_time(double time) throw()
   { time_ = time; }
   void set_dt(double dt) throw()
@@ -155,6 +150,10 @@ public: // interface
   /// Return the current cycle number
   int cycle() const throw() 
   { return cycle_; };
+
+  /// Return the initial cycle number
+  int initial_cycle() const throw() 
+  { return cycle_initial_; };
 
   /// Return the current time
   double time() const throw() 
@@ -204,6 +203,8 @@ public: // virtual functions
   /// stopping criteria
   virtual void update_state(int cycle, double time, double dt, double stop) ;
 
+  void p_initialize_state(MsgState *);
+
   /// initialize the Simulation given a parameter file
   virtual void initialize() throw();
 
@@ -226,7 +227,7 @@ public: // virtual functions
   void debug_open() {
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
     char buffer[40];
-    sprintf(buffer,"out.debug.%03d-%03d",CkMyPe(),cycle_);
+    snprintf(buffer,sizeof(buffer),"out.debug.%03d-%03d",CkMyPe(),cycle_);
     fp_debug_ = fopen (buffer,"w");
 #endif
   }
@@ -240,6 +241,10 @@ public: // virtual functions
 
   /// Wait for all Hierarchy to be initialized before creating any Blocks
   void r_initialize_block_array(CkReductionMsg * msg);
+
+  /// Wait for all simulation objects to create blocks in levels <=0
+  /// before calling doneInserting
+  void r_initialize_root_blocks_created(CkReductionMsg * msg);
 
   /// Send Config and Parameters from ip==0 to all other processes
 
@@ -401,6 +406,18 @@ public: // virtual functions
   int refresh_count() const
   { return refresh_list_.size(); }
 
+  //--------------------------------------
+  // Initialization
+  //--------------------------------------
+
+  /// Return the number of blocks created during the 
+  /// initialization phase.
+  int initial_block_count () throw();
+
+  /// Update block counter used to synchornize blocks
+  /// during the initialization phase.
+  void p_initial_block_created() throw();
+
 protected: // functions
 
   /// Initialize the Config object
@@ -487,6 +504,9 @@ protected: // attributes
   /// Cycle at last start of performance monitoring
   int cycle_watch_;
 
+  /// Initial cycle
+  int cycle_initial_;
+
   /// Current time
   double time_;
 
@@ -547,6 +567,9 @@ protected: // attributes
   /// Particle descriptor
   ParticleDescr * particle_descr_;
 
+  /// Initialization synchronization.
+  Sync sync_init_block_count_;
+
   /// Output synchronization (depreciated)
   Sync sync_output_begin_;
   Sync sync_output_write_;
@@ -563,9 +586,7 @@ protected: // attributes
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   std::map<Index,MsgRefine *> msg_refine_map_;
-#endif
 
   /// Currently active output object
   int index_output_;

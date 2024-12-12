@@ -5,295 +5,203 @@
 /// @date     2018-05
 /// @brief    Implements the EnzoMethodBackgroundAcceleration class
 
-
-#include "cello.hpp"
-#include "enzo.hpp"
-
-// What are these defs and do I need them?
-//#include "enzo.decl.h"
-//
-//
-// #define CK_TEMPLATES_ONLY
-// #include "enzo.def.h"
-// #undef CK_TEMPLATES_ONLY
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/gravity/gravity.hpp"
 
 //---------------------------------------------------------------------
 
-EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
-(bool zero_acceleration) // do need
- : Method(),
-   zero_acceleration_(zero_acceleration),
-   mx_(0), my_(0), mz_(0),
-   gx_(0), gy_(0), gz_(0),
-   xm_(0), ym_(0), zm_(0),
-   hx_(0), hy_(0), hz_(0)
+namespace { // stuff inside anonymous namespace are local to this source file
+
+struct BlockInfo {
+  // In the future, we can make use of data::field_cells instead of this helper
+  // struct (this helper struct only exists to avoid introducing changes to
+  // test answers right now)
+
+
+  // attributes:
+  std::array<int, 3> dimensions;    // include ghost zones
+  std::array<int, 3> ghost_depth;
+  std::array<double, 3> cell_width;
+  std::array<double, 3> lower_edge;
+
+  BlockInfo(Block * block){
+    Field field = block->data()->field();
+
+    field.dimensions (0,&(dimensions[0]),&(dimensions[1]),&(dimensions[2]));
+    field.ghost_depth(0,&(ghost_depth[0]),&(ghost_depth[1]),&(ghost_depth[2]));
+    block->data()->lower(&(lower_edge[0]),&(lower_edge[1]),&(lower_edge[2]));
+    double xp, yp, zp;
+    block->data()->upper(&xp,&yp,&zp);
+    field.cell_width(lower_edge[0],xp,&(cell_width[0]),
+                     lower_edge[1],yp,&(cell_width[1]),
+                     lower_edge[2],zp,&(cell_width[2]));
+  }
+
+  inline double x_val(int ix) const noexcept
+  { return lower_edge[0] + (ix - ghost_depth[0] + 0.5) * cell_width[0]; }
+
+  inline double y_val(int iy) const noexcept
+  { return lower_edge[1] + (iy - ghost_depth[1] + 0.5) * cell_width[1]; }
+
+  inline double z_val(int iz) const noexcept
+  { return lower_edge[2] + (iz - ghost_depth[2] + 0.5) * cell_width[2]; }
+
+};
+
+//---------------------------------------------------------------------
+
+class GalaxyModel {
+
+  /// @class    GalaxyModel
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Evaluates the background potential of a Galaxy model
+  ///
+  /// If we didn't support cosmological simulations, we would simply store the
+  /// fields of the EnzoPotentialConfigGalaxy struct as members of this class
+  /// (in terms of code units)
+
+public:
+  GalaxyModel(const EnzoPotentialConfigGalaxy& pack_dfltU, const Units* units)
+  {
+    pack_codeU_ = EnzoPotentialConfigGalaxy::to_codeU(pack_dfltU, units);
+
+    double xtemp = pack_codeU_.DM_mass_radius / pack_codeU_.rcore;
+
+    // compute the density constant for an NFW halo (rho_o)
+    DM_density_ = (pack_codeU_.DM_mass / (4.0 * cello::pi * std::pow(pack_codeU_.rcore,3))) / (std::log(1.0+xtemp)-xtemp/(1.0+xtemp));
+  }
+
+  /// compute the x,y,z components of the acceleration
+  std::array<double,3> accel(double G_code, double cosmo_a,
+                             double x, double y, double z)
+    const noexcept
+  {
+    double zheight = (pack_codeU_.amom_uvec[0]*x +
+                      pack_codeU_.amom_uvec[1]*y +
+                      pack_codeU_.amom_uvec[2]*z); // height above disk
+
+    // projected positions in plane of the disk
+    double xplane = x - zheight*pack_codeU_.amom_uvec[0];
+    double yplane = y - zheight*pack_codeU_.amom_uvec[1];
+    double zplane = z - zheight*pack_codeU_.amom_uvec[2];
+
+    double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
+    double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
+
+    // need to multiple all of the below by the gravitational constants
+    double xtemp     = radius/pack_codeU_.rcore;
+
+    double bulge_denom = pow(radius + pack_codeU_.bulge_radius, 2);
+    double accel_sph =
+      G_code * pack_codeU_.bulge_mass / bulge_denom +  // bulge
+      4.0 * G_code * cello::pi * DM_density_ * pack_codeU_.rcore *
+      (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
+
+    double accel_R =
+      G_code * pack_codeU_.stellar_mass * rcyl /
+      sqrt( pow( pow(rcyl,2) +
+                 pow(pack_codeU_.stellar_r +
+                     sqrt( pow(zheight,2) + pow(pack_codeU_.stellar_z,2)),
+                     2),
+                 3)
+            );
+
+    double accel_z   =
+      G_code * pack_codeU_.stellar_mass /
+      sqrt(pow(zheight,2) + pow(pack_codeU_.stellar_z,2)) *
+      zheight / sqrt(pow(pow(rcyl,2) +
+                         pow(pack_codeU_.stellar_r +
+                             sqrt(pow(zheight,2)
+                                  + pow(pack_codeU_.stellar_z,2)),
+                             2),
+                         3))
+      * (pack_codeU_.stellar_z * sqrt(pow(zheight,2) +
+                                      pow(pack_codeU_.stellar_z,2)));
+
+    accel_sph = (radius  == 0.0) ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a);
+    accel_R   = (rcyl    == 0.0) ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a);
+    accel_z   = (zheight == 0.0) ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a;
+
+    return {accel_sph * x + accel_R*xplane + accel_z*pack_codeU_.amom_uvec[0],
+            accel_sph * y + accel_R*yplane + accel_z*pack_codeU_.amom_uvec[1],
+            accel_sph * z + accel_R*zplane + accel_z*pack_codeU_.amom_uvec[2]};
+  }
+
+private:
+  EnzoPotentialConfigGalaxy pack_codeU_;
+
+  /// density constant for an NFW halo (rho_o)
+  double DM_density_;
+
+};
+
+//---------------------------------------------------------------------
+
+class PointMassModel {
+
+public:
+
+  PointMassModel(const EnzoPotentialConfigPointMass& pack_dfltU,
+                 const Units* units, double cosmo_a,
+                 std::array<double,3> cell_width)
+  {
+    pack_codeU_ = EnzoPotentialConfigPointMass::to_codeU(pack_dfltU, units);
+
+    // TODO: should we be using the min or max cell_width?
+    double rcore_tmp = std::max(0.1*cell_width[0], pack_codeU_.rcore);
+    min_accel_ = pack_codeU_.mass / ((rcore_tmp*rcore_tmp*rcore_tmp)*cosmo_a);
+  }
+
+  std::array<double,3> accel(double G_code, double cosmo_a,
+                             double x, double y, double z)
+    const noexcept
+  {
+    double rsqr  = x*x + y*y + z*z;
+    double r     = sqrt(rsqr);
+
+    double accel =
+      G_code * std::min(pack_codeU_.mass / ((rsqr)*r*cosmo_a), min_accel_);
+
+    return {accel * x, accel * y, accel * z};
+  }
+
+private:
+  EnzoPotentialConfigPointMass pack_codeU_;
+  double min_accel_;
+};
+
+//---------------------------------------------------------------------
+
+
+template<typename T>
+void compute_accel_(const T functor,
+                    enzo_float * ax, enzo_float * ay, enzo_float * az,
+                    double G_code, Particle * particle,
+                    const BlockInfo block_info, const int rank,
+                    const enzo_float cosmo_a,
+                    const std::array<double, 3> accel_center,
+                    const double dt) noexcept
 {
+  const int mx = block_info.dimensions[0];
+  const int my = block_info.dimensions[1];
+  const int mz = block_info.dimensions[2];
 
-  this->G_four_pi_ = 4.0 * cello::pi * enzo_constants::grav_constant;
+  for (int iz=0; iz<mz; iz++){
+     double z = (rank >= 3) ? block_info.z_val(iz) - accel_center[2] : 0.0;
 
-  FieldDescr * field_descr = cello::field_descr();
+     for (int iy=0; iy<my; iy++){
+       double y = (rank >= 2) ? block_info.y_val(iy) - accel_center[1] : 0.0;
 
-  //const int id =  field_descr->field_id("density");
-  const int iax = field_descr->field_id("acceleration_x");
-  const int iay = field_descr->field_id("acceleration_y");
-  const int iaz = field_descr->field_id("acceleration_z");
+       for (int ix=0; ix<mx; ix++){
+         double x = block_info.x_val(ix) - accel_center[0];
 
-
-  // Do not need to refresh acceleration fields in this method
-  // since we do not need to know any ghost zone information
-  //
-  cello::simulation()->refresh_set_name(ir_post_,name());
-  Refresh * refresh = cello::refresh(ir_post_);
-  refresh->add_field(iax);
-  refresh->add_field(iay);
-  refresh->add_field(iaz);
-
-  // refresh(ir)->add_field(id);
-  // iax iay and iax are used in method gravity to do
-  // refreshing of fields.... Do I need ot do this here? If so
-  // why do I need it..... otherwise I can just worry about field
-  // access with field_values?
-
-  return;
-
-} // EnzoMethodBackgroundAcceleration
-
-//-------------------------------------------------------------------
-void EnzoMethodBackgroundAcceleration::compute ( Block * block) throw()
-{
-  if (block->is_leaf()){
-    this->compute_(block);
-  }
-
-  // Wait for all blocks to finish before continuing
-  block->compute_done();
-  return;
-}
-
-void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
-{
-  /* This applies background potential to grid and particles */
-
-  //TRACE_METHOD("compute()",block);
-  EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
-  EnzoUnits * enzo_units = enzo::units();
-
-  if (!(enzo_config->method_background_acceleration_apply_acceleration)) return;
-
-  Field field = block->data()->field();
-
-  // Obtain grid sizes and ghost sizes
-
-  field.dimensions (0,&mx_,&my_,&mz_);
-  field.ghost_depth(0,&gx_,&gy_,&gz_);
-  double xp, yp, zp;
-  block->data()->lower(&xm_,&ym_,&zm_);
-  block->data()->upper(&xp,&yp,&zp);
-  field.cell_width(xm_,xp,&hx_,ym_,yp,&hy_,zm_,zp,&hz_);
-
-  // We will probably never be in the situation of constant acceleration
-  // and cosmology, but just in case.....
-  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-  enzo_float cosmo_a = 1.0;
-
-  const int rank = cello::rank();
-
-  if (cosmology) {
-    enzo_float cosmo_dadt = 0.0;
-    double dt    = block->dt();
-    double time  = block->time();
-    cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,time+0.5*dt);
-    if (rank >= 1) hx_ *= cosmo_a;
-    if (rank >= 2) hy_ *= cosmo_a;
-    if (rank >= 3) hz_ *= cosmo_a;
-  }
-
-
-  enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
-  enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
-  enzo_float * az = (enzo_float*) field.values ("acceleration_z");
-
-  int m = mx_ * my_ * mz_;
-  if (zero_acceleration_){
-    if (ax){ for(int i = 0; i < m; i ++){ ax[i] = 0.0;}}
-    if (ay){ for(int i = 0; i < m; i ++){ ay[i] = 0.0;}}
-    if (az){ for(int i = 0; i < m; i ++){ az[i] = 0.0;}}
-  }
-
-  Particle particle = enzo_block->data()->particle();
-
-  if (enzo_config->method_background_acceleration_flavor == "GalaxyModel"){
-
-    this->GalaxyModel(ax, ay, az, &particle, rank,
-                      cosmo_a, enzo_config, enzo_units, enzo_block->dt);
-
-  } else if (enzo_config->method_background_acceleration_flavor == "PointMass"){
-    this->PointMass(ax, ay, az, &particle, rank,
-                    cosmo_a, enzo_config, enzo_units, enzo_block->dt);
-  } else {
-
-    ERROR("EnzoMethodBackgroundAcceleration::compute_()",
-          "Background acceleration flavor not recognized");
-
-  }
-
-
-  return;
-
-} // compute
-
-void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
-                                                 enzo_float * ay,
-                                                 enzo_float * az,
-                                                 Particle * particle,
-                                                 const int rank,
-                                                 const enzo_float cosmo_a,
-                                                 const EnzoConfig * enzo_config,
-                                                 const EnzoUnits * enzo_units,
-                                                 const double dt)
-                                                 throw() {
-
-  // just need to define position of each cell
-
-  double mass = enzo_config->method_background_acceleration_mass *
-                enzo_constants::mass_solar / enzo_units->mass();
-  double rcore = std::max(0.1*hx_,
-                     enzo_config->method_background_acceleration_core_radius/enzo_units->length());
-  double G = this->G_four_pi_ *
-            enzo_units->density() * enzo_units->time() * enzo_units->time();
-
-  double x = 0.0, y = 0.0, z = 0.0;
-
-  const double min_accel = mass / ((rcore*rcore*rcore)*cosmo_a);
-
-  for (int iz=0; iz<mz_; iz++){
-    if (rank >= 3) z = zm_ + (iz - gz_ + 0.5)*hz_ - enzo_config->method_background_acceleration_center[2];
-
-    for (int iy=0; iy<my_; iy++){
-      if (rank >= 2) y = ym_ + (iy - gy_ + 0.5)*hy_ - enzo_config->method_background_acceleration_center[1];
-
-      for (int ix=0; ix<mx_; ix++){
-        x = xm_ + (ix - gx_ + 0.5)*hx_ - enzo_config->method_background_acceleration_center[0];
-
-        double rsqr  = x*x + y*y + z*z;
-        double r     = sqrt(rsqr);
-
-        double accel = G * std::min(mass / ((rsqr)*r*cosmo_a), min_accel);
-
-        int i = INDEX(ix,iy,iz,mx_,my_);
-
-        if (ax) ax[i] -= accel * x;
-        if (ay) ay[i] -= accel * y;
-        if (az) az[i] -= accel * z;
-
-      }
-    }
-  } // end loop over grid cells
-
-  // Update particle accelerations here -- leave for now
-
-  // Particle particle = block->data()->particle();
-
-  return;
-}
-
-void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
-                                                   enzo_float * ay,
-                                                   enzo_float * az,
-                                                   Particle * particle,
-                                                   const int rank,
-                                                   const enzo_float cosmo_a,
-                                                   const EnzoConfig * enzo_config,
-                                                   const EnzoUnits * enzo_units,
-                                                   const double dt)
-                                                   throw() {
-
-  double DM_mass     = enzo_config->method_background_acceleration_DM_mass *
-                         enzo_constants::mass_solar / enzo_units->mass();
-  double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius *
-                          enzo_constants::kpc_cm / enzo_units->length();
-  double stellar_r   = enzo_config->method_background_acceleration_stellar_scale_height_r *
-                         enzo_constants::kpc_cm / enzo_units->length();
-  double stellar_z   = enzo_config->method_background_acceleration_stellar_scale_height_z *
-                         enzo_constants::kpc_cm / enzo_units->length();
-  double stellar_mass = enzo_config->method_background_acceleration_stellar_mass *
-                        enzo_constants::mass_solar / enzo_units->mass();
-  double bulge_mass   = enzo_config->method_background_acceleration_bulge_mass *
-                        enzo_constants::mass_solar / enzo_units->mass();
-  double bulgeradius = enzo_config->method_background_acceleration_bulge_radius *
-                        enzo_constants::kpc_cm / enzo_units->length();
-  const double * amom = enzo_config->method_background_acceleration_angular_momentum;
-
-//  double G = this->G_four_pi_ *
-//             enzo_units->density() * enzo_units->time() * enzo_units->time();
-  double G_code = enzo_constants::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
-
-  double rcore = enzo_config->method_background_acceleration_core_radius *
-                 enzo_constants::kpc_cm / enzo_units->length();
-
-  ASSERT1("Enzo::MethodBackgroundAcceleration", "DM halo mass (=%e code_units) must be positive and in units of solar masses", DM_mass, (DM_mass > 0));
-
-  double xtemp = DM_mass_radius / rcore;
-
-  // compute the density constant for an NFW halo (rho_o)
-  double DM_density = (DM_mass / (4.0 * cello::pi * std::pow(rcore,3))) / (std::log(1.0+xtemp)-xtemp/(1.0+xtemp));
-
-  double x = 0.0, y = 0.0, z = 0.0;
-
-  double accel_sph, accel_R, accel_z;
-
-  for (int iz=0; iz<mz_; iz++){
-     if (rank >= 3) z = zm_ + (iz - gz_ + 0.5)*hz_ - enzo_config->method_background_acceleration_center[2];
-
-     for (int iy=0; iy<my_; iy++){
-       if (rank >= 2) y = ym_ + (iy - gy_ + 0.5)*hy_ - enzo_config->method_background_acceleration_center[1];
-
-       for (int ix=0; ix<mx_; ix++){
-         x = xm_ + (ix - gx_ + 0.5)*hx_ - enzo_config->method_background_acceleration_center[0];
-
-         // double rsqr  = x*x + y*y + z*z;
-         // double r     = sqrt(rsqr);
-
-         double zheight = amom[0]*x + amom[1]*y + amom[2]*z; // height above disk
-
-         // projected positions in plane of the disk
-         double xplane = x - zheight*amom[0];
-         double yplane = y - zheight*amom[1];
-         double zplane = z - zheight*amom[2];
-
-         double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
-         double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
-
-         // need to multiple all of the below by the gravitational constants
-         double xtemp     = radius/rcore;
-
-         //double
-         accel_sph = G_code * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                     + 4.0 * G_code * cello::pi * DM_density * rcore *
-                          (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
-
-         //double
-         accel_R   = G_code * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
-                             + pow(stellar_r + sqrt( pow(zheight,2)
-                            + pow(stellar_z,2)),2),3));
-         //double
-         accel_z   = G_code * stellar_mass / sqrt(pow(zheight,2)
-                               + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
-                               + pow(stellar_r + sqrt(pow(zheight,2)
-                               + pow(stellar_z,2)),2),3))
-                                   * (stellar_z * sqrt(pow(zheight,2) + pow(stellar_z,2)));
-
-         accel_sph = (radius  == 0.0 ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a));
-         accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a));
-         accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
-
-         accel_R = 0.0; accel_z = 0.0;
+         std::array<double,3> accel = functor.accel(G_code, cosmo_a, x, y, z);
          // now apply accelerations in cartesian (grid) coordinates
-         int i = INDEX(ix,iy,iz,mx_,my_);
-         if (ax) ax[i] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
-         if (ay) ay[i] -= (accel_sph * y + accel_R*yplane + accel_z*amom[1]);
-         if (az) az[i] -= (accel_sph * z + accel_R*zplane + accel_z*amom[2]);
+         int i = INDEX(ix,iy,iz,mx,my);
+         if (ax) ax[i] -= accel[0];
+         if (ay) ay[i] -= accel[1];
+         if (az) az[i] -= accel[2];
         }
      }
   } // end loop over grid cells
@@ -343,47 +251,16 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
           int ipdp = ip*dp;
           int ipda = ip*da;
 
-          x = px[ipdp] - enzo_config->method_background_acceleration_center[0];
-          y = py[ipdp] - enzo_config->method_background_acceleration_center[1];
-          z = pz[ipdp] - enzo_config->method_background_acceleration_center[2];
+          const double x = px[ipdp] - accel_center[0];
+          const double y = py[ipdp] - accel_center[1];
+          const double z = pz[ipdp] - accel_center[2];
 
-          double zheight = amom[0]*x + amom[1]*y + amom[2]*z; // height above disk
-
-          // projected positions in plane of the disk
-          double xplane = x - zheight*amom[0];
-          double yplane = y - zheight*amom[1];
-          double zplane = z - zheight*amom[2];
-
-          double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
-          double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
-
-          // need to multiple all of the below by the gravitational constants
-          double xtemp     = radius/rcore;
-
-          //double
-          accel_sph = G_code * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                     + 4.0 * G_code * cello::pi * DM_density * rcore *
-                          (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
-
-          accel_R   = G_code * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
-                              + pow(stellar_r + sqrt( pow(zheight,2)
-                             + pow(stellar_z,2)),2),3));
-          //double
-          accel_z   = G_code * stellar_mass / sqrt(pow(zheight,2)
-                                + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
-                                + pow(stellar_r + sqrt(pow(zheight,2)
-                                + pow(stellar_z,2)),2),3))
-                                    * (stellar_z * sqrt(pow(zheight,2) + pow(stellar_z,2)));
-
-          accel_sph = (radius  == 0.0 ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a));
-          accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a));
-          accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
+          std::array<double,3> accel = functor.accel(G_code, cosmo_a, x, y, z);
 
           // now apply accelerations in cartesian (grid) coordinates
-          if (pax) pax[ipda] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
-          if (pay) pay[ipda] -= (accel_sph * y + accel_R*yplane + accel_z*amom[1]);
-          if (paz) paz[ipda] -= (accel_sph * z + accel_R*zplane + accel_z*amom[2]);
-
+          if (pax) pax[ipda] -= accel[0];
+          if (pay) pay[ipda] -= accel[1];
+          if (paz) paz[ipda] -= accel[2];
 
         } // end loop over particles
 
@@ -393,9 +270,158 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
   } // end loop over particles
 
+}
+
+} // close anonymous namespace
+
+//---------------------------------------------------------------------
+
+EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
+(ParameterGroup p)
+ : Method(),
+   zero_acceleration_(false),
+   potential_center_xyz_{}, // fills array with zeros
+   flavor_(p.value_string("flavor","unknown")),
+   galaxy_pack_dfltU_(nullptr),
+   point_mass_pack_dfltU_(nullptr)
+{
+
+  // If self-gravity is calculated, we do not need to zero out the acceleration
+  // field from the previous time stepbefore adding the background acceleration
+  bool preceded_by_gravity = enzo::problem()->method("gravity") != nullptr;
+  zero_acceleration_ = !preceded_by_gravity;
+
+  for (int i = 0; i < 3; i++) {
+    potential_center_xyz_[i] = p.list_value_float(i,"center",0.5);
+  }
+
+  if (flavor_ == "GalaxyModel") {
+    galaxy_pack_dfltU_ = std::unique_ptr<EnzoPotentialConfigGalaxy>
+      (new EnzoPotentialConfigGalaxy);
+    *galaxy_pack_dfltU_ = EnzoPotentialConfigGalaxy::from_parameters(p);
+
+  } else if (flavor_ == "PointMass") {
+    point_mass_pack_dfltU_ = std::unique_ptr<EnzoPotentialConfigPointMass>
+      (new EnzoPotentialConfigPointMass);
+    *point_mass_pack_dfltU_ = EnzoPotentialConfigPointMass::from_parameters(p);
+
+  } else {
+    ERROR1("EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration",
+           "Background acceleration flavor not recognized: %s",
+           flavor_.c_str());
+  }
+
+  FieldDescr * field_descr = cello::field_descr();
+
+  const int iax = field_descr->field_id("acceleration_x");
+  const int iay = field_descr->field_id("acceleration_y");
+  const int iaz = field_descr->field_id("acceleration_z");
+
+
+  // Do not need to refresh acceleration fields in this method
+  // since we do not need to know any ghost zone information
+  cello::simulation()->refresh_set_name(ir_post_,name());
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_field(iax);
+  refresh->add_field(iay);
+  refresh->add_field(iaz);
 
   return;
+
+} // EnzoMethodBackgroundAcceleration
+
+//-------------------------------------------------------------------
+
+void EnzoMethodBackgroundAcceleration::compute ( Block * block) throw()
+{
+  if (block->is_leaf()){
+    this->compute_(block);
+  }
+
+  // Wait for all blocks to finish before continuing
+  block->compute_done();
+  return;
 }
+
+//---------------------------------------------------------------------
+
+void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
+{
+  /* This applies background potential to grid and particles */
+
+  //TRACE_METHOD("compute()",block);
+  EnzoBlock * enzo_block = enzo::block(block);
+  Units * units = (Units*)enzo::units();
+
+  Field field = block->data()->field();
+
+  BlockInfo block_info(block);
+
+  // We will probably never be in the situation of constant acceleration
+  // and cosmology, but just in case.....
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  enzo_float cosmo_a = 1.0;
+
+  const int rank = cello::rank();
+
+  if (cosmology) {
+    enzo_float cosmo_dadt = 0.0;
+    double dt    = block->dt();
+    double time  = block->time();
+    cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,time+0.5*dt);
+    if (rank >= 1) block_info.cell_width[0] *= cosmo_a;
+    if (rank >= 2) block_info.cell_width[1] *= cosmo_a;
+    if (rank >= 3) block_info.cell_width[2] *= cosmo_a;
+  }
+
+
+  enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
+  enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
+  enzo_float * az = (enzo_float*) field.values ("acceleration_z");
+
+  int m = (block_info.dimensions[0] * block_info.dimensions[1] *
+           block_info.dimensions[2]);
+  if (zero_acceleration_){
+    if (ax){ for(int i = 0; i < m; i ++){ ax[i] = 0.0;}}
+    if (ay){ for(int i = 0; i < m; i ++){ ay[i] = 0.0;}}
+    if (az){ for(int i = 0; i < m; i ++){ az[i] = 0.0;}}
+  }
+
+  Particle particle = enzo_block->data()->particle();
+
+  // unclear why the gravitational constant is different in each branch!
+
+  if (galaxy_pack_dfltU_ != nullptr) {
+
+    double G_code = enzo::grav_constant_cgs() * units->density() * units->time() * units->time();
+    const GalaxyModel functor(*galaxy_pack_dfltU_, units);
+
+    compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
+                   cosmo_a, potential_center_xyz_, enzo_block->dt);
+
+  } else if (point_mass_pack_dfltU_ != nullptr) {
+
+    double G_code = (4.0 * cello::pi * enzo::grav_constant_cgs()) *
+            units->density() * units->time() * units->time();
+    const PointMassModel functor(*point_mass_pack_dfltU_, units,
+                                 cosmo_a, block_info.cell_width);
+
+    compute_accel_(functor, ax, ay, az, G_code, &particle, block_info, rank,
+                   cosmo_a, potential_center_xyz_, enzo_block->dt);
+
+  } else {
+
+    ERROR("EnzoMethodBackgroundAcceleration::compute_()",
+          "Background acceleration flavor not recognized");
+
+  }
+
+
+  return;
+
+} // compute
+
+//---------------------------------------------------------------------
 
 double EnzoMethodBackgroundAcceleration::timestep (Block * block) throw()
 {
@@ -464,11 +490,3 @@ double EnzoMethodBackgroundAcceleration::timestep (Block * block) throw()
 
   return 0.5*dt;
 }
-
-/* Placeholder for the general DM potential
-   methods (NFW is a specific case)
-void EnzoMethodBackgroundAcceleration::General(void){
-
-  return;
-}
-*/

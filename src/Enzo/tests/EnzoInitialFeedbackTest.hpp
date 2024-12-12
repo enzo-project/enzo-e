@@ -17,14 +17,22 @@ class EnzoInitialFeedbackTest : public Initial {
 public:  // interface
 
   ///Charm++ constructor
-  EnzoInitialFeedbackTest(const EnzoConfig * enzo_config) throw();
+  EnzoInitialFeedbackTest(int cycle, double time, ParameterGroup p) throw();
 
   /// Charm++ PUP::able declaration
   PUPable_decl(EnzoInitialFeedbackTest);
 
   /// CHARM++ migration constructor
   EnzoInitialFeedbackTest(CkMigrateMessage *m)
-      : Initial (m)
+    : Initial (m),
+      density_CGS_(0.0),
+      temperature_(0.0),
+      metal_fraction_(0.0),
+      species_densities_CGS_(),
+      num_particles(0),
+      position{},
+      mass(),
+      luminosity()
   {  }
 
   /// CHARM++ Pack / Unpack function
@@ -39,7 +47,11 @@ public:  // interface
   virtual ~EnzoInitialFeedbackTest() throw() {};
 
 private:
-
+  
+  double density_CGS_;
+  double temperature_;
+  double metal_fraction_;
+  std::map<std::string, double> species_densities_CGS_;
   int num_particles;
   std::vector<double> position[3];
   std::vector<double> mass;

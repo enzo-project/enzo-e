@@ -10,13 +10,16 @@ including adding new computational methods, initial conditions,
 refinement criteria, etc.
 
 .. toctree::
-      
+
    coding-guidelines
    initial
    adapt
    method
+   param
+   physics
    array
    hydro_infrastructure
    eos-fluidprops
+   debugging
    cmake_primer
    writing-docs

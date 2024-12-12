@@ -11,9 +11,10 @@
 
 class CProxy_IoEnzoReader;
 class CProxy_IoEnzoWriter;
+class CProxy_EnzoLevelArray;
 
 #include "charm++.h"
-#include "enzo.decl.h"
+#include "charm_enzo.hpp"
 
 
 class EnzoSimulation : public CBase_EnzoSimulation
@@ -43,14 +44,14 @@ public: // functions
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-  /// Request by newly created EnzoBlock to get its MsgRefine object
-  virtual void p_get_msg_refine(Index index);
+  virtual void p_refine_create_block(MsgRefine*);
+  void refine_create_block(MsgRefine*);
 
-  virtual void p_get_msg_check(Index index);
   void set_msg_check (Index index, EnzoMsgCheck *);
-  EnzoMsgCheck * get_msg_check (Index index);
-#endif
+
+  /// Request by newly created EnzoBlock to get its MsgRefine object
+  MsgRefine * get_msg_refine(Index index);
+  EnzoMsgCheck * get_msg_check(Index index);
 
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
@@ -65,11 +66,29 @@ public: // functions
   /// EnzoMethodCheck
   void r_method_check_enter (CkReductionMsg *);
   void p_check_done();
-  void p_set_io_reader(CProxy_IoEnzoReader io_reader);
-  void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+  void p_set_io_reader(CProxy_IoEnzoReader proxy);
+  void p_set_io_writer(CProxy_IoEnzoWriter proxy);
+  void p_set_level_array(CProxy_EnzoLevelArray proxy);
+
   void set_sync_check_writer(int count)
   { sync_check_writer_created_.set_stop(count); }
+
+  void set_sync_infer_count(int count)
+  { sync_infer_count_.set_stop(count); }
+  void set_sync_infer_create(int count)
+  { sync_infer_create_.set_stop(count); }
+  void set_sync_infer_done(int count)
+  { sync_infer_done_.set_stop(count); }
+
   void p_io_reader_created();
+
+  /// EnzoMethodInference
+  /// Set count of inference arrays to be created
+  void p_infer_set_array_count(int count);
+  /// Decrement inference array counter
+  void p_infer_array_created();
+  /// Synchronize after inference has been applied
+  void p_infer_done();
 
   /// Read in and initialize the next refinement level from a checkpoint;
   /// or exit if done
@@ -86,6 +105,7 @@ public: // virtual functions
 
 private: // functions
 
+  void infer_check_create_();
 
 private: // virtual functions
 
@@ -96,6 +116,14 @@ private: // attributes
   /// Checkpoint synchronization
   Sync                     sync_check_writer_created_;
   Sync                     sync_check_done_;
+  /// Count root-level blocks before continuing in EnzoMethodInference
+  Sync                     sync_infer_count_;
+  /// Count inference arrays created
+  Sync                     sync_infer_create_;
+  /// Count inference arrays that are done with inference
+  Sync                     sync_infer_done_;
+  /// Total number of inference arrays to create
+  int                      infer_count_arrays_;
   int                      check_num_files_;
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;
@@ -104,9 +132,9 @@ private: // attributes
   Sync sync_method_balance_;
   /// Current restart level
   int restart_level_; 
-#ifdef BYPASS_CHARM_MEM_LEAK
+
+  /// MsgCheck objects for newly created Blocks on this process
   std::map<Index,EnzoMsgCheck *> msg_check_map_;
-#endif
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

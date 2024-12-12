@@ -184,15 +184,17 @@ std::string Input::expand_name_
 
     strncpy (buffer, middle.c_str(),MAX_BUFFER);
     
-    if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
-    else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
-    else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
-    else 
-      {
-	ERROR3("Input::expand_name_",
-	       "Unknown file variable #%d '%s' for file '%s'",
-	       int(i),arg.c_str(),name.c_str());
-      }
+    if (arg == "cycle") {
+      snprintf (buffer_new,sizeof(buffer_new), buffer, cycle_);
+    } else if (arg == "time") {
+      snprintf (buffer_new,sizeof(buffer_new), buffer, time_);
+    } else if (arg == "proc") {
+      snprintf (buffer_new,sizeof(buffer_new), buffer, CkMyPe());
+    } else {
+	  ERROR3("Input::expand_name_",
+	         "Unknown file variable #%d '%s' for file '%s'",
+	         int(i),arg.c_str(),name.c_str());
+    }
 
     right = std::string(buffer_new) + right;
 

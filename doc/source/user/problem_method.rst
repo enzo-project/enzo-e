@@ -149,7 +149,7 @@ For example, to load balance a simulation with a 4^3 root-level blocking
 ===============================
 
 Adds the comoving expansion terms to the physical variables.
-   
+
 ``"grackle"`` method
 ====================
 
@@ -234,8 +234,8 @@ acceleration fields.
 ``"heat"`` method
 =================
 
-A sample Method for implementing forward-euler to solve the heat equation.   
-   
+A sample Method for implementing forward-euler to solve the heat equation.
+
 ``"merge_sinks"`` method
 ========================
 
@@ -306,6 +306,7 @@ parameters
        the minimum across all 3 dimensions), at the highest refinement
        level.`
 
+.. _vlct_overview:
 
 ``"mhd_vlct"`` method
 =====================
@@ -351,28 +352,28 @@ parameter) should be less than 0.5.
 .. list-table:: Method ``mhd_vlct`` parameters
    :widths: 10 5 1 30
    :header-rows: 1
-   
+
    * - Parameter
      - Type
      - Default
      - Description
-   * - ``"mhd_choice"``
+   * - :par:param:`~Method:mhd_vlct:mhd_choice`
      - `string`
      - `none`
      - `Specifies handling of magnetic fields (or lack thereof)`
-   * - ``"riemann_solver"``
+   * - :par:param:`~Method:mhd_vlct:time_scheme`
+     - `string`
+     - `vl`
+     - `Specifies time integration scheme (CURRENTLY JUST FOR TESTING)`
+   * - :par:param:`~Method:mhd_vlct:riemann_solver`
      - `string`
      - `hlld`
      - `name of the Riemann Solver to use`
-   * - ``"half_dt_reconstruct_method"``
-     - `string`
-     - `nn`
-     - `Reconstruction method for half timestep`
-   * - ``"full_dt_reconstruct_method"``
+   * - :par:param:`~Method:mhd_vlct:reconstruct_method`
      - `string`
      - `plm`
-     - `Reconstruction method for full timestep`
-   * - ``"theta_limiter"``
+     - `Reconstruction method`
+   * - :par:param:`~Method:mhd_vlct:theta_limiter`
      - `float`
      - `1.5`
      - `controls dissipation of the "plm"/"plm_enzo" reconstruction
@@ -389,11 +390,11 @@ fields
    * - Field
      - Type
      - Read/Write
-     - Description   
+     - Description
    * - ``"density"``
      - ``enzo_float``
      - [rw]
-     -    
+     -
    * - ``"velocity_x"``
      - ``enzo_float``
      - [rw]
@@ -445,7 +446,7 @@ fields
 
 In hydro-mode, none of the 6 fields used to store the magnetic field should
 be defined.
-       
+
 At initialization the face-centered magnetic field should be
 divergence free. Trivial configurations (e.g. a constant magnetic
 field everywhere) can be provided with the ``"value"``
@@ -487,19 +488,19 @@ the stale depth increases. We define the amount by which it
 increases as the "staling rate" (which depends on the choice
 of interpolation method).
 
-For a unigrid simulation, the number of required ghost zones
-is given by the sum of the staling rates for each selected
-reconstruction method.
+For a unigrid simulation, the number of ghost zones is ``1 + staling_rate``
+where ``staling_rate`` depends on the chosen reconstruction method.
 
-We provide the names used to specify each available method in
-the input file, the associated staling depth, and a brief
-description.
+For each available reconstruction method, the following table provides
+the name that must be passed to
+:par:param:`~Method:mhd_vlct:reconstruct_method` in the input file,
+the associated staling depth, and a brief description.
 
 .. list-table:: Available ``mhd_vlct`` reconstructors (and slope
 		limiters)
    :widths: 3 1 30
    :header-rows: 1
-   
+
    * - Name
      - Staling Depth
      - Description
@@ -531,20 +532,31 @@ description.
 
 We provide a few notes about the choice of interpolator for this algorithm:
 
-   * The recommended choices of reconstruction algorithms are ``"nn"`` for the
-     half-timestep and then piecewise-linear reconstruction for the
-     full-timestep (most test problems have been run using ``plm`` with
-     ``theta_limiter=2``, matching the integrator description in
-     `Stone & Gardiner 2009
-     <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
-     both times also works, however tests show that errors arise when
-     piecewise linear reconstruction is used both times.
+   * The recommended choices of reconstruction algorithm is
+     piecewise-linear reconstruction (most test problems have been run
+     using ``plm`` with ``theta_limiter=2``, matching the integrator
+     description in `Stone & Gardiner 2009
+     <https://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ).
    * It is supposed to be possible to reconstruct the characteristic quantities
      for this method or to use higher order reconstruction in place of ``"plm"``
    * Reconstruction is always performed on the cell-centered magnetic fields.
      After reconstructing values along a given axis, the values of the
      reconstructed magnetic field component for that axis are replaced by the
      face-centered magnetic field values.
+
+.. note::
+
+   Under the hood, the default predictor-corrector temporal integration scheme
+   **always** uses ``"nn"`` reconstruction to compute fluxes during the
+   prediction stage (aka the partial timestep); the scheme breaks for any other
+   choices.
+
+   This is why the number of required ghost zones is ``1 + staling_rate``:
+      * the first term is the staling depth of the ``"nn"`` reconstructor
+      * the second term is the staling depth of the reconstructor specified by
+        the :par:param:`~Method:mhd_vlct:reconstruct_method` parameter; this
+        is used for computing fluxes for the second stage (for the full
+        timestep).
 
 .. _using-vlct-riemann-solver:
 
@@ -583,7 +595,7 @@ them:
     hydrodynamical problems that models contact and shear waves. The
     wavespeed bounds are estimated according to the Einfeldt approach.
     This can only be used in hydro mode.
-    
+
   * ``"hlld"`` The HLLD approximate Riemann solver described in
     Miyoshi & Kusano, 2005. JCP, 315, 344. The wavespeed bounds are
     estimated according to eqn 67 from the paper. This reduces to an
@@ -603,77 +615,77 @@ them:
       assumes constant total pressure. It is unclear whether this causes any
       problems.
 
-``"m1_closure"``: multigroup radiative transfer   
+``"m1_closure"``: multigroup radiative transfer
 ===============================================
 
-Enzo-E's multigroup M1 Closure radiative transfer solver. The M1 Closure solver is implemented following 
+Enzo-E's multigroup M1 Closure radiative transfer solver. The M1 Closure solver is implemented following
 `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_.
 
 This method adds the following capabilities:
 
-1. **Photon injection:** Photons are sourced from star particles and CiC-deposited 
-   onto the mesh using a cloud radius of one cell width. Depositions occuring at 
-   block boundaries are communicated to neighboring blocks via ghost zone refresh with 
-   ``set_accumulate = true``. This method accesses the ``"luminosity`` attribute 
-   for ``"star"`` particles, where luminosity is in units of :math:`\mathrm{s}^{-1}`. 
-   One can provide an SED using the ``SED`` parameter and specifying ``m1_closure:radiation_spectrum="SED"``. 
-   Alternatively, one can specify ``m1_closure:radiation_spectrum="blackbody"``, in which case 
-   a blackbody spectrum will be integrated. Radiation from recombination is also 
-   optionally included by setting the ``recombination_radiation`` parameter. 
+1. **Photon injection:** Photons are sourced from star particles and CiC-deposited
+   onto the mesh using a cloud radius of one cell width. Depositions occuring at
+   block boundaries are communicated to neighboring blocks via ghost zone refresh with
+   ``set_accumulate = true``. This method accesses the ``"luminosity`` attribute
+   for ``"star"`` particles, where luminosity is in units of :math:`\mathrm{s}^{-1}`.
+   One can provide an SED using the ``SED`` parameter and specifying ``m1_closure:radiation_spectrum="SED"``.
+   Alternatively, one can specify ``m1_closure:radiation_spectrum="blackbody"``, in which case
+   a blackbody spectrum will be integrated. Radiation from recombination is also
+   optionally included by setting the ``recombination_radiation`` parameter.
 
-2. **Photon transport:** The transport equation is solved to update the radiation fields. 
+2. **Photon transport:** The transport equation is solved to update the radiation fields.
    Attenuation is optionally included with the ``attenuation`` parameter.
 
-3. **Photoionization and heating:** This method calculates photoionization and heating rates, 
+3. **Photoionization and heating:** This method calculates photoionization and heating rates,
    which can then be accessed by the ``"grackle"`` method with ``Method:grackle:with_radiative_transfer=true``.
-   Photoionization cross sections can either be provided in the parameter file or calculated inline. 
+   Photoionization cross sections can either be provided in the parameter file or calculated inline.
    This is controlled using the ``m1_closure:cross_section_calculator`` parameter.
 
 This is a reduced speed-of-light (RSOL) method, meaning that the value of the speed of light can be varied
-by setting the ``m1_closure:clight_fraction`` parameter. The radiation timescale is generally set by 
-the speed of light, so a smaller speed of light will allow the simulation to progress faster. 
+by setting the ``m1_closure:clight_fraction`` parameter. The radiation timescale is generally set by
+the speed of light, so a smaller speed of light will allow the simulation to progress faster.
 Some care must be taken when choosing the value for the RSOL, as the approximation is more valid in dense gas.
 The general rule of thumb is the the chosen RSOL must be much less than the typical I-front propagation
-speed in the medium.  For densities typical for the interstellar medium 
-:math:`\left(10^{-2}\,\,\mathrm{cm}^{-3} - 10^{1}\,\,\mathrm{cm}^{-3}\right)`, fractions as low as 
+speed in the medium.  For densities typical for the interstellar medium
+:math:`\left(10^{-2}\,\,\mathrm{cm}^{-3} - 10^{1}\,\,\mathrm{cm}^{-3}\right)`, fractions as low as
 :math:`10^{-2}\,\,\mathrm{cm}^{-3}` are valid. For simulations that seek to resolve
-the reionization of the intergalactic medium, however, the true value of speed of light must be taken in order for reionization to occur at the correct time. 
+the reionization of the intergalactic medium, however, the true value of speed of light must be taken in order for reionization to occur at the correct time.
 See Section 4 of `Rosdahl et al. (2013) <https://ui.adsabs.harvard.edu/abs/2013MNRAS.436.2188R/abstract>`_ for a more detailed discussion.
 
-This method **must** be used in tandem with the ``"m1_closure"`` initializer by appending ``"m1_closure"`` to 
+This method **must** be used in tandem with the ``"m1_closure"`` initializer by appending ``"m1_closure"`` to
 ``Initial:list``.
 
-.. note:: 
+.. note::
 
    Additional term in the radiative transfer equation corresponding to cosmological redshift not yet included. As such, redshifting of radiation into and out of groups is not captured.
 
-   The radiation timescale is set by the courant condition :math:`\Delta t\leq\frac{\Delta x}{3 c_r}`. 
+   The radiation timescale is set by the courant condition :math:`\Delta t\leq\frac{\Delta x}{3 c_r}`.
    For :math:`c_r=c`, this will result in a timestep that is **very** small. Subcycling of radiative transfer
    with respect to hydrodynamics will be implemented soon!
 
    Photochemistry is only supported for six-species: HI, HII, HeI, HeII, HeIII, and :math:`e^-`.
 
-Required Fields 
+Required Fields
 ---------------
 
-The evolved fields are ``"photon_density_i"``, ``"flux_x_i"``, ``"flux_y_i"``, and ``"flux_z_i"``, 
-where photon densities and fluxes are in units of :math:`[L]^{-3}` :e:`and` :math:`[L]^2[T]^{-1}`, 
+The evolved fields are ``"photon_density_i"``, ``"flux_x_i"``, ``"flux_y_i"``, and ``"flux_z_i"``,
+where photon densities and fluxes are in units of :math:`[L]^{-3}` and :math:`[L]^2[T]^{-1}`,
 respectively, and :math:`i` denotes the group number. A set of fields must be defined for each group, and
 fluxes must be defined in the x, y, and z directions regardless of the dimensionality of the simulation.
 For technical reasons, an additional field called ``"photon_density_i_deposit"`` must be defined for each group.
 
-For example, a simulation that evolves three groups must define these fifteen fields: 
-``"photon_density_0"``, ``"photon_density_0_deposit"``, ``"flux_x_0"``, ``"flux_y_0"``, ``"flux_z_1"``, 
-``"photon_density_1"``, ``"photon_density_1_deposit"``, ``"flux_x_1"``, ``"flux_y_1"``, ``"flux_z_1"``, 
+For example, a simulation that evolves three groups must define these fifteen fields:
+``"photon_density_0"``, ``"photon_density_0_deposit"``, ``"flux_x_0"``, ``"flux_y_0"``, ``"flux_z_1"``,
+``"photon_density_1"``, ``"photon_density_1_deposit"``, ``"flux_x_1"``, ``"flux_y_1"``, ``"flux_z_1"``,
 ``"photon_density_2"``, ``"photon_density_2_deposit"``, ``"flux_x_2"``, ``"flux_y_2"``, ``"flux_z_2"``.
 
 Nine additional fields must be defined corresponding to the elements of the 3D radiation pressure tensor:
-``"P00"``, ``"P01"``, ``"P02"``, 
-``"P10"``, ``"P11"``, ``"P12"``, 
-``"P20"``, ``"P21"``, ``"P22"`` 
+``"P00"``, ``"P01"``, ``"P02"``,
+``"P10"``, ``"P11"``, ``"P12"``,
+``"P20"``, ``"P21"``, ``"P22"``
 Note that only these nine fields are required, regardless of the number of radiation groups specified.
 
-Photionization and heating rates are calculated and stored in the following fields: 
+Photionization and heating rates are calculated and stored in the following fields:
 ``"RT_HI_ionization_rate"``, ``"RT_HeI_ionization_rate"``, ``"RT_HeII_ionization_rate"``, and ``"RT_heating_rate"``.
 
 ``"order_morton"`` method
@@ -717,7 +729,7 @@ parameters
 .. list-table:: Method ``ppm`` parameters
    :widths: 10 5 1 30
    :header-rows: 1
-   
+
    * - Parameter
      - Type
      - Default
@@ -763,7 +775,7 @@ parameters
 .. list-table:: Method ``ppm`` parameters
    :widths: 10 5 1 30
    :header-rows: 1
-   
+
    * - Parameter
      - Type
      - Default
@@ -803,11 +815,11 @@ fields
    * - Field
      - Type
      - Read/Write
-     - Description   
+     - Description
    * - ``"density"``
      - ``enzo_float``
      - [rw]
-     -    
+     -
    * - ``"velocity_x"``
      - ``enzo_float``
      - [rw]
@@ -854,8 +866,6 @@ This method currently ignores all of the floor parameters that are set in the ``
 =================
 
 PPML ideal MHD solver
-
-.. _vlct_overview:
 
 ``"sink_maker"`` method
 =======================

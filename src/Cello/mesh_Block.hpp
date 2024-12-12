@@ -37,16 +37,10 @@ class Block : public CBase_Block
 
 public: // interface
 
-#ifdef BYPASS_CHARM_MEM_LEAK
   /// create a Block whose MsgRefine is on the creating process
   Block ( process_type ip_source, MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
-#else
-  /// create a Block with the given block count, lower extent, block
-  /// size, and number of field blocks
-  Block ( MsgRefine * msg );
-#endif
 
   /// Destructor
   virtual ~Block();
@@ -170,7 +164,7 @@ public: // interface
   /// Return the name of the block with the given index
   std::string name(Index index) const throw();
 
-  /// Return the size the Block array
+  /// Return the size of the Block array
   void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Compute the lower extent of the Block in the domain
@@ -181,7 +175,22 @@ public: // interface
 
   /// Return the index of this Block in global coordinates for its level
   void index_global
-  ( int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const;
+  ( Index index, int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const;
+
+  void index_global
+  ( int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const {
+    index_global(index_, ix, iy, iz, nx, ny, nz);
+  };
+
+  /// Return the index for the block corresponding to the given global coordinates.
+  Index index_from_global(int ix, int iy, int iz, int level, int min_level);
+
+  /// Create child blocks during initialization.
+  virtual void create_initial_child_blocks() {};
+
+  /// Return boolean indicating if the indicated block should refine
+  /// during the initialization phase.
+  bool refine_during_initialization (Index index) const throw();
 
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
@@ -247,8 +256,11 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
-  /// Initiate applying the sequence of Initial conditions
-  void initial_new_begin_(int level);
+  /// Initiate applying all Initial conditions.
+  void p_initial_begin() { initial_begin(); }
+  void initial_begin();
+  void initial_new_begin_();
+
   /// Continue to the next Initial conditions object
   void r_initial_new_next(CkReductionMsg * msg)
   { delete msg; initial_new_next_(); }
@@ -335,6 +347,17 @@ public: // interface
   /// Return the currently-active Solver
   Solver * solver () throw();
 
+  /// Accessor functions for block ordering index and count 
+  void set_order (long long index, long long count)
+  {
+    index_order_ = index;
+    count_order_ = count;
+  }
+  void get_order (long long * index, long long * count) const
+  { *index = index_order_;
+    *count = count_order_;
+  }
+  
 protected: // methods
 
   Index neighbor_ (const int if3[3], Index * ind = 0) const;
@@ -591,6 +614,11 @@ public:
   void p_method_order_morton_weight(int ic3[3], int weight, Index index);
   void p_method_order_morton_index(int index, int count);
 
+  void r_method_order_hilbert_continue(CkReductionMsg * msg);
+  void r_method_order_hilbert_complete(CkReductionMsg * msg);
+  void p_method_order_hilbert_weight(int ic3[3], int weight, Index index);
+  void p_method_order_hilbert_index(int index, int count);
+
   void p_method_output_next (MsgOutput * msg);
   void p_method_output_write (MsgOutput * msg);
   void r_method_output_continue(CkReductionMsg * msg);
@@ -809,7 +837,7 @@ public: // virtual functions
   (int if3[3], int ic3[3], int g3[3],
    int refresh_type,
    Refresh * refresh,
-   bool new_refresh) const;
+   bool new_refresh = true) const;
 
   virtual void print (FILE * fp = nullptr) const;
 
@@ -854,7 +882,7 @@ protected: // functions
     char buffer[27];
     int v3[3];
     index_.values(v3);
-    sprintf (buffer,"%08X-%08X-%08X",
+    snprintf (buffer, sizeof(buffer), "%08X-%08X-%08X",
 	     v3[0],v3[1],v3[2]);
     return buffer;
   }
@@ -1016,6 +1044,9 @@ protected: // attributes
   std::vector < Sync > refresh_sync_list_;
   std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
 
+  /// Index and total count used for ordering blocks, e.g. for dynamic load balancing
+  long long index_order_;
+  long long count_order_;
 };
 
 #endif /* COMM_BLOCK_HPP */

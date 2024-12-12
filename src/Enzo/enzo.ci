@@ -14,31 +14,16 @@ module enzo {
   readonly int EnzoMsgCheck::counter[CONFIG_NODE_SIZE];
 
   readonly EnzoConfig g_enzo_config;
-  readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::DomainLeftEdge [CONFIG_NODE_SIZE_3];
-  readonly enzo_float EnzoBlock::DomainRightEdge[CONFIG_NODE_SIZE_3];
-  readonly int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
-  readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
 
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  // ALWAYS define the following (even if CONFIG_USE_GRACKLE is not defined)
+  PUPable GrackleFacade;
+
   // EnzoInitial
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
-#endif
   PUPable EnzoInitialAccretionTest;
   PUPable EnzoInitialBBTest;
   PUPable EnzoInitialBCenter;
@@ -66,15 +51,12 @@ module enzo {
   PUPable IoEnzoBlock;
 
   // EnzoRefine
-  PUPable EnzoRefineShock;
-  PUPable EnzoRefineParticleMass;
   PUPable EnzoRefineMass;
+  PUPable EnzoRefineParticleMass;
+  PUPable EnzoRefineShock;
 
   // EnzoCompute
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoComputeCoolingTime;
-#endif
-
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
@@ -86,9 +68,7 @@ module enzo {
   PUPable EnzoMatrixIdentity;
 
   // EnzoMethod
-#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoMethodGrackle;
-#endif
   PUPable EnzoMethodAccretion;
   PUPable EnzoMethodBackgroundAcceleration;
   PUPable EnzoMethodBondiHoyleAccretion;
@@ -102,6 +82,7 @@ module enzo {
   PUPable EnzoMethodFluxAccretion;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
+  PUPable EnzoMethodInference;
   PUPable EnzoMethodMergeSinks;
   PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodPmDeposit;
@@ -113,21 +94,13 @@ module enzo {
   PUPable EnzoMethodThresholdAccretion;
   PUPable EnzoMethodTurbulence;
 
-  PUPable EnzoIntegrationQuanUpdate;
-  PUPable EnzoReconstructorNN;
-  // EnzoReconstructorPLMEnzoRKLim
-  PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
-  // EnzoReconstructorPLMAthenaLim
-  PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
-
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
   PUPable EnzoMethodStarMakerSTARSS;
 
-  PUPable EnzoBfieldMethodCT;
-
   PUPable EnzoPhysicsCosmology;
   PUPable EnzoPhysicsFluidProps;
+  PUPable EnzoPhysicsGravity;
 
   PUPable EnzoProblem;
   PUPable EnzoProlong;
@@ -154,6 +127,7 @@ module enzo {
   readonly CProxy_EnzoSimulation proxy_enzo_simulation;
   readonly CProxy_IoEnzoReader   proxy_io_enzo_reader;
   readonly CProxy_IoEnzoWriter   proxy_io_enzo_writer;
+  readonly CProxy_EnzoLevelArray proxy_level_array;
 
   //----------------------------------------------------------------------
 
@@ -163,10 +137,7 @@ module enzo {
 
     entry void r_startup_begun (CkReductionMsg *);
 
-#ifdef BYPASS_CHARM_MEM_LEAK
-    entry void p_get_msg_refine(Index index);
-    entry void p_get_msg_check(Index index);
-#endif
+    entry void p_refine_create_block (MsgRefine *);
 
     //EnzoMethodBalance
     entry void r_method_balance_count(CkReductionMsg * msg);
@@ -175,35 +146,36 @@ module enzo {
     // EnzoMethodCheck
     entry void r_method_check_enter(CkReductionMsg *);
     entry void p_check_done();
-    entry void p_set_io_writer(CProxy_IoEnzoWriter io_writer);
+    entry void p_set_io_writer(CProxy_IoEnzoWriter proxy);
+
+    // EnzoMethodInfer
+    entry void p_infer_set_array_count(int count);
+    entry void p_infer_array_created();
+    entry void p_infer_done();
 
     // enzo_control_restart
-    entry void p_set_io_reader(CProxy_IoEnzoReader io_reader);
+    entry void p_set_io_reader(CProxy_IoEnzoReader proxy);
     entry void p_io_reader_created();
     entry void p_restart_next_level();
     entry void p_restart_level_created();
-}
+    // enzo_level_array
+    entry void p_set_level_array(CProxy_EnzoLevelArray proxy);
+  };
 
   //----------------------------------------------------------------------
   array[Index] EnzoBlock : Block {
 
-#ifdef BYPASS_CHARM_MEM_LEAK
     entry EnzoBlock (process_type ip_source, MsgType msg_type);
-    entry void p_set_msg_refine (MsgRefine    * msg);
-    entry void p_set_msg_check  (EnzoMsgCheck * msg);
-#else
-    entry EnzoBlock (MsgRefine    * msg);
-    entry EnzoBlock (EnzoMsgCheck * msg);
-#endif
+
     entry EnzoBlock();
  
     // EnzoMethodFeedbackSTARSS synchronization entry methods
     entry void p_method_feedback_starss_end();
- 
+
     // EnzoMethodM1Closure synchronization entry methods
     entry void p_method_m1_closure_solve_transport_eqn();
-    entry void p_method_m1_closure_set_global_averages(CkReductionMsg *msg);  
- 
+    entry void p_method_m1_closure_set_global_averages(CkReductionMsg *msg);
+
     // EnzoMethodTurbulence synchronization entry methods
     entry void r_method_turbulence_end(CkReductionMsg *msg);
 
@@ -217,6 +189,15 @@ module enzo {
     entry void p_method_gravity_continue();
     entry void p_method_gravity_end();
 
+    // EnzoMethodInference
+
+    entry void p_method_infer_merge_masks
+      (int n, char mask[n], int ic3[3]);
+    entry void p_method_infer_count_arrays (int count);
+    entry void p_method_infer_request_data (int il3[3]);
+    entry void p_method_infer_update (int n, char buffer[n], int il3[3]);
+    entry void p_method_infer_exit();
+
     // checkpoint
     entry void p_check_write_first
       (int num_files, std::string ordering, std::string name_dir);
@@ -224,7 +205,7 @@ module enzo {
     entry void p_check_done();
 
     // restart
-    entry void p_restart_refine (int ic3[3], int io_reader);
+    entry void p_restart_refine (int ic3[3], int io_reader, int ip);
     entry void p_restart_set_data(EnzoMsgCheck *);
     entry void p_restart_done();
 
@@ -286,7 +267,6 @@ module enzo {
     entry void r_solver_mg0_barrier(CkReductionMsg* msg);
     entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
-
   };
 
   array[1D] IoEnzoReader : IoReader {
@@ -300,8 +280,17 @@ module enzo {
 
   array[1D] IoEnzoWriter : IoWriter {
     entry IoEnzoWriter();
-    entry IoEnzoWriter (int num_files, std::string ordering, int monitor_iter);
+    entry IoEnzoWriter (int num_files, std::string ordering,
+                        int monitor_iter, int include_ghosts);
     entry void p_write(EnzoMsgCheck * );
-  }
+  };
 
+  array[Index3] EnzoLevelArray {
+    entry EnzoLevelArray(std::string,
+                         int level_base, int level_array, int level_infer,
+                         int nax, int nay, int naz);
+    entry void p_request_data ();
+    entry void p_transfer_data (Index, int nf, enzo_float field_data[nf] );
+    entry void p_done(Index);
+  };
 };
