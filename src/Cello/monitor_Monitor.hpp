@@ -63,11 +63,10 @@ public: // interface
 
     // // NOTE: change this function whenever attributes change
     // p |  *timer_;
-    p |  mode_;
-    p |  verbose_;
-    // p |  group_default_;
-    // p |  group_active_;
-
+    p | mode_;
+    p | verbose_;
+    p | include_proc_;
+    p | include_time_;
   }
 
   /// Return an instance of a Monitor object
@@ -110,11 +109,22 @@ public: // interface
 
 
   void set_verbose (int verbose) 
-  { 
-    if (CkMyRank() == 0) verbose_ = verbose; 
+  {
+    if (CkMyRank() == 0) verbose_ = verbose;
   }
 
   int is_verbose () const { return verbose_; }
+  bool include_proc () const
+  { return include_proc_; }
+
+  void set_include_proc (bool include_proc)
+  { include_proc_ = include_proc; }
+
+  bool include_time () const
+  { return include_time_; }
+
+  void set_include_time (bool include_time)
+  { include_time_ = include_time; }
 
   /// Print a message without format specifications to stdout
   void print_verbatim (const char * component, const char * buffer) const;
@@ -142,6 +152,11 @@ private: // attributes
   /// Override default of group_active_ for specific groups
   std::map<std::string,int> group_mode_;
 
+  /// Whether to include process in output
+  bool include_proc_;
+
+  /// Whether to include timestamp in output
+  bool include_time_;
 
   //----------------------------------------------------------------------
 

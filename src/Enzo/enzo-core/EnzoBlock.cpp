@@ -22,6 +22,7 @@ EnzoBlock::EnzoBlock (CkMigrateMessage *m)
     // redshift(0.0)
 {
   TRACE("CkMigrateMessage");
+  PERF_START(perf_block);
   // EnzoSimulation[0] counts migrated Blocks
   proxy_enzo_simulation[0].p_method_balance_check();
 }
@@ -49,12 +50,11 @@ EnzoBlock::EnzoBlock( process_type ip_source,  MsgType msg_type)
 
 void EnzoBlock::set_msg_check(EnzoMsgCheck * msg)
 {
-  performance_start_(perf_block);
-
+  PERF_START(perf_block);
   restart_set_data_(msg);
   initialize();
   Block::initialize();
-  performance_stop_(perf_block);
+  PERF_STOP(perf_block);
 }
 
 //----------------------------------------------------------------------

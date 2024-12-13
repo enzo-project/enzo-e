@@ -213,9 +213,7 @@ CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 void EnzoBlock::r_method_turbulence_end(CkReductionMsg * msg)
 {
   TRACE_TURBULENCE;
-  performance_start_(perf_compute,__FILE__,__LINE__);
   method()->compute_resume (this,msg);
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------

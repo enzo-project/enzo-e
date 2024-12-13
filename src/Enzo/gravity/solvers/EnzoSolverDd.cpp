@@ -271,7 +271,7 @@ void EnzoSolverDd::prolong(EnzoBlock * enzo_block) throw()
   }
 
   if (coarse_level_ < level && level <= max_level_) {
-    enzo_block->solver_dd_prolong_recv(NULL);
+    prolong_recv(enzo_block,nullptr);
   } else {
     call_domain_solver (enzo_block);
   }
@@ -300,9 +300,6 @@ void EnzoSolverDd::prolong_send_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_dd_prolong_recv(FieldMsg * msg)
-{  solver_dd_prolong_recv(msg); }
-
-void EnzoBlock::solver_dd_prolong_recv(FieldMsg * msg)
 {
   static_cast<EnzoSolverDd*> (solver())->prolong_recv(this,msg);
 }

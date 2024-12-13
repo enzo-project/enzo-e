@@ -21,9 +21,7 @@
 
 void Block::compute_enter_ ()
 {
-  performance_start_(perf_compute,__FILE__,__LINE__);
   compute_begin_();
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -71,7 +69,6 @@ void Block::compute_next_ ()
 
 void Block::compute_continue_ ()
 {
-  performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_COMPUTE
   if (cycle() >= CYCLE)
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_continue_()\n", CkMyPe(),name().c_str());
@@ -87,6 +84,7 @@ void Block::compute_continue_ ()
     (schedule==NULL) ||
     (schedule->write_this_cycle(cycle_,time_));
 
+  PERF_METHOD_START(method);
   if (is_scheduled) {
     TRACE2 ("Block::compute_continue() method = %d %p\n",
 	    index_method_,method); fflush(stdout);
@@ -98,14 +96,10 @@ void Block::compute_continue_ ()
     CkPrintf ("DEBUG_TRACE_REFRESH Method %s compute()\n",method->name().c_str());
 #endif
     // Apply the method to the Block
-
     method->compute (this);
-    
-    performance_stop_(perf_compute,__FILE__,__LINE__);
 
   } else {
 
-    performance_stop_(perf_compute,__FILE__,__LINE__);
     compute_done();
 
   }
@@ -119,6 +113,7 @@ void Block::compute_done ()
   if (cycle() >= CYCLE)
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_done_()\n", CkMyPe(),name().c_str());
 #endif
+  PERF_METHOD_STOP(method());
   index_method_++;
   compute_next_();
 }
