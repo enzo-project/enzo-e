@@ -46,7 +46,8 @@ REFRESH=`awk '/perf:region refresh/{print $(NF-2)}' $input | sort | uniq`
 METHOD=`awk '/perf:region method/{print $(NF-2)}' $input | sort | uniq`
 SOLVER=`awk '/perf:region solver/{print $(NF-2)}' $input | sort | uniq`
 MEMORY=`awk '/perf:region cycle /{print $(NF-1)}' $input | sort | uniq`
-BALANCE=`awk '/perf:balance /{print $(NF-2)}' $input | sort | uniq`
+BALANCE_MAX=`awk '/perf:balance max-/{print $(NF-1)}' $input | sort | uniq`
+BALANCE_EFF=`awk '/perf:balance eff-/{print $(NF-2)}' $input | sort | uniq`
 MESH=`awk '/perf:mesh /{print $(NF-1)}' $input | sort | uniq`
 
 num_procs=`awk '/CkNumPes/  {print $5}' $input`
@@ -103,7 +104,7 @@ for mesh in $MESH; do
     fi
 done
 
-for balance in $BALANCE; do
+for balance in $BALANCE_MAX $BALANCE_EFF; do
     if [[ ! -e "$balance.data" ]]; then
            echo "Generating $balance.data"
            awk '/Simulation cycle/{c=$NF}; /perf:balance '"$balance"' /{print c,$(NF-1)}' $input > $balance.data

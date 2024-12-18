@@ -17,7 +17,7 @@ if(NOT __processedUserDefaults)
   # Note (12/2021): passing -march=native to gfortran seems to slow down the
   # PPM solver
 
-  set(__ARCH_C_OPT_FLAGS "-O0 -g -funroll-loops")
+  set(__ARCH_C_OPT_FLAGS "-O3 -g -funroll-loops")
   set(CMAKE_C_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${__ARCH_C_OPT_FLAGS}")
   set(CMAKE_CXX_FLAGS_RELEASE "${__ARCH_C_OPT_FLAGS}")

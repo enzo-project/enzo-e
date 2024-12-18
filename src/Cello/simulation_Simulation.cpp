@@ -917,8 +917,6 @@ void Simulation::data_delete_particles(int64_t count)
 
 void Simulation::monitor_output()
 {
-  monitor()-> print("", "-------------------------------------");
-
   Monitor * monitor = cello::monitor();
   monitor-> print("", "-------------------------------------");
   const bool in_p = monitor->include_proc();
@@ -1082,7 +1080,7 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
     long long num_leaf_blocks = 0;
     for (int i=hierarchy_->min_level(); i<=hierarchy_->max_level(); i++) {
       const long long num_blocks_level = counters_reduce[m++]; // NL
-      monitor()->print("performance","simulation num-blocks-level %d %lld",
+      monitor()->print("perf:mesh","blocks-level_%d %lld",
                        i,num_blocks_level);
 
       num_total_blocks += num_blocks_level;

@@ -42,6 +42,7 @@
 
 void Block::refresh_start (int id_refresh, int callback)
 {
+  PERF_START(perf_refresh);
   CHECK_ID(id_refresh);
   Refresh * refresh = cello::refresh(id_refresh);
   Sync * sync = sync_(id_refresh);
@@ -228,6 +229,7 @@ void Block::p_refresh_recv (MsgRefresh * msg_refresh)
 
 void Block::refresh_exit (Refresh & refresh)
 {
+  PERF_REFRESH_START(perf_refresh_exit);
   CHECK_ID(refresh.id());
   update_boundary_();
   control_sync (refresh.callback(),
@@ -236,6 +238,8 @@ void Block::refresh_exit (Refresh & refresh)
   		refresh.min_face_rank(),
   		refresh.neighbor_type(),
   		refresh.root_level());
+  PERF_REFRESH_STOP(perf_refresh_exit);
+  PERF_STOP(perf_refresh);
 }
 
 //----------------------------------------------------------------------
