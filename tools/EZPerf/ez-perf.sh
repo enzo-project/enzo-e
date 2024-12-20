@@ -21,6 +21,12 @@ done
 topdir=$(dirname $file)
 topdir="$PWD/$topdir"
 
+bindir="`dirname $0`"
+if [ "$bindir" == "${bindir#/}" ]; then
+    bindir="$PWD/$bindir"
+fi
+echo "bindir = $bindir"
+
 # Get input file $input
 input="$PWD/$1"
 
@@ -53,61 +59,63 @@ MESH=`awk '/perf:mesh /{print $(NF-1)}' $input | sort | uniq`
 num_procs=`awk '/CkNumPes/  {print $5}' $input`
 num_nodes=`awk '/CkNumNodes/{print $5}' $input`
 
+input_clean="input-clean.data"
+grep -v WARNING $input > $input_clean
 # ==============================
 # Generate data files
 # ==============================
 
 echo "nodes $num_nodes procs $num_procs"
 if [[ ! -e "cycle.data" ]]; then
-    awk '/Simulation cycle/{if ($NF==0) {t0=$2}; print $NF,'"$num_procs"'*($2-t0)}' $input > cycle.data
+    awk '/Simulation cycle/{if ($NF==0) {t0=$2}; print $NF,'"$num_procs"'*($2-t0)}' $input_clean > cycle.data
 fi
 
 
 for adapt in $ADAPT; do
     if [[ ! -e "$adapt.data" ]]; then
            echo "Generating $adapt.data"
-           awk '/Simulation cycle/{c=$NF}; /perf:region '"$adapt"' /{print c,$NF}' $input > $adapt.data
+           awk '/Simulation cycle/{c=$NF}; /perf:region '"$adapt"' /{print c,$NF}' $input_clean > $adapt.data
        fi
 done
 
 for refresh in $REFRESH; do
     if [[ ! -e "$refresh.data" ]]; then
            echo "Generating $refresh.data"
-           awk '/Simulation cycle/{c=$NF}; /perf:region '"$refresh"' /{print c,$NF}' $input > $refresh.data
+           awk '/Simulation cycle/{c=$NF}; /perf:region '"$refresh"' /{print c,$NF}' $input_clean > $refresh.data
        fi
 done
 
 for method in $METHOD; do
     if [[ ! -e "$method.data" ]]; then
         echo "Generating $method.data"
-        awk '/Simulation cycle/{c=$NF}; /perf:region '"$method"' /{print c,$NF}' $input > $method.data
+        awk '/Simulation cycle/{c=$NF}; /perf:region '"$method"' /{print c,$NF}' $input_clean > $method.data
     fi
 done
 
 for solver in $SOLVER; do
     if [[ ! -e "$solver.data" ]]; then
         echo "Generating $solver.data"
-        awk '/Simulation cycle/{c=$NF}; /perf:region '"$solver"' /{print c,$NF}' $input > $solver.data
+        awk '/Simulation cycle/{c=$NF}; /perf:region '"$solver"' /{print c,$NF}' $input_clean > $solver.data
     fi
 done
 
 for memory in $MEMORY; do
     if [[ ! -e "$memory.data" ]]; then
         echo "Generating $memory.data"
-        awk '/Simulation cycle/{c=$NF}; /perf:region cycle '"$memory"' /{print c,$NF}' $input > $memory.data
+        awk '/Simulation cycle/{c=$NF}; /perf:region cycle '"$memory"' /{print c,$NF}' $input_clean > $memory.data
     fi
 done
 for mesh in $MESH; do
     if [[ ! -e "$mesh.data" ]]; then
         echo "Generating $mesh.data"
-        awk '/Simulation cycle/{c=$NF}; /perf:mesh '"$mesh"' /{print c,$NF}' $input > $mesh.data
+        awk '/Simulation cycle/{c=$NF}; /perf:mesh '"$mesh"' /{print c,$NF}' $input_clean > $mesh.data
     fi
 done
 
 for balance in $BALANCE_MAX $BALANCE_EFF; do
     if [[ ! -e "$balance.data" ]]; then
            echo "Generating $balance.data"
-           awk '/Simulation cycle/{c=$NF}; /perf:balance '"$balance"' /{print c,$(NF-1)}' $input > $balance.data
+           awk '/Simulation cycle/{c=$NF}; /perf:balance '"$balance"' /{print c,$(NF-1)}' $input_clean > $balance.data
        fi
 done
 
@@ -115,47 +123,50 @@ done
 # Generate plots from data files
 # ==============================
 
+
+$bindir/_plot-perf.py
+
 if [[ ! -e "plot-adapt.png" ]]; then
     echo "Generating plot-adapt.png"
-    gnuplot $topdir/plot-adapt.gnu >& /dev/null
+    gnuplot $bindir/plot-adapt.gnu >& /dev/null
 fi
 if [[ ! -e "plot-adapt-post.png" ]]; then
     echo "Generating plot-adapt-post.png"
-    gnuplot $topdir/plot-adapt-post.gnu >& /dev/null
+    gnuplot $bindir/plot-adapt-post.gnu >& /dev/null
 fi
 
 if [[ ! -e "plot-refresh.png" ]]; then 
     echo "Generating plot-refresh.png"
-    gnuplot $topdir/plot-refresh.gnu >& /dev/null
+    gnuplot $bindir/plot-refresh.gnu >& /dev/null
 fi
 # if [[ ! -e "plot-refresh-post.png" ]]; then
 #     echo "Generating plot-refresh-post.png"
-#     gnuplot $topdir/plot-refresh-post.gnu >& /dev/null
+#     gnuplot $bindir/plot-refresh-post.gnu >& /dev/null
 # fi
 
 if [[ ! -e "plot-method.png" ]]; then
     echo "Generating plot-method.png"
-    gnuplot $topdir/plot-method.gnu >& /dev/null
+    gnuplot $bindir/plot-method.gnu >& /dev/null
 fi
 if [[ ! -e "plot-balance.png" ]]; then
     echo "Generating plot-balance.png"
-    gnuplot $topdir/plot-balance.gnu >& /dev/null
+    gnuplot $bindir/plot-balance.gnu >& /dev/null
 fi
 if [[ ! -e "plot-solver.png" ]]; then
     echo "Generating plot-solver.png"
-    gnuplot $topdir/plot-solver.gnu >& /dev/null
+    gnuplot $bindir/plot-solver.gnu >& /dev/null
 fi
 if [[ ! -e "plot-memory.png" ]]; then
     echo "Generating plot-memory.png"
-    gnuplot $topdir/plot-memory.gnu >& /dev/null
+    gnuplot $bindir/plot-memory.gnu >& /dev/null
 fi
 if [[ ! -e "plot-mesh.png" ]]; then
     echo "Generating plot-mesh.png"
-    gnuplot $topdir/plot-mesh.gnu >& /dev/null
+    gnuplot $bindir/plot-mesh.gnu >& /dev/null
 fi
 if [[ ! -e "plot-perf.png" ]]; then
     echo "Generating plot-perf.png"
-    gnuplot $topdir/plot-perf.gnu >& /dev/null
+    gnuplot $bindir/plot-perf.gnu >& /dev/null
 fi
 
 #====================

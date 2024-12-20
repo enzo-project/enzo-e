@@ -46,7 +46,6 @@ public: // interface
        dt(0.0),
        redshift(0.0)
   {
-    PERF_START(perf_block);
     for (int i=0; i<MAX_DIMENSION; i++) {
       GridLeftEdge[i] = 0;
       GridDimension[i] = 0;

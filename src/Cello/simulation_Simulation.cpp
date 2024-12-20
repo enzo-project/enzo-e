@@ -965,7 +965,6 @@ void Simulation::monitor_performance()
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
 
-
   int m=0;
   const int num_max = 4 + num_solver;
   counters_reduce[m++] = n - num_max - 2;

@@ -22,7 +22,6 @@ EnzoBlock::EnzoBlock (CkMigrateMessage *m)
     // redshift(0.0)
 {
   TRACE("CkMigrateMessage");
-  PERF_START(perf_block);
   // EnzoSimulation[0] counts migrated Blocks
   proxy_enzo_simulation[0].p_method_balance_check();
 }
