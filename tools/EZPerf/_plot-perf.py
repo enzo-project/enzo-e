@@ -8,7 +8,8 @@ import glob
 import os.path
 import string
 
-def open_plot(plt,title,label_x,label_y):
+#--------------------------------------------------
+def plot_open(plt,title,label_x,label_y):
 
     plt.clf()
 
@@ -18,6 +19,40 @@ def open_plot(plt,title,label_x,label_y):
     plt.xlabel(label_x)
     plt.ylabel(label_y)
     plt.grid(True)
+
+#--------------------------------------------------
+def plot_total(plt,name,label,i=0,scale=1e-6):
+    data =  loadtxt(name,dtype=float)
+    total_x = data[:,0]
+    total_y = data[:,1]
+    plt.plot(total_x,scale*total_y, label=label, color=c[i%7],marker=m[i%7], ls=l, lw=w)
+    return [total_x, total_y]
+
+#--------------------------------------------------
+def plot_list(plt,file_list,scale=1e-6):
+    file_times={}
+    # sort file names by revert end time
+    for file in file_list:
+        if (not file.endswith(("_post.data"))):
+            data =  loadtxt(file,dtype=float)
+            glob_x = data[:,0]
+            glob_y = data[:,1]
+            file_times[glob_y[len(glob_y)-1]] = file
+    i=1
+    # plot by revert end time
+    for size in sorted(file_times,reverse=True):
+        file=file_times[size]
+        data =  loadtxt(file,dtype=float)
+        glob_x = data[:,0]
+        glob_y = data[:,1]
+        name=os.path.splitext(os.path.basename(file))[0]
+        plt.plot(glob_x,scale*glob_y, label=name, color=c[i%7],marker=m[i%7], ls=l, lw=w)
+        i=i+1
+
+def plot_write(name):
+    print ("Writing 'plot_%s'" % (name))
+    plt.savefig(("plot_%s.pdf") % (name), format='pdf')
+    plt.savefig(("plot_%s.png") % (name), format='png')
 
 # ======================================================================
 
@@ -49,125 +84,51 @@ figure(figsize=(8,6), dpi=100)
 # ADAPT
 # ======================================================================
 
-open_plot(plt,"Enzo-E: Cumulative time in adapt","cycle","time (s)");
-
-f_adapt =  loadtxt('adapt.data',dtype=float)
-adapt_x_total = f_adapt[:,0]
-adapt_y_total = f_adapt[:,1]
-plt.plot(adapt_x_total,1e-6*adapt_y_total, label='adapt', color=c[0],marker=m[0], ls=l, lw=w)
-
-i=1
-for file in list(glob.glob('adapt_*data')):
-    if (not file.endswith(("_post.data"))):
-        f_adapt =  loadtxt(file,dtype=float)
-        x_cycle = f_adapt[:,0]
-        y_adapt = f_adapt[:,1]
-        name=os.path.splitext(os.path.basename(file))[0]
-        plt.plot(x_cycle,1e-6*y_adapt, label=name, color=c[i%7],marker=m[i%7], ls=l, lw=w)
-        i=i+1
+plot_open(plt,"Enzo-E: Cumulative time in adapt","cycle","time (s)");
+[adapt_x_total, adapt_y_total] = plot_total(plt,'adapt.data','adapt')
+plot_list(plt,glob.glob('adapt_*data'))
 
 plt.legend(loc='lower center',ncols=4)
-plt.yscale("log") 
-print ("Writing 'plot_adapt'")
-plt.savefig("plot_adapt.pdf", format='pdf')
-plt.savefig("plot_adapt.png", format='png')
+plt.yscale("log")
+plot_write('plot_adapt')
 
 # ======================================================================
 
-open_plot(plt,"Enzo-E: Cumulative time in refresh","cycle","time (s)");
-
-f_refresh =  loadtxt('refresh.data',dtype=float)
-refresh_x_total = f_refresh[:,0]
-refresh_y_total = f_refresh[:,1]
-plt.plot(refresh_x_total,1e-6*refresh_y_total, label='refresh', color=c[0],marker=m[0], ls=l, lw=w)
-
-i=1
-for file in list(glob.glob('refresh_*data')):
-    if (not file.endswith(("_post.data"))):
-        f_refresh =  loadtxt(file,dtype=float)
-        x_cycle = f_refresh[:,0]
-        y_refresh = f_refresh[:,1]
-        name=os.path.splitext(os.path.basename(file))[0]
-        plt.plot(x_cycle,1e-6*y_refresh, label=name, color=c[i%7],marker=m[i%7], ls=l, lw=w)
-        i=i+1
+plot_open(plt,"Enzo-E: Cumulative time in refresh","cycle","time (s)");
+[refresh_x_total, refresh_y_total] = plot_total(plt,'refresh.data','refresh')
+plot_list(plt,glob.glob('refresh_*data'))
 
 plt.legend(loc='lower center',ncols=4)
-plt.yscale("log") 
-print ("Writing 'plot_refresh'")
-plt.savefig("plot_refresh.pdf", format='pdf')
-plt.savefig("plot_refresh.png", format='png')
+plt.yscale("log")
+plot_write('plot_refresh')
 
 # ======================================================================
 
-open_plot(plt,"Enzo-E: Cumulative time in method","cycle","time (s)");
-
-f_method =  loadtxt('method.data',dtype=float)
-method_x_total = f_method[:,0]
-method_y_total = f_method[:,1]
-plt.plot(method_x_total,1e-6*method_y_total, label='method', color=c[0],marker=m[0], ls=l, lw=w)
-
-i=1
-for file in list(glob.glob('method_*data')):
-    if (not file.endswith(("_post.data"))):
-        f_method =  loadtxt(file,dtype=float)
-        x_cycle = f_method[:,0]
-        y_method = f_method[:,1]
-        name=os.path.splitext(os.path.basename(file))[0]
-        plt.plot(x_cycle,1e-6*y_method, label=name, color=c[i%7],marker=m[i%7], ls=l, lw=w)
-        i=i+1
+plot_open(plt,"Enzo-E: Cumulative time in method","cycle","time (s)");
+[method_x_total, method_y_total] = plot_total(plt,'method.data','method')
+plot_list(plt,glob.glob('method_*data'))
 
 plt.legend(loc='lower center',ncols=4)
-plt.yscale("log") 
-print ("Writing 'plot_method'")
-plt.savefig("plot_method.pdf", format='pdf')
-plt.savefig("plot_method.png", format='png')
+plt.yscale("log")
+plot_write('plot_method')
 
 # ======================================================================
 
-open_plot(plt,"Enzo-E: Cumulative time in solver","cycle","time (s)");
-
-f_solver =  loadtxt('solver.data',dtype=float)
-solver_x_total = f_solver[:,0]
-solver_y_total = f_solver[:,1]
-plt.plot(solver_x_total,1e-6*solver_y_total, label='solver', color=c[0],marker=m[0], ls=l, lw=w)
-
-i=1
-for file in list(glob.glob('solver_*data')):
-    if (not file.endswith(("_post.data"))):
-        f_solver =  loadtxt(file,dtype=float)
-        x_cycle = f_solver[:,0]
-        y_solver = f_solver[:,1]
-        name=os.path.splitext(os.path.basename(file))[0]
-        plt.plot(x_cycle,1e-6*y_solver, label=name, color=c[i%7],marker=m[i%7], ls=l, lw=w)
-        i=i+1
+plot_open(plt,"Enzo-E: Cumulative time in solver","cycle","time (s)");
+[solver_x_total, solver_y_total] = plot_total(plt,'solver.data','solver')
+plot_list(plt,glob.glob('solver_*data'))
 
 plt.legend(loc='lower center',ncols=4)
-plt.yscale("log") 
-print ("Writing 'plot_solver'")
-plt.savefig("plot_solver.pdf", format='pdf')
-plt.savefig("plot_solver.png", format='png')
+plt.yscale("log")
+plot_write('plot_solver')
 
 # ======================================================================
 
-open_plot(plt,"Enzo-E: Cumulative times","cycle","time (s)");
+plot_open(plt,"Enzo-E: Cumulative times","cycle","time (s)");
 
-f_cycle =  loadtxt('cycle.data',dtype=float)
-cycle_x_total = f_cycle[:,0]
-cycle_y_total = f_cycle[:,1]
-i=0
-plt.plot(cycle_x_total,cycle_y_total, label='cycle', color=c[i],marker=m[i], ls=l, lw=w)
-i=i+1
-plt.plot(method_x_total,1e-6*method_y_total, label='method', color=c[i],marker=m[i], ls=l, lw=w)
-i=i+1
-plt.plot(solver_x_total,1e-6*solver_y_total, label='solver', color=c[i],marker=m[i], ls=l, lw=w)
-i=i+1
-plt.plot(refresh_x_total,1e-6*refresh_y_total, label='refresh', color=c[i],marker=m[i], ls=l, lw=w)
-i=i+1
-plt.plot(adapt_x_total,1e-6*adapt_y_total, label='adapt', color=c[i],marker=m[i], ls=l, lw=w)
-i=i+1
+plot_total(plt,'cycle.data','cycle',0,1.0)
+plot_list(plt,["method.data", "solver.data", "refresh.data", "adapt.data"])
 
 plt.legend(loc='lower center',ncols=4)
-plt.yscale("log") 
-print ("Writing 'plot_total'")
-plt.savefig("plot_total.pdf", format='pdf')
-plt.savefig("plot_total.png", format='png')
+plt.yscale("log")
+plot_write('plot_total')
