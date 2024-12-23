@@ -123,9 +123,7 @@ void Block::stopping_exit_()
   } else {
 
     if (cello::simulation()->cycle_changed()) {
-      // if performance counters haven't started yet for this cycle
-      int cycle_initial = cello::config()->initial_cycle;
-      if (cycle_ > cycle_initial) {
+      if (cycle_ > cello::simulation()->initial_cycle()) {
         // stop if any previous cycle
         PERF_STOP(perf_cycle);
       }

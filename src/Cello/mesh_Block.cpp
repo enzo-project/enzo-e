@@ -80,9 +80,6 @@ Block::Block ()
 Block::Block (CkMigrateMessage *m)
   : CBase_Block(m)
 {
-  if (method()) {
-    PERF_METHOD_START(method());
-  }
 }
 
 //----------------------------------------------------------------------
@@ -120,9 +117,7 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     index_(thisIndex)
 {
 #ifdef TRACE_BLOCK
-
   CkPrintf ("%d TRACE_BLOCK %s Block::Block(ip)\n",  CkMyPe(),name(thisIndex).c_str());
-
 #endif
 
   PERF_START(perf_block);
@@ -398,6 +393,20 @@ void Block::pup(PUP::er &p)
 
   p | index_order_;
   p | count_order_;
+}
+
+//----------------------------------------------------------------------
+
+void Block::ckAboutToMigrate(void)
+{
+  PERF_METHOD_STOP(method());
+  CBase_Block::ckAboutToMigrate();
+}
+
+void Block::ckJustMigrated(void)
+{
+  PERF_METHOD_START(method());
+  CBase_Block::ckJustMigrated();
 }
 
 //----------------------------------------------------------------------

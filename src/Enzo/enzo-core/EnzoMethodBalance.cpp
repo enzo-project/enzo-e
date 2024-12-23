@@ -115,7 +115,6 @@ void EnzoMethodBalance::do_migrate(EnzoBlock * enzo_block)
     fflush(stdout);
 
     enzo_block->migrateMe(ip_next);
-    PERF_METHOD_STOP(this);
   }
 }
 
