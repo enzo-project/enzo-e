@@ -1079,8 +1079,10 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
     long long num_leaf_blocks = 0;
     for (int i=hierarchy_->min_level(); i<=hierarchy_->max_level(); i++) {
       const long long num_blocks_level = counters_reduce[m++]; // NL
-      monitor()->print("perf:mesh","blocks-level_%d %lld",
-                       i,num_blocks_level);
+      if (i>=0) {
+        monitor()->print("perf:mesh","blocks-level_%d %lld",
+                         i,num_blocks_level);
+      }
 
       num_total_blocks += num_blocks_level;
       // compute leaf blocks given number of blocks per level

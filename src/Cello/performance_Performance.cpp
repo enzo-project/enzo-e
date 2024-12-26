@@ -48,10 +48,10 @@ Performance::Performance (Config * config)
   // ORDER MUST MATCH index_enum
   new_counter(counter_type_rel,"time-usec");
   // MEMORY
-  new_counter(counter_type_abs,"bytes-curr");
-  new_counter(counter_type_abs,"bytes-high");
-  new_counter(counter_type_abs,"bytes-highest");
-  new_counter(counter_type_abs,"bytes-available");
+  new_counter(counter_type_abs,"memory_bytes-curr");
+  new_counter(counter_type_abs,"memory_bytes-high");
+  new_counter(counter_type_abs,"memory_bytes-highest");
+  new_counter(counter_type_abs,"memory_bytes-available");
 
 #ifdef CONFIG_USE_PAPI
   papi_.init();
