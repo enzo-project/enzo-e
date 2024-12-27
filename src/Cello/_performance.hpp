@@ -88,6 +88,15 @@ enum perf_region {
   perf_refresh_child_post,
   perf_refresh_exit,
   perf_refresh_exit_post,
+#ifdef CONFIG_SMP_MODE
+  perf_smp,
+  perf_smp_field_face,
+  perf_smp_hierarchy,
+  perf_smp_initial_music,
+  perf_smp_initial_value,
+  perf_smp_method_close_files,
+  perf_smp_solver_bcg,
+#endif
   perf_balance,
   perf_control,
   perf_method,
@@ -141,6 +150,14 @@ enum perf_region {
 #   define PERF_METHOD_STOP(METHOD)                                     \
   cello::performance()->stop_region((METHOD)->index_perf(),__FILE__,__LINE__); \
   cello::performance()->stop_region(perf_method)
+#ifdef CONFIG_SMP_MODE
+#   define PERF_SMP_START(INDEX)                                \
+  cello::performance()->start_region(INDEX,__FILE__,__LINE__);  \
+  cello::performance()->start_region(perf_smp)
+#   define PERF_SMP_STOP(INDEX)                                 \
+  cello::performance()->stop_region(INDEX,__FILE__,__LINE__);   \
+  cello::performance()->stop_region(perf_smp)
+#endif
 #else
 #   define PERF_START(INDEX) /* ... */
 #   define PERF_STOP(INDEX) /* ... */
@@ -154,6 +171,8 @@ enum perf_region {
 #   define PERF_SOLVER_STOP(SOLVER) /* ... */
 #   define PERF_METHOD_START(METHOD) /* ... */
 #   define PERF_METHOD_STOP(METHOD) /* ... */
+#   define PERF_SMP_START(INDEX) /* ... */
+#   define PERF_SMP_STOP(INDEX) /* ... */
 #endif
 
 //----------------------------------------------------------------------

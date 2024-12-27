@@ -11,7 +11,6 @@
 
 //----------------------------------------------------------------------
 
-#define CONFIG_SMP_MODE
 static CmiNodeLock initial_value_node_lock;
 void mutex_init_initial_value()
 {  initial_value_node_lock = CmiCreateLock(); }
@@ -56,6 +55,7 @@ void InitialValue::enforce_block ( Block * block,
 				   const Hierarchy  * hierarchy ) throw()
 {
 #ifdef CONFIG_SMP_MODE
+  PERF_SMP_START(perf_smp_initial_value);
   CmiLock(initial_value_node_lock);
 #endif  
   // make sure values_ is initialized
@@ -174,6 +174,7 @@ void InitialValue::enforce_block ( Block * block,
 
 #ifdef CONFIG_SMP_MODE
   CmiUnlock(initial_value_node_lock);
+  PERF_SMP_STOP(perf_smp_initial_value);
 #endif
 
   block->initial_done();

@@ -48,13 +48,14 @@ mkdir $outdir
 cd $outdir
 
 ADAPT=`awk '/perf:region adapt/{print $(NF-2)}' $input | sort | uniq`
-REFRESH=`awk '/perf:region refresh/{print $(NF-2)}' $input | sort | uniq`
-METHOD=`awk '/perf:region method/{print $(NF-2)}' $input | sort | uniq`
-SOLVER=`awk '/perf:region solver/{print $(NF-2)}' $input | sort | uniq`
-MEMORY=`awk '/perf:region cycle /{print $(NF-1)}' $input | sort | uniq`
-BALANCE_MAX=`awk '/perf:balance max-/{print $(NF-1)}' $input | sort | uniq`
 BALANCE_EFF=`awk '/perf:balance eff-/{print $(NF-2)}' $input | sort | uniq`
+BALANCE_MAX=`awk '/perf:balance max-/{print $(NF-1)}' $input | sort | uniq`
+MEMORY=`awk '/perf:region cycle /{print $(NF-1)}' $input | sort | uniq`
 MESH=`awk '/perf:mesh /{print $(NF-1)}' $input | sort | uniq`
+METHOD=`awk '/perf:region method/{print $(NF-2)}' $input | sort | uniq`
+REFRESH=`awk '/perf:region refresh/{print $(NF-2)}' $input | sort | uniq`
+SMP=`awk '/perf:region smp/{print $(NF-2)}' $input | sort | uniq`
+SOLVER=`awk '/perf:region solver/{print $(NF-2)}' $input | sort | uniq`
 
 num_procs=`awk '/CkNumPes/  {print $5}' $input`
 num_nodes=`awk '/CkNumNodes/{print $5}' $input`
@@ -85,6 +86,13 @@ for refresh in $REFRESH; do
        fi
 done
 
+for smp in $SMP; do
+    if [[ ! -e "$smp.data" ]]; then
+           echo "Generating $smp.data"
+           awk '/Simulation cycle/{c=$NF}; /perf:region '"$smp"' /{print c,$NF}' $input_clean > $smp.data
+       fi
+done
+
 for method in $METHOD; do
     if [[ ! -e "$method.data" ]]; then
         echo "Generating $method.data"
@@ -105,6 +113,7 @@ for memory in $MEMORY; do
         awk '/Simulation cycle/{c=$NF}; /perf:region cycle '"$memory"' /{print c,$NF}' $input_clean > $memory.data
     fi
 done
+
 for mesh in $MESH; do
     if [[ ! -e "$mesh.data" ]]; then
         echo "Generating $mesh.data"

@@ -763,9 +763,15 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
 
   if (is_converged) {
     if (block->level() == coarse_level_) {
+#ifdef CONFIG_SMP_MODE
+      PERF_SMP_START(perf_smp_solver_bcg);
       CmiLock(bcg_iter_node_lock);
+#endif
       cello::simulation()->set_solver_iter(index_,iter);
+#ifdef CONFIG_SMP_MODE
       CmiUnlock(bcg_iter_node_lock);
+      PERF_SMP_STOP(perf_smp_solver_bcg);
+#endif
     }
   }
 #ifdef DEBUG_SOLVER_BCG

@@ -139,14 +139,14 @@ html_start_row(html)
 # ----------------------------------------------------------------------
 plot_open(plt,'Enzo-E: cumulative times','cycle','time (s)');
 plot_total(plt,'cycle.data','cycle',scale=1.0)
-plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data'])
+plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data', 'smp.data'])
 plt.legend(loc='lower center',ncols=3)
 plt.yscale('log')
 plot_write('plot_time_total',html)
 # ----------------------------------------------------------------------
 plot_open(plt,'Enzo-E: per-cycle times','cycle','time (s)');
 plot_total(plt,'cycle.data','cycle',scale=1.0,type='cycle')
-plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data'],type='cycle')
+plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data', 'smp.data'],type='cycle')
 plt.legend(loc='lower center',ncols=3)
 plot_write('plot_time_cycle',html)
 # ----------------------------------------------------------------------
@@ -190,20 +190,6 @@ html_stop_row(html)
 html_start_row(html)
 
 # ----------------------------------------------------------------------
-plot_open(plt,'Enzo-E: cumulative time in adapt','cycle','time (s)');
-[adapt_x_total, adapt_y_total] = plot_total(plt,'adapt.data','adapt')
-plot_list(plt,glob.glob('adapt_*data'))
-plt.legend(loc='lower center',ncols=3)
-plt.yscale('log')
-plot_write('plot_adapt_total',html)
-# ----------------------------------------------------------------------
-plot_open(plt,'Enzo-E: cumulative time in refresh','cycle','time (s)');
-[refresh_x_total, refresh_y_total] = plot_total(plt,'refresh.data','refresh')
-plot_list(plt,glob.glob('refresh_*data'))
-plt.legend(loc='lower center',ncols=3)
-plt.yscale('log')
-plot_write('plot_refresh_total',html)
-# ----------------------------------------------------------------------
 plot_open(plt,'Enzo-E: cumulative time in method','cycle','time (s)');
 [method_x_total, method_y_total] = plot_total(plt,'method.data','method')
 plot_list(plt,glob.glob('method_*data'))
@@ -218,6 +204,27 @@ plt.legend(loc='lower center',ncols=3)
 plt.yscale('log')
 plot_write('plot_solver_total',html)
 # ----------------------------------------------------------------------
+plot_open(plt,'Enzo-E: cumulative time in adapt','cycle','time (s)');
+[adapt_x_total, adapt_y_total] = plot_total(plt,'adapt.data','adapt')
+plot_list(plt,glob.glob('adapt_*data'))
+plt.legend(loc='lower center',ncols=3)
+plt.yscale('log')
+plot_write('plot_adapt_total',html)
+# ----------------------------------------------------------------------
+plot_open(plt,'Enzo-E: cumulative time in refresh','cycle','time (s)');
+[refresh_x_total, refresh_y_total] = plot_total(plt,'refresh.data','refresh')
+plot_list(plt,glob.glob('refresh_*data'))
+plt.legend(loc='lower center',ncols=3)
+plt.yscale('log')
+plot_write('plot_refresh_total',html)
+# ----------------------------------------------------------------------
+plot_open(plt,'Enzo-E: cumulative time in SMP','cycle','time (s)');
+[smp_x_total, smp_y_total] = plot_total(plt,'smp.data','smp')
+plot_list(plt,glob.glob('smp_*data'))
+plt.legend(loc='lower center',ncols=3)
+plt.yscale('log')
+plot_write('plot_smp_total',html)
+# ----------------------------------------------------------------------
 
 html_stop_row(html)
 
@@ -227,6 +234,18 @@ html_stop_row(html)
 
 html_start_row(html)
 
+# ----------------------------------------------------------------------
+plot_open(plt,'Enzo-E: per-cycle time in method','cycle','time (s)');
+[method_x_total, method_y_total] = plot_total(plt,'method.data','method',type='cycle')
+plot_list(plt,glob.glob('method_*data'),type='cycle')
+plt.legend(loc='lower center',ncols=3)
+plot_write('plot_method_cycle',html)
+# ----------------------------------------------------------------------
+plot_open(plt,'Enzo-E: per-cycle time in solver','cycle','time (s)');
+[solver_x_total, solver_y_total] = plot_total(plt,'solver.data','solver',type='cycle')
+plot_list(plt,glob.glob('solver_*data'),type='cycle')
+plt.legend(loc='lower center',ncols=3)
+plot_write('plot_solver_cycle',html)
 # ----------------------------------------------------------------------
 plot_open(plt,'Enzo-E: per-cycle time in adapt','cycle','time (s)');
 [adapt_x_total, adapt_y_total] = plot_total(plt,'adapt.data','adapt',type='cycle')
@@ -240,17 +259,11 @@ plot_list(plt,glob.glob('refresh_*data'),type='cycle')
 plt.legend(loc='lower center',ncols=3)
 plot_write('plot_refresh_cycle',html)
 # ----------------------------------------------------------------------
-plot_open(plt,'Enzo-E: per-cycle time in method','cycle','time (s)');
-[method_x_total, method_y_total] = plot_total(plt,'method.data','method',type='cycle')
-plot_list(plt,glob.glob('method_*data'),type='cycle')
+plot_open(plt,'Enzo-E: per-cycle time in smp','cycle','time (s)');
+[smp_x_total, smp_y_total] = plot_total(plt,'smp.data','smp',type='cycle')
+plot_list(plt,glob.glob('smp_*data'),type='cycle')
 plt.legend(loc='lower center',ncols=3)
-plot_write('plot_method_cycle',html)
-# ----------------------------------------------------------------------
-plot_open(plt,'Enzo-E: per-cycle time in solver','cycle','time (s)');
-[solver_x_total, solver_y_total] = plot_total(plt,'solver.data','solver',type='cycle')
-plot_list(plt,glob.glob('solver_*data'),type='cycle')
-plt.legend(loc='lower center',ncols=3)
-plot_write('plot_solver_cycle',html)
+plot_write('plot_smp_cycle',html)
 # ----------------------------------------------------------------------
 
 html_stop_row(html)
