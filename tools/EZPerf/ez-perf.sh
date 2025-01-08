@@ -47,70 +47,73 @@ fi
 mkdir $outdir
 cd $outdir
 
-ADAPT=`awk '/perf:region adapt/{print $(NF-2)}' $input | sort | uniq`
-BALANCE_EFF=`awk '/perf:balance eff-/{print $(NF-2)}' $input | sort | uniq`
-BALANCE_MAX=`awk '/perf:balance max-/{print $(NF-1)}' $input | sort | uniq`
-MEMORY=`awk '/perf:region cycle /{print $(NF-1)}' $input | sort | uniq`
-MESH=`awk '/perf:mesh /{print $(NF-1)}' $input | sort | uniq`
-METHOD=`awk '/perf:region method/{print $(NF-2)}' $input | sort | uniq`
-REFRESH=`awk '/perf:region refresh/{print $(NF-2)}' $input | sort | uniq`
-SMP=`awk '/perf:region smp/{print $(NF-2)}' $input | sort | uniq`
-SOLVER=`awk '/perf:region solver/{print $(NF-2)}' $input | sort | uniq`
-
-num_procs=`awk '/CkNumPes/  {print $5}' $input`
-num_nodes=`awk '/CkNumNodes/{print $5}' $input`
-
 input_clean="input-clean.data"
 grep -v WARNING $input > $input_clean
+
+ADAPT=`awk '/perf:region adapt/{print $(NF-2)}' $input_clean | sort | uniq`
+BALANCE_EFF=`awk '/perf:balance eff-/{print $(NF-2)}' $input_clean | sort | uniq`
+BALANCE_MAX=`awk '/perf:balance max-/{print $(NF-1)}' $input_clean | sort | uniq`
+MEMORY=`awk '/perf:region cycle /{print $(NF-1)}' $input_clean | sort | uniq`
+MESH=`awk '/perf:mesh /{print $(NF-1)}' $input_clean | sort | uniq`
+METHOD=`awk '/perf:region method/{print $(NF-2)}' $input_clean | sort | uniq`
+REFRESH=`awk '/perf:region refresh/{print $(NF-2)}' $input_clean | sort | uniq`
+SMP=`awk '/perf:region smp/{print $(NF-2)}' $input_clean | sort | uniq`
+SOLVER=`awk '/perf:region solver/{print $(NF-2)}' $input_clean | sort | uniq`
+
+num_procs=`awk '/CkNumPes/  {print $5}' $input_clean`
+num_nodes=`awk '/CkNumNodes/{print $5}' $input_clean`
+
 # ==============================
 # Generate data files
 # ==============================
 
 echo "nodes $num_nodes procs $num_procs"
 if [[ ! -e "cycle.data" ]]; then
-    awk '/Simulation cycle/{if ($NF==0) {t0=$2}; print $NF,'"$num_procs"'*($2-t0)}' $input_clean > cycle.data
+    awk '/Simulation cycle/{if ($NF==0) {t0=$2}; print $NF,($2-t0)}' $input_clean > cycle.data
 fi
 
 
+echo "ADAPT = $ADAPT"
 for adapt in $ADAPT; do
     if [[ ! -e "$adapt.data" ]]; then
            echo "Generating $adapt.data"
-           awk '/Simulation cycle/{c=$NF}; /perf:region '"$adapt"' /{print c,$NF}' $input_clean > $adapt.data
+           awk '/Simulation cycle/{c=$NF}; /perf:region '"$adapt"' /{print c,$NF/'"$num_procs"'}' $input_clean > $adapt.data
        fi
 done
 
+echo "REFRESH = $REFRESH"
 for refresh in $REFRESH; do
     if [[ ! -e "$refresh.data" ]]; then
            echo "Generating $refresh.data"
-           awk '/Simulation cycle/{c=$NF}; /perf:region '"$refresh"' /{print c,$NF}' $input_clean > $refresh.data
+           awk '/Simulation cycle/{c=$NF}; /perf:region '"$refresh"' /{print c,$NF/'"$num_procs"'}' $input_clean > $refresh.data
        fi
 done
 
 for smp in $SMP; do
     if [[ ! -e "$smp.data" ]]; then
            echo "Generating $smp.data"
-           awk '/Simulation cycle/{c=$NF}; /perf:region '"$smp"' /{print c,$NF}' $input_clean > $smp.data
+           awk '/Simulation cycle/{c=$NF}; /perf:region '"$smp"' /{print c,$NF/'"$num_procs"'}' $input_clean > $smp.data
        fi
 done
 
 for method in $METHOD; do
     if [[ ! -e "$method.data" ]]; then
         echo "Generating $method.data"
-        awk '/Simulation cycle/{c=$NF}; /perf:region '"$method"' /{print c,$NF}' $input_clean > $method.data
+        awk '/Simulation cycle/{c=$NF}; /perf:region '"$method"' /{print c,$NF/'"$num_procs"'}' $input_clean > $method.data
     fi
 done
 
 for solver in $SOLVER; do
     if [[ ! -e "$solver.data" ]]; then
         echo "Generating $solver.data"
-        awk '/Simulation cycle/{c=$NF}; /perf:region '"$solver"' /{print c,$NF}' $input_clean > $solver.data
+        awk '/Simulation cycle/{c=$NF}; /perf:region '"$solver"' /{print c,$NF/'"$num_procs"'}' $input_clean > $solver.data
     fi
 done
 
 for memory in $MEMORY; do
     if [[ ! -e "$memory.data" ]]; then
         echo "Generating $memory.data"
-        awk '/Simulation cycle/{c=$NF}; /perf:region cycle '"$memory"' /{print c,$NF}' $input_clean > $memory.data
+        awk '/Simulation cycle/{c=$NF}; /perf:region cycle '"$memory"' /{print c,$NF/'"$num_procs"'}' $input_clean > $memory.data
     fi
 done
 
