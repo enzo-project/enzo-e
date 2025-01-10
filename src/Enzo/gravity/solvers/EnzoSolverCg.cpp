@@ -262,6 +262,7 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0a(NULL),
 		      enzo_block->proxy_array());
 
+  PERF_REDUCE_START(perf_reduce_solver_cg);
   enzo_block->contribute (3*sizeof(long double), &reduce,
 			  sum_long_double_3_type,
 			  callback);
@@ -273,6 +274,7 @@ void EnzoBlock::r_solver_cg_loop_0a (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_cg);
   EnzoSolverCg * solver =
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -308,6 +310,7 @@ void EnzoSolverCg::loop_0a
 void EnzoBlock::r_solver_cg_loop_0b (CkReductionMsg * msg)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_cg);
   EnzoSolverCg * solver =
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -405,6 +408,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_shift_1(NULL),
 		      enzo_block->proxy_array());
 
+  PERF_REDUCE_START(perf_reduce_solver_cg);
   enzo_block->contribute (sizeof(long double), &reduce,
 			  sum_long_double_type,
 			  callback);
@@ -414,6 +418,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_cg);
   EnzoSolverCg * solver =
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -508,6 +513,7 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
     CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_3(NULL),
 			enzo_block->proxy_array());
 
+    PERF_REDUCE_START(perf_reduce_solver_cg);
     enzo_block->contribute (3*sizeof(long double), &reduce,
 			    sum_long_double_3_type,
 			    callback);
@@ -518,6 +524,7 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::r_solver_cg_loop_3 (CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_cg);
   EnzoSolverCg * solver =
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -605,6 +612,7 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_5(NULL),
 		      enzo_block->proxy_array());
 
+  PERF_REDUCE_START(perf_reduce_solver_cg);
   enzo_block->contribute (3*sizeof(long double), &reduce,
 			  sum_long_double_3_type,
 			  callback);
@@ -616,6 +624,7 @@ void EnzoBlock::r_solver_cg_loop_5 (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> solver_cg_loop_6
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_cg);
   EnzoSolverCg * solver =
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -689,6 +698,7 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0b(NULL),
 		      enzo_block->proxy_array());
 
+  PERF_REDUCE_START(perf_reduce_solver_cg);
   enzo_block->contribute (sizeof(int), &iter,
 			  CkReduction::max_int, callback);
 }

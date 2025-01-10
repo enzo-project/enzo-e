@@ -728,13 +728,7 @@ public:
     PERF_STOP(perf_stopping);
   }
 
-  /// Quiescence before load balancing
-  void p_stopping_load_balance()
-  { stopping_load_balance_(); }
-  void r_stopping_load_balance(CkReductionMsg * msg)
-  { delete msg;
-    stopping_load_balance_();
-  }
+  void r_stopping_load_balance(CkReductionMsg * msg);
 
   /// Exit the stopping phase
   void p_stopping_exit ()

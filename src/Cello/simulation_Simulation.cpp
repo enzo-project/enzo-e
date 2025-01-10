@@ -421,6 +421,30 @@ void Simulation::initialize_performance_() throw()
   p->new_region(perf_refresh_exit_post,     "refresh_exit_post",in_charm);
   p->new_region(perf_refresh_child,         "refresh_child");
   p->new_region(perf_refresh_child_post,    "refresh_child_post",in_charm);
+
+  p->new_region(perf_reduce,                "reduce");
+  p->new_region(perf_reduce_adapt,          "reduce_adapt");
+  p->new_region(perf_reduce_charm,          "reduce_charm");
+  p->new_region(perf_reduce_initialize,     "reduce_initialize");
+  p->new_region(perf_reduce_method_balance, "reduce_method_balance");
+  p->new_region(perf_reduce_method_check,   "reduce_method_check");
+  p->new_region(perf_reduce_method_debug,   "reduce_method_debug");
+  p->new_region(perf_reduce_method_flux_correct,"reduce_method_flux_correct");
+  p->new_region(perf_reduce_method_inference, "reduce_method_inference");
+  p->new_region(perf_reduce_method_m1_closure,"reduce_method_m1_closure");
+  p->new_region(perf_reduce_method_order_hilbert,"reduce_method_order_hilbert");
+  p->new_region(perf_reduce_method_order_morton,"reduce_method_order_morton");
+  p->new_region(perf_reduce_method_output,  "reduce_method_output");
+  p->new_region(perf_reduce_method_turbulence,"reduce_method_turbulence");
+  p->new_region(perf_reduce_output,         "reduce_output");
+  p->new_region(perf_reduce_restart,        "reduce_restart");
+  p->new_region(perf_reduce_simulation,     "reduce_simulation");
+  p->new_region(perf_reduce_solver_bicgstab,"reduce_solver_bicgstab");
+  p->new_region(perf_reduce_solver_cg,      "reduce_solver_cg");
+  p->new_region(perf_reduce_solver_dd,      "reduce_solver_dd");
+  p->new_region(perf_reduce_solver_mg0,     "reduce_solver_mg0");
+  p->new_region(perf_reduce_stopping,       "reduce_stopping");
+
 #ifdef CONFIG_SMP_MODE
   p->new_region(perf_smp,                     "smp");
   p->new_region(perf_smp_field_face,          "smp_field_face");
@@ -1030,6 +1054,7 @@ void Simulation::monitor_performance()
   CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
 #endif
 
+  PERF_REDUCE_START(perf_reduce_simulation);
   contribute
     (n*sizeof(long long),
      counters_reduce,
@@ -1047,6 +1072,7 @@ void Simulation::monitor_performance()
 
 void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_simulation);
   if (CkMyPe() == 0) {
     long long * counters_reduce = (long long *)msg->getData();
 

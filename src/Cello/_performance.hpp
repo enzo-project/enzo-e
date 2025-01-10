@@ -78,6 +78,29 @@ enum perf_region {
   perf_adapt_recv_level_post,
   perf_adapt_recv_child,
   perf_adapt_recv_child_post,
+  perf_reduce,
+  perf_reduce_stopping,
+  perf_reduce_adapt,
+  perf_reduce_charm,
+  perf_reduce_initialize,
+  perf_reduce_output,
+  perf_reduce_restart,
+  perf_reduce_balance,
+  perf_reduce_method_balance,
+  perf_reduce_method_check,
+  perf_reduce_method_inference,
+  perf_reduce_method_m1_closure,
+  perf_reduce_method_turbulence,
+  perf_reduce_simulation,
+  perf_reduce_solver_bicgstab,
+  perf_reduce_solver_cg,
+  perf_reduce_solver_dd,
+  perf_reduce_solver_mg0,
+  perf_reduce_method_debug,
+  perf_reduce_method_flux_correct,
+  perf_reduce_method_order_hilbert,
+  perf_reduce_method_order_morton,
+  perf_reduce_method_output,
   perf_refresh,
   perf_refresh_post,
   perf_refresh_start,
@@ -130,6 +153,13 @@ enum perf_region {
 #   define PERF_ADAPT_POST(INDEX)                                       \
   cello::performance()->start_region(INDEX,__FILE__,__LINE__);          \
   cello::performance()->start_region(perf_adapt_post,__FILE__,__LINE__);
+
+#   define PERF_REDUCE_START(INDEX)                                     \
+  cello::performance()->start_region(INDEX,__FILE__,__LINE__);          \
+  cello::performance()->start_region(perf_reduce,__FILE__,__LINE__)
+#   define PERF_REDUCE_STOP(INDEX)                                      \
+  cello::performance()->stop_region(INDEX,__FILE__,__LINE__);           \
+  cello::performance()->stop_region(perf_reduce,__FILE__,__LINE__)
 
 #   define PERF_REFRESH_START(INDEX)                                      \
   cello::performance()->start_region(INDEX,__FILE__,__LINE__)

@@ -199,6 +199,7 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
   CkCallback callback (CkIndex_Block::r_method_flux_correct_sum_fields(nullptr), 
                        block->proxy_array());
 
+  PERF_REDUCE_START(perf_reduce_method_flux_correct);
   block->contribute
     ((nf+1)*sizeof(long double), reduce, sum_long_double_n_type, callback);
 
@@ -209,6 +210,7 @@ void MethodFluxCorrect::compute_continue_refresh( Block * block ) throw()
 
 void Block::r_method_flux_correct_sum_fields(CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_method_flux_correct);
   static_cast<MethodFluxCorrect*>
     (this->method())->compute_continue_sum_fields(this,msg);
 }

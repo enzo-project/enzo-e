@@ -138,22 +138,20 @@ html_start_table(html)
 html_start_row(html)
 
 # ----------------------------------------------------------------------
+region_list = ['method.data', 'solver.data', 'refresh.data', 'adapt.data', 'reduce.data']
+if os.path.exists('smp.data'):
+    region_list.append(['smp.data'])
+
 plot_open(plt,'Enzo-E: cumulative times','cycle','time (s)');
 plot_total(plt,'cycle.data','cycle',scale=1.0)
-if os.path.exists('smp.data'):
-    plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data', 'smp.data'])
-else:
-    plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data'])
+plot_list(plt,region_list)
 plt.legend(loc='lower center',ncols=3)
 plt.yscale('log')
 plot_write('plot_time_total',html)
 # ----------------------------------------------------------------------
 plot_open(plt,'Enzo-E: per-cycle times','cycle','time (s)');
 plot_total(plt,'cycle.data','cycle',scale=1.0,type='cycle')
-if os.path.exists('smp.data'):
-    plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data', 'smp.data'],type='cycle')
-else:
-    plot_list(plt,['method.data', 'solver.data', 'refresh.data', 'adapt.data'],type='cycle')
+plot_list(plt,region_list,type='cycle')
 plt.legend(loc='lower center',ncols=3)
 plot_write('plot_time_cycle',html)
 # ----------------------------------------------------------------------

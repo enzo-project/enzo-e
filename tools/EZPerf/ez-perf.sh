@@ -56,6 +56,7 @@ BALANCE_MAX=`awk '/perf:balance max-/{print $(NF-1)}' $input_clean | sort | uniq
 MEMORY=`awk '/perf:region cycle /{print $(NF-1)}' $input_clean | sort | uniq`
 MESH=`awk '/perf:mesh /{print $(NF-1)}' $input_clean | sort | uniq`
 METHOD=`awk '/perf:region method/{print $(NF-2)}' $input_clean | sort | uniq`
+REDUCE=`awk '/perf:region reduce/{print $(NF-2)}' $input_clean | sort | uniq`
 REFRESH=`awk '/perf:region refresh/{print $(NF-2)}' $input_clean | sort | uniq`
 SMP=`awk '/perf:region smp/{print $(NF-2)}' $input_clean | sort | uniq`
 SOLVER=`awk '/perf:region solver/{print $(NF-2)}' $input_clean | sort | uniq`
@@ -86,6 +87,14 @@ for refresh in $REFRESH; do
     if [[ ! -e "$refresh.data" ]]; then
            echo "Generating $refresh.data"
            awk '/Simulation cycle/{c=$NF}; /perf:region '"$refresh"' /{print c,$NF/'"$num_procs"'}' $input_clean > $refresh.data
+       fi
+done
+
+echo "REDUCE = $REDUCE"
+for reduce in $REDUCE; do
+    if [[ ! -e "$reduce.data" ]]; then
+           echo "Generating $reduce.data"
+           awk '/Simulation cycle/{c=$NF}; /perf:region '"$reduce"' /{print c,$NF/'"$num_procs"'}' $input_clean > $reduce.data
        fi
 done
 

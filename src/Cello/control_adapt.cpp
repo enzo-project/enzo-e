@@ -130,6 +130,7 @@ void Block::adapt_barrier_()
       (CkIndex_Block::r_adapt_next(nullptr), 
        proxy_array());
     adapt_ready_ = true;
+    PERF_REDUCE_START(perf_reduce_adapt);
     contribute(sizeof(int),&changed,CkReduction::sum_int, callback);
   }
 }
@@ -144,6 +145,7 @@ void Block::adapt_barrier_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
+  PERF_REDUCE_STOP(perf_reduce_adapt);
   TRACE_ADAPT("adapt_next contribute called_",this);
   update_levels_();
 

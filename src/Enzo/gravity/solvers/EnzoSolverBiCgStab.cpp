@@ -538,7 +538,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
 //----------------------------------------------------------------------
 
 void EnzoBlock::r_solver_bicgstab_start_1(CkReductionMsg* msg) {
-
+  PERF_REDUCE_STOP(perf_reduce_solver_bicgstab);
   static_cast<EnzoSolverBiCgStab*> (solver())->start_2(this,msg);
 
 }
@@ -652,6 +652,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* block,
 
 void EnzoBlock::r_solver_bicgstab_start_3(CkReductionMsg* msg) {
 
+  PERF_REDUCE_STOP(perf_reduce_solver_bicgstab);
   static_cast<EnzoSolverBiCgStab*> (solver())->loop_0a(this,msg);
   
 }
@@ -1043,6 +1044,7 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* block) throw() {
 
 void EnzoBlock::r_solver_bicgstab_loop_5(CkReductionMsg* msg) {
 
+  PERF_REDUCE_STOP(perf_reduce_solver_bicgstab);
   static_cast<EnzoSolverBiCgStab*> (solver())->loop_6(this,msg);
 
 }
@@ -1343,7 +1345,7 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
 //----------------------------------------------------------------------
 
 void EnzoBlock::r_solver_bicgstab_loop_11(CkReductionMsg* msg) {
-
+  PERF_REDUCE_STOP(perf_reduce_solver_bicgstab);
   static_cast<EnzoSolverBiCgStab*> (solver())->loop_12(this,msg);
   
 }
@@ -1507,7 +1509,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
 //----------------------------------------------------------------------
 
 void EnzoBlock::r_solver_bicgstab_loop_13(CkReductionMsg* msg) {
-
+  PERF_REDUCE_STOP(perf_reduce_solver_bicgstab);
   static_cast<EnzoSolverBiCgStab*> (solver())->loop_14(this,msg);
 
 }
@@ -1593,7 +1595,7 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* block,
 //----------------------------------------------------------------------
 
 void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg) {
-
+  PERF_REDUCE_STOP(perf_reduce_solver_bicgstab);
   static_cast<EnzoSolverBiCgStab*> (solver())->loop_0b(this,msg);
 
 }
@@ -1622,6 +1624,7 @@ void EnzoSolverBiCgStab::inner_product_
     dot_compute_tree_(block,n,reduce+1,is_array,i_function,s_iter_(block));
   } else {
     TRACE_BCG(block,this,"inner_product_B");
+    PERF_REDUCE_START(perf_reduce_solver_bicgstab);
     block->contribute((n+1)*sizeof(long double), reduce, 
 		      sum_long_double_n_type, callback);
   }

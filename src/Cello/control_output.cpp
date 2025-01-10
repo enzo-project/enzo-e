@@ -110,6 +110,7 @@ void Simulation::output_start(int index_output)
   output->init();
   output->open();
   index_output_ = index_output;
+  PERF_REDUCE_START(perf_reduce_output);
   contribute(CkCallback (CkIndex_Simulation::r_output_barrier(NULL),thisProxy));
 }
 
@@ -117,6 +118,7 @@ void Simulation::output_start(int index_output)
 
 void Simulation::r_output_barrier(CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_output);
   PERF_START(perf_output);
   delete msg;
   Output * output = problem()->output(index_output_);

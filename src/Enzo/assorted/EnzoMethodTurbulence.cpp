@@ -176,6 +176,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 
   CkCallback callback (CkIndex_EnzoBlock::r_method_turbulence_end(NULL),
 		       enzo_block->proxy_array());
+  PERF_REDUCE_START(perf_reduce_method_turbulence);
   enzo_block->contribute(n*sizeof(double),g,r_method_turbulence_type,callback);
 }
 
@@ -188,6 +189,7 @@ void register_method_turbulence(void)
 
 CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 {
+  PERF_REDUCE_STOP(perf_reduce_method_turbulence);
   double accum[max_turbulence_array];
   for (int i=0; i<max_turbulence_array; i++) {
     accum[i] = 0.0;
