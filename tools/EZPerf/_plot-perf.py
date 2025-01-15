@@ -38,7 +38,7 @@ def plot_list(plt,file_list,type='total',scale=1e-6,sort=True):
         # sort file names by revert end time
         file_times = []
         for file in file_list:
-            if (not file.endswith(('_post.data'))):
+            if (os.path.exists(file) and (not file.endswith(('_post.data')))):
                 data =  loadtxt(file,dtype=float)
                 glob_x = data[:,0]
                 glob_y = data[:,1]
@@ -47,16 +47,17 @@ def plot_list(plt,file_list,type='total',scale=1e-6,sort=True):
         # plot by revert end time
         for row in sorted(file_times,reverse=True):
             file = row[1]
-            data =  loadtxt(file,dtype=float)
-            glob_x = data[:,0]
-            glob_y = data[:,1]
-            if (type == 'cycle'):
-                n=len(glob_x)
-                glob_x = glob_x[1:n-1]
-                glob_y = glob_y[2:n] - glob_y[1:n-1]
-            name=os.path.splitext(os.path.basename(file))[0]
-            plt.plot(glob_x,scale*glob_y, label=name, color=c[i%7],marker=m[i%7], ls=l, lw=w)
-            i=i+1
+            if (os.path.exists(file)):
+                data =  loadtxt(file,dtype=float)
+                glob_x = data[:,0]
+                glob_y = data[:,1]
+                if (type == 'cycle'):
+                    n=len(glob_x)
+                    glob_x = glob_x[1:n-1]
+                    glob_y = glob_y[2:n] - glob_y[1:n-1]
+                name=os.path.splitext(os.path.basename(file))[0]
+                plt.plot(glob_x,scale*glob_y, label=name, color=c[i%7],marker=m[i%7], ls=l, lw=w)
+                i=i+1
     else:
         i=1
         # plot by revert end time
@@ -140,7 +141,7 @@ html_start_row(html)
 # ----------------------------------------------------------------------
 region_list = ['method.data', 'solver.data', 'refresh.data', 'adapt.data', 'reduce.data']
 if os.path.exists('smp.data'):
-    region_list.append(['smp.data'])
+    region_list.append('smp.data')
 
 plot_open(plt,'Enzo-E: cumulative times','cycle','time (s)');
 plot_total(plt,'cycle.data','cycle',scale=1.0)
