@@ -134,6 +134,9 @@ public: // interface
   Method * method(size_t i) const throw() 
   { return (i < method_list_.size()) ? method_list_[i] : nullptr; }
 
+  int num_methods () const throw()
+  { return method_list_.size(); }
+
   /// Return the named method object if present
   Method * method (std::string name) const throw();
 

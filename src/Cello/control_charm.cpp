@@ -49,7 +49,7 @@
 
 void Block::initial_exit_()
 {
-  performance_start_(perf_initial);
+  PERF_START(perf_initial);
   TRACE_CONTROL("initial_exit");
 
 #ifdef TRACE_CONTRIBUTE  
@@ -65,7 +65,7 @@ void Block::initial_exit_()
   } else {
     control_sync_barrier (CkIndex_Block::r_adapt_enter(NULL));
   }
-  performance_stop_(perf_initial);
+  PERF_STOP(perf_initial);
 }
 
 //----------------------------------------------------------------------
@@ -87,15 +87,13 @@ void Block::adapt_exit_()
 
 void Block::output_exit_()
 {
-  performance_start_(perf_output);
+  PERF_START(perf_output);
 
   TRACE_CONTROL("output_exit");
 
   if (index_.is_root()) {
     cello::simulation()->monitor_output();
   }
-
-  performance_stop_(perf_output);
 
 #ifdef TRACE_CONTRIBUTE  
   CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_stopping_enter()\n",
@@ -104,6 +102,7 @@ void Block::output_exit_()
 #endif  
   control_sync_barrier (CkIndex_Block::r_stopping_enter(NULL));
 
+  PERF_STOP(perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -111,17 +110,6 @@ void Block::output_exit_()
 void Block::stopping_exit_()
 {
   TRACE_CONTROL("stopping_exit");
-
-  if (cello::simulation()->cycle_changed()) {
-    // if performance counters haven't started yet for this cycle
-    int cycle_initial = cello::config()->initial_cycle;
-    if (cycle_ > cycle_initial) {
-      // stop if any previous cycle
-      performance_stop_(perf_cycle,__FILE__,__LINE__);
-    }
-    // start 
-    performance_start_ (perf_cycle,__FILE__,__LINE__);
-  }
 
   if (stop_) {
 
@@ -134,6 +122,14 @@ void Block::stopping_exit_()
 
   } else {
 
+    if (cello::simulation()->cycle_changed()) {
+      if (cycle_ > cello::simulation()->initial_cycle()) {
+        // stop if any previous cycle
+        PERF_STOP(perf_cycle);
+      }
+      // start 
+      PERF_START(perf_cycle);
+    }
     compute_enter_();
 
   }

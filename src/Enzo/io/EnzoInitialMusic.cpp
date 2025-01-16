@@ -128,7 +128,10 @@ void EnzoInitialMusic::enforce_block
     // Open the field file
 
     if (throttle_intranode_) {
+#ifdef CONFIG_SMP_MODE
+      PERF_SMP_START(perf_smp_initial_music);
       CmiLock(throttle_node_lock);
+#endif
     }
 
     FileHdf5 * file = nullptr;
@@ -267,10 +270,11 @@ void EnzoInitialMusic::enforce_block
     }    
 
     if (throttle_intranode_) {
+#ifdef CONFIG_SMP_MODE
       CmiUnlock(throttle_node_lock);
+      PERF_SMP_STOP(perf_smp_initial_music);
+#endif
     }
-
-
   }
 
   for (size_t index=0; index<particle_files_.size(); index++) {
@@ -278,7 +282,10 @@ void EnzoInitialMusic::enforce_block
     std::string file_name = particle_files_[index];
 
     if (throttle_intranode_) {
+#ifdef CONFIG_SMP_MODE
+      PERF_SMP_START(perf_smp_initial_music);
       CmiLock(throttle_node_lock);
+#endif
     }
 
     FileHdf5 * file = nullptr;
@@ -404,7 +411,10 @@ void EnzoInitialMusic::enforce_block
     } 
 
     if (throttle_intranode_) {
+#ifdef CONFIG_SMP_MODE
       CmiUnlock(throttle_node_lock);
+      PERF_SMP_STOP(perf_smp_initial_music);
+#endif
     }
     
     // Create particles and initialize them

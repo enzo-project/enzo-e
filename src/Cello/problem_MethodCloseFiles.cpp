@@ -41,6 +41,7 @@ void MethodCloseFiles::compute( Block * block) throw()
   const bool is_first_cycle = (block->cycle() == cello::config()->initial_cycle);
   if (is_first_cycle) {
     throttle_stagger_();
+    PERF_SMP_START(perf_smp_method_close_files);
     CmiLock(MethodCloseFiles::node_lock);
     for (auto it=FileHdf5::file_list.begin();
          it!=FileHdf5::file_list.end(); ++it) {
@@ -55,6 +56,7 @@ void MethodCloseFiles::compute( Block * block) throw()
       FileHdf5::file_list.erase(it);
     }
     CmiUnlock(MethodCloseFiles::node_lock);
+    PERF_SMP_STOP(perf_smp_method_close_files);
   }
 
   block->compute_done(); 

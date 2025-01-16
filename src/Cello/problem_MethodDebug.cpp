@@ -159,9 +159,10 @@ void MethodDebug::compute ( Block * block) throw()
     }
   }
 #endif
-    CkCallback callback (CkIndex_Block::r_method_debug_sum_fields(NULL),
+  CkCallback callback (CkIndex_Block::r_method_debug_sum_fields(NULL),
                        block->proxy_array());
 
+  PERF_REDUCE_START(perf_reduce_method_debug);
   block->contribute
     ((1+num_reduce)*sizeof(long double), reduce,
      r_reduce_method_debug_type, callback);
@@ -173,6 +174,7 @@ void MethodDebug::compute ( Block * block) throw()
 
 void Block::r_method_debug_sum_fields(CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_method_debug);
   static_cast<MethodDebug*>
     (this->method())->compute_continue(this,msg);
 }

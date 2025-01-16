@@ -26,9 +26,9 @@
 void Block::output_enter_ ()
 {
   TRACE_OUTPUT("Block::output_enter_()");
-  performance_start_(perf_output);
+  PERF_START(perf_output);
   output_begin_();
-  performance_stop_(perf_output);
+  PERF_STOP(perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -47,13 +47,11 @@ void Simulation::output_enter ()
 
   // Switch from Block to Simulation parallelism
   if (sync_output_begin_.next()) {
-    performance_->start_region(perf_output);
     set_phase(phase_output);
 
     problem()->output_reset();
     problem()->output_next(this);
 
-    performance_->stop_region(perf_output);
   }
 }
 
@@ -112,6 +110,7 @@ void Simulation::output_start(int index_output)
   output->init();
   output->open();
   index_output_ = index_output;
+  PERF_REDUCE_START(perf_reduce_output);
   contribute(CkCallback (CkIndex_Simulation::r_output_barrier(NULL),thisProxy));
 }
 
@@ -119,6 +118,8 @@ void Simulation::output_start(int index_output)
 
 void Simulation::r_output_barrier(CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_output);
+  PERF_START(perf_output);
   delete msg;
   Output * output = problem()->output(index_output_);
   output->write_simulation(this);
@@ -131,6 +132,7 @@ void Simulation::r_output_barrier(CkReductionMsg * msg)
   //  if (CkMyPe() == 0) {
   //    hierarchy_->block_array().p_output_write(index_output,0);
   //  }
+  PERF_STOP(perf_output);
 
 }
 
@@ -138,8 +140,8 @@ void Simulation::r_output_barrier(CkReductionMsg * msg)
 
 void Block::p_output_write (int index_output, int step)
 {
+  PERF_START (perf_output);
   TRACE_OUTPUT("Simulation::p_output_write()");
-  performance_start_ (perf_output);
 
   Simulation    * simulation     = cello::simulation();
   Output        * output         = cello::output(index_output);
@@ -151,7 +153,7 @@ void Block::p_output_write (int index_output, int step)
   output->write_block(this);
 
   simulation->write_();
-  performance_stop_ (perf_output);
+  PERF_STOP (perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -162,20 +164,9 @@ void Simulation::write_()
 
   if (sync_output_write_.next()) {
 
-    r_write(NULL);
+    problem()->output_wait(this);
 
   }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::r_write(CkReductionMsg * msg)
-{
-  performance_->start_region(perf_output);
-  TRACE_OUTPUT("Simulation::r_write()");
-  delete msg;
-  problem()->output_wait(this);
-  performance_->stop_region(perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -234,8 +225,10 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 void Simulation::p_output_write (int n, char * buffer)
 {
+  PERF_START(perf_output);
   TRACE_OUTPUT("Simulation::p_output_write()");
   problem()->output_write(this,n,buffer); 
+  PERF_STOP (perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -291,10 +284,10 @@ void Simulation::output_exit()
 
 void Block::p_output_end()
 {
-  performance_start_(perf_output);
+  PERF_START(perf_output);
   TRACE_OUTPUT("Block::p_output_end()");
-  performance_stop_(perf_output);
   output_exit_();
+  PERF_STOP(perf_output);
 }
 
 //======================================================================

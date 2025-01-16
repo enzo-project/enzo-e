@@ -218,9 +218,15 @@ void Hierarchy::increment_block_count(int count, int level)
           "Block level %d exceeds block count array",
           level, 0 <= index && index < n);
   num_blocks_level_[level-min_level_] += count;
+#ifdef CONFIG_SMP_MODE
+  PERF_SMP_START(perf_smp_hierarchy);
   CmiLock(hierarchy_node_lock);
+#endif
   Hierarchy::num_blocks_node += count;
+#ifdef CONFIG_SMP_MODE
   CmiUnlock(hierarchy_node_lock);
+  PERF_SMP_STOP(perf_smp_hierarchy);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -228,9 +234,15 @@ void Hierarchy::increment_block_count(int count, int level)
 void Hierarchy::increment_particle_count(int64_t count)
 {
   num_particles_ += count;
+#ifdef CONFIG_SMP_MODE
+  PERF_SMP_START(perf_smp_hierarchy);
   CmiLock(hierarchy_node_lock);
+#endif
   Hierarchy::num_particles_node += count;
+#ifdef CONFIG_SMP_MODE
   CmiUnlock(hierarchy_node_lock);
+  PERF_SMP_STOP(perf_smp_hierarchy);
+#endif
   
 }
 

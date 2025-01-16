@@ -237,15 +237,8 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 #else /* CONFIG_USE_GRACKLE */
 
-    // Start timer
-    Simulation * simulation = cello::simulation();
-    if (simulation)
-      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
-
     this->compute_(block);
 
-    if (simulation)
-      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
 #endif
   }
 

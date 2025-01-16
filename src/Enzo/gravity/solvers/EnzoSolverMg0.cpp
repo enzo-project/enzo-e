@@ -105,22 +105,6 @@
 #include "Enzo/enzo.hpp"
 #include "Enzo/gravity/gravity.hpp"
 
-// #define DEBUG_SOLVER_CONTROL
-
-#define CYCLE 129
-#define AFTER_CYCLE(BLOCK,CYCLE) (BLOCK->cycle() >= CYCLE)
-
-#ifdef DEBUG_SOLVER_CONTROL
-#   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE)                \
-  if (AFTER_CYCLE(BLOCK,CYCLE)) {                               \
-    CkPrintf ("DEBUG_SOLVER_CONTROL %-4s %-10s %s\n",           \
-	      name_.c_str(),BLOCK->name().c_str(),MESSAGE);     \
-    fflush(stdout); \
-  }
-#else
-#   define SOLVER_CONTROL(BLOCK,MIN,MAX,MESSAGE) /* ... */
-#endif
-
 //======================================================================
 
 EnzoSolverMg0::EnzoSolverMg0
@@ -273,15 +257,12 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     /// sum and count
 
     CkCallback callback(CkIndex_EnzoBlock::r_solver_mg0_begin_solve(nullptr),
-			enzo::block_array());
+                        enzo::block_array());
 
-    SOLVER_CONTROL (enzo_block,"min","max","1 calling begin_solve_1 (shift)");
-
+    PERF_REDUCE_START(perf_reduce_solver_mg0);
     enzo_block->contribute(2*sizeof(long double), &reduce,
-			   sum_long_double_2_type, callback);
+                           sum_long_double_2_type, callback);
   } else {
-
-    SOLVER_CONTROL(enzo_block,"min","max","2 calling begin_solve_2 (no shift)");
 
     begin_solve (enzo_block,nullptr);
 
@@ -312,10 +293,8 @@ void EnzoSolverMg0::compute_shift_
 
 void EnzoBlock::r_solver_mg0_begin_solve(CkReductionMsg* msg)
 {
-  performance_start_(perf_compute,__FILE__,__LINE__);
+  PERF_REDUCE_STOP(perf_reduce_solver_mg0);
   static_cast<EnzoSolverMg0*> (solver())->begin_solve(this,msg);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -323,16 +302,12 @@ void EnzoBlock::r_solver_mg0_begin_solve(CkReductionMsg* msg)
 void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block,
 				CkReductionMsg *msg) throw()
 {
-  SOLVER_CONTROL(enzo_block,"min","max", "3 calling do_shift_1");
-
   do_shift_(enzo_block,msg);
 
   // control flow starts at leaves, even in level > max_level,
   // since coarse solve may require reductions over all Blocks
 
   if (is_finest_(enzo_block)) {
-
-    SOLVER_CONTROL(enzo_block, "fine","max", "4 calling begin_cycle_1");
 
     begin_cycle_ (enzo_block);
 
@@ -343,7 +318,6 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block,
     if ( coarse_level_ <= level && level <= max_level_) {
       restrict_recv(enzo_block,nullptr);
     } else {
-      SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_1");
       call_coarse_solver(enzo_block);
     }
 
@@ -389,21 +363,16 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
   if (level == coarse_level_) {
 
-    SOLVER_CONTROL(enzo_block,"min","coarse","6 calling coarse_solve_1");
-
-    SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_2");
     call_coarse_solver(enzo_block);
 
   } else {
 
     if (index_smooth_pre_ >= 0) {
 
-      SOLVER_CONTROL(enzo_block,"coarse+1","fine", "7 calling pre_smooth_1");
       call_pre_smoother (enzo_block);
 
     } else {
 
-      SOLVER_CONTROL(enzo_block,"coarse+1","fine", "8 calling restrict_1");
       restrict (enzo_block);
 
     }
@@ -430,9 +399,6 @@ void EnzoSolverMg0::monitor_output_(EnzoBlock * enzo_block)
 
 void EnzoBlock::p_solver_mg0_solve_coarse()
 {
-  SOLVER_CONTROL(this,"*","*", "p_solve_coarse");
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
   EnzoSolverMg0 * solver =
     static_cast<EnzoSolverMg0*> (this->solver());
 
@@ -441,18 +407,17 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 
   long double data[1] = {solver->rr_local()};
 
+  PERF_REDUCE_START(perf_reduce_solver_mg0);
   contribute(sizeof(long double), data,  sum_long_double_type, callback);
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::r_solver_mg0_barrier(CkReductionMsg* msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_mg0);
   EnzoSolverMg0 * solver =
     static_cast<EnzoSolverMg0*> (this->solver());
-
-  performance_start_(perf_compute,__FILE__,__LINE__);
 
   long double rr = ((long double*) msg->getData())[0];
   solver->set_rr(rr);
@@ -462,24 +427,16 @@ void EnzoBlock::r_solver_mg0_barrier(CkReductionMsg* msg)
   delete msg;
 
   solver->prolong(this);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_restrict()
 {
-  SOLVER_CONTROL(this,"*","*", "p_restrict");
-
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
   EnzoSolverMg0 * solver =
     static_cast<EnzoSolverMg0*> (this->solver());
 
   solver->restrict(this);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -489,14 +446,11 @@ void EnzoSolverMg0::restrict(EnzoBlock * enzo_block) throw()
 ///      callback = p_restrict_send()
 ///      call refresh (X,level,"level")
 {
-  SOLVER_CONTROL(enzo_block,"coarse+1","fine", "9 restrict_2");
-
   restrict_send (enzo_block);
 
   // All Blocks must call coarse solver since may involve
   // global reductions
 
-  SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_3");
   call_coarse_solver(enzo_block);
 }
 
@@ -504,8 +458,6 @@ void EnzoSolverMg0::restrict(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverMg0::call_coarse_solver(EnzoBlock * enzo_block) throw()
 {
-  SOLVER_CONTROL(enzo_block,"min","max", "10 call_coarse_solve_2");
-
   Solver * solve_coarse = cello::solver(index_solve_coarse_);
 
   solve_coarse->set_min_level(min_level_);
@@ -523,7 +475,6 @@ void EnzoSolverMg0::call_coarse_solver(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverMg0::call_pre_smoother(EnzoBlock * enzo_block) throw()
 {
-  SOLVER_CONTROL(enzo_block,"min","max", "11 call_pre_smooth_1");
   Solver * smooth_pre = cello::solver(index_smooth_pre_);
 
   smooth_pre->set_min_level(enzo_block->level());
@@ -541,7 +492,6 @@ void EnzoSolverMg0::call_pre_smoother(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverMg0::call_post_smoother(EnzoBlock * enzo_block) throw()
 {
-  SOLVER_CONTROL(enzo_block,"min","max", "12 call_post_smooth_1");
   Solver * smooth_post = cello::solver(index_smooth_post_);
 
   smooth_post->set_min_level(enzo_block->level());
@@ -559,7 +509,6 @@ void EnzoSolverMg0::call_post_smoother(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverMg0::call_last_smoother(EnzoBlock * enzo_block) throw()
 {
-  SOLVER_CONTROL(enzo_block,"min","max", "13 call_last_smooth_1");
   Solver * smooth_last = cello::solver(index_smooth_last_);
 
   smooth_last->set_sync_id (enzo_sync_id_solver_mg0_last);
@@ -593,8 +542,6 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverMg0::compute_residual_(EnzoBlock * enzo_block) throw()
 {
-  SOLVER_CONTROL(enzo_block,"coarse+1","fine", "14 compute_residual_1");
-
   Field field = enzo_block->data()->field();
 
   A_->residual(ir_, ib_, ix_, enzo_block);
@@ -616,17 +563,10 @@ void EnzoSolverMg0::compute_residual_(EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
 {
-  SOLVER_CONTROL(this,"*","*", "p_restrict_recv");
-
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
   EnzoSolverMg0 * solver =
     static_cast<EnzoSolverMg0*> (this->solver());
 
   solver->restrict_recv(this,msg);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
-
 }
 
 //----------------------------------------------------------------------
@@ -638,9 +578,6 @@ void EnzoSolverMg0::restrict_recv
 ///      if (sync.next())
 ///          begin_cycle()
 {
-
-  SOLVER_CONTROL(enzo_block,"coarse","fine-1", "15 restrict_recv_1");
-  if (msg == nullptr)   SOLVER_CONTROL(enzo_block,"coarse","fine-1", "16 restrict_recv_1 nullptr");
 
   // Unpack "B" vector data from children
 
@@ -669,9 +606,6 @@ void EnzoSolverMg0::prolong(EnzoBlock * enzo_block) throw()
 ///      solve A X = B
 ///      end_cycle()
 {
-
-  SOLVER_CONTROL(enzo_block,"min","max", "17 prolong_1");
-
   /// Prolong solution to next-finer level
 
   const int level = enzo_block->level();
@@ -680,18 +614,15 @@ void EnzoSolverMg0::prolong(EnzoBlock * enzo_block) throw()
 
     if ( ! is_finest_(enzo_block) ) {
 
-      SOLVER_CONTROL(enzo_block,"coarse","fine-1", "18 call prolong_send_1");
       prolong_send_ (enzo_block);
 
     }
   }
 
   if (coarse_level_ < level && level <= max_level_) {
-    SOLVER_CONTROL(enzo_block,"coarse","fine-1", "20 call prolong_recv_1");
-    enzo_block->solver_mg0_prolong_recv(nullptr);
+    prolong_recv(enzo_block,nullptr);
   } else {
 
-    SOLVER_CONTROL(enzo_block,"coarse","fine-1", "19 call end_cycle_1");
     end_cycle (enzo_block);
   }
 }
@@ -704,8 +635,6 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 ///         pack X
 ///         child.prolong_recv(X)
 {
-  SOLVER_CONTROL(enzo_block,"coarse","fine-1", "22 prolong_send_2");
-
   ItChild it_child(cello::rank());
   int ic3[3];
 
@@ -715,7 +644,6 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
     Index index_child = enzo_block->index().index_child(ic3,min_level_);
 
-    SOLVER_CONTROL(enzo_block,"coarse","fine-1", "23 call prolong_recv_2");
     enzo::block_array()[index_child].p_solver_mg0_prolong_recv(msg);
 
   }
@@ -724,17 +652,6 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
-{
-  SOLVER_CONTROL(this,"*","*", "p_prolong_recv");
-  performance_start_(perf_compute,__FILE__,__LINE__);
-  solver_mg0_prolong_recv(msg);
-  performance_stop_(perf_compute,__FILE__,__LINE__);
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::solver_mg0_prolong_recv(FieldMsg * msg)
 {
   static_cast<EnzoSolverMg0*> (solver())->prolong_recv(this,msg);
 }
@@ -757,8 +674,6 @@ void EnzoSolverMg0::prolong_recv
 
   if (! psync_prolong(enzo_block)->next() ) return;
 
-  SOLVER_CONTROL(enzo_block,"coarse+1","fine", "24 prolong_recv_3");
-
   // Restore saved message then clear
   msg = *pmsg_prolong(enzo_block);
   *pmsg_prolong(enzo_block) = nullptr;
@@ -776,12 +691,10 @@ void EnzoSolverMg0::prolong_recv
 
   if (index_smooth_post_ >= 0) {
 
-    SOLVER_CONTROL(enzo_block,"coarse","fine-1", "25 call post_smooth_2");
     call_post_smoother(enzo_block);
 
   } else {
 
-    SOLVER_CONTROL(enzo_block,"coarse","fine-1", "26 call post_smooth_3");
     post_smooth (enzo_block);
   }
 
@@ -791,16 +704,10 @@ void EnzoSolverMg0::prolong_recv
 
 void EnzoBlock::p_solver_mg0_post_smooth()
 {
-  SOLVER_CONTROL(this,"*","*", "p_post_smooth");
-
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
   EnzoSolverMg0 * solver =
     static_cast<EnzoSolverMg0*> (this->solver());
 
   solver->post_smooth(this);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -810,16 +717,12 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
 ///      smooth.apply (A,X,B)
 ///      end_cycle()
 {
-  SOLVER_CONTROL(enzo_block,"coarse+1","fine", "27 post_smooth_4");
-
   if ( ! is_finest_(enzo_block) ) {
 
-    SOLVER_CONTROL(enzo_block,"coarse","fine-1", "28 call prolong_send_3");
     prolong_send_ (enzo_block);
   }
 
   end_cycle (enzo_block);
-  SOLVER_CONTROL(enzo_block,"coarse","fine-1", "29 call end_cycle_2");
 }
 
 //----------------------------------------------------------------------
@@ -832,8 +735,6 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 ///      else
 ///         begin_cycle()
 {
-  SOLVER_CONTROL(enzo_block,"min","max", "30 end_cycle_3");
-
   ++ (*piter(enzo_block));
 
   bool is_converged = is_converged_(enzo_block);
@@ -858,12 +759,10 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
     if (index_smooth_last_ >= 0 && (is_finest_(enzo_block)) ) {
 
-      SOLVER_CONTROL(enzo_block,"coarse","fine-1", "31 call last_smooth_1");
       call_last_smoother(enzo_block);
 
     } else {
 
-      SOLVER_CONTROL(enzo_block,"coarse","fine-1", "32 call end_2");
       end (enzo_block);
     }
 
@@ -871,15 +770,12 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
     if ( is_finest_(enzo_block)) {
 
-      SOLVER_CONTROL(enzo_block,"coarse","fine-1", "33 call begin_cycle_2");
       begin_cycle_ (enzo_block);
 
     } else {
 
       int level = enzo_block->level();
       if ( ! (coarse_level_ <= level && level <= max_level_) ) {
-	SOLVER_CONTROL(enzo_block,"coarse","fine-1", "34 call coarse_solver");
-        SOLVER_CONTROL(enzo_block,"min","max", "CALL_COARSE_SOLVER_4");
 	call_coarse_solver(enzo_block);
       } else {
         restrict_recv(enzo_block,nullptr);
@@ -894,14 +790,9 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::p_solver_mg0_last_smooth()
 {
-  SOLVER_CONTROL(this,"*","*", "p_last_smooth");
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
   EnzoSolverMg0 * solver = static_cast<EnzoSolverMg0*> (this->solver());
 
   solver->end(this);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1090,8 +981,6 @@ bool EnzoSolverMg0::is_diverged_(EnzoBlock * enzo_block) const
 
 void EnzoSolverMg0::end(Block * block)
 {
-  SOLVER_CONTROL(block,"min","max", "35 end_1");
-
   deallocate_temporary_(block);
 
   Solver::end_(block);

@@ -240,6 +240,7 @@ void EnzoBlock::p_solver_dd_solve_coarse()
 {
   CkCallback callback(CkIndex_EnzoBlock::r_solver_dd_barrier(NULL),
 		      enzo::block_array());
+  PERF_REDUCE_START(perf_reduce_solver_dd);
   contribute(callback);
 }
 
@@ -247,6 +248,7 @@ void EnzoBlock::p_solver_dd_solve_coarse()
 
 void EnzoBlock::r_solver_dd_barrier(CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_dd);
   static_cast<EnzoSolverDd*> (solver())->prolong(this);
   delete msg;
 }
@@ -271,7 +273,7 @@ void EnzoSolverDd::prolong(EnzoBlock * enzo_block) throw()
   }
 
   if (coarse_level_ < level && level <= max_level_) {
-    enzo_block->solver_dd_prolong_recv(NULL);
+    prolong_recv(enzo_block,nullptr);
   } else {
     call_domain_solver (enzo_block);
   }
@@ -300,9 +302,6 @@ void EnzoSolverDd::prolong_send_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_dd_prolong_recv(FieldMsg * msg)
-{  solver_dd_prolong_recv(msg); }
-
-void EnzoBlock::solver_dd_prolong_recv(FieldMsg * msg)
 {
   static_cast<EnzoSolverDd*> (solver())->prolong_recv(this,msg);
 }
@@ -381,6 +380,7 @@ void EnzoSolverDd::continue_after_domain_solve(EnzoBlock * enzo_block) throw()
 {
   CkCallback callback(CkIndex_EnzoBlock::r_solver_dd_end(NULL),
 		      enzo::block_array());
+  PERF_REDUCE_START(perf_reduce_solver_dd);
   enzo_block->contribute(callback);
 }
 
@@ -388,6 +388,7 @@ void EnzoSolverDd::continue_after_domain_solve(EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::r_solver_dd_end(CkReductionMsg * msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_solver_dd);
   static_cast<EnzoSolverDd*> (solver())->call_last_smoother(this);
   delete msg;
 }

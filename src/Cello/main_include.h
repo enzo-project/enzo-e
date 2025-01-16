@@ -26,7 +26,6 @@
      entry void p_output_enter ();
      entry void p_output_exit();
      entry void p_stopping_enter();
-     entry void p_stopping_balance();
      entry void p_stopping_exit();
      entry void p_text_file_write(int nd, char dir[nd],
      	                          int nf, char file[nf],

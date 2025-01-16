@@ -124,6 +124,8 @@ void Config::pup (PUP::er &p)
 
   p | monitor_debug;
   p | monitor_verbose;
+  p | monitor_proc;
+  p | monitor_time;
 
   // Output
 
@@ -882,7 +884,8 @@ void Config::read_monitor_ (Parameters * p) throw()
 
   monitor_debug   = p->value_logical("Monitor:debug",  false);
   monitor_verbose = p->value_logical("Monitor:verbose",false);
-
+  monitor_proc    = p->value_logical("Monitor:include_proc", true);
+  monitor_time    = p->value_logical("Monitor:include_time",true);
 }
 
 //----------------------------------------------------------------------

@@ -60,6 +60,7 @@ class Monitor;
 class Output;
 class Parameters;
 class ParticleDescr;
+class Performance;
 class Problem;
 class Refresh;
 class ScalarDescr;
@@ -757,6 +758,8 @@ namespace cello {
   CProxy_Block    block_array();
   /// Return a pointor to the Problem object defining the problem being solved
   Problem *       problem();
+  /// Return a pointor to the Performance object
+  Performance *   performance();
   /// Return a pointor to the ith Bounday object
   Boundary *      boundary(int i);
   /// Return a pointer to the Hierarchy object defining the mesh hierarchy

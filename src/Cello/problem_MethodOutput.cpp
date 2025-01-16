@@ -217,6 +217,7 @@ void MethodOutput::compute ( Block * block) throw()
 
   CkCallback callback(CkIndex_Block::r_method_output_continue(nullptr),
                       cello::block_array());
+  PERF_REDUCE_START(perf_reduce_method_output);
   block->contribute(callback);
 
 }
@@ -225,6 +226,7 @@ void MethodOutput::compute ( Block * block) throw()
 
 void Block::r_method_output_continue(CkReductionMsg *msg)
 {
+  PERF_REDUCE_STOP(perf_reduce_method_output);
   delete msg;
   MethodOutput * method = static_cast<MethodOutput*> (this->method());
   method->compute_continue(this);
