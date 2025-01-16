@@ -6,9 +6,9 @@
 /// @date     Wed Jul 23 00:30:49 UTC 2014
 /// @brief    [\ref Enzo] Initial conditions for turbulence simulations
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 // #define DEBUG_TURBULENCE
 

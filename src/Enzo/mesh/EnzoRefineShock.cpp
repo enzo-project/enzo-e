@@ -5,7 +5,8 @@
 /// @date     Mon Jul 21 16:02:39 PDT 2014
 /// @brief    Implementation of EnzoRefineShock class
 
-#include "enzo.hpp"
+#include "Enzo/mesh/mesh.hpp"
+#include "Enzo/enzo.hpp"
 
 // #define DEBUG_ENZO_REFINE_SHOCK
 

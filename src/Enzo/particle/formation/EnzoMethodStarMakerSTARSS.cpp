@@ -10,8 +10,10 @@
 ///     adapted from the algorithm described in Hopkins et al. 
 ///     (2018, MNRAS, 480, 800)
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
+
 #include <time.h>
 
 // #define DEBUG_SF_CRITERIA
@@ -19,17 +21,15 @@
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerSTARSS::EnzoMethodStarMakerSTARSS
-()
-  : EnzoMethodStarMaker()
+(ParameterGroup p)
+  : EnzoMethodStarMaker(p),
+    min_level_(p.value_integer("min_level",0)),
+    turn_off_probability_(p.value_logical("turn_off_probability",false))
 {
   cello::simulation()->refresh_set_name(ir_post_,name());
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->add_all_fields();
   refresh->add_all_particles();
-
-  ParticleDescr * particle_descr = cello::particle_descr();
-
-  return;
 }
 
 //-------------------------------------------------------------------
@@ -42,7 +42,8 @@ void EnzoMethodStarMakerSTARSS::pup (PUP::er &p)
 
   EnzoMethodStarMaker::pup(p); // call parent class pup
 
-  return;
+  p | min_level_;
+  p | turn_off_probability_;
 }
 
 //------------------------------------------------------------------
@@ -61,7 +62,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   // Are we at the highest level?
   // Can we form stars at this level?
-  if ( (! block->is_leaf() ) || (block->level() < enzo_config->method_star_maker_min_level) ){
+  if ( (! block->is_leaf() ) || (block->level() < this->min_level_) ){
     block->compute_done();
     return;
   }
@@ -269,7 +270,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double mean_particle_mass = mu * enzo_constants::mass_hydrogen;
         double ndens = rho_cgs / mean_particle_mass;
 
-        double cell_mass  = density[i] * cell_volume;
+        double cell_mass  = density[i] * cell_volume; // code units
         double metallicity = (metal) ? metal[i]/density[i]/enzo_constants::metallicity_solar : 0.0;
 
         //
@@ -348,15 +349,15 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         #endif 
         
         //free fall time in code units
-        double tff = sqrt(3*cello::pi/(32*enzo_constants::grav_constant*density[i]*rhounit))/tunit;        
+        double tff = sqrt(3*cello::pi/(32*enzo::grav_constant_cgs()*density[i]*rhounit))/tunit;        
        /* Determine Mass of new particle
                 WARNING: this removes the mass of the formed particle from the
                          host cell.  If your simulation has very small (>15 Msun) baryon mass
                          per cell, it will break your sims! - AIW
        */
         double divisor = std::max(1.0, tff * tunit/enzo_constants::Myr_s);
-        double maximum_star_mass = enzo_config->method_star_maker_maximum_star_mass;
-        double minimum_star_mass = enzo_config->method_star_maker_minimum_star_mass;
+        double maximum_star_mass = this->star_particle_max_mass_;
+        double minimum_star_mass = this->minimum_star_mass();
          
         if (maximum_star_mass < 0){
             maximum_star_mass = this->maximum_star_fraction_ * cell_mass * munit_solar; //Msun
@@ -371,7 +372,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
         double p_form = 1.0 - std::exp(-bulk_SFR*dt*(tunit/enzo_constants::Myr_s)/
                 (this->maximum_star_fraction_*cell_mass*munit_solar));
 
-        if (enzo_config->method_star_maker_turn_off_probability) p_form = 1.0;
+        if (this->turn_off_probability_) p_form = 1.0;
 
         double random = double(mt()) / double(mt.max()); 
 

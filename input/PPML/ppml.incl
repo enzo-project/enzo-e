@@ -14,6 +14,15 @@
       root_size = [32,32,32];
    }
 
+   Physics {
+      list = ["fluid_props"];
+      fluid_props {
+        eos {
+          type = "isothermal";
+        }
+      }
+   }
+
    # Field parameters include those concerning fields as a group, as
    # well as individual fields
 
@@ -35,8 +44,6 @@
          "velox_rz",    "veloy_rz",    "veloz_rz",
          "bfieldx_rz",  "bfieldy_rz",  "bfieldz_rz"
       ] ;
-
-      gamma = 1.0;
 
       padding   = 0;
       alignment = 8;

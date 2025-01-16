@@ -5,7 +5,9 @@
 /// @date     2016-09-10
 /// @brief    Definition of the Soup class for "alphabet soup" test problem
 
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+
 #include <random>
 
 const int EnzoInitialSoup::position_[] = 
@@ -15,42 +17,31 @@ const int EnzoInitialSoup::position_[] =
 
 //======================================================================
 
-EnzoInitialSoup::EnzoInitialSoup
-(int cycle,
- double time,
- std::string filename,
- int rank,
- bool rotate,
- int    nax,    int nay,    int naz,
- double dpx, double dpy, double dpz,
- double dsx, double dsy, double dsz,
- double density,
- double pressure_in, double pressure_out) throw ()
+EnzoInitialSoup::EnzoInitialSoup(int cycle, double time, ParameterGroup p) throw ()
   : Initial(cycle,time),
-    file_name_(filename),
-    rank_(rank),
-    rotate_(rotate),
-    png_(NULL),
-    density_(density),
-    pressure_in_(pressure_in),
-    pressure_out_(pressure_out)
+    file_name_(p.value_string("filename","soup.png")),
+    rank_(p.value_integer("rank",0)),
+    rotate_(p.value_logical("rotate",false)),
+    array_{},
+    d_pos_{},
+    d_size_{},
+    png_mask_(NULL),
+    density_(p.value_float("density",1.0)),
+    pressure_in_(p.value_float("pressure_in",1.0)),
+    pressure_out_(p.value_float("pressure_out",1e-5))
 {
-  array_[0] = nax;
-  array_[1] = nay;
-  array_[2] = naz;
-  d_pos_[0] = dpx;
-  d_pos_[1] = dpy;
-  d_pos_[2] = dpz;
-  d_size_[0] = dsx;
-  d_size_[1] = dsy;
-  d_size_[2] = dsz;
+  for (int axis = 0; axis < 3; axis++){
+    array_[axis]  = p.list_value_integer(axis, "array", 1);
+    d_pos_[axis]  = p.list_value_float(axis, "d_pos", 0.0);
+    d_size_[axis] = p.list_value_float(axis, "d_size", 0.0);
+  }
 
-  png_ = new pngwriter;
-    
-  png_->readfromfile(file_name_.c_str());
 
-  int nx = png_->getwidth();
-  int ny = png_->getheight();
+  int nax = array_[0];
+  int nay = array_[1];
+  int naz = array_[2];
+  int nx, ny;
+  png_mask_ = pngio::read_as_mask(file_name_, nx, ny);
 
   ASSERT3 ("EnzoInitialSoup::EnzoInitialSoup()",
 	   "Error reading input PNG file %s: size must be %d x %d",
@@ -78,10 +69,8 @@ EnzoInitialSoup::EnzoInitialSoup
 
 EnzoInitialSoup::~EnzoInitialSoup() throw ()
 {
-  delete png_;
-  png_ = NULL;
+  delete [] png_mask_;
   delete [] letter_;
-  letter_ = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -192,9 +181,7 @@ void EnzoInitialSoup::enforce_block
 	      int lx = lxm + 1.0*(lxp-lxm)/(2.0*rx)*(x - cx + rx);
 	      bool in_range_x = (lxm <= lx && lx <= lxp);
 	      if ( in_range_x && in_range_y && in_range_z) {
-		if (png_->read(lx+1,ly+1,1) +
-		    png_->read(lx+1,ly+1,2) +
-		    png_->read(lx+1,ly+1,3) > 0.0) {
+		if (png_mask_[lx + SOUP_IMAGE_NX * ly]){
 		  te[i] = te_in;
 		}
 	      }

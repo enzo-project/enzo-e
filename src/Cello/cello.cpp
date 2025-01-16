@@ -1,3 +1,10 @@
+// back when we used boost::filesystem, we explicitly avoided including the
+// associated header because it was a large header that took a long time to
+// read (~0.4 seconds).
+// -> we continue to do this with <filesystem>, but it's not clear how much
+//    this does for us
+#include <filesystem>
+
 #include "cello.hpp"
 #include "error.hpp"
 #include "charm_simulation.hpp"
@@ -7,11 +14,12 @@
 namespace cello {
 
   // @@@ KEEP IN SYNCH WITH precision_enum in cello.hpp
-  const char * precision_name[7] = {
+  const char * precision_name[8] = {
     "unknown",
     "default",
     "single",
     "double",
+    "extended64",
     "extended80",
     "extended96",
     "quadruple"
@@ -23,6 +31,7 @@ namespace cello {
     "default",    // "default" floating-point precision, e.g. enzo_float
     "single",
     "double",
+    "extended64",
     "extended80",
     "extended96",
     "quadruple",
@@ -38,6 +47,7 @@ namespace cello {
     0, // default
     4, // single
     8, // double
+    8, // extended64
     10, // extended80
     12, // extended96
     16, // quadruple
@@ -58,6 +68,7 @@ namespace cello {
     return (type == type_single || 
 	    type == type_double || 
 	    type == type_quadruple ||
+	    type == type_extended64 ||
 	    type == type_extended80 ||
 	    type == type_extended96);
   }
@@ -81,6 +92,9 @@ namespace cello {
       size = 4;
       break;
     case precision_double:
+      size = 8;
+      break;
+    case precision_extended64:
       size = 8;
       break;
     case precision_extended80:
@@ -115,6 +129,9 @@ namespace cello {
       break;
     case precision_double:
       is_supported = (sizeof(double)==8);
+      break;
+    case precision_extended64:
+      is_supported = (sizeof(long double)==8);
       break;
     case precision_extended80:
       is_supported = (sizeof(long double)==10);
@@ -506,23 +523,44 @@ namespace cello {
       left  = left.substr(0,pos);
 
       strncpy (buffer, middle.c_str(),MAX_BUFFER);
-      if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle); }
-      else if (arg == "time")  { sprintf (buffer_new,buffer, time); }
-      else if (arg == "count") { sprintf (buffer_new,buffer, counter); }
-      else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
-      else if (arg == "flipflop")  { sprintf (buffer_new,buffer, counter % 2); }
-      else 
-        {
+      if (arg == "cycle") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, cycle);
+      } else if (arg == "time") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, time);
+      } else if (arg == "count") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, counter);
+      } else if (arg == "proc") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, CkMyPe());
+      } else if (arg == "flipflop") {
+        snprintf (buffer_new, sizeof(buffer_new), buffer, counter % 2);
+      } else {
           ERROR3("cello::expand_name",
                  "Unknown file variable #%d '%s' for file '%s'",
                  int(i),arg.c_str(),name.c_str());
-        }
+      }
 
       right = std::string(buffer_new) + right;
 
     }
 
     return left + right;
+  }
+
+  //----------------------------------------------------------------------
+
+  bool ensure_directory_exists(const std::string& dir_name)
+  {
+    std::filesystem::path directory(dir_name);
+
+    if (std::filesystem::is_directory(directory)) {
+      return true;
+    } else {
+      std::filesystem::create_directory(directory);
+      ASSERT1 ("cello::ensure_directory_exists()",
+               "Error creating directory %s",
+               dir_name.c_str(), std::filesystem::is_directory(directory));
+      return false;
+    }
   }
 
   //----------------------------------------------------------------------
@@ -536,33 +574,48 @@ namespace cello {
    bool & already_exists
    )
   {
-    std::string dir = ".";
+    // if path_format expands to a directory name, ensure it exists. Otherwise
+    // return a single dot, to indicate that it specifies the local directory
     std::string name_dir = expand_name(path_format,counter, cycle, time);
-
-    // Create subdirectory if any
     if (name_dir != "") {
-
-      dir = name_dir;
-
-      boost::filesystem::path directory(name_dir);
-
-      if (boost::filesystem::is_directory(directory)) {
-
-        already_exists = true;
-
-      } else {
-
-        boost::filesystem::create_directory(directory);
-
-        ASSERT1 ("cello::create_directory()",
-                 "Error creating directory %s",
-                 name_dir.c_str(),
-                 boost::filesystem::is_directory(directory));
-      }
+      already_exists = ensure_directory_exists(name_dir);
+      return name_dir;
     }
-
-    return dir;
+    return ".";
   }
 
   //----------------------------------------------------------------------
+
+  bool is_initial_cycle(InitCycleKind kind) noexcept {
+    Simulation * sim = cello::simulation();
+    ASSERT("cello::is_first_cycle(InitCycleKind)",
+           "cello::simulation() returned nullptr", sim != nullptr);
+    return cello::is_initial_cycle(sim->cycle(), kind);
+  }
+
+  //----------------------------------------------------------------------
+
+  bool is_initial_cycle(int cycle, InitCycleKind kind) noexcept {
+    switch (kind) {
+    case InitCycleKind::fresh:
+      {
+        const Config * config = cello::config();
+        ASSERT("cello::is_initial_cycle(int, InitCycleKind)",
+               "cello::config() returned nullptr", config != nullptr);
+        return cycle == config->initial_cycle;
+      }
+    case InitCycleKind::charmrestart:
+      ERROR("cello::is_initial_cycle(int, InitCycleKind)",
+            "can't currently provide any details about whether a charm-based "
+            "restart just occured.");
+    case InitCycleKind::fresh_or_noncharm_restart:
+      {
+        const Simulation * sim = cello::simulation();
+        ASSERT("cello::is_initial_cycle(int, InitCycleKind)",
+               "cello::simulation() returned nullptr", sim != nullptr);
+        return cycle == sim->initial_cycle();
+      }
+    }
+  }
+
 }

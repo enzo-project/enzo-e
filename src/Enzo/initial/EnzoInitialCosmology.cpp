@@ -6,8 +6,9 @@
 /// @brief    [\ref Enzo] Declaration of the EnzoInitialCosmology class
 
 
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 //----------------------------------------------------------------------
 

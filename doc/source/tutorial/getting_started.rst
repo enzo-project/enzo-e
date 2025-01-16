@@ -15,7 +15,7 @@ architectures, including the "Frontera" supercomputer at TACC and the
 
 .. toctree::
    :maxdepth: 1
-	   
+
    getting_started_pleiades
    getting_started_frontera
 
@@ -23,7 +23,7 @@ Dependency Installation
 =======================
 
 Before compiling ``Enzo-E / Cello``, you may need to download
-and install 1. ``CMake``, 2. ``Charm++``, 3. ``HDF5``, 4. ``libpng``, 5. ``libboost``, and (optionally) 6. ``Grackle``:
+and install 1. ``CMake``, 2. ``Charm++``, 3. ``HDF5``, 4. ``libpng``, and (optionally) 5. ``Grackle``:
 
 1. Install ``CMake``
 --------------------
@@ -103,16 +103,7 @@ available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
 <https://www.libpng.org/pub/png/libpng.html>`_ website.
 
-5. Install ``libboost-dev``
----------------------------
-
-"`Boost <https://www.boost.org/>`_ provides free peer-reviewed portable C++ source libraries."
-
-If ``libboost-dev`` is not already installed on your machine, it may be
-available through your operating system distribution, otherwise it can
-be downloaded from the `libboost <https://www.boost.org/>`_ website.
-
-6. Install Grackle  (Optional)
+5. Install Grackle  (Optional)
 ------------------------------
 
 By default, Enzo-E requires the Grackle chemistry and cooling library.
@@ -121,7 +112,7 @@ If you do not need to use Grackle, you can simple disabling it by setting
 See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
 instructions.
 
-7. Install yt (Optional)
+6. Install yt (Optional)
 ------------------------
 
 If you want to use the yt python package to analyse Enzo-E output data, you should install the latest version from source.
@@ -174,6 +165,7 @@ Configuration options
 
 Current ``cmake`` options are listed in the following subsubsections.
 Skip ahead to :ref:`how_to_specify_the_configuration` for details about how to specify the configuration.
+
 
 General Configuration
 ^^^^^^^^^^^^^^^^^^^^^
@@ -284,7 +276,7 @@ These options control compilation choices that can be used to facillitate profil
 Testing Options
 ^^^^^^^^^^^^^^^
 
-These options configure properties of parallel automated tests.
+These options configure properties of automated tests. These options currently just affect tests in the :ref:`ctest framework <ctest>` and don't affect tests in the :ref:`pytest framework <pytest>`.
 
 .. list-table:: Testing-Related Configuration
    :widths: 10 30 5
@@ -302,12 +294,16 @@ These options configure properties of parallel automated tests.
    * - ``PARALLEL_LAUNCHER_NPROC``
      - Number of processors to run parallel unit tests
      - 4
+   * - ``BUILD_TESTING``
+     - Whether to setup the CTest infrastructure and build unit test binaries (which are primarily built to be executed by the CTest infrastructure). This has no effect on the pytest infrastructure.
+     - "ON"
+
 
 Debugging Options
 ^^^^^^^^^^^^^^^^^
 
 The following options are useful for debugging.
-       
+
 .. list-table:: Debug Options
    :widths: 10 30 5
    :header-rows: 1
@@ -341,6 +337,49 @@ The following options are useful for debugging.
      - Trace main phases
      - OFF
 
+Misc Options
+^^^^^^^^^^^^
+
+The following options don't really belong in any other category
+
+.. list-table:: Misc Options
+   :widths: 10 30 5
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Default
+   * - ``USE_PRECOMPILED_HEADERS``
+     - Precompile headers to try to reduce compile time
+     - ON
+
+.. _about_enzoe_lang_flist:
+
+``ENZOE_<LANG>_FLIST`` Variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We strongly encourage users and developers to make use of the options described in the preceding subsections.
+They exist to provide a curated/consistent experience in a variety of scenarios.
+(If you think that some option is missing, please let us know!)
+
+With that said, we also recognize that the need may arise where a user/developer may want to specify arbitrary flags.
+We provide the ``ENZOE_<LANG>_FLIST`` variables for this purpose (where ``<LANG>`` is ``C``, ``CXX``, ``Fortran``).
+Flags passed to this variable will be passed to the compiler while compiling source files (that are written in ``<LANG>``) that are directly used in the Cello/Enzo-E libraries and resulting executable.
+Here are 2 illustrative examples:
+
+ * First we show that in order to pass multiple flags, the flags need to be specified by a semicolon delimited list.
+   If you stored ``"-Wall;-Wpedantic;-funroll-loops"`` within the ``ENZOE_CXX_FLIST`` variable, then all C++ files used to build Cello and Enzo-E would be passed those flags.
+
+ * Next we show that to properly pass "options groups" you may need to make use of shell-like quoting with the ``SHELL:`` prefix (this is required because of option de-duplication performed by cmake).
+   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``.
+
+
+CMake offers a similar set of standard variables named ``CMAKE_<LANG>_FLAGS`` that serve a similar purpose, but they behave slightly differently.
+**Most importantly**, flags passed ``CMAKE_<LANG>_FLAGS`` will be used to specify flags that are passed to ALL source-files (of the given language) compiled in a given build -- including the source files of any external dependencies that the build is automatically compiling (in the near future, this may include Grackle).
+The contents of ``CMAKE_<LANG>_FLAGS`` are also passed to the compiler front-end during linking.
+Additionally, the contents of ``CMAKE_<LANG>_FLAGS`` are command line snippets (i.e. options are separated by whitespace rather than semi-colons and no shell-quoting is needed).
+
+
 .. _how_to_specify_the_configuration:
 
 Specifying Configuration Options
@@ -355,7 +394,7 @@ For example, a configure line may look like
   cmake -DCHARM_ROOT=$(pwd)/../../charm/build-gcc-mpi-proj -DEnzo-E_CONFIG=msu_hpcc_gcc -DGrackle_ROOT=${HOME}/src/grackle/build-gcc -Duse_projections=ON -Duse_jemalloc=ON -Dbalance=ON  ..
 
 To see all available (and selected) options you can also run ``ccmake .`` in the
-build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI 
+build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI
 directly to interactively configure Enzo-E by calling ``ccmake ..`` in an empty build
 directory.
 
@@ -400,6 +439,12 @@ In other words, if ``USE_DOUBLE_PREC`` is ``ON`` in the machine file (or even au
 through the global default), the running
 ``cmake -DEnzo-E_CONFIG=my_config_name -DUSE_DOUBLE_PREC=OFF ..`` will result in a single
 precision version of Enzo-E.
+
+Some of these files may also initialize the ``ENZOE_<LANG>_FLIST_INIT`` variables.
+When defined, these variables are used to provide defaults for the ``ENZOE_<LANG>_FLIST`` variables, which are discussed :ref:`up above <about_enzoe_lang_flist>`.
+As discussed above, these variables provide a mechanism to quickly and easily provide extra flags to the compiler.
+Ideally you should only need to rely upon these for quick-and-easy-tests and the other options should meet most of your needs.
+If you find the existing options don't meet your needs, please let us know
 
 Options in the machine file can also include the paths to external libraries and
 can be set via a "cached string", i.e., via
@@ -486,7 +531,7 @@ Time = 0.05
 Time = 0.10
 
 .. image:: hello-de-0165.png
-   :scale: 40 %                   
+   :scale: 40 %
 
 .. image:: hello-mesh-level-0165.png
    :scale: 40 %
@@ -498,7 +543,7 @@ Time = 0.10
 If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-E / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-E / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
 If you encounter any problems in getting Enzo-E to compile or run,
-please contact the Enzo-E / Cello community at cello-l@ucsd.edu or the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
+please contact the Enzo-E / Cello community at the `users' mailing list <https://groups.google.com/g/enzo-e-users>`_ and someone will be happy to help resolve the problems.
 
 ----
 

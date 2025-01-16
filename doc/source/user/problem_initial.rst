@@ -85,7 +85,7 @@ a 3D array of Sedov blast waves.
    Federrath et al 2010, ApJ, 713, 269.
 
 ``"soup"``
-   
+
    Similar to the ``"sedov"`` problem, but with letters instead of spheres.
 
 ``"trace"``
@@ -95,7 +95,7 @@ a 3D array of Sedov blast waves.
    ``"density"`` field distribution.
 
 ``"turbulence"``
-   
+
    Initialize fields for driving turbulence, including ``"driving_[xyz]"``
    fields.
 

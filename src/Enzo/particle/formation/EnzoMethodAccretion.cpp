@@ -9,17 +9,17 @@
 ///         momentum, and energy from the gas, and add mass and
 ///         momentum to the sink particle.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 EnzoMethodAccretion::EnzoMethodAccretion
-(double accretion_radius_cells,
- double physical_density_threshold_cgs,
- double max_mass_fraction)
+(ParameterGroup p)
   : Method(),
-    accretion_radius_cells_(accretion_radius_cells),
-    physical_density_threshold_cgs_(physical_density_threshold_cgs),
-    max_mass_fraction_(max_mass_fraction),
+    accretion_radius_cells_(p.value_float("accretion_radius_cells", 4.0)),
+    physical_density_threshold_cgs_(p.value_float
+                                    ("physical_density_threshold_cgs", 1.e-24)),
+    max_mass_fraction_(p.value_float("max_mass_fraction", 0.25)),
     ir_accretion_(-1)
 {
   // This method requires three dimensions.
@@ -232,12 +232,15 @@ void EnzoMethodAccretion::do_checks_(const Block *block) throw()
 
     // Check if merging radius is at least twice that of the accretion
     // radius
+    enzo_float merging_radius_cells = static_cast<const EnzoMethodMergeSinks*>
+      (enzo::problem()->method("merge_sinks")
+       )->merging_radius_cells();
+
     ASSERT("EnzoMethodAccretion",
 	   "Merging radius (Method:merge_sinks:merging_radius_cells "
 	   "must be at least twice the accretion radius "
 	   "(Method:accretion_compute:accretion_radius).",
-	   enzo::config()->method_merge_sinks_merging_radius_cells >=
-	   2.0 * accretion_radius_cells_);
+	   merging_radius_cells >= 2.0 * accretion_radius_cells_);
 
     // Check if either PPM or VL+CT method is being used.
     ASSERT("EnzoMethodAccretion",

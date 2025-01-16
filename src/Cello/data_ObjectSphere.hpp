@@ -57,7 +57,7 @@ public: // interface
   int data_size () const
   {
     //--------------------------------------------------
-    //  1. determine buffer size (must be consistent with #3)
+    //  1. determine buffer size
     //--------------------------------------------------
 
     int size = 0;

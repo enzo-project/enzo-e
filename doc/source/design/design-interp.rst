@@ -24,7 +24,7 @@ augmented coarse-grid array overlaps multiple additional blocks.
     In ENZO's SecondOrderA interpolation method, multiple additional blocks
     intersect the extended array of coarse values (red) required for
     computing the interpolated ghost zone values (blue) for the fine block (green)
-    that intersects a coarse block.          
+    that intersects a coarse block.
 
 ======
 Design
@@ -35,9 +35,9 @@ Note a given block may participate in multiple roles for different block faces.
 There are three main block roles involved in an interpolation:
 
    1. **Sending block**
-      
+
       a. sends its overlapped cell values to the receiver
-         
+
    2. **Extra block**
 
       a. sends its overlapped cell values to the receiver
@@ -88,7 +88,7 @@ receiver.  This is handled in the
 ``Block::refresh_load_extra_face_()`` method, which can be found in
 the ``control_refresh.cpp`` source file.  Depending on the relative
 mesh refinement level, an extra block may be handled
-          
+
 Receiving Block
 ===============
 

@@ -38,13 +38,14 @@ Hierarchy::Hierarchy
   refinement_(refinement),
   min_level_(min_level),
   max_level_(max_level),
+  refined_regions_lower_(),
+  refined_regions_upper_(),
   num_blocks_(0),
   num_blocks_level_(),
   num_particles_(0),
   num_zones_total_(0),
   num_zones_real_(0),
-  block_array_(),
-  block_exists_(false)
+  block_array_()
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
@@ -82,6 +83,8 @@ void Hierarchy::pup (PUP::er &p)
   p | refinement_;
   p | min_level_;
   p | max_level_;
+  p | refined_regions_lower_;
+  p | refined_regions_upper_;
 
   p | num_blocks_;
   p | num_blocks_level_;
@@ -103,7 +106,6 @@ void Hierarchy::pup (PUP::er &p)
   }
 
   p | block_array_;
-  p | block_exists_;
 
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
@@ -247,7 +249,7 @@ CProxy_Block Hierarchy::new_block_proxy ( bool allocate_data) throw()
 
 //----------------------------------------------------------------------
 
-void Hierarchy::create_block_array ( bool allocate_data) throw()
+void Hierarchy::create_block_array () throw()
 {
   // determine block size
   const int mbx = root_size_[0] / blocking_[0];
@@ -284,14 +286,11 @@ void Hierarchy::create_block_array ( bool allocate_data) throw()
       blocking_[0],blocking_[1],blocking_[2],
       mbx,mby,mbz,
       num_field_blocks);
-
-  block_exists_ = allocate_data;
 }
 
 //----------------------------------------------------------------------
 
-void Hierarchy::create_subblock_array
-(bool allocate_data) throw()
+void Hierarchy::create_subblock_array () throw()
 {
   // determine block size
 
@@ -314,6 +313,32 @@ void Hierarchy::create_subblock_array
      mbx,mby,mbz,
      num_field_blocks);
     
+}
+
+// --------------------------------------------------------------------
+
+void Hierarchy::refined_region_lower(int* region_lower, int level) throw()
+{
+  if (level >= 0){
+    region_lower[0] = refined_regions_lower_.at(level).at(0);
+    region_lower[1] = refined_regions_lower_.at(level).at(1);
+    region_lower[2] = refined_regions_lower_.at(level).at(2);
+  } else {
+    region_lower[0] = 0;
+    region_lower[1] = 0;
+    region_lower[2] = 0;
+  }
+}
+
+void Hierarchy::refined_region_upper(int* region_upper, int level) throw()
+{
+  if (level >= 0) {
+    region_upper[0] = refined_regions_upper_.at(level).at(0);
+    region_upper[1] = refined_regions_upper_.at(level).at(1);
+    region_upper[2] = refined_regions_upper_.at(level).at(2);
+  } else {
+    root_blocks(region_upper, region_upper+1, region_upper+2);
+  }
 }
 
 // --------------------------------------------------------------------

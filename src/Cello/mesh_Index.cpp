@@ -270,7 +270,20 @@ int Index::adjacency (Index index, int rank, const int p3[3]) const
 		      static_cast<int>(p3[1]*shift),
 		      static_cast<int>(p3[2]*shift)};
 
-  int la3[3]={0},ra3[3]={0},lb3[3]={0},rb3[3]={0};
+  // After GH PR #325 is merged delete the follow ifdef statement and replace
+  // all occurences of MARK_MAYBE_UNUSED with [[maybe_unused]]
+#if __cplusplus >= 201703L
+  #define MARK_MAYBE_UNUSED [[maybe_unused]]
+#elif defined(__GNUC__)
+  #define MARK_MAYBE_UNUSED [[gnu::unused]]
+#else
+  #define MARK_MAYBE_UNUSED /* .. */
+#endif
+  
+  MARK_MAYBE_UNUSED int la3[3]={0};
+  MARK_MAYBE_UNUSED int ra3[3]={0};
+  MARK_MAYBE_UNUSED int lb3[3]={0};
+  MARK_MAYBE_UNUSED int rb3[3]={0};
   int a = false;
   int ic = 0;
   for (int axis=0; axis<rank; axis++) {
@@ -515,7 +528,7 @@ void Index::write (int ip,
 		   const int nb3[3]) const
 {
   char filename[80];
-  sprintf (filename,"index.%s.%d",msg,ip);
+  snprintf (filename,sizeof(filename),"index.%s.%d",msg,ip);
   FILE * fp = fopen(filename,"a");
 
   print_(fp,msg,max_level,rank,nb3,false);

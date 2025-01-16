@@ -1,5 +1,5 @@
 .. include:: ../roles.incl
-	     
+
 *************************
 Enzo-E / Cello Parameters
 *************************
@@ -44,7 +44,7 @@ available, which is used to control how frequently load balancing
 is performed.
 
 .. include:: balance.incl
-	     
+
 --------
 Boundary
 --------
@@ -58,8 +58,8 @@ specifies boundary conditions for some subset of the domain.  The
 :p:`axis` and :p:`face` parameters are available to restrict boundary
 conditions to a subset of faces, whereas the :p:`mask` parameter is
 available for even finer control of mixed boundary conditions, which
-may be time-dependent.  Inflow boundary conditions use the :p:`inflow`
-parameter to specify field values at the boundary.
+may be time-dependent.  Inflow boundary conditions use the :p:`value`
+parameter/subgroup to specify field values at the boundary.
 
 .. include:: boundary.incl
 
@@ -96,18 +96,18 @@ different types of Field's and Particles.  For example, field groups
 may include "color" and "temporary", and particle groups may include
 "dark_matter" and "star".
 
-:: 
+::
 
     Group {
 
        list = ["color", "temporary"];
 
        color {
-          field_list = ["species_HI", "species_HII" ]; 
-       } 
+          field_list = ["species_HI", "species_HII" ];
+       }
 
        temporary {
-          field_list = ["pressure", "temperature"]; 
+          field_list = ["pressure", "temperature"];
        }
 
     }
@@ -115,7 +115,7 @@ may include "color" and "temporary", and particle groups may include
 Field and Particle groups can analogously be defined in the respective
 Field and Particle parameter groups:
 
-:: 
+::
 
     Field {
 
@@ -123,7 +123,7 @@ Field and Particle parameter groups:
 
        species_HI {
 
-          group_list = ["temporary"]; 
+          group_list = ["temporary"];
 
        }
 
@@ -134,7 +134,7 @@ different types of fields and particles using the ``Grouping`` class
 (see ``src/Cello/data_Grouping.?pp``).
 
 .. include:: group.incl
-	     
+
 -------
 Initial
 -------
@@ -142,7 +142,7 @@ Initial
 The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specifies the initial cycle number (usually 0), :p:`list` specifies a list of initial conditions, which may include ``"value"`` for initializing fields directly, or other problem-specific initial condition generators.
 
 .. include:: initial.incl
-	     
+
 ------
 Memory
 ------
@@ -225,11 +225,13 @@ Just as with fields, particle types can be assigned to groups_.
 
 .. include:: particle.incl
 
--------   
+-------
 Physics
 -------
 
 .. include:: physics.incl
+
+.. _schedule_param:
 
 --------
 schedule
@@ -253,13 +255,13 @@ Note that when simulation "time" is specified, then the simulation's
 time step may be reduced so that the corresponding output occurs
 exactly at the specified time.
 
-:: 
+::
 
     Output {
 
 
        list = ["check", "dump", "image"];
-    
+
        check {
 
           # **** write a checkpoint every 100.0 seconds ****
@@ -295,7 +297,7 @@ exactly at the specified time.
             ...
        }
     }
-            
+
 .. include:: schedule.incl
 
 ------
@@ -316,8 +318,8 @@ Testing
 
 .. include:: testing.incl
 
------   
+-----
 Units
------   
+-----
 
 .. include:: units.incl

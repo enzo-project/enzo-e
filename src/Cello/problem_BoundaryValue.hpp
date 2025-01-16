@@ -17,17 +17,26 @@ class BoundaryValue : public Boundary
   /// @ingroup  Problem
   /// @brief    [\ref Problem] Encapsulate a BoundaryValue conditions generator
 
+  /// associates a value object with a list of one or more fields
+  using ValueFListPair = std::pair<Value,std::vector<std::string>>;
+
 public: // interface
 
   /// Create a new BoundaryValue
-  BoundaryValue() throw() 
-  : Boundary (), value_(0) 
-  {  }
-
-  /// Create a new BoundaryValue
-  BoundaryValue(axis_enum axis, face_enum face, Value * value, 
-		std::vector<std::string> field_list) throw() 
-    : Boundary(axis,face,0), value_(value), field_list_(field_list)
+  ///
+  /// @param[in] p is a reference to a parameter object
+  /// @param[in] parameter_group is the string specifying the parameter_group
+  ///     specifying the inflow boundary. Looks something like
+  ///     ``"Boundary:<boundary-name>:"``
+  /// @param[in] axis enum specifying the axis upon which the parameter applies
+  /// @param[in] face enum specifying the face upon which the parameter applies
+  ///
+  /// @note
+  /// axis and face are already parsed from the parameter group
+  BoundaryValue(Parameters& p, const std::string& parameter_group,
+                axis_enum axis, face_enum face) throw()
+  : Boundary(axis,face,0),
+    pairs_(BoundaryValue::construct_ValueFList_pairs_(p,parameter_group))
   { }
 
   /// Destructor
@@ -38,9 +47,11 @@ public: // interface
 
   BoundaryValue(CkMigrateMessage *m)
     : Boundary (m),
-      value_(NULL),
-      field_list_()
+      pairs_()
   { }
+
+  /// returns a string that summarizes contents (for debugging)
+  std::string debug_string() const throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) ;
@@ -61,10 +72,18 @@ protected: // functions
 	     int nx,  int ny,  int nz,
 	     int ix0, int iy0, int iz0) const throw ();
 
+  /// Create a vector of ValueFListPair instances from the Parameters
+  ///
+  /// @param[in] p is a reference to a Parameter object
+  /// @param[in] parameter_group is the string specifying the parameter_group
+  ///     specifying the inflow boundary. Looks something like
+  ///     ``"Boundary:<boundary-name>:"``
+  static std::vector<ValueFListPair> construct_ValueFList_pairs_
+  (Parameters& p, const std::string& parameter_group) throw();
+
 protected: // attributes
 
-  Value * value_;
-  std::vector<std::string> field_list_;
+  std::vector<ValueFListPair> pairs_;
 
 };
 

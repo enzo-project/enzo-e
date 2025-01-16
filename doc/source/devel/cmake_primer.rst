@@ -115,7 +115,7 @@ Note, the usage of Charm++ introduces some additional complexity to this project
 
    At this time, the conventions for organizing Cello/Enzo-E's header files introduce a lot of transitive dependencies.
    Going forward, we may wish to revisit this.
-   
+
 
 
 ``cmake`` directory
@@ -125,7 +125,7 @@ This directory holds scripts used for optimizations, building charm++ modules, a
 
 ``config`` directory
 ~~~~~~~~~~~~~~~~~~~~
-Following a convention from Enzo, the ``config`` directory holds CMake scripts that each define useful variables for the build that are specific to different platforms. 
+Following a convention from Enzo, the ``config`` directory holds CMake scripts that each define useful variables for the build that are specific to different platforms.
 
 
 =========
@@ -186,12 +186,21 @@ At the time of writing this page, this should now be less of an issue.
 What do I need to change when I add a new file to the source code?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The answer to this question is: "usually nothing".
-The CMake system for Enzo-E is configured to use globbing expressions to locate source files that are included in the build.
-As long your new files are added to one of the main source directories and follows standard naming conventions, the build system should automatically find it.
+The answer depends on whether you are adding a file to the Cello layer or the Enzo layer.
+Here, we assume that you're adding a file to an existing directory.
 
-As an aside, our usage of globbing expressions to locate sources needed by CMake is considered a bad practice by the CMake developers.
-Their recommendation is that all files used in the build are explicitly listed.
+ * If you're adding a file to the Cello layer, you usually don't need to do anything.
+   In more detail, the CMake system for this layer is currently configured to use globbing expressions to locate source files that are included in the build.
+   As long your new files are added to the main source directory and follows standard naming conventions, the build system should automatically find it.
+
+ * If you're adding a file to the Enzo layer, you need to open the ``CMakeLists.txt`` file in the directory where your new file is located.
+   You then need to find the location within the ``CMakeLists.txt`` file where the other files in the directory are currently listed and insert the name of your new file into that list.
+
+
+Originally, we used globbing expressions everywhere, but we have fully phased them out of the Enzo layer (we may consider phasing them out of the Cello layer in the future).
+
+In more detail, the usage of globbing expressions to locate sources needed by CMake is considered a bad practice by the CMake developers.
+Their recommendation is that all files used in the build are explicitly listed (as is now done in the Enzo layer).
 This is because CMake generally only adjusts the build system if a ``CMakeLists.txt`` file has been updated (e.g. if you append a new entry to the list of source files).
 Historically, if you globbed for source files, CMake wouldn't know that it needed to rebuild the list of source files when you added a new one (since the ``CMakeLists.txt`` file wasn't touched).
 
@@ -204,7 +213,7 @@ The CMake developers generally view this unfavorably because:
 
  * "[t]he ``CONFIGURE_DEPENDS`` flag may not work reliably on all generators"
 
-For that reason, we may want to reconsider our approach in the future.
+Furthermore, incremental-rebuilds generally perform, after changing branches, when the required sources are explicitly listed.
 
 .. note:
    In the interval of time between Enzo-E's transition to using CMake and the patch introducing this documentation, the command to locate source files with globbing expressions did not include the ``CONFIGURE_DEPENDS`` Flag.

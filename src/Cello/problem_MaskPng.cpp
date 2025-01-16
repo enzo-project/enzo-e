@@ -19,36 +19,7 @@ MaskPng::MaskPng
     xm_(xm),xp_(xp),
     ym_(ym),yp_(yp)
 {
-  pngwriter png;
-
-  // Open the PNG file
-
-  png.readfromfile(file_name.c_str());
-
-  // Get the PNG file size
-
-  nx_ = png.getwidth();
-  ny_ = png.getheight();
-
-  // Allocate and clear the mask
-
-  int n = nx_*ny_;
-  mask_ = new bool [n];
-  for (int i=0; i<n; i++) mask_[i] = false;
-
-  for (int iy=0; iy<ny_; iy++) {
-    for (int ix=0; ix<nx_; ix++) {
-
-      int i = ix + nx_*iy;
-
-      int r = png.read(ix+1,iy+1,1);
-      int g = png.read(ix+1,iy+1,2);
-      int b = png.read(ix+1,iy+1,3);
-
-      mask_[i] = (r+g+b > 0);
-    }
-  }
-  png.close();
+  mask_ = pngio::read_as_mask(file_name, nx_, ny_);
 }
 
 //----------------------------------------------------------------------
