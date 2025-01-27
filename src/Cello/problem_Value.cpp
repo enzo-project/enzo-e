@@ -24,8 +24,8 @@ Value::Value(Parameters * parameters,
 	    parameter_name.c_str(),
 	    param != NULL);
 	    
-    ScalarExpr * scalar_expr = new ScalarExpr(param);
-    scalar_expr_list_.push_back(scalar_expr);
+    ScalarExpr scalar_expr = ScalarExpr(param);
+    scalar_expr_list_.push_back(std::move(scalar_expr));
 
     mask_list_.push_back(nullptr);
 
@@ -41,9 +41,8 @@ Value::Value(Parameters * parameters,
 	      parameter_name.c_str(),index,
 	      param != NULL);
       
-      ScalarExpr * scalar_expr = new ScalarExpr(param);
-
-      scalar_expr_list_.push_back(scalar_expr);
+      ScalarExpr scalar_expr = ScalarExpr(param);
+      scalar_expr_list_.push_back(std::move(scalar_expr));
 
       if (index+1 < list_length) {
 	param = parameters->param(parameter_name,index+1);
@@ -61,11 +60,11 @@ Value::Value(Parameters * parameters,
 
 //----------------------------------------------------------------------
 
-double Value::evaluate (double t, double x, double y, double z) throw ()
+double Value::evaluate (double t, double x, double y, double z) const throw ()
 {
   double value = 0.0;
   for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
-    value = scalar_expr_list_[index]->evaluate(t,x,y,z,mask_list_[index], value);
+    value = scalar_expr_list_[index].evaluate(t,x,y,z,mask_list_[index], value);
   }
   return value;
 }
@@ -77,10 +76,10 @@ void Value::evaluate
 (T * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ()
+ int ndz, int nz, double * z) const throw ()
 {
   for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
-    scalar_expr_list_[index]->evaluate
+    scalar_expr_list_[index].evaluate
       (values,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,mask_list_[index], values);
   }
 }
@@ -89,28 +88,30 @@ template void Value::evaluate
 (float * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ();
+ int ndz, int nz, double * z) const throw ();
 
 template void Value::evaluate
 (double * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ();
+ int ndz, int nz, double * z) const throw ();
 
 template void Value::evaluate
 (long double * values, double t,
  int ndx, int nx, double * x,
  int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ();
+ int ndz, int nz, double * z) const throw ();
 
 //----------------------------------------------------------------------
 
-void Value::copy_(const Value & value) throw()
+std::string Value::debug_string() const throw()
 {
-  mask_list_.resize(value.mask_list_.size());
-  for (size_t i = 0; i<mask_list_.size(); i++) {
-    mask_list_[i] = value.mask_list_[i]->make_clone();
+  std::string out = "Value{";
+  for (std::size_t i = 0; i < scalar_expr_list_.size(); i++) {
+    out += scalar_expr_list_[i].expr_to_string();
+    if (i < mask_list_.size() && (mask_list_[i] != nullptr)) {
+      out += ", mask, ";
+    }
   }
+  return out + '}';
 }
-
-//----------------------------------------------------------------------

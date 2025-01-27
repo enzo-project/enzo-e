@@ -5,9 +5,9 @@
 /// @date     2013-05-09
 /// @brief    Implentation of Enzo's prolongation (INCOMPLETE)
 
-#include "enzo.hpp"
-
-#include "cello.hpp"
+#include "Enzo/mesh/mesh.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
 EnzoProlongMC1::EnzoProlongMC1(std::string type) throw()
   : Prolong (),

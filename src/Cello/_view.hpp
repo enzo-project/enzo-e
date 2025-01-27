@@ -25,5 +25,6 @@
 #include "view_CelloView.hpp"
 #include "view_ViewCollec.hpp"
 #include "view_StringIndRdOnlyMap.hpp"
+#include "view_ViewMap.hpp"
 
 #endif /* _VIEW_HPP */

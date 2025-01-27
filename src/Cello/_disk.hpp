@@ -12,8 +12,6 @@
 // System includes
 //----------------------------------------------------------------------
 
-#include <hdf5.h>
-
 #include <string>
 
 //----------------------------------------------------------------------
@@ -22,5 +20,8 @@
 
 #include "disk_File.hpp"
 #include "disk_FileHdf5.hpp"
+#include "disk_utils.hpp"
+
+#include "disk_pngio.hpp"
 
 #endif /* _DISK_HPP */

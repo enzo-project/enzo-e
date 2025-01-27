@@ -6,34 +6,28 @@
 /// @brief    Initializer for the Shu Collapse problem as described
 ///           in Federrath et al 2010, ApJ, 713, 269.
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Enzo/initial/initial.hpp"
+#include "Enzo/enzo.hpp"
+#include "Cello/cello.hpp"
 
-EnzoInitialShuCollapse::EnzoInitialShuCollapse
-(int cycle, double time,
- const double center[3],
- const double drift_velocity[3],
- double truncation_radius,
- double nominal_sound_speed,
- double instability_parameter,
- double external_density,
- bool central_sink_exists,
- double central_sink_mass) throw()
+EnzoInitialShuCollapse::EnzoInitialShuCollapse(int cycle, double time, ParameterGroup p) throw()
   :Initial(cycle, time),
-   truncation_radius_(truncation_radius),
-   nominal_sound_speed_(nominal_sound_speed),
-   instability_parameter_(instability_parameter),
-   external_density_(external_density),
-   central_sink_exists_(central_sink_exists),
-   central_sink_mass_(central_sink_mass)
+   truncation_radius_(p.value_float("truncation_radius",1.0)),
+   nominal_sound_speed_(p.value_float("nominal_sound_speed",1.0)),
+   instability_parameter_(p.value_float("instability_parameter",2.1)),
+   external_density_(p.value_float("external_density",1.0e-6)),
+   central_sink_exists_(p.value_logical("central_sink_exists",false)),
+   central_sink_mass_(p.value_float("central_sink_mass",0.0)),
+   center_{},
+   drift_velocity_{}
 {
-  center_[0] = center[0];
-  center_[1] = center[1];
-  center_[2] = center[2];
+  center_[0] = p.list_value_float(0,"center",0.0);
+  center_[1] = p.list_value_float(1,"center",0.0);
+  center_[2] = p.list_value_float(2,"center",0.0);
 
-  drift_velocity_[0] = drift_velocity[0];
-  drift_velocity_[1] = drift_velocity[1];
-  drift_velocity_[2] = drift_velocity[2];
+  drift_velocity_[0] = p.list_value_float(0,"drift_velocity",0.0);
+  drift_velocity_[1] = p.list_value_float(1,"drift_velocity",0.0);
+  drift_velocity_[2] = p.list_value_float(2,"drift_velocity",0.0);
 
 }
 
@@ -120,15 +114,11 @@ void EnzoInitialShuCollapse::enforce_block
 	 "required.",
 	 enzo::problem()->method_exists("mhd_vlct"));
 
-  // Check that mhd_choice parameter is set to "no_bfield"
-  ASSERT("EnzoInitialShuCollapse",
-	 "Method:mhd_vlct:mhd_choice must be set to no_bfield",
-	 enzo::config()->method_vlct_mhd_choice == "no_bfield");
+  // only been tested with the hllc Riemann Solver
 
-  // Check that riemann_solver parameter is set to "hllc"
-  ASSERT("EnzoInitialShuCollapse",
-	 "Method:mhd_vlct:mhd_choice must be set to hllc",
-	 enzo::config()->method_vlct_riemann_solver == "hllc");
+  // require pure hydrodynamics
+  ASSERT("EnzoInitialShuCollapse","only works in pure-hydro sims",
+	     !enzo::uses_magnetic_fields());
 
   if (!block->is_leaf()) return;
   ASSERT("EnzoInitialShuCollapse",
@@ -240,7 +230,7 @@ void EnzoInitialShuCollapse::enforce_block
   std::fill_n(specific_te,m,specific_ke + specific_ie);
 
   // Now to initialise the density field
-  const double const_G  = enzo_constants::grav_constant * enzo::units()->density() *
+  const double const_G  = enzo::grav_constant_cgs() * enzo::units()->density() *
     enzo::units()->time() * enzo::units()->time();
 
   const double density_profile_factor =

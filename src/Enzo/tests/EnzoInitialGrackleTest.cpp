@@ -5,17 +5,22 @@
 /// @date     Tue May 7 2019
 /// @brief    [\ref Enzo] Grackle chemistry/cooling library initial conditions
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/tests/tests.hpp"
 
 //----------------------------------------------------------------------
 
 EnzoInitialGrackleTest::EnzoInitialGrackleTest
-(const EnzoConfig * config) throw ()
-  : Initial(config->initial_cycle, config->initial_time)
-{
-  return;
-}
+(int cycle, double time, ParameterGroup p) noexcept
+  : Initial(cycle, time),
+    min_max_H_number_density_{p.value_float("minimum_H_number_density",0.1),
+                              p.value_float("maximum_H_number_density",1000.0)},
+    min_max_metallicity_{p.value_float("minimum_metallicity", 1.0E-4),
+                         p.value_float("maximum_metallicity", 1.0)},
+    min_max_temperature_{p.value_float("minimum_temperature",10.0),
+                         p.value_float("maximum_temperature",1.0E8)}
+{ }
 
 //----------------------------------------------------------------------
 
@@ -27,17 +32,9 @@ void EnzoInitialGrackleTest::pup (PUP::er &p)
 
   Initial::pup(p);
 
-#ifdef CONFIG_USE_GRACKLE
-  static bool warn[CONFIG_NODE_SIZE] = {false};
-  const int in = cello::index_static();
-  if (! warn[in]) {
-    WARNING("EnzoInitialGrackleTest::pup()","Skipping units_");
-    //  const code_units      * units_;
-    WARNING("EnzoInitialGrackleTest::pup()", "Skipping chemistry_");
-    //  const chemistry_data  * chemistry_;
-    warn[in] = true;
-  }
-#endif
+  p | min_max_H_number_density_;
+  p | min_max_metallicity_;
+  p | min_max_temperature_;
 }
 
 //----------------------------------------------------------------------
@@ -46,37 +43,10 @@ void EnzoInitialGrackleTest::enforce_block
 (
  Block * block, const Hierarchy  * hierarchy) throw()
 {
-#ifndef CONFIG_USE_GRACKLE
 
-  ERROR("EnzoInitialGrackleTest::compute()",
-  "Trying to use Initialization 'grackle_test' with "
-  "Grackle configuration turned off!");
-
-#else /* CONFIG_USE_GRACKLE */
-
-  ASSERT("EnzoInitialGrackleTest",
-   "Block does not exist",
-   block != NULL);
-
-  EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits  * enzo_units = enzo::units();
 
   Field field = block->data()->field();
-
-  grackle_field_data grackle_fields_;
-
-  const EnzoMethodGrackle * grackle_method = enzo::grackle_method();
-
-  grackle_method->setup_grackle_fields(block, & grackle_fields_);
-
-  gr_float * total_energy  = (gr_float *) field.values("total_energy");
-
-  enzo_float * pressure    = field.is_field("pressure") ?
-               (enzo_float*) field.values("pressure") : NULL;
-  enzo_float * temperature = field.is_field("temperature") ?
-               (enzo_float*) field.values("temperature") : NULL;
-
 
   // Block size (excluding ghosts)
   int nx,ny,nz;
@@ -96,23 +66,17 @@ void EnzoInitialGrackleTest::enforce_block
   int gx,gy,gz;
   field.ghost_depth(0,&gx,&gy,&gz);
 
-  // WARNING("EnzoInitialGrackleTest",
-  //      "Assumes same ghost zone depth for all fields");
-
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
 
-  double H_n_slope = log10(enzo_config->initial_grackle_test_maximum_H_number_density /
-                           enzo_config->initial_grackle_test_minimum_H_number_density) /
-                           double(nx);
+  double H_n_slope = log10(min_max_H_number_density_[1]/
+                           min_max_H_number_density_[0]) / double(nx);
 
-  double temperature_slope = log10(enzo_config->initial_grackle_test_maximum_temperature/
-                                   enzo_config->initial_grackle_test_minimum_temperature)/
-                                   double(ny);
+  double temperature_slope = log10(min_max_temperature_[1]/
+                                   min_max_temperature_[0]) / double(ny);
 
-  double metallicity_slope = log10(enzo_config->initial_grackle_test_maximum_metallicity/
-                                   enzo_config->initial_grackle_test_minimum_metallicity)/
-                                   double(nz);
+  double metallicity_slope = log10(min_max_metallicity_[1]/
+                                   min_max_metallicity_[0]) / double(nz);
 
   double tiny_number = 1e-10;
 
@@ -132,48 +96,94 @@ void EnzoInitialGrackleTest::enforce_block
   const double DeuteriumToHydrogenRatio
     = grackle_chem->get<double>("DeuteriumToHydrogenRatio");
 
+  // load in fields required in all grackle-configurations
+  CelloView<enzo_float,3> density    = field.view<enzo_float>("density");
+  CelloView<enzo_float,3> velocity_x = field.view<enzo_float>("velocity_x");
+  CelloView<enzo_float,3> velocity_y = field.view<enzo_float>("velocity_y");
+  CelloView<enzo_float,3> velocity_z = field.view<enzo_float>("velocity_z");
+  CelloView<enzo_float,3> eint = field.view<enzo_float>("internal_energy");
+  CelloView<enzo_float,3> etot = field.view<enzo_float>("total_energy");
+
+  // at the time of writing the following check, it looks like grackle
+  // will soon unlock extra functionality with metal_cooling > 1
+  ASSERT("EnzoInitialGrackleTest",
+         "the initializer currently assumes Grackle has metal_cooling=1",
+         grackle_chem->get<int>("metal_cooling") == 1);
+  CelloView<enzo_float,3> metal_density = field.view<enzo_float>("metal_density");
+
+  // now we load in species fields
+  CelloView<enzo_float,3> HI_density = (primordial_chemistry > 0) ?
+    field.view<enzo_float>("HI_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> HII_density = (primordial_chemistry > 0) ?
+    field.view<enzo_float>("HII_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> HeI_density = (primordial_chemistry > 0) ?
+    field.view<enzo_float>("HeI_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> HeII_density = (primordial_chemistry > 0) ?
+    field.view<enzo_float>("HeII_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> HeIII_density = (primordial_chemistry > 0) ?
+    field.view<enzo_float>("HeIII_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> e_density = (primordial_chemistry > 0) ?
+    field.view<enzo_float>("e_density") : CelloView<enzo_float,3>();
+
+  CelloView<enzo_float,3> HM_density = (primordial_chemistry > 1) ?
+    field.view<enzo_float>("HM_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> H2I_density = (primordial_chemistry > 1) ?
+    field.view<enzo_float>("H2I_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> H2II_density = (primordial_chemistry > 1) ?
+    field.view<enzo_float>("H2II_density") : CelloView<enzo_float,3>();
+
+  CelloView<enzo_float,3> DI_density = (primordial_chemistry > 2) ?
+    field.view<enzo_float>("DI_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> DII_density = (primordial_chemistry > 2) ?
+    field.view<enzo_float>("DII_density") : CelloView<enzo_float,3>();
+  CelloView<enzo_float,3> HDI_density = (primordial_chemistry > 2) ?
+    field.view<enzo_float>("HDI_density") : CelloView<enzo_float,3>(); 
+
   for (int iz=0; iz<nz+gz; iz++){ // Metallicity
     for (int iy=0; iy<ny+gy; iy++) { // Temperature
       for (int ix=0; ix<nx+gx; ix++) { // H Number Density
-        int i = INDEX(ix,iy,iz,ngx,ngy);
 
-        grackle_fields_.density[i] = enzo_constants::mass_hydrogen *
-                     pow(10.0, ((H_n_slope * (ix-gx)) + log10(enzo_config->initial_grackle_test_minimum_H_number_density)))/
-                     HydrogenFractionByMass / enzo_units->density();
+        const enzo_float cur_density = 
+          (enzo_constants::mass_hydrogen *
+           pow(10.0, ((H_n_slope * (ix-gx)) + log10(min_max_H_number_density_[0])))/
+           HydrogenFractionByMass / enzo_units->density());
+
+        density(iz,iy,ix) = cur_density;
 
         // solar metallicity
-        grackle_fields_.metal_density[i] = pow(10.0,((metallicity_slope * (iz-gz)) +
-                                          log10(enzo_config->initial_grackle_test_minimum_metallicity))) *
-                                          SolarMetalFractionByMass * grackle_fields_.density[i];
-        grackle_fields_.x_velocity[i] = 0.0;
-        grackle_fields_.y_velocity[i] = 0.0;
-        grackle_fields_.z_velocity[i] = 0.0;
+        enzo_float solar_metal_dens = SolarMetalFractionByMass * cur_density;
+        metal_density(iz,iy,ix) = pow(10.0,((metallicity_slope * (iz-gz)) +
+                                            log10(min_max_metallicity_[0]))) *
+                                  solar_metal_dens;
+        velocity_x(iz,iy,ix) = 0.0;
+        velocity_y(iz,iy,ix) = 0.0;
+        velocity_z(iz,iy,ix) = 0.0;
 
         if (primordial_chemistry > 0){
-            grackle_fields_.HI_density[i]    = grackle_fields_.density[i] * HydrogenFractionByMass;
-            grackle_fields_.HII_density[i]   = grackle_fields_.density[i] * tiny_number;
-            grackle_fields_.HeI_density[i]   = grackle_fields_.density[i] * (1.0 - HydrogenFractionByMass);
-            grackle_fields_.HeII_density[i]  = grackle_fields_.density[i] * tiny_number;
-            grackle_fields_.HeIII_density[i] = grackle_fields_.density[i] * tiny_number;
-            grackle_fields_.e_density[i]     = grackle_fields_.density[i] * tiny_number;
+          HI_density(iz,iy,ix)    = cur_density * HydrogenFractionByMass;
+          HII_density(iz,iy,ix)   = cur_density * tiny_number;
+          HeI_density(iz,iy,ix)   = cur_density * (1.0 - HydrogenFractionByMass);
+          HeII_density(iz,iy,ix)  = cur_density * tiny_number;
+          HeIII_density(iz,iy,ix) = cur_density * tiny_number;
+          e_density(iz,iy,ix)     = cur_density * tiny_number;
         }
         if (primordial_chemistry > 1){
-          grackle_fields_.HM_density[i]    = grackle_fields_.density[i] * tiny_number;
-          grackle_fields_.H2I_density[i]   = grackle_fields_.density[i] * tiny_number;
-          grackle_fields_.H2II_density[i]  = grackle_fields_.density[i] * tiny_number;
+          HM_density(iz,iy,ix)    = cur_density * tiny_number;
+          H2I_density(iz,iy,ix)   = cur_density * tiny_number;
+          H2II_density(iz,iy,ix)  = cur_density * tiny_number;
         }
         if (primordial_chemistry > 2){
-            grackle_fields_.DI_density[i]    = grackle_fields_.density[i] * DeuteriumToHydrogenRatio;
-            grackle_fields_.DII_density[i]   = grackle_fields_.density[i] * tiny_number;
-            grackle_fields_.HDI_density[i]   = grackle_fields_.density[i] * tiny_number;
+          DI_density(iz,iy,ix)    = cur_density * DeuteriumToHydrogenRatio;
+          DII_density(iz,iy,ix)   = cur_density * tiny_number;
+          HDI_density(iz,iy,ix)   = cur_density * tiny_number;
         }
 
       }
     }
   }
 
-  /* Set internal energy and temperature */
-  enzo_float mu = enzo::fluid_props()->mol_weight();
+  /* Set internal energy from temperature requirements */
+  enzo_float nominal_mu = enzo::fluid_props()->mol_weight();
   const enzo_float nominal_gamma = enzo::fluid_props()->gamma();
 
   for (int iz=0; iz<nz+gz; iz++){ // Metallicity
@@ -181,75 +191,44 @@ void EnzoInitialGrackleTest::enforce_block
       for (int ix=0; ix<nx+gx; ix++) { // H Number Density
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
-        /* calculate mu if following species */
-        if (primordial_chemistry > 0){
-
-          mu = grackle_fields_.e_density[i] + grackle_fields_.HI_density[i] +
-                      grackle_fields_.HII_density[i] +
-                      (grackle_fields_.HeI_density[i] +
-                       grackle_fields_.HeII_density[i] +
-                       grackle_fields_.HeIII_density[i])*0.25;
+        enzo_float mu;
+        if (primordial_chemistry == 0) {
+          mu = nominal_mu;
+        } else {
+          enzo_float tmp = 
+            ( (e_density(iz,iy,ix) + HI_density(iz,iy,ix) +
+               HII_density(iz,iy,ix)) +
+              0.25 * (HeI_density(iz,iy,ix) + HeII_density(iz,iy,ix) +
+                      HeIII_density(iz,iy,ix) ) );
 
           if (primordial_chemistry > 1){
-
-            mu += grackle_fields_.HM_density[i] + (grackle_fields_.H2I_density[i] +
-                   grackle_fields_.H2II_density[i])*0.5;
+            tmp += HM_density(iz,iy,ix) + 0.5 * (H2I_density(iz,iy,ix) +
+                                                 H2II_density(iz,iy,ix));
           }
           if (primordial_chemistry > 2){
-            mu += (grackle_fields_.DI_density[i] + grackle_fields_.DII_density[i])*0.5 +
-                   grackle_fields_.HDI_density[i]/3.0;
+            tmp += (0.5 * (DI_density(iz,iy,ix) + DII_density(iz,iy,ix))
+                    + HDI_density(iz,iy,ix)/3.0);
           }
 
-          mu = grackle_fields_.density[i] / mu;
+          mu = density(iz,iy,ix) / tmp;
         } // end primordial_chemistry > 0
 
-        grackle_fields_.internal_energy[i] =
+        enzo_float specific_thermal_energy =
           (pow(10.0, ((temperature_slope * (iy-gy)) +
-           log10(enzo_config->initial_grackle_test_minimum_temperature)))/
+                      log10(min_max_temperature_[0]))) /
            mu / enzo_units->kelvin_per_energy_units() / (nominal_gamma - 1.0));
-        total_energy[i]    = grackle_fields_.internal_energy[i];
+        eint(iz,iy,ix) = specific_thermal_energy;
+        etot(iz,iy,ix) = specific_thermal_energy;
       }
     }
   }
 
-  // Finally compute temperature and pressure if fields are tracked
-  // for output
-  int comoving_coordinates = enzo_config->physics_cosmology;
-  if (pressure){
-    const enzo_float gamma = enzo::fluid_props()->gamma();
-    EnzoComputePressure compute_pressure (gamma,comoving_coordinates);
-
-    // Note: using compute_ method to avoid re-generating grackle_fields
-    //       struct. Otherwise, one could just do:
-    //             compute_pressure.compute(enzo_block, pressure);
-    //       OR
-    //             compute_pressure.compute(enzo_block);
-    //
-    //       The former provides ability to compute pressure into an
-    //       array that is non-static (i.e. not a field that persists).
-    //
-    compute_pressure.compute_(enzo_block,
-                              pressure,
-                              0,
-                              NULL,
-                              &grackle_fields_);
-  }
-
-  if (temperature){
-    EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                               comoving_coordinates);
-
-    compute_temperature.compute_(enzo_block,
-                                 temperature,
-                                 false, // do not re-compute pressure field
-                                 NULL, &grackle_fields_
-                                 );
-  }
-
-
+  // In the original version of this method, we computed the temperature and
+  // pressure fields here, but there wasn't any point to doing that.
+  // -> I think it sets a somewhat poor example to do that without any reason,
+  //    so I have deleted that logic
 
   block->initial_done();
 
   return;
-#endif /* CONFIG_USE_GRACKLE */
 }

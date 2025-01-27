@@ -38,13 +38,6 @@
 
 #include "../../auto_config.def"
 
-// The following needs to be included once and only once
-// This may not be the perfect place for this, but it is when it is included in
-// multiple object files
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
-
 //----------------------------------------------------------------------
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
@@ -297,8 +290,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-
-//======================================================================
-#include "enzo.def.h"
-//======================================================================

@@ -6,9 +6,9 @@
 /// @date     2019-05-07
 /// @brief    Implements the EnzoComputePressure class
 
-#include "cello.hpp"
-
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/fluid-props/fluid-props.hpp"
 
 //----------------------------------------------------------------------
 
@@ -60,20 +60,6 @@ void EnzoComputePressure::compute (Block * block, enzo_float *p,
 {
   if (!block->is_leaf()) return;
 
-  compute_(block, p, stale_depth);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoComputePressure::compute_(Block * block,
-                                   enzo_float * p,
-                                   int stale_depth /* 0 */
-#ifdef CONFIG_USE_GRACKLE
-                                 , code_units * grackle_units, /*NULL*/
-                                   grackle_field_data * grackle_fields /*NULL*/
-#endif
-                                   )
-{
   // make a CelloView that wraps p
   Field field = block->data()->field();
   int gx,gy,gz;
@@ -101,21 +87,17 @@ void EnzoComputePressure::compute_pressure
  double gamma,
  int stale_depth, /* 0 */
  bool ignore_grackle /*false*/
-#ifdef CONFIG_USE_GRACKLE
- , code_units * grackle_units, /*nullptr*/
- grackle_field_data * grackle_fields /*nullptr*/
-#endif
  ) throw()
 {
 
-  if (enzo::config()->method_grackle_use_grackle & !ignore_grackle){
-#ifdef CONFIG_USE_GRACKLE
-    // the following assertion is not strictly necessary (the problem will be
-    // caught later in EnzoMethodGrackle), but this is more informative...
+  const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
+
+  if ((grackle_method != nullptr) & !ignore_grackle){
+
+    // ToDo: earlier versions of grackle didn't work right when stale_depth >
+    //       0. We should probably test it in Enzo-E.
     ASSERT("EnzoMethodGrackle::calculate_pressure",
-           "until PR #106 is merged into grackle, stale_depth must be 0 since "
-           "grackle's local_calculate_pressure ignores the grid_start and "
-           "grid_stop members of grackle_field_data",
+           "untested when stale_depth exceeds 0 (but this should work!)",
            stale_depth == 0);
 
     if (!fadaptor.consistent_with_field_strides(p)){
@@ -123,14 +105,9 @@ void EnzoComputePressure::compute_pressure
             "When using grackle to compute pressure, the output array must "
             "have identical strides to the fields.");
     }
-    const EnzoMethodGrackle* grackle_method = enzo::grackle_method();
-    grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth,
-                                       grackle_units, grackle_fields);
-#else
-    ERROR("EnzoComputePressure::compute_()",
-          "Attempting to compute pressure with method Grackle " 
-          "but Enzo-E has not been compiled with Grackle (set use_grackle = 1) \n");
-#endif
+
+    grackle_method->calculate_pressure(fadaptor, p.data(), stale_depth);
+
   } else {
 
     using RdOnlyEFltArr = CelloView<const enzo_float, 3>;
@@ -215,10 +192,7 @@ void EnzoComputePressure::compute_pressure
     }
   }
 
-  // Place any additional pressure computation here:
-	//    Note: if adding more here, may need to also change
-	//          location of field pointer declarations above
-	//          (inside / outside of Grackle ifdef)
+  // Place any additional pressure computation here
 
  return;
 }

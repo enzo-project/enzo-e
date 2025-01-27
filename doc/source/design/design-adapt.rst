@@ -89,7 +89,7 @@ Before presenting the algorithm, we define the following notation:
   \bar{L}_{i,s}^{k+1}`: *current lower and upper level bounds (for
   step s), which are dynamically updated*
 * :math:`L_i^{k+1}` *the next level which is decided when* :math:`\underline{L}_{i,s}^{k+1} = \bar{L}_{i,s}^{k+1}`
- 
+
 We can now write the two main conditions that we use to initialize and
 update the level bounds:
 

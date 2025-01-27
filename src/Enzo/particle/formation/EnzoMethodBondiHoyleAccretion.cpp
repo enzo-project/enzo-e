@@ -8,18 +8,15 @@
 ///             See Krumholz+ 2004, ApJ, 611, 399 for details.
 ///
 
-#include "cello.hpp"
-#include "enzo.hpp"
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/particle/particle.hpp"
 
 //------------------------------------------------------------------
 
 EnzoMethodBondiHoyleAccretion::EnzoMethodBondiHoyleAccretion
-(double accretion_radius_cells,
- double physical_density_threshold_cgs,
- double max_mass_fraction)
-  : EnzoMethodAccretion(accretion_radius_cells,
-			physical_density_threshold_cgs,
-			max_mass_fraction)
+(ParameterGroup p)
+  : EnzoMethodAccretion(p)
 {
 
 }
@@ -42,8 +39,9 @@ void EnzoMethodBondiHoyleAccretion::pup (PUP::er &p)
 void EnzoMethodBondiHoyleAccretion::compute (Block * block) throw()
 {
 
-  if (enzo::simulation()->cycle() == enzo::config()->initial_cycle)
+  if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     do_checks_(block);
+  }
 
   if (block->is_leaf()) {
     this->compute_(block);
@@ -81,7 +79,7 @@ void EnzoMethodBondiHoyleAccretion::compute_(Block * block)
 
     // Get gravitational constant in code units
     const double const_G =
-      enzo_constants::grav_constant * enzo::units()->density() *
+      enzo::grav_constant_cgs() * enzo::units()->density() *
       enzo::units()->time() * enzo::units()->time();
 
     // Also need the field dimensions

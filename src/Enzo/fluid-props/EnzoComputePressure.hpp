@@ -9,6 +9,9 @@
 #ifndef ENZO_ENZO_COMPUTE_PRESSURE_HPP
 #define ENZO_ENZO_COMPUTE_PRESSURE_HPP
 
+// this is to get the proper grackle-related declarations
+#include "Enzo/chemistry/chemistry.hpp"
+
 class EnzoComputePressure : public Compute {
 
   /// @class    EnzoComputePressure
@@ -59,20 +62,6 @@ public: // interface
                 enzo_float* p,
                 int stale_depth = 0) throw();
 
-  /// Perform the calculation with the provided `grackle_units` or
-  /// `grackle_fields` object.
-  ///
-  /// @note
-  /// This is primarily used by `EnzoInitialGrackleTest`
-  void compute_(Block * block,
-                enzo_float * p,
-                int stale_depth = 0
-#ifdef CONFIG_USE_GRACKLE
-                , code_units * grackle_units = nullptr,
-                grackle_field_data * grackle_fields = nullptr
-#endif
-                );
-
   /// static method to compute thermal pressure
   ///
   /// @param[in]  fadaptor Contains arrays of quantities used to compute the
@@ -99,12 +88,7 @@ public: // interface
                                const CelloView<enzo_float, 3>& p,
                                bool mhd, bool dual_energy, double gamma,
                                int stale_depth = 0,
-                               bool ignore_grackle = false
-#ifdef CONFIG_USE_GRACKLE
-                              , code_units * grackle_units = nullptr,
-                               grackle_field_data * grackle_fields = nullptr
-#endif
-                               ) throw();
+                               bool ignore_grackle = false) throw();
 
 protected: // attributes
 

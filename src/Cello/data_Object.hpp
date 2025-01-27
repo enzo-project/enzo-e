@@ -17,8 +17,7 @@ class Object : public PUP::able {
 public: // interface
 
   /// Constructor
-  Object() throw()
-  { }
+  Object() = default;
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Object);
@@ -28,16 +27,13 @@ public: // interface
   { }
 
   /// Copy constructor
-  Object(const Object & Object) throw()
-  { }
+  Object(const Object & Object) = default;
 
-  /// Assignment operator
-  Object & operator= (const Object & Object) throw()
-  { }
+  /// Copy assignment operator
+  Object & operator= (const Object & Object) = default;
 
   /// Destructor
-  virtual ~Object() throw()
-  { }
+  virtual ~Object() = default;
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)

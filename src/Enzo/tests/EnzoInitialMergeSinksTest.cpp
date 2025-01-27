@@ -8,9 +8,10 @@
 ///           given in the file specified by "Initial:merge_sinks_test:particle_data_filename"
 ///
 
-#include "cello.hpp"
-#include "enzo.hpp"
 #include <fstream>
+#include "Cello/cello.hpp"
+#include "Enzo/enzo.hpp"
+#include "Enzo/tests/tests.hpp"
 
 //----------------------------------------------------------------------
 

@@ -286,17 +286,17 @@ std::string Param::value_to_string (int type)
     break;
   case parameter_logical_expr:
   case parameter_float_expr:
-    sprintf_expression(value_expr_,char_buffer);
+    sprintf_expression(value_expr_,char_buffer,sizeof(char_buffer));
     string_buffer = expr_begin + char_buffer + expr_end;
     break;
   case parameter_integer:
-    sprintf (char_buffer,"%d",value_integer_);
+    snprintf (char_buffer,sizeof(char_buffer),"%d",value_integer_);
     string_buffer = char_buffer;
     break;
   case parameter_float:
     // '#' format character forces a decimal point, which is required to
     // differentiate an integer from a float type
-    sprintf (char_buffer,FLOAT_FORMAT,value_float_);
+    snprintf (char_buffer,sizeof(char_buffer),FLOAT_FORMAT,value_float_);
     string_buffer =  char_buffer;
     break;
   case parameter_logical:

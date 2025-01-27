@@ -68,7 +68,7 @@ the number of dimensionsions of the array.
 
 At a high-level, this class template has semantics like a pointer or
 ``std::shared_ptr`` (there are also similarities to numpy's
-``ndarray``).  These objects serve as a 
+``ndarray``).  These objects serve as a
 smart-pointer with methods for treating the data as a specialized
 array.  These semantics explicitly differ from the C++ standard
 library containers (like ``std::vector``).
@@ -106,10 +106,10 @@ Simplest initialization:
 
 
     * Construct an array of shape ``(5,)`` that holds ints:
-       
+
     .. code-block:: c++
 
-       CelloView<int,1> arr(5); 
+       CelloView<int,1> arr(5);
        CelloView<int,1> arr2 = CelloView<int,1>(5); // yields same result
 
 Wrap a pre-existing pointer:
@@ -130,7 +130,7 @@ We can also forward declare an array and assign values to it later.
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloView<int,2> arr; 
+   CelloView<int,2> arr;
    arr = CelloView<int,2>(data,2,3);
 
 
@@ -189,7 +189,7 @@ To perform a deepcopy, assign the the results of the ``deepcopy`` method.
    int data[] = {0,1,2,3,4,5};
    CelloView<int,2> a(data,2,3);
    CelloView<int,2> e = a.deepcopy(); // e is now a deep copy of a
-   
+
 Modifications to the contents of ``e`` will not be reflected in ``a``
 or ``data`` (and vice-versa)
 
@@ -339,7 +339,7 @@ the generating subarrays of a ``CelloView`` instance. These are
      are passed as the ``start`` argument, they are understood to mean
      that the slice starts at the first element
      (``CSlice(0,NULL)``, ``CSlice(0,nullptr)``, ``CSlice(NULL,NULL)``, &
-     ``CSlice(nullptr,nullptr)`` are all equivalent). 
+     ``CSlice(nullptr,nullptr)`` are all equivalent).
 
 Finally, we note that ``CSlice`` provides a default constructor to
 simplify the construction of arrays of slices. However, to help avoid
@@ -486,16 +486,16 @@ have:
 
   * An ``(mz,my,mx-1)`` array of left reconstructed values, ``wl``
 
-  * An ``(mz,my,mx-1)`` array of right reconstructed values, ``wr`` 
+  * An ``(mz,my,mx-1)`` array of right reconstructed values, ``wr``
 
 First is an the ``CelloView`` version:
-    
+
 .. code-block:: c++
 
    typedef double enzo_float;
    typedef CelloView<enzo_float,3> EFlt3DArray;
 
-   void reconstruct_NN_x(EFlt3DArray &w, EFlt3DArray &wl, 
+   void reconstruct_NN_x(EFlt3DArray &w, EFlt3DArray &wl,
                          EFlt3DArray &wr){
        w.subarray(CSlice(0,w.shape(0)),
                   CSlice(0,w.shape(1)),
@@ -518,7 +518,7 @@ The analogous code using conventional pointer operations is:
        for (int iy=0; iy<my-1; iy++) {
          for(int ix=0; ix<mx-1; ix++) {
            int i = (iz*my + iy)*mx + ix;
-           int i_xf = (iz*my + iy)*(mx-1) + ix; 
+           int i_xf = (iz*my + iy)*(mx-1) + ix;
            wl[i_xf] = w[i];
            Wr[i_xf] = w[i + offset];
          }
@@ -585,9 +585,9 @@ The analogous function using conventional pointer operations is provided below:
    typedef double enzo_float;
    typedef CelloView<enzo_float,3> EFlt3DArray;
 
-   void update_cons(enzo_float *u, enzo_float *out, 
+   void update_cons(enzo_float *u, enzo_float *out,
                     enzo_float *xflux, enzo_float *yflux,
-                    enzo_float *zflux, enzo_float dt, 
+                    enzo_float *zflux, enzo_float dt,
                     enzo_float dx, enzo_float dy, enzo_float dz,
                     int mx, int my, int mz){
      enzo_float dtdx = dt/dx;
@@ -606,7 +606,7 @@ The analogous function using conventional pointer operations is provided below:
            int i_yf = (iz*(my-1) + iy) * mx + ix;
            int i_xf = (iz*my + iy) * (mx-1) + ix;
 
-           out[i] = (u[i] 
+           out[i] = (u[i]
                      - dtdx * (xflux[i_xf] - xflux[i_xf - x_offset])
                      - dtdy * (yflux[i_yf] - yflux[i_yf - y_offset])
                      - dtdz * (zflux[i_zf] - zflux[i_zf - z_offset]));
@@ -651,7 +651,7 @@ This code assumes a mesh with shape ``(mz, my, mx)``. Suppose we have:
    void calc_center_bfield(EFlt3DArray &bc, EFlt3DArray &bi, int dim){
      EFlt3DArray bi_l = bi;
 
-     // The following is a repeating pattern that gets factored out into 
+     // The following is a repeating pattern that gets factored out into
      // a helper function
      EFlt3DArrau bi_r;
      if (dim == 0) {
@@ -697,17 +697,28 @@ A consequence of this difference is that ``CelloView`` has different
 semantics from standard library containers (described above).
 
 
-.. _EnzoEFltArrayMap-Description:
+.. _ViewMap-Description:
 
-====================
-``EnzoEFltArrayMap``
-====================
+==============================
+The ``ViewMap`` Class Template
+==============================
 
-A class that is frequently used alongside ``CelloView`` is the
-``EnzoEFltArrayMap`` class. As the name may suggest, these classes
-serve as a map/dictionary of instances of ``EFlt3DArray`` (or
-equivalently, instances of ``CelloView<enzo_float,3>``). The keys
-of the map are always strings.
+``ViewMap<T>`` is a class template frequently used alongside
+``CelloView``.  As the name may suggest, it implements as a
+map/dictionary of instances of ``CelloView<T,3>``.  The keys of the
+map are always strings.
+
+.. note::
+
+    As a historical note, the ``ViewMap`` class template replaces an
+    older concrete class known as ``EnzoEFltArrayMap``, which was a
+    map/dictionary of instances of ``CelloView<enzo_float,3>`` (or
+    equivalently, instances of ``EFlt3DArray``).  To facillitate
+    backwards compatability, ``EnzoEFltArrayMap`` is now defined as a
+    type alias for ``ViewMap<enzo_float>``.
+
+    New code should prefer to use ``ViewMap<enzo_float>`` in place of
+    ``EnzoEFltArrayMap``.
 
 Overview
 --------
@@ -721,10 +732,10 @@ useful for our applications:
 
       * key-value pairs can't be inserted/deleted.
 
-      * the ``EFlt3DArray`` associated a with a key can't be overwritten with a
-        different ``EFlt3DArray``
+      * the ``CelloView`` associated a with a key can't be overwritten with a
+        different ``CelloView``
 
-      * Of course, the elements of the contained ``EFlt3DArray`` can still be
+      * Of course, the elements of the contained ``CelloView`` can still be
         modified.
 
   * The user specifies the ordering of the keys at construction.
@@ -734,33 +745,30 @@ configurable "struct of arrays".
 
 .. note::
 
-   In the future, we may replace this ``EnzoEFltArrayMap`` with a
-   template class (e.g. ``ViewMap<T, D>``) that can represent a
-   map of ``CelloView``\s that have a datatype other than
-   ``enzo_float`` and numbers of dimensions other than 3. In that
-   case, we would probably define ``EnzoEFltArrayMap`` as an alias
-   to maintain backwards compatability.
+   In the future, we may there may be a reason to make the
+   dimensionality of the contained views into a template parameter of
+   ``ViewMap``.  In other words, we would replace ``ViewMap<T>`` with
+   ``ViewMap<T,D>``.
 
 Basic Usage
 -----------
 
 Below, we provide a brief (non-exhaustive) overview of how the
-``EnzoEFltArrayMap`` class is used. This is not as detailed as the
-description for the ``CelloView`` template class.
+``ViewMap`` class template is used.  This is not as detailed as the
+description for the ``CelloView`` class template.
 
 Creation
 ~~~~~~~~
 
-There are 2 primary ways to construct a new ``EnzoEFltArrayMap``
-instance.
+There are 2 primary ways to construct a new ``ViewMap`` instance.
 
   1. The following code snippet illustrates how to construct an instance
      that holds existing ``CelloView`` instances.
 
      .. code-block:: c++
 
-       // let's assume we have arrays holding density and velocity_x
-       // (it does NOT matter whether any of these arrays allocate their own
+       // let's assume we have views holding density and velocity_x
+       // (it does NOT matter whether any of these views allocate their own
        // data or wrap a pre-existing pointer)
        CelloView<enzo_float,3> density_arr(4,5,6);
        CelloView<enzo_float,3> velocity_x_arr(4,5,6);
@@ -770,28 +778,28 @@ instance.
        std::string map_name = "My Wrapper Map";
        std::vector<std::string> key_l = {"density", "velocity_x",
                                          "velocity_y", "velocity_z"};
-       std::vector<CelloView<enzo_float,3>> arr_l = {density_arr,
-                                                     velocity_x_arr,
-                                                     velocity_y_arr,
-                                                     velocity_z_arr};
-       EnzoEFltArrayMap wrapper_arr_map(map_name, key_l, arr_l);
+       std::vector<CelloView<enzo_float,3>> view_l = {density_arr,
+                                                      velocity_x_arr,
+                                                      velocity_y_arr,
+                                                      velocity_z_arr};
+       ViewMap<enzo_float> wrapper_view_map(map_name, key_l, view_l);
 
-     In the above example, we gave our array map the name ``"My
+     In the above example, we gave our view map the name ``"My
      Wrapper Map"``.  This is completely optional and primarily for
      debugging purposes. We could replace the last line from the above block
      with the following, if we didn't want to name the map:
 
      .. code-block:: c++
 
-       EnzoEFltArrayMap unnamed_wrapper_arr_map(key_l, arr_l);
+       ViewMap<enzo_float> unnamed_wrapper_view_map(key_l, view_l);
 
-     **Note:** If ``key_l`` and ``arr_l`` did not have the same number of
-     entries OR one of the arrays in ``arr_l`` had a shape that differed from
-     any of the arrays in the list, the program would abort with an error
+     **Note:** If ``key_l`` and ``view_l`` did not have the same number of
+     entries OR one of the views in ``view_l`` had a shape that differed from
+     any of the views in the list, the program would abort with an error
      message.
 
-  2. The other way to construct a new ``EnzoEFltArrayMap`` has the constructor
-     allocate memory for all of the arrays in the map. This is illustrated
+  2. The other way to construct a new ``ViewMap`` has the constructor
+     allocate memory for all of the views in the map. This is illustrated
      below:
 
      .. code-block:: c++
@@ -800,19 +808,19 @@ instance.
        std::vector<std::string> key_l = {"density", "velocity_x",
                                          "velocity_y", "velocity_z"};
        std::array<int,3> shape = {4,5,6};
-       EnzoEFltArrayMap scratch_arr_map(map_name, key_l, shape);
+       ViewMap<enzo_float> scratch_view_map(map_name, key_l, shape);
 
-     In the above code-block, we gave our array map the name ``"My
-     Scratch Map"``. ``scratch_arr_map`` contains the same keys as
-     ``wrapper_arr_map`` and each of the contained arrays have the same
-     shape. The values inside each array of ``scratch_arr_map`` were set
+     In the above code-block, we gave our view map the name ``"My
+     Scratch Map"``. ``scratch_view_map`` contains the same keys as
+     ``wrapper_view_map`` and each of the contained views have the same
+     shape. The initial values inside each view of ``scratch_arr_map`` were set
      by the constructor of ``CelloView``.
 
-     If we didn't want to name our array map, we could alternatively use:
+     If we didn't want to name our view map, we could alternatively use:
 
      .. code-block:: c++
 
-       EnzoEFltArrayMap unnamed_scratch_arr_map(key_l, shape);
+       ViewMap<enzo_float> unnamed_scratch_view_map(key_l, shape);
 
 Element Access
 ~~~~~~~~~~~~~~
@@ -825,26 +833,26 @@ The following snippet shows two ways to access a
    std::vector<std::string> key_l = {"density", "velocity_x",
                                      "velocity_y", "velocity_z"};
    std::array<int,3> shape = {4,5,6};
-   EnzoEFltArrayMap scratch_arr_map(map_name, key_l, shape);
+   EnzoEFltArrayMap scratch_view_map(map_name, key_l, shape);
 
-   CelloView<enzo_float,3> my_arr1 = scratch_arr_map["density"];
-   CelloView<enzo_float,3> my_arr2 = scratch_arr_map.at("density");
+   CelloView<enzo_float,3> my_view1 = scratch_view_map["density"];
+   CelloView<enzo_float,3> my_view2 = scratch_view_map.at("density");
 
-Due to the pointer-semantics of ``CelloView``, ``my_arr1`` and
-``my_arr2`` are shallow-copies of one-another. For the same reason,
-``other_arr1`` and ``other_arr2`` in the following snipet are also
-shallow copies of ``density_arr``.
+Due to the pointer-semantics of ``CelloView``, ``my_view1`` and
+``my_view2`` are shallow-copies of one-another. For the same reason,
+``other_view1`` and ``other_view2`` in the following snipet are also
+shallow copies of ``density_view``.
 
 .. code-block:: c++
 
-   CelloView<enzo_float,3> density_arr(4,5,6);
-   CelloView<enzo_float,3> velocity_x_arr(4,5,6);
-   std::vector<std::string> key_l = {"density", "velocity_x"};
-   std::vector<CelloView<enzo_float,3>> arr_l = {density_arr, velocity_x_arr};
-   EnzoEFltArrayMap other_arr_map(key_l, arr_l);
+   CelloView<enzo_float,3> density_view(4,5,6);
+   CelloView<enzo_float,3> velocity_x_view(4,5,6);
+   std::vector<std::string> other_key_l = {"density", "velocity_x"};
+   std::vector<CelloView<enzo_float,3>> view_l = {density_view, velocity_x_view};
+   EnzoEFltArrayMap other_view_map(other_key_l, view_l);
 
-   CelloView<enzo_float,3> other_arr1 = scratch_arr_map["density"];
-   CelloView<enzo_float,3> other_arr2 = scratch_arr_map.at("density");
+   CelloView<enzo_float,3> other_view1 = other_view_map["density"];
+   CelloView<enzo_float,3> other_view2 = other_view_map.at("density");
 
 Unlike the element access methods of something like
 ``std::map<std::string, CelloView<enzo_float,3>``, these methods
@@ -853,75 +861,133 @@ or to replace the ``CelloView`` associated with a given
 key. (naturally, you can still change elements within the retrieved
 ``CelloView`` instances).
 
-``EnzoEFltArrayMap`` also supports index-access to it's contents.
-``scratch_arr_map[i]`` accesses the ``CelloView`` associated with the
-``i``th key (using the order specified during construction). Note that
-we don't support passing an integer value to ``EnzoEFltArrayMap::at``.
+``ViewMap`` also supports index-access to it's contents.
+``scratch_view_map[i]`` and ``other_view_map[i]`` respectively access
+the ``CelloView`` associated with the ``i``\th key (using the order
+specified during construction). These expressions are respectively
+equivalent to ``scratch_view_map[key_l[i]]`` and
+``other_view_map[other_key_l[i]]``, in the context of the preceding
+snippets. Note that we don't support passing an integer value to
+``ViewMap::at``.
 
 Copy and ``const`` Semantics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Making a copy of an ``EnzoEFltArrayMap`` instance (e.g. with a copy
+Making a copy of a ``ViewMap`` instance (e.g. with a copy
 constructor) always effectively produces a shallow copy. This is a
 natural consequnce of the ``CelloView``\'s pointer semantics. For
 example, each element in a copy of a ``std::vector<CelloView<T,D>>``
 would be a shallow copy of the corresponding element in the orginal
 vector.
 
-A ``const EnzoEFltArrayMap`` is effectively read-only. For reference,
-element-access of an ``EnzoEFltArrayMap`` instance yields a
-``CelloView<enzo_float,3>`` instance (whose elements can be modified).
-In comparison, element-access of a ``const EnzoEFltArrayMap`` yields a
-``CelloView<const enzo_float,3>`` which prevents direct modification of
-array elements.
+A ``const ViewMap`` holds very little meaning. If you declare and
+assign a variable, ``var``, as
+``const ViewMap<double> var = /*... */;``,
+then the fact that you used ``const ViewMap`` effectively tells the
+compiler to forbid you from performing ``var = other_view_map;`` in a
+subsequent statement.  You are still free to mutate the elements held
+by any contained CelloView.
+
+If you want to denote that a ``ViewMap`` is read-only, you should
+declare the type as ``ViewMap<const double>`` instead. Note
+that a ``ViewMap<float>`` can be implicitly converted to a
+``ViewMap<const float>`` (e.g. you can pass the former to a
+function that expecting the latter). It’s analogous to an implicit
+conversion from ``float*`` to a ``const float*``.
+
+The following snippet shows an example where we might want to use this
+property. Imagine we are writing a function that computes pressure
+from the contents of a ``ViewMap`` and stores it in a freshly
+allocated ``CelloView``. Suppose that during the calculation it
+applies a density floor (but it doesn't actually mutate the input
+``ViewMap``. In that case, we might declare the following function
+signature:
+
+.. code-block:: c++
+
+    CelloView<enzo_float,3> calculate_pressure(ViewMap<const enzo_float> arg,
+                                               double density_floor);
+
+This function signature makes a very clear promise to other developers
+that ``arg`` is not mutated inside of the function. In fact the
+compiler will not compile any implementation of the function where the
+contents of arg are mutated (this can be a very useful reminder to any
+future developer that alters the implementation of
+``calculate_pressure`` - they are of course able to change the
+function signature, but it's a good reminder to make sure that they
+aren't breaking other areas of the code). For reference, the primary
+alternative to the above signature is identical, except that ``arg``
+is associated with the ``ViewMap<enzo_float>`` type. It's important to
+note that both function signatures are equally easy to call.
+
+.. note::
+
+    At the time of writing, be aware that ``ViewMap``\s that internally
+    store their contents like an array of pointers will currently
+    perform a heap allocation during the implicit conversion from
+    ``ViewMap<T>`` to ``ViewMap<const T>``.
+
+    The main purpose of this comment, is to serve as a reminder to fix
+    this after `GitHub PR #325
+    <https://github.com/enzo-project/enzo-e/pull/325>`_ is merged. A
+    description of how to fix this is provided as a comment within
+    `Cello/view_ViewCollec.hpp`.  Please **don't** let this influence
+    whether you use ``ViewMap<const T>`` in your code. This will be
+    fixed very soon.
+
+.. note::
+
+    Historically, we tried to implement the ``EnzoEFltArrayMap`` with
+    different const-semantics. Essentially, we tried to treat a
+    ``const EnzoEFltArrayMap`` as read-only. However, there were
+    soundness problems with this approach.
 
 
 Other Utilities
 ~~~~~~~~~~~~~~~
 
-``EnzoEFltArrayMap`` also provides a series of methods to query
+``ViewMap`` also provides a series of methods to query
 information about an instance's contents. We describe these methods
-for a hypothetical instance, ``arr_map``:
+for a hypothetical instance, ``view_map``:
 
-  * ``arr_map.size()`` specifies the number of key-value pairs in
-    ``arr_map``.
+  * ``view_map.size()`` specifies the number of key-value pairs in
+    ``view_map``.
 
-  * ``arr_map.contains(const std::string& key)`` returns whether
-    ``arr_map`` holds some key, ``key``.
+  * ``view_map.contains(const std::string& key)`` returns whether
+    ``view_map`` holds some key, ``key``.
 
-  * ``arr_map.array_shape(unsigned int dim)`` returns the value that
-    would be returned by calling ``arr.shape(dim)`` for any array
-    contained within ``arr_map``.
+  * ``view_map.array_shape(unsigned int dim)`` returns the value that
+    would be returned by calling ``arr.shape(dim)`` for any view
+    contained within ``view_map``.
 
 Some other utilities include:
 
-  * the ``EnzoEFltArrayMap::subarray_map`` method. This constructs a
-    new ``EnzoEFltArrayMap`` object that holds subarrays.
+  * the ``ViewMap::subarray_map`` method. This constructs a
+    new ``ViewMap`` object that holds subviews.
 
-  * the ``EnzoEFltArrayMap::name`` method specifies the name
-    associated with an array map. If there isn't an associated name,
+  * the ``ViewMap::name`` method specifies the name
+    associated with a view map. If there isn't an associated name,
     an empty string is returned.
 
 
 Internal Data Organization
 --------------------------
 
-This class *currently* supports two approaches for internally storing
-the values of the map:
+At the time of writing, ``ViewMap`` *currently* supports two
+approaches for internally storing the values of the map:
 
   1. The default, flexible approach stores the ``CelloView`` values
-     in a ``vector``. This storage approach is analogous to having an
-     array of pointers. This is the approach that is used when a
-     ``EnzoEFltArrayMap`` is constructed that wraps pre-existing
+     in a data-structure resembling a ``vector``. This storage approach
+     is analogous to having an array of pointers. This is the approach
+     that is used when a ``ViewMap`` is constructed that wraps pre-existing
      ``CelloView`` instances.
 
   2. The secondary, more specialized approach stores the individual
-     ``CelloView`` values in a single ``CelloView<enzo_float, 4>``
-     instance. Access of individual ``CelloView`` values is
-     accomplished with the overload of the
-     ``CelloView<T,D>::subarray`` method. This approach is used when
-     you construct an ``EnzoEFltArrayMap`` that allocates memory for
-     the contained ``CelloView``\s.
+     ``CelloView`` values in a single ``CelloView<T, 4>`` instance.
+     Access of individual ``CelloView`` values is accomplished with
+     the overload of the ``CelloView<T,D>::subarray`` method. This
+     approach is used when you construct a ``ViewMap`` that
+     allocates memory for the contained ``CelloView``\s.
 
 
 From an API-perspective, both approaches are nearly
@@ -930,30 +996,30 @@ provide better data locality.
 
 The **only** API difference introduced by these approaches is the
 instances using the latter one supports the
-``EnzoEFltArrayMap::get_backing_array()`` method, which provides
+``ViewMap::get_backing_array()`` method, which provides
 access to the underlying ``CelloView<enzo_float, 4>``.  If that
 method is invoked on an instance that uses the first approach, the
 program will abort and print an error message. To that end, the
-``EnzoEFltArrayMap::contiguous_arrays()`` instance method let's you
+``ViewMap::contiguous_arrays()`` instance method let's you
 determine which approach is being used.
 
 .. note::
 
-   The ``EnzoEFltArrayMap::get_backing_array()`` method was introduced
+   The ``ViewMap::get_backing_array()`` method was introduced
    as an "escape-hatch" to facillitate optimizations in particularly
    performance critical parts of the code (e.g. a Riemann Solver).
    Whenever this function is used, it introduces implicit assumptions
-   about the properties of an ``EnzoEFltArrayMap`` instance (in addition
+   about the properties of an ``ViewMap`` instance (in addition
    to requiring a particular data organization, it usually introduces an
    assumption about the underlying key ordering).
 
    We **strongly** advise that you avoid using this method unless you
    deem it absolutely necessary. In many cases, the API of
-   ``EnzoEFltArrayMap`` is sufficiently fast for retrieving the
+   ``ViewMap`` is sufficiently fast for retrieving the
    required ``CelloView``\s before an expensive nested for-loop or in
    the outermost level of a nested for-loop.
 
-   As an aside, the way that ``EnzoEFltArrayMap`` implements key-lookups could be
-   refactored and sped up considerably.
+   As an aside, there is room for optimizing the way that ``ViewMap``
+   implements key-lookups (which may produce a small speedup).
 
 

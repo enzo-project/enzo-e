@@ -26,17 +26,7 @@ class EnzoInitialSoup : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialSoup
-  (int cycle,
-   double time,
-   std::string filename,
-   int rank,
-   bool rotate,
-   int     nx,     int ny,     int nz,
-   double dpx, double dpy, double dpz,
-   double dsx, double dsy, double dsz,
-   double density,
-   double pressure_in, double pressure_out) throw ();
+  EnzoInitialSoup(int cycle, double time, ParameterGroup p) throw ();
 
   /// Constructor
   EnzoInitialSoup(const EnzoConfig * enzo_config) throw();
@@ -50,7 +40,7 @@ public: // interface
       file_name_(""),
       rank_(0),
       rotate_(false),
-      png_(NULL),
+      png_mask_(NULL),
       density_(0.0),
       pressure_in_(0.0),
       pressure_out_(0.0),
@@ -90,11 +80,6 @@ public: // virtual functions
   virtual void enforce_block
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
-  /// Return whether enforce() expects block != NULL
-  virtual bool expects_blocks_allocated() const throw()
-  { return true; }
-
-
 private: // functions
 
 private: // attributes
@@ -119,8 +104,8 @@ private: // attributes
   // size of random perturbations to size
   double d_size_[3];
 
-  /// Current pngwriter
-  pngwriter * png_;
+  /// mask read from file_name_
+  bool * png_mask_;
 
   /// Image data
   bool data_[SOUP_IMAGE_NX*SOUP_IMAGE_NY];

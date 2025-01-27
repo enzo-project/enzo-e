@@ -47,7 +47,8 @@ The functionality described in this subsection are only defined as methods of :c
 In the future, it might make sense to move them around.
 
 It's important that none of these functions actually mutate the contents of :cpp:class:`!EnzoPhysicsFluidProps`.
-As in the Hydro/MHD Infrastructure section, many of these function operations act on the contents of :cpp:class:`!EnzoEFltArrayMap` rather than directly on :cpp:class:`!Block` objects for additional flexibility.
+As in the Hydro/MHD Infrastructure section, many of these function operations act on the contents of :cpp:class:`!ViewMap` rather than directly on :cpp:class:`!Block` objects for additional flexibility.
+As an aside, the signatures of these methods actually use :cpp:type:`!EnzoEFltArrayMap`, which is an alias of :cpp:class:`!ViewMap<enzo_float>` (for historic reasons).
 
 .. cpp:function:: void EnzoPhysicsFluidProps::primitive_from_integration \
                   (const EnzoEFltArrayMap &integration_map, \
@@ -80,7 +81,7 @@ As in the Hydro/MHD Infrastructure section, many of these function operations ac
    If :cpp:class:`!EnzoPhysicsFluidProps` holds a barotropic EOS, this method should do nothing.
 
    .. note::
-      In the future, it may make sense to directly pass the pressure floor. 
+      In the future, it may make sense to directly pass the pressure floor.
 
 
     .. _EOS-Developer-Guide:
@@ -182,7 +183,7 @@ The :cpp:class:`!EnzoEOSIdeal` class implements methods that, given the density 
 
     4. no base classes or virtual methods
 
-  Invariants that might be enforced in a constuctor are instead enforced by a factory method (e.g. :cpp:func:`!EnzoEOSIdealt::construct`). 
+  Invariants that might be enforced in a constuctor are instead enforced by a factory method (e.g. :cpp:func:`!EnzoEOSIdealt::construct`).
 
   In reality, it would probably simplify the code quite a bit, without sacrificing much/any performance, if we just required that the class was trivially copyable (that's possible without it being an aggregate)
 
@@ -340,7 +341,7 @@ This means that any time you perform a copy on an instance of :cpp:class:`!EnzoE
   // make a copy of eos_variant
   EnzoEOSVariant my_eos_variant = eos_variant;
 
-  
+
 Any mutations to the contents of ``my_eos_variant`` will not affect the contents of ``enzo::fluid_props()->eos_variant()``.
 Examples might include:
 
@@ -414,7 +415,7 @@ This snippet will abort with an error if each Processing Element's global :cpp:c
 Using ``EnzoEOSVariant`` (visitor pattern)
 ------------------------------------------
 
-The :cpp:func:`EOSVariant::visit` method can be used to dispatch code based on the type of the EOS that is stored within the EOSVariant. 
+The :cpp:func:`EOSVariant::visit` method can be used to dispatch code based on the type of the EOS that is stored within the EOSVariant.
 This method effectively implements the `visitor design pattern <https://en.m.wikipedia.org/wiki/Visitor_pattern>`_.
 While this is generally most helpful when you have a collection of objects, it may be helpful in simplifying some code in Enzo-E.
 

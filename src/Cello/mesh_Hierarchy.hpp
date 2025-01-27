@@ -29,14 +29,15 @@ public: // interface
     refinement_(0),
     min_level_(0),
     max_level_(0),
+    refined_regions_lower_(),
+    refined_regions_upper_(),
     num_blocks_(0),
     num_blocks_level_(),
     block_vec_(),
     num_particles_(0), 
     num_zones_total_(0), 
     num_zones_real_(0), 
-    block_array_(),
-    block_exists_(false)
+    block_array_()
   {
     for (int axis=0; axis<3; axis++) {
       root_size_[axis] = 0;
@@ -128,12 +129,6 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Return whether Blocks have been allocated or not
-  bool blocks_allocated() const throw()
-  { 
-    return block_exists_;
-  }
-
   /// Deallocate local Blocks
   void deallocate_blocks() throw();
 
@@ -205,9 +200,21 @@ public: // interface
 
   CProxy_Block new_block_proxy (bool allocate_data) throw();
 
-  void create_block_array (bool allocate_data) throw();
+  void create_block_array () throw();
 
-  void create_subblock_array (bool allocate_data) throw();
+  void create_subblock_array () throw();
+
+  // Getter/Setter functions for refined_regions_lower/upper members.
+  void refined_region_lower(int region_lower[3], int level) throw();
+  void refined_region_upper(int region_upper[3], int level) throw();
+  std::vector< std::vector<int> > refined_region_lower() {return refined_regions_lower_;}
+  std::vector< std::vector<int> > refined_region_upper() {return refined_regions_upper_;}
+  void set_refined_regions_lower(std::vector< std::vector<int> > lower) throw() {
+    refined_regions_lower_ = lower;
+  }
+  void set_refined_regions_upper(std::vector< std::vector<int> > upper) throw() {
+    refined_regions_upper_ = upper;
+  }
 
   /// Return the number of root-level Blocks along each rank
   /// in the given level (default level is root)
@@ -232,6 +239,14 @@ protected: // attributes
   /// Maximum mesh level
   int max_level_;
 
+  // Lower limits of regions of blocks, at different levels, which should
+  // refine to create the next nested grid at initialization.
+  std::vector< std::vector<int> > refined_regions_lower_;
+
+  // Upper limits of regions of blocks, at different levels, which should
+  // refine to create the next nested grid at initialization.
+  std::vector< std::vector<int> > refined_regions_upper_;
+
   /// Maximum number of refinement levels
 
   /// Current number of blocks on this process
@@ -254,7 +269,6 @@ protected: // attributes
   
   /// Array of Blocks 
   CProxy_Block block_array_;
-  bool           block_exists_;
 
   /// Size of the root grid
   int root_size_[3];

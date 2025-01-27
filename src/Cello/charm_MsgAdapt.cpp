@@ -53,12 +53,7 @@ void * MsgAdapt::pack (MsgAdapt * msg)
   //  3. serialize message data into buffer 
   //--------------------------------------------------
 
-  union {
-    char * pc;
-    int  * pi;
-  };
-
-  pc = buffer;
+  char * pc = buffer;
 
   SAVE_SCALAR_TYPE(pc,int,   msg->adapt_step_);
   SAVE_SCALAR_TYPE(pc,Index, msg->index_);
@@ -72,7 +67,7 @@ void * MsgAdapt::pack (MsgAdapt * msg)
   SAVE_SCALAR_TYPE(pc,bool,  msg->can_coarsen_);
   SAVE_ARRAY_TYPE(pc,char,msg->tag_,TAG_LEN+1);
   
-  ASSERT2("MsgRefresh::pack()",
+  ASSERT2("MsgAdapt::pack()",
 	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
@@ -99,12 +94,7 @@ MsgAdapt * MsgAdapt::unpack(void * buffer)
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
 
-  union {
-    char * pc;
-    int  * pi;
-  };
-
-  pc = (char *) buffer;
+  char * pc = (char *) buffer;
 
   LOAD_SCALAR_TYPE(pc,int,   msg->adapt_step_);
   LOAD_SCALAR_TYPE(pc,Index, msg->index_);
