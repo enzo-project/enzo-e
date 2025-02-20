@@ -12,6 +12,16 @@ a working document and always open to suggestions for changes.
 
 -----------------------
 
+===============
+Code formatting
+===============
+
+``clang-format`` is used for formatting C/C++ files.
+At the time that we introduced ``clang-format``, we decided not to apply the style to most older source files that already existed (to mitigate merge-conflicts).
+We plan to apply ``clang-format`` more broadly in the future.
+
+For more details about code-formatting (including how we recommend that you invoke it) see :doc:`this page <style-formatting>`.
+
 ============
 Naming files
 ============
