@@ -110,7 +110,7 @@ function(get_required_fortran_options outVar)
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     set(FC_FLAGS ${all_gnu_flags})
 
-  elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "INTEL")
+  elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
     set(FC_FLAGS "-nofor-main") # <-- I think only needed for ppml dialect
     if (USE_DOUBLE_PREC)
       list(APPEND FC_FLAGS "SHELL:-real-size 64 -double-size 64")
