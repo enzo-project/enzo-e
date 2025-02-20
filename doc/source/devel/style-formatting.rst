@@ -93,7 +93,7 @@ We primarily use the pre-commit software because of its ability to automatically
    3. the "pre-commit" `git hook <https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks>__`.
       This is one of multiple different "hooks" offered by git.
       The pre-commit software is named after this hook because it was originally designed to be used with this hook.
-      While developers are free to use the pre-commit software with the pre-commit hook, that is **NOT** (and is not discussed on this page)
+      We do **NOT** currently recommend using the pre-commit software with the pre-commit hook.
 
 
 Running the Checks Locally
@@ -109,13 +109,13 @@ Once you have installed ``pre-commit``, you can enforce the checks by invoking t
 
    ~/enzo-e $ pre-commit run --all-files
 
-The above command does 2 things:
+The above command does two things:
 
- 1. First, it ensure that local copies of the correct versions of the required enforcement tools are installed.
+ 1. it ensures that local copies of the correct versions of the required enforcement tools are installed.
     These local copies are only accessed by pre-commit and won't affect other parts of your system.
     These copies are also cached (so that the tools don't need to be reinstalled on every invocation).
 
- 2. Then the command applies the enforcement tools on the files in your repository (tool-specific exclusions, like files listed ``.clang-format-ignore`` are obviously respected).
+ 2. it applies the enforcement tools on the files in your repository (tool-specific exclusions, like files listed ``.clang-format-ignore`` are obviously respected).
 
 .. caution::
 
@@ -135,7 +135,7 @@ Here we briefly discuss some of the individual checks and enforcement tools mana
 -----------------------------------
 C/C++ code is formatted by `clang-format <https://releases.llvm.org/18.1.8/tools/clang/docs/ClangFormat.html>`__.
 
- * At this time of writing, ``clang-format`` enforces formatting rules that are largely derived from the google-style (with a handful of tweaks that derive from the llvm style guide).
+ * At the time of writing, ``clang-format`` enforces formatting rules that are largely derived from the google-style (with a handful of tweaks that derive from the llvm style guide).
    Details about the enforced style are configured in the ``.clang-format`` file at the root of the Enzo-E repository.
 
  * files that are formatted this way will generally have far fewer merge conflicts.
