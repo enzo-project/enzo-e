@@ -9,22 +9,27 @@ Getting Started: Pleiades
   module use -a /nasa/modulefiles/testing
   module purge
   module load pkgsrc/2021Q1 gcc/10.2 mpi-hpe/mpt.2.23 comp-intel/2020.4.304 hdf5/1.12.0_serial pkgsrc/2021Q1
+
   # Build Grackle (optional)
-  # Following https://grackle.readthedocs.io/en/latest/Installation.html
-  mkdir -p ~/src
-  cd ~/src
-  git clone https://github.com/grackle-project/grackle
-  cd grackle
-  git submodule update --init
-  ./configure
-  # create build directory as install target later
-  mkdir build-icc
-  cd src/clib
-  # Adjust config to loaded modules, set install path, and optimization options
-  sed -i 's/1.8.18/1.12.0/;s/2020.2.254/2020.4.304/;s#$(HOME)/local#$(PWD)/../../build-icc#;s/-axAVX -xSSE4.1 -ip -ipo/-axCORE-AVX512,CORE-AVX2/' Make.mach.nasa-pleiades
-  make machine-nasa-pleiades
-  make
-  make install
+  ## These instructions are now outdated
+  ## -> Enzo-E will now build Grackle for you. Or, it will want to install it
+  ##    separately, you must use Grackle's CMake build-system
+  ## Following https://grackle.readthedocs.io/en/latest/Installation.html
+  #mkdir -p ~/src
+  #cd ~/src
+  #git clone https://github.com/grackle-project/grackle
+  #cd grackle
+  #git submodule update --init
+  #./configure
+  ## create build directory as install target later
+  #mkdir build-icc
+  #cd src/clib
+  ## Adjust config to loaded modules, set install path, and optimization options
+  #sed -i 's/1.8.18/1.12.0/;s/2020.2.254/2020.4.304/;s#$(HOME)/local#$(PWD)/../../build-icc#;s/-axAVX -xSSE4.1 -ip -ipo/-axCORE-AVX512,CORE-AVX2/' Make.mach.nasa-pleiades
+  #make machine-nasa-pleiades
+  #make
+  #make install
+
 
   # Build Charm++
   cd ~/src

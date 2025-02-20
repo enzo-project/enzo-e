@@ -40,19 +40,15 @@ if(USE_GRACKLE)
 
   FetchContent_Declare(Grackle
     GIT_REPOSITORY https://github.com/grackle-project/grackle
-    GIT_TAG 06c665fa2f53013752810cf7cce8a833930c343d
-    # ^ current hash is shortly after cmake build-system got introduced
+    GIT_TAG fca6db9657f16f8ae1e68afdad4b49f3110f7027
+    # ^ current hash is from some time after the cmake build-system got introduced
   )
 
-  # At this time, Grackle currently supports 2 build-systems
-  #   1. the classic build-system (inherited from Enzo-Classic) 
-  #   2. the newer cmake build-system. 
-  # Once we feel comfortable requiring that people always use a CMake-build of 
-  # Grackle, we can start to make use of thet GrackleConfig.cmake file that is
-  # created in those builds. (Doing that will ALWAYS be more robust than our
-  # custom FindGrackle.cmake logic). A better default behavior might then be
-  # to searching for Grackle first and then performing an in-source build if
-  # it can't be found
+  # A better default behavior might then be to searching for Grackle first and
+  # then performing an in-source build if it can't be found
+
+  set(GRACKLE_USE_DOUBLE USE_DOUBLE_PREC)
+  set(GRACKLE_USE_OPENMP OFF)
 
   if (USE_EXTERNAL_GRACKLE)
     find_package(Grackle)
@@ -66,8 +62,6 @@ if(USE_GRACKLE)
         "(e.g. `-DGrackle_ROOT=/PATH/TO/GRACKLE/INSTALL/DIRECTORY`).")
     endif()
   else()
-    set(GRACKLE_USE_DOUBLE USE_DOUBLE_PREC)
-    set(GRACKLE_USE_OPENMP OFF)
 
     message("downloading Grackle...")
     FetchContent_MakeAvailable(Grackle)

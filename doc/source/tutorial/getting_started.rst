@@ -110,6 +110,11 @@ By default, Enzo-E requires the Grackle chemistry and cooling library.
 For user-convenience, the default behavior is for Grackle to be automatically downloaded and compiled as part of an Enzo-E build.
 Alternatively, if you want to make use of an existing Grackle installation (those installation instructions are provided  `here <https://grackle.readthedocs.io>`__), you can set ``-DUSE_EXTERNAL_GRACKLE=ON``.
 
+.. note::
+
+   If you choose to link Enzo-E against a pre-built version of Grackle, that version must have been built with CMake.
+   (Enzo-E no longer supports linking against version of Grackle built with its "Classic Build System")
+
 If you do not need to use Grackle, you can disable it by setting ``-DUSE_GRACKLE=OFF``.
 
 6. Install yt (Optional)
