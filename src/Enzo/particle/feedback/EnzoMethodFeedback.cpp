@@ -100,10 +100,10 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
 
   const int rank = cello::rank();
 
-  double current_time  = block->time();
+  double current_time  = block->state()->time();
   if (cosmology) {
     enzo_float cosmo_dadt = 0.0;
-    double dt    = block->dt();
+    double dt    = block->state()->dt();
     cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
     if (rank >= 1) hx *= cosmo_a;
     if (rank >= 2) hy *= cosmo_a;

@@ -883,7 +883,7 @@ PARALLEL_MAIN_BEGIN
     passed = true;
     for (int i=0; i<M5; i++) { passed &= (v5[i] == HIST_INIT(5,ih,i));  }
     unit_assert (passed);
-    
+
     // note--no time saved for history = 0
 
     ih = 1;
@@ -905,7 +905,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert (passed);
 
     unit_func ("history_time[1]");
-    unit_assert (5.0-ih == field.history_time(ih));
+    unit_assert (5.0-ih == field.history_time(ih-1));
 
     ih = 2;
     unit_func ("history[2]");
@@ -926,7 +926,7 @@ PARALLEL_MAIN_BEGIN
     unit_assert (passed);
 
     unit_func ("history_time[2]");
-    unit_assert (5.0-ih == field.history_time(ih));
+    unit_assert (5.0-ih == field.history_time(ih-1));
 
     ih = 3;
     unit_func ("history[3]");
@@ -947,8 +947,8 @@ PARALLEL_MAIN_BEGIN
     unit_assert (passed);
 
     unit_func ("history_time[3]");
-    unit_assert (5.0-ih == field.history_time(ih));
-    
+    unit_assert (5.0-ih == field.history_time(ih-1));
+
     //--------------------------------------------------
     unit_func ("units_scale_cgs");
 

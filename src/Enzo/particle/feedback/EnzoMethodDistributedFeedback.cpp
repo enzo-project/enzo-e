@@ -408,7 +408,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
   EnzoUnits * enzo_units = enzo::units();
 
-  double current_time  = block->time();
+  double current_time  = block->state()->time();
 
   // apply feedback depending on particle type
   // for now, just do this for all star particles
@@ -624,7 +624,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
             delay_time   *=  enzo_constants::yr_s / enzo_units->time(); // code units
             star_age = current_time - pcreation[ipdc]; // code units
-            if ((delay_time > star_age) && (delay_time < star_age + enzo_block->dt  )) {
+            if ((delay_time > star_age) && (delay_time < star_age + enzo_block->state()->dt()  )) {
             // AJE: I"m a little confused as to why the above check in original code
             //      was within a time range and not a one-sided check: ---
             //         MUCH LESS CONFUSED NOW: because fixed random number gen will work
@@ -632,7 +632,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 #ifdef DEBUG_FEEDBACK
             CkPrintf("DistributedFeedback (%18s): %d of %d - delay: %f  age+dt: %g  pm: %g \n", enzo_block->name().c_str(), kk+1, number_of_sn, delay_time, star_age, progenitor_mass);
 #endif
-            // if ( delay_time < star_age + enzo_block->dt  ) {
+            // if ( delay_time < star_age + enzo_block->state()->dt()  ) {
 
               if (explosion_flag == -1){
                 explosion_flag = 1;
@@ -687,7 +687,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
      //           for the size of the star particle
         wind_mass = wind_mass * star_maker_method->minimum_star_mass() * 1.0E-6;
         wind_mass = wind_mass / enzo_constants::yr_s; // in Msun / s
-        wind_mass = (wind_mass * enzo_units->time()) * enzo_block->dt; // Msun this timestep
+        wind_mass = (wind_mass * enzo_units->time()) * enzo_block->state()->dt(); // Msun this timestep
 
         double tsoon7      = soonest_explosion * enzo_units->time() / (1.0E7 * enzo_constants::yr_s);
         double wind_energy = 0.0;
@@ -827,10 +827,10 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
 
   const int rank = cello::rank();
 
-  double current_time  = block->time();
+  double current_time  = block->state()->time();
   if (cosmology) {
     enzo_float cosmo_dadt = 0.0;
-    double dt    = block->dt();
+    double dt    = block->state()->dt();
     cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
     if (rank >= 1) hx *= cosmo_a;
     if (rank >= 2) hy *= cosmo_a;
@@ -984,10 +984,10 @@ void EnzoMethodDistributedFeedback::inject_feedback(
 
   const int rank = cello::rank();
 
-  double current_time  = block->time();
+  double current_time  = block->state()->time();
   if (cosmology) {
     enzo_float cosmo_dadt = 0.0;
-    double dt    = block->dt();
+    double dt    = block->state()->dt();
     cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
     if (rank >= 1) hx *= cosmo_a;
     if (rank >= 2) hy *= cosmo_a;

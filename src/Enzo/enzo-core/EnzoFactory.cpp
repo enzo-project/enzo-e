@@ -63,11 +63,10 @@ void EnzoFactory::create_block_array
 
   int count_adapt;
 
-  int    cycle = 0;
-  double time  = 0.0;
+  int    cycle = enzo::simulation()->state()->cycle();
+  double time  = enzo::simulation()->state()->time();
   double dt    = 0.0;
-  int num_face_level = 0;
-  int * face_level = 0;
+  State state (cycle,time,dt,false);
 
 #ifdef TRACE_FACTORY
   CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
@@ -75,6 +74,9 @@ void EnzoFactory::create_block_array
 
   int nax,nay,naz;
   cello::hierarchy()->root_blocks(&nax,&nay,&naz);
+
+  std::vector<int> face_level;
+  face_level.clear();
 
   for (int ix=0; ix<nbx; ix++) {
     for (int iy=0; iy<nby; iy++) {
@@ -92,10 +94,10 @@ void EnzoFactory::create_block_array
              nx,ny,nz,
              num_field_blocks,
              count_adapt = 0,
-             cycle,time,dt,
              refresh_same,
-             num_face_level, face_level,
-             nullptr);
+             face_level,
+             nullptr,
+             &state);
 
           msg->set_data_msg(data_msg);
 
@@ -138,6 +140,14 @@ void EnzoFactory::create_subblock_array
   int nax,nay,naz;
   cello::hierarchy()->root_blocks(&nax,&nay,&naz);
 
+  int    cycle = enzo::simulation()->state()->cycle();
+  double time  = enzo::simulation()->state()->time();
+  double dt    = 0.0;
+  State state (cycle,time,dt,false);
+
+  std::vector<int> face_level;
+  face_level.clear();
+
   for (int level = -1; level >= min_level; level--) {
 
     if (nbx > 1) nbx = ceil(0.5*nbx);
@@ -146,15 +156,10 @@ void EnzoFactory::create_subblock_array
 
     int count_adapt;
 
-    int    cycle = 0;
-    double time  = 0.0;
-    double dt    = 0.0;
-    int num_face_level = 0;
-    int * face_level = 0;
-
 #ifdef TRACE_FACTORY
     CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
 #endif
+
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
         for (int iz=0; iz<nbz; iz++) {
@@ -177,10 +182,10 @@ void EnzoFactory::create_subblock_array
                nx,ny,nz,
                num_field_blocks,
                count_adapt=0,
-               cycle,time,dt,
                refresh_same,
-               num_face_level, face_level,
-               nullptr);
+               face_level,
+               nullptr,
+               &state);
 
             msg->set_data_msg(data_msg);
 
@@ -202,11 +207,10 @@ void EnzoFactory::create_block
  int nx, int ny, int nz,
  int num_field_blocks,
  int count_adapt,
- int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level,
- int * face_level,
+ const std::vector<int> & face_level,
  Adapt * adapt,
+ State * state,
  Simulation * simulation,
  int io_reader,
  int ip) const throw()
@@ -224,19 +228,19 @@ void EnzoFactory::create_block
 
   const int rank = cello::rank();
 
-   MsgRefine * msg = new MsgRefine 
+  MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,
      num_field_blocks,
      count_adapt,
-     cycle,time,dt,
      refresh_type,
-     num_face_level, face_level,
+     face_level,
      adapt,
+     state,
      io_reader);
 
   msg->set_data_msg(data_msg);
-  
+
   if (ip == -1) ip = CkMyPe();
 
   proxy_enzo_simulation[ip].p_refine_create_block (msg);

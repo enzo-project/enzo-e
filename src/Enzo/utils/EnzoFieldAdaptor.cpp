@@ -68,7 +68,7 @@ namespace enzo_field_adaptor_detail {
   double BlockWrapper::compute_time() const noexcept
   {
     if (index_history_ == 0) {
-      return block_->time();
+      return block_->state()->time();
     } else {
       return field_.history_time(index_history_);
     }
