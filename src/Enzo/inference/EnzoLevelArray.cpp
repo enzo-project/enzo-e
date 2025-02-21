@@ -58,6 +58,10 @@ EnzoLevelArray::EnzoLevelArray
     field_values_[i].resize(nix_*niy_*niz_);
   }
   proxy_enzo_simulation[0].p_infer_array_created();
+
+  // if inference_method == "starnet"
+  starfind_ = new StarFind();
+  fbnet_    = new FBNet();
 }
 
 //----------------------------------------------------------------------

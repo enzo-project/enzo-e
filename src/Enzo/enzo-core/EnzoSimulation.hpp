@@ -80,6 +80,20 @@ public: // functions
   void set_sync_infer_done(int count)
   { sync_infer_done_.set_stop(count); }
 
+  void p_fbnet_done();
+
+  void set_sync_fbnet_count(int count)
+  { sync_fbnet_count_.set_stop(count); }
+  void reset_sync_fbnet_count()
+  { sync_fbnet_count_.reset(); }
+
+  void set_sync_fbnet_update(int count)
+  { sync_fbnet_update_.set_stop(count); }
+  void reset_sync_fbnet_update()
+  { sync_fbnet_update_.reset(); }
+  bool sync_fbnet_update_next()
+  { return sync_fbnet_update_.next(); }
+
   void p_io_reader_created();
 
   /// EnzoMethodInference
@@ -90,10 +104,16 @@ public: // functions
   /// Synchronize after inference has been applied
   void p_infer_done();
 
+  /// EnzoMethodFBNetDeposit
+  void p_fbnet_concatenate_sphere_lists();
+
   /// Read in and initialize the next refinement level from a checkpoint;
   /// or exit if done
   void p_restart_next_level();
   void p_restart_level_created();
+
+  void method_fbnet_clear_sphere_list()
+  { method_fbnet_sphere_list.clear(); }
 
 public: // virtual functions
 
@@ -102,6 +122,10 @@ public: // virtual functions
 
   /// Return an EnzoFactory object, creating it if needed
   virtual const Factory * factory() const throw();
+
+public: // attributes
+
+  std::vector<EnzoObjectFeedbackSphere> method_fbnet_sphere_list;
 
 private: // functions
 
@@ -127,6 +151,9 @@ private: // attributes
   int                      check_num_files_;
   std::string              check_ordering_;
   std::vector<std::string> check_directory_;
+  /// Count total blocks on process before reduction in EnzoMethodFBNetDeposit
+  Sync                     sync_fbnet_count_;
+  Sync                     sync_fbnet_update_;
 
   /// Balance Method synchronization
   Sync sync_method_balance_;

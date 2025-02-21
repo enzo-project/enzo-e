@@ -12,6 +12,9 @@
 // #define TRACE_INFER
 // #define DEBUG_INFER
 
+
+// # define PRINT_FIELD_VALUES
+
 //----------------------------------------------------------------------
 
 EnzoMethodInference::EnzoMethodInference
@@ -63,7 +66,7 @@ EnzoMethodInference::EnzoMethodInference
   Refresh * refresh = cello::refresh(ir_post_);
   // BUG WORKAROUND: add a field to bypass hang bug
   refresh->add_field("density");
-
+  
   // Create Level Array & broadcast proxy to other Simulation objects
   if (CkMyPe() == 0) {
 
@@ -105,6 +108,7 @@ EnzoMethodInference::EnzoMethodInference
 
   //    level array chare array element to simulation[0] sync counter
   enzo::simulation()->set_sync_infer_create(0);
+
 }
 
 //----------------------------------------------------------------------
@@ -153,6 +157,7 @@ void EnzoMethodInference::compute ( Block * block) throw()
   sync_parent_(block).set_stop(1+1);  // +1 for self
 
   const int level = block->level();
+
 
   if (block->is_leaf()) {
 
@@ -1018,37 +1023,347 @@ void EnzoLevelArray::apply_inference()
   //
   //==================================================
 
-  // Update blocks with inference results
+  const EnzoConfig * enzo_config = enzo::config();
 
-  //    find center of inference array
-  double center[3] = {
-    0.5*(lower[0]+upper[0]),
-    0.5*(lower[1]+upper[1]),
-    0.5*(lower[2]+upper[2])};
+// if inference_method == "starnet"
+// TUTORIAL: https://github.com/prabhuomkar/pytorch-cpp/blob/master/tutorials/basics/pytorch_basics/main.cpp
 
-  //    put a sphere there and add it to a list sphere_list
-  double radius = 0.1*(upper[0]-lower[0]);
-  ObjectSphere sphere(center,radius);
-  std::vector<ObjectSphere> sphere_list;
-  sphere_list.push_back(sphere);
+  if (enzo_config->method_inference_starnet_repeatable) {
+    // seed random number generator using block index.
+    // Multiplying by cycle number ensures that outcome of RNG
+    // will not be the same at difference cycles, while still maintaining
+    // repeatability.
 
-#ifdef TRACE_INFER
-  for (auto sphere : sphere_list) {
-    char buffer[80];
-    sprintf (buffer,"TRACE_INFER %d",cello::simulation()->cycle());
-    sphere.print(buffer);
+    srand( INDEX(thisIndex[0]+1,thisIndex[1]+1,thisIndex[2]+1,nax_,nay_) * 
+           (cello::simulation()->cycle()+1) );
+  }
+  else { 
+    // seed using time and PE index
+    srand( time(NULL) * (cello::simulation()->cycle()+1) * (CkMyPe()+1) );
+  }
+
+  double sphere_x=0.0, sphere_y=0.0, sphere_z=0.0;
+  double sphere_r=0.0;
+  double yield_SNe=0.0, yield_HNe=0.0, yield_PISNe=0.0;
+  double stellar_mass=0.0;
+  int nSNe=0, nHNe=0, nPISNe=0, nBH=0;
+
+  #ifdef CONFIG_USE_TORCH
+    // StarFind:
+    // ----------------------
+    // prepare fields, shove into torch::Tensor "sample" with dimensions {1, N_fields, dim, dim, dim} 
+    // loop through fields in "Inference" group
+    //   see StarNetDataLoader()
+    // density, H2I_density, total_energy, div(v), and metal_density
+
+    const std::string stage1_checkpoint = "/home1/07320/whick002/StarNetRuntime/model_checkpoints/smalldense.jtpt";
+    
+    // Deserialized stage-1 checkpoint (U-net)
+    torch::jit::script::Module stage1 = starfind_->stage1(); 
+    torch::Tensor field_data = torch::zeros({1,5,nix_,niy_,niz_}, torch::dtype(torch::kFloat32)); // array that gets passed into model
+
+    // array increments
+    const int idx = 1;
+    const int idy = nix_;
+    const int idz = nix_*niy_;
+
+    // get indices of fields in field_list_ (they're not the same as where they appear in Group:inference
+    std::vector<std::string> group_list_ = cello::field_groups()->group_list(field_group_);
+    int idx_density = INT_MAX, idx_H2I_density = INT_MAX, idx_metal_density = INT_MAX, idx_PopIII_metal_density = INT_MAX;
+    int idx_velocity_x = INT_MAX, idx_velocity_y = INT_MAX, idx_velocity_z = INT_MAX;
+    int idx_total_energy = INT_MAX;
+
+    for (int i_f=0; i_f < num_fields_; i_f++) {
+      std::string field_name = cello::field_groups()->item(field_group_,i_f);
+      if      (field_name == "density") {idx_density = i_f;             continue;}
+      else if (field_name == "H2I_density") {idx_H2I_density = i_f;     continue;}
+      else if (field_name == "velocity_x") {idx_velocity_x = i_f;       continue;}
+      else if (field_name == "velocity_y") {idx_velocity_y = i_f;       continue;}
+      else if (field_name == "velocity_z") {idx_velocity_z = i_f;       continue;}
+      else if (field_name == "total_energy") {idx_total_energy = i_f;   continue;}
+      else if (field_name == "metal_density") {idx_metal_density = i_f; continue;}
+      else if (field_name == "PopIII_metal_density") {idx_PopIII_metal_density = i_f;} 
+    }
+
+    enzo_float * density = field_values_[idx_density].data();
+    enzo_float * H2I_density = field_values_[idx_H2I_density].data();
+    enzo_float * vx = field_values_[idx_velocity_x].data();
+    enzo_float * vy = field_values_[idx_velocity_y].data();
+    enzo_float * vz = field_values_[idx_velocity_z].data();
+    enzo_float * total_energy = field_values_[idx_total_energy].data();
+    enzo_float * metal_density = field_values_[idx_metal_density].data();
+    enzo_float * PopIII_metal_density = field_values_[idx_PopIII_metal_density].data();
+
+    // create velocity divergence derived field
+    enzo_float * velocity_divergence = new enzo_float[nix_*niy_*niz_];
+
+    int nx,ny,nz;
+    cello::hierarchy()->root_size(&nx,&ny,&nz);
+
+    const double hx = (upper[0] - lower[0]) / nix_;
+    const double hy = (upper[1] - lower[1]) / niy_;
+    const double hz = (upper[2] - lower[2]) / niz_;
+
+    for (int iz=0; iz<niz_; iz++){
+      for (int iy=0; iy<niy_; iy++){
+        for (int ix=0; ix<nix_; ix++){
+          int i = INDEX(ix,iy,iz,nix_,niy_);
+
+          double divVx=0.0, divVy=0.0, divVz=0.0;
+
+          if (ix == 0)         divVx = vx[i+idx]-vx[i];
+          else if (ix == nix_-1) divVx = vx[i]-vx[i-idx];
+          else                 divVx = 0.5 * (vx[i+idx] - vx[i-idx]);
+
+          if (iy == 0)         divVy = vy[i+idy]-vy[i];
+          else if (iy == niy_-1) divVy = vy[i]-vy[i-idy];
+          else                 divVy = 0.5 * (vy[i+idy] - vy[i-idy]);
+
+          if (iz == 0)         divVz = vz[i+idz]-vz[i];
+          else if (iz == niz_-1) divVz = vz[i]-vz[i-idz];
+          else                 divVz = 0.5 * (vz[i+idz] - vz[i-idz]);
+
+          velocity_divergence[i] = divVx + divVy + divVz;
+
+        } // ix
+      } // iy
+    } // iz
+ 
+    // scale field such that x = (x-mean) / std
+    EnzoUnits * enzo_units = enzo::units();
+    double rhounit = enzo_units->density();
+    double vunit = enzo_units->velocity();
+    double lunit = enzo_units->length();
+    double Zunit = enzo_constants::metallicity_solar;
+ 
+    // means and stds from StarNetRuntime/resources/Scaling_64x160.torch (generated from the Phoenix simulations) 
+    // All values are in CGS units except for total_energy
+    std::vector <double> means = {3.395644060629469e-27/rhounit, 1.5020361582642288e-30/rhounit, 
+                -793.0158410664843/vunit, 
+                96878457078.45897, 2.3778995827734495e-08, 2.419114340099057e-07};
+    std::vector <double> stds  = {4.858201188227477e-26/rhounit, 7.886306542228033e-29/rhounit, 
+                8358.282154906454/vunit,
+                531795315558.7779, 2.5806363586099314e-06, 2.9415985082639072e-05};
+
+#ifdef PRINT_FIELD_VALUES
+  for (int i_f = 0; i_f < num_fields_; i_f++) {
+      // print out all field values
+      for (int iz=0; iz<niz_; iz++){
+        for (int iy=0; iy<niy_; iy++){
+          for (int ix=0; ix<nix_; ix++){
+            int i = ix + nix_*(iy + niy_*iz);
+            CkPrintf("field_%d(%d,%d,%d) = %e\n",i_f,ix,iy,iz, field_values_[i_f].data()[i]);
+          }
+        }
+      }
   }
 #endif
 
-  //    pack sphere list into a buffer to send to blocks
+    // pack fields into torch array
+    double mean_popII  = means[4], std_popII  = stds[4];
+    double mean_popIII = means[5], std_popIII = stds[5];
+    for (int iz=0; iz<niz_; iz++){
+      for (int iy=0; iy<niy_; iy++){
+        for (int ix=0; ix<nix_; ix++){
+          int i = ix + nix_*(iy + niy_*iz);
+          // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
+          field_data.index_put_( {0,0,ix,iy,iz}, 
+                       ((double) density[i] - means[0])/stds[0] );
+          field_data.index_put_( {0,1,ix,iy,iz}, 
+                       ((double) H2I_density[i] - means[1])/stds[1] );
+          field_data.index_put_( {0,2,ix,iy,iz}, 
+                       ((double) velocity_divergence[i] - means[2])/stds[2] );
+          field_data.index_put_( {0,3,ix,iy,iz}, 
+                       ((double) total_energy[i] - means[3])/stds[3] );
 
+          // now deal with metal fields
+          double rho_popIII = PopIII_metal_density[i];
+          double rho_popII  = metal_density[i] - rho_popIII;
+          double val = 0.0;
+
+          // see StarNetRuntime/StarNetDataLoader.py
+          val  = (rho_popIII-mean_popIII)*std_popII;
+          //val -= mean_popIII*std_popII;
+          val += (rho_popII-mean_popII)*std_popIII;
+          val /= std_popIII*std_popII;
+          //CkPrintf("scaled metal density: %1.2e; metal_density: %1.2e; rho_popIII: %1.2e\n", val, array_tot[i], array_popIII[i]);
+
+          // see https://pytorch.org/cppdocs/notes/tensor_indexing.html
+          field_data.index_put_( {0,4,ix,iy,iz}, val );
+        }
+      }   
+    }
+
+    delete [] velocity_divergence;
+
+    std::vector<torch::jit::IValue> sample; 
+    sample.push_back(field_data);
+
+    // if skipping stage 1 classifier, all inference blocks
+    // are treated as potential star-forming blocks 
+    // and will be fed into the stage 2 inception network
+    bool star_in_block = true;
+
+    if (enzo_config->method_inference_starnet_S1) {
+      // see step 4 of https://pytorch.org/tutorials/advanced/cpp_export.html 
+
+      at::Tensor prediction_s1 = stage1.forward(sample).toTensor(); //(pstar, pnostar)
+    
+      double num_0 = std::exp(prediction_s1.index({0,0}).item<double>());
+      double num_1 = std::exp(prediction_s1.index({0,1}).item<double>());
+      double pnostar = num_0 / (num_0 + num_1);
+      double pstar   = num_1 / (num_0 + num_1);
+ 
+      CkPrintf("EnzoMethodInference::S1 prediction = (%f, %f), (pnostar, pstar) = (%f, %f); pnostar + pstar = %f\n", prediction_s1.index({0,0}).item<double>(), prediction_s1.index({0,1}).item<double>(), pnostar, pstar, pstar+pnostar);
+
+      //ASSERT("EnzoMethodInference::apply_inference()",
+      //       "pstar+pnostar != 1.0", pstar+pnostar == 1.0);
+        
+      star_in_block = (pstar > pnostar);
+    }
+
+    bool SF_confirmed = false; // flag for if S2 network identified star-forming regions
+
+    if (star_in_block && enzo_config->method_inference_starnet_S2) {
+
+      CkPrintf("EnzoMethodInference::Calling S2 inception U-net...\n");
+      
+      // Deserialized stage-2 checkpoint (inception net)
+      torch::jit::script::Module stage2 = starfind_->stage2(); // shape = {1,2,nx,ny,nz}
+
+      at::Tensor prediction_s2 = stage2.forward(sample).toTensor();
+
+      int N_edge = 1; // number of edge layers to consider when evaluating S2 predictions
+      double pstar_i, pnostar_i, num_0_i, num_1_i;
+      double rho_x = 0.0, rho_y = 0.0, rho_z = 0.0, rho = 0.0; // for calculating mean position
+
+      bool is_valid = true;
+      double zcrit = enzo_config->method_inference_starnet_critical_metallicity;
+
+      for (int iz=0; iz<niz_; iz++){
+       for (int iy=0; iy<niy_; iy++){
+         for (int ix=0; ix<nix_; ix++){
+           int i = INDEX(ix,iy,iz,nix_,niy_);
+
+           num_0_i = std::exp(prediction_s2.index({0,0,ix,iy,iz}).item<double>());
+           num_1_i = std::exp(prediction_s2.index({0,1,ix,iy,iz}).item<double>());
+           pnostar_i = num_0_i / (num_0_i + num_1_i);
+           pstar_i   = num_1_i / (num_0_i + num_1_i);
+
+           if (pstar_i > pnostar_i) {
+             SF_confirmed = true;
+
+             double x_i = lower[0]+(ix+0.5)*hx;
+             double y_i = lower[1]+(iy+0.5)*hy;
+             double z_i = lower[2]+(iz+0.5)*hz;
+
+             // contribute to the mean predicted position
+             double rho_i = density[i];
+             rho += rho_i;
+             rho_x += rho_i * x_i;
+             rho_y += rho_i * y_i;
+             rho_z += rho_i * z_i;
+
+             if (metal_density[i]/rho_i / enzo_constants::metallicity_solar > zcrit) {
+               // if a flagged cell is above the critical metallicity separating PopII from PopIII SF,
+               // this identified region is invalid. Don't do anything in this case
+               is_valid = false;
+             } 
+
+             // if a flagged cell is within N_edge of the border of this inference block,
+             // this identified region is also invalid.
+             
+             is_valid *= (N_edge <= iz) && (iz < niz_-N_edge);
+             is_valid *= (N_edge <= iy) && (iy < niy_-N_edge);
+             is_valid *= (N_edge <= ix) && (ix < nix_-N_edge);
+
+             CkPrintf("[%d] EnzoMethodInference::Starfind predicts potential Pop III star formation at (x, y, z) = (%f,%f,%f); index = %d (%d,%d,%d); lower = (%f,%f,%f); upper = (%f,%f,%f); cell metallicity = %1.2e (%1.2e, %1.2e); is_valid = %d \n", CkMyPe(), x_i, y_i, z_i, i, ix, iy, iz, lower[0], lower[1], lower[2], upper[0], upper[1], upper[2], metal_density[i]/rho_i / enzo_constants::metallicity_solar, metal_density[i], rho_i, is_valid);
+           } 
+         } // ix
+       } // iy
+      } // iz
+
+      // REMOVE THIS LINE!!!!!! JUST FOR DEBUGGING
+      //is_valid = true;
+
+      // only do FB if S2 network identifies star-forming regions
+      if ( (SF_confirmed && is_valid) && enzo_config->method_inference_starnet_feedback) {
+        // center of FB sphere is (xmean, ymean, zmean)
+        double rho_inv = 1.0 / rho;
+        sphere_x = rho_x * rho_inv;
+        sphere_y = rho_y * rho_inv;
+        sphere_z = rho_z * rho_inv;
+     
+        // determine properties of population and metal yields
+        std::vector<double> masses, creationtimes;
+      
+        int Nstars = fbnet_->get_Nstars();
+        for (int i=0; i<Nstars; i++) {
+          double mass = fbnet_->get_mass();
+          if ((11.0 <= mass) && (mass < 20.0)) {
+            yield_SNe += fbnet_->metal_yield_SNe(mass);
+            nSNe += 1;
+          }
+          else if ((20.0 <= mass) && (mass < 40.0)) {
+            yield_HNe += fbnet_->metal_yield_HNe(mass);
+            nHNe += 1;
+          }
+          else if ((140.0 <= mass) && (mass < 260.0)) {
+            yield_PISNe += fbnet_->metal_yield_PISNe(mass);
+            nPISNe += 1;
+          }
+          else { // black hole
+            nBH += 1;
+          }
+          stellar_mass += mass;
+          masses.push_back(mass);
+          creationtimes.push_back(fbnet_->get_creationtime());
+        }
+ 
+        // The evolved remnant radii in the Phoenix simulations were determined
+        // by expanding a sphere until the average metallicity within
+        // drops below Z_crit. Since the evolved remnants won't be perfectly
+        // spherical in general, and since metallicities could in principle
+        // be much larger than Z_crit, the radii returned by the model
+        // will be too big. Correct for this by introducing a "radius_modifier" factor.
+        // This is introduced in FBNet.py (apply_spherical_feedback). Azton's final
+        // simulation that is comparable to the Phoenix simulations used a value of 0.2
+        double radius_modifier = enzo_config->method_inference_starnet_radius_modifier;
+        // calculate radius of evolved remnant
+        sphere_r = (yield_SNe+yield_PISNe+yield_HNe > 0) ? 
+                 radius_modifier*fbnet_->get_radius( masses, creationtimes ) : 0.0;
+        CkPrintf("EnzoMethodInference::FBNet predicts a region with %d stars radius %1.2e kpc and metal yields (%1.2e, %1.2e, %1.2e) Msun\n", Nstars, sphere_r, yield_SNe, yield_HNe, yield_PISNe);
+        // put everything into code units
+        EnzoUnits * enzo_units = enzo::units();
+        double lunit = enzo_units->length();
+        double munit = enzo_units->mass();
+
+        sphere_r *= enzo_constants::kpc_cm / lunit;
+        yield_SNe *= enzo_constants::mass_solar / munit;
+        yield_HNe *= enzo_constants::mass_solar / munit;
+        yield_PISNe *= enzo_constants::mass_solar / munit;
+    }
+   
+  } // if pstar > pnostar in a block
+
+  #endif
+
+  // Update blocks with inference results
+
+  //    center of sphere
+  double center[3] = {sphere_x, sphere_y, sphere_z};
+
+  //    put a sphere object there and add it to a list sphere_list
+  EnzoObjectFeedbackSphere sphere(center, sphere_r, yield_SNe, yield_HNe, yield_PISNe,
+                                  nSNe, nHNe, nPISNe, nBH, stellar_mass);
+ 
   //    allocate buffer
   int n = 0;
-  SIZE_VECTOR_TYPE(n,ObjectSphere,sphere_list);
+  SIZE_SCALAR_TYPE(n,EnzoObjectFeedbackSphere,sphere);
   //    initialize buffer
   char * buffer = new char [n];
-  char *pc = buffer;
-  SAVE_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
+  char * pc = buffer;
+  SAVE_SCALAR_TYPE(pc,EnzoObjectFeedbackSphere,sphere);
 
   //    Send data to leaf blocks via base-level block
   Index index_block = get_block_index_();
@@ -1070,24 +1385,31 @@ void EnzoBlock::p_method_infer_update(int n, char * buffer, int il3[3])
   EnzoMethodInference * method =
     static_cast<EnzoMethodInference*> (this->method());
 
-  // Return control back to EnzoMethodInference
-  method->update(this,n, buffer, il3);
+  method->update(this, n, buffer, il3);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[3])
 {
-  // Unpack buffer into sphere_list
-
-  std::vector<ObjectSphere> sphere_list;
+  // Unpack buffer into sphere object
+  EnzoObjectFeedbackSphere sphere;
   char *pc = buffer;
-  LOAD_VECTOR_TYPE(pc,ObjectSphere,sphere_list);
+  LOAD_SCALAR_TYPE(pc,EnzoObjectFeedbackSphere,sphere);
 
   Index index_block = block->index();
   const int level = block->level();
 
   if (block->is_leaf()) {
+
+    // if inference_method == "starnet"
+    // Note that there is a check within spawn_remnant_particle
+    // that particle is located inside this leaf block. Necessary
+    // because EnzoMethodInference::update() forwards data from
+    // the root block to ALL leaves contained inside its volume,
+    // so the sphere particle we would like to spawn may not
+    // necessarily lie in this specific leaf.
+    spawn_remnant_particle(block, &sphere);
 
     // if leaf block, we're done, tell level array element
     Index3 index3(il3[0],il3[1],il3[2]);
@@ -1106,6 +1428,156 @@ void EnzoMethodInference::update ( Block * block, int n, char * buffer, int il3[
       }
     }
   }
+
+}
+
+//-----------------------------------------
+
+void EnzoMethodInference::spawn_remnant_particle ( Block * block, 
+                                    EnzoObjectFeedbackSphere * sphere)
+{
+  if (sphere->r() == 0.0) {
+    // return if sphere object is empty
+    return;
+  } 
+ 
+  EnzoBlock * enzo_block = enzo::block(block);
+
+  Field field = enzo_block->data()->field();
+
+  int mx,my,mz;
+  field.dimensions(0,&mx, &my, &mz); //field dimensions, including ghost zones
+  int gx,gy,gz;
+  field.ghost_depth(0,&gx, &gy, &gz);
+
+  double xm,ym,zm;
+  double xp,yp,zp;
+  double hx,hy,hz;
+  enzo_block->data()->lower(&xm,&ym,&zm);
+  enzo_block->data()->upper(&xp,&yp,&zp);
+  field.cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+   
+  // get 3D grid index for sphere center - account for ghost zones!!
+  int ix = (int) std::floor((sphere->pos(0) - xm) / hx) + gx;
+  int iy = (int) std::floor((sphere->pos(1) - ym) / hy) + gy;
+  int iz = (int) std::floor((sphere->pos(2) - zm) / hz) + gz;
+
+  // make sure that particle is actually within block
+  bool in_block = true;
+  in_block = in_block && ((gx <= ix) && (ix <= mx-gx));
+  in_block = in_block && ((gy <= iy) && (iy <= my-gy));
+  in_block = in_block && ((gz <= iz) && (iz <= mz-gz));
+  
+  if (! in_block ) {
+    return;
+  }
+
+  EnzoUnits * enzo_units = enzo::units();
+  double lunit = enzo_units->length();
+  double munit = enzo_units->mass();
+
+  Particle particle = enzo_block->data()->particle();
+
+  // declare particle arrays
+  const int it = particle.type_index("popIIIremnant");
+
+  const int ia_x = particle.attribute_index (it, "x");
+  const int ia_y = particle.attribute_index (it, "y");
+  const int ia_z = particle.attribute_index (it, "z");
+  const int ia_r = particle.attribute_index (it, "r");
+  const int ia_vx = particle.attribute_index (it, "vx");
+  const int ia_vy = particle.attribute_index (it, "vy");
+  const int ia_vz = particle.attribute_index (it, "vz");
+  
+  const int ia_mSNe = particle.attribute_index(it, "yield_SNe");
+  const int ia_mHNe = particle.attribute_index(it, "yield_HNe");
+  const int ia_mPISNe = particle.attribute_index(it, "yield_PISNe");
+
+  const int ia_mstar = particle.attribute_index(it, "stellar_mass");
+  const int ia_nSNe = particle.attribute_index(it, "num_SNe");
+  const int ia_nHNe = particle.attribute_index(it, "num_HNe");
+  const int ia_nPISNe = particle.attribute_index(it, "num_PISNe");
+  const int ia_nBH = particle.attribute_index(it, "num_BH");
+
+  const int ia_t = particle.attribute_index(it, "creation_time");
+
+
+  int ib  = 0; // batch counter
+  int ipp = 0; // counter
+
+  // insert a particle
+  int my_particle = particle.insert_particles(it, 1);
+
+  // get batch number and particle index
+  particle.index(my_particle, &ib, &ipp);
+
+  // pointers for particle attribute arrays
+  enzo_float * px   = (enzo_float *) particle.attribute_array(it, ia_x, ib);
+  enzo_float * py   = (enzo_float *) particle.attribute_array(it, ia_y, ib);
+  enzo_float * pz   = (enzo_float *) particle.attribute_array(it, ia_z, ib);
+  enzo_float * pr   = (enzo_float *) particle.attribute_array(it, ia_r, ib);
+  enzo_float * pvx  = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
+  enzo_float * pvy  = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
+  enzo_float * pvz  = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
+  enzo_float * pmSNe = (enzo_float *) particle.attribute_array(it, ia_mSNe, ib);
+  enzo_float * pmHNe = (enzo_float *) particle.attribute_array(it, ia_mHNe, ib);
+  enzo_float * pmPISNe = (enzo_float *) particle.attribute_array(it, ia_mPISNe, ib);
+  enzo_float * pmstar = (enzo_float *) particle.attribute_array(it, ia_mstar, ib);
+  enzo_float * pnSNe = (enzo_float *) particle.attribute_array(it, ia_nSNe, ib);
+  enzo_float * pnHNe = (enzo_float *) particle.attribute_array(it, ia_nHNe, ib);
+  enzo_float * pnPISNe = (enzo_float *) particle.attribute_array(it, ia_nPISNe, ib);
+  enzo_float * pnBH = (enzo_float *) particle.attribute_array(it, ia_nBH, ib);
+
+  enzo_float * pform  = (enzo_float *) particle.attribute_array(it, ia_t, ib);
+
+  int io = ipp;
+
+  px[io] = sphere->pos(0); // code length
+  py[io] = sphere->pos(1);
+  pz[io] = sphere->pos(2);
+  pr[io] = sphere->r();
+
+  pmSNe[io] = sphere->metal_mass_SNe(); // code mass
+  pmHNe[io] = sphere->metal_mass_HNe();
+  pmPISNe[io] = sphere->metal_mass_PISNe();
+
+  pmstar[io] = sphere->stellar_mass();
+  pnSNe[io] = sphere->num_SNe();
+  pnHNe[io] = sphere->num_HNe();
+  pnPISNe[io] = sphere->num_PISNe();
+  pnBH[io] = sphere->num_BH();
+
+  enzo_float * density = (enzo_float *) field.values("density");
+  enzo_float * velocity_x = (enzo_float *) field.values("velocity_x");
+  enzo_float * velocity_y = (enzo_float *) field.values("velocity_y");
+  enzo_float * velocity_z = (enzo_float *) field.values("velocity_z");
+
+  // average particle velocity over many cells to prevent runaway
+  double rhosum = 0.0;
+  double vx = 0.0;
+  double vy = 0.0;
+  double vz = 0.0;
+  for (int iz_=std::max(0,iz-3); iz_ <= std::min(iz+3,mx); iz_++) {
+    for (int iy_=std::max(0,iy-3); iy_ <= std::min(iy+3,my); iy_++) {
+      for (int ix_=std::max(0,ix-3); ix_ <= std::min(ix+3,mz); ix_++) {
+        int i_ = INDEX(ix_,iy_,iz_,mx,my);
+        vx += velocity_x[i_]*density[i_];
+        vy += velocity_y[i_]*density[i_];
+        vz += velocity_z[i_]*density[i_];
+        rhosum += density[i_];
+      }
+    } 
+  }  
+  vx /= rhosum;
+  vy /= rhosum;
+  vz /= rhosum;
+
+  pvx[io] = vx;
+  pvy[io] = vy;
+  pvz[io] = vz;
+
+  CkPrintf("Spawning remnant particle!!! creation_time = %f \n", block->time());
+  pform[io] = block->time();
 }
 
 //----------------------------------------------------------------------
@@ -1143,7 +1615,6 @@ void EnzoSimulation::p_infer_done()
     enzo::block_array().p_method_infer_exit();
   }
 }
-
 //----------------------------------------------------------------------
 
 std::tuple<int,int,int,int,int,int>
@@ -1517,3 +1988,5 @@ bool EnzoMethodInference::block_intersects_array_(Index index, int ia3[3])
   bool intersects = lx && ly && lz;
   return intersects;
 }
+
+//================================================================
