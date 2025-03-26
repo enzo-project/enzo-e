@@ -111,7 +111,12 @@ private: // attributes
   float volume_ratio_;
 
   /// List of spheres
-  std::vector<ObjectSphere> spheres_;
+  std::vector<EnzoObjectFeedbackSphere> spheres_;
+
+  /// Utility functions for StarFind and FBNet (used when inference_method == "starnet")
+  StarFind * starfind_;
+  FBNet * fbnet_;
+
 };
 
 #endif /* ENZO_IO_ENZO_LEVEL_ARRAY_HPP */

@@ -692,6 +692,10 @@ Method * EnzoProblem::create_method_
       method = new EnzoMethodFeedback(p_group);
     }
 
+  } else if (name == "fbnet_deposit") {
+
+    method = new EnzoMethodFBNetDeposit();
+
   } else if (name == "m1_closure") {
 
     method = new EnzoMethodM1Closure(p_group);

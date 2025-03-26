@@ -83,6 +83,7 @@ module enzo {
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodInference;
+  PUPable EnzoMethodFBNetDeposit;
   PUPable EnzoMethodMergeSinks;
   PUPable EnzoMethodMHDVlct;
   PUPable EnzoMethodPmDeposit;
@@ -97,6 +98,8 @@ module enzo {
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
   PUPable EnzoMethodStarMakerSTARSS;
+
+  PUPable EnzoObjectFeedbackSphere;
 
   PUPable EnzoPhysicsCosmology;
   PUPable EnzoPhysicsFluidProps;
@@ -160,6 +163,10 @@ module enzo {
     entry void p_restart_level_created();
     // enzo_level_array
     entry void p_set_level_array(CProxy_EnzoLevelArray proxy);
+
+   // FBNet
+   entry void p_fbnet_concatenate_sphere_lists();
+   entry void p_fbnet_done();
   };
 
   //----------------------------------------------------------------------
@@ -197,6 +204,9 @@ module enzo {
     entry void p_method_infer_request_data (int il3[3]);
     entry void p_method_infer_update (int n, char buffer[n], int il3[3]);
     entry void p_method_infer_exit();
+
+    entry void p_method_fbnet_update_mesh(CkReductionMsg * msg);
+    entry void p_method_fbnet_exit();
 
     // checkpoint
     entry void p_check_write_first

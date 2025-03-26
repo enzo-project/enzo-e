@@ -97,6 +97,12 @@ enum return_enum {
 // Component class includes
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_TORCH
+  #include <torch/script.h>
+//  #include <torch/csrc/api/include/torch/all.h>
+#endif
+//----------------------------------------------------------------------
+
 #include "fortran.h" /* included so scons knowns to install fortran.h */
 
 #include "fortran_types.h" /* included so scons knowns to install fortran.h */
@@ -118,18 +124,20 @@ enum return_enum {
 
 #include "enzo-core/EnzoFactory.hpp"
 
+#include "inference/EnzoObjectFeedbackSphere.hpp"
 #include "enzo-core/EnzoSimulation.hpp"
 
 #include "enzo-core/EnzoProblem.hpp"
 
+#include "inference/EnzoStarNetUtils.hpp"
 #include "enzo-core/EnzoConfig.hpp"
 
 #include "enzo-core/EnzoBlock.hpp"
+#include "enzo-core/EnzoBoundary.hpp"
 
 #include "inference/EnzoLevelArray.hpp"
 #include "inference/EnzoMethodInference.hpp"
-
-#include "enzo-core/EnzoBoundary.hpp"
+#include "inference/EnzoMethodFBNetDeposit.hpp"
 
 #include "enzo-core/EnzoMethodBalance.hpp"
 

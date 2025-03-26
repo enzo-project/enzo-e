@@ -188,6 +188,15 @@ public: // interface
       method_inference_level_infer(0),
       method_inference_field_group(),
       method_inference_overdensity_threshold(0),
+      method_inference_model(),
+      method_inference_starnet_repeatable(false),
+      method_inference_starnet_critical_metallicity(3.1e-6),
+      method_inference_starnet_feedback(true),
+      method_inference_starnet_radius_modifier(0.2),
+      method_inference_starnet_S1(true),
+      method_inference_starnet_S2(true),
+      ///EnzoMethodFBNetDeposit
+      method_fbnet_deposit_hot_deposit(false),
       // EnzoProlong
       prolong_enzo_type(),
       prolong_enzo_positive(true),
@@ -255,6 +264,7 @@ protected: // methods
   void read_method_background_acceleration_(Parameters *);
   void read_method_check_(Parameters *);
   void read_method_inference_(Parameters *);
+  void read_method_fbnet_deposit_(Parameters *);
   void read_method_turbulence_(Parameters *);
 
   void read_physics_(Parameters *);
@@ -441,6 +451,16 @@ public: // attributes
   int                        method_inference_level_infer;
   std::string                method_inference_field_group;
   float                      method_inference_overdensity_threshold;
+  std::string                method_inference_model;
+  bool                       method_inference_starnet_repeatable;
+  double                     method_inference_starnet_critical_metallicity;
+  bool                       method_inference_starnet_feedback;
+  double                     method_inference_starnet_radius_modifier;
+  bool                       method_inference_starnet_S1;
+  bool                       method_inference_starnet_S2;
+
+  /// EnzoMethodFBNetDeposit
+  bool                       method_fbnet_deposit_hot_deposit;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

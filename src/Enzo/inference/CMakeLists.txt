@@ -10,6 +10,11 @@ add_library(Enzo_inference
    EnzoLevelArray.hpp
    EnzoMethodInference.cpp
    EnzoMethodInference.hpp
+   EnzoMethodFBNetDeposit.cpp
+   EnzoMethodFBNetDeposit.hpp
+   EnzoObjectFeedbackSphere.hpp 
+   EnzoStarNetUtils.cpp
+   EnzoStarNetUtils.hpp
    Index3.cpp
    Index3.hpp
 )

@@ -85,7 +85,9 @@ public: // methods
   /// block
   void request_data (Block * block, int ia3[3]);
 
-  void update (Block *, int n, char * buffer, int ia3[3]);
+  void update (Block * block, int n, char * buffer, int ia3[3]);
+
+  void spawn_remnant_particle(Block * block, EnzoObjectFeedbackSphere * sphere); 
 
 protected: // methods
 

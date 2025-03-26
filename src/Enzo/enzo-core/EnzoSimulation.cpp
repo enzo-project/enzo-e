@@ -89,6 +89,8 @@ void EnzoSimulation::pup (PUP::er &p)
   p | sync_infer_create_;
   p | sync_infer_done_;
   p | infer_count_arrays_;
+  p | sync_fbnet_count_;
+  p | sync_fbnet_update_;
   p | check_num_files_;
   p | check_ordering_;
   p | check_directory_;
@@ -244,4 +246,3 @@ const Factory * EnzoSimulation::factory() const throw()
 }
 
 //======================================================================
-

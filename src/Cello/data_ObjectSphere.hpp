@@ -27,7 +27,8 @@ public: // interface
   };
 
   ObjectSphere() throw()
-    : Object()
+    : Object(),
+      radius_(0)
   { };
 
   /// Charm++ PUP::able declarations
@@ -103,6 +104,12 @@ public: // interface
     return pc;
   }
 
+  //---------------------------------------------------------------------
+  
+  double pos(int d) {return center_[d];}
+
+  double r() {return radius_;}
+
 public: // virtual methods
 
   virtual void draw() { CkPrintf ("ObjectSphere::draw()\n"); }
@@ -117,8 +124,8 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  double center_[3];
-  double radius_;
+  double center_[3] = {};
+  double radius_ = 0.0;
 
 };
 
