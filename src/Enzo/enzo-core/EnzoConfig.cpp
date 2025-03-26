@@ -847,28 +847,27 @@ void EnzoConfig::read_initial_bb_test_(Parameters * p)
 
 //----------------------------------------------------------------------
 
-void EnzoConfig::read_method_check_(Parameters * p)
+void EnzoConfig::read_method_check_(Parameters * all_p)
 {
-  p->group_set(0,"Method");
-  p->group_push("check");
+  ParameterGroup p(*all_p, "Method:check");
 
-  method_check_num_files = p->value_integer
+  method_check_num_files = p.value_integer
     ("num_files",1);
-  method_check_ordering = p->value_string
+  method_check_ordering = p.value_string
     ("ordering","order_morton");
 
-  if (p->type("dir") == parameter_string) {
+  if (p.type("dir") == parameter_string) {
     method_check_dir.resize(1);
-    method_check_dir[0] = p->value_string("dir","");
-  } else if (p->type("dir") == parameter_list) {
-    int size = p->list_length("dir");
+    method_check_dir[0] = p.value_string("dir","");
+  } else if (p.type("dir") == parameter_list) {
+    int size = p.list_length("dir");
     if (size > 0) method_check_dir.resize(size);
     for (int i=0; i<size; i++) {
-      method_check_dir[i] = p->list_value_string(i,"dir","");
+      method_check_dir[i] = p.list_value_string(i,"dir","");
     }
   }
-  method_check_monitor_iter   = p->value_integer("monitor_iter",0);
-  method_check_include_ghosts = p->value_logical("include_ghosts",false);
+  method_check_monitor_iter   = p.value_integer("monitor_iter",0);
+  method_check_include_ghosts = p.value_logical("include_ghosts",false);
 }
 
 //----------------------------------------------------------------------
@@ -955,10 +954,8 @@ namespace{
     EnzoDualEnergyConfig out = EnzoDualEnergyConfig::build_disabled();
 
     // fetch names of parameters in Physics:fluid_props:dual_energy
-    p->group_set(0, "Physics");
-    p->group_set(1, "fluid_props");
-    p->group_set(2, "dual_energy");
-    std::vector<std::string> names = p->leaf_parameter_names();
+    std::vector<std::string> names = p->leaf_parameter_names
+      ("Physics:fluid_props:dual_energy");
 
     const bool missing_de_config = names.size() == 0;
     if (!missing_de_config){ // parse Physics:fluid_props:dual_energy
@@ -1065,10 +1062,8 @@ namespace{
     const bool legacy_gamma_specified = p->param("Field:gamma") != nullptr;
 
     // fetch names of parameters in Physics:fluid_props:eos
-    p->group_set(0, "Physics");
-    p->group_set(1, "fluid_props");
-    p->group_set(2, "eos");
-    std::vector<std::string> names = p->leaf_parameter_names();
+    std::vector<std::string> names = p->leaf_parameter_names
+      ("Physics:fluid_props:eos");
 
     const bool missing_eos_config = names.size() == 0;
 
@@ -1199,10 +1194,8 @@ namespace{
 
     // fetch names of parameters in Physics:fluid_props:floors. If any of them
     // exist, let's parse them
-    p->group_set(0, "Physics");
-    p->group_set(1, "fluid_props");
-    p->group_set(2, "floors");
-    std::vector<std::string> floor_l = p->leaf_parameter_names();
+    std::vector<std::string> floor_l = p->leaf_parameter_names
+      ("Physics:fluid_props:floors");
 
     const bool no_legacy = (floor_l.size() > 0);
     if (no_legacy){

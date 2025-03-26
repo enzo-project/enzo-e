@@ -231,16 +231,15 @@ void EnzoInitialBCenter::enforce_block( Block * block,
 
 void EnzoInitialBCenter::initialize_values_()
 {
-  parameters_->group_set(0,"Initial");
-  parameters_->group_set(1,"vlct_bfield");
-
 
   // Check if values are specified for any component of the vector potential
   //    - If only a subset of values are specified, than the unspecified
   //      components are assumed to be constant.
   //    - If none of the components are specified, then bfields are assumed to
   //      be pre-calculated and only the cell-centered values are computed
-  std::string names[3] = {"Ax","Ay","Az"};
+  std::string names[3] = {"Initial:vlct_bfield:Ax",
+                          "Initial:vlct_bfield:Ay",
+                          "Initial:vlct_bfield:Az"};
   for (int i = 0; i < 3; i++){
     if (parameters_->type(names[i]) == parameter_unknown){
       values_[i] = nullptr;
