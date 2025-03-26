@@ -42,17 +42,6 @@ public: // interface
     : Config (m),
       adapt_mass_type(),
       field_uniform_density(1.0),
-      // Cosmology
-      physics_cosmology(false),
-      physics_cosmology_hubble_constant_now(0.0),
-      physics_cosmology_omega_matter_now(0.0),
-      physics_cosmology_omega_lamda_now(0.0),
-      physics_cosmology_omega_baryon_now(1.0),
-      physics_cosmology_omega_cdm_now(0.0),
-      physics_cosmology_comoving_box_size(0.0),
-      physics_cosmology_max_expansion_rate(0.0),
-      physics_cosmology_initial_redshift(0.0),
-      physics_cosmology_final_redshift(0.0),
       // FluidProps
       physics_fluid_props_de_config(),
       physics_fluid_props_eos_variant(),
@@ -287,18 +276,6 @@ public: // attributes
   std::vector <std::string>  adapt_mass_type;
 
   double                     field_uniform_density;
-
-  /// Cosmology
-  bool                       physics_cosmology;
-  double                     physics_cosmology_hubble_constant_now;
-  double                     physics_cosmology_omega_matter_now;
-  double                     physics_cosmology_omega_lamda_now;
-  double                     physics_cosmology_omega_baryon_now;
-  double                     physics_cosmology_omega_cdm_now;
-  double                     physics_cosmology_comoving_box_size;
-  double                     physics_cosmology_max_expansion_rate;
-  double                     physics_cosmology_initial_redshift;
-  double                     physics_cosmology_final_redshift;
 
   /// FluidProps
   EnzoDualEnergyConfig       physics_fluid_props_de_config;

@@ -58,8 +58,6 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
   std::mt19937 mt(std::time(nullptr));
   int count = 0;
 
-  const EnzoConfig * enzo_config = enzo::config();
-
   // Are we at the highest level?
   // Can we form stars at this level?
   if ( (! block->is_leaf() ) || (block->level() < this->min_level_) ){
@@ -226,7 +224,7 @@ void EnzoMethodStarMakerSTARSS::compute ( Block *block) throw()
 
   // compute the temperature
   EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                             enzo_config->physics_cosmology);
+                                             enzo::cosmology() != nullptr);
 
   compute_temperature.compute(enzo_block);
 
