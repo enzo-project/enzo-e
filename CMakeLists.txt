@@ -33,7 +33,7 @@ if(EXISTS "${LOC_PATH}")
       "Please make a build subdirectory. Feel free to remove CMakeCache.txt and CMakeFiles.")
 endif()
 
-# Ensure the custom modules to find Charm++ and Grackle are included
+# Ensure the custom module to find Charm++ is included
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # confirm that std::filesystem is supported by the compiler and create an
