@@ -38,10 +38,10 @@ size of blocks.
 Balance
 -------
 
-Parameters for controlling dynamic load balancing are enclosed within
-the :p:`Balance` group.  Currently only one :p:`Balance` parameter is
-available, which is used to control how frequently load balancing
-is performed.
+Parameters for controlling the Charm++ dynamic load balancer are
+enclosed within the :p:`Balance` group.  Currently only one
+:p:`Balance` parameter is available, which is used to control how
+frequently load balancing is performed.
 
 .. include:: balance.incl
 

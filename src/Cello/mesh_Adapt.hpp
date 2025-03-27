@@ -35,28 +35,49 @@ public: // interface
     int level_max_;
     bool is_sibling_;
     bool can_coarsen_;
+    void clear() {
+      level_now_ = 0;
+      level_min_ = 0;
+      level_max_ = 0;
+      is_sibling_ = false;
+      can_coarsen_ = false;
+    }
   };
 
   /// Constructor
   Adapt ()
-    : valid_(false),
+    : face_level_curr_(),
+      face_level_next_(),
+      face_level_last_(),
+      face_level_curr_count_(),
+      face_level_next_count_(),
+      face_level_last_count_(),
+      valid_(false),
       rank_(0),
+      periodicity_(),
       min_level_(0),
-      max_level_(0)
+      max_level_(0),
+      neighbor_list_(),
+      count_(0)
   {
-    face_level_[0].resize(27);
-    face_level_[1].resize(27);
-    face_level_[2].resize(27*8);
-    reset_face_level(LevelType::curr);
-    reset_face_level(LevelType::next);
-    reset_face_level(LevelType::last);
+    reset_face_level_curr();
+    reset_face_level_next();
+    reset_face_level_last();
+    periodicity_[0] = 0;
+    periodicity_[1] = 0;
+    periodicity_[2] = 0;
+    self_.clear();
   }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    PUParray(p,face_level_,3);
-
+    p | face_level_curr_;
+    p | face_level_next_;
+    p | face_level_last_;
+    p | face_level_curr_count_;
+    p | face_level_next_count_;
+    p | face_level_last_count_;
     p | valid_;
     p | rank_;
     PUParray (p,periodicity_,3);
@@ -64,96 +85,145 @@ public: // interface
     p | max_level_;
     p | self_;
     p | neighbor_list_;
+    p | count_;
 
   }
-
-  enum class LevelType { curr, next, last };
 
   //----------------------------------------------------------------------
 
-  /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level (const int if3[3], LevelType level_type,
-                       int level_min, int level_max, bool can_coarsen);
+  /// Set current level for the block in the given face if counter is
+  /// greater than saved
+  void set_face_level_curr (const int if3[3], int level, int count);
 
-  /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level (const int if3[3], LevelType level_type,
-                       int level_min)
-  {
-    face_level_[int(level_type)][IF3(if3)] = level_min;
-  }
+  /// Set next level for the block in the given face if counter is
+  /// greater than saved
+  void set_face_level_next (const int if3[3], int level, int count);
 
-  /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level_last (const int ic3[3], const int if3[3],
-                            int level_min, int level_max, bool can_coarsen);
-
-  /// Set level for the block in the given face and (neighbor's) child
-  void set_face_level_last (const int ic3[3], const int if3[3],
-                            int level_min)
-  {
-    face_level_[int(LevelType::last)][ICF3(ic3,if3)] = level_min;
-  }
+  /// Set last level for the block in the given face and neighbor's
+  /// child if counter is greater than last
+  void set_face_level_last
+  (const int ic3[3], const int if3[3], int level, int count);
 
   /// Return the current level_now for the block in the given face and
   /// (neighbor's) child
-  int face_level (const int if3[3],LevelType level_type) const
-  {
-    ASSERT("Adapt::face_level",
-           "face_level() called with LevelType::last",
-           (level_type != LevelType::last));
-    return face_level_[int(level_type)][IF3(if3)];
-  }
+  int face_level_curr (const int if3[3]) const
+  { return face_level_curr_[IF3(if3)];  }
 
-  int face_level (int axis, int face, LevelType level_type) const
+  int face_level_next (const int if3[3]) const
+  { return face_level_next_[IF3(if3)];  }
+
+  int face_level_curr (int axis, int face) const
   {
-    ASSERT("Adapt::face_level",
-           "face_level() called with LevelType::last",
-           (level_type != LevelType::last));
     int if3[3];
     cello::af_to_xyz(axis,face,if3);
-    return face_level(if3,level_type);
+    return face_level_curr(if3);
+  }
+
+  int face_level_next (int axis, int face) const
+  {
+    int if3[3];
+    cello::af_to_xyz(axis,face,if3);
+    return face_level_next(if3);
   }
 
   int face_level_last (const int ic3[3], const int if3[3]) const
   {
-    return face_level_[int(LevelType::last)][ICF3(ic3,if3)];
+    return face_level_last_[IC3(ic3)][IF3(if3)];
   }
 
-  inline void reset_face_level (LevelType level_type)
+  inline void reset_face_level_curr()
   {
-    int value = (level_type == LevelType::last) ? -1 : 0;
-    std::fill(face_level_[int(level_type)].begin(),
-              face_level_[int(level_type)].end(),value);
+    clear_curr_face_count();
+    if (face_level_curr_.size() != 27)
+        face_level_curr_.resize(27);
+    std::fill(face_level_curr_.begin(),
+              face_level_curr_.end(), 0 );
   }
 
-  size_t size_face_level(LevelType level_type)
-  { return face_level_[int(level_type)].size(); }
+  inline void reset_face_level_next()
+  {
+    clear_next_face_count();
+    if (face_level_next_.size() != 27)
+        face_level_next_.resize(27);
+    std::fill(face_level_next_.begin(),
+              face_level_next_.end(), 0 );
+  }
 
-  std::vector<int> & vector_face_level(LevelType level_type)
-  { return face_level_[int(level_type)]; }
+  inline void reset_face_level_last()
+  {
+    clear_last_face_count();
+    const size_t nc = cello::num_children();
+    if (face_level_last_.size() != nc)
+        face_level_last_.resize(nc);
+    for (size_t i=0; i<nc; i++) {
+      if (face_level_last_[i].size() != 27)
+          face_level_last_[i].resize(27);
+      std::fill(face_level_last_[i].begin(),
+                face_level_last_[i].end(), -1 );
+    }
+  }
+
+  /// Clear all face level counts
+  void clear_face_counts()
+  {
+    clear_curr_face_count();
+    clear_next_face_count();
+    clear_last_face_count();
+  }
+
+  /// Clear current face level counts
+  void clear_curr_face_count()
+  {
+    auto & curr = face_level_curr_count_;
+    if (curr.size() != 27) curr.resize(27);
+    std::fill(curr.begin(), curr.end(), -1 );
+  }
+
+  /// clear next face level counts
+  void clear_next_face_count()
+  {
+    auto & next = face_level_next_count_;
+    if (next.size() != 27) next.resize(27);
+    std::fill(next.begin(), next.end(), -1 );
+  }
+
+  /// clear last face level counts
+  void clear_last_face_count()
+  {
+    auto & last = face_level_last_count_;
+    const size_t nc = cello::num_children();
+    if (last.size() != nc) last.resize(nc);
+    for (size_t i=0; i<nc; i++) {
+      if (last[i].size() != 27) last[i].resize(27);
+      std::fill(last[i].begin(), last[i].end(), -1 );
+    }
+  }
+
+  /// Return vector of current face levels
+  std::vector<int> & face_level_curr()
+  { return face_level_curr_; }
+
+  /// Return vector of current face level counts
+  std::vector<int> & face_level_curr_count()
+  { return face_level_curr_count_; }
 
   void update_curr_from_next ()
-  {
-    face_level_[int(LevelType::curr)] = face_level_[int(LevelType::next)];
-  }
-  void update_next_from_curr ()
-  {
-    face_level_[int(LevelType::next)] = face_level_[int(LevelType::curr)];
-  }
+  { face_level_curr_ = face_level_next_; }
 
-  void copy_face_level(LevelType level_type, int * face_level)
+  void update_next_from_curr ()
+  { face_level_next_ = face_level_curr_; }
+
+  void copy_face_level_curr(int * face_level)
   {
-    ASSERT("Adapt::copy_face_level",
-           "copy_face_level() called with LevelType::last",
-           (level_type != LevelType::last));
-    int n = face_level_[int(level_type)].size();
-    for (int i=0; i<n; i++) face_level_[int(level_type)][i] = face_level[i];
+    for (int i=0; i<27; i++)
+      face_level_curr_[i] = face_level[i];
   }
 
   inline void reset ()
   {
-    reset_face_level(LevelType::curr);
-    reset_face_level(LevelType::next);
-    reset_face_level(LevelType::last);
+    reset_face_level_curr();
+    reset_face_level_next();
+    reset_face_level_last();
   }
 
   //======================================================================
@@ -192,15 +262,12 @@ public: // interface
     self_.level_now_ = index.level();
   }
 
-  inline bool insert_neighbor (Index index)
-  { return insert_neighbor (index,self_.index_.is_sibling(index)); }
+  inline void insert_neighbor (Index index)
+  { insert_neighbor (index,self_.index_.is_sibling(index)); }
 
   /// Insert the given neighbor into the list of neighbors. Return
   /// true if successful and false if neighbor already inserted
-  bool insert_neighbor  (Index index, bool is_sibling);
-
-  /// Reset self and level bounds for next adapt phase
-  void reset_bounds();
+  void insert_neighbor  (Index index, bool is_sibling);
 
   /// Delete the given neighbor from list of neighbors. Return true if
   /// successful and false if neighbor not found.
@@ -220,13 +287,13 @@ public: // interface
   /// Coarsen self, replacing blocks non-adjacent blocks with siblings
   void coarsen (const Adapt & adapt_child);
 
-  void initialize_self
-  (Index index, int level_min, int level_now);
-
   /// Update a Block neighbor’s current level bounds, presumably from
   /// updated bounds received by the neighboring Block.
   void update_neighbor
   (Index index, int level_min, int level_max, bool can_coarsen);
+
+  /// Initialize level bounds for self and neighbors
+  void initialize_bounds(int level_next, int level_curr);
 
   /// Update the Block’s own level bounds given the current list of
   /// neighbor level bounds. Returns true iff the values change, which
@@ -262,6 +329,7 @@ public: // interface
   /// Return the minimum level for the given block
   inline int level_min() const {return self_.level_min_; }
   inline int level_max() const {return self_.level_max_; }
+  inline int level_now() const {return self_.level_now_; }
   inline bool can_coarsen() const {return self_.can_coarsen_; }
   inline int num_neighbors() const { return neighbor_list_.size(); }
   inline bool is_sibling (int i) const { return neighbor_list_[i].is_sibling_; }
@@ -291,6 +359,10 @@ public: // interface
   /// its index if it is (or one past last index if not)
   bool is_neighbor (Index index, int * ip = 0) const;
 
+  int count() const { return count_; }
+  void inc_count () { ++count_; }
+  void clear_count() { count_ = 0; }
+
 private: // methods
 
   void copy_ (const Adapt & adapt);
@@ -310,9 +382,19 @@ private: // methods
 
 private: // attributes
 
-  /// List of neighbor indices (and self)
   // NOTE: change pup() function whenever attributes change
-  std::vector<int> face_level_[3];
+
+  /// List of neighbor levels
+  std::vector<int> face_level_curr_;
+  std::vector<int> face_level_next_;
+  std::vector < std::vector<int> > face_level_last_;
+
+  /// List of counts associated with last assignment to neighbor levels
+  /// Used to maintain assignment order even when Charm++ messages don't
+  /// arrive in the same order sent
+  std::vector<int> face_level_curr_count_;
+  std::vector<int> face_level_next_count_;
+  std::vector < std::vector<int> > face_level_last_count_;
 
   /// Whether this Adapt class is valid; used for resetting existing
   /// Adapt
@@ -329,7 +411,8 @@ private: // attributes
   LevelInfo self_;
   /// Level bound information for neighboring blocks
   std::vector<LevelInfo> neighbor_list_;
-
+  /// Local count
+  int count_;
 };
 
 #endif /* MESH_ADAPT_HPP */
