@@ -47,7 +47,7 @@ if(USE_GRACKLE)
   # A better default behavior might then be to searching for Grackle first and
   # then performing an in-source build if it can't be found
 
-  set(GRACKLE_USE_DOUBLE USE_DOUBLE_PREC)
+  set(GRACKLE_USE_DOUBLE "${USE_DOUBLE_PREC}")
   set(GRACKLE_USE_OPENMP OFF)
 
   if (USE_EXTERNAL_GRACKLE)
