@@ -16,6 +16,111 @@
 #define ERROR_LENGTH 255
 
 //----------------------------------------------------------------------
+/// @def      __CELLO_PRETTY_FUNC__
+/// @brief    a magic contant like __LINE__ or __FILE__ used to specify the name
+///           of the current function
+///
+/// In more detail:
+/// - The C++11 standard ensures __func__ is provided on all platforms, but it
+///   only provides limited information (just the name of the function).
+/// - note that __func__ is technically not a macro. It's a static constant
+///   string implicitly defined by the compiler within each function definition
+/// - Where available, we prefer to use compiler-specific features that provide
+///   more information about the function (like the scope of the function, the
+///   the function signature, any template specialization, etc.).
+#ifdef __GNUG__
+  #define __CELLO_PRETTY_FUNC__ __PRETTY_FUNCTION__
+#else
+  #define __CELLO_PRETTY_FUNC__ __func__
+#endif
+
+//----------------------------------------------------------------------
+/// @def CELLO_ERROR
+/// @brief function-like macro that handles a (lethal) error message
+///
+/// This macro should be treated as a function with the signature:
+///
+///   [[noreturn]] void CELLO_ERROR(const char* msg, ...);
+///
+/// The ``msg`` arg is printf-style format argument specifying the error
+/// message. The remaining args arguments are used to format error message
+///
+/// @note
+/// the ``msg`` string is part of the variadic args so that there is always
+/// at least 1 variadic argument (even in cases when ``msg`` doesn't format
+/// any arguments). There is no portable way around this until C++ 20.
+///
+/// @note
+/// This is intended to replace the ERROR macros. There are 2 improvements:
+/// 1. CELLO_ERROR automatically detects the function name
+/// 2. CELLO_ERROR automatically takes a variable number of message-formatting
+///    arguments (in contrast, different ERROR macros are defined to accept
+///    different numbers of arguments)
+#define CELLO_ERROR(...)                                                      \
+  { cello::message                                                            \
+        (stderr,"ERROR",__FILE__,__LINE__,__CELLO_PRETTY_FUNC__,__VA_ARGS__); \
+        cello::error(); }
+
+//----------------------------------------------------------------------
+/// @def CELLO_REQUIRE
+/// @brief implements functionality analogous to the assert() macro
+///
+/// if the condition is false, print an error-message (with printf
+/// formatting) & abort the program.
+///
+/// This macro should be treated as a function with the signature:
+///
+///   void CELLO_REQUIRE(bool cond, const char* msg, ...);
+///
+/// - The 1st arg is a boolean condition. When true, this does nothing
+/// - The 2nd arg is printf-style format argument specifying the error message
+/// - The remaining args arguments are used to format error message
+///
+/// @note
+/// The behavior is independent of the ``NDEBUG`` macro
+///
+/// @note
+/// This is intended to replace the ASSERT macros. There are 3 differences:
+/// 1. CELLO_REQUIRE expects the boolean condition to be the first arg (rather
+///    than the last).
+/// 2. CELLO_REQUIRE automatically detects the function name
+/// 2. CELLO_REQUIRE automatically takes a variable number of message-formatting
+///    arguments (in contrast, different ASSERT macros are defined to accept
+///    different numbers of arguments)
+#define CELLO_REQUIRE(cond, ...)                                              \
+  {  if (!(cond))                                                             \
+      { cello::message                                                        \
+        (stderr,"ERROR",__FILE__,__LINE__,__CELLO_PRETTY_FUNC__,__VA_ARGS__); \
+        cello::error(); } }
+
+//----------------------------------------------------------------------
+/// @def CELLO_WARNING
+/// @brief function-like macro that handles a (non-lethal) warning message
+///
+/// This macro should be treated as a function with the signature:
+///
+///   void CELLO_WARN(const char* msg, ...);
+///
+/// The ``msg`` arg is printf-style format argument specifying the error
+/// message. The remaining args arguments are used to format error message
+///
+/// @note
+/// the ``msg`` string is part of the variadic args so that there is always
+/// at least 1 variadic argument (even in cases when ``msg`` doesn't format
+/// any arguments). There is no portable way around this until C++ 20.
+///
+/// @note
+/// This is intended to replace the WARNING macros. There are 2 improvements:
+/// 1. CELLO_WARN automatically detects the function name
+/// 2. CELLO_WARN automatically takes a variable number of message-formatting
+///    arguments (in contrast, different ERROR macros are defined to accept
+///    different numbers of arguments)
+#define CELLO_WARN(...)                                                       \
+  { cello::message                                                            \
+      (stderr,"WARNING",__FILE__,__LINE__,__CELLO_PRETTY_FUNC__,              \
+       __VA_ARGS__); }
+
+//----------------------------------------------------------------------
 /// @def      WARNING
 /// @brief    Handle a (non-lethal) warning message
 #define WARNING(F,M)                                    \
@@ -47,6 +152,9 @@
       (stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); }
 
 //----------------------------------------------------------------------
+
+// these macros are deprecated. Prefer to use the CELLO_ERROR macro
+
 /// @def      ERROR
 /// @brief    Handle a (lethal) error message
 #define ERROR(F,M)                              \
@@ -256,6 +364,10 @@
 #endif /* CELLO_DEBUG */
 
 //----------------------------------------------------------------------
+
+// these macros are deprecated. New code should prefer the CELLO_REQUIRE macro.
+// Note that the CELLO_REQUIRE macro expects the condition as the first arguement
+
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
 
@@ -314,7 +426,7 @@
 
 
 namespace cello {
-  extern void message
+  void message
   (FILE * fp,
    const char * type, 
    const char * file, 
