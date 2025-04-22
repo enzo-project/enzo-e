@@ -65,7 +65,16 @@ void Block::stopping_begin_()
     Method * method;
     double dt_block = std::numeric_limits<double>::max();
     while ((method = problem->method(index++))) {
+      // update dt_block based on the maximum timestep allowed by method for
+      // data stored on the current block (this is done even when method
+      // might not be scheduled to run)
       dt_block = std::min(dt_block,method->timestep(this));
+
+      // if applicable, reduce timestep to coincide with method's schedule
+      Schedule * schedule = method->schedule();
+      if (schedule != nullptr){
+        dt_block = schedule->update_timestep(time_,dt_block);
+      }
     }
 
     // Reduce timestep to coincide with scheduled output if needed
