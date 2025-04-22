@@ -31,6 +31,16 @@ parameter_type ParameterGroup::type(std::string param) noexcept
 
 //----------------------------------------------------------------------
 
+parameter_type ParameterGroup::list_type(int index, std::string param) noexcept
+{
+  std::vector<std::string> init_groups(pop_wrapped_p_groups_());
+  parameter_type out = wrapped_p_.list_type(index, full_name(param));
+  restore_wrapped_p_groups_(init_groups);
+  return out;
+}
+
+//----------------------------------------------------------------------
+
 int ParameterGroup::value_integer (std::string s, int deflt) noexcept
 {
   std::vector<std::string> init_groups(pop_wrapped_p_groups_());

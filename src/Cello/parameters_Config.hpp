@@ -11,6 +11,7 @@
 #define PARAMETERS_CONFIG_HPP
 
 class Parameters;
+class ParameterGroup;
 
 class Config : public PUP::able {
 
@@ -577,8 +578,7 @@ protected: // functions
   void read_testing_     ( Parameters * ) throw();
   void read_units_       ( Parameters * ) throw();
 
-  int read_schedule_( Parameters * ,
-		      const std::string group   );
+  int read_schedule_( ParameterGroup p);
 
 };
 

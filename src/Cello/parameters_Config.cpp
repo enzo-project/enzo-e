@@ -329,12 +329,8 @@ void Config::read_adapt_ (Parameters * p) throw()
       (p->type(prefix+"schedule:var") != parameter_unknown);
 
     if (adapt_scheduled) {
-      p->group_set(0,"Adapt");
-      p->group_push(adapt_list[ia]);
-      p->group_push("schedule");
-      adapt_schedule_index[ia] = read_schedule_(p, prefix);
-      p->group_pop();
-      p->group_pop();
+      ParameterGroup p_group(*p, prefix + "schedule");
+      adapt_schedule_index[ia] = read_schedule_(p_group);
     } else {
       adapt_schedule_index[ia] = -1;
     }
@@ -362,10 +358,8 @@ void Config::read_balance_ (Parameters * p) throw()
     (p->type("Balance:schedule:var") != parameter_unknown);
 
   if (balance_scheduled) {
-    p->group_set(0,"Balance");
-    p->group_push("schedule");
-    balance_schedule_index = read_schedule_(p, "Balance");
-    p->group_pop();
+    ParameterGroup p_group(*p, "Balance:schedule");
+    balance_schedule_index = read_schedule_(p_group);
   } else {
     balance_schedule_index = -1;
   }
@@ -849,16 +843,12 @@ void Config::read_method_ (Parameters * p) throw()
     method_list[index_method] = name;
 
     // Read schedule for the Method object if any
-      
     const bool method_scheduled = 
       (p->type(full_name + ":schedule:var") != parameter_unknown);
 
     if (method_scheduled) {
-      p->group_set(0,"Method");
-      p->group_push(name);
-      p->group_push("schedule");
-      method_schedule_index[index_method] = read_schedule_(p, name);
-      p->group_pop();
+      ParameterGroup p_group(*p, full_name + ":schedule");
+      method_schedule_index[index_method] = read_schedule_(p_group);
     } else {
       method_schedule_index[index_method] = -1;
     }
@@ -887,15 +877,13 @@ void Config::read_monitor_ (Parameters * p) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_output_ (Parameters * p) throw()
+void Config::read_output_ (Parameters * all_p) throw()
 {
   //--------------------------------------------------
   // Output
   //--------------------------------------------------
 
-  p->group_set(0,"Output");
-
-  num_output = p->list_length("list");
+  num_output = all_p->list_length("Output:list");
 
   output_list.resize(num_output);
   output_type.resize(num_output);
@@ -926,48 +914,54 @@ void Config::read_output_ (Parameters * p) throw()
   output_particle_list.resize(num_output);
   output_name.resize(num_output);
 
-  output_dir_global = p->value_string("dir_global",".");
+  output_dir_global = all_p->value_string("Output:dir_global",".");
 
   for (int index_output=0; index_output<num_output; index_output++) {
 
     TRACE1 ("index = %d",index_output);
 
     output_list[index_output] = 
-      p->list_value_string (index_output,"Output:list","unknown");
+      all_p->list_value_string (index_output,"Output:list","");
+    
+    if (output_list[index_output] == "") {
+      ERROR1("Config::read_output_",
+             "there was a problem parsing element %d of Output:list",
+             index_output);
+    }
 
-    p->group_set(1,output_list[index_output]);
+    ParameterGroup p (*all_p, "Output:" + output_list[index_output]);
 
-    output_type[index_output] = p->value_string("type","unknown");
+    output_type[index_output] = p.value_string("type","unknown");
 
     if (output_type[index_output] == "unknown") {
-      ERROR1("Config::read",
+      ERROR1("Config::read_output_",
 	     "Output:%s:type parameter is undefined",
 	     output_list[index_output].c_str());
     }
 
-    output_stride_write[index_output] = p->value_integer("stride_write",0);
+    output_stride_write[index_output] = p.value_integer("stride_write",0);
 
-    output_stride_wait[index_output] = p->value_integer("stride_wait",0);
+    output_stride_wait[index_output] = p.value_integer("stride_wait",0);
 
-    if (p->type("dir") == parameter_string) {
+    if (p.type("dir") == parameter_string) {
       output_dir[index_output].resize(1);
-      output_dir[index_output][0] = p->value_string("dir","");
-    } else if (p->type("dir") == parameter_list) {
-      int size = p->list_length("dir");
+      output_dir[index_output][0] = p.value_string("dir","");
+    } else if (p.type("dir") == parameter_list) {
+      int size = p.list_length("dir");
       if (size > 0) output_dir[index_output].resize(size);
       for (int i=0; i<size; i++) {
-	output_dir[index_output][i] = p->list_value_string(i,"dir","");
+	output_dir[index_output][i] = p.list_value_string(i,"dir","");
       }
     }
 
-    if (p->type("name") == parameter_string) {
+    if (p.type("name") == parameter_string) {
       output_name[index_output].resize(1);
-      output_name[index_output][0] = p->value_string("name","");
-    } else if (p->type("name") == parameter_list) {
-      int size = p->list_length("name");
+      output_name[index_output][0] = p.value_string("name","");
+    } else if (p.type("name") == parameter_list) {
+      int size = p.list_length("name");
       if (size > 0) output_name[index_output].resize(size);
       for (int i=0; i<size; i++) {
-	output_name[index_output][i] = p->list_value_string(i,"name","");
+	output_name[index_output][i] = p.list_value_string(i,"name","");
       }
     }
 
@@ -983,36 +977,34 @@ void Config::read_output_ (Parameters * p) throw()
     //   }
     // }
 
-    if (p->type("field_list") == parameter_list) {
-      int length = p->list_length("field_list");
+    if (p.type("field_list") == parameter_list) {
+      int length = p.list_length("field_list");
       output_field_list[index_output].resize(length);
       for (int i=0; i<length; i++) {
-	output_field_list[index_output][i] = p->list_value_string(i,"field_list","");
+	output_field_list[index_output][i] = p.list_value_string(i,"field_list","");
       }
     }
 
-    if (p->type("particle_list") == parameter_list) {
-      int length = p->list_length("particle_list");
+    if (p.type("particle_list") == parameter_list) {
+      int length = p.list_length("particle_list");
       output_particle_list[index_output].resize(length);
       for (int i=0; i<length; i++) {
-	output_particle_list[index_output][i] = p->list_value_string(i,"particle_list","");
+	output_particle_list[index_output][i] = p.list_value_string(i,"particle_list","");
       }
     }
 
     // Read schedule for the Output object
-      
-    p->group_push("schedule");
-    output_schedule_index[index_output] = 
-      read_schedule_(p, output_list[index_output]);
-    p->group_pop();
+
+    ParameterGroup p_schedule_group(*all_p, p.get_group_path() + ":schedule");
+    output_schedule_index[index_output] = read_schedule_(p_schedule_group);
 
     // Image 
     
     if (output_type[index_output] == "image") {
 
 
-      if (p->type("axis") != parameter_unknown) {
-	std::string axis = p->value_string("axis");
+      if (p.type("axis") != parameter_unknown) {
+	std::string axis = p.value_string("axis");
 	ASSERT2("Problem::initialize_output",
 		"Output %s axis %s must be \"x\", \"y\", or \"z\"",
 		output_list[index_output].c_str(), axis.c_str(),
@@ -1026,54 +1018,54 @@ void Config::read_output_ (Parameters * p) throw()
       }
 
 
-      output_image_type[index_output] = p->value_string("image_type","data");
+      output_image_type[index_output] = p.value_string("image_type","data");
 
-      output_image_log[index_output] = p->value_logical("image_log",false);
-      output_image_abs[index_output] = p->value_logical("image_abs",false);
+      output_image_log[index_output] = p.value_logical("image_log",false);
+      output_image_abs[index_output] = p.value_logical("image_abs",false);
 
       output_image_mesh_color[index_output] = 
-	p->value_string("image_mesh_color","level");
+	p.value_string("image_mesh_color","level");
       output_image_mesh_order[index_output] = 
-	p->value_string("image_mesh_order","none");
+	p.value_string("image_mesh_order","none");
 
       output_image_color_particle_attribute[index_output] = 
-	p->value_string("image_color_particle_attribute","");
+	p.value_string("image_color_particle_attribute","");
 
       output_image_size[index_output].resize(2);
       output_image_size[index_output][0] = 
-	p->list_value_integer(0,"image_size",512);
+	p.list_value_integer(0,"image_size",512);
       output_image_size[index_output][1] = 
-	p->list_value_integer(1,"image_size",512);
+	p.list_value_integer(1,"image_size",512);
 
       output_image_reduce_type[index_output] = 
-	p->value_string("image_reduce_type","sum");
+	p.value_string("image_reduce_type","sum");
 
       output_image_face_rank[index_output] = 
-	p->value_integer("image_face_rank",3);
+	p.value_integer("image_face_rank",3);
 
       output_image_ghost[index_output] = 
-	p->value_logical("image_ghost",false);
+	p.value_logical("image_ghost",false);
 
       output_image_min[index_output] =
-	p->value_float("image_min",std::numeric_limits<double>::max());
+	p.value_float("image_min",std::numeric_limits<double>::max());
       output_image_max[index_output] =
-	p->value_float("image_max",-std::numeric_limits<double>::max());
+	p.value_float("image_max",-std::numeric_limits<double>::max());
 
-      output_min_level[index_output] = p->value_integer("min_level",0);
+      output_min_level[index_output] = p.value_integer("min_level",0);
       output_max_level[index_output] =
-	p->value_integer("max_level",std::numeric_limits<int>::max());
-      output_leaf_only[index_output] = p->value_logical("leaf_only",true);
+	p.value_integer("max_level",std::numeric_limits<int>::max());
+      output_leaf_only[index_output] = p.value_logical("leaf_only",true);
 
-      if (p->type("colormap") == parameter_list) {
-	int size = p->list_length("colormap");
+      if (p.type("colormap") == parameter_list) {
+	int size = p.list_length("colormap");
 	output_colormap[index_output].clear();
 	for (int i=0; i<size; i++) {
-          if (p->list_type(i,"colormap") == parameter_float) {
+          if (p.list_type(i,"colormap") == parameter_float) {
             // Assume red, green, blue triad if float
             output_colormap[index_output].push_back
-              (p->list_value_float(i,"colormap",0.0));
-          } else if (p->list_type(i,"colormap") == parameter_string) {
-            std::string name = p->list_value_string(i,"colormap");
+              (p.list_value_float(i,"colormap",0.0));
+          } else if (p.list_type(i,"colormap") == parameter_string) {
+            std::string name = p.list_value_string(i,"colormap");
             // Check for #rrggbb or color name
             int color_rgb;
             if (name[0] == '#') {
@@ -1110,7 +1102,7 @@ void Config::read_output_ (Parameters * p) throw()
           } else {
             ERROR1("Config::read_output()",
                    "Unknown colormap list type %d\n",
-                   p->list_type(i,"colormap"));
+                   p.list_type(i,"colormap"));
           }
 	}
       }
@@ -1119,9 +1111,9 @@ void Config::read_output_ (Parameters * p) throw()
       output_image_upper[index_output].resize(3);
       for (int axis=0; axis<3; axis++) {
 	output_image_lower[index_output][axis] =
-	  p->list_value_float(axis,"image_lower",-std::numeric_limits<double>::max());
+	  p.list_value_float(axis,"image_lower",-std::numeric_limits<double>::max());
 	output_image_upper[index_output][axis] =
-	  p->list_value_float(axis,"image_upper",std::numeric_limits<double>::max());
+	  p.list_value_float(axis,"image_upper",std::numeric_limits<double>::max());
       }
 
     }
@@ -1352,16 +1344,12 @@ void Config::read_performance_ (Parameters * p) throw()
   int i_off = -1;
   
   if (p->type("Performance:projections:schedule_on:var") != parameter_unknown) {
-    p->group_set(0,"Performance");
-    p->group_push("projections");
-    p->group_push("schedule_on");
-    i_on = read_schedule_(p,"projections_on");
+    ParameterGroup p_group(*p, "Performance:projections:schedule_on");
+    i_on = read_schedule_(p_group);
   }
   if (p->type("Performance:projections:schedule_off:var") != parameter_unknown) {
-    p->group_set(0,"Performance");
-    p->group_push("projections");
-    p->group_push("schedule_off");
-    i_off = read_schedule_(p,"projections_off");
+    ParameterGroup p_group(*p, "Performance:projections:schedule_off");
+    i_off = read_schedule_(p_group);
   }
   p->group_clear();
 
@@ -1540,8 +1528,9 @@ void Config::read_testing_ (Parameters * p) throw()
 
 //======================================================================
 
-int Config::read_schedule_(Parameters * p, const std::string group)
+int Config::read_schedule_(ParameterGroup p)
 {
+  const std::string group_name = p.get_group_path();
   int index = index_schedule;
 
   schedule_list.resize(index+1);
@@ -1551,7 +1540,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   schedule_stop.resize(index+1);
   schedule_step.resize(index+1);
   
-  std::string var = p->value_string("var","none");
+  std::string var = p.value_string("var","none");
 
   schedule_var[index] = var;
 
@@ -1566,12 +1555,12 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",
-	    schedule_var[index].c_str(),group.c_str());
+	    schedule_var[index].c_str(),group_name.c_str());
   }
 
   // Determine the schedule type (interval or list)
 
-  const bool type_is_list = (p->type("list") != parameter_unknown);
+  const bool type_is_list = (p.type("list") != parameter_unknown);
   const bool type_is_interval = ! type_is_list;
 
   if (type_is_interval) schedule_type[index] = "interval";
@@ -1582,35 +1571,36 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 
   if (type_is_interval) {
     if (var_is_int) {
-      schedule_start[index] = p->value("start",0);
-      schedule_step[index]  = p->value("step",1);
-      schedule_stop[index]  = p->value("stop",max_int);
+      schedule_start[index] = p.value("start",0);
+      schedule_step[index]  = p.value("step",1);
+      schedule_stop[index]  = p.value("stop",max_int);
     } else {
-      schedule_start[index] = p->value("start",0.0);
-      schedule_step[index]  = p->value("step",1.0);
-      schedule_stop[index]  = p->value("stop",max_double);
+      schedule_start[index] = p.value("start",0.0);
+      schedule_step[index]  = p.value("step",1.0);
+      schedule_stop[index]  = p.value("stop",max_double);
     }
   } else if (type_is_list) {
-    int n = p->list_length("list");
+    int n = p.list_length("list");
     if (n == 0) {
+      std::string full_name = group_name + ":list";
       ERROR1 ("Config::read",
 	      "Schedule variable %s has length 0",
-	      (group + ":list").c_str());
+	      (full_name).c_str());
     }
     schedule_list[index].resize(n);
     if (var_is_int) {
       for (int i=0; i<n; i++) {
-	schedule_list[index][i] = p->value(i,"list",0);
+	schedule_list[index][i] = p.value(i,"list",0);
       }
     } else {
       for (int i=0; i<n; i++) {
-	schedule_list[index][i] = p->value(i,"list",0.0);
+	schedule_list[index][i] = p.value(i,"list",0.0);
       }
     }
   } else {
     ERROR2 ("Config::read_schedule_",
 	    "Schedule type %s is not recognized for parameter group %s",
-	    schedule_type[index].c_str(),group.c_str());
+	    schedule_type[index].c_str(), group_name.c_str());
   }
 
   return index_schedule++;
