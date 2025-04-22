@@ -19,7 +19,6 @@ public: // interface
   IoEnzoWriter() throw()
   : CBase_IoEnzoWriter(),
     num_files_(0),
-    ordering_(""),
     stream_block_list_(),
     file_(nullptr),
     monitor_iter_(0),
@@ -28,7 +27,6 @@ public: // interface
 
   /// Constructor
   IoEnzoWriter(int num_files,
-               std::string ordering,
                int monitor_iter,
                bool include_ghosts) throw();
 
@@ -41,7 +39,6 @@ public: // interface
     TRACEPUP; CBase_IoEnzoWriter::pup(p);
 
     p | num_files_;
-    p | ordering_;
     p | monitor_iter_;
     p | include_ghosts_;
   }
@@ -69,9 +66,6 @@ protected: // attributes
 
   /// Number of files in which to store Block data
   int num_files_;
-
-  /// Block-ordering used for mapping blocks to files
-  std::string ordering_;
 
   std::ofstream stream_block_list_;
 

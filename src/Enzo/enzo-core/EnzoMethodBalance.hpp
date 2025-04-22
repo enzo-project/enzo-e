@@ -24,7 +24,7 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   EnzoMethodBalance (CkMigrateMessage *m)
-    : Method (m), ip_next_(-1)
+    : Method (m)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -42,10 +42,6 @@ public: // virtual methods
   { return "balance"; }
 
 protected: // attributes
-
-  /// Process to migrate to
-  int ip_next_;
-
 };
 
 #endif /* ENZO_ENZO_METHOD_BALANCE_HPP */

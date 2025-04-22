@@ -477,13 +477,13 @@ private: // attributes
   /// Whether to refresh all particle types, ignoring particle_list_
   int all_particles_;
 
+  /// Indicies of particles to include
+  std::vector <int> particle_list_;
+
   /// Whether or not, for all particle types participating in the refresh,
   /// all particles are copied to all neighbouring blocks
   bool particles_are_copied_;
   
-  /// Indicies of particles to include
-  std::vector <int> particle_list_;
-
   /// Whether to refresh flux data
   int all_fluxes_;
 

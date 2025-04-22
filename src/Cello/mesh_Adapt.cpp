@@ -9,23 +9,41 @@
 
 //----------------------------------------------------------------------
 
-void Adapt::set_face_level (const int if3[3], LevelType level_type,
-                            int level_min, int level_max, bool can_coarsen)
+void Adapt::set_face_level_curr (const int if3[3], int level, int count)
 {
-  set_face_level(if3,level_type,level_min);
+  const int i = IF3(if3);
+  if (count >= face_level_curr_count_[i]) {
+    face_level_curr_[i]       = level;
+    face_level_curr_count_[i] = count;
+  }
+}
+
+//----------------------------------------------------------------------
+void Adapt::set_face_level_next (const int if3[3], int level, int count)
+{
+  const int i = IF3(if3);
+  if (count >= face_level_next_count_[i]) {
+    face_level_next_[i]       = level;
+    face_level_next_count_[i] = count;
+  }
 }
 
 //----------------------------------------------------------------------
 
-void Adapt::set_face_level_last (const int ic3[3], const int if3[3],
-                                 int level_min, int level_max, bool can_coarsen)
+void Adapt::set_face_level_last
+(const int ic3[3], const int if3[3], int level, int count)
 {
-  set_face_level_last(ic3,if3,level_min);
+  const int i = IC3(ic3);
+  const int j = IF3(if3);
+  if (count >= face_level_last_count_[i][j]) {
+    face_level_last_[i][j]       = level;
+    face_level_last_count_[i][j] = count;
+  }
 }
 
 //----------------------------------------------------------------------
 
-bool Adapt::insert_neighbor (Index index, bool is_sibling)
+void Adapt::insert_neighbor (Index index, bool is_sibling)
 {
   const bool found = is_neighbor(index);
 
@@ -35,8 +53,6 @@ bool Adapt::insert_neighbor (Index index, bool is_sibling)
     LevelInfo neighbor { index, level, level-1, level+1, is_sibling, false };
     neighbor_list_.push_back(neighbor);
   }
-
-  return (! found);
 }
 
 //----------------------------------------------------------------------
@@ -51,24 +67,6 @@ bool Adapt::delete_neighbor (Index index)
     delete_neighbor_(i);
   }
   return found;
-}
-
-//----------------------------------------------------------------------
-
-void Adapt::reset_bounds()
-{
-  // reset self level bounds
-  self_.level_min_ = std::max(self_.level_now_-1,min_level_);
-  self_.level_max_ = std::min(self_.level_now_+1,max_level_);
-  self_.can_coarsen_ = false;
-  // reset neighbor level bounds
-  const int n = num_neighbors();
-  for (int i=0; i<n; i++) {
-    LevelInfo & neighbor = neighbor_list_[i];
-    neighbor.level_min_ = std::max(neighbor.level_now_-1, min_level_);
-    neighbor.level_max_ = std::min(neighbor.level_now_+1, max_level_);
-    neighbor.can_coarsen_ = false;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -189,18 +187,6 @@ void Adapt::coarsen (const Adapt & adapt_child)
   }
 }
 
-
-//----------------------------------------------------------------------
-
-void Adapt::initialize_self
-(Index index, int level_min, int level_now)
-{
-  self_.level_now_ = level_now;
-  self_.level_min_ = std::max(level_min,min_level_);
-  self_.level_max_ = std::min(level_now+1,max_level_);
-  self_.can_coarsen_ = false;
-}
-
 //----------------------------------------------------------------------
 
 void Adapt::update_neighbor
@@ -216,6 +202,26 @@ void Adapt::update_neighbor
 
 //----------------------------------------------------------------------
 
+void Adapt::initialize_bounds
+(int level_next, int level_curr)
+{
+  // reset self level bounds
+  self_.level_now_ = level_curr;
+  self_.level_min_ = std::max(level_next,min_level_);
+  self_.level_max_ = std::min(level_curr+1,max_level_);
+  self_.can_coarsen_ = false;
+  // reset neighbor level bounds
+  const int n = num_neighbors();
+  for (int i=0; i<n; i++) {
+    LevelInfo & neighbor = neighbor_list_[i];
+    neighbor.level_min_ = std::max(neighbor.level_now_-1, min_level_);
+    neighbor.level_max_ = std::min(neighbor.level_now_+1, max_level_);
+    neighbor.can_coarsen_ = false;
+  }
+}
+
+//----------------------------------------------------------------------
+
 bool Adapt::update_bounds()
 {
   // Save values to test later if changed
@@ -224,17 +230,19 @@ bool Adapt::update_bounds()
   const int can_coarsen = self_.can_coarsen_;
 
   const int n = neighbor_list_.size();
+
   int level_min_new = self_.level_min_;
-  int level_max_new = self_.level_max_;
   for (int i=0; i<n; i++) {
-    level_min_new = std::max(level_min_new, (neighbor_list_[i].level_min_ - 1) );
+    level_min_new = std::max
+      (level_min_new, (neighbor_list_[i].level_min_ - 1) );
   }
   int neighbor_max = min_level_;
   for (int i=0; i<n; i++) {
-    neighbor_max = std::max(neighbor_max,neighbor_list_[i].level_max_);
+    neighbor_max = std::max
+      (neighbor_max, neighbor_list_[i].level_max_);
   }
 
-  level_max_new = std::max(level_min_new,neighbor_max-1);
+  const int level_max_new = std::max(level_min_new, neighbor_max - 1 );
 
   self_.can_coarsen_ = (level_max_new == self_.level_now_ - 1);
 
@@ -254,14 +262,14 @@ bool Adapt::update_bounds()
     // block can coarsen, check that all neighbors can as well
     for (int i=0; i<n; i++) {
       const auto & neighbor = neighbor_list_[i];
-      if (self_.index_.is_sibling(neighbor.index_)) {
+      if (self_.index_.is_sibling(neighbor.index_,min_level_)) {
         if (neighbor.can_coarsen_) {
           ++count_coarsen;
         }
         if (neighbor.level_min_ >= self_.level_now_) {
           cannot_coarsen = true;
         }
-      } else if (self_.index_.is_nibling(neighbor.index_)) {
+      } else if (self_.index_.is_nibling(neighbor.index_,min_level_)) {
           // cannot coarsen if sibling is refined
           cannot_coarsen = true;
       }
@@ -348,35 +356,51 @@ std::vector<Index> Adapt::index_neighbors() const
 
 void Adapt::print(std::string message, const Block * block, FILE * fp) const
 {
-  if (fp != nullptr) {
+  if (fp != nullptr && block->is_leaf() && valid_) {
     std::string prefix = std::string("DEBUG_ADAPT ")+message;
+    fprintf (fp,"%s Block %s cycle %d\n",prefix.c_str(),block->name().c_str(),block->cycle());
     fprintf (fp,"%s face_level curr: ",prefix.c_str());
-    for (std::size_t i=0; i<face_level_[0].size(); i++) {
-      fprintf (fp,"%d ", face_level_[0].at(i));
+    for (std::size_t i=0; i<face_level_curr_.size(); i++) {
+      fprintf (fp,"%d ", face_level_curr_.at(i));
     }
     fprintf (fp,"\n");
     fprintf (fp,"%s face_level next: ",prefix.c_str());
-    for (std::size_t i=0; i<face_level_[1].size(); i++) {
-      fprintf (fp,"%d ", face_level_[1].at(i));
+    for (std::size_t i=0; i<face_level_next_.size(); i++) {
+      fprintf (fp,"%d ", face_level_next_.at(i));
     }
     fprintf (fp,"\n");
     fprintf (fp,"%s periodicity %d %d %d\n",
-              prefix.c_str(),
-              periodicity_[0],
-              periodicity_[1],
-              periodicity_[2]);
-
-    for (std::size_t i=0; i<face_level_[2].size(); i++) {
-      if (i%27==0) fprintf (fp,"\n%s face_level last: ",prefix.c_str());
-      fprintf (fp,"%2d ", face_level_[2].at(i));
+             prefix.c_str(),
+             periodicity_[0],
+             periodicity_[1],
+             periodicity_[2]);
+    for (int ifz=-1; ifz<=1; ifz++) {
+      for (int ify=-1; ify<=1; ify++) {
+        fprintf (fp,"%s face_level last: ",prefix.c_str());
+        for (int icz=0; icz<2; icz++) {
+          for (int icy=0; icy<2; icy++) {
+            for (int icx=0; icx<2; icx++) {
+              for (int ifx=-1; ifx<=1; ifx++) {
+                int if3[3] = {ifx,ify,ifz};
+                int ic3[3] = {icx, icy, icz};
+                const int lf = face_level_last_[IC3(ic3)][IF3(if3)];
+                if (lf == -1) fprintf (fp," - "); else fprintf (fp,"%2d ", lf);
+              }
+              fprintf (fp,"  ");
+            }
+          }
+        }
+        fprintf (fp,"\n");
+      }
+      if (ifz<1) fprintf (fp,"\n");
     }
-    fprintf (fp,"\n");
-    fprintf (fp,"%s (%d <= %d <= %d) C%d\n",prefix.c_str(),
-              self_.level_min_,
-              self_.level_now_,
-              self_.level_max_,
-              self_.can_coarsen_?1:0);
-
+    if (block->is_leaf()) {
+      fprintf (fp,"%s levels (%d <= %d <= %d) C%d\n",prefix.c_str(),
+               self_.level_min_,
+               self_.level_now_,
+               self_.level_max_,
+               self_.can_coarsen_?1:0);
+    }
     const int n = num_neighbors();
     fprintf (fp,"%s num_neighbors %d\n",prefix.c_str(),n);
     for (int i=0; i<n; i++) {
@@ -396,9 +420,10 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
                  ia3[1],it3[1],
                  ia3[2],it3[2]);
       }
-      fprintf (fp,"%s   %d %s [%d %d] S%d C%d\n",
+      fprintf (fp,"%s   %d %s L %d %d %d S%d C%d\n",
                 prefix.c_str(),i,neighbor_block,
                 info.level_min_,
+                info.level_now_,
                 info.level_max_,
                 info.is_sibling_?1:0,
                 info.can_coarsen_?1:0);
@@ -434,9 +459,13 @@ int Adapt::data_size () const
 {
   int size = 0;
 
-  SIZE_VECTOR_TYPE(size,int,face_level_[0]);
-  SIZE_VECTOR_TYPE(size,int,face_level_[1]);
-  SIZE_VECTOR_TYPE(size,int,face_level_[2]);
+  SIZE_VECTOR_TYPE(size,int,face_level_curr_);
+  SIZE_VECTOR_TYPE(size,int,face_level_next_);
+  SIZE_VECTOR_VECTOR_TYPE(size,int,face_level_last_);
+
+  SIZE_VECTOR_TYPE(size,int,face_level_curr_count_);
+  SIZE_VECTOR_TYPE(size,int,face_level_next_count_);
+  SIZE_VECTOR_VECTOR_TYPE(size,int,face_level_last_count_);
 
   SIZE_SCALAR_TYPE(size,bool,valid_);
   SIZE_SCALAR_TYPE(size,int,rank_);
@@ -445,6 +474,7 @@ int Adapt::data_size () const
   SIZE_SCALAR_TYPE(size,int,max_level_);
   SIZE_SCALAR_TYPE(size,LevelInfo,self_);
   SIZE_VECTOR_TYPE(size,LevelInfo,neighbor_list_);
+  SIZE_SCALAR_TYPE(size,int,count_);
 
   return size;
 }
@@ -455,9 +485,13 @@ char * Adapt::save_data (char * buffer) const
 {
   char * pc = buffer;
 
-  SAVE_VECTOR_TYPE(pc,int,face_level_[0]);
-  SAVE_VECTOR_TYPE(pc,int,face_level_[1]);
-  SAVE_VECTOR_TYPE(pc,int,face_level_[2]);
+  SAVE_VECTOR_TYPE(pc,int,face_level_curr_);
+  SAVE_VECTOR_TYPE(pc,int,face_level_next_);
+  SAVE_VECTOR_VECTOR_TYPE(pc,int,face_level_last_);
+
+  SAVE_VECTOR_TYPE(pc,int,face_level_curr_count_);
+  SAVE_VECTOR_TYPE(pc,int,face_level_next_count_);
+  SAVE_VECTOR_VECTOR_TYPE(pc,int,face_level_last_count_);
 
   SAVE_SCALAR_TYPE(pc,bool,valid_);
   SAVE_SCALAR_TYPE(pc,int,rank_);
@@ -466,6 +500,7 @@ char * Adapt::save_data (char * buffer) const
   SAVE_SCALAR_TYPE(pc,int,max_level_);
   SAVE_SCALAR_TYPE(pc,LevelInfo,self_);
   SAVE_VECTOR_TYPE(pc,LevelInfo,neighbor_list_);
+  SAVE_SCALAR_TYPE(pc,int,count_);
 
   return pc;
 }
@@ -476,9 +511,13 @@ char * Adapt::load_data (char * buffer)
 {
   char * pc = buffer;
 
-  LOAD_VECTOR_TYPE(pc,int,face_level_[0]);
-  LOAD_VECTOR_TYPE(pc,int,face_level_[1]);
-  LOAD_VECTOR_TYPE(pc,int,face_level_[2]);
+  LOAD_VECTOR_TYPE(pc,int,face_level_curr_);
+  LOAD_VECTOR_TYPE(pc,int,face_level_next_);
+  LOAD_VECTOR_VECTOR_TYPE(pc,int,face_level_last_);
+
+  LOAD_VECTOR_TYPE(pc,int,face_level_curr_count_);
+  LOAD_VECTOR_TYPE(pc,int,face_level_next_count_);
+  LOAD_VECTOR_VECTOR_TYPE(pc,int,face_level_last_count_);
 
   LOAD_SCALAR_TYPE(pc,bool,valid_);
   LOAD_SCALAR_TYPE(pc,int,rank_);
@@ -487,6 +526,7 @@ char * Adapt::load_data (char * buffer)
   LOAD_SCALAR_TYPE(pc,int,max_level_);
   LOAD_SCALAR_TYPE(pc,LevelInfo,self_);
   LOAD_VECTOR_TYPE(pc,LevelInfo,neighbor_list_);
+  LOAD_SCALAR_TYPE(pc,int,count_);
 
   return pc;
 }
@@ -524,9 +564,12 @@ void Adapt::delete_neighbor_ (int i)
 
 void Adapt::copy_ (const Adapt & adapt)
 {
-  face_level_[0] = adapt.face_level_[0];
-  face_level_[1] = adapt.face_level_[1];
-  face_level_[2] = adapt.face_level_[2];
+  face_level_curr_ = adapt.face_level_curr_;
+  face_level_next_ = adapt.face_level_next_;
+  face_level_last_ = adapt.face_level_last_;
+  face_level_curr_count_ = adapt.face_level_curr_count_;
+  face_level_next_count_ = adapt.face_level_next_count_;
+  face_level_last_count_ = adapt.face_level_last_count_;
 
   valid_ =         adapt.valid_;
   rank_ =          adapt.rank_;
@@ -537,5 +580,6 @@ void Adapt::copy_ (const Adapt & adapt)
   max_level_ =     adapt.max_level_;
   self_ =          adapt.self_;
   neighbor_list_ = adapt.neighbor_list_;
+  count_         = adapt.count_;
 }
 
