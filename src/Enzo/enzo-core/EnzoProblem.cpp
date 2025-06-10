@@ -297,7 +297,7 @@ Refine * EnzoProblem::create_refine_
        config->adapt_min_refine2[index],
        config->adapt_max_coarsen2[index],
        enzo::fluid_props()->gamma(),
-       enzo_config->physics_cosmology,
+       enzo::cosmology() != nullptr,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
@@ -502,12 +502,12 @@ Compute * EnzoProblem::create_compute
   if (name == "temperature") {
 
     compute = new EnzoComputeTemperature(enzo::fluid_props(),
-                                         enzo_config->physics_cosmology);
+                                         enzo::cosmology() != nullptr);
 
   } else if (name == "pressure"){
 
     compute = new EnzoComputePressure(enzo::fluid_props()->gamma(),
-                                      enzo_config->physics_cosmology);
+                                      enzo::cosmology() != nullptr);
 
 #ifdef CONFIG_USE_GRACKLE
   } else if (name == "cooling_time"){
@@ -592,10 +592,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "grackle") {
 
-    method = new EnzoMethodGrackle
-      (p_group,
-       enzo_config->physics_cosmology_initial_redshift,
-       enzo::simulation()->state()->time());
+    method = new EnzoMethodGrackle(p_group, enzo::simulation()->state()->time());
+
     skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -620,7 +618,7 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
-       enzo_config->physics_cosmology);
+       enzo::cosmology() != nullptr);
 
   } else if (name == "cosmology") {
 
@@ -628,9 +626,7 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "comoving_expansion") {
 
-    bool comoving_coordinates = enzo_config->physics_cosmology;
-
-    method = new EnzoMethodComovingExpansion ( comoving_coordinates );
+    method = new EnzoMethodComovingExpansion ( enzo::cosmology() != nullptr );
 
   } else if (name == "gravity") {
 
@@ -818,18 +814,7 @@ Physics * EnzoProblem::create_physics_
 
   if (type == "cosmology") {
 
-    physics = new EnzoPhysicsCosmology
-      (
-       enzo_config->physics_cosmology_hubble_constant_now,
-       enzo_config->physics_cosmology_omega_matter_now,
-       enzo_config->physics_cosmology_omega_baryon_now,
-       enzo_config->physics_cosmology_omega_cdm_now,
-       enzo_config->physics_cosmology_omega_lamda_now,
-       enzo_config->physics_cosmology_comoving_box_size,
-       enzo_config->physics_cosmology_max_expansion_rate,
-       enzo_config->physics_cosmology_initial_redshift,
-       enzo_config->physics_cosmology_final_redshift
-       );
+    physics = new EnzoPhysicsCosmology(p_group);
 
   } else if (type == "fluid_props") {
 

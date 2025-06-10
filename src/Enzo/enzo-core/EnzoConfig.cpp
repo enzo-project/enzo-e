@@ -18,16 +18,6 @@ EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
   field_uniform_density(1.0),
-  physics_cosmology(false),
-  physics_cosmology_hubble_constant_now(0.0),
-  physics_cosmology_omega_matter_now(0.0),
-  physics_cosmology_omega_lamda_now(0.0),
-  physics_cosmology_omega_baryon_now(1.0),
-  physics_cosmology_omega_cdm_now(0.0),
-  physics_cosmology_comoving_box_size(0.0),
-  physics_cosmology_max_expansion_rate(0.0),
-  physics_cosmology_initial_redshift(0.0),
-  physics_cosmology_final_redshift(0.0),
   // FluidProps
   physics_fluid_props_de_config(),
   physics_fluid_props_eos_variant(),
@@ -208,17 +198,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | adapt_mass_type;
 
   p | field_uniform_density;
-
-  p | physics_cosmology;
-  p | physics_cosmology_hubble_constant_now;
-  p | physics_cosmology_omega_lamda_now;
-  p | physics_cosmology_omega_matter_now;
-  p | physics_cosmology_omega_baryon_now;
-  p | physics_cosmology_omega_cdm_now;
-  p | physics_cosmology_comoving_box_size;
-  p | physics_cosmology_max_expansion_rate;
-  p | physics_cosmology_initial_redshift;
-  p | physics_cosmology_final_redshift;
 
   p | physics_fluid_props_de_config;
   ::pup(p, physics_fluid_props_eos_variant);
@@ -941,45 +920,6 @@ void EnzoConfig::read_physics_(Parameters * p)
   num_physics = p->list_length("Physics:list");
 
   for (int index_physics=0; index_physics<num_physics; index_physics++) {
-
-    std::string name =
-      p->list_value_string(index_physics,"Physics:list");
-
-    std::string full_name = std::string("Physics:") + name;
-
-    if (physics_list[index_physics] == "cosmology") {
-
-      physics_cosmology = true;
-
-      physics_cosmology_hubble_constant_now = p->value_float
-        (full_name + ":hubble_constant_now",0.701);
-
-      physics_cosmology_omega_matter_now = p->value_float
-        (full_name + ":omega_matter_now",   0.279);
-
-      physics_cosmology_omega_baryon_now = p->value_float
-        (full_name + ":omega_baryon_now",   1.0);
-
-      physics_cosmology_omega_cdm_now = p->value_float
-        (full_name + ":omega_cdm_now",   0.0);
-
-      physics_cosmology_omega_lamda_now = p->value_float
-        (full_name + ":omega_lambda_now",   0.721);
-
-
-      physics_cosmology_comoving_box_size = p->value_float
-        (full_name + ":comoving_box_size", 64.0);
-
-      physics_cosmology_max_expansion_rate = p->value_float
-        (full_name + ":max_expansion_rate", 0.01);
-
-      physics_cosmology_initial_redshift = p->value_float
-        (full_name + ":initial_redshift",  20.0);;
-
-      physics_cosmology_final_redshift = p->value_float
-        (full_name + ":final_redshift",  0.0);;
-
-    }
 
     if (physics_list[index_physics] == "fluid_prop"){
       ERROR("EnzoConfig::read_physics_",

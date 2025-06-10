@@ -1116,6 +1116,7 @@ namespace cello {
   /// (however, the option exists to make the code more explicit)
   bool is_initial_cycle(InitCycleKind kind) noexcept;
   bool is_initial_cycle(int cycle, InitCycleKind kind) noexcept;
+
 }
 
 #endif /* CELLO_HPP */

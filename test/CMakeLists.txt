@@ -2,7 +2,7 @@
 function(setup_test_dir TESTDIR)
   # make test directory within build tree (will be used for test output/current working directory)
   file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TESTDIR})
-  # link in input directory because of fixed input file hierarchy 
+  # link in input directory because of fixed input file hierarchy
   file(CREATE_LINK ${PROJECT_SOURCE_DIR}/input ${PROJECT_BINARY_DIR}/test/${TESTDIR}/input SYMBOLIC)
 endfunction()
 

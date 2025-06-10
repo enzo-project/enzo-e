@@ -115,7 +115,7 @@ Note, the usage of Charm++ introduces some additional complexity to this project
 
    At this time, the conventions for organizing Cello/Enzo-E's header files introduce a lot of transitive dependencies.
    Going forward, we may wish to revisit this.
-   
+
 
 
 ``cmake`` directory
@@ -125,7 +125,7 @@ This directory holds scripts used for optimizations, building charm++ modules, a
 
 ``config`` directory
 ~~~~~~~~~~~~~~~~~~~~
-Following a convention from Enzo, the ``config`` directory holds CMake scripts that each define useful variables for the build that are specific to different platforms. 
+Following a convention from Enzo, the ``config`` directory holds CMake scripts that each define useful variables for the build that are specific to different platforms.
 
 
 =========

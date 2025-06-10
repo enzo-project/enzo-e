@@ -670,7 +670,7 @@ void Simulation::initialize_data_descr_() throw()
   for (int index_particle=0; index_particle<num_particles; index_particle++) {
     std::string particle = config_->particle_list[index_particle];
     int num_groups = config_->particle_group_list[index_particle].size();
-   
+
     for (int index_group=0; index_group<num_groups; index_group++) {
       std::string group = config_->particle_group_list[index_particle][index_group];
       particle_descr_->groups()->add(particle,group);

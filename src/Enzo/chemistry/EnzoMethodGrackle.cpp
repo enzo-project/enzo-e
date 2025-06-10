@@ -103,15 +103,12 @@ GrackleChemistryData parse_chemistry(ParameterGroup p)
 EnzoMethodGrackle::EnzoMethodGrackle
 (
  ParameterGroup p,
- const double physics_cosmology_initial_redshift,
  const double time
 )
   : Method(),
     grackle_facade_(std::move(parse_chemistry(p)),
                     // for when not using cosmology - redshift of UVB
                     p.value_float("radiation_redshift", -1.0),
-                    // the next parameter is relevant when using cosmology
-                    physics_cosmology_initial_redshift,
                     time),
     use_cooling_timestep_(p.value_logical("use_cooling_timestep", false))
 {

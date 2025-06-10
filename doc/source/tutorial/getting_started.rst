@@ -15,7 +15,7 @@ architectures, including the "Frontera" supercomputer at TACC and the
 
 .. toctree::
    :maxdepth: 1
-	   
+
    getting_started_pleiades
    getting_started_frontera
 
@@ -107,10 +107,15 @@ be downloaded from the `libpng
 ------------------------------
 
 By default, Enzo-E requires the Grackle chemistry and cooling library.
-If you do not need to use Grackle, you can simple disabling it by setting
-``-DUSE_GRACKLE=OFF`` when you configure Enzo-E.
-See the `Grackle documentation <https://grackle.readthedocs.io>`__ for installation
-instructions.
+For user-convenience, the default behavior is for Grackle to be automatically downloaded and compiled as part of an Enzo-E build.
+Alternatively, if you want to make use of an existing Grackle installation (those installation instructions are provided  `here <https://grackle.readthedocs.io>`__), you can set ``-DUSE_EXTERNAL_GRACKLE=ON``.
+
+.. note::
+
+   If you choose to link Enzo-E against a pre-built version of Grackle, that version must have been built with CMake.
+   (Enzo-E no longer supports linking against version of Grackle built with its "Classic Build System")
+
+If you do not need to use Grackle, you can disable it by setting ``-DUSE_GRACKLE=OFF``.
 
 6. Install yt (Optional)
 ------------------------
@@ -218,6 +223,9 @@ In some cases, you may need to provide additional hints about the location of th
    * - ``USE_GRACKLE``
      - Use Grackle Chemistry
      - ON
+   * - ``USE_EXTERNAL_GRACKLE``
+     - Indicates preference for using an existing grackle installation or directly embedding grackle within the Enzo-E build.
+     - OFF
    * - ``use_jemalloc``
      - Use the jemalloc library for memory allocation
      - OFF
@@ -303,7 +311,7 @@ Debugging Options
 ^^^^^^^^^^^^^^^^^
 
 The following options are useful for debugging.
-       
+
 .. list-table:: Debug Options
    :widths: 10 30 5
    :header-rows: 1
@@ -371,7 +379,7 @@ Here are 2 illustrative examples:
    If you stored ``"-Wall;-Wpedantic;-funroll-loops"`` within the ``ENZOE_CXX_FLIST`` variable, then all C++ files used to build Cello and Enzo-E would be passed those flags.
 
  * Next we show that to properly pass "options groups" you may need to make use of shell-like quoting with the ``SHELL:`` prefix (this is required because of option de-duplication performed by cmake).
-   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``. 
+   Thus storing ``"SHELL:-option1 A;-Wall;SHELL:-option2 B"`` within ``ENZOE_Fortran_FLIST`` would cause all Fortran files used in Enzo-E and Cello to be passed ``-option1 A -Wall -option2 B``.
 
 
 CMake offers a similar set of standard variables named ``CMAKE_<LANG>_FLAGS`` that serve a similar purpose, but they behave slightly differently.
@@ -394,7 +402,7 @@ For example, a configure line may look like
   cmake -DCHARM_ROOT=$(pwd)/../../charm/build-gcc-mpi-proj -DEnzo-E_CONFIG=msu_hpcc_gcc -DGrackle_ROOT=${HOME}/src/grackle/build-gcc -Duse_projections=ON -Duse_jemalloc=ON -Dbalance=ON  ..
 
 To see all available (and selected) options you can also run ``ccmake .`` in the
-build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI 
+build directory (after running ``cmake`` in first place), or use the ``ccmake`` GUI
 directly to interactively configure Enzo-E by calling ``ccmake ..`` in an empty build
 directory.
 
@@ -452,6 +460,15 @@ can be set via a "cached string", i.e., via
 ..  code-block:: cmake
 
   set(CHARM_ROOT "/home/user/Charm/charm/build-mpi" CACHE STRING "my charm build")
+
+Advanced Options
+----------------
+It is worth mentioning that when using automatic dependency management of Grackle, the default behavior is to freshly download the Grackle repository every time you configure a new build-directory.
+You should **NOT** modify the downloaded source files since they can be freely overwritten at any time.
+
+If you want to codevelop a feature in Grackle and Enzo-E, you can check out a local copy of Grackle and configure Enzo-E with ``-DFETCHCONTENT_SOURCE_DIR_GRACKLE=<path/to/grackle/repository>``.
+By doing this, your Enzo-E build will directly use the source files from your Grackle repositories (and any changes you make to them will be reflected in the resulting Enzo-E binary).
+
 
 Running
 =======
@@ -531,7 +548,7 @@ Time = 0.05
 Time = 0.10
 
 .. image:: hello-de-0165.png
-   :scale: 40 %                   
+   :scale: 40 %
 
 .. image:: hello-mesh-level-0165.png
    :scale: 40 %

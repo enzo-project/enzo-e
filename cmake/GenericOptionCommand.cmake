@@ -35,7 +35,7 @@ set(__GenericOptionCommand YES)
 
 
 function(generic_option variable type help_text)
-  
+
   # on the off-chance that the variable-name matches a value used in this
   # function, let's check if it already exists (BEFORE DEFINING ANY VARIABLES)
   if (DEFINED "${variable}")
@@ -90,7 +90,7 @@ somewhere to define the variable.
      instead choose to refactor, keep in mind that it's a little tricky to get
      this \"right\" (it can be tricky to allow users to override the value)")
   endif()
- 
+
   cmake_policy(GET CMP0077 _CMP0077_val)
   if ("${_CMP0077_val}" STREQUAL "OLD")
     message(FATAL_ERROR "${_func_name} needs NEW behavior of CMP0077")

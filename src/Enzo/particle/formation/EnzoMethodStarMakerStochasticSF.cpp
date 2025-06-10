@@ -58,7 +58,6 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   }
 
   EnzoBlock * enzo_block = enzo::block(block);
-  const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
 
@@ -147,7 +146,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
   // compute the temperature (we need it here)
   EnzoComputeTemperature compute_temperature(enzo::fluid_props(),
-                                             enzo_config->physics_cosmology);
+                                             enzo::cosmology() != nullptr);
 
   compute_temperature.compute(enzo_block);
 

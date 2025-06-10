@@ -102,7 +102,7 @@ function(get_required_fortran_options outVar)
     set(gnu_precision_flags "-fdefault-real-8;-fdefault-double-8")
   else()
     set(gnu_precision_flags "")
-  endif() 
+  endif()
   set(all_gnu_flags
     "-fno-second-underscore" "-ffixed-line-length-132" ${gnu_precision_flags})
 
@@ -110,7 +110,7 @@ function(get_required_fortran_options outVar)
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     set(FC_FLAGS ${all_gnu_flags})
 
-  elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "INTEL")
+  elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
     set(FC_FLAGS "-nofor-main") # <-- I think only needed for ppml dialect
     if (USE_DOUBLE_PREC)
       list(APPEND FC_FLAGS "SHELL:-real-size 64 -double-size 64")
@@ -176,7 +176,7 @@ function(target_required_fortran_compile_options target flag_scope)
 
   get_required_fortran_options(_REQ_FC_FLAGS)
 
-  if (NOT ("${_REQ_FC_FLAGS}" STREQUAL "")) 
+  if (NOT ("${_REQ_FC_FLAGS}" STREQUAL ""))
     target_compile_options(${target} ${flag_scope} "${_REQ_FC_FLAGS}")
   endif()
 endfunction()

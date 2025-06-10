@@ -86,7 +86,6 @@ public: // interface
   /// public-facing constructor
   GrackleFacade(GrackleChemistryData&& my_chemistry,
                 const double radiation_redshift,
-                const double physics_cosmology_initial_redshift,
                 const double time) noexcept;
 
   /// CHARM++ PUP::able declaration
