@@ -138,7 +138,7 @@ void EnzoInitialBCenter::enforce_block( Block * block,
   // the vector potential
   if (values_[0] != nullptr || values_[1] != nullptr || values_[2] != nullptr){
 
-    double t = block->time();
+    double t = block->state()->time();
     int nx, ny, nz; // number of cells per axis in the active zone
     field.size(&nx, &ny, &nz);
     int gx, gy, gz;

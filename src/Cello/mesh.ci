@@ -79,6 +79,7 @@ module mesh {
   PUPable ScheduleInterval;
   PUPable ScheduleList;
   PUPable SolverNull;
+  PUPable State;
   PUPable Stopping;
   PUPable Units;
 

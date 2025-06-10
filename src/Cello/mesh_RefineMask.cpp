@@ -49,7 +49,7 @@ int RefineMask::apply ( Block * block ) throw ()
   double * x = new double [nx];
   double * y = new double [ny];
   double * z = new double [nz];
-  double t = block->time();
+  double t = block->state()->time();
 
   data->field_cells(x,y,z);
 

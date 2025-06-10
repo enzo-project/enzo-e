@@ -410,7 +410,7 @@ void Adapt::print(std::string message, const Block * block, FILE * fp) const
 
 void Adapt::write(std::string root, const Block * block, int cycle_start) const
 {
-  const int cycle = cello::simulation()->cycle();
+  const int cycle = cello::simulation()->state()->cycle();
   if (cycle >= cycle_start) {
     char filename[80];
     snprintf (filename,sizeof(filename),"%d-%s.%s",cycle,root.c_str(),

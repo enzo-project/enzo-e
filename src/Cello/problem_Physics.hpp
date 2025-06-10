@@ -20,21 +20,16 @@ class Physics : public PUP::able
 public: // interface
 
   /// empty constructor for charm++ pup()
-  Physics() throw()
+  Physics() throw() : PUP::able()
   {}
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(Physics);
 
   /// CHARM++ migration constructor for PUP::able
-  Physics (CkMigrateMessage *m)
-    : PUP::able(m)
+  Physics (CkMigrateMessage *m) : PUP::able(m)
   {  }
 
-  /// Virtual destructor
-  virtual ~Physics()
-  {  }
-  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {

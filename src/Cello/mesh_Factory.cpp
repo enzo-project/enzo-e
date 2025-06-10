@@ -94,8 +94,8 @@ void Factory::create_block_array
   int    cycle = 0;
   double time  = 0.0;
   double dt    = 0.0;
-  int num_face_level = 0;
-  int * face_level = 0;
+  std::vector<int> face_level;
+  face_level.clear();
 
 #ifdef DEBUG_ADAPT
   CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
@@ -112,9 +112,10 @@ void Factory::create_block_array
            nx,ny,nz,
            num_field_data,
            count_adapt = 0,
-           cycle,time,dt,
            refresh_same,
-           num_face_level, face_level, nullptr);
+           face_level,
+           nullptr,
+           nullptr);
 
         msg->set_data_msg(data_msg);
 
@@ -161,8 +162,8 @@ void Factory::create_subblock_array
     int    cycle = 0;
     double time  = 0.0;
     double dt    = 0.0;
-    int num_face_level = 0;
-    int * face_level = 0;
+    std::vector<int> face_level;
+    face_level.clear();
 
 #ifdef DEBUG_ADAPT  
   CkPrintf ("TRACE_FACTORY %s:%d\n",__FILE__,__LINE__); fflush(stdout);
@@ -184,9 +185,10 @@ void Factory::create_subblock_array
 	     nx,ny,nz,
 	     num_field_blocks,
 	     count_adapt = 0,
-	     cycle,time,dt,
 	     refresh_same,
-	     num_face_level, face_level, nullptr);
+	     face_level,
+             nullptr,
+             nullptr);
 
 	  msg->set_data_msg(data_msg);
 
@@ -209,11 +211,10 @@ void Factory::create_block
  int nx, int ny, int nz,
  int num_field_data,
  int count_adapt,
- int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level,
- int * face_level,
+ const std::vector<int> & face_level,
  Adapt * adapt,
+ State * state,
  Simulation * simulation,
  int io_reader, 
  int ip
@@ -237,9 +238,10 @@ void Factory::create_block
      nx,ny,nz,
      num_field_data,
      count_adapt,
-     cycle,time,dt,
      refresh_type,
-     num_face_level, face_level, adapt,
+     face_level,
+     adapt,
+     state,
      io_reader);
 
   msg->set_data_msg (data_msg);

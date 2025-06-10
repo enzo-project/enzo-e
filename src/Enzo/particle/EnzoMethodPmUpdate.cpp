@@ -93,16 +93,15 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
 
+    const double dt = block->state()->dt();
+
     if (cosmology) {
-      double time = block->time();
-      double dt   = block->dt();
+      double time = block->state()->time();
       cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
       //      cosmology-> compute_expansion_factor (&av,&dadtv,time+dt);
     }
 
     const int rank = cello::rank();
-
-    const double dt = block->dt();
 
     double dt_shift = 0.5*dt/cosmo_a;
 
@@ -110,7 +109,6 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
     const double coef = 0.25*cosmo_dadt/cosmo_a*dt;
     const double cvv = (1.0 - coef) / (1.0 + coef);
     const double cva = 0.5*dt / (1.0 + coef);
-
 
     Particle particle = block->data()->particle();
 
@@ -312,8 +310,8 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) throw()
 
     if (cosmology) {
       enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
-      double time = block->time();
-      double dt   = block->dt();
+      double time = block->state()->time();
+      double dt   = block->state()->dt();
       cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
       hx *= cosmo_a;
       hy *= cosmo_a;

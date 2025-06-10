@@ -42,11 +42,12 @@ public: // interface
 
   /// Initialize an empty EnzoBlock
   EnzoBlock()
-    :  CBase_EnzoBlock(),
-       dt(0.0),
-       redshift(0.0)
+    :  CBase_EnzoBlock()
   {
     performance_start_(perf_block);
+
+    // replace Block's State with EnzoState
+    state_ = std::make_shared<EnzoState> (0, 0.0, 0.0, false);
 
     for (int i=0; i<MAX_DIMENSION; i++) {
       GridLeftEdge[i] = 0;
@@ -91,19 +92,6 @@ public: // interface
   virtual void create_initial_child_blocks();
   void instantiate_children() throw();
 
-  //----------------------------------------------------------------------
-  // Original Enzo functions
-  //----------------------------------------------------------------------
-
-  /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
-  virtual void set_dt (double dt) throw();
-
-  /// Set EnzoBlock's time (overloaded to update current time)
-  virtual void set_time (double time) throw();
-
-  /// Set EnzoBlock's stopping criteria
-  void set_stop (bool stop) throw();
-
   /// Initialize EnzoBlock
   virtual void initialize () throw();
 
@@ -116,9 +104,6 @@ public: /// entry methods
   void r_method_turbulence_end(CkReductionMsg *msg);
 
   void p_initial_hdf5_recv(MsgInitial * msg_initial);
-
-  /// TEMP
-  double timestep() { return dt; }
 
   //--------------------------------------------------
 
@@ -273,11 +258,13 @@ public: /// entry methods
   void p_method_m1_closure_solve_transport_eqn();
   void p_method_m1_closure_set_global_averages(CkReductionMsg * msg);
 
+  const auto state() const
+  { return std::dynamic_pointer_cast<EnzoState> (state_); }
+
   virtual void print() const {
     FILE *fp = fopen ((std::string("EB-")+name_).c_str(),"a");
     fprintf (fp,"PRINT_ENZO_BLOCK name = %s\n",name().c_str());
-    fprintf (fp,"PRINT_ENZO_BLOCK dt = %g\n",dt);
-    fprintf (fp,"PRINT_ENZO_BLOCK redshift = %g\n",redshift);
+    fprintf (fp,"PRINT_ENZO_BLOCK redshift = %g\n",state()->redshift());
     fprintf (fp,"PRINT_ENZO_BLOCK GridLeftEdge[] = %g %g %g\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
     fprintf (fp,"PRINT_ENZO_BLOCK GridDimension[] = %d %d %d\n",GridDimension[0],GridDimension[1],GridDimension[2]);
     fprintf (fp,"PRINT_ENZO_BLOCK GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
@@ -303,14 +290,6 @@ protected: // methods
 protected: // attributes
 
 public: // attributes (YIKES!)
-
-  union {
-    enzo_float dt;
-    enzo_float dtFixed;
-  };
-
-  /// Cosmological redshift for the current cycle
-  enzo_float redshift;
 
   /// starting pos (active problem space)
   enzo_float GridLeftEdge[MAX_DIMENSION];

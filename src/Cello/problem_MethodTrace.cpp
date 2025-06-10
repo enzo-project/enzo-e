@@ -70,7 +70,7 @@ void MethodTrace::compute ( Block * block) throw()
     const double hy = (yp-ym)/ny;
     const double hz = (zp-zm)/nz;
 
-    double dt = block -> dt();
+    double dt = block->state()->dt();
 
     // Get velocity precision: ASSUMES precision same for all axes and
     // is single or double

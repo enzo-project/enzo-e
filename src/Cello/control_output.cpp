@@ -65,8 +65,8 @@ void Problem::output_next(Simulation * simulation) throw()
 
   simulation->set_phase(phase_output);
 
-  int cycle   = simulation->cycle();
-  double time = simulation->time();
+  int cycle   = simulation->state()->cycle();
+  double time = simulation->state()->time();
 
   Output * output;
 

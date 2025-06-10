@@ -154,7 +154,7 @@ void BoundaryValue::enforce
   data -> lower(&xm,&ym,&zm);
   data -> upper(&xp,&yp,&zp);
 
-  double t = block->time();
+  double t = block->state()->time();
 
   for (const BoundaryValue::ValueFListPair& cur_pair : pairs_) {
     const Value& value = cur_pair.first;

@@ -57,22 +57,8 @@ public: // functions
     p | alignment_;
     p | padding_;
     p | precision_;
-
-    if (pk) n=centering_.size();
-    p | n;
-    if (up) centering_.resize(n);
-    for (int i=0; i<n; i++) {
-      if (up) centering_[i] = new int[3];
-      PUParray(p,centering_[i],3);
-    }
-    
-    if (pk) n=ghost_depth_.size();
-    p | n;
-    if (up) ghost_depth_.resize(n);
-    for (int i=0; i<n; i++) {
-      if (up) ghost_depth_[i] = new int[3];
-      PUParray(p,ghost_depth_[i],3);
-    }
+    p | centering_;
+    p | ghost_depth_;
     PUParray(p,ghost_depth_default_,3);
     p | conserved_;
     p | history_;
@@ -138,7 +124,7 @@ public: // functions
 	  int i = ip + np*ih;
 
 	  const int ih = insert_temporary();
-	
+
 	  history_id_[i] = ih;
 
 	  // set precision
@@ -173,7 +159,7 @@ public: // functions
   /// field ip (0 is current, 1 first generation, etc.)
   int history_id (int ip, int ih) const throw()
   {
-    int np = num_permanent();
+    const int np = num_permanent();
     return (ih == 0) ? ip : history_id_[ip + np*(ih-1)];
   }
 
@@ -209,9 +195,9 @@ public: // functions
   /// return whether the field variable is centered in the cell
   bool is_centered(int id_field) const
   {
-    return (centering_[id_field][0] == 0 &&
-	    centering_[id_field][1] == 0 &&
-	    centering_[id_field][2] == 0); }
+    return (std::get<0>(centering_[id_field]) == 0 &&
+            std::get<1>(centering_[id_field]) == 0 &&
+            std::get<2>(centering_[id_field]) == 0); }
 
   /// depth of ghost zones of given field
   void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
@@ -286,10 +272,10 @@ private: // attributes
   std::vector<int> precision_;
 
   /// cell centering for each field
-  std::vector<int *> centering_;
+  std::vector<std::tuple<int,int,int> > centering_;
 
   /// Ghost depth of each field, or -1 if using default
-  std::vector<int *> ghost_depth_;
+  std::vector<std::tuple<int,int,int> > ghost_depth_;
 
   /// Default ghost depth if not specified
   int ghost_depth_default_[3];

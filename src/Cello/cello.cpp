@@ -590,7 +590,7 @@ namespace cello {
     Simulation * sim = cello::simulation();
     ASSERT("cello::is_first_cycle(InitCycleKind)",
            "cello::simulation() returned nullptr", sim != nullptr);
-    return cello::is_initial_cycle(sim->cycle(), kind);
+    return cello::is_initial_cycle(sim->state()->cycle(), kind);
   }
 
   //----------------------------------------------------------------------

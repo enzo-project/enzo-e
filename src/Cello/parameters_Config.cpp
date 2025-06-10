@@ -116,6 +116,7 @@ void Config::pup (PUP::er &p)
   p | num_method;
   p | method_courant_global;
   p | method_list;
+  p | method_max_supercycle;
   p | method_schedule_index;
   p | method_courant;
   p | method_type;
@@ -833,6 +834,7 @@ void Config::read_method_ (Parameters * p) throw()
   num_method = p->list_length("Method:list");
 
   method_list.   resize(num_method);
+  method_max_supercycle.resize(num_method);
   method_courant.resize(num_method);
   method_schedule_index.resize(num_method);
   method_type.resize(num_method);
@@ -848,9 +850,15 @@ void Config::read_method_ (Parameters * p) throw()
 
     method_list[index_method] = name;
 
+    // Read minimum number of super-cycles allowed, and maximum number of
+    // sub-cycles allowed.
+
+    method_max_supercycle[index_method] = p->value_integer
+      (full_name+":max_supercycle", 1);
+
     // Read schedule for the Method object if any
-      
-    const bool method_scheduled = 
+
+    const bool method_scheduled =
       (p->type(full_name + ":schedule:var") != parameter_unknown);
 
     if (method_scheduled) {
@@ -1033,7 +1041,7 @@ void Config::read_output_ (Parameters * p) throw()
 
       output_image_mesh_color[index_output] = 
 	p->value_string("image_mesh_color","level");
-      output_image_mesh_order[index_output] = 
+      output_image_mesh_order[index_output] =
 	p->value_string("image_mesh_order","none");
 
       output_image_color_particle_attribute[index_output] = 

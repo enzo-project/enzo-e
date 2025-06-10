@@ -31,12 +31,10 @@ public: // functions
   ( const char parameter_file[], int n);
 
   /// CHARM++ Constructor
-  EnzoSimulation() : CBase_EnzoSimulation() {}
+  EnzoSimulation();
 
   /// CHARM++ Migration constructor
-  EnzoSimulation(CkMigrateMessage * m) : CBase_EnzoSimulation(m)
-  {
-  };
+  EnzoSimulation(CkMigrateMessage * m);
 
   /// Destructor
   virtual ~EnzoSimulation();

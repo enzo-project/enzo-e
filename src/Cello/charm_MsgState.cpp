@@ -36,10 +36,7 @@ MsgState::~MsgState()
 
 void MsgState::update (Simulation * simulation)
 {
-  simulation->set_cycle(cycle_);
-  simulation->set_time(time_);
-  simulation->set_dt(dt_);
-  simulation->set_stop(stop_);
+  simulation->state()->init(cycle_,time_,dt_,stop_);
 }
 
 //----------------------------------------------------------------------

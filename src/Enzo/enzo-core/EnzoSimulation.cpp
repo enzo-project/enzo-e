@@ -41,6 +41,9 @@ EnzoSimulation::EnzoSimulation
     check_directory_(),
     restart_level_(0)
 {
+  // replace Simulation's State with EnzoState
+  state_ = std::make_unique<EnzoState> (0, 0.0, 0.0, false);
+
 #ifdef CHECK_MEMORY
   mtrace();
 #endif
@@ -61,6 +64,18 @@ EnzoSimulation::EnzoSimulation
 
   contribute(callback);
 
+}
+
+EnzoSimulation::EnzoSimulation() : CBase_EnzoSimulation()
+{
+  // replace Simulation's State with EnzoState
+  state_ = std::make_unique<EnzoState> (0, 0.0, 0.0, false);
+}
+
+EnzoSimulation::EnzoSimulation(CkMigrateMessage * m) : CBase_EnzoSimulation(m)
+{
+  // replace Simulation's State with EnzoState
+  state_ = std::make_unique<EnzoState> (0, 0.0, 0.0, false);
 }
 
 //----------------------------------------------------------------------

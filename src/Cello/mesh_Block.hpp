@@ -9,6 +9,8 @@
 #ifndef MESH_BLOCK_HPP
 #define MESH_BLOCK_HPP
 
+#include "data_State.hpp"
+
 class Data;
 class MsgRefresh;
 class MsgRefine;
@@ -45,16 +47,13 @@ public: // interface
   /// Destructor
   virtual ~Block();
 
-  /// Copy constructor
-  Block(const Block & block)
-  /// @param     block  Object being copied
-  { copy_(block);  }
+  /// Copy constructor: disallow
+  Block(const Block & block) = delete;
 
-  /// Assignment operator
-  Block & operator = (const Block & block)
-  /// @param     block  Source object of the assignment
-  /// @return    The target assigned object
-  {  copy_(block);  return *this; }
+  /// Assignment operator: disallow
+  Block & operator = (const Block & block) = delete;
+
+public:
 
   //----------------------------------------------------------------------
   // CHARM
@@ -90,14 +89,6 @@ public: // interface
   inline void index_array (int * ix, int * iy, int * iz) const throw ()
   { index_.array(ix,iy,iz); }
 
-  /// Return the current cycle number
-  int cycle() const throw()
-  { return cycle_; };
-
-  /// Return the current time
-  double time() const throw()
-  { return time_; };
-
   /// Return the level in the Hierarchy
   int level() const throw()
   {  return index_.level(); };
@@ -111,18 +102,14 @@ public: // interface
   /// Set  process to migrate to next
   void set_ip_next(int ip) { ip_next_ = ip; }
 
-  /// Return the current timestep
-  double dt() const throw()
-  { return dt_; };
+  /// Return pointer to Block's current state
+  auto & state () { return state_; }
+  const auto & state () const { return state_; }
 
   /// Return current cell widths
   void cell_width
   (double * dx, double * dy = 0, double * dz = 0)
   const throw();
-
-  /// Return the current stopping criteria
-  bool stop() const throw()
-  { return stop_; };
 
   /// Return whether this Block is a leaf in the octree array
   bool is_leaf() const
@@ -216,10 +203,10 @@ public: // interface
    int nx, int ny, int nz,
    int num_field_blocks,
    int num_adapt_steps,
-   int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level,
-   Adapt * adapt);
+   const std::vector<int> & face_level,
+   Adapt * adapt,
+   State * state);
 
   /// Initialize Adapt class for neighbor connectivity
   void init_adapt_(Adapt * adapt_parent);
@@ -319,21 +306,10 @@ public: // interface
   Method * method () throw();
 
   /// Start a new solver
-  void push_solver(int index_solver) throw()
-  {
-    index_solver_.push_back(index_solver);
-  }
+  void push_solver(int index_solver) throw();
 
   /// Return from a solver
-  int pop_solver() throw()
-  {
-    int index = index_solver();
-    ASSERT ("Block::pop_solver",
-	    "Trying to pop element off of empty Block::index_solver_ stack",
-	    index_solver_.size() > 0);
-    index_solver_.resize(index_solver_.size()-1);
-    return index;
-  }
+  int pop_solver() throw();
 
   /// Return the index of the current solver
   int index_solver() const throw()
@@ -373,6 +349,9 @@ protected: // methods
   void compute_end_();
   /// Exit control compute phase
   void compute_exit_();
+
+  /// Update Method state variables after method completes a step
+  void compute_update_method_state_(int index_method);
 
 public: // methods
 
@@ -757,6 +736,8 @@ protected:
   void stopping_balance_();
   void stopping_load_balance_();
   void stopping_exit_();
+  double stopping_compute_global_dt_(double min_reduce[]);
+  void stopping_update_method_state_(double min_reduce[],double dt_global);
 
 public:
   /// Exit the stopping phase to exit
@@ -800,31 +781,6 @@ public: // virtual functions
   /// Check if given 3D coordinates are within the block domain
   bool check_position_in_block(const double& x, const double &y,
                                const double& z, bool include_ghost = false);
-
-  /// Set state
-  void set_state (int cycle, double time, double dt, bool stop)
-  {
-    set_cycle(cycle);
-    set_time(time);
-    set_dt(dt);
-    set_stop(stop);
-  }
-
-  /// Set Block's cycle
-  void set_cycle (int cycle) throw()
-  { cycle_ = cycle;}
-
-  /// Set Block's time
-  virtual void set_time (double time) throw()
-  { time_  = time; }
-
-  /// Set Block's timestep
-  virtual void set_dt (double dt) throw()
-  { dt_  = dt; }
-
-  /// Set Block's stopping criteria
-  void set_stop (double stop) throw()
-  { stop_  = stop; }
 
   /// Initialize Block
   virtual void initialize ();
@@ -887,12 +843,6 @@ protected: // functions
     return buffer;
   }
 
-  /// Allocate and copy in attributes from give Block
-  void copy_(const Block & block) throw();
-
-  /// Return the (lower) indices of the Block in the level,
-  /// and the number of indices
-
   /// Update face_level_[] for given child in refined Block
   void refine_face_level_update_ (Index index_child);
 
@@ -952,20 +902,9 @@ protected: // attributes
   /// Desired level for the next cycle
   int level_next_;
 
-  //--------------------------------------------------
+  /// Block's current state (cycle, time, dt, stopping, etc.)
+  std::shared_ptr<State> state_;
 
-  /// Current cycle number
-  int cycle_;
-
-  /// Current time
-  double time_;
-
-  /// Current timestep
-  double dt_;
-
-  /// Current stopping criteria
-  bool stop_;
-  
   //--------------------------------------------------
 
   /// Index of current initialization routine

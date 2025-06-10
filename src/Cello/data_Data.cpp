@@ -149,6 +149,8 @@ void Data::allocate () throw()
   // allocate Block Field storage
   for (size_t i=0; i<field_data_.size(); i++) {
     field_data_[i]->set_history_(cello::field_descr());
+    auto time = cello::simulation()->state()->time();
+    field_data_[i]->init_history_time(cello::field_descr(),time);
     field_data_[i]->allocate_permanent(cello::field_descr(),true);
   }
   // initialize Flux field list
