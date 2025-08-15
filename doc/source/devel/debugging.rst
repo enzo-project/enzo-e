@@ -10,7 +10,7 @@ General Advice
 In general, if you find simple calls to ``CkPrintf`` are inadequate, you should consider whether the GDB debugger can help.
 A common scenario where the GDB debugger is useful is when you encounter a segmentation fault (this can occur when you dereference a ``NULL`` pointer).
 Essentially, the debugger runs the program until it crashes and then it will let you inspect variables in the stack frames just before the segmentation fault occurred.
-It can also be very useful to inspect variables in stack frames when the program aborted early during a call to the ``ERROR`` or ``ASSERT`` macros.
+It can also be very useful to inspect variables in stack frames when the program aborted early during a call to the ``CELLO_ERROR`` or ``CELLO_REQUIRE`` macros (or the older ``ERROR`` or ``ASSERT`` macros).
 
 Debugging a program with GDB is easiest when debugging a problem: replicated in a version of Enzo-E/Cello that was built on top of a netlrts-based build of charm++ on a local machine with xterm windows.
 In this scenario, you simply need to append ``++debug-no-pause`` to the arguments of the ``charmrun`` launcher (e.g. near the arguments specifying the number of nodes).

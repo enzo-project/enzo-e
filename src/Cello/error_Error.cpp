@@ -12,7 +12,7 @@
 
 //----------------------------------------------------------------------
 
-extern void cello::message
+void cello::message
 (
  FILE *       fp,
  const char * type,

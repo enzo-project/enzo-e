@@ -455,23 +455,33 @@ We recommend some of the following coding practices:
        This generally leads to more explicit code.
        Furthermore, it lets the compiler identify cases where the order of an integer argument and a scoped enum argument are accidentally permuted.
 
-* **ERROR REPORTING:** We don't use C++ exceptions in the codebase. In general, when an error arises, we generally abort the program with an informative error message. You can signal that an error occured by using the ``ERROR`` family of macros or you can use the ``ASSERT`` family of macros to have the program conditionally abort if some condition is not satisfied.
+* **ERROR REPORTING:** We don't use C++ exceptions in the codebase. In general, when an error arises, we generally abort the program with an informative error message. You can signal that an error occured by using the :c:macro:`!CELLO_ERROR` function-like macro. Alternatively you can use the :c:macro:`!CELLO_ABORT` function-like macro to conditionally abort if some condition is not satisfied.
 
-  * When you are implementing new functionality, you are encouraged to liberally use the :c:macro:`!ERROR` and :c:macro:`!ASSERT` families of macros to ensure that Enzo-E loudly fails and aborts when the functionality is used in unexpected ways.
+  * When you are implementing new functionality, you are encouraged to liberally use the :c:macro:`!CELLO_ERROR` and :c:macro:`!CELLO_REQUIRE` macros to ensure that Enzo-E loudly fails and aborts when the functionality is used in unexpected ways.
     When running a really expensive simulation, a user should generally prefer that a simulation loudly fails.
     The extreme alternative case is for the simulation to run to completion while silently having problems, which likely invalidates the results (and these problems may not be detected until MUCH later).
     Furthermore, it's easy enough for a user to comment out an error message that they wish to ignore.
 
-  * We briefly describe the arguments of :c:macro:`!ERROR`, :c:macro:`!ERROR1`, :c:macro:`!ERROR2`, ..., :c:macro:`!ERROR8`, :c:macro:`!ASSERT`, :c:macro:`!ASSERT1`, :c:macro:`!ASSERT2`, ..., :c:macro:`!ASSERT8` down below:
+  * in more detail, you can treat the macros as though they are functions with the following signatures:
 
-    * The first argument is always the name of the function where the macro is being invoked (to assist debugging in the future).
+    .. code-block:: c++
 
-    * The second argument is a c-string that provides the error message.
-      Printf formatting specifiers can be used within the error message, but the number of specifiers must match the integer at the end of the macro (e.g. :c:macro:`!ERROR2` or :c:macro:`!ASSERT2` expects 2 printf specifiers while :c:macro:`!ERROR` or :c:macro:`!ASSERT2` expects none).
+       [[noreturn]] void CELLO_ERROR(const char* format, ...);
+       void CELLO_REQUIRE(bool satisfies_requirement, const char* format, ...);
 
-    * The next arguments specifiy the variables used by the formatting specifier (if there are any).
+    The ``format`` argument is a :c:func:`!printf`-style formatting string and the trailing arguments specify that data to be formatted.
+    In the case of :c:macro:`!CELLO_REQUIRE`, the program will only abort if the ``satisfies_requirement`` argument is ``false``.
 
-    * The :c:macro:`!ASSERT` macro-family expects 1 last argument: the boolean condition dictating whether the program aborts.
+  .. note::
+
+     The :c:macro:`!CELLO_ERROR` macro is a replacement for the :c:macro:`!ERROR`, :c:macro:`!ERROR1`, :c:macro:`!ERROR2`, ..., :c:macro:`!ERROR8` family of macros.
+     Likewise  :c:macro:`!CELLO_REQUIRE`, is a replacement for the :c:macro:`!ASSERT`, :c:macro:`!ASSERT1`, :c:macro:`!ASSERT2`, ..., :c:macro:`!ASSERT8` family of macros.
+
+     The arguments for the older macros are similar, but slightly different.
+     The first argument is the name of the function where the macro is invoked.
+     The second argument is the format-string.
+     The next ``N`` arguments specifiy the data to be formatted (if ``N > 0``, the number is included in the macro name).
+     Members of the :c:macro:`ASSERT` macro-family each take 1 final argument: ``satisfies_requirement``.
 
 ====================
 Accessing Field data

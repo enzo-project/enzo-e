@@ -272,8 +272,7 @@ In this situation let's imagine that we want to write a more detailed error mess
       = enzo::fluid_props()->eos_variant().get_if<EnzoEOSIdeal>();
 
     if (eos == nullptr) {
-      ERROR("my_func",
-            "my_func only works when Enzo-E is configured with an ideal EOS");
+      CELLO_ERROR("my_func only works when Enzo-E is configured with an ideal EOS");
     }
     enzo_float gamma = eos->get_gamma();
     // do work with gamma...
@@ -299,8 +298,7 @@ Alternatively we could also accomplish the above by writing:
 
     const EnzoEOSVariant& eos_variant = enzo::fluid_props()->eos_variant();
     if (!eos_variant.holds_alternative<EnzoEOSIdeal>()) {
-      ERROR("my_func",
-            "my_func only works when Enzo-E is configured with an ideal EOS");
+      CELLO_ERROR("my_func only works when Enzo-E is configured with an ideal EOS");
     }
     enzo_float gamma = eos_variant().get<EnzoEOSIdeal>().get_gamma();
     // do work with gamma...
@@ -447,7 +445,7 @@ Now the obvious way to write this is:
      } else if (eos_variant.holds_alternative<EnzoEOSIsothermal>()) {
        return eos_variant.get<EnzoEOSIsothermal>().is_barotropic();
      } else {
-       ERROR("is_barotropic_eos", "eos_variant holds an unknown eos");
+       CELLO_ERROR("eos_variant holds an unknown eos");
      }
    }
 
