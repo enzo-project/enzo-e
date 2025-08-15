@@ -122,6 +122,9 @@ public:
   /// Return the type of the given parameter
   parameter_type type(std::string param) noexcept;
 
+  /// Return the type of the given element in a parameter list
+  parameter_type list_type(int, std::string) throw();
+
   /// Return the Param pointer for the specified parameter
   Param * param (std::string parameter);
 

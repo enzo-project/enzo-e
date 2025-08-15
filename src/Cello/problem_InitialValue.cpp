@@ -68,11 +68,6 @@ void InitialValue::enforce_block ( Block * block,
   ASSERT("InitialValue::enforce_block",
 	 "Block does not exist",
 	 block != NULL);
-  
-  //--------------------------------------------------
-  parameters_->group_set(0,"Initial");
-  parameters_->group_set(1,"value");
-  //--------------------------------------------------
 
   Data *data = block->data();
 
@@ -94,7 +89,8 @@ void InitialValue::enforce_block ( Block * block,
        index_field++) {
     
     std::string field_name = field_descr->field_name(index_field);
-    parameter_type parameter_type = parameters_->type(field_name);
+    std::string parameter_path = "Initial:value:" + field_name;
+    parameter_type parameter_type = parameters_->type(parameter_path);
 
     if ((index_field>=num_fields_) && (parameter_type != parameter_unknown)){
       // It is possiblefor a permanent field to be initialized after
@@ -109,7 +105,7 @@ void InitialValue::enforce_block ( Block * block,
 
       if (parameter_type == parameter_float) {
 	field_data->clear(field_descr,
-			  parameters_->value_float(field_name,0.0), 
+			  parameters_->value_float(parameter_path, 0.0),
 			  index_field);
       } else if (parameter_type != parameter_unknown){
 	int cx,cy,cz;
@@ -256,19 +252,17 @@ void InitialValue::initialize_values_()
   // skip, if values_ has already been initialized
   if (initialized_values_){return;}
 
-  parameters_->group_set(0,"Initial");
-  parameters_->group_set(1,"value");
-
   values_ = new Value*[num_fields_];
 
   // Initialize Value objects
   for (int index_field = 0; index_field < num_fields_; index_field++) {
     std::string field_name = cello::field_descr()->field_name(index_field);
-    parameter_type parameter_type = parameters_->type(field_name);
+    std::string parameter_path = "Initial:value:" + field_name;
+    parameter_type parameter_type = parameters_->type(parameter_path);
 
     if ((parameter_type != parameter_unknown) &&
 	(parameter_type != parameter_float)){
-      values_[index_field] = new Value(parameters_, field_name);
+      values_[index_field] = new Value(parameters_, parameter_path);
     } else {
       values_[index_field] = NULL;
     }
