@@ -477,17 +477,13 @@ void Problem::initialize_method
 
   Method::courant_global = config->method_courant_global;
 
-  // in the future, it might be nice to refactor Problem::create_method_ so
-  // that we can use it to construct this first MethodNull object. (But that
-  // may be somewhat involved)
-  {
-    const std::string root_path = "Method:null";
-    ASSERT("Problem::create_method_", "Something is wrong",
-           cello::simulation());
-    ParameterGroup p_group(*(cello::simulation()->parameters()), root_path);
-    method_list_.push_back(new MethodNull(p_group));
-  }
-  
+  const std::string root_path = "Method:null";
+  ASSERT("Problem::initialize_method()", "Something is wrong",
+         cello::simulation());
+
+  ParameterGroup p_group(*(cello::simulation()->parameters()), root_path);
+  method_list_.push_back(new MethodNull(p_group));
+
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
     std::string name = config->method_type[index_method];
@@ -509,6 +505,8 @@ void Problem::initialize_method
 			     config->schedule_step[index_schedule],
 			     config->schedule_list[index_schedule]));
       }
+      method->set_max_supercycle(config->method_max_supercycle[index_method]);
+      method->set_index(num_methods() - 1);
 
     } else {
       ERROR1("Problem::initialize_method",

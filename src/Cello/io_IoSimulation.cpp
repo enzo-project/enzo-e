@@ -12,9 +12,9 @@
 IoSimulation::IoSimulation(const Simulation * s) throw ()
   : Io(),
     rank_ (s->rank_), 
-    cycle_(s->cycle_),
-    time_ (s->time_),
-    dt_   (s->dt_)
+    cycle_(s->state()->cycle()),
+    time_ (s->state()->time()),
+    dt_   (s->state()->dt())
 {
   meta_name_.push_back("rank");
   meta_name_.push_back("cycle");
@@ -68,9 +68,9 @@ void IoSimulation::save_to (void * v)
   Simulation * s = static_cast<Simulation *>(v);
 
   s->rank_  = rank_;
-  s->cycle_ = cycle_;
-  s->time_  = time_;
-  s->dt_    = dt_;;
+  s->state()->set_cycle(cycle_);
+  s->state()->set_time(time_);
+  s->state()->set_dt(dt_);
 }
 
 

@@ -123,7 +123,7 @@ enum return_enum {
 #include "enzo-core/EnzoProblem.hpp"
 
 #include "enzo-core/EnzoConfig.hpp"
-
+#include "enzo-core/EnzoState.hpp"
 #include "enzo-core/EnzoBlock.hpp"
 
 #include "inference/EnzoLevelArray.hpp"

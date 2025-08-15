@@ -16,6 +16,7 @@ class Adapt;
 class Block;
 class Data;
 class DataMsg;
+class State;
 
 class MsgRefine : public CMessage_MsgRefine {
 
@@ -32,10 +33,10 @@ public: // interface
    int nx, int ny, int nz,
    int num_field_blocks,
    int num_adapt_steps,
-   int cycle, double time, double dt,
    int refresh_type,
-   int num_face_level, int * face_level,
+   const std::vector<int> & face_level,
    Adapt * adapt_parent,
+   State * state,
    int io_reader = -1) ;
 
   virtual ~MsgRefine();
@@ -88,18 +89,15 @@ protected: // attributes
 
   /// MsgRefine-specific attributes
  
-  double time_;          // attribute-01
-  double dt_;            // attribute-02
   Index index_;          // attribute-03
   int nx_, ny_, nz_;     // attribute-04
   int num_field_blocks_; // attribute-05
   int num_adapt_steps_;  // attribute-06
-  int cycle_;            // attribute-07
   int refresh_type_;     // attribute-08
-  int num_face_level_;   // attribute-09
-  int * face_level_;     // attribute-10
+  std::vector<int> face_level_;   // attribute-09
   /// Mesh connectivity of parent block to update child's
   Adapt * adapt_parent_;        // attribute-11
+  State * state_;
 
 public:
   /// If refining during a restart, the index of the io_reader

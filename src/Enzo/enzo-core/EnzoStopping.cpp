@@ -23,6 +23,5 @@ bool EnzoStopping::complete (int    curr_cycle,
     cosmology->set_current_time(curr_time);
     stop = (stop || (cosmology->current_redshift() <= stop_redshift_));
   }
-    
   return stop;
 }

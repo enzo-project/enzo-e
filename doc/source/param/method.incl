@@ -71,6 +71,18 @@
    the time step applied on top of any Field or Particle specific Courant
    safety factors.`
 
+----
+
+.. par:parameter:: Method:<method>:max_supercycle
+
+   :Summary: :s:`Maximum number of cycles the Method can super-cycle relative to other Methods`
+   :Type:    :par:typefmt:`integer`
+   :Default: :d:`1`
+   :Scope:     :c:`Cello`
+
+   :e:`This parameter allows for different Methods to proceed at different relative timesteps, while still always respecting all Method-specific timesteps . Currently, it's only implemented for the "gravity" method. When set to an integer` :math:`N > 1` :e:`, the method will be called only every` :math:`1 \leq k \leq N` :e:`cycles, where` :math:`k` :e:`is the largest value that satisfies the maximum timestep for that Method. During cycles where the method is not called, computed values are linearly extrapolated using stored values from the previous two calls. This can significantly speed up simulations in which the gravity solve is dominant, and where other methods are running at shorter time-scales. See` :ref:`Adaptive Time-Step Design` :e:`for more details on the algorithm as used in the gravity solver.`
+
+
 accretion
 ---------
 
@@ -394,6 +406,26 @@ gravity
         - enforcement of minimum pressure support
         - star formation
         - certain initial conditions
+
+----
+
+.. par:parameter:: Method:gravity:type_super
+
+   :Summary: :s:`How supercycling is performed with gravity: by extrapolating gravitational potential or extrapolating accelerations`
+   :Type:    :par:typefmt:`string`
+   :Default: :d:`"accelerations"`
+   :Scope:     :c:`Cello`
+
+   :e:`This parameter selects one of two approaches to how gravity is
+   handled in non-solve super-cycle cycles: by extrapolating previously
+   saved gravitational potentials` :p:`(\"potential\")` :e:`or
+   previously saved accelerations` :p:`(\"accelerations\").` :e:`While
+   extrapolating potentials only requires two saved fields instead of
+   six (or four for 2D problems), extrapolating potentials can lead to
+   noticeable grid effects in the computed accelerations along
+   resolution level boundaries. For this reason, the default value of`
+   :p:`\"accelerations\"` :e:`is preferred. See` :ref:`Adaptive Time-Step Design` :e:`for more information about super-cycling gravity.`
+
 
 heat
 ----

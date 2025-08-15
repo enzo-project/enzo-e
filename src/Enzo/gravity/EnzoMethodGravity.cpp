@@ -10,24 +10,35 @@
 #include "Enzo/enzo.hpp"
 #include "Enzo/gravity/gravity.hpp"
 
-// #define DEBUG_COPY_B
-// #define DEBUG_COPY_DENSITIES
-// #define DEBUG_COPY_POTENTIAL
-// #define DEBUG_COPY_ACCELERATION
-
-#define NEW_TIMESTEP
+// #define TRACE_SUPERCYCLE
 
 //----------------------------------------------------------------------
 
 EnzoMethodGravity::EnzoMethodGravity(ParameterGroup p, int index_solver,
-                                     int index_prolong)
+                                     int index_prolong,
+                                     int max_super,
+                                     std::string type_super)
   : Method(),
     index_solver_(index_solver),
     order_(p.value_integer("order",4)),
     ir_exit_(-1),
     index_prolong_(index_prolong),
+    type_super_(),
     dt_max_(p.value_float("dt_max",1.0e10))
 {
+  max_supercycle_ = max_super;
+  // Initialize type_super_ super-cycling type
+  if (type_super == "potential") {
+    type_super_ = super_type_potential;
+  } else if (type_super=="accelerations") {
+    type_super_ = super_type_accelerations;
+  } else {
+    ERROR1("EnzoMethodGravity::EnzoMethodGravity()",
+          "Unknown type_super %s (must be \"potential\" or \"accelerations\")",
+           type_super.c_str());
+  }
+
+  // Declare required fields
   const bool accumulate = p.value_logical("accumulate",true);
 
   // Change this if fields used in this routine change
@@ -41,23 +52,31 @@ EnzoMethodGravity::EnzoMethodGravity(ParameterGroup p, int index_solver,
   if (rank >= 2) cello::define_field ("acceleration_y");
   if (rank >= 3) cello::define_field ("acceleration_z");
 
-#ifdef DEBUG_FIELD_FACE
-  cello::define_field ("debug_1");
-  cello::define_field ("debug_2");
-#endif
-#ifdef DEBUG_COPY_B
-  cello::define_field ("B_copy");
-#endif
-#ifdef DEBUG_COPY_POTENTIAL
-  cello::define_field ("potential_copy");
-#endif
-#ifdef DEBUG_COPY_DENSITIES
-  cello::define_field ("density_total_copy");
-#endif
-#ifdef READ_ENZO_POTENTIAL
-  cello::define_field ("potential_enzo");
-  cello::define_field ("potential_dff");
-#endif
+  if (is_supercycle()) {
+
+    if (type_super_ == super_type_potential) {
+
+      super_define_fields_("potential","potential_curr", "potential_prev");
+
+    } else if (type_super_ == super_type_accelerations) {
+
+      if (rank >= 1) {
+        super_define_fields_("acceleration_x",
+                             "acceleration_x_curr",
+                             "acceleration_x_prev");
+      }
+      if (rank >= 2) {
+        super_define_fields_("acceleration_y",
+                             "acceleration_y_curr",
+                             "acceleration_y_prev");
+      }
+      if (rank >= 3) {
+        super_define_fields_("acceleration_z",
+                             "acceleration_z_curr",
+                             "acceleration_z_prev");
+      }
+    }
+  }
 
   if (accumulate){
     cello::define_field ("density_particle");
@@ -71,9 +90,8 @@ EnzoMethodGravity::EnzoMethodGravity(ParameterGroup p, int index_solver,
   Refresh * refresh = cello::refresh(ir_post_);
   refresh->set_prolong(index_prolong_);
 
-  refresh->add_field("acceleration_x");
-  refresh->add_field("acceleration_y");
-  refresh->add_field("acceleration_z");
+  refresh_add_potentials_   (refresh);
+  refresh_add_accelerations_(refresh);
   // Accumulate is used when particles are deposited into density_total
 
   if (accumulate) {
@@ -83,8 +101,8 @@ EnzoMethodGravity::EnzoMethodGravity(ParameterGroup p, int index_solver,
       cello::problem()->prolong(index_prolong_)->name();
 
     ASSERT1("EnzoMethodGravity::EnzoMethodGravity()",
-           "Requesting accumulated particle mass refresh: "
-           "rerun with parameter Method : %s : prolong = \"linear\"",
+            "Requesting accumulated particle mass refresh: "
+            "rerun with parameter Method : %s : prolong = \"linear\"",
             name().c_str(),
             (prolong_name != "enzo"));
 
@@ -98,15 +116,60 @@ EnzoMethodGravity::EnzoMethodGravity(ParameterGroup p, int index_solver,
   cello::simulation()->refresh_set_name(ir_exit_,name()+":exit");
   Refresh * refresh_exit = cello::refresh(ir_exit_);
   refresh_exit->set_prolong(index_prolong_);
-  refresh_exit->add_field("potential");
+
+  refresh_add_potentials_   (refresh_exit);
+  refresh_add_accelerations_(refresh_exit);
 
   refresh_exit->set_callback(CkIndex_EnzoBlock::p_method_gravity_end());
+
+  ASSERT1 ("EnzoMethodGravity::EnzoMethodGravity()",
+           "type_super parameter must be either 0 (extrapolate potentials) or "
+           "1 (extrapolate accelerations", type_super_,
+           (type_super_ == super_type_potential) ||
+           (type_super_ == super_type_accelerations));
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravity::refresh_add_potentials_(Refresh * refresh)
+{
+  refresh->add_field("potential");
+  if ( is_supercycle_potential() ) {
+    refresh->add_field("potential_curr");
+    refresh->add_field("potential_prev");
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravity::refresh_add_accelerations_(Refresh * refresh)
+{
+  const int rank = cello::rank();
+  if (rank >= 1) refresh->add_field("acceleration_x");
+  if (rank >= 2) refresh->add_field("acceleration_y");
+  if (rank >= 3) refresh->add_field("acceleration_z");
+  if ( is_supercycle_accelerations() ) {
+    if (rank >= 1) {
+      refresh->add_field("acceleration_x_curr");
+      refresh->add_field("acceleration_x_prev");
+    }
+    if (rank >= 2) {
+      refresh->add_field("acceleration_y_curr");
+      refresh->add_field("acceleration_y_prev");
+    }
+    if (rank >= 3) {
+      refresh->add_field("acceleration_z_curr");
+      refresh->add_field("acceleration_z_prev");
+    }
+  }
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*>(block);
+
   if (cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     ASSERT("EnzoMethodGravity",
            "Error: pm_deposit method must precede gravity method.",
@@ -114,90 +177,119 @@ void EnzoMethodGravity::compute(Block * block) throw()
   }
   // Initialize the linear system
 
-  Field field = block->data()->field();
-  /// access problem-defining fields for eventual RHS and solution
-  const int ib  = field.field_id ("B");
-  const int id  = field.field_id("density");
-  const int idt = field.field_id("density_total");
-  const int idensity = (idt != -1) ? idt : id;
-  ASSERT ("EnzoMethodGravity::compute",
-          "modifying density in EnzoMethodGravity?",
-          idensity != id);
-  
-  // Solve the linear system
-  int mx,my,mz;
-  int gx,gy,gz;
-  field.dimensions (0,&mx,&my,&mz);
-  field.ghost_depth(0,&gx,&gy,&gz);
+#ifdef TRACE_SUPERCYCLE
+  if (block->index().is_root()) {
+    const auto & method_state = block->state()->method(index());
+    CkPrintf ("TRACE_SUPERCYCLE cycle %d step %d num_steps %d\n",
+              block->state()->cycle(),
+              method_state.step(),
+              method_state.num_steps());
+  }
+#endif
 
-  const int m = mx*my*mz;
-  enzo_float * B = (enzo_float*) field.values (ib);
-#ifdef DEBUG_COPY_B
-  const int ib_copy = field.field_id ("B_copy");
-  enzo_float * B_copy = (enzo_float*) field.values (ib_copy);
-#endif  
-#ifdef DEBUG_COPY_DENSITIES  
-  const int id_copy = field.field_id ("D_copy");
-  const int idt_copy = field.field_id ("DT_copy");
-  enzo_float * D_copy = (enzo_float*) field.values (id_copy);
-  enzo_float * DT_copy = (enzo_float*) field.values (idt_copy);
-#endif  
-  enzo_float * D = (enzo_float*) field.values (idensity);
+  // Solve only if this method's current substep is 0
+  bool solve_this_step = (block->state()->method(index()).step() == 0);
 
-  for (int i=0; i<m; i++) D[i] += B[i];
+  if (solve_this_step) {
 
-  // Add density_particle values to density_particle_accumulate ghosts
+#ifdef TRACE_SUPERCYCLE
+    if (block->index().is_root()) {
+      CkPrintf ("TRACE_SUPERCYCLE cycle %d: solve\n",block->state()->cycle());
+    }
+#endif
 
-  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+    Field field = block->data()->field();
+    /// access problem-defining fields for eventual RHS and solution
+    const int ib  = field.field_id ("B");
+    const int id  = field.field_id("density");
+    const int idt = field.field_id("density_total");
+    ASSERT ("EnzoMethodGravity::compute",
+            "missing required field density_total",
+            idt != -1);
+    // Solve the linear system
+    int mx,my,mz;
+    int gx,gy,gz;
+    field.dimensions (0,&mx,&my,&mz);
+    field.ghost_depth(0,&gx,&gy,&gz);
 
-  if (block->is_leaf()) {
-    if (cosmology) {
-      int gx,gy,gz;
-      field.ghost_depth(0,&gx,&gy,&gz);
-      gx=gy=gz=0;
-      for (int iz=gz; iz<mz-gz; iz++) {
-	for (int iy=gy; iy<my-gy; iy++) {
-	  for (int ix=gx; ix<mx-gx; ix++) {
-	    int i = ix + mx*(iy + my*iz);
-	    // In cosmological simulations, density units are defined such that `rho_bar_m` is
-	    // 1.0, and time units are defined such that `4 * pi * G * rho_bar_m` is 1.0, where
-	    // `G` is the gravitational constant, and `rho_bar_m` is the mean matter density
-	    // of the universe. These choices of units result in Poisson's equation having a
-	    // much simplified form.
-	    D[i]=-(D[i]-1.0);
-	    B[i]  = D[i];
-	  }
-	}
-      }
-    } else {
-      double grav_const = enzo::grav_constant_codeU();
-      field.scale(ib, -4.0 * (cello::pi) * grav_const, idensity);
+
+    const int m = mx*my*mz;
+    enzo_float * B = (enzo_float*) field.values (ib);
+    enzo_float * DT = (enzo_float*) field.values (idt);
+
+    for (int i=0; i<m; i++) {
+      DT[i] += B[i];
     }
 
-  } else {
+    // Prepare right-hand side vector B
 
-    for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
+    for (int i=0; i<m; i++) B[i] = 0.0;
 
+    if (block->is_leaf()) {
+
+      EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+
+      if (cosmology) {
+        for (int i=0; i<m; i++) {
+          // In cosmological simulations, density units are defined
+          // such that `rho_bar_m` is 1.0, and time units are defined
+          // such that `4 * pi * G * rho_bar_m` is 1.0, where `G` is
+          // the gravitational constant, and `rho_bar_m` is the mean
+          // matter density of the universe. These choices of units
+          // result in Poisson's equation having a much simplified
+          // form.
+          DT[i] = - (DT[i] - 1.0);
+          B[i]  = DT[i];
+        }
+
+      } else { // ! cosmology
+
+        const double scale = -4.0 * (cello::pi) * (enzo::grav_constant_codeU());
+        for (int i=0; i<m; i++) {
+          B[i] = scale * DT[i];
+        }
+
+      }
+
+    }
+
+    Solver * solver = enzo::problem()->solver(index_solver_);
+
+    // May exit before solve is done...
+    solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
+
+    // Save previous potential
+
+    if ( is_supercycle_potential() ) {
+      super_shift_fields_(enzo_block);
+    }
+
+    int ix = field.field_id("potential");
+
+    ASSERT("EnzoMethodGravity::compute()",
+           "max_supercycle > 1 but potential_curr field not defined",
+           (ix >= 0));
+
+    std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
+    solver->set_field_x(ix);
+    solver->set_field_b(ib);
+    solver->apply (A, block);
+
+  } else { // ( ! solve_this_step )
+
+#ifdef TRACE_SUPERCYCLE
+    if (block->index().is_root()) {
+      CkPrintf ("TRACE_SUPERCYCLE cycle %d: extrapolate\n",block->state()->cycle());
+    }
+#endif
+
+    // Skip solve; compute accelerations using extrapolated potential
+    if (enzo_block->is_leaf()) {
+      compute_accelerations(enzo_block);
+    }
+
+    enzo_block->compute_done();
   }
-  
-  Solver * solver = enzo::problem()->solver(index_solver_);
-
-  // May exit before solve is done...
-  solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
-
-  const int ix = field.field_id ("potential");
-  std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
-  solver->set_field_x(ix);
-  solver->set_field_b(ib);
-#ifdef DEBUG_COPY_B
-  if (B_copy) for (int i=0; i<m; i++) B_copy[i] = B[i];
-#endif	
-#ifdef DEBUG_COPY_DENSITIES
-  enzo_float * DT = (enzo_float*) field.values (idt);
-  if (DT_copy) for (int i=0; i<m; i++) DT_copy[i] = DT[i];
-  if (D_copy) for (int i=0; i<m; i++) D_copy[i] = D[i];
-#endif	
-  solver->apply (A, block);
 }
 
 //----------------------------------------------------------------------
@@ -211,7 +303,6 @@ void EnzoBlock::p_method_gravity_continue()
 
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->refresh_potential(this);
-
 }
 
 //----------------------------------------------------------------------
@@ -238,24 +329,43 @@ void EnzoBlock::p_method_gravity_end()
 void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 {
 
+  // Extrapolate potential from "potential_curr" and "potential_prev"
+  // if supercycling and not a solve step
+
+  const bool is_root = enzo_block->index().is_root();
+
+  if (is_supercycle_potential() && is_solve_cycle_(enzo_block)) {
+
+    super_save_fields_(enzo_block);
+
+  }
+
+  if ( is_supercycle_potential() ) {
+
+    if (is_solve_cycle_(enzo_block)) {
+
+      super_update_time_(enzo_block, enzo_block->state()->time());
+
+    } else {
+
+      super_extrapolate_fields_(enzo_block, enzo_block->state()->time());
+
+    }
+  }
+
+
   Field field = enzo_block->data()->field();
-  int gx,gy,gz;
-  int mx,my,mz;
-  field.ghost_depth(0,&gx,&gy,&gz);
-  field.dimensions (0,&mx,&my,&mz);
-  const int m = mx*my*mz;
-  enzo_float * potential = (enzo_float*) field.values ("potential");
+  const int m = field.dimensions (0);
+
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (cosmology) {
-
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
-    double dt   = enzo_block->timestep();
-    double time = enzo_block->time();
+    enzo_float * potential = (enzo_float*) field.values ("potential");
+    auto dt   = enzo_block->state()->dt();
+    auto time = enzo_block->state()->time();
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
-    //    cosmology-> compute_expansion_factor (&a,&dadt,time);
-
     for (int i=0; i<m; i++) potential[i] /= cosmo_a;
   }
 
@@ -263,7 +373,32 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
   EnzoComputeAcceleration compute_acceleration(cello::rank(), order_);
 
-  compute_acceleration.compute(enzo_block);
+  if (is_supercycle_accelerations() ) {
+    enzo_float * ax =      (enzo_float*) field.values ("acceleration_x");
+    enzo_float * ay =      (enzo_float*) field.values ("acceleration_y");
+    enzo_float * az =      (enzo_float*) field.values ("acceleration_z");
+    enzo_float * ax_curr = (enzo_float*) field.values ("acceleration_x_curr");
+    enzo_float * ay_curr = (enzo_float*) field.values ("acceleration_y_curr");
+    enzo_float * az_curr = (enzo_float*) field.values ("acceleration_z_curr");
+
+    if (is_solve_cycle_(enzo_block)) {
+
+      super_shift_fields_(enzo_block);
+
+      compute_acceleration.compute(enzo_block);
+
+      super_save_fields_(enzo_block);
+
+    } else { // not a solve step
+
+      super_extrapolate_fields_(enzo_block, enzo_block->state()->time());
+    }
+
+  } else {
+
+    compute_acceleration.compute(enzo_block);
+
+  }
 
   // Clear "B" and "density_total" fields for next call
   // Note density_total may not be defined
@@ -274,12 +409,6 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   enzo_float * de_t = (enzo_float*) field.values("density_total");
   if (de_t) for (int i=0; i<m; i++) de_t[i] = 0.0;
 
-#ifdef DEBUG_COPY_POTENTIAL
-  enzo_float * potential_copy = (enzo_float*) field.values ("potential_copy");
-  if (potential_copy) {
-    for (int i=0; i<m; i++) potential_copy[i] = potential[i];
-  }
-#endif	
 }
 
 //----------------------------------------------------------------------
@@ -295,94 +424,60 @@ double EnzoMethodGravity::timestep_ (Block * block) throw()
 {
   Field field = block->data()->field();
 
-  int mx,my,mz;
-  int gx,gy,gz;
-  field.dimensions (0,&mx,&my,&mz);
-  field.ghost_depth(0,&gx,&gy,&gz);
-
-#ifdef NEW_TIMESTEP  
-  enzo_float * a3[3] =
-    { (enzo_float*) field.values ("acceleration_x"),
-      (enzo_float*) field.values ("acceleration_y"),
-      (enzo_float*) field.values ("acceleration_z") };
-#else
   enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
   enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
   enzo_float * az = (enzo_float*) field.values ("acceleration_z");
-#endif  
 
   const int rank = cello::rank();
-  
+
   enzo_float dt = std::numeric_limits<enzo_float>::max();
 
-#ifdef NEW_TIMESTEP  
-  double h3[3];
-  block->cell_width(h3,h3+1,h3+2);
-#else  
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
-#endif  
-  
-  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
-  if (cosmology) {
-    enzo_float cosmo_a = 1.0;
-    enzo_float cosmo_dadt = 0.0;
-    double dt = block->dt();
-    double time = block->time();
-    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
-#ifdef NEW_TIMESTEP  
-    if (rank >= 1) h3[0]*=cosmo_a;
-    if (rank >= 2) h3[1]*=cosmo_a;
-    if (rank >= 3) h3[2]*=cosmo_a;
-#else
-    if (rank >= 1) hx*=cosmo_a;
-    if (rank >= 2) hy*=cosmo_a;
-    if (rank >= 3) hz*=cosmo_a;
-#endif 
-  }
-  
   double mean_cell_width;
 
-#ifdef NEW_TIMESTEP
-  if (rank == 1) mean_cell_width = h3[0];
-  if (rank == 2) mean_cell_width = sqrt(h3[0]*h3[1]);
-  if (rank == 3) mean_cell_width = cbrt(h3[0]*h3[1]*h3[2]);
-#else
   if (rank == 1) mean_cell_width = hx;
   if (rank == 2) mean_cell_width = sqrt(hx*hy);
   if (rank == 3) mean_cell_width = cbrt(hx*hy*hz);
-#endif
-  
+
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  if (cosmology) {
+    enzo_float cosmo_a = 1.0;
+    enzo_float cosmo_dadt = 0.0;
+    double dt = block->state()->dt();
+    double time = block->state()->time();
+    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+    mean_cell_width *= cosmo_a;
+  }
+
   // Timestep is sqrt(mean_cell_width / (a_mag_max + epsilon)),
   // where a_mag_max is the maximum acceleration magnitude
   // across all cells in the block, and epsilon defined as
   // mean_cell_width / dt_max_^2. This means that when acceleration
   // is zero everywhere, the timestep is equal to dt_max_
-  
+
   const double epsilon = mean_cell_width / (dt_max_ * dt_max_);
 
   // Find th maximum of the square of the magnitude of acceleration
   // across all active cells, then get the square root of this value
-  
+
   double a_mag_2_max = 0.0;
   double a_mag_2;
+
+  int mx,my,mz;
+  int gx,gy,gz;
+  field.dimensions (0,&mx,&my,&mz);
+  field.ghost_depth(0,&gx,&gy,&gz);
 
   for (int iz=gz; iz<mz-gz; iz++) {
     for (int iy=gy; iy<my-gy; iy++) {
       for (int ix=gx; ix<mx-gx; ix++) {
 	int i=ix + mx*(iy + iz*my);
-#ifdef NEW_TIMESTEP
-	if (rank == 1) a_mag_2 = a3[0][i] * a3[0][i];
-	if (rank == 2) a_mag_2 = a3[0][i] * a3[0][i] + a3[1][i] * a3[1][i];
-	if (rank == 3) a_mag_2 = a3[0][i] * a3[0][i] + a3[1][i] * a3[1][i]
-			       + a3[2][i] * a3[2][i];
-#else
 	if (rank == 1) a_mag_2 = ax[i] * ax[i];
 	if (rank == 2) a_mag_2 = ax[i] * ax[i] + ay[i] * ay[i];
 	if (rank == 3) a_mag_2 = ax[i] * ax[i] + ay[i] * ay[i]
 			       + az[i] * az[i];
-#endif
 	a_mag_2_max = std::max(a_mag_2_max,a_mag_2);
       }
     }

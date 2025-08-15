@@ -115,7 +115,7 @@ void Block::stopping_exit_()
   if (cello::simulation()->cycle_changed()) {
     // if performance counters haven't started yet for this cycle
     int cycle_initial = cello::config()->initial_cycle;
-    if (cycle_ > cycle_initial) {
+    if (state_->cycle() > cycle_initial) {
       // stop if any previous cycle
       performance_stop_(perf_cycle,__FILE__,__LINE__);
     }
@@ -123,7 +123,7 @@ void Block::stopping_exit_()
     performance_start_ (perf_cycle,__FILE__,__LINE__);
   }
 
-  if (stop_) {
+  if (state_->stopping()) {
 
 #ifdef TRACE_CONTRIBUTE  
     CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_exit()\n",

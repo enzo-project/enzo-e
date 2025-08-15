@@ -490,6 +490,35 @@ enum class InitCycleKind {
 
 //--------------------------------------------------
 
+#define SIZE_VECTOR_OBJECT_TYPE(COUNT,TYPE,VECTOR)      \
+  {                                                     \
+    (COUNT) += sizeof(int);                             \
+    for (int i=0; i<(VECTOR).size(); i++) {             \
+      SIZE_OBJECT_TYPE(COUNT,(VECTOR)[i]);              \
+    }                                                   \
+  }
+#define SAVE_VECTOR_OBJECT_TYPE(POINTER,TYPE,VECTOR)    \
+  {                                                     \
+    int size = (VECTOR).size();                         \
+    memcpy(POINTER,&size, sizeof(int));                 \
+    (POINTER) += sizeof(int);                           \
+    for (int i=0; i<(VECTOR).size(); i++) {             \
+      SAVE_OBJECT_TYPE(POINTER,(VECTOR)[i]);            \
+    }                                                   \
+  }
+#define LOAD_VECTOR_OBJECT_TYPE(POINTER,TYPE,VECTOR)    \
+  {                                                     \
+    int size;                                           \
+    memcpy(&size, POINTER, sizeof(int));                \
+    (POINTER) += sizeof(int);                           \
+    (VECTOR).resize(size);                              \
+    for (int i=0; i<(VECTOR).size(); i++) {             \
+      LOAD_OBJECT_TYPE(POINTER,(VECTOR)[i]);            \
+    }                                                   \
+  }
+
+//--------------------------------------------------
+
 #define SIZE_OBJECT_TYPE(COUNT,OBJECT)          \
   {						\
     (COUNT) += (OBJECT).data_size();            \

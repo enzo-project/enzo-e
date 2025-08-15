@@ -49,7 +49,6 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
   return CkReductionMsg::buildNew(length*sizeof(long long),&accum[0]);
 }
 
-
 //======================================================================
 
 CkReduction::reducerType r_reduce_method_debug_type;
@@ -61,13 +60,9 @@ CkReductionMsg * r_reduce_method_debug(int n, CkReductionMsg ** msgs)
 {
   if (n <= 0) return NULL;
 
-  long double num_fields = ((long double*) (msgs[0]->getData()))[0];
-
-  const int length = 1 + 4*num_fields;
+  long double length = ((long double*) (msgs[0]->getData()))[0];
+  int num_fields = (length - 1) / 4;
   std::vector<long double> accum;
-  ASSERT1 ("r_reduce_method_debug",
-	   "Sanity check failed on expected accumulator array %d",
-	   length, (length < 500));
   accum.resize(length);
   accum.clear();
 

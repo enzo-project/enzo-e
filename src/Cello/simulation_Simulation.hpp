@@ -24,6 +24,7 @@ class Schedule;
 #include <fstream>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
+#include "data_State.hpp"
 class Simulation : public CBase_Simulation 
 {
   /// @class    Simulation
@@ -126,46 +127,24 @@ public: // interface
   Monitor * monitor() const throw()
   { return monitor_; }
 
-  void set_cycle(int cycle) throw()
-  { cycle_ = cycle; }
-  void set_initial_cycle(int cycle) throw()
-  { cycle_initial_ = cycle; }
-  void set_time(double time) throw()
-  { time_ = time; }
-  void set_dt(double dt) throw()
-  { dt_ = dt; }
-  void set_stop(bool stop) throw()
-  { stop_ = stop; }
+  /// Get Simulation state (cycle, time, etc.)
+  auto & state ()  { return state_; }
+  const auto & state () const  { return state_; }
 
   /// Return true iff cycle_ changes
   bool cycle_changed() {
     bool value = false;
-    if (cycle_ != cycle_watch_) {
+    const int cycle = state_->cycle();
+    if (cycle != cycle_watch_) {
       value = true;
-      cycle_watch_ = cycle_;
+      cycle_watch_ = cycle;
     }
     return value;
   }
   
-  /// Return the current cycle number
-  int cycle() const throw() 
-  { return cycle_; };
-
   /// Return the initial cycle number
   int initial_cycle() const throw() 
   { return cycle_initial_; };
-
-  /// Return the current time
-  double time() const throw() 
-  { return time_; };
-
-  /// Return the current dt (stored from main)
-  double dt() const throw() 
-  { return dt_; };
-
-  /// Return the current stopping criteria (stored from main reduction)
-  bool stop() const throw() 
-  { return stop_; };
 
   /// Return the current phase of the simulation
   int phase() const throw() 
@@ -498,23 +477,14 @@ protected: // attributes
   /// Rank of the simulation
   int  rank_; 
 
-  /// Current cycle
-  int cycle_;
-
   /// Cycle at last start of performance monitoring
   int cycle_watch_;
 
   /// Initial cycle
   int cycle_initial_;
 
-  /// Current time
-  double time_;
-
-  /// Current timestep
-  double dt_;
-
-  /// Current stopping criteria
-  bool stop_;
+  /// Current state of the simulation (time, cycle, etc.)
+  std::shared_ptr<State> state_;
 
   /// Current phase of the cycle
   mutable int phase_;

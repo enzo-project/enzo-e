@@ -579,7 +579,7 @@ void EnzoMethodM1Closure::inject_photons ( EnzoBlock * enzo_block, int igroup ) 
 
   double cell_volume = hx*hy*hz * enzo_units->volume(); 
 
-  double dt = enzo_block->dt * tunit;
+  double dt = enzo_block->state()->dt() * tunit;
 
   // get relevant field variables
   enzo_float * N          = (enzo_float *) field.values(
@@ -1383,7 +1383,7 @@ void EnzoMethodM1Closure::solve_transport_eqn ( EnzoBlock * enzo_block, int igro
   double tunit = enzo_units->time();
   double Nunit = enzo_units->photon_number_density();
 
-  double dt = enzo_block->dt;
+  double dt = enzo_block->state()->dt();
   double hx = (xp-xm)/(mx-2*gx);
   double hy = (yp-ym)/(my-2*gy);
   double hz = (zp-zm)/(mz-2*gz);
@@ -1519,7 +1519,7 @@ void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21)
     double D = 5.882e-4;
     double E = -5.056e-6;
 
-    double z = enzo_block->redshift;
+    double z = enzo_block->state()->redshift();
     if (z > 30) { // function valid for z < 30 (not many Pop III stars at z > 30)
       return;
     }
@@ -1536,7 +1536,6 @@ void EnzoMethodM1Closure::add_LWB(EnzoBlock * enzo_block, double J21)
   double Nbackground = 4*cello::pi * JLW/(energy_cgs*enzo_constants::clight) * dnu / Nunit;
 
   Scalar<double> scalar = enzo_block->data()->scalar_double();
-
   double Nbackground_previous = cello::is_initial_cycle(InitCycleKind::fresh)
     ? 0.0 : *(scalar.value(scalar.index("N_LWB")));
  

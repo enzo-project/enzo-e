@@ -105,8 +105,8 @@ void EnzoComputeAcceleration::compute_(Block * block)
 
   enzo_float cosmo_a = 1.0;
   enzo_float cosmo_dadt = 0.0;
-  double time = block->time();
-  double dt   = block->dt();
+  const double time = block->state()->time();
+  double dt   = block->state()->dt();
 
   if (cosmology) {
 
@@ -219,7 +219,7 @@ void EnzoComputeAcceleration::compute_(Block * block)
 
     if (particle.num_particles(it) > 0) {
 
-      double dt_shift = 0.5*block->dt() / cosmo_a;
+      double dt_shift = 0.5*dt / cosmo_a;
       //  double dt_shift = 0.0;
       if (rank_ >= 1) {
         EnzoComputeCicInterp interp_x

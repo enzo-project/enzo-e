@@ -117,7 +117,6 @@ Initial * EnzoProblem::create_initial_
   const EnzoConfig * enzo_config = enzo::config();
 
   if (type == "hdf5") {
-
     initial = new EnzoInitialHdf5
       (cycle,time,
        enzo_config->initial_hdf5_max_level,
@@ -593,7 +592,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "grackle") {
 
-    method = new EnzoMethodGrackle(p_group, enzo::simulation()->time());
+    method = new EnzoMethodGrackle(p_group, enzo::simulation()->state()->time());
+
     skip_auto_courant = true;
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -648,7 +648,10 @@ Method * EnzoProblem::create_method_
     const int index_prolong = prolong_list_.size();
     prolong_list_.push_back(prolong);
 
-    method = new EnzoMethodGravity(p_group, index_solver, index_prolong);
+    method = new EnzoMethodGravity
+      (p_group, index_solver, index_prolong,
+       enzo_config->method_max_supercycle[index_method],
+       enzo_config->method_gravity_type_super);
 
   } else if (name == "mhd_vlct") {
 

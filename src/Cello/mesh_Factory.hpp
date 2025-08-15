@@ -88,11 +88,10 @@ public: // interface
    int nx, int ny, int nz,
    int num_field_data,
    int count_adapt,
-   int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level,
-   int * face_level,
+   const std::vector<int> & face_level,
    Adapt * adapt,
+   State * state,
    Simulation * simulation = 0,
    int io_reader = -1,
    int ip = -1

@@ -534,7 +534,10 @@ namespace { // define local helper functions in anonymous namespace
 void EnzoMethodPmDeposit::compute ( Block * block) throw()
 {
 
-   if (enzo::simulation()->cycle() == enzo::config()->initial_cycle) {
+  auto cycle = enzo::simulation()->state()->cycle();
+  auto cycle_initial = enzo::config()->initial_cycle;
+
+  if (cycle == cycle_initial) {
     // Check if the gravity method is being used and that pm_deposit
     // precedes the gravity method.
     ASSERT("EnzoMethodPmDeposit",
@@ -573,11 +576,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float cosmo_a=1.0;
     enzo_float cosmo_dadt=0.0;
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+    const double time = block->state()->time();
+    const double dt   = block->state()->dt();
     if (cosmology) {
-      cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,
-                                          block->time() + alpha_*block->dt());
+      cosmology->compute_expansion_factor
+        (&cosmo_a,&cosmo_dadt,time + alpha_*dt);
     }
-    const double dt_div_cosmoa = alpha_ * block->dt() / cosmo_a;
+    const double dt_div_cosmoa = alpha_ * dt / cosmo_a;
 
     double hx,hy,hz;
     block->cell_width(&hx,&hy,&hz);

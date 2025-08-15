@@ -23,6 +23,10 @@
 
 // #define DEBUG_STOPPING
 
+// #define TRACE_DT
+
+// #define DEBUG_STATE
+
 #ifdef DEBUG_STOPPING
 #   define TRACE_STOPPING(A)					\
   CkPrintf ("%d %s:%d %s TRACE %s\n",					\
@@ -53,57 +57,37 @@ void Block::stopping_begin_()
   int stopping_interval = cello::config()->stopping_interval;
 
   bool stopping_reduce = stopping_interval ? 
-    ((cycle_ % stopping_interval) == 0) : false;
+    ((state_->cycle() % stopping_interval) == 0) : false;
 
-  if (stopping_reduce || dt_==0.0) {
+  if (stopping_reduce || state_->dt()==0.0) {
 
-    // Compute local dt
+    // Compute dt_ik for block i and method k
 
     Problem * problem = simulation->problem();
 
-    int index = 0;
-    Method * method;
-    double dt_block = std::numeric_limits<double>::max();
-    while ((method = problem->method(index++))) {
-      dt_block = std::min(dt_block,method->timestep(this));
-    }
-
-    // Reduce timestep to coincide with scheduled output if needed
-
-    int index_output=0;
-    while (Output * output = problem->output(index_output++)) {
-      Schedule * schedule = output->schedule();
-      dt_block = schedule->update_timestep(time_,dt_block);
-    }
-
-    // Reduce timestep to not overshoot final time from stopping criteria
-
-    Stopping * stopping = problem->stopping();
-
-    double time_stop = stopping->stop_time();
-    double time_curr = time_;
-
-    dt_block = MIN (dt_block, (time_stop - time_curr));
+    //    allocate reduction vector for stopping criteria plus method dt
+    const int n = 1 + problem->num_methods();
+    std::vector<double> min_reduce(n);
 
     // Evaluate local stopping criteria
 
-    int stop_block = stopping->complete(cycle_,time_);
+    Stopping * stopping = problem->stopping();
+    const int stop_block = stopping->complete(state_->cycle(),state_->time());
+    min_reduce[0] = stop_block ? 1.0 : 0.0;
 
-    // Reduce to find Block array minimum dt and stopping criteria
-
-    double min_reduce[2];
-
-    min_reduce[0] = dt_block;
-    min_reduce[1] = stop_block ? 1.0 : 0.0;
+    // Evaluate dt for each method k
+    for (int k=0; k<problem->num_methods(); k++) {
+      min_reduce[k+1] = problem->method(k)->timestep(this);
+    }
 
     CkCallback callback (CkIndex_Block::r_stopping_compute_timestep(NULL),
 			 thisProxy);
 
-#ifdef TRACE_CONTRIBUTE    
+#ifdef TRACE_CONTRIBUTE
     CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
 	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
-#endif    
-    contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
+#endif
+    contribute(n*sizeof(double), min_reduce.data(), CkReduction::min_double, callback);
 
   } else {
 
@@ -118,27 +102,27 @@ void Block::stopping_begin_()
 void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
   performance_start_(perf_stopping);
-  
   TRACE_STOPPING("Block::r_stopping_compute_timestep");
-  
   ++age_;
 
   double * min_reduce = (double * )msg->getData();
 
-  dt_   = min_reduce[0];
-  stop_ = min_reduce[1] == 1.0 ? true : false;
+  state_->set_stopping(min_reduce[0] == 1.0);
+
+  // Compute timestep
+  double dt_global = stopping_compute_global_dt_(min_reduce);
+
+  stopping_update_method_state_(min_reduce,dt_global);
 
   delete msg;
 
+  // Update Block state timestep
+  state_->set_dt(dt_global);
+
+  // Update simulation state to block state
   Simulation * simulation = cello::simulation();
-
-  dt_ *= Method::courant_global;
-  
-  set_dt   (dt_);
-  set_stop (stop_);
-
-  simulation->set_dt(dt_);
-  simulation->set_stop(stop_);
+  simulation->state()->set_dt      (state_->dt());
+  simulation->state()->set_stopping(state_->stopping());
 
 #ifdef CONFIG_USE_PROJECTIONS
   bool was_off = (simulation->projections_tracing() == false);
@@ -178,6 +162,74 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
+double Block::stopping_compute_global_dt_ (double min_reduce[])
+{
+  Simulation * simulation = cello::simulation();
+  Problem * problem = simulation->problem();
+  double dt_global = std::numeric_limits<double>::max();
+
+  // compute minimum timestep dt_global over all methods
+  for (int k=0; k<problem->num_methods(); k++) {
+    const double dt_method = min_reduce[k+1];
+    dt_global = std::min(dt_global,dt_method);
+  }
+
+  // Adjust timestep dt for global courant condition
+  dt_global *= Method::courant_global;
+
+  // adjust timestep dt to align with any scheduled output times
+  double time_curr = state_->time();
+  int index_output=0;
+  while (Output * output = problem->output(index_output++)) {
+    Schedule * schedule = output->schedule();
+    dt_global = schedule->update_timestep(time_curr,dt_global);
+  }
+
+  // Reduce timestep to not overshoot final time from stopping criteria
+
+  Stopping * stopping = problem->stopping();
+  double time_stop = stopping->stop_time();
+
+  dt_global = std::min (dt_global, (time_stop - time_curr));
+
+  return dt_global;
+}
+
+//----------------------------------------------------------------------
+
+void Block::stopping_update_method_state_(double min_reduce[], double dt_global)
+{
+  // update Method states for supercycling
+  Simulation * simulation = cello::simulation();
+  Problem * problem = simulation->problem();
+#ifdef DEBUG_STATE
+  // Write current state
+  if (index().is_root()) {
+    state()->print("update_method_state");
+  }
+#endif
+  for (int k=0; k<problem->num_methods(); k++) {
+    const double dt_method = min_reduce[k+1];
+    const int max_super = problem->method(k)->max_supercycle();
+    const double max_dt_method = dt_global*max_super;
+    const double ratio = dt_method / dt_global;
+    const int desired_super = int(std::floor(ratio));
+    const int allowed_super = std::min(desired_super,max_super);
+    State::MethodState & method_state = state_->method(k);
+    const int step = method_state.step();
+    const int num_steps = method_state.num_steps();
+    bool update_state = (step >= num_steps);
+    if (update_state) {
+      method_state.set_time(state_->time());
+      method_state.set_dt(allowed_super * dt_global);
+      method_state.set_num_steps(allowed_super);
+      method_state.set_step(0);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void Block::stopping_balance_()
 {
   TRACE_STOPPING("Block::stopping_balance_");
@@ -185,7 +237,7 @@ void Block::stopping_balance_()
   Schedule * schedule = cello::simulation()->schedule_balance();
 
   bool do_balance = (schedule && 
-		     schedule->write_this_cycle(cycle_,time_));
+		     schedule->write_this_cycle(state_->cycle(),state_->time()));
 
   if (do_balance) {
 

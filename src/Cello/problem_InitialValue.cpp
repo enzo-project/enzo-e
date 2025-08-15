@@ -80,13 +80,14 @@ void InitialValue::enforce_block ( Block * block,
 
   double *val_array = NULL;
   double *xc=NULL, *yc=NULL, *zc=NULL, *xf=NULL, *yf=NULL, *zf=NULL; 
-  double t = block->time();
 
   Field field = data->field();
   int nx, ny, nz; // number of cells per axis in the active zone
   field.size(&nx,&ny,&nz);
   int gx, gy, gz;
   field.ghost_depth(0,&gx,&gy,&gz);
+
+  double t = block->state()->time();
 
   FieldDescr * field_descr = cello::field_descr();
   for (int index_field = 0;

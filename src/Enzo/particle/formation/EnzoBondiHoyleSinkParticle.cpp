@@ -561,7 +561,7 @@ void EnzoBondiHoyleSinkParticle::compute(double density_threshold,
   for (int i = 0; i < n_cells; i++){
     const int index = acc_zone_1d_indices_[i];
     double density_change =
-      bound_fractions_[i] * cell_weights_[i] * accretion_rate_ * block_->dt() * inv_cell_volume;
+      bound_fractions_[i] * cell_weights_[i] * accretion_rate_ * block_->state()->dt() * inv_cell_volume;
 
     // Restrict density change via density_threshold and max_mass_fraction
     density_change = std::min(std::min(density_change,density[index] - density_threshold),

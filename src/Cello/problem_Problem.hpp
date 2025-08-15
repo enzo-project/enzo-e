@@ -137,6 +137,9 @@ public: // interface
   /// Return the named method object if present
   Method * method (std::string name) const throw();
 
+  /// Return number of methods
+  int num_methods() const { return method_list_.size(); }
+
   // Return whether a method object with given name exists for this problem
   bool method_exists(const std::string &name) const throw();
 

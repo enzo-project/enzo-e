@@ -250,7 +250,7 @@ void MethodDebug::compute_continue
         char buffer[256];
         snprintf(buffer,255,"field-%s-%s-%03d.data",
                  field.field_name(i_f).c_str(),
-                 block->name().c_str(),block->cycle());
+                 block->name().c_str(),block->state()->cycle());
         FILE * fp = fopen (buffer,"a");
         for (int iz=gz; iz<mz-gz; iz++) {
           for (int iy=gy; iy<my-gy; iy++) {
@@ -270,7 +270,7 @@ void MethodDebug::compute_continue
           char buffer[256];
           snprintf(buffer,255,"FIELD-%s-%s-%03d.data",
                    field.field_name(i_f).c_str(),
-                   block->name().c_str(),block->cycle());
+                   block->name().c_str(),block->state()->cycle());
           FILE * fp = fopen (buffer,"a");
 
           int mx,my,mz;

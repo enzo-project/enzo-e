@@ -31,9 +31,45 @@ public: // interface
     return (index >= 0) ? & value_[scalar_descr->offset(index)] : NULL;
   }
 
+  const T * value (const ScalarDescr * scalar_descr, int index) const 
+  { return (index >= 0) ? & value_.at(scalar_descr->offset(index)) : NULL; }
+
   /// Allocate scalars
   void allocate(const ScalarDescr * scalar_descr)
   { value_.resize(scalar_descr->size()); }
+
+  size_t size() const
+  { return value_.size(); }
+  
+  //--------------------------------------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const
+  {
+    int size = 0;
+    SIZE_VECTOR_TYPE(size,T,value_);
+    return size;
+  };
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (char * buffer) const
+  {
+    char * pc = buffer;
+    SAVE_VECTOR_TYPE(pc,T,value_);
+    return pc;
+  }
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (char * buffer)
+  {
+    char * pc = buffer;
+    LOAD_VECTOR_TYPE(pc,T,value_);
+    return pc;
+  }
 
 private: // attributes
 

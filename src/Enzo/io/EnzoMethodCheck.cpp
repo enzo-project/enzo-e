@@ -390,8 +390,8 @@ std::string Simulation::file_create_dir_
 (std::vector<std::string> directory_format, bool & already_exists)
 {
   const int counter = Simulation::file_counter_++;
-  const int cycle = cello::simulation()->cycle();
-  const double time = cello::simulation()->time();
+  const int cycle = cello::simulation()->state()->cycle();
+  const double time = cello::simulation()->state()->time();
 
   cello::create_directory
     (&directory_format, counter,cycle,time,already_exists);
