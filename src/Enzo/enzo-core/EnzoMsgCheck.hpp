@@ -11,7 +11,7 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-#define ADAPT_BUFFER_SIZE 1000
+#define ADAPT_BUFFER_SIZE 2000
 
 class EnzoBlock;
 class IoEnzoBlock;
@@ -172,8 +172,8 @@ protected: // methods
                   adapt_buffer_);
     index_file_  = enzo_msg_check.index_file_;
 
-    index_order_ = enzo_msg_check.index_order_;
-    count_order_ = enzo_msg_check.count_order_;
+    order_index_ = enzo_msg_check.order_index_;
+    order_count_ = enzo_msg_check.order_count_;
   }
 
 protected: // attributes
@@ -226,8 +226,8 @@ protected: // attributes
   int index_file_;
 
   /// index/count for load balancing
-  long long index_order_;
-  long long count_order_;
+  long long order_index_;
+  long long order_count_;
 };
 
 #endif /* CHARM_ENZO_MSG_CHECK_HPP */

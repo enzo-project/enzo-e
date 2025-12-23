@@ -15,38 +15,20 @@
 #include <sstream>
 #include <iomanip>
 
-// #define TRACE_METHOD_CHECK
-
-#ifdef TRACE_METHOD_CHECK
-#   undef TRACE_METHOD_CHECK
-#   define TRACE_CHECK(MSG)                                           \
-  CkPrintf ("%d TRACE_CHECK %s msg_check %lld\n",CkMyPe(),std::string(MSG).c_str(),EnzoMsgCheck::counter[cello::index_static()]); \
-  fflush(stdout);
-#   define TRACE_CHECK_BLOCK(MSG,BLOCK)                               \
-  CkPrintf ("%d TRACE_CHECK %s %s msg_check %lld\n",CkMyPe(),BLOCK->name().c_str(),  \
-            std::string(MSG).c_str(),EnzoMsgCheck::counter[cello::index_static()]);                                 \
-  fflush(stdout);
-#else
-#   define TRACE_CHECK(MSG)  /* ... */
-#   define TRACE_CHECK_BLOCK(MSG,BLOCK)  /* ... */
-#endif
-
 int Simulation::file_counter_ = 0;
 
 //----------------------------------------------------------------------
 
 EnzoMethodCheck::EnzoMethodCheck
-(int num_files, std::string ordering,
+(int num_files, 
  std::vector<std::string> directory,
  int monitor_iter,
  bool include_ghosts)
   : Method(),
     num_files_(num_files),
-    ordering_(ordering),
     directory_(directory),
     include_ghosts_(include_ghosts)
 {
-  TRACE_CHECK("[1] EnzoMethodCheck::EnzoMethodCheck()");
   Refresh * refresh = cello::refresh(ir_post_);
   cello::simulation()->refresh_set_name(ir_post_,name());
   refresh->add_field("density");
@@ -60,7 +42,7 @@ EnzoMethodCheck::EnzoMethodCheck
     CkArrayOptions opts(num_files);
     opts.setMap(io_map);
     proxy_io_enzo_writer = CProxy_IoEnzoWriter::ckNew
-      (num_files, ordering,monitor_iter, include_ghosts_, opts);
+      (num_files, monitor_iter, include_ghosts_, opts);
 
     proxy_io_enzo_writer.doneInserting();
 
@@ -85,7 +67,6 @@ void EnzoMethodCheck::pup (PUP::er &p)
   Method::pup(p);
 
   p | num_files_;
-  p | ordering_;
   p | directory_;
 
 }
@@ -94,8 +75,6 @@ void EnzoMethodCheck::pup (PUP::er &p)
 
 void EnzoMethodCheck::compute ( Block * block) throw()
 {
-  TRACE_CHECK_BLOCK("[2] EnzoMethodCheck::compute()",block);
-
   if (!cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
                         proxy_enzo_simulation);
@@ -110,12 +89,9 @@ void EnzoMethodCheck::compute ( Block * block) throw()
 void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
 // [ Called on ip=0 only ]
 {
-  TRACE_CHECK("[3] EnzoSimulation::r_method_check_enter()");
-  
   delete msg;
 
   check_num_files_  = enzo::config()->method_check_num_files;
-  check_ordering_   = enzo::config()->method_check_ordering;
   check_directory_  = enzo::config()->method_check_dir;
 
   /// Initialize synchronization counters
@@ -152,7 +128,7 @@ void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
     stream_file_list.flush();
 
     enzo::block_array().p_check_write_first
-      (check_num_files_, check_ordering_, name_dir);
+      (check_num_files_, name_dir);
   }
   // Create IoEnzoWriter array. Synchronizes by calling
   // EnzoSimulation[0]::p_writer_created() when done
@@ -163,29 +139,24 @@ void EnzoSimulation::r_method_check_enter(CkReductionMsg *msg)
 
 IoEnzoWriter::IoEnzoWriter
 (int num_files,
- std::string ordering,
  int monitor_iter,
  bool include_ghosts) throw ()
   : CBase_IoEnzoWriter(),
     num_files_(num_files),
-    ordering_(ordering),
     monitor_iter_(monitor_iter),
     include_ghosts_(include_ghosts)
 {
-  TRACE_CHECK("[4] IoEnzoWriter::IoEnzoWriter()");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_check_write_first
-(int num_files, std::string ordering, std::string name_dir)
+(int num_files, std::string name_dir)
 {
-  TRACE_CHECK_BLOCK("[8] EnzoBlock::p_check_write_first",this);
-
   EnzoMsgCheck * msg_check;
   bool is_first (false);
   const int index_file = create_msg_check_
-    (&msg_check,num_files,ordering,name_dir,&is_first);
+    (&msg_check,num_files,name_dir,&is_first);
 
   if (is_first) {
     proxy_io_enzo_writer[index_file].p_write (msg_check);
@@ -196,14 +167,12 @@ void EnzoBlock::p_check_write_first
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_check_write_next(int num_files, std::string ordering)
+void EnzoBlock::p_check_write_next(int num_files)
 {
-  TRACE_CHECK_BLOCK("[9] EnzoBlock::p_check_write_next",this);
-
   std::string name_dir {""};
   EnzoMsgCheck * msg_check;
   const int index_file = create_msg_check_
-    (&msg_check,num_files,ordering);
+    (&msg_check,num_files);
 
   proxy_io_enzo_writer[index_file].p_write (msg_check);
 }
@@ -212,20 +181,19 @@ void EnzoBlock::p_check_write_next(int num_files, std::string ordering)
 
 void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
 {
-  TRACE_CHECK("[A] IoEnzoWriter::p_write");
   std::string name_this, name_next;
   Index index_this, index_next;
-  long long index_block;
+  long long order_index;
   bool is_first, is_last;
   std::string name_dir;
 
   msg_check->get_parameters
     (index_this,index_next,name_this,name_next,
-     index_block,is_first,is_last,name_dir);
+     order_index,is_first,is_last,name_dir);
 
   if (thisIndex == 0 && monitor_iter_ &&
-      ((is_first || is_last) || ((index_block % monitor_iter_) == 0))) {
-    cello::monitor()->print("Method", "check %d",index_block);
+      ((is_first || is_last) || ((order_index % monitor_iter_) == 0))) {
+    cello::monitor()->print("Method", "check %d",order_index);
   }
   
   // Write to block list file, opening or closing file as needed
@@ -266,7 +234,7 @@ void IoEnzoWriter::p_write (EnzoMsgCheck * msg_check)
   }
 
   if (!is_last) {
-    enzo::block_array()[index_next].p_check_write_next(num_files_, ordering_);
+    enzo::block_array()[index_next].p_check_write_next(num_files_);
   } else {
     proxy_enzo_simulation[0].p_check_done();
   }
@@ -303,7 +271,6 @@ void IoEnzoWriter::close_block_list_()
 
 void EnzoSimulation::p_check_done()
 {
-  TRACE_CHECK("[B] EnzoSimulation::p_check_done()");
   if (sync_check_done_.next()) {
     enzo::block_array().p_check_done();
   }
@@ -313,7 +280,6 @@ void EnzoSimulation::p_check_done()
 
 void EnzoBlock::p_check_done()
 {
-  TRACE_CHECK_BLOCK("[C] EnzoBlock::p_check_done()",this);
   compute_done();
 }
 
@@ -321,47 +287,32 @@ void EnzoBlock::p_check_done()
 
 int EnzoBlock::create_msg_check_
 ( EnzoMsgCheck ** msg_check,
-  int num_files, std::string ordering,
+  int num_files, 
   std::string name_dir,
   bool * is_first
   )
 {
-  ScalarData<long long> *   scalar_data_long_long    = data()->scalar_data_long_long();
-  ScalarDescr *       scalar_descr_long_long   = cello::scalar_descr_long_long();
-  ScalarData<Index> * scalar_data_index  = data()->scalar_data_index();
-  ScalarDescr *       scalar_descr_index = cello::scalar_descr_index();
-  const long long is_index = scalar_descr_long_long->index(ordering+":index");
-  const long long is_count = scalar_descr_long_long->index(ordering+":count");
-  const long long is_next  = scalar_descr_index->index(ordering+":next");
-  const long long count    = *scalar_data_long_long->value(scalar_descr_long_long,is_count);
-  const Index next   = *scalar_data_index->value(scalar_descr_index,is_next);
-
-  const int rank = cello::rank();
-  const Hierarchy * hierarchy = enzo::simulation()->hierarchy();
-  int na3[3];
-  hierarchy->root_blocks(na3,na3+1,na3+2);
-
-  const int min_level = hierarchy->min_level();
-
   Index index_this, index_next;
   std::string name_this, name_next;
-  long long index_block;
   int index_file;
   bool is_last;
 
+  long long order_index, order_count;
+  Index order_next;
+  get_order(&order_index, &order_count, &order_next);
+
   index_this = this->index();
-  index_next = next;
+  index_next = order_next;
 
   name_this = this->name();
   name_next = this->name(index_next);
 
-  index_block    = *scalar_data_long_long->value(scalar_descr_long_long,is_index);
-  index_file = index_block*num_files/count;
+  index_file = order_index*num_files/order_count;
 
-  const long long ib  = index_block;
-  const long long ibm = index_block - 1;
-  const long long ibp = index_block + 1;
-  const long long nb = count;
+  const long long ib  = order_index;
+  const long long ibm = order_index - 1;
+  const long long ibp = order_index + 1;
+  const long long nb = order_count;
   const long long nf = num_files;
   if (is_first) { (*is_first) = (ib  == 0)  || (ib*nf/nb != (ibm)*nf/nb); }
   is_last  = (ibp == nb) || (ib*nf/nb != (ibp)*nf/nb);
@@ -372,7 +323,7 @@ int EnzoBlock::create_msg_check_
 
   (*msg_check)->set_parameters
     (index_this,index_next,name_this,name_next,
-     index_block,is_first?(*is_first):false,is_last);
+     order_index,is_first?(*is_first):false,is_last);
 
   (*msg_check)->set_name_dir (name_dir);
 
@@ -464,7 +415,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
   Index  index_next;
   std::string  name_block;
   std::string  name_next;
-  long long  block_order;
+  long long  order_index;
   bool  is_first;
   bool  is_last;
   std::string  name_dir;
@@ -474,7 +425,7 @@ void IoEnzoWriter::file_write_block_ (EnzoMsgCheck * msg_check)
       index_next,
       name_block,
       name_next,
-      block_order,
+      order_index,
       is_first,
       is_last,
       name_dir);

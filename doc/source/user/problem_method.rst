@@ -98,14 +98,18 @@ parameters
 
 While the Charm++ parallel programming system supports many load balancers,
 Enzo-E also implements its own dynamic load balancer based on space-filling
-curves. As such, it relies on the "ordering_morton" Method to be called
-before "balance".
+curves. As such, it relies on the ``"order"`` Method to be called
+before ``"balance"``.
 
 There are currently no method-specific parameters, though ``schedule``
 parameters are likely to be useful, since one generally doesn't want
-or need to run the load balancer every cycle. Also, as further
-orderings are implemented beyond the "Morton" ordering, a parameter is
-likely to be introduced in the future for specifying the ordering to use.
+or need to run the load balancer at every cycle.
+
+For more information on the ``"order"`` method, including using
+multiple orderings in the same simulation, see the :ref:`order method`
+section below. Also please review the :ref:`restrictions` section below.
+
+.. _restrictions:
 
 restrictions
 ------------
@@ -114,14 +118,15 @@ There are two known potential pitfalls when using the built-in Enzo-E load balan
 
 First, there is a bug related to the ordering of Methods in ``Method :
 list``, where the simulation can hang if ``balance`` is the last
-Method. To bypass this bug, please use ``order_morton`` and
+Method. To bypass this bug, please use ``order`` and
 ``balance`` at the beginning of the ``Method : list`` parameter.
 
-Second, the minimum level parameter ``Adapt : min_level`` should be set
-such that the coarsest level (which may be negative) is a single block.
-(This restriction is likely to be lifted in the near future when this
-particular parameter is removed.) (Also note this is a restriction related to the
-"order_morton" method, not the "balance" method.)
+Second, the minimum level parameter ``Adapt : min_level`` should be
+set such that the coarsest level (which may be negative!) is a single
+block.  This restriction is likely to be lifted in the near future
+when this particular parameter is removed. Also, note this is a
+restriction related to the ``"order"`` method, not the ``"balance"``
+method.
 
 For example, to load balance a simulation with a 4^3 root-level blocking
 (4 root-level blocks of any size along each axis), one can use the following:
@@ -139,9 +144,9 @@ For example, to load balance a simulation with a 4^3 root-level blocking
    }
 
    Method {
-      list = ["order_morton", "balance", "ppm" ];
-      order_morton { schedule { var = "cycle"; step = 20; } }
-      balance      { schedule { var = "cycle"; step = 20; } }
+      list = ["order", "balance", "ppm" ];
+      order    { schedule { var = "cycle"; step = 20; } }
+      balance  { schedule { var = "cycle"; step = 20; } }
       # ...
    }
 
@@ -688,26 +693,61 @@ Note that only these nine fields are required, regardless of the number of radia
 Photionization and heating rates are calculated and stored in the following fields:
 ``"RT_HI_ionization_rate"``, ``"RT_HeI_ionization_rate"``, ``"RT_HeII_ionization_rate"``, and ``"RT_heating_rate"``.
 
-``"order_morton"`` method
-=========================
+.. _order method:
 
-This method is used to compute the "Morton-ordering" of blocks in the AMR
-hierarchy. This is a space-filling curve with moderate locality properties.
+``"order"`` method
+==================
+
+This method is used to compute an ordering of Blocks in the AMR
+hierarchy. Currently, only the ``"morton"`` ordering is implemented,
+but a ``"hilbert"`` ordering is under development. The ordering type
+is specified using the ``"ordering"`` parameter, which has the default
+value of ``"morton"``.
+
+The output of the ``"order"`` method is setting internal "index" and
+"count" (long) integer variables for each Block, such that ``"count"``
+is the total number of Blocks, and ``"index"`` is unique for each
+Block, and 0 <= ``"index"`` < ``"count"``.
 
 This method is typically used with other methods, including
-``"check"`` and ``"balance"``. Output are long integer Block scalar data
-``"order_morton:index"`` and ``"order_morton::count`` that give the
-unique index of the block in the ordering 0 <= index < CkNumPes(), and
-the total number of blocks (which is the same for all blocks).
+``"check"`` and ``"balance"``. Since both ``"check"`` and
+``"balance"`` may be used in the same run, and will typically have
+separate schedules associated with them (neither is typically called
+every cycle), multiple ``"order"`` methods can be used. If so, since
+methods must have unique names, they cannot (both) be named
+``"order"``.
 
-See the :ref:`"balance" method <balance_method>` section for a code example.
-The ``"order_morton"`` method currently has no method-specific parameters,
-though is typically called with a ``schedule`` matching that of the methods
-that depend on the ordering.
+An example of suggested use and naming is shown below, where the
+``"balance"`` load balancing method is called every 15 cycles, and the
+``"check"`` check-pointing method is called every 100 cycles. Each has
+an associated ``"order"`` method, specified as such using the
+``"type"`` parameter, and named ``"balance_order"`` and
+``"check_order"``. Each ``"order"``-type method has a schedule to
+match their respective ``"balance"`` and ``"check"`` methods.
 
-Note: the name of this method may change in the future to ``"order"``,
-with ``"morton"`` being provided as a parameter to specify the
-ordering type.
+.. code::
+
+   Method {
+      list = [ "balance_order", "balance",
+               "check_order",   "check",
+               "ppm", ... ];
+
+      balance_order {
+         type = "order";
+         schedule { var = "cycle"; step = 15; }
+      }
+      balance {
+         schedule { var = "cycle"; step = 15; }
+      }
+
+      check_order {
+         type = "order";
+         schedule { var = "cycle"; start = 100; step = 100; }
+      }
+      check {
+         schedule { var = "cycle"; start = 100; step = 100; }
+      }
+   }
 
 restrictions
 ------------

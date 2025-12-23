@@ -101,18 +101,18 @@ public:
   bool is_root() const;
 
   /// Whether given `index` is a sibling (has the same parent as this Index)
-  bool is_sibling (Index index) const
+  bool is_sibling (Index index, int min_level = 0) const
   {
     const int level = this->level();
-    return (level >= 1 && index.level() >= 1) ?
-      (index_parent() == index.index_parent()) : false;
+    return (level >= min_level + 1 && index.level() >= min_level + 1) ?
+      (index_parent(min_level) == index.index_parent(min_level)) : false;
   }
   /// Whether given `index` is a "nibling" (child of a sibling of this Index)
-  bool is_nibling (Index index) const
+  bool is_nibling (Index index, int min_level = 0) const
   {
     const int level = this->level();
-    return (level >= 1 && index.level() >= 2) ?
-      (index_parent() == index.index_parent().index_parent()) : false;
+    return (level >= min_level + 1 && index.level() >= min_level + 2) ?
+      (index_parent(min_level) == index.index_parent(min_level).index_parent(min_level)) : false;
   }
 
   /// Return the dimensionality of shared face (0 corner, 1 edge, 2

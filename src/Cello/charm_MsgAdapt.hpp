@@ -34,7 +34,8 @@ public: // interface
    int level_now,
    int level_min,
    int level_max,
-   bool can_coarsen
+   bool can_coarsen,
+   int count
    )
     :
     adapt_step_(adapt_step),
@@ -43,6 +44,7 @@ public: // interface
     level_min_(level_min),
     level_max_(level_max),
     can_coarsen_(can_coarsen),
+    count_(count),
     buffer_(nullptr)
   {
     cello::hex_string(tag_,TAG_LEN); // add new tag for new message
@@ -103,6 +105,7 @@ protected: // attributes
   int level_min_;
   int level_max_;
   bool can_coarsen_;
+  int count_;
   /// Saved Charm++ buffer for deleting after unpack()
   void * buffer_;
   /// Random hex tag for tracking messages for debugging

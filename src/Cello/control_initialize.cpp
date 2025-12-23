@@ -71,16 +71,6 @@ void Simulation::initialize() throw()
     block_array = hierarchy_->new_block_proxy (allocate_data);
     thisProxy.p_set_block_array(block_array);
   }
-
-  CkCallback callback 
-    (CkIndex_Simulation::r_initialize_block_array(NULL), thisProxy);
-
-  // --------------------------------------------------
-#ifdef TRACE_CONTRIBUTE  
-  CkPrintf ("%s:%d DEBUG_CONTRIBUTE r_initialize_block_array()\n",__FILE__,__LINE__); fflush(stdout);
-#endif  
-  contribute(0,0,CkReduction::concat,callback);
-  // --------------------------------------------------
 }
 
 //----------------------------------------------------------------------

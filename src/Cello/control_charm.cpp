@@ -23,19 +23,19 @@
 
 
 #ifdef TRACE_CONTROL
-# define TRACE_BLOCK (cycle()>=104)
+# define TRACE_BLOCK (cycle()>=0)
 # undef TRACE_CONTROL
 # define TRACE_CONTROL(A)                               \
   if (TRACE_BLOCK) {                                    \
-    CkPrintf ("%d %s:%d %s TRACE_CONTROL %s \n",        \
-              CkMyPe(),__FILE__,__LINE__,               \
+    CkPrintf ("%d :%d %s TRACE_CONTROL %s \n",        \
+              CkMyPe(),__LINE__,               \
               name_.c_str(), A);                        \
     fflush(stdout);                                     \
   }
 # define TRACE_SYNC(A)                                          \
   if (TRACE_BLOCK) {                                            \
-    CkPrintf ("%d %s:%d %s TRACE_SYNC %s entry %d id %d\n",	\
-              CkMyPe(),__FILE__,__LINE__,                       \
+    CkPrintf ("%d :%d %s TRACE_SYNC %s entry %d id %d\n",	\
+              CkMyPe(),__LINE__,                       \
               name_.c_str(), A,entry_point,id_sync);            \
     fflush(stdout);                                             \
   }

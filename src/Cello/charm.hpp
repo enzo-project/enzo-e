@@ -20,6 +20,7 @@
 #include "charm_MsgAdapt.hpp"
 #include "charm_MsgCoarsen.hpp"
 #include "charm_MsgInitial.hpp"
+#include "charm_MsgOrder.hpp"
 #include "charm_MsgOutput.hpp"
 #include "charm_MsgRefine.hpp"
 #include "charm_MsgRefresh.hpp"

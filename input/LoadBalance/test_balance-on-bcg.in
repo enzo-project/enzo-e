@@ -5,9 +5,9 @@ Adapt {
  }
 
  Method {
-     list = [ "order_morton", "balance", "ppm", "pm_deposit", "gravity", "pm_update", "comoving_expansion"];
-     order_morton { schedule { step = 20; var = "cycle"; }  }
-     balance      { schedule { step = 20; var = "cycle"; }  }
+     list = [ "order", "balance", "ppm", "pm_deposit", "gravity", "pm_update", "comoving_expansion"];
+     order    { schedule { step = 20; var = "cycle"; }  }
+     balance  { schedule { step = 20; var = "cycle"; }  }
      gravity { solver = "bcg"; }
  }
 

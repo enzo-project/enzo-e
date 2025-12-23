@@ -38,7 +38,7 @@ class Block : public CBase_Block
 public: // interface
 
   /// create a Block whose MsgRefine is on the creating process
-  Block ( process_type ip_source, MsgType msg_type );
+  Block ( MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
   virtual void p_set_msg_refine(MsgRefine * msg);
 
@@ -133,10 +133,10 @@ public: // interface
   { return index_; }
 
   int face_level (const int if3[3]) const
-  { return adapt_.face_level(if3,Adapt::LevelType::curr); }
+  { return adapt_.face_level_curr(if3); }
 
   int face_level (int axis, int face) const
-  { return adapt_.face_level(axis,face,Adapt::LevelType::curr); }
+  { return adapt_.face_level_curr(axis,face); }
 
 
   int child_face_level (const int ic3[3], const int if3[3]) const
@@ -145,13 +145,19 @@ public: // interface
   int child_face_level_next (const int ic3[3], const int if3[3]) const
   { return child_face_level_next_[ICF3(ic3,if3)]; }
 
-  void set_child_face_level_curr (const int ic3[3], const int if3[3], int level)
-  { child_face_level_curr_[ICF3(ic3,if3)] = level;  }
+  void set_child_face_level_curr
+  (const int ic3[3], const int if3[3], int level, int count = -1);
 
-  void set_child_face_level_next (const int ic3[3], const int if3[3], int level)
-  { child_face_level_next_[ICF3(ic3,if3)] = level; }
+  void set_child_face_level_next
+  (const int ic3[3], const int if3[3], int level, int count = -1);
 
-
+  void clear_child_face_level_counts()
+  {
+    auto & curr_count = child_face_level_curr_count_;
+    std::fill(curr_count.begin(),curr_count.end(),-1);
+    auto & next_count = child_face_level_next_count_;
+    std::fill(next_count.begin(),next_count.end(),-1);
+  }
   /// Verify that new and old adapt neighbors match
   void verify_neighbors();
 
@@ -272,6 +278,7 @@ public: // interface
   }
 
   void initial_exit_();
+
   void p_initial_exit()
   { initial_exit_(); }
 
@@ -348,14 +355,20 @@ public: // interface
   Solver * solver () throw();
 
   /// Accessor functions for block ordering index and count 
-  void set_order (long long index, long long count)
+  void set_order (long long index, long long count, Index next)
   {
-    index_order_ = index;
-    count_order_ = count;
+    order_index_ = index;
+    order_count_ = count;
+    order_next_  = next;
   }
-  void get_order (long long * index, long long * count) const
-  { *index = index_order_;
-    *count = count_order_;
+
+  void get_order (long long * index,
+                  long long * count = 0,
+                  Index *     next = 0) const
+  {
+    *index = order_index_;
+    if (count) *count = order_count_;
+    if (next)  *next  = order_next_;
   }
   
 protected: // methods
@@ -493,13 +506,14 @@ public:
    int ic3[3],
    std::vector<int> if3[3],
    int level_now, int level_new,
-   int level_max, bool can_coarsen);
-  
+   int level_max, bool can_coarsen,
+   int count);
+
   void p_adapt_recv_child (MsgCoarsen * msg);
 
   void adapt_recv (Index index_send, const int of3[3], const int ic3[3],
 		   int level_face_new, int level_relative,
-                   int level_max, bool can_coarsen);
+                   int level_max, bool can_coarsen, int count);
 
   void adapt_send_level();
 
@@ -607,12 +621,11 @@ public:
 
   void p_method_flux_correct_refresh();
   void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
+
   void r_method_debug_sum_fields(CkReductionMsg * msg);
 
-  void r_method_order_morton_continue(CkReductionMsg * msg);
-  void r_method_order_morton_complete(CkReductionMsg * msg);
-  void p_method_order_morton_weight(int ic3[3], int weight, Index index);
-  void p_method_order_morton_index(int index, int count);
+  void p_method_order_accum_count (MsgOrder * msg);
+  void p_method_order_accum_index (MsgOrder * msg);
 
   void r_method_order_hilbert_continue(CkReductionMsg * msg);
   void r_method_order_hilbert_complete(CkReductionMsg * msg);
@@ -990,9 +1003,11 @@ protected: // attributes
 
   /// current level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_curr_;
+  std::vector<int> child_face_level_curr_count_;
 
   /// new level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_next_;
+  std::vector<int> child_face_level_next_count_;
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
@@ -1045,8 +1060,9 @@ protected: // attributes
   std::vector < std::vector <MsgRefresh * > > refresh_msg_list_;
 
   /// Index and total count used for ordering blocks, e.g. for dynamic load balancing
-  long long index_order_;
-  long long count_order_;
+  long long order_index_;
+  long long order_count_;
+  Index order_next_;
 };
 
 #endif /* COMM_BLOCK_HPP */

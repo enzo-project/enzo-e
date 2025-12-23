@@ -231,7 +231,8 @@ void Block::r_method_order_hilbert_complete(CkReductionMsg * msg)
 void MethodOrderHilbert::compute_complete(Block * block)
 {
   // Update Block's index and count
-  block->set_order(*pindex_(block),*pcount_(block));
+  Index next;
+  block->set_order(*pindex_(block),*pcount_(block),next);
   block->compute_done();
 }
 

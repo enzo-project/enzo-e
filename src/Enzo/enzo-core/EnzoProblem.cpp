@@ -702,7 +702,6 @@ Method * EnzoProblem::create_method_
     // Method for checkpointing the simulation
     method = new EnzoMethodCheck
       (enzo_config->method_check_num_files,
-       enzo_config->method_check_ordering,
        enzo_config->method_check_dir,
        enzo_config->method_check_monitor_iter,
        enzo_config->method_check_include_ghosts);
