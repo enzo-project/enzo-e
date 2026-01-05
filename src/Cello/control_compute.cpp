@@ -62,8 +62,11 @@ void Block::compute_next_ ()
 
   } else {
 
-    compute_end_();
+    // Barrier before exiting compute to synchronize the updating of
+    // Simulation state variables (time, cycle)
 
+    contribute
+      ( CkCallback (CkIndex_Block::r_compute_end(nullptr), proxy_array()) ) ;
   }
 }
 

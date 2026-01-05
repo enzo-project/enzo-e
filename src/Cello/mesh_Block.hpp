@@ -310,6 +310,11 @@ public: // interface
     delete msg;
     compute_exit_();
   }
+  void r_compute_end(CkReductionMsg * msg)
+  {
+    delete msg;
+    compute_end_();
+  }
 
   /// Return the currently active Method
   int index_method() const throw()
