@@ -58,15 +58,15 @@ namespace cello {
   };
 
   bool type_is_int(int type) {
-    return (type == type_int8 || 
-	    type == type_int16 || 
-	    type == type_int32 || 
+    return (type == type_int8 ||
+	    type == type_int16 ||
+	    type == type_int32 ||
 	    type == type_int64);
   }
 
   bool type_is_float(int type) {
-    return (type == type_single || 
-	    type == type_double || 
+    return (type == type_single ||
+	    type == type_double ||
 	    type == type_quadruple ||
 	    type == type_extended64 ||
 	    type == type_extended80 ||
@@ -169,7 +169,7 @@ namespace cello {
       break;
     default: // 9.63e-35 for 128-bit, but compliers vary on extended
 	     // precision support
-      WARNING ("cello::machine_epsilon", 
+      WARNING ("cello::machine_epsilon",
 	       "Machine epsilon for extended precision unknown;"
 	       " assuming double");
       epsilon =  1.11e-16; // http://en.wikipedia.org/wiki/Machine_epsilon;
@@ -192,21 +192,21 @@ namespace cello {
     }
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Simulation * simulation()
   {
     return proxy_simulation.ckLocalBranch();
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   const Factory * factory()
   {
     return simulation()->factory();
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
   ScalarDescr * scalar_descr_double()
   {
     static ScalarDescr * scalar_descr_double_[CONFIG_NODE_SIZE] = {nullptr};
@@ -278,49 +278,56 @@ namespace cello {
     return scalar_descr_index_[in];
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   CProxy_Block block_array()
   {
     return cello::hierarchy()->block_array();
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   const Config * config()
   {
     return simulation() ? simulation()->config() : nullptr;
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   const Parameters * parameters()
   {
     return simulation() ? simulation()->parameters() : nullptr;
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Problem * problem()
   {
     return simulation() ? simulation()->problem() : nullptr;
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
+
+  Performance *   performance()
+  {
+    return simulation() ? simulation()->performance() : nullptr;
+  }
+
+  //----------------------------------------------------------------------
 
   Boundary * boundary(int i)
   {
     return problem() ? problem()->boundary(i) : nullptr;
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Hierarchy * hierarchy()
   {
     return simulation() ? simulation()->hierarchy() : nullptr;
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   FieldDescr * field_descr()
   {
@@ -333,12 +340,12 @@ namespace cello {
     return field_descr_[in];
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Grouping * field_groups()
   { return field_descr()->groups(); }
-    
-  //---------------------------------------------------------------------- 
+
+  //----------------------------------------------------------------------
 
   int define_field (std::string field_name, int cx, int cy, int cz)
   {
@@ -346,18 +353,18 @@ namespace cello {
     Config   * config  = (Config *) cello::config();
     if( ! field_descr->is_field( field_name )){
       const int id_field = field_descr->insert_permanent( field_name );
- 
+
       field_descr->set_precision(id_field, config->field_precision);
- 
+
       if ( cx != 0 || cy != 0 || cz != 0 ) {
         field_descr->set_centering(id_field, cx, cy, cz);
       }
     }
     return field_descr->field_id(field_name);
   }
- 
-  //---------------------------------------------------------------------- 
- 
+
+  //----------------------------------------------------------------------
+
   int define_field_in_group
   (std::string field_name, std::string group_name,
    int cx, int cy, int cz)
@@ -366,8 +373,8 @@ namespace cello {
     field_groups()->add(field_name,group_name);
     return out;
   }
- 
-  //---------------------------------------------------------------------- 
+
+  //----------------------------------------------------------------------
   void finalize_fields ()
   {
     FieldDescr * field_descr = cello::field_descr();
@@ -375,14 +382,14 @@ namespace cello {
     field_descr->reset_history(config->field_history);
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Monitor * monitor()
   {
     return simulation() ? simulation()->monitor() : Monitor::instance();
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   ParticleDescr * particle_descr()
   {
@@ -395,26 +402,26 @@ namespace cello {
     return particle_descr_[in];
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Grouping * particle_groups()
   { return particle_descr()->groups(); }
-    
-  //---------------------------------------------------------------------- 
+
+  //----------------------------------------------------------------------
 
   Output * output(int index)
   {
     return problem() ? problem()->output(index) : nullptr;
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Solver * solver(int index)
   {
     return problem() ? problem()->solver(index) : nullptr;
   }
 
-  //---------------------------------------------------------------------- 
+  //----------------------------------------------------------------------
 
   Units * units()
   {
@@ -451,14 +458,14 @@ namespace cello {
   {
     return hierarchy() ? hierarchy()->num_blocks() : 0;
   }
-  
+
   //----------------------------------------------------------------------
 
   double relative_cell_volume (int level)
   {
     return (1.0/pow(1.0*num_children(),1.0*level));
   }
-  
+
   //----------------------------------------------------------------------
 
   std::string expand_name
@@ -470,9 +477,9 @@ namespace cello {
    )
   {
     if (file_format->size()==0) return "";
-  
+
     const std::string & name = (*file_format)[0];
-  
+
     const int MAX_BUFFER = 255;
 
     char buffer[MAX_BUFFER+1];
@@ -504,7 +511,7 @@ namespace cello {
              count, name.c_str(),file_format->size()-1,
              file_format->size()-1 == count);
 
-    // loop through file_format[] from the right and replace 
+    // loop through file_format[] from the right and replace
     // format strings with variable values
 
     std::string left  = name;

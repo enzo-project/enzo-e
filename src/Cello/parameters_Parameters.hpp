@@ -44,6 +44,10 @@ public: // interface
   
   /// Read in parameters from a file
   void read (const char * file_name);
+
+  /// Return saved file name
+  std::string file_name() const { return file_name_; }
+
   /// Write parameters to a file
   void write (const char * file_name, int write_type = param_write_cello);
   void write (FILE * fp, int write_type = param_write_cello);
@@ -297,6 +301,9 @@ private: // functions
   //--------------------------------------------------
 
 private: // attributes
+
+  /// Saved file name
+  std::string file_name_;
 
   /// Stack of current grouping
   std::vector <std::string> current_group_;

@@ -23,7 +23,6 @@ module simulation {
     entry void r_initialize_block_array (CkReductionMsg * msg);
 
     entry void s_write ();
-    entry void r_write (CkReductionMsg * msg);
     entry void r_write_checkpoint_output ();
 
     entry void r_restart_start(CkReductionMsg *);

@@ -57,10 +57,10 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("new_counter");
 
-  int id_counter_1 = performance->new_counter(counter_type_user,"counter_1");
-  int id_counter_2 = performance->new_counter(counter_type_user,"counter_2");
+  int id_counter_1 = performance->new_counter(PerfCounterType::User,"counter_1");
+  int id_counter_2 = performance->new_counter(PerfCounterType::User,"counter_2");
   int id_counter_flops =
-    performance->new_counter(counter_type_papi,"PAPI_FP_INS");
+    performance->new_counter(PerfCounterType::Papi,"PAPI_FP_INS");
 
   unit_assert (id_counter_1 != id_counter_2);
   unit_assert (id_counter_1 != id_counter_flops);

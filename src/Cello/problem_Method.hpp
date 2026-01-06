@@ -93,6 +93,12 @@ public: // virtual functions
   void set_courant(double courant) throw ()
   { courant_ = courant; }
 
+  /// Access performance index
+  inline void set_perf_index(int index) throw ()
+  { index_perf_ = index; }
+  inline int index_perf() const throw()
+  { return index_perf_; }
+
 protected: // functions
 
   /// Perform vector copy X <- Y
@@ -124,6 +130,8 @@ protected: // attributes
   /// Default refresh type
   int neighbor_type_;
 
+  /// Performance index
+  int index_perf_;
 };
 
 #endif /* PROBLEM_METHOD_HPP */

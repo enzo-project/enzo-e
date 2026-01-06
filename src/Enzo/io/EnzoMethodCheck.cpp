@@ -99,6 +99,7 @@ void EnzoMethodCheck::compute ( Block * block) throw()
   if (!cello::is_initial_cycle(InitCycleKind::fresh_or_noncharm_restart)) {
     CkCallback callback(CkIndex_EnzoSimulation::r_method_check_enter(NULL),0,
                         proxy_enzo_simulation);
+    PERF_REDUCE_START(perf_rindex_reduce_method_check);
     block->contribute(callback);
   } else { // Don't checkpoint if it's the initial cycle
     block->compute_done();
@@ -313,6 +314,7 @@ void EnzoSimulation::p_check_done()
 
 void EnzoBlock::p_check_done()
 {
+  PERF_REDUCE_STOP(perf_rindex_reduce_method_check);
   TRACE_CHECK_BLOCK("[C] EnzoBlock::p_check_done()",this);
   compute_done();
 }

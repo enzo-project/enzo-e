@@ -176,15 +176,6 @@ void Main::p_stopping_enter()
 
 //----------------------------------------------------------------------
 
-void Main::p_stopping_balance()
-{
-#ifdef CHARM_ENZO
-  cello::block_array().p_stopping_load_balance();
-#endif
-}
-
-//----------------------------------------------------------------------
-
 void Main::p_stopping_exit()
 {
 #ifdef CHARM_ENZO

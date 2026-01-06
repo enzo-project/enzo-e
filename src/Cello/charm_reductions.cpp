@@ -2,6 +2,8 @@
 
 //======================================================================
 
+#define MAX_LENGTH_REDUCTION 1000
+
 CkReduction::reducerType r_reduce_performance_type;
 
 void register_reduce_performance(void)
@@ -18,7 +20,7 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
   std::vector<long long> accum;
   ASSERT1 ("r_reduce_performance",
 	   "Sanity check failed on expected accumulator array %d",
-	   length, (length < 500));
+	   length, (length < MAX_LENGTH_REDUCTION));
   accum.resize(length);
   accum.clear();
 
@@ -33,7 +35,6 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 	    msgs[i]->getSize(),length*sizeof(long long),num_sum,num_max,
 	    (((long unsigned)(msgs[i]->getSize()) ==
               length*sizeof(long long))));
-      
     long long * values = (long long *) msgs[i]->getData();
     int j = 2;
     for (int count=1; count <= num_sum; count++) {
@@ -67,7 +68,7 @@ CkReductionMsg * r_reduce_method_debug(int n, CkReductionMsg ** msgs)
   std::vector<long double> accum;
   ASSERT1 ("r_reduce_method_debug",
 	   "Sanity check failed on expected accumulator array %d",
-	   length, (length < 500));
+	   length, (length < MAX_LENGTH_REDUCTION));
   accum.resize(length);
   accum.clear();
 

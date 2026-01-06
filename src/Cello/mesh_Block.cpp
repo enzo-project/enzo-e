@@ -36,7 +36,9 @@ const char * phase_name[] = {
 
 // #define TRACE_BLOCK
 
-Block::Block ( process_type ip_source, MsgType msg_type )
+//----------------------------------------------------------------------
+
+Block::Block ()
   : CBase_Block(),
     data_(NULL),
     child_data_(NULL),
@@ -66,28 +68,79 @@ Block::Block ( process_type ip_source, MsgType msg_type )
     index_method_(-1),
     index_solver_(),
     refresh_(),
-    index_(thisIndex)
+    index_(thisIndex),
+    index_order_(0),
+    count_order_(1)
+{
+  init_refresh_();
+  init_adapt_(nullptr);
+
+  for (int i=0; i<3; i++) array_[i]=0;
+}
+
+//----------------------------------------------------------------------
+
+Block::Block (CkMigrateMessage *m)
+  : CBase_Block(m)
+{
+}
+
+//----------------------------------------------------------------------
+
+Block::Block ( process_type ip_source, MsgType msg_type )
+  : CBase_Block(),
+    data_(NULL),
+    child_data_(NULL),
+    level_next_(0),
+    cycle_(0),
+    time_(0.0),
+    dt_(0.0),
+    stop_(false),
+    index_initial_(0),
+    children_(),
+    sync_coarsen_(),
+    sync_count_(),
+    sync_max_(),
+    adapt_(),
+    child_face_level_curr_(),
+    child_face_level_next_(),
+    count_coarsen_(0),
+    adapt_step_(0),
+    adapt_ready_(false),
+    adapt_balanced_(false),
+    adapt_changed_(0),
+    coarsened_(false),
+    is_leaf_((thisIndex.level() >= 0)),
+    age_(0),
+    ip_next_(-1),
+    name_(""),
+    name8_(""),
+    index_method_(-1),
+    index_solver_(),
+    refresh_(),
+    index_(thisIndex),
+    index_order_(0),
+    count_order_(1)
 {
 #ifdef TRACE_BLOCK
-
   CkPrintf ("%d TRACE_BLOCK %s Block::Block(ip)\n",  CkMyPe(),name(thisIndex).c_str());
-
 #endif
 
-  performance_start_(perf_block);
+  PERF_START(perf_rindex_block);
 
   init_refresh_();
   usesAtSync = true;
 
   thisIndex.array(array_,array_+1,array_+2);
 
+  PERF_STOP(perf_rindex_block);
 }
 
 //----------------------------------------------------------------------
 
 void Block::p_set_msg_refine(MsgRefine * msg)
 {
-  performance_start_(perf_block);
+  PERF_START(perf_rindex_block);
 
   init_refine_ (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -102,8 +155,6 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
   apply_initial_(msg);
 
-  performance_stop_(perf_block);
-
 #ifdef TRACE_BLOCK
   {
   CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine) done\n",
@@ -116,6 +167,7 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   fflush(stdout);
 #endif
   delete msg;
+  PERF_STOP(perf_rindex_block);
 }
 
 //----------------------------------------------------------------------
@@ -327,6 +379,7 @@ void Block::pup(PUP::er &p)
   p | age_;
   p | ip_next_;
   p | name_;
+  p | name8_;
   p | index_method_;
   p | index_solver_;
   p | refresh_;
@@ -347,6 +400,20 @@ void Block::pup(PUP::er &p)
 
   p | index_order_;
   p | count_order_;
+}
+
+//----------------------------------------------------------------------
+
+void Block::ckAboutToMigrate(void)
+{
+  PERF_METHOD_STOP(method());
+  CBase_Block::ckAboutToMigrate();
+}
+
+void Block::ckJustMigrated(void)
+{
+  PERF_METHOD_START(method());
+  CBase_Block::ckJustMigrated();
 }
 
 //----------------------------------------------------------------------
@@ -424,6 +491,7 @@ void Block::print (FILE * fp_in) const
   } else {
     fp = fp_in;
   }
+  fprintf (fp,"%d %s PRINT_BLOCK name8_ = %s\n",CkMyPe(),name_.c_str(),name8().c_str());
   fprintf (fp,"%d %s PRINT_BLOCK data_ = %p\n",CkMyPe(),name_.c_str(),(void*)data_);
   fprintf (fp,"%d %s PRINT_BLOCK child_data_ = %p\n",CkMyPe(),name_.c_str(),(void*)child_data_);
   int v3[3];index().values(v3);
@@ -632,7 +700,7 @@ void Block::p_refresh_child
  int    ic3[3]
  )
 {
-  performance_start_(perf_refresh_child);
+  PERF_START(perf_rindex_refresh_child);
   int if3[3] = {0,0,0};
   int  g3[3] = {0,0,0};
   Refresh * refresh = new Refresh;
@@ -643,47 +711,9 @@ void Block::p_refresh_child
 
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;
-  performance_stop_(perf_refresh_child);
-  performance_start_(perf_refresh_child_sync);
-}
 
-//----------------------------------------------------------------------
-
-Block::Block ()
-  : CBase_Block(),
-    data_(NULL),
-    child_data_(NULL),
-    level_next_(0),
-    cycle_(0),
-    time_(0.0),
-    dt_(0.0),
-    stop_(false),
-    index_initial_(0),
-    children_(),
-    sync_coarsen_(),
-    sync_count_(),
-    sync_max_(),
-    adapt_(),
-    child_face_level_curr_(),
-    child_face_level_next_(),
-    count_coarsen_(0),
-    adapt_step_(0),
-    adapt_ready_(false),
-    adapt_balanced_(false),
-    adapt_changed_(0),
-    coarsened_(false),
-    is_leaf_((thisIndex.level() >= 0)),
-    age_(0),
-    ip_next_(-1),
-    name_(""),
-    index_method_(-1),
-    index_solver_(),
-    refresh_()
-{
-  init_refresh_();
-  init_adapt_(nullptr);
-
-  for (int i=0; i<3; i++) array_[i]=0;
+  PERF_STOP(perf_rindex_refresh_child);
+  PERF_START(perf_rindex_refresh_child_post);
 }
 
 //----------------------------------------------------------------------
@@ -784,17 +814,6 @@ void Block::init_refresh_()
 
 //----------------------------------------------------------------------
 
-std::string Block::name() const throw()
-{
-  if (name_ == "") {
-
-    name_ = name(index_);
-  }
-  return name_;
-}
-
-//----------------------------------------------------------------------
-
 std::string Block::name(Index index) const throw()
 {
   int blocking[3] = {1,1,1};
@@ -817,7 +836,40 @@ std::string Block::name(Index index) const throw()
   if (blocking[1]) do { ++bits[1]; } while (blocking[1]/=2);
   if (blocking[2]) do { ++bits[2]; } while (blocking[2]/=2);
 
-  return std::string("B" + index.bit_string(level,cello::rank(),bits));
+  std::string name = std::string("B" + index.bit_string(level,cello::rank(),bits));
+  return name;
+}
+
+//----------------------------------------------------------------------
+
+std::string Block::name8(Index index) const throw()
+{
+  int a3[3];
+  int t3[3];
+  index.array(a3,a3+1,a3+2);
+  index.tree(t3,t3+1,t3+2);
+
+  const int min_level = cello::config()->mesh_min_level;
+
+  std::string name8 = "[#";
+  for (int level=std::min(index.level(),0)-min_level-1; level>=0; level--) {
+    int shift = level;
+    int ax = (a3[0] >> shift) & 1;
+    int ay = (a3[1] >> shift) & 1;
+    int az = (a3[2] >> shift) & 1;
+    char digit = '0' + ax+2*(ay+2*az);
+    name8 += digit;
+  }
+  name8 += "]";
+  for (int level=1; level<=index.level(); level++) {
+    int shift = (INDEX_BITS_TREE-level);
+    int tx = (t3[0] >> shift) & 1;
+    int ty = (t3[1] >> shift) & 1;
+    int tz = (t3[2] >> shift) & 1;
+    char digit = tx+2*(ty+2*tz);
+    name8 += '0' + digit;
+  }
+  return name8;
 }
 
 //----------------------------------------------------------------------
@@ -1124,26 +1176,6 @@ Index Block::neighbor_
 
 //----------------------------------------------------------------------
 
-void Block::performance_start_
-(int index_region, std::string file, int line)
-{
-  Simulation * simulation = cello::simulation();
-  if (simulation)
-    simulation->performance()->start_region(index_region,file,line);
-}
-
-//----------------------------------------------------------------------
-
-void Block::performance_stop_
-(int index_region, std::string file, int line)
-{
-  Simulation * simulation = cello::simulation();
-  if (simulation)
-    simulation->performance()->stop_region(index_region,file,line);
-}
-
-//----------------------------------------------------------------------
-
 void Block::check_leaf_()
 {
   if (level() >= 0 &&
@@ -1156,7 +1188,6 @@ void Block::check_leaf_()
 	     children_.size());
   }
 }
-
 
 //----------------------------------------------------------------------
 

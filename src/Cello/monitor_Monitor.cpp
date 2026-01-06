@@ -8,6 +8,7 @@
 #include "cello.hpp"
 
 #include "monitor.hpp"
+#include "parameters.hpp"
 
 #include "../../auto_config.def"
 
@@ -19,7 +20,9 @@ Monitor::Monitor()
   : timer_(new Timer),
     mode_(monitor_mode_root),
     verbose_(false),
-    group_default_(monitor_mode_all)
+    group_default_(monitor_mode_all),
+    include_proc_(true),
+    include_time_(true)
 {
   timer_->start();
 
@@ -40,23 +43,23 @@ Monitor::~Monitor()
 void Monitor::header () const
 {
   print ("","==============================================");
-  print (""," ");
-  print ("","  .oooooo.             oooo  oooo            ");
-  print (""," d8P'  `Y8b            `888  `888            ");
-  print ("","888           .ooooo.   888   888   .ooooo.  ");
-  print ("","888          d88' `88b  888   888  d88' `88b ");
-  print ("","888          888ooo888  888   888  888   888 ");
-  print ("","`88b    ooo  888    .o  888   888  888   888 ");
-  print (""," `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' ");
-  print (""," ");
+  print ("","");
+  print ("","  .oooooo.             oooo  oooo");
+  print (""," d8P'  `Y8b            `888  `888");
+  print ("","888           .ooooo.   888   888   .ooooo.");
+  print ("","888          d88' `88b  888   888  d88' `88b");
+  print ("","888          888ooo888  888   888  888   888");
+  print ("","`88b    ooo  888    .o  888   888  888   888");
+  print (""," `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P'");
+  print ("","");
   print ("","A Parallel Adaptive Mesh Refinement Framework");
-  print (""," ");
+  print ("","");
   print ("","  Laboratory for Computational Astrophysics");
   print ("","        San Diego Supercomputer Center");
   print ("","     University of California, San Diego");
-  print (""," ");
+  print ("","");
   print ("","See 'LICENSE_CELLO' for software license information");
-  print (""," ");
+  print ("","");
 
   // Get date text
 
@@ -73,7 +76,7 @@ void Monitor::header () const
 	 t->tm_hour,
 	 t->tm_min,
 	 t->tm_sec);
-
+  print ("Input","File name            %s", g_parameters.file_name().c_str());
   // Print all recognized configuration settings
 
   print ("Define","Simulation processors %d",CkNumPes());
@@ -182,23 +185,23 @@ void Monitor::write_ (FILE * fp, const char * component, const char * message) c
 
   char process[MONITOR_LENGTH] = "";
 
-  snprintf (process,MONITOR_LENGTH,"%0d",CkMyPe());
+  if (include_proc_) snprintf (process,MONITOR_LENGTH,"%0d ",CkMyPe());
 
   // Get time
 
-  char time[10];
+  char time[10] = "";
 
-  snprintf (time,10,"%08.2f",timer_->value());
+  if (include_time_) snprintf (time,10,"%08.2f ",timer_->value());
 
   // Print
 
   const char newline = (strcmp(message,"")==0) ? ' ' : '\n';
   if (fp == stdout) {
     PARALLEL_PRINTF
-      ("%s %s %s %s%c",     process, time, component, message,newline);
+      ("%s%s%s %s%c",     process, time, component, message,newline);
   } else {
     fprintf
-      (fp,"%s %s %s %s%c",  process, time, component, message,newline);
+      (fp,"%s%s%s %s%c",  process, time, component, message,newline);
   }
 }
 

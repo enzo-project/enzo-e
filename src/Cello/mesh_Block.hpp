@@ -37,6 +37,10 @@ class Block : public CBase_Block
 
 public: // interface
 
+  /// Initialize an empty Block
+  Block();
+  /// Initialize a migrated Block
+  Block (CkMigrateMessage *m);
   /// create a Block whose MsgRefine is on the creating process
   Block ( process_type ip_source, MsgType msg_type );
   /// Initialize Block using MsgRefine returned by creating process
@@ -60,14 +64,12 @@ public: // interface
   // CHARM
   //----------------------------------------------------------------------
 
-  /// Initialize an empty Block
-  Block();
-
-  /// Initialize a migrated Block
-  Block (CkMigrateMessage *m) : CBase_Block(m) { }
-
   /// CHARM pupper
   virtual void pup(PUP::er &p);
+
+  /// Pre- and post-migration functions called by Charm++
+  void ckAboutToMigrate(void);
+  void ckJustMigrated(void);
 
   //----------------------------------------------------------------------
   // ACCESS METHODS
@@ -159,10 +161,15 @@ public: // interface
   // GENERAL
   //----------------------------------------------------------------------
 
-  /// Return the name of the block
-  std::string name () const throw();
-  /// Return the name of the block with the given index
-  std::string name(Index index) const throw();
+  /// Return the name of the block, optionally with different Index
+  std::string name(Index) const throw();
+  std::string name () const throw()
+  { if (name_ == "") name_ = name(index_); return name_; }
+
+  /// Return a short variation of the Block name based on octal digits
+  std::string name8(Index) const throw();
+  std::string name8() const throw()
+  { if (name8_ == "") name8_ = name8(index_); return name8_; }
 
   /// Return the size of the Block array
   void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
@@ -428,56 +435,59 @@ public:
 
   void p_adapt_enter()
   {
-    performance_start_(perf_adapt_apply);
+    PERF_ADAPT_START(perf_rindex_adapt_enter);
     adapt_enter_();
-    performance_stop_(perf_adapt_apply);
-    performance_start_(perf_adapt_apply_sync);
+    PERF_ADAPT_STOP(perf_rindex_adapt_enter);
+    PERF_ADAPT_POST(perf_rindex_adapt_enter_post);
   }
   void r_adapt_enter(CkReductionMsg * msg)
   {
-    performance_start_(perf_adapt_apply);
+    PERF_ADAPT_START(perf_rindex_adapt_enter);
     delete msg;
     adapt_enter_();
-    performance_stop_(perf_adapt_apply);
-    performance_start_(perf_adapt_apply_sync);
+    PERF_ADAPT_STOP(perf_rindex_adapt_enter);
+    PERF_ADAPT_POST(perf_rindex_adapt_enter_post);
   }
 
   void r_adapt_next(CkReductionMsg * msg)
   {
-    performance_start_(perf_adapt_update);
+    PERF_ADAPT_START(perf_rindex_adapt_next);
     adapt_changed_ = *((int * )msg->getData());
     delete msg;
     adapt_next_();
-    performance_stop_(perf_adapt_update);
-    performance_start_(perf_adapt_update_sync);
+    PERF_ADAPT_STOP(perf_rindex_adapt_next);
+    PERF_ADAPT_POST(perf_rindex_adapt_next_post);
   }
 
   void p_adapt_called()
   {
-    performance_start_(perf_adapt_notify);
+    PERF_ADAPT_START(perf_rindex_adapt_called);
     adapt_called_();
-    performance_stop_(perf_adapt_notify);
-    performance_start_(perf_adapt_notify_sync);
+    PERF_ADAPT_STOP(perf_rindex_adapt_called);
+    PERF_ADAPT_POST(perf_rindex_adapt_called_post);
   }
 
   void p_adapt_end ()
   {
-    performance_start_(perf_adapt_end);
+    PERF_ADAPT_START(perf_rindex_adapt_end);
     adapt_end_();
-    performance_stop_(perf_adapt_end);
-    performance_start_(perf_adapt_end_sync);
+    PERF_ADAPT_STOP(perf_rindex_adapt_end);
+    PERF_ADAPT_POST(perf_rindex_adapt_end_post);
   }
   void p_adapt_update()
   {
+    PERF_ADAPT_START(perf_rindex_adapt_update);
     adapt_update_();
+    PERF_ADAPT_STOP(perf_rindex_adapt_update);
+    PERF_ADAPT_POST(perf_rindex_adapt_update_post);
   }
 
   void p_adapt_exit()
   {
-    performance_start_(perf_adapt_end);
+    PERF_ADAPT_START(perf_rindex_adapt_exit);
     adapt_exit_();
-    performance_stop_(perf_adapt_end);
-    performance_start_(perf_adapt_end_sync);
+    PERF_ADAPT_STOP(perf_rindex_adapt_exit);
+    PERF_ADAPT_POST(perf_rindex_adapt_exit_post);
   }
 
   /// Parent tells child to delete itself
@@ -525,11 +535,8 @@ public:
 
   void r_restart_enter(CkReductionMsg * msg)
   {
-    //    performance_start_(perf_restart);
     delete msg;
     restart_enter_();
-    //    performance_stop_(perf_restart);
-    //    performance_start_(perf_restart_sync);
   }
 
 protected:
@@ -549,9 +556,7 @@ public:
   /// supplied once with others count arguments 0.
   void p_control_sync_count(int entry_point, int id, int count)
   {
-    performance_start_(perf_control);
     control_sync_count(entry_point, id, count);
-    performance_stop_(perf_control);
   }
 
   void control_sync_neighbor (int entry_point, int id,
@@ -716,38 +721,29 @@ public:
   /// Enter the stopping phase
   void p_stopping_enter ()
   {
-    performance_start_(perf_stopping);
+    PERF_START(perf_rindex_stopping);
     stopping_enter_();
-    performance_stop_(perf_stopping);
+    PERF_STOP(perf_rindex_stopping);
   }
   void r_stopping_enter (CkReductionMsg * msg)
   {
-    performance_start_(perf_stopping);
+    PERF_START(perf_rindex_stopping);
     delete msg;
     stopping_enter_();
-    performance_stop_(perf_stopping);
+    PERF_STOP(perf_rindex_stopping);
   }
 
-  /// Quiescence before load balancing
-  void p_stopping_load_balance()
-  { stopping_load_balance_(); }
-  void r_stopping_load_balance(CkReductionMsg * msg)
-  { delete msg;
-    stopping_load_balance_();
-  }
+  void r_stopping_load_balance(CkReductionMsg * msg);
 
   /// Exit the stopping phase
   void p_stopping_exit ()
   {
-    performance_start_(perf_stopping);
     stopping_exit_();
-    performance_stop_(perf_stopping);
   }
   void r_stopping_exit (CkReductionMsg * msg)
   {
     delete msg;
     stopping_exit_();
-    performance_stop_(perf_stopping);
   }
 
 protected:
@@ -762,31 +758,22 @@ public:
   /// Exit the stopping phase to exit
   void p_exit ()
   {
-    performance_start_(perf_exit);
+    PERF_START(perf_rindex_exit);
     exit_();
-    performance_stop_(perf_exit);
+    PERF_STOP(perf_rindex_exit);
   }
   void r_exit (CkReductionMsg * msg)
   {
-    performance_start_(perf_exit);
+    PERF_START(perf_rindex_exit);
     delete msg;
     exit_();
-    performance_stop_(perf_exit);
+    PERF_STOP(perf_rindex_exit);
   }
 protected:
 
   void exit_();
 
-  //--------------------------------------------------
-  // PERFORMANCE
-  //--------------------------------------------------
-
 protected:
-  /// Start and stop measuring Block-based performance regions
-  void performance_start_
-  (int index_region, std::string file="", int line=0);
-  void performance_stop_
-  (int index_region, std::string file="", int line=0);
 
   //--------------------------------------------------
   // TESTING
@@ -1030,6 +1017,7 @@ protected: // attributes
 
   /// String for storing bit ID name
   mutable std::string name_;
+  mutable std::string name8_;
 
   /// Index of currently-active Method
   int index_method_;

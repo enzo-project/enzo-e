@@ -120,7 +120,7 @@ void EnzoSolverJacobi::apply
 {
   TRACE_JACOBI(block,this,"apply()");
 
-  begin_(block);
+  Solver::begin_(block);
 
   if (solve_type_ == solve_level && ! is_finest_(block))
     Solver::end_(block);
@@ -142,9 +142,6 @@ void EnzoSolverJacobi::apply
 
 void EnzoBlock::p_solver_jacobi_continue()
 {
- 
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
   EnzoSolverJacobi * solver = nullptr;  
   TRACE_JACOBI(this,solver,"p_solver_jacobi_continue()");
 
@@ -152,8 +149,6 @@ void EnzoBlock::p_solver_jacobi_continue()
   TRACE_JACOBI(this,solver,"p_solver_jacobi_continue()");
 
   solver->compute(this);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------

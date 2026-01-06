@@ -13,6 +13,14 @@
 
 Config g_config;
 
+// Uncomment to remove Mesh:min_level parameter
+// Should be commented since some regression tests and code implicitly
+// assume min_level = 0. This is a problem for runs that require
+// minimum levels, e.g. multigrid solver, space-filling curve
+// load balancing, and checkpoint / restart
+
+// #define DEPRECIATE_MESH_MIN_LEVEL
+
 //----------------------------------------------------------------------
 
 void Config::pup (PUP::er &p)
@@ -124,6 +132,8 @@ void Config::pup (PUP::er &p)
 
   p | monitor_debug;
   p | monitor_verbose;
+  p | monitor_proc;
+  p | monitor_time;
 
   // Output
 
@@ -705,7 +715,21 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   // Note mesh_min_level may be < 0 for multigrid
 
-  mesh_min_level = p->value_integer("Adapt:min_level",0);
+  // Removing mesh_min_level breaks some regression tests that
+  // implicitly assume no non-leaf blocks (e.g. vlct_dual_energy_shock_tube)
+
+#ifdef DEPRECIATE_MESH_MIN_LEVEL
+    int max_root_blocks = std::max( { mx, my, mz } );
+    int array_bits = 0;
+    while (max_root_blocks=(max_root_blocks>>1)) ++array_bits;
+    if (! (p->type("Adapt:min_level") == parameter_unknown)) {
+      WARNING ("Config::read_mesh_()",
+               "Parameters 'Adapt : min_level' is depreciated: ignoring");
+    }
+    mesh_min_level = - array_bits;
+#else
+    mesh_min_level = p->value_integer("Adapt:min_level",0);
+#endif
 
   if ( mesh_min_level > 0 ) {
     ERROR1 ("Config::read", 
@@ -882,7 +906,8 @@ void Config::read_monitor_ (Parameters * p) throw()
 
   monitor_debug   = p->value_logical("Monitor:debug",  false);
   monitor_verbose = p->value_logical("Monitor:verbose",false);
-
+  monitor_proc    = p->value_logical("Monitor:include_proc", true);
+  monitor_time    = p->value_logical("Monitor:include_time",true);
 }
 
 //----------------------------------------------------------------------

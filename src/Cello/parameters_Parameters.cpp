@@ -17,7 +17,8 @@ Parameters g_parameters;
 
 Parameters::Parameters(Monitor * monitor) 
   throw()
-  : current_group_(),
+  : file_name_(),
+    current_group_(),
     parameter_map_(),
     parameter_tree_("Cello"),
     monitor_(monitor),
@@ -28,11 +29,10 @@ Parameters::Parameters(Monitor * monitor)
 
 //----------------------------------------------------------------------
 
-Parameters::Parameters(const char * file_name,
-		       Monitor * monitor) 
-  throw()
+Parameters::Parameters(const char * file_name, Monitor * monitor) throw()
   : Parameters(monitor)
 {
+  file_name_ = file_name;
   read(file_name);
 }
 
@@ -110,7 +110,7 @@ void Parameters::pup (PUP::er &p)
 void Parameters::read ( const char * file_name )
 /// @param    file_name An opened input parameter file or stdin
 {
-
+  file_name_ = file_name;
   FILE * file_pointer = fopen(file_name,"r");
 
   ASSERT1("Parameters::read",

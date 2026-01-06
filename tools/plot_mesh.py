@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+import sys
 import fileinput
 import matplotlib
 import matplotlib.pyplot as plt
@@ -11,6 +13,8 @@ import re
 #1 0.5      t = 0.5
 # 0          t = 0.25
 #
+
+
 def decode_block(block_name):
     prefix="B"
     indices = block_name[len(prefix):].split("_")
@@ -22,9 +26,12 @@ def decode_block(block_name):
         index_array = 0
         index_tree  = 0
         c=index.find(":")
-        index_forest = index[0:c] + index[c+1:]
+        if (c<0):
+            index_forest = index
+        else:
+            index_forest = index[0:c] + index[c+1:]
         in_tree = 0
-        if (index_forest==-1): in_tree = 1
+        if (c==-1): in_tree = 1
         index_bit=0
         factor_array = 1
         factor_tree  = 1
@@ -47,6 +54,16 @@ def decode_block(block_name):
         index_axis = index_axis + 1
     return [level,lower, upper]
 
+#======================================================================
+
+filename=""
+if (len(sys.argv) > 1):
+    arg=sys.argv[1]
+    if (arg[len(arg)-4:len(arg)] == ".png"):
+        filename = arg
+        print (filename)
+        sys.argv.pop(0)
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 xmin=10000; xmax=-10000
@@ -67,6 +84,7 @@ for plotlevel in range(0,max_level):
                   re.search(r'^B_+',word)):
 
                   [level,lower, upper] = decode_block(word)
+
                   if (level == plotlevel):
                       nc = len(colormap)
                       r = matplotlib.patches.Rectangle ( (lower[0],lower[1]), 
@@ -102,8 +120,14 @@ ymin -= r
 xmax += r
 ymax += r
 
+#plt.axes().set_aspect('equal','datalim')
+xmin=-0.2
+ymin=-0.2
+xmax=1.2
+ymax=1.2
 plt.xlim([xmin,xmax])
 plt.ylim([ymin,ymax])
-#plt.axes().set_aspect('equal','datalim')
-plt.show()
-
+if (filename == ""):
+    plt.show()
+else:
+    matplotlib.pyplot.savefig(filename, dpi=None, facecolor='w', edgecolor='w', orientation='portrait', format=None, transparent=False, bbox_inches=None, pad_inches=0.1, metadata=None)

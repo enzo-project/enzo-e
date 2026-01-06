@@ -38,7 +38,6 @@ void Simulation::initialize() throw()
 
   initialize_monitor_();
   initialize_memory_();
-  initialize_performance_();
   initialize_simulation_();
   initialize_balance_();
 
@@ -59,6 +58,8 @@ void Simulation::initialize() throw()
   cello::finalize_fields();
 
   initialize_hierarchy_();
+
+  initialize_performance_();
 
   // initialize_block_array() is called in charm_initialize
   // using QD to ensure that initialize_hierarchy() is called
@@ -88,7 +89,7 @@ void Simulation::initialize() throw()
 void Simulation::r_initialize_block_array(CkReductionMsg * msg) 
 {
   TRACE_INITIAL_SIM("Simulation::r_initialize_block_array_()");
-  performance_->start_region(perf_initial);
+  PERF_START(perf_rindex_initial);
   delete msg;
   
   initialize_block_array_();

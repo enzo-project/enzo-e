@@ -8,59 +8,109 @@
 #ifndef PERFORMANCE_PERFORMANCE_HPP
 #define PERFORMANCE_PERFORMANCE_HPP
 
-class Config;
+//----------------------------------------------------------------------
+// ENUMERATION DECLARATIONS
+//----------------------------------------------------------------------
 
 /// @enum     counter_type_enum
 /// @brief    Counter value type
-enum counter_type_enum {
-  counter_type_unknown,
-  counter_type_rel,
-  counter_type_abs,
-  counter_type_papi,
-  counter_type_user,
-  num_counter_type
+
+enum class PerfCounterType {
+  Unknown,
+  Relative,
+  Absolute,
+  Papi,
+  User
 };
 
-enum index_enum {
-  perf_index_time,
-  perf_index_bytes,
-  perf_index_bytes_high,
-  perf_index_bytes_highest,
-  perf_index_bytes_available,
-  perf_index_last,
-  num_perf_index = perf_index_last
+enum PerfCounterIndex {
+  perf_cindex_time,
+  perf_cindex_mem_bytes,
+  perf_cindex_mem_bytes_high,
+  perf_cindex_mem_bytes_highest,
+  perf_cindex_mem_bytes_available,
+  perf_cindex_mem_last
 };
-  
+
 /// @enum    perf_region
 /// @brief   region ID's for the Simulation performance object
-enum perf_region {
-  perf_unknown,
-  perf_simulation,
-  perf_cycle,
-  perf_initial,
-  perf_adapt_apply,
-  perf_adapt_apply_sync,
-  perf_adapt_update,
-  perf_adapt_update_sync,
-  perf_adapt_notify,
-  perf_adapt_notify_sync,
-  perf_adapt_end,
-  perf_adapt_end_sync,
-  perf_refresh_store,
-  perf_refresh_child,
-  perf_refresh_exit,
-  perf_refresh_store_sync,
-  perf_refresh_child_sync,
-  perf_refresh_exit_sync,
-  perf_control,
-  perf_compute,
-  perf_output,
-  perf_stopping,
-  perf_block,
-  perf_exit,
-  perf_grackle,
-  num_perf_region
+enum PerfRegionIndex {
+  perf_rindex_unknown,
+  perf_rindex_simulation,
+  perf_rindex_cycle,
+  perf_rindex_initial,
+  perf_rindex_adapt,
+  perf_rindex_adapt_post,
+  perf_rindex_adapt_enter,
+  perf_rindex_adapt_enter_post,
+  perf_rindex_adapt_end,
+  perf_rindex_adapt_end_post,
+  perf_rindex_adapt_update,
+  perf_rindex_adapt_update_post,
+  perf_rindex_adapt_next,
+  perf_rindex_adapt_next_post,
+  perf_rindex_adapt_called,
+  perf_rindex_adapt_called_post,
+  perf_rindex_adapt_exit,
+  perf_rindex_adapt_exit_post,
+  perf_rindex_adapt_delete,
+  perf_rindex_adapt_delete_post,
+  perf_rindex_adapt_recv_level,
+  perf_rindex_adapt_recv_level_post,
+  perf_rindex_adapt_recv_child,
+  perf_rindex_adapt_recv_child_post,
+  perf_rindex_reduce,
+  perf_rindex_reduce_stopping,
+  perf_rindex_reduce_adapt,
+  perf_rindex_reduce_charm,
+  perf_rindex_reduce_initialize,
+  perf_rindex_reduce_output,
+  perf_rindex_reduce_restart,
+  perf_rindex_reduce_balance,
+  perf_rindex_reduce_method_balance,
+  perf_rindex_reduce_method_check,
+  perf_rindex_reduce_method_inference,
+  perf_rindex_reduce_method_m1_closure,
+  perf_rindex_reduce_method_turbulence,
+  perf_rindex_reduce_simulation,
+  perf_rindex_reduce_solver_bicgstab,
+  perf_rindex_reduce_solver_cg,
+  perf_rindex_reduce_solver_dd,
+  perf_rindex_reduce_solver_mg0,
+  perf_rindex_reduce_method_debug,
+  perf_rindex_reduce_method_flux_correct,
+  perf_rindex_reduce_method_order_hilbert,
+  perf_rindex_reduce_method_order_morton,
+  perf_rindex_reduce_method_output,
+  perf_rindex_refresh,
+  perf_rindex_refresh_post,
+  perf_rindex_refresh_start,
+  perf_rindex_refresh_start_post,
+  perf_rindex_refresh_recv,
+  perf_rindex_refresh_recv_post,
+  perf_rindex_refresh_child,
+  perf_rindex_refresh_child_post,
+  perf_rindex_refresh_exit,
+  perf_rindex_refresh_exit_post,
+  perf_rindex_smp,
+  perf_rindex_smp_field_face,
+  perf_rindex_smp_hierarchy,
+  perf_rindex_smp_initial_music,
+  perf_rindex_smp_initial_value,
+  perf_rindex_smp_method_close_files,
+  perf_rindex_smp_solver_bcg,
+  perf_rindex_balance,
+  perf_rindex_control,
+  perf_rindex_method,
+  perf_rindex_solver,
+  perf_rindex_output,
+  perf_rindex_stopping,
+  perf_rindex_block,
+  perf_rindex_exit,
+  perf_rindex_grackle
 };
+
+class Config;
 
 class Performance {
 
@@ -73,24 +123,32 @@ public: // interface
 
   Performance()
     :
-#ifdef CONFIG_USE_PAPI  
+#ifdef CONFIG_USE_PAPI
      papi_(),
-#endif     
+#endif
      counter_name_(),
      counter_type_(),
      counter_values_(),
      counter_values_reduced_(),
      region_name_(),
      region_counters_(),
-     region_started_(),
      region_index_(),
+     region_multiplicity_(),
      region_in_charm_(),
-#ifdef CONFIG_USE_PAPI     
+     warnings_(false),
+     index_region_current_(perf_rindex_unknown)
+#ifdef CONFIG_USE_PAPI
+     ,
+     papi_(),
      papi_counters_(0),
 #endif
-     warnings_(false),
-     index_region_current_(perf_unknown)
-  {};
+#ifdef CONFIG_USE_PROJECTIONS
+     ,
+     projections_tracing_(),
+     projections_schedule_on_(),
+     projections_schedule_off_()
+#endif
+  { /* ... */ }
 
   /// Initialize a Performance object
   Performance(Config *);
@@ -99,28 +157,32 @@ public: // interface
   ~Performance();
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
+  void pup (PUP::er &p)
   {
     TRACEPUP;
-    
+
     // NOTE: change this function whenever attributes change
-#ifdef CONFIG_USE_PAPI  
+
+#ifdef CONFIG_USE_PAPI
     p | papi_;
 #endif
+
     p | counter_name_;
     p | counter_type_;
     p | counter_values_;
     p | counter_values_reduced_;
     p | region_name_;
     p | region_counters_;
-    p | region_started_;
     p | region_index_;
+    p | region_multiplicity_;
     p | region_in_charm_;
-#ifdef CONFIG_USE_PAPI  
-    WARNING("Performance::pup",
-	    "skipping Performance:papi_counters_");
-    //    p | papi_counters_
-#endif    
+
+#ifdef CONFIG_USE_PROJECTIONS
+    p | projections_tracing_;
+    p | projections_schedule_on_;
+    p | projections_schedule_off_;
+#endif
+
     p | warnings_;
     p | index_region_current_;
   }
@@ -132,11 +194,11 @@ public: // interface
   void end() throw();
 
   /// Return the number of counters
-  int num_counters() const throw() 
+  int num_counters() const throw()
   { return counter_name_.size(); }
 
   ///  	Create a new user counter.
-  int new_counter(int counter_type, std::string counter_name);
+  int new_counter(PerfCounterType type, std::string counter_name);
 
   ///  	Return the value of a counter.
   long long counter(int index_counter) throw();
@@ -152,7 +214,7 @@ public: // interface
   { return counter_name_[index_counter]; }
 
   /// Return the type of the given counter index
-  int counter_type (int index) const throw()
+  PerfCounterType counter_type (int index) const throw()
   { return counter_type_[index]; }
 
   /// Return number of regions
@@ -166,13 +228,17 @@ public: // interface
   /// Return the index of the given region
   int region_index (std::string name) const throw();
 
+  /// Return the multiplicity (#start - #stop) of the region
+  int region_multiplicity (int index_region) const throw()
+  { return region_multiplicity_[index_region]; }
+
   /// Return whether the code region is outside the scope of Cello
   bool region_in_charm (std::string name) const throw();
 
   /// Add a new region, returning the id
   void new_region(int index_region, std::string region, bool in_charm=false) throw();
 
-  /// Return whether performance monitoring is started for the region 
+  /// Return whether performance monitoring is started for the region
   bool is_region_active(int index_region) throw();
 
   /// Start counters for a code region
@@ -187,14 +253,25 @@ public: // interface
   /// Return counters for a code region
   void region_counters(int index_region, long long * counters) throw();
 
-  /// Return whether the given region is active
-  bool region_started(int index_region) const throw()
-  { return region_started_[index_region]; }
-
-#ifdef CONFIG_USE_PAPI  
+#ifdef CONFIG_USE_PAPI
   /// Return the associated Papi object
   Papi * papi() { return &papi_; };
-#endif  
+#endif
+
+#ifdef CONFIG_USE_PROJECTIONS
+  /// Set whether performance tracing with projections is enabled or not
+  void set_projections_tracing (bool value)
+  { projections_tracing_ = value; }
+
+  bool projections_tracing() const
+  { return projections_tracing_; }
+
+  Schedule * projections_schedule_on() const
+  { return projections_schedule_on_; }
+
+  Schedule * projections_schedule_off() const
+  { return projections_schedule_off_; }
+#endif
 
 private: // functions
 
@@ -214,23 +291,18 @@ private: // functions
 
 private: // attributes
 
-#ifdef CONFIG_USE_PAPI  
-  /// PAPI counters, if available
-  Papi papi_;
-#endif
-
   /// Counter names
   std::vector<std::string> counter_name_;
 
   /// Counter types
-  std::vector<int> counter_type_;
+  std::vector<PerfCounterType> counter_type_;
 
   /// Counter values
   std::vector<long long> counter_values_;
 
   /// Reduced counter values (e.g. sum over processes)
   std::vector<long long> counter_values_reduced_;
-  
+
   /// list of region names
   std::vector<std::string> region_name_;
 
@@ -243,19 +315,32 @@ private: // attributes
   /// mapping of region name to index
   std::map<std::string,int> region_index_;
 
+  /// region number of starts - number of stops
+  std::vector <int> region_multiplicity_;
+
   /// which regions are outside scope of Cello
   std::vector<char> region_in_charm_;
-
-#ifdef CONFIG_USE_PAPI  
-  /// Array for storing PAPI counter values
-  long long * papi_counters_;
-#endif  
 
   /// Whether to output warning messages
   bool warnings_;
 
   /// Last region index started
   int index_region_current_;
+
+#ifdef CONFIG_USE_PAPI
+  /// PAPI counters, if available
+  Papi papi_;
+
+  /// Array for storing PAPI counter values
+  long long * papi_counters_;
+#endif
+
+#ifdef CONFIG_USE_PROJECTIONS
+  /// Schedule for projections on / off
+  bool projections_tracing_;
+  Schedule * projections_schedule_on_;
+  Schedule * projections_schedule_off_;
+#endif
 };
 
 #endif /* PERFORMANCE_PERFORMANCE_HPP */

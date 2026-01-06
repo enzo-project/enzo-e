@@ -46,8 +46,6 @@ public: // interface
        dt(0.0),
        redshift(0.0)
   {
-    performance_start_(perf_block);
-
     for (int i=0; i<MAX_DIMENSION; i++) {
       GridLeftEdge[i] = 0;
       GridDimension[i] = 0;
@@ -55,7 +53,6 @@ public: // interface
       GridEndIndex[i] = 0;
       CellWidth[i] = 0.0;
     }
-    performance_stop_(perf_block);
   }
 
   /// Charm++ Migration constructor

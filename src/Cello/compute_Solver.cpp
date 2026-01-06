@@ -137,6 +137,7 @@ bool Solver::reuse_solution_ (int cycle) const throw()
 
 void Solver::begin_(Block * block)
 {
+  PERF_SOLVER_START(this);
 #ifdef TRACE_SOLVER  
   if (block->cycle() >= CYCLE)
     CkPrintf ("%s TRACE_SOLVER %d Solver::begin_(%s)\n",
@@ -150,6 +151,7 @@ void Solver::begin_(Block * block)
 
 void Solver::end_(Block * block)
 {
+  PERF_SOLVER_STOP(this);
   int index = block->pop_solver();
 #ifdef TRACE_SOLVER  
   if (block->cycle() >= CYCLE)

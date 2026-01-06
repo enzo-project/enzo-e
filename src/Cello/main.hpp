@@ -104,7 +104,6 @@ public:
   void p_output_enter ();
   void p_output_exit();
   void p_stopping_enter();
-  void p_stopping_balance();
   void p_text_file_write(int nd, char * dir,
 			 int nf, char * file,
 			 int nl, char * line,
